@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en-SG">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- EDIT: page title (under 60 characters) and description (under 155) -->
+  <title>[Calculator Name] · Ken Property Tools</title>
+  <meta name="description" content="[One sentence: what this calculator works out, for whom, in Singapore.]">
+  <!-- EDIT: replace [folder]/[slug] with the real path -->
+  <link rel="canonical" href="https://tools.kentanthepropertyguy.com/calculators/[slug]/">
+  <meta property="og:title" content="[Calculator Name] · Ken Property Tools">
+  <meta property="og:description" content="[Same as description]">
+  <meta property="og:url" content="https://tools.kentanthepropertyguy.com/calculators/[slug]/">
+  <meta property="og:image" content="https://tools.kentanthepropertyguy.com/assets/images/brand/og-default.jpg">
+  <meta name="robots" content="noindex"><!-- DELETE this line when the page goes live -->
+  <link rel="icon" href="../../assets/images/brand/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/css/kpt.css">
+</head>
+
+<!-- EDIT: data-tool-name must match the id in data/tools.js -->
+<body data-page-type="calculator"
+      data-tool-name="template-calculator"
+      data-tool-title="Calculator Template"
+      data-tool-category="calculator">
+
+  <div data-kpt-header></div>
+
+  <main class="kpt-main kpt-wrap">
+    <nav data-kpt-breadcrumb></nav>
+
+    <section class="kpt-hero">
+      <p class="kpt-eyebrow">Calculator</p>
+      <h1 class="kpt-h1">Calculator Template</h1>
+      <p class="kpt-lead">One or two sentences: what this works out, and why it matters before you commit.</p>
+      <p class="kpt-template-note">Template page. Copy this folder to <code>calculators/your-slug/</code>, replace the example calculation, and delete this note.</p>
+    </section>
+
+    <div class="kpt-tool">
+      <!-- INPUTS: anything inside data-kpt-inputs fires tool_started on first use -->
+      <form class="kpt-form kpt-tool__in" data-kpt-inputs onsubmit="return false">
+        <div class="kpt-field">
+          <label class="kpt-field__label" for="price">Purchase price</label>
+          <div class="kpt-money"><input class="kpt-input" id="price" type="text" inputmode="numeric" value="1,500,000"></div>
+        </div>
+
+        <div class="kpt-field">
+          <span class="kpt-field__label">Loan-to-value <span class="kpt-field__help">Example only</span></span>
+          <div class="kpt-segment" role="radiogroup">
+            <label><input type="radio" name="ltv" value="75" checked><span>75%</span></label>
+            <label><input type="radio" name="ltv" value="55"><span>55%</span></label>
+            <label><input type="radio" name="ltv" value="45"><span>45%</span></label>
+          </div>
+        </div>
+
+        <div class="kpt-field">
+          <label class="kpt-field__label" for="years">Loan tenure <span class="kpt-field__help"><output id="years-out">30</output> years</span></label>
+          <input class="kpt-range" id="years" type="range" min="5" max="35" step="1" value="30">
+        </div>
+      </form>
+
+      <!-- RESULT -->
+      <div class="kpt-tool__out">
+        <div class="kpt-result" aria-live="polite">
+          <p class="kpt-result__label">Example result: downpayment needed</p>
+          <p class="kpt-result__value" id="r-main">—</p>
+          <p class="kpt-result__note">Replace this with the tool's headline answer.</p>
+          <div class="kpt-result__rows">
+            <div class="kpt-result__row"><span>Loan amount</span><span id="r-loan">—</span></div>
+            <div class="kpt-result__row"><span>Loan tenure</span><span id="r-years">—</span></div>
+          </div>
+        </div>
+        <div data-kpt-cta data-cta="after-result"></div>
+      </div>
+    </div>
+
+    <!-- KEN'S TAKE: your interpretation, in your own voice -->
+    <section class="kpt-section">
+      <aside class="kpt-take">
+        <div class="kpt-take__head">
+          <p class="kpt-take__label">Ken's take</p>
+          <p class="kpt-take__by">Ken Tan · Property agent since 2007</p>
+        </div>
+        <p>Two or three sentences on what people usually get wrong here, or what the number means in practice. This is what makes the tool yours rather than a bank calculator.</p>
+      </aside>
+    </section>
+
+    <!-- HOW IT WORKS: short, builds trust and helps Google -->
+    <section class="kpt-section kpt-prose">
+      <h2>How this is calculated</h2>
+      <p>Explain the formula and assumptions in plain English. Link to the official source for any rule used.</p>
+    </section>
+
+    <section class="kpt-section" data-kpt-next></section>
+
+    <p class="kpt-disclaimer">Estimates only, based on the assumptions shown. Not financial advice. Confirm with your bank and official sources before committing.</p>
+  </main>
+
+  <div data-kpt-footer></div>
+
+  <script src="../../data/tools.js"></script>
+  <script src="../../assets/js/kpt.js"></script>
+
+  <!-- THIS TOOL'S OWN LOGIC -->
+  <script>
+  (function () {
+    var $ = function (id) { return document.getElementById(id); };
+    var num = function (v) { return Number(String(v).replace(/[^0-9.]/g, '')) || 0; };
+
+    function calc() {
+      var price = num($('price').value);
+      var ltv = num(document.querySelector('input[name="ltv"]:checked').value);
+      var years = num($('years').value);
+      $('years-out').textContent = years;
+
+      var loan = price * ltv / 100;
+      var down = price - loan;
+
+      $('r-main').textContent = KPT.fmt.money(down);
+      $('r-loan').textContent = KPT.fmt.money(loan);
+      $('r-years').textContent = years + ' years';
+
+      /* Standard hooks: */
+      KPT.setWaContext('My estimate showed a downpayment of about ' + KPT.fmt.money(down) + '.');
+      if (price > 0) KPT.completed({ result_value: Math.round(down) });
+    }
+
+    $('price').addEventListener('blur', function () { this.value = num(this.value).toLocaleString('en-SG'); });
+    document.querySelector('[data-kpt-inputs]').addEventListener('input', calc);
+    calc();
+  })();
+  </script>
+</body>
+</html>
