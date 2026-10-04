@@ -36,7 +36,8 @@ window.KPT_TOOLS = [
     short: "What your HDB sale frees up, and what you can upgrade to.",
     category: "calculator",
     url: "calculators/hdb-upgrade/",
-    status: "coming-soon",
+    status: "live",
+    updated: "2026-10-04",
     popular: true
   },
   {

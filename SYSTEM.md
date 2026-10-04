@@ -9,7 +9,7 @@ This file is the single source of truth for how every page on
   Property Tools system"*, follow Part B exactly and do not ask Ken to
   re-explain any of it.
 
-Last updated: 4 Oct 2026 (Phase 1 complete · Design v2.1 locked)
+Last updated: 4 Oct 2026 (Phase 2 · HDB Upgrade Calculator V1 live · Design v2.1 locked)
 
 ---
 
@@ -107,9 +107,14 @@ ken-property-tools/
 ├── data/
 │   ├── tools.js                  registry + journeys
 │   ├── projects/<slug>.js        one data file per project
-│   └── rules/                    shared government rules
-│       ├── stamp-duty.js
-│       └── loan-limits.js
+│   ├── rules/                    shared GOVERNMENT rules (regulatory only)
+│   │   ├── stamp-duty.js         BSD bands, ABSD rates, remission, payment timing
+│   │   ├── loan-limits.js        TDSR, stress-test rate, LTV tiers, tenure
+│   │   ├── cpf-housing.js        CPF refund, accrued interest, 55+ rules, retirement sums
+│   │   ├── hdb.js                MOP
+│   │   └── gst.js                GST rate
+│   └── assumptions/              KPT estimates & planning assumptions (NOT rules)
+│       └── hdb-upgrade.js        mortgage rate, selling costs, fees, Ken's Planning Budget
 ├── assets/
 │   ├── css/kpt.css
 │   ├── js/kpt.js
@@ -213,7 +218,10 @@ Standard params on every event: `page_type`, `tool_name`, `tool_category`,
 `project_name` (when set).
 GA4 custom dimensions to register (event scope): `tool_name`,
 `tool_category`, `project_name`, `page_type`, `cta_location`, `journey`,
-`target_tool`.
+`target_tool`. For the HDB Upgrade Calculator also: `budget_band`, `planning_band`,
+`limiting_factor`, `planning_limit`, `buyers`, `buyer_profile`, `age_55_flag`,
+`refund_estimated`. Never send exact incomes, prices or other personal figures
+to analytics — only rounded bands and categories.
 
 New event names: lowercase_with_underscores, verb at the end
 (`*_view`, `*_click`, `*_started`, `*_completed`). Add them to this table.
@@ -353,6 +361,15 @@ Do not change them unless Ken explicitly asks.
 **Footer** (drawn by kpt.js): roomy on phones — 2-column link list with
 large tap targets, legal block separated by a hairline.
 
+**Guided calculators** (kpt.css section 18): for tools with more than ~5
+inputs, use progressive steps (`.kpt-form--steps` → `.kpt-step` with
+`is-open` / `is-done` / `is-locked`, a summary line and an Edit button), not one
+long form. Supporting pieces: `.kpt-sub` (grouped sub-fields), `.kpt-row2`,
+`.kpt-note` / `--warn` / `--stop`, `.kpt-pill` (limiting factor), `.kpt-figure2`
+(second headline figure), `.kpt-approx` (quiet "≈"), `.kpt-details` +
+`.kpt-workings` (full working), `.kpt-rules` (rules list).
+Reference implementation: `calculators/hdb-upgrade/`.
+
 **Components** (all in `kpt.css`): `.kpt-card`, `.kpt-tiles/.kpt-tile`,
 `.kpt-result`, `.kpt-form/.kpt-field/.kpt-input/.kpt-money/.kpt-segment/.kpt-range`,
 `.kpt-table`, `.kpt-bars`, `.kpt-take` (Ken's take), `.kpt-asof`,
@@ -366,6 +383,23 @@ every calculator explains its assumptions; every page has a disclaimer.
 ("unbeatable", "don't miss out", "golden opportunity").
 
 Formatting numbers: use `KPT.fmt.money()`, `.psf()`, `.pct()`, `.num()`, `.date()`.
+
+### B7a. Rules vs assumptions (every calculator)
+
+- **Government rules** live only in `data/rules/*.js`. Every value carries its
+  official `source`, `effective_from` and `checked_on`. Never hard-code a rule in
+  a page or engine; read it from the data file.
+- **Estimates and planning assumptions** live in `data/assumptions/<tool>.js`,
+  clearly labelled, dated where market-based, and editable on the page.
+- On screen, every number is one of: **You entered**, **Estimate**,
+  **Assumption**, **Rule** or **Planning** (use `.kpt-tag` / `.kpt-tag--plan`).
+- Each calculator page ends with a "Rules and assumptions used" list generated
+  from the data files (`.kpt-rules`), so it updates when the files change.
+- Put a tool's maths in its own `engine.js` (pure functions, no page code) and
+  page behaviour in `page.js`. The engine can then be tested on its own.
+- **Ken's Planning Budget** is the standard name for KPT's conservative planning
+  figure. Always describe it as a planning scenario, never as a government,
+  MAS, bank or financial-advice threshold.
 
 ### B8a. Consumer-facing wording (every page)
 
@@ -433,6 +467,22 @@ Do not modify Layer 2 microsites unless Ken explicitly asks.
   Crops only; originals preserved (see B8 "Photography of Ken").
   Desktop portrait refined to sit frameless in a soft white glow.
   **Personal branding approved and locked.**
+- **Phase 2 — HDB Upgrade Calculator V1 live (4 Oct 2026).** `calculators/hdb-upgrade/`
+  (index.html, engine.js, page.js). Sell-first, private residential only, 1–2
+  buyers (SC/PR), maximum budget + Ken's Planning Budget, limiting-factor
+  analysis, dynamic Ken's take. 55+ buyers flagged, not modelled. Rules verified
+  4 Oct 2026 (ABSD/remission and 2026 BRS/FRS independently confirmed by Ken).
+  `tool_completed` sends budget_band, planning_band, limiting_factor,
+  planning_limit, buyers, buyer_profile, age_55_flag, refund_estimated.
+- **HDB Upgrade Calculator V1.1 (4 Oct 2026, pre-launch corrections):** Ken's
+  Planning Budget is now the PRIMARY figure ("Recommended planning figure");
+  the maximum is shown second as the "estimated technical ceiling". Owners 55+:
+  results labelled preliminary with an explicit CPF warning; no single FRS
+  figure is applied (retirement sums depend on the year each member turned 55).
+  CPF refund rule sourced from CPF Board only. Citizen + PR ABSD wording:
+  "may qualify for full ABSD remission, subject to IRAS conditions".
+  Rule for future tools: when a tool shows both a maximum and Ken's Planning
+  Budget, the Planning Budget leads.
 - **Phase 1 complete (4 Oct 2026).** Next: Phase 2 — first live tools. The
   project, comparison and guide templates still use pre-v2.1 markup for the
   Ken's take block (it renders correctly via the legacy styles); switch each to

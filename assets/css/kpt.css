@@ -265,7 +265,7 @@ a.kpt-card:hover .kpt-card__arrow { transform: translateX(3px); color: var(--nav
 .kpt-result__rows { margin-top: 28px; }
 .kpt-result__row { display: flex; justify-content: space-between; gap: 12px; padding: 15px 0; border-top: 1px solid var(--line); font-size: 16px; }
 .kpt-result__row span:first-child { color: var(--ink-2); }
-.kpt-result__row span:last-child { font-weight: 600; }
+.kpt-result__row span:last-child { font-weight: 600; white-space: nowrap; }
 
 /* ---------- 10. Inputs: simple, roomy, product-like ---------- */
 .kpt-form { background: var(--surface); border-radius: var(--r-lg); padding: 24px 20px; display: grid; gap: 28px; box-shadow: var(--shadow-1); margin: 0; }
@@ -276,6 +276,7 @@ a.kpt-card:hover .kpt-card__arrow { transform: translateX(3px); color: var(--nav
 .kpt-input, .kpt-select { width: 100%; height: 58px; padding: 0 18px; font: 600 22px var(--font-display); letter-spacing: -0.02em; color: var(--ink); background: var(--fill); border: 0; border-radius: var(--r-sm); -webkit-appearance: none; appearance: none; transition: background .2s, box-shadow .2s; }
 .kpt-input:hover, .kpt-select:hover { background: var(--fill-2); }
 .kpt-input:focus, .kpt-select:focus { outline: none; background: var(--surface); box-shadow: 0 0 0 2px var(--navy), var(--ring); }
+.kpt-input::placeholder { color: #B9BDC5; font-weight: 500; opacity: 1; }
 .kpt-money { position: relative; }
 .kpt-money::before { content: "$"; position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--muted); font: 600 22px var(--font-display); }
 .kpt-money .kpt-input { padding-left: 36px; }
@@ -452,6 +453,81 @@ body[data-page-type="calculator"] .kpt-hero .kpt-lead { font-size: clamp(17px, 2
 
 /* ---------- 16. Template-only notice ---------- */
 .kpt-template-note { background: #FFF7E6; color: #6B4E14; border-radius: var(--r-sm); padding: 12px 16px; font-size: 14px; margin-top: 20px; max-width: 48em; }
+
+/* ---------- 18. Guided steps, notes, figures (calculator building blocks) ----------
+   Added with the HDB Upgrade Calculator (Phase 2). Built from v2.1 tokens.
+   Use .kpt-form--steps with .kpt-step blocks for guided, progressive input. */
+.kpt-form--steps, .kpt-tool .kpt-form--steps { gap: 0; }
+.kpt-step { padding: 22px 0; border-top: 1px solid var(--line); }
+.kpt-step:first-child { border-top: 0; padding-top: 0; }
+.kpt-step:last-child { padding-bottom: 0; }
+.kpt-step__head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.kpt-step__n { display: block; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 2px; }
+.kpt-step__title { font: 650 21px/1.2 var(--font-display); letter-spacing: -0.02em; margin: 0; }
+.kpt-step__summary { font-size: 14px; color: var(--ink-2); margin: 6px 0 0; }
+.kpt-step__edit { font: 500 15px var(--font); color: var(--navy); background: none; border: 0; padding: 4px 0; cursor: pointer; white-space: nowrap; }
+.kpt-step__edit:hover { text-decoration: underline; text-underline-offset: 3px; }
+.kpt-step__body { display: grid; gap: 24px; margin-top: 20px; }
+.kpt-step.is-done .kpt-step__body, .kpt-step.is-locked .kpt-step__body { display: none; }
+.kpt-step.is-locked .kpt-step__title, .kpt-step.is-locked .kpt-step__n { color: #B4B8C0; }
+.kpt-step:not(.is-done) .kpt-step__summary, .kpt-step:not(.is-done) .kpt-step__edit { display: none; }
+.kpt-step.is-open { animation: kpt-in .35s var(--ease); }
+.kpt-step__next { justify-self: start; }
+@media (max-width: 480px) { .kpt-step__next { justify-self: stretch; } }
+
+.kpt-row2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.kpt-sub { display: grid; gap: 18px; padding: 18px; background: var(--bg); border-radius: var(--r-sm); }
+.kpt-sub__title { font-size: 14px; font-weight: 650; margin: 0; }
+.kpt-field__hint { font-size: 14px; color: var(--ink-2); margin: 0; line-height: 1.45; }
+.kpt-field__err { font-size: 14px; color: var(--bad); margin: 0; }
+.kpt-linkbtn { font: 500 15px var(--font); color: var(--navy); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+
+/* Notes: plain information, a caution, or a stop */
+.kpt-note { font-size: 15px; line-height: 1.5; padding: 14px 16px; border-radius: var(--r-sm); background: var(--navy-soft); color: var(--ink); margin: 0; }
+.kpt-note strong { font-weight: 650; }
+.kpt-note--warn { background: #FFF4E0; color: #5E4513; }
+.kpt-note--stop { background: #FDECEA; color: #7A2A1D; }
+.kpt-note a { color: inherit; font-weight: 600; }
+
+/* Labels for what kind of number something is */
+.kpt-tag { display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: .01em; padding: 2px 8px; border-radius: var(--pill); background: var(--fill); color: var(--ink-2); vertical-align: 2px; }
+.kpt-tag--plan { background: var(--navy-soft); color: var(--navy); }
+.kpt-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; padding: 6px 12px; border-radius: var(--pill); background: var(--navy-soft); color: var(--navy); }
+
+/* A second, smaller headline figure under the hero result */
+.kpt-figure2 { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line); }
+.kpt-figure2__label { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+.kpt-figure2__value { font: 700 clamp(36px, 10vw, 56px)/1 var(--font-display); letter-spacing: -0.04em; color: var(--ink); margin: 6px 0 10px; }
+.kpt-figure2__note { font-size: 14px; color: var(--muted); margin: 0; max-width: 32em; }
+.kpt-result__value.is-empty, .kpt-figure2__value.is-empty { color: #C9CDD4; }
+
+/* Disclosure */
+.kpt-details { border-top: 1px solid var(--line); }
+.kpt-details > summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 0; font-weight: 600; font-size: 16px; }
+.kpt-details > summary::-webkit-details-marker { display: none; }
+.kpt-details > summary::after { content: "+"; font-size: 22px; font-weight: 400; color: var(--muted); line-height: 1; transition: transform .25s var(--ease); }
+.kpt-details[open] > summary::after { transform: rotate(45deg); }
+.kpt-details__body { padding: 0 0 18px; }
+.kpt-workings { width: 100%; border-collapse: collapse; font-size: 15px; }
+.kpt-workings td { padding: 9px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.kpt-workings td:last-child { text-align: right; white-space: nowrap; font-weight: 600; padding-left: 12px; }
+.kpt-workings tr.is-total td { border-bottom: 0; font-weight: 650; color: var(--navy); }
+.kpt-workings .kpt-tag { margin-left: 6px; }
+
+/* "≈" before an estimated headline figure: present but quiet */
+.kpt-approx { font-size: .5em; font-weight: 500; color: var(--muted); margin-right: .1em; vertical-align: .22em; letter-spacing: 0; }
+@media (max-width: 899px) { .kpt-tool { grid-template-columns: minmax(0, 1fr); } }
+.kpt-tool .kpt-result__value, .kpt-figure2__value { white-space: nowrap; }
+.kpt-tool .kpt-result__value { font-size: clamp(40px, 11.5vw, 88px); }
+.kpt-figure2__value { font-size: clamp(32px, 8.5vw, 56px); }
+@media (min-width: 900px) { .kpt-tool .kpt-result__value { font-size: clamp(56px, 5.4vw, 88px); } }
+
+/* Rules & assumptions list on calculator pages */
+.kpt-rules { display: grid; gap: 0; }
+.kpt-rules__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; padding: 14px 0; border-top: 1px solid var(--line); font-size: 15px; }
+.kpt-rules__row span:nth-child(2) { font-weight: 600; text-align: right; }
+.kpt-rules__meta { grid-column: 1 / -1; font-size: 13px; color: var(--muted); }
+.kpt-rules__meta a { color: var(--muted); }
 
 /* ---------- 17. Motion preferences ---------- */
 @media (prefers-reduced-motion: reduce) {
