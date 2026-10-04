@@ -130,12 +130,45 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
   .kpt-band { padding: 140px 0 40px; }
 }
 
-/* Homepage hero is centred, like a product landing */
-body[data-page-type="home"] .kpt-hero > .kpt-wrap > .kpt-eyebrow,
-body[data-page-type="home"] .kpt-hero > .kpt-wrap > .kpt-h1,
-body[data-page-type="home"] .kpt-hero > .kpt-wrap > .kpt-lead { text-align: center; margin-left: auto; margin-right: auto; }
-body[data-page-type="home"] .kpt-hero .kpt-h1 { max-width: 15em; }
-body[data-page-type="home"] .kpt-hero .kpt-lead { max-width: 30em; }
+/* Homepage hero with Ken's portrait.
+   Phones: a small round head-and-shoulders photo + name, so the tools stay high.
+   Desktop: text left, waist-up portrait right in a quiet white frame
+   (the photo has a white studio background, so the frame blends with it).
+   Photos are cropped originals only — never retouched or regenerated. */
+.kpt-hero__grid { display: grid; gap: 22px; }
+.kpt-hero__text .kpt-h1 { max-width: 11em; }
+.kpt-hero__text .kpt-lead { margin-bottom: 0; }
+.kpt-hero__ken { margin: 0; display: flex; align-items: center; gap: 12px; }
+.kpt-hero__ken img { display: block; width: 52px; height: 52px; border-radius: 50%; object-fit: cover; background: #fff; box-shadow: 0 0 0 1px var(--line); }
+.kpt-hero__ken figcaption { display: flex; flex-direction: column; line-height: 1.3; }
+.kpt-hero__name { font-weight: 650; font-size: 15px; }
+.kpt-hero__role { font-size: 13px; color: var(--muted); }
+@media (min-width: 900px) {
+  .kpt-hero__grid { grid-template-columns: minmax(0, 1.35fr) minmax(0, .65fr); gap: 56px; align-items: end; }
+  .kpt-hero__text { padding-bottom: 72px; }
+  body[data-page-type="home"] .kpt-hero { padding-top: 56px; }
+  .kpt-hero__ken { flex-direction: column; align-items: stretch; gap: 0; background: transparent; }
+  /* No frame. The portrait sits in a soft pool of white light: a large
+     radial glow (pure white where the photo is, fading into the page grey)
+     makes the photo's white studio background disappear, so Ken stands in
+     the hero's whitespace rather than inside a card. The photo itself is
+     untouched — no masks, filters or recolouring. */
+  .kpt-hero__ken picture { display: block; position: relative; z-index: 0; }
+  /* feather only the outer white edges of the studio background into the glow */
+  .kpt-hero__ken img {
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 7%), linear-gradient(to right, transparent 0, #000 7%, #000 93%, transparent 100%);
+    -webkit-mask-composite: source-in;
+            mask-image: linear-gradient(to bottom, transparent 0, #000 7%), linear-gradient(to right, transparent 0, #000 7%, #000 93%, transparent 100%);
+            mask-composite: intersect; }
+  .kpt-hero__ken picture::before { content: ""; position: absolute; inset: -130px -150px -170px; z-index: -1; pointer-events: none;
+    background: radial-gradient(closest-side, #fff 66%, rgba(255,255,255,0) 100%); }
+  .kpt-hero__ken img { width: 100%; height: auto; aspect-ratio: 400 / 500; border-radius: 0; box-shadow: none; object-fit: cover; object-position: center top; }
+  .kpt-hero__ken figcaption { position: relative; z-index: 1; padding: 6px 0 0; text-align: center; }
+  .kpt-hero__text { position: relative; z-index: 1; }
+  .kpt-hero__name { font-size: 16px; }
+  .kpt-hero__role { font-size: 14px; }
+}
+@media (min-width: 1100px) { .kpt-hero__grid { grid-template-columns: minmax(0, 1.5fr) minmax(0, .7fr); gap: 72px; } }
 
 /* ---------- 6. Journey cards (homepage) ---------- */
 .kpt-journeys { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 36px; }
@@ -336,14 +369,15 @@ body[data-page-type="calculator"] .kpt-hero .kpt-lead { font-size: clamp(17px, 2
    Markup:
    <aside class="kpt-take">
      <div class="kpt-take__head">
+       <img class="kpt-take__photo" src="../../assets/images/brand/ken-headshot.jpg" alt="Ken Tan">
        <p class="kpt-take__label">Ken's take</p>
        <p class="kpt-take__by">Ken Tan · Property agent since 2007</p>
      </div>
      <p>The insight. One to three short paragraphs.</p>
    </aside> */
 .kpt-take { display: grid; gap: 18px; padding: 26px 0 0; border-top: 2px solid var(--navy); margin: 0; }
-.kpt-take__head { display: grid; grid-template-columns: 40px 1fr; column-gap: 12px; align-items: center; align-content: start; }
-.kpt-take__head::before { content: "K"; grid-row: 1 / span 2; width: 40px; height: 40px; border-radius: 50%; background: var(--navy); color: var(--mono-k); display: grid; place-items: center; font: 700 17px/1 var(--font-display); }
+.kpt-take__head { display: grid; grid-template-columns: 48px 1fr; column-gap: 14px; align-items: center; align-content: start; }
+.kpt-take__photo { grid-row: 1 / span 2; width: 48px; height: 48px; border-radius: 50%; object-fit: cover; display: block; }
 .kpt-take__label { font-weight: 650; font-size: 15px; color: var(--ink); margin: 0; line-height: 1.3; }
 .kpt-take__by { font-size: 13px; color: var(--muted); margin: 0; line-height: 1.4; }
 /* older markup without a head: label directly inside .kpt-take */
@@ -351,7 +385,7 @@ body[data-page-type="calculator"] .kpt-hero .kpt-lead { font-size: clamp(17px, 2
 .kpt-take > .kpt-take__label::before { content: "K"; flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--navy); color: var(--mono-k); display: grid; place-items: center; font: 700 17px/1 var(--font-display); }
 .kpt-take > p:not([class]) { font: 500 clamp(21px, 3vw, 30px)/1.38 var(--font-display); letter-spacing: -0.025em; color: var(--ink); margin: 0; max-width: 30em; text-wrap: pretty; }
 @media (min-width: 900px) {
-  .kpt-take { grid-template-columns: 260px minmax(0, 1fr); column-gap: 56px; row-gap: 0; padding-top: 36px; }
+  .kpt-take { grid-template-columns: 300px minmax(0, 1fr); column-gap: 56px; row-gap: 0; padding-top: 36px; }
   .kpt-take > p:not([class]) + p:not([class]) { margin-top: 20px; }
   .kpt-take__head, .kpt-take > .kpt-take__label { grid-column: 1; grid-row: 1 / span 20; align-self: start; }
   .kpt-take > p:not([class]) { grid-column: 2; }

@@ -316,12 +316,39 @@ in large type on the right. Once per page, after the main result/content:
 ```html
 <aside class="kpt-take">
   <div class="kpt-take__head">
+    <img class="kpt-take__photo" src="../../assets/images/brand/ken-headshot.jpg" width="240" height="240" alt="Ken Tan">
     <p class="kpt-take__label">Ken's take</p>
     <p class="kpt-take__by">Ken Tan · Property agent since 2007</p>
   </div>
   <p>The insight. One to three short paragraphs, plain English, with a view.</p>
 </aside>
 ```
+
+(The `src` path above is for pages two folders deep, e.g. `calculators/<slug>/`.)
+
+**Personal branding — LOCKED (approved by Ken, 4 Oct 2026).** The homepage
+portrait treatment (desktop and mobile), the Ken's take author photo, the byline
+"Ken Tan · Property agent since 2007", and the photo rules below are final.
+Do not change them unless Ken explicitly asks.
+
+**Photography of Ken — strict rules**
+- Use only Ken's real photographs. **Never** AI-generate, regenerate, beautify,
+  retouch, restyle, filter, colour-grade or otherwise change his appearance.
+  Allowed edits: cropping and resizing only.
+- Originals are kept untouched in `assets/images/brand/originals/`
+  (`TUP_1206.jpg` full-length studio portrait, `headshot-tiktok.png` round headshot).
+  Make new crops from these; never overwrite them.
+- Approved crops:
+  - `ken-portrait-hero.jpg` — waist/chest-up from TUP_1206, homepage hero on desktop.
+    Right column, **no card or frame**: Ken stands in a soft pool of white light
+    (radial glow) that absorbs the photo's white studio background, with only the
+    outer background edges feathered. Caption below, centred: "Ken Tan" /
+    "Property agent since 2007".
+  - `ken-portrait-mobile.jpg` — head-and-shoulders from TUP_1206, shown as a
+    52px circle beside his name on phones so the tools stay high on the page.
+  - `ken-headshot.jpg` — from headshot-tiktok.png, inside the white ring; the
+    small author photo in Ken's take (48px circle).
+- Alt text: "Ken Tan" (or "Ken Tan, property agent").
 
 **Footer** (drawn by kpt.js): roomy on phones — 2-column link list with
 large tap targets, legal block separated by a hairline.
@@ -401,6 +428,11 @@ Do not modify Layer 2 microsites unless Ken explicitly asks.
 - **Design v2.1 (4 Oct 2026):** fewer cards, calculator as one instrument panel,
   editorial Ken's take, roomier footer, gold reserved for the K monogram.
   **Approved and locked as the KPT design system.**
+- **Photography added (4 Oct 2026):** Ken's real portrait in the homepage hero
+  (large on desktop, small on phones) and as the Ken's take author photo.
+  Crops only; originals preserved (see B8 "Photography of Ken").
+  Desktop portrait refined to sit frameless in a soft white glow.
+  **Personal branding approved and locked.**
 - **Phase 1 complete (4 Oct 2026).** Next: Phase 2 — first live tools. The
   project, comparison and guide templates still use pre-v2.1 markup for the
   Ken's take block (it renders correctly via the legacy styles); switch each to

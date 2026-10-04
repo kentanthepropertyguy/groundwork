@@ -30,9 +30,25 @@
     <!-- 1. HERO: start with the visitor's problem -->
     <section class="kpt-hero">
       <div class="kpt-wrap">
-        <p class="kpt-eyebrow">Singapore property, analysed</p>
-        <h1 class="kpt-h1">What are you looking to do?</h1>
-        <p class="kpt-lead">Pick your situation and see which numbers to look at first. Free calculators, comparisons and project analysis by Ken Tan.</p>
+        <div class="kpt-hero__grid">
+          <div class="kpt-hero__text">
+            <p class="kpt-eyebrow">Singapore property, analysed</p>
+            <h1 class="kpt-h1">What are you looking to do?</h1>
+            <p class="kpt-lead">Pick your situation and see which numbers to look at first. Free calculators, comparisons and project analysis by Ken Tan.</p>
+          </div>
+
+          <!-- Ken's portrait: large waist-up on desktop, small head-and-shoulders on phones -->
+          <figure class="kpt-hero__ken">
+            <picture>
+              <source media="(min-width: 900px)" srcset="assets/images/brand/ken-portrait-hero.jpg" width="400" height="500">
+              <img src="assets/images/brand/ken-portrait-mobile.jpg" width="216" height="216" alt="Ken Tan, property agent">
+            </picture>
+            <figcaption>
+              <span class="kpt-hero__name">Ken Tan</span>
+              <span class="kpt-hero__role">Property agent since 2007</span>
+            </figcaption>
+          </figure>
+        </div>
 
         <div class="kpt-journeys" data-kpt-journeys></div>
 
