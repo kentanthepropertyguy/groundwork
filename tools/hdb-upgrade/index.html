@@ -65,6 +65,13 @@
         <button type="button" class="kpt-choice" data-value="buy-first" aria-pressed="false">I may buy before it's sold</button>
       </div>
 
+      <div id="bfPrice" class="kpt-field" style="margin-top:14px;" hidden>
+        <label for="targetPrice">The price of the home you're considering</label>
+        <input id="targetPrice" type="text" inputmode="numeric" placeholder="e.g. 1,400,000" autocomplete="off">
+        <div class="kpt-error" data-for="targetPrice"></div>
+        <p class="kpt-note" style="margin-top:6px;">Buying first changes what matters most, so this is the one extra thing we need. Cash and CPF under "Add more detail" make the answer sharper.</p>
+      </div>
+
       <p class="kpt-qlabel kpj-sub" style="margin-top:14px;">Residency</p>
       <div class="kpt-choices kpj-small" data-group="residency">
         <button type="button" class="kpt-choice" data-value="all-sc" aria-pressed="true">All buyers are Singapore Citizens</button>
@@ -112,9 +119,10 @@
 <script src="assumptions.js"></script>
 <script src="ken-takes.js"></script>
 <script src="engine.js"></script>
+<script src="buyfirst.js"></script>
 <script>
 (function () {
-  const ENG = window.KPT_HDB, A = window.KPT_ASSUMPTIONS, R = window.KPT_RULES;
+  const ENG = window.KPT_HDB, BF = window.KPT_HDB_BUYFIRST, A = window.KPT_ASSUMPTIONS, R = window.KPT_RULES;
   KPT.setContext({ tool_name: 'hdb-upgrade', tool_category: 'own', project_name: null });
   KPT.track('page_view', { page: 'hdb-upgrade' });
 
@@ -153,6 +161,7 @@
       group.querySelectorAll('.kpt-choice').forEach((x) => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
       choice[group.dataset.group] = b.dataset.value;
       if (group.dataset.group === 'buyers') $('buyer2').hidden = b.dataset.value !== '2';
+      if (group.dataset.group === 'timing') $('bfPrice').hidden = b.dataset.value !== 'buy-first';
       updateQuickRead();
     });
   });
@@ -164,6 +173,7 @@
       salePrice: num('salePrice'), outstandingLoan: num('outstandingLoan'), buyers,
       timing: choice.timing, residency: choice.residency,
       otherMonthlyDebt: num('otherMonthlyDebt'), cashSavings: num('cashSavings'), otherCpfOa: num('otherCpfOa'),
+      targetPrice: choice.timing === 'buy-first' ? num('targetPrice') : undefined,
     };
   }
 
@@ -181,7 +191,7 @@
     const set = (id, v) => { if (v !== undefined && v !== null) $(id).value = id.startsWith('age') ? String(v) : Number(v).toLocaleString('en-SG'); };
     set('salePrice', i.salePrice); set('outstandingLoan', i.outstandingLoan);
     set('age1', i.buyers[0].age); set('income1', i.buyers[0].income);
-    set('otherMonthlyDebt', i.otherMonthlyDebt); set('cashSavings', i.cashSavings); set('otherCpfOa', i.otherCpfOa);
+    set('targetPrice', i.targetPrice); set('otherMonthlyDebt', i.otherMonthlyDebt); set('cashSavings', i.cashSavings); set('otherCpfOa', i.otherCpfOa);
     const click = (g, v) => { const b = document.querySelector(`[data-group="${g}"] [data-value="${v}"]`); if (b) b.click(); };
     click('buyers', i.buyers.length === 2 ? '2' : '1'); click('timing', i.timing); click('residency', i.residency);
     if (i.buyers[1]) { set('age2', i.buyers[1].age); set('income2', i.buyers[1].income); }
@@ -193,7 +203,15 @@
     markStarted();
     document.querySelectorAll('.kpt-error').forEach((e) => (e.textContent = ''));
     lastInput = collect();
-    const r = ENG.analyse(lastInput);
+    let r = ENG.analyse(lastInput);
+    if (r.state === 'buy-first') {
+      // Buying before selling: same required answers as selling first, plus the price being considered.
+      const bf = BF.analyse(lastInput);
+      const errs = bf.state === 'incomplete' ? bf.errors.slice() : [];
+      if (!lastInput.targetPrice) errs.push({ field: 'targetPrice', message: "Enter the price of the home you're considering." });
+      if (errs.length) r = { state: 'incomplete', errors: errs };
+      else r = { state: 'buy-first', bf: bf };
+    }
     if (r.state === 'incomplete') {
       let first = null;
       r.errors.forEach((e) => {
@@ -219,7 +237,7 @@
   function render(r) {
     const root = $('result-root');
     let html;
-    if (r.state === 'buy-first') html = buyFirstHtml(r);
+    if (r.state === 'buy-first') html = r.bf ? buyFirstAnalysisHtml(r) : buyFirstHtml(r);
     else if (r.state === 'no-result') html = noResultHtml(r);
     else html = analysisHtml(r);
     root.innerHTML = html;
@@ -249,6 +267,89 @@
       </div>`,
       `<div class="kpt-section" style="padding-top:0;">${askKenBlock(r, 'Want to talk it through before you commit to anything?')}</div>`,
     ]);
+  }
+
+  // --- buy-first analysis ------------------------------------------------------------------
+  const BF_SENTENCE = {
+    'sell-first-cleaner': (b) => `This price sits within what selling first could support on your figures, so you may avoid ${b.hasPR ? '' : 'the second-property ABSD and '}the upfront funding problem.`,
+    'funds-short': (b) => `Before your flat's sale proceeds arrive, the cash and CPF you listed look about ${KPT.money(b.shortfall.low)}${b.shortfall.low === b.shortfall.high ? '' : '–' + KPT.money(b.shortfall.high)} short.`,
+    'potentially-workable': (b) => `The cash and CPF you listed would cover the upfront amount. Whether it works then depends on your lender and on selling your flat on time.`,
+    'depends-on-loan-count': (b) => `What you listed covers the upfront amount only if your flat's loan isn't counted against you. Your lender can confirm that.`,
+    'funds-unknown': (b) => `Add the cash and CPF you could put in to see whether you'd cover it.`,
+  };
+  const upfrontText = (b) => b.upfrontLow === b.upfrontHigh ? KPT.money(b.upfrontLow) : KPT.money(b.upfrontLow) + '–' + KPT.money(b.upfrontHigh);
+
+  function buyFirstAnalysisHtml(r) {
+    const b = r.bf, c = b.cases, hasTwo = c.length === 2;
+    const sentence = (BF_SENTENCE[b.verdict] || (() => ''))(b);
+    const addLink = b.verdict === 'funds-unknown' ? ` <a href="#" id="addFunds">Add cash and CPF →</a>` : '';
+
+    const hero = `<div class="kpt-section" style="padding-top:8px;">
+        <p class="kpt-eyebrow">Buying before selling</p>
+        <p class="kpt-body kpt-muted" style="margin:14px 0 4px;">Cash and CPF needed before your flat sells, at ${KPT.money(b.price)}</p>
+        <div class="kpt-figure${b.upfrontLow === b.upfrontHigh ? '' : ' kpj-fig-range'}">${upfrontText(b)}</div>
+        <p class="kpt-hero-head">${b.headline}</p>
+        <p class="kpt-hero-sub">${sentence}${addLink}</p>
+      </div>`;
+
+    const loanLine = hasTwo
+      ? `${KPT.money(c[1].loan)}${c[1].loan === c[0].loan ? '' : '–' + KPT.money(c[0].loan)}`
+      : KPT.money(c[0].loan);
+    const loanNote = hasTwo
+      ? `Up to ${pct(c[1].ltv)} of the price (at least ${pct(c[1].minCashPct)} in cash) if your flat's loan counts as an outstanding housing loan, or up to ${pct(c[0].ltv)} (at least ${pct(c[0].minCashPct)} cash) if it doesn't. Your lender decides.`
+      : `Up to ${pct(c[0].ltv)} of the price, with at least ${pct(c[0].minCashPct)} in cash.${c[0].incomeLimited ? ' Your income is what limits this.' : ''}`;
+    const absdNote = b.hasPR
+      ? `${pct(b.absdRate)} because at least one buyer is a PR. `
+      : `${pct(b.absdRate)} on the whole price. `;
+    const refundNote = b.singleBuyer
+      ? `A refund is possible only in limited cases, so this tool doesn't assume one.`
+      : `${R.absdRefund.whoText.charAt(0).toUpperCase() + R.absdRefund.whoText.slice(1)} can apply for a refund, subject to conditions, including selling your flat within ${R.absdRefund.months} months of buying (or of TOP/CSC for an uncompleted property). Not netted off here.`;
+
+    const rows = `<div class="kpj-rows">
+        <div class="kpj-row"><div class="kpj-row-h"><span>Upfront cash and CPF</span><b>${upfrontText(b)}</b></div>
+          <p>Price, stamp duty (${usd(b.bsd)}), ABSD and fees, less the loan.${b.available > 0 ? ` You listed ${usd(b.available)} in cash and CPF.` : ''}</p></div>
+        <div class="kpj-row"><div class="kpj-row-h"><span>ABSD</span><b>${usd(b.absd)}</b></div>
+          <p>${absdNote}${refundNote}</p></div>
+        <div class="kpj-row"><div class="kpj-row-h"><span>Loan you could get</span><b>${loanLine}</b></div>
+          <p>${loanNote}</p></div>
+        <div class="kpj-row"><div class="kpj-row-h"><span>Your flat's sale proceeds</span><b>about ${KPT.money(b.netProceeds)}</b></div>
+          <p>After your loan and selling costs. They arrive only when the sale completes, so they don't count towards the upfront amount.</p></div>
+      </div>`;
+
+    const sfBtn = b.sellFirstRange
+      ? `<button class="kpt-cta kpj-btn${b.verdict === 'sell-first-cleaner' ? '' : ' kpj-btn--ghost'}" id="seeSellFirst" type="button">See the selling-first position →</button>` : '';
+    const next = `<div class="kpt-section" style="padding-top:6px;">
+        <p class="kpt-hero-sub" style="margin-bottom:16px;">Buying first depends on timing and on your lender. Ken can look at your actual situation.</p>
+        ${b.verdict === 'sell-first-cleaner' ? sfBtn + '<div style="height:10px"></div>' : ''}
+        <a class="kpt-cta kpj-btn kpj-btn--wa" id="askKen" href="#">Get Ken's view →</a>
+        ${b.verdict !== 'sell-first-cleaner' && sfBtn ? '<div style="height:10px"></div>' + sfBtn : ''}
+        <button class="kpj-link kpj-link--muted" id="startOver" type="button">Change my answers</button>
+      </div>`;
+
+    const reg = [
+      `Second-property ABSD is ${pct(R.absdSecondProperty.allSingaporeCitizens)} for Singapore Citizens and ${pct(R.absdSecondProperty.anyPermanentResident)} for PRs (MOF/IRAS).`,
+      `MAS limits the loan by how many housing loans you already have: ${pct(R.ltvByOutstandingLoans.none.ltv)} with none (at least ${pct(R.ltvByOutstandingLoans.none.minCashPct)} cash), ${pct(R.ltvByOutstandingLoans.one.ltv)} with one (at least ${pct(R.ltvByOutstandingLoans.one.minCashPct)} cash) (MAS).`,
+      `Total monthly debt repayments, including the new loan, can't exceed ${pct(R.tdsrCeiling)} of income, tested at ${Math.round(R.stressRate * 1000) / 10}% a year (MAS).`,
+      `Buyer's stamp duty at this price: about ${usd(b.bsd)} (IRAS).`,
+      `Rules last checked ${R.meta.lastVerified}.`,
+    ];
+    const ours = [
+      `Funds counted: the cash savings and other CPF OA you entered (${b.available > 0 ? usd(b.available) : 'none entered'}). Sale proceeds are not counted, because they arrive later.`,
+      `The loan is the lower of the LTV limit and what ${pct(R.tdsrCeiling)} of your income supports at ${Math.round(R.stressRate * 1000) / 10}% over ${b.tenureYears} years (about ${usd(b.loanCap)}).`,
+      `Other costs of ${usd(b.purchaseCosts)} (legal and other fees) are included. ${b.hasPR ? 'ABSD is at the PR rate because a buyer is a PR.' : 'We assume every buyer already owns the flat, so the second-property rate applies.'}`,
+      `The ABSD refund is never assumed or netted off.`,
+    ];
+    const lender = [
+      `Whether your flat's HDB loan counts as an outstanding housing loan isn't something we can confirm, so both cases are shown.`,
+      `We only count the monthly repayments you enter. If you still pay a loan on your flat, include it in "Other monthly loan repayments".`,
+      `Income is counted as entered; lenders may discount variable income and may be stricter than the rules.`,
+    ];
+    const li = (a) => a.map((x) => `<li>${x}</li>`).join('');
+    const details = `<details class="kpt-disclosure" id="methodology"><summary>How this was worked out</summary><div class="inner">
+        <p class="kpt-group">${REG}Regulatory rules</p><ul class="kpt-list">${li(reg)}</ul>
+        <p class="kpt-group">${OURS}Our planning assumptions</p><ul class="kpt-list">${li(ours)}</ul>
+        <p class="kpt-group">${LENDER}Lender-dependent</p><ul class="kpt-list">${li(lender)}</ul></div></details>`;
+    return hero + rows + next + details;
   }
 
   // --- no workable result ------------------------------------------------------
@@ -425,13 +526,22 @@
   function wire(r) {
     const ask = $('askKen');
     if (ask) {
-      ask.href = KPT.waLink({ message: ENG.whatsappMessage(r) });
+      ask.href = KPT.waLink({ message: ENG.whatsappMessage(r.bf ? { state: 'buy-first' } : r) });
       ask.addEventListener('click', () => KPT.track('whatsapp_click', { tool_name: 'hdb-upgrade', result_state: r.state }));
     }
     const so = $('startOver');
     if (so) so.addEventListener('click', () => {
       $('view-result').style.display = 'none'; $('view-input').style.display = ''; document.body.dataset.view = 'input';
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    const af = $('addFunds');
+    if (af) af.addEventListener('click', (e) => {
+      e.preventDefault(); $('startOver').click(); const d = document.querySelector('#view-input details'); if (d) d.open = true; $('cashSavings').focus();
+    });
+    const ssf = $('seeSellFirst');
+    if (ssf) ssf.addEventListener('click', () => {
+      $('startOver').click(); document.querySelector('[data-group="timing"] [data-value="sell-first"]').click(); $('seeEstimate').click();
+      KPT.track('see_sell_first_click', { tool_name: 'hdb-upgrade' });
     });
     const va = $('viewAssumptions');
     if (va) va.addEventListener('click', (e) => { e.preventDefault(); const m = $('methodology'); m.open = true; m.scrollIntoView({ behavior: 'smooth', block: 'start' }); KPT.track('view_assumptions', { tool_name: 'hdb-upgrade' }); });

@@ -50,6 +50,31 @@
     // which can reduce usable CPF. Not modelled; triggers the Indicative state.
     cpfRetirementAccountAge: 55,
 
+
+    // ---- Buying BEFORE selling (used only by buyfirst.js; the sell-first engine does not read these) ----
+
+    // IRAS / MOF — ABSD on/after 27 Apr 2023 for a buyer who already owns ONE other residential
+    // property (an HDB flat counts). Singapore Citizen 20%, Permanent Resident 30%.
+    // Source: MOF "Measures for a Sustainable Property Market", 26 Apr 2023. Verified 2026-10-05.
+    // NOTE: confirm against the live IRAS ABSD page before launch (the IRAS page could not be rendered for this check).
+    absdSecondProperty: { allSingaporeCitizens: 0.20, anyPermanentResident: 0.30 },
+
+    // MOF — ABSD refund. "Married couples with at least one SC spouse, who jointly purchase a second residential
+    // property, can continue to apply for a refund of ABSD, subject to conditions", including selling the first
+    // residential property within 6 months after the purchase date (completed property) or after the TOP/CSC
+    // issuance date (uncompleted property). Same source/date/caveat as above. The tool never assumes the refund
+    // is granted and never nets it off the upfront figure.
+    absdRefund: { months: 6, whoText: 'married couples with at least one Singapore Citizen spouse buying jointly' },
+
+    // MAS — LTV limit and MINIMUM CASH downpayment by number of the borrower's outstanding housing loans
+    // (standard structure; loans with OTP on/after 6 Jul 2018). Page last updated 5 Jul 2018. Verified 2026-10-05.
+    // The MAS page does NOT say whether an HDB loan counts as an outstanding housing loan, so the tool shows both
+    // cases when the user's flat has a loan, and says the lender decides how it is counted.
+    ltvByOutstandingLoans: {
+      none: { ltv: 0.75, minCashPct: 0.05 },
+      one:  { ltv: 0.45, minCashPct: 0.25 },
+    },
+
     meta: { lastVerified: '2026-10-05' },
   };
 });
