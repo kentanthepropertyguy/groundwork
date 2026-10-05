@@ -1,0 +1,7 @@
+key,value
+stale_days,120
+expired_days,270
+hold_tolerance_pct,5
+near_miss_pct,10
+review_days,90
+max_shortlist,3

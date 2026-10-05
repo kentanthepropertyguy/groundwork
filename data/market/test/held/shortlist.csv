@@ -1,0 +1,8 @@
+entry_id,state,priority,label,project,project_id,region,status,age_band,bedroom,budget_min,budget_max,purpose,reason,trade_off,indicative_low,indicative_high,price_as_of,reviewed_on,review_by
+T01,Active,1,Safe choice,Test Project A,,OCR,Resale,10–25,3,1150000,1450000,own-stay,TEST COPY: replace with your own reasoning.,"Older building, fewer facilities",1550000,1650000,2026-09-20,2026-09-20,2026-12-19
+T02,Active,2,Worth stretching for,Test Project B,,OCR,Resale,0–10,3,1400000,1700000,own-stay,TEST COPY: replace with your own reasoning.,Uses most of your headroom,1420000,1550000,2026-09-20,2026-09-20,2026-12-19
+T03,Active,,"Smaller, closer in",Test Project C,,RCR,Resale,10–25,2,1150000,1450000,any,TEST COPY: replace with your own reasoning.,"Less space, better location",1200000,1320000,2026-09-28,2026-09-28,2026-12-27
+T04,Review due,3,Value pick,Test Project D,,OCR,Resale,25+,3,950000,1350000,own-stay,TEST COPY: replace with your own reasoning.,Remaining lease is a factor,980000,1100000,2026-06-02,2026-06-02,2026-09-02
+T05,Active,,Best for resale liquidity,Test Project E,,OCR,Resale,10–25,4,1500000,1900000,own-stay,TEST COPY: replace with your own reasoning.,Fewer units come up,1520000,1700000,2026-09-10,2026-09-10,2026-12-09
+T06,Active,4,A different angle,Test Project F,,RCR,Resale,25+,3,1250000,1550000,own-stay,TEST COPY: replace with your own reasoning.,"Older lease, closer in",1300000,1400000,2026-09-25,2026-09-25,2026-12-24
+T07,Retired,,,Test Project G (retired),,OCR,Resale,10–25,3,1000000,1300000,any,TEST COPY: replace with your own reasoning.,,1000000,1100000,2026-01-10,2026-01-10,2026-04-10
