@@ -1,3 +1,0 @@
-User-agent: *
-Disallow: /templates/
-Sitemap: https://tools.kentanthepropertyguy.com/sitemap.xml
