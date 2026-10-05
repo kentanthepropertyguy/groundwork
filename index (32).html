@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Ken Property Tools helps you work out a property decision in Singapore: HDB upgrade, what your budget buys, and the trade-offs behind it.">
+<meta name="theme-color" content="#FAFAF8">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<title>Ken Property Tools — Property decisions, analysed.</title>
+<link rel="stylesheet" href="assets/css/kpt-system.css">
+<link rel="stylesheet" href="assets/css/kpt-site.css">
+</head>
+<body class="kps">
+<header class="kpt-header kpt-shell">
+  <div class="brand">KEN PROPERTY TOOLS</div>
+</header>
+
+<main class="kpt-shell">
+  <section class="kpt-section kps-hero">
+    <p class="kpt-eyebrow">Property decisions, analysed.</p>
+    <h1 class="kpt-h1">Make sense of your next property move.</h1>
+    <p class="kpt-lede">Start from where you are. See what the numbers mean for you, and what trade-offs sit behind them.</p>
+  </section>
+
+  <nav class="kpt-router" aria-label="Start your question">
+    <a href="own/" data-journey="own">
+      <h3>I own a property</h3>
+      <p>Upgrading, selling, or just want to know where you stand.</p>
+    </a>
+    <a href="buy/" data-journey="buy">
+      <h3>I'm looking to buy</h3>
+      <p>Figure out what you can comfortably afford, and where.</p>
+    </a>
+    <a href="research/" data-journey="research">
+      <h3>I'm researching a property</h3>
+      <p>Get an honest read on a launch, a resale unit, or two options side by side.</p>
+    </a>
+  </nav>
+
+  <p class="kps-credit"><img src="assets/img/ken-portrait.jpg" alt="Ken Tan"><span>Ken Tan · Property agent since 2007</span></p>
+</main>
+
+<footer class="kpt-footer kpt-shell">
+  Ken Tan · Property agent since 2007 · CEA R007903D · Huttons Asia Pte Ltd (L3008899K)
+</footer>
+
+<script src="assets/js/kpt-analytics.js"></script>
+<script src="assets/js/kpt-components.js"></script>
+<script>
+  KPT.setContext({ tool_category: "homepage" });
+  KPT.track("page_view", { page: "homepage" });
+  document.querySelectorAll('.kpt-router a').forEach(function (a) {
+    a.addEventListener('click', function () {
+      KPT.track('journey_started', { journey: a.dataset.journey });
+    });
+  });
+</script>
+</body>
+</html>

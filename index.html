@@ -1,132 +1,100 @@
 <!doctype html>
-<html lang="en-SG">
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ken Property Tools · Singapore property calculators and project analysis</title>
-  <meta name="description" content="Free Singapore property tools by Ken Tan: HDB upgrade and affordability calculators, new launch analysis, and side-by-side comparisons.">
-  <link rel="canonical" href="https://tools.kentanthepropertyguy.com/">
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Ken Property Tools">
-  <meta property="og:description" content="Singapore property calculators, comparisons and project analysis by Ken Tan | The Property Guy.">
-  <meta property="og:url" content="https://tools.kentanthepropertyguy.com/">
-  <meta property="og:image" content="https://tools.kentanthepropertyguy.com/assets/images/brand/og-default.jpg">
-  <meta name="theme-color" content="#F5F5F7">
-  <link rel="icon" href="assets/images/brand/favicon.svg" type="image/svg+xml">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/kpt.css">
-  <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebSite","name":"Ken Property Tools","url":"https://tools.kentanthepropertyguy.com/","publisher":{"@type":"Person","name":"Ken Tan","jobTitle":"Property Agent, CEA R007903D"}}
-  </script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Own an HDB flat, condo or landed home in Singapore? Work out where you stand and what your next move could look like.">
+<meta name="theme-color" content="#FAFAF8">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<title>I own a property — Ken Property Tools</title>
+<link rel="stylesheet" href="../assets/css/kpt-system.css">
+<link rel="stylesheet" href="../assets/css/kpt-site.css">
 </head>
+<body class="kps">
+<header class="kpt-header kpt-shell">
+  <a class="brand" href="../">KEN PROPERTY TOOLS</a>
+</header>
 
-<body data-page-type="home">
-  <div data-kpt-header></div>
+<main class="kpt-shell" style="max-width:640px;">
+  <section class="kpt-section" style="padding-top:20px;">
+    <p class="kpt-eyebrow">I own a property</p>
+    <h1 class="kpt-h2" style="font-size:31px;">What do you own?</h1>
+  </section>
 
-  <main class="kpt-main kpt-main--flush">
+  <section id="step-type" class="kpt-section" style="padding-top:0;">
+    <div class="kps-opts">
+      <button class="kpt-cta" data-type="hdb">HDB flat</button>
+      <button class="kpt-cta" data-type="condo">Private condo</button>
+      <button class="kpt-cta" data-type="landed">Landed</button>
+    </div>
+  </section>
 
-    <!-- 1. HERO: start with the visitor's problem -->
-    <section class="kpt-hero">
-      <div class="kpt-wrap">
-        <div class="kpt-hero__grid">
-          <div class="kpt-hero__text">
-            <p class="kpt-eyebrow">Singapore property, analysed</p>
-            <h1 class="kpt-h1">What are you looking to do?</h1>
-            <p class="kpt-lead">Pick your situation and see which numbers to look at first. Free calculators, comparisons and project analysis by Ken Tan.</p>
-          </div>
+  <section id="step-intent" class="kpt-section" style="display:none; padding-top:0;">
+    <p class="kpt-quickread" id="type-echo"></p>
+    <h2 class="kpt-h2" style="margin-top:18px;">What's on your mind?</h2>
+    <div class="kps-opts">
+      <button class="kpt-cta" data-intent="upgrading">Thinking about upgrading</button>
+      <button class="kpt-cta" data-intent="selling">Thinking about selling</button>
+      <button class="kpt-cta" data-intent="checking">Just checking where I stand</button>
+    </div>
+  </section>
 
-          <!-- Ken's portrait: large waist-up on desktop, small head-and-shoulders on phones -->
-          <figure class="kpt-hero__ken">
-            <picture>
-              <source media="(min-width: 900px)" srcset="assets/images/brand/ken-portrait-hero.jpg" width="400" height="500">
-              <img src="assets/images/brand/ken-portrait-mobile.jpg" width="216" height="216" alt="Ken Tan, property agent">
-            </picture>
-            <figcaption>
-              <span class="kpt-hero__name">Ken Tan</span>
-              <span class="kpt-hero__role">Property agent since 2007</span>
-            </figcaption>
-          </figure>
-        </div>
+  <section id="step-result" class="kpt-section" style="display:none; padding-top:0;">
+    <div id="result-inner"></div>
+  </section>
+</main>
 
-        <div class="kpt-journeys" data-kpt-journeys></div>
+<footer class="kpt-footer kpt-shell">
+  Ken Tan · Property agent since 2007 · CEA R007903D · Huttons Asia Pte Ltd (L3008899K)
+</footer>
 
-        <!-- 2. Starting path: appears when a goal is tapped -->
-        <div class="kpt-path" data-kpt-path hidden></div>
-      </div>
-    </section>
+<script src="../assets/js/kpt-analytics.js"></script>
+<script src="../assets/js/kpt-components.js"></script>
+<script>
+  KPT.setContext({ tool_category: "own" });
+  KPT.track("page_view", { page: "own" });
 
-    <!-- 3. POPULAR TOOLS -->
-    <section class="kpt-section">
-      <div class="kpt-wrap">
-        <div class="kpt-section__head">
-          <h2 class="kpt-h2">Popular tools</h2>
-          <a href="calculators/">All calculators →</a>
-        </div>
-        <div class="kpt-scroller" data-kpt-list="popular"></div>
-      </div>
-    </section>
+  var ownedType = null;
 
-    <!-- 4. LATEST PROJECT ANALYSIS -->
-    <section class="kpt-section">
-      <div class="kpt-wrap">
-        <div class="kpt-section__head">
-          <h2 class="kpt-h2">Latest project analysis</h2>
-          <a href="projects/">All projects →</a>
-        </div>
-        <p class="kpt-section__sub">New launches broken down: pricing, PSF against nearby projects, unit mix, and who each one suits.</p>
-        <div class="kpt-grid kpt-grid--3" data-kpt-list="project" data-limit="6"></div>
-      </div>
-    </section>
+  document.querySelectorAll('#step-type button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      ownedType = b.dataset.type;
+      KPT.track('tool_started', { tool_name: 'own-router', step: 'type', value: ownedType });
+      document.getElementById('type-echo').textContent =
+        'Got it — a ' + ({hdb:'HDB flat', condo:'private condo', landed:'landed home'}[ownedType]) + '.';
+      document.getElementById('step-intent').style.display = '';
+      document.getElementById('step-intent').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
 
-    <!-- 5. CALCULATORS -->
-    <section class="kpt-section">
-      <div class="kpt-wrap">
-        <div class="kpt-section__head">
-          <h2 class="kpt-h2">Calculators</h2>
-          <a href="calculators/">See all →</a>
-        </div>
-        <div class="kpt-list kpt-list--2" data-kpt-list="calculator" data-limit="6"></div>
-      </div>
-    </section>
+  document.querySelectorAll('#step-intent button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var intent = b.dataset.intent;
+      KPT.track('tool_started', { tool_name: 'own-router', step: 'intent', value: intent, owned_type: ownedType });
 
-    <!-- 6. COMPARISONS -->
-    <section class="kpt-section">
-      <div class="kpt-wrap">
-        <div class="kpt-section__head">
-          <h2 class="kpt-h2">Comparisons</h2>
-          <a href="compare/">See all →</a>
-        </div>
-        <div class="kpt-list kpt-list--2" data-kpt-list="compare" data-limit="4"></div>
-      </div>
-    </section>
+      // Only one path is actually built right now: HDB + upgrading.
+      // Every other combination gets an honest answer, not a fake tool.
+      if (ownedType === 'hdb' && intent === 'upgrading') {
+        window.location.href = '../tools/hdb-upgrade/?from=own';
+        return;
+      }
 
-    <!-- 7. GUIDES -->
-    <section class="kpt-section">
-      <div class="kpt-wrap">
-        <div class="kpt-section__head">
-          <h2 class="kpt-h2">Guides</h2>
-          <a href="guides/">See all →</a>
-        </div>
-        <div class="kpt-list kpt-list--2" data-kpt-list="guide" data-limit="4"></div>
-      </div>
-    </section>
-
-    <!-- 8. SOFT CTA -->
-    <section class="kpt-band">
-      <div class="kpt-wrap">
-        <div data-kpt-cta data-cta="home-band"
-             data-cta-heading="Want me to look at your actual numbers?"
-             data-cta-text="Calculators give you the shape of it. If you'd like it worked out properly for your HDB, income and timeline, send me a message. I reply personally."></div>
-      </div>
-    </section>
-  </main>
-
-  <div data-kpt-footer></div>
-
-  <!-- Order matters: data first, then the shared script -->
-  <script src="data/tools.js"></script>
-  <script src="assets/js/kpt.js"></script>
+      var inner = document.getElementById('result-inner');
+      inner.innerHTML =
+        '<p class="kps-lead">I\'m still building out this exact path on the site — but tell me a bit ' +
+        'about your situation on WhatsApp and I\'ll walk you through it directly.</p>' +
+        '<a class="kpt-cta kpt-cta--wa" id="wa-stub" style="margin-top:10px;">Get Ken\'s view →</a>';
+      document.getElementById('wa-stub').href = KPT.waLink({
+        message: "Hi Ken, I own a " + ({hdb:'HDB flat',condo:'private condo',landed:'landed home'}[ownedType]) +
+          " and I'm " + ({upgrading:'thinking about upgrading',selling:'thinking about selling',checking:'just checking where I stand'}[intent]) + "."
+      });
+      document.getElementById('wa-stub').addEventListener('click', function () {
+        KPT.track('whatsapp_click', { tool_name: 'own-router' });
+      });
+      document.getElementById('step-result').style.display = '';
+      document.getElementById('step-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>
 </body>
 </html>
