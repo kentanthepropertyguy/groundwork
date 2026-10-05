@@ -135,3 +135,11 @@
 .kpj .res-rng .dot{ position:absolute; top:50%; width:14px; height:14px; margin:-7px 0 0 -7px; border-radius:50%; background:#fff; border:2px solid var(--ink); box-shadow:0 2px 6px rgba(22,33,62,.2); }
 .kpj .res-rtxt{ font-size:13px; color:var(--muted); margin:14px 0 0; }
 .kpj .res-sumtxt{ font-family:var(--serif); font-size:18px; line-height:1.4; margin:24px 0 0; color:var(--ink); }
+
+/* Buying before selling: four plain rows, no cards */
+.kpj .kpj-rows{ padding:6px 0 10px; border-top:1px solid var(--line); }
+.kpj .kpj-row{ padding:16px 0; border-bottom:1px solid var(--line); }
+.kpj .kpj-row-h{ display:flex; justify-content:space-between; align-items:baseline; gap:16px; }
+.kpj .kpj-row-h span{ font-size:14px; color:var(--muted); }
+.kpj .kpj-row-h b{ font:400 20px var(--serif); text-align:right; }
+.kpj .kpj-row p{ margin:6px 0 0; font-size:13px; line-height:1.5; color:var(--muted); }
