@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Understand a project through its transactions, or compare it with another.">
+<meta name="theme-color" content="#FAFAF8">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<title>I'm researching a property — Ken Property Tools</title>
+<link rel="stylesheet" href="../assets/css/kpt-system.css">
+<link rel="stylesheet" href="../assets/css/kpt-research.css">
+</head>
+<body class="kpr" data-view="home">
+<header class="kpt-header kpt-shell"><a class="brand" href="../">KEN PROPERTY TOOLS</a>
+  <div class="kpt-byline"><img src="../assets/img/ken-portrait.jpg" alt="Ken Tan"></div></header>
+
+<main class="kpt-shell" id="app"></main>
+
+<footer class="kpt-footer kpt-shell">Ken Tan · Property agent since 2007 · CEA R007903D · Huttons Asia Pte Ltd (L3008899K)<br>
+  <span id="attribution">Data source: URA private residential transaction data (PMI_Resi_Transaction).<br>
+  Analysis and derived statistics by Ken Property Tools.<br>
+  Contains information made available under the <a href="https://www.ura.gov.sg/eservices-info/maps/acceptance-grant-licence" target="_blank" rel="noopener noreferrer">Singapore Open Data Licence v1.0</a>.<br>
+  Not endorsed by URA.</span></footer>
+
+<script src="../assets/js/kpt-analytics.js"></script>
+<script src="../assets/js/kpt-components.js"></script>
+<script src="../assets/js/kpt-project.js"></script>
+<script src="../assets/js/kpt-research.js"></script>
+<script src="../data/research/config.js"></script>
+<script>
+// Presentation only. All reasoning is in assets/js/kpt-research.js; all numbers come from the generated project data.
+(function () {
+  const P = window.KPT_PROJECT, R = window.KPT_RESEARCH, CFG = window.KPT_RESEARCH_CONFIG;
+  KPT.setContext({ tool_name: 'research-journey', tool_category: 'research', project_name: null });
+  KPT.track('page_view', { page: 'research' });
+
+  const $app = document.getElementById('app');
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const base = new URL(CFG.projects, location.href).href, notesUrl = new URL(CFG.kenNotes, location.href).href;
+  const getJson = (u) => fetch(u).then((r) => { if (!r.ok) throw new Error(u + ' ' + r.status); return r.json(); });
+  const store = P.createStore(base, getJson);
+  const TODAY = new Date().toISOString().slice(0, 10);
+  const S = { size: '', win: null, pairKey: null, cur: null };
+  try { S.size = sessionStorage.getItem('kpt.research.size') || ''; } catch (e) {}
+  const saveSize = () => { try { if (S.size) sessionStorage.setItem('kpt.research.size', S.size); else sessionStorage.removeItem('kpt.research.size'); } catch (e) {} };
+  const track = (ev, d) => { const pl = R.analytics(ev, d); if (pl) KPT.track(ev, pl); };
+  const seen = {}; const once = (k, f) => { if (!seen[k]) { seen[k] = 1; f(); } };
+
+  // ---------------------------------------------------------------- data
+  let notesP = null; const loadNotes = () => (notesP = notesP || getJson(notesUrl).catch(() => []));
+  const loadAll = (ids) => Promise.all([store.manifest()].concat(ids.map((id) => store.index().then((ix) => { const r = P.findById(ix, id); if (!r) throw new Error('nf'); return store.shard(id, { shards: 64 }).then((d) => d.projects[id]); }))));
+  const loadSearch = () => Promise.all([store.index(), store.searchDoc()]);
+  const loadPeers = (p) => Promise.all([store.peers(p.district).catch(() => null), store.peers(p.seg).catch(() => null)]).then((a) => ({ district: a[0], region: a[1] }));
+
+  // ---------------------------------------------------------------- bits
+  const rangeText = (d) => '$' + R.num(d.q1) + '–' + R.num(d.q3);
+  const tagHtml = (tags) => (tags || []).map((t) => `<span class="kpr-tag${t.id === 'older' || t.id === 'none-recent' ? ' kpr-tag--older' : ''}">${esc(t.text)}</span>`).join('');
+  const evHtml = (e) => `<p class="kpr-ev">${esc(e.line)}</p>${e.tags.length ? `<div>${tagHtml(e.tags)}</div>` : ''}`;
+  function axisOf(ds) { let lo = Infinity, hi = -Infinity; ds.forEach((d) => { if (!d) return; lo = Math.min(lo, d.min); hi = Math.max(hi, d.max); }); if (!isFinite(lo)) return { lo: 0, hi: 1 }; const pad = (hi - lo) * 0.06 || 50; return { lo: lo - pad, hi: hi + pad }; }
+  function bar(d, ax, cls) {
+    if (!d) return '';
+    const x = (v) => Math.max(0, Math.min(100, (v - ax.lo) / (ax.hi - ax.lo) * 100));
+    return `<span class="kpr-bar${cls ? ' kpr-bar--' + cls : ''}" role="img" aria-label="Middle range $${R.num(d.q1)} to $${R.num(d.q3)}, median $${R.num(d.med)} per sqft, approximate">` +
+      `<i class="r" style="left:${x(d.min)}%;width:${x(d.max) - x(d.min)}%"></i><i class="iq" style="left:${x(d.q1)}%;width:${Math.max(0.8, x(d.q3) - x(d.q1))}%"></i><i class="md" style="left:${x(d.med)}%"></i></span>`;
+  }
+  const short = (label) => { const e = String(label).split('–')[1] || label, a = e.split(' '); return a[0] + ' ’' + String(a[1]).slice(2); };
+  function chart(series) {
+    const W = 340, H = 176, L = 10, Rr = 10, T = 22, B = 40;
+    const labels = []; series.forEach((s) => s.pts.forEach((p) => { if (labels.indexOf(p.label) < 0) labels.push(p.label); }));
+    if (!labels.length) return '';
+    const vals = []; series.forEach((s) => s.pts.forEach((p) => { vals.push(p.q1, p.q3, p.med); }));
+    let lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals); const pad = (hi - lo) * 0.12 || 30; lo -= pad; hi += pad;
+    const xs = (i) => (labels.length === 1 ? W / 2 : L + 14 + i * ((W - L - Rr - 28) / (labels.length - 1))), ys = (v) => T + (hi - v) / (hi - lo) * (H - T - B);
+    let g = '';
+    labels.forEach((l, i) => { g += `<text x="${xs(i)}" y="${H - 20}" text-anchor="middle">${esc(short(l))}</text>`; });
+    series.forEach((s, si) => {
+      const col = s.cls === 'b' ? '#A9822F' : '#16213E', off = series.length > 1 ? (si ? 6 : -6) : 0, pts = s.pts.map((p) => ({ p, i: labels.indexOf(p.label) }));
+      if (pts.length > 1) g += `<polyline fill="none" stroke="${col}" stroke-width="1.5" opacity=".55" points="${pts.map((q) => xs(q.i) + off + ',' + ys(q.p.med)).join(' ')}"/>`;
+      pts.forEach((q) => {
+        const x = xs(q.i) + off;
+        g += `<line x1="${x}" x2="${x}" y1="${ys(q.p.q1)}" y2="${ys(q.p.q3)}" stroke="${col}" stroke-width="7" stroke-linecap="round" opacity=".22"/><circle cx="${x}" cy="${ys(q.p.med)}" r="3.6" fill="${col}"/>`;
+        if (series.length === 1) g += `<text class="m" x="${x}" y="${ys(q.p.q3) - 8}" text-anchor="middle">$${R.num(q.p.med)}</text>`;
+        g += `<text x="${x}" y="${H - 7}" text-anchor="middle" fill="${col}">n=${q.p.n}</text>`;
+      });
+    });
+    return `<div class="kpr-hist"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Middle transaction PSF by 12-month period, oldest to newest. Dot is the median, bar is the middle range.">${g}</svg></div>`;
+  }
+  const seg = (items, cur, attr) => `<div class="kpr-seg" role="group">${items.map((o) => `<button type="button" ${attr}="${esc(o.id)}" aria-pressed="${o.id === cur}">${esc(o.label)}${o.note ? `<small>${esc(o.note)}</small>` : ''}</button>`).join('')}</div>`;
+  const kenHtml = (k) => (k ? `<section class="kpr-sec" aria-label="Ken's Take"><div class="kpr-ken"><img src="../assets/img/ken-portrait.jpg" alt="Ken Tan"><div><h3>Ken's Take <span>My judgement, not URA data</span></h3><p>“${esc(k.note)}”</p></div></div></section>` : '');
+  const notMeasuredHtml = (M) => `<section class="kpr-sec"><p class="kpr-label">What the transactions don't tell you</p><ul class="kpr-list">${M.notMeasured.map((x) => `<li>${esc(x)}</li>`).join('')}</ul><p class="kpr-note">These are judgement calls. That is where Ken's view comes in.</p></section>`;
+  const focusHtml = (M, kind) => {
+    const f = M.focus; let st = '';
+    if (kind === 'project' && f && f.requested) st = f.hasEvidence ? `<span class="kpr-pill">Focused on ${esc(f.label)}</span>` : `<span class="kpr-pill">No sales in the ${esc(f.requestedLabel)} band</span>`;
+    if (kind === 'compare' && S.size) { const b = R.focusBin(S.size, { bin: 100 }); st = b === null ? '' : `<span class="kpr-pill">Focused on ${esc(R.bandLabel(b, 100))}</span>`; }
+    return `<details class="kpr-focus"${S.size ? ' open' : ''}><summary>Looking at a particular size?</summary>
+      <div class="kpr-focus-row"><label class="kpr-note" for="sizeIn" style="margin:0">Size in sqft</label><input id="sizeIn" inputmode="numeric" autocomplete="off" placeholder="e.g. 1,000" value="${esc(S.size)}" aria-describedby="sizeNote"><button class="kpr-btn" type="button" id="sizeGo">Focus</button>${S.size ? '<button class="kpr-link" type="button" id="sizeClear">Clear</button>' : ''}</div>
+      <p class="kpr-note" id="sizeNote">Square feet only. We don't estimate bedrooms. This is kept on this device and is never sent to analytics or WhatsApp.</p><div class="kpr-err" id="sizeErr" role="alert"></div>${st ? `<div style="margin-top:8px">${st}</div>` : ''}</details>`;
+  };
+
+  // ---------------------------------------------------------------- home / search
+  function searchBox(excludeId, onPick) {
+    const wrap = document.createElement('div'); wrap.className = 'kpr-search';
+    wrap.innerHTML = `<input type="text" id="q" role="combobox" aria-expanded="false" aria-controls="res" aria-autocomplete="list" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Search a project name" aria-label="Search a project name"><div id="res" aria-live="polite"></div>`;
+    const input = wrap.querySelector('input'), res = wrap.querySelector('#res'); let timer = null, loaded = null;
+    const ready = () => (loaded = loaded || loadSearch());
+    function show(q) {
+      ready().then(([ix, sd]) => {
+        const rows = q.trim() ? P.search(ix, sd, q, { limit: 8 }).filter((r) => r.id !== excludeId) : [];
+        input.setAttribute('aria-expanded', rows.length ? 'true' : 'false');
+        if (!q.trim()) { res.innerHTML = ''; return; }
+        if (!rows.length) { res.innerHTML = `<div class="kpr-results"><div class="kpr-empty">No transactions found under that name in the last 5 years. It may be a launch with no sales yet, or spelled differently.</div></div>`; }
+        else res.innerHTML = `<ul class="kpr-results" role="listbox">${rows.map((r, i) => `<li role="option"><button type="button" data-id="${esc(r.id)}" ${i === 0 ? 'aria-selected="true"' : ''}><b>${esc(R.displayName(r.name))}</b><span>${esc(r.street)} · D${Number(r.district)} · ${esc(r.seg)} · ${r.n} sales · latest ${esc(R.fmtMonth(r.last))}${r.new ? ' · new sales' : ''}${r.resale ? ' · resale' : ''}</span></button></li>`).join('')}</ul>`;
+        clearTimeout(timer); timer = setTimeout(() => { if (q.trim().length >= 2) track('research_search', { results: rows.length }); }, 1200);
+      }).catch(() => { res.innerHTML = `<div class="kpr-results"><div class="kpr-empty">Search is unavailable right now. Please refresh.</div></div>`; });
+    }
+    input.addEventListener('focus', ready);
+    input.addEventListener('input', () => show(input.value));
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const b = res.querySelector('button'); if (b) { e.preventDefault(); onPick(b.dataset.id); } } if (e.key === 'ArrowDown') { const b = res.querySelector('button'); if (b) { e.preventDefault(); b.focus(); } } });
+    res.addEventListener('click', (e) => { const b = e.target.closest('button[data-id]'); if (b) onPick(b.dataset.id); });
+    return wrap;
+  }
+  function renderHome() {
+    document.body.dataset.view = 'home'; document.title = "I'm researching a property — Ken Property Tools";
+    $app.innerHTML = `<section class="kpr-sec" style="padding-top:16px;border-top:none"><p class="kpt-eyebrow">I'm researching a property</p><h1 class="kpr-h" tabindex="-1">Which property are you looking at?</h1>
+      <p class="kpr-lead">Search a private condo or apartment project to see what its transactions say, then compare it with another. This uses URA transaction records from the last 5 years.</p><div id="sb"></div>
+      <p class="kpr-note">Projects with no transactions yet, such as an unsold launch, won't appear.</p></section>`;
+    $app.querySelector('#sb').appendChild(searchBox(null, (id) => { location.hash = '#/p/' + id; }));
+  }
+
+  // ---------------------------------------------------------------- project
+  function projectHtml(M) {
+    const f = M.focus, band = M.recent.band, mix = M.mix, domN = mix.length ? mix.slice().sort((a, b) => b.n - a.n)[0] : null;
+    const saleBlock = M.sale.options.length > 1 ? `<div class="kpr-tools"><span class="kpr-note" style="margin:0">Showing:</span>${seg(M.sale.options.map((o) => ({ id: o.id, label: o.label, note: o.recent + ' in last 12m' })), M.sale.selected, 'data-sale')}</div>`
+      : `<span class="kpr-pill">Showing ${esc(M.sale.label)} sales · ${esc(M.sale.note)}</span>`;
+    const tiles = `<div class="kpr-tiles">
+      <div class="kpr-tile"><p class="k">Sales, last 12 months</p><p class="v">${M.recent.n}</p><p class="s">${M.recent.n ? esc(R.fmtMonth(M.recent.latest) ? M.recent.months + (M.recent.months === 1 ? ' month' : ' months') + ' · latest ' + R.fmtMonth(M.recent.latest) : '') : M.recent.latestLabel ? 'Latest sale ' + esc(M.recent.latestLabel) : ''}</p></div>
+      <div class="kpr-tile"><p class="k">Middle PSF (approx.)</p><p class="v">${band ? rangeText(band.psf) : M.recent.psfAll ? rangeText(M.recent.psfAll) : '—'}</p><p class="s">${band ? esc(band.short) + ' band · median $' + R.num(band.psf.med) + (band.evidence.tags.length ? ' · ' + esc(band.evidence.tags.map((t) => t.text).join(', ')) : '') : M.recent.psfAll ? 'All sizes · median $' + R.num(M.recent.psfAll.med) : 'No sales in the last 12 months'}</p></div>
+      <div class="kpr-tile"><p class="k">${f.userChosen ? 'Your size focus' : 'Typical size, last 12 months'}</p><p class="v">${f.bin != null ? esc(R.bandShort(f.bin)) + ' <span style="font-size:.5em;color:var(--muted)">sqft</span>' : '—'}</p><p class="s">${f.userChosen ? 'Band you focused on' : domN ? 'Most sales: ' + domN.n + ' of ' + M.recent.n : 'No recent sales'}</p></div>
+      <div class="kpr-tile"><p class="k">Sale type</p><p class="v" style="text-transform:capitalize">${esc(M.sale.label)}</p><p class="s">${esc(M.sale.note)}</p></div></div>`;
+    // size rows + panel
+    const ax = axisOf(M.bands.map((b) => b.psf));
+    const rows = M.bands.map((b) => `<button type="button" class="kpr-row" data-bin="${b.bin}" aria-pressed="${b.isFocus}"><span class="t"><b>${esc(b.label)}</b><span>${b.n} ${b.n === 1 ? 'sale' : 'sales'}${b.recent ? ' · ' + b.recent.n + ' in last 12m' : ''}</span></span>${bar(b.psf, ax)}<span class="e">${esc(b.evidence.line)}</span>${b.tags.length ? `<span style="display:block">${tagHtml(b.tags)}</span>` : ''}</button>`).join('');
+    let panel = '';
+    if (f.bin != null) {
+      const fb = M.bands.find((b) => b.bin === f.bin), fax = axisOf([fb.psf, fb.recent && fb.recent.psf, ...M.floors.rows.map((r) => r.psf), ...M.history.band.points.map((p) => ({ min: p.min, max: p.max }))]);
+      panel = `<div class="kpr-panel"><h3>${esc(fb.label)}</h3><p class="kpr-note" style="margin:0 0 8px">Tap another size to change this view.</p>
+        ${fb.recent ? `<p class="kpr-label" style="margin-top:12px">Last 12 months</p>${bar(fb.recent.psf, fax)}<p class="kpr-ev">Middle range ${rangeText(fb.recent.psf)}, median $${R.num(fb.recent.psf.med)} (approx.)</p>${evHtml(fb.recent.evidence)}` : `<p class="kpr-warn">No sale in this band in the last 12 months. The latest was ${esc(fb.evidence.latestLabel)}.</p>`}
+        <p class="kpr-label" style="margin-top:14px">Full history</p>${bar(fb.psf, fax)}<p class="kpr-ev">Middle range ${rangeText(fb.psf)}, median $${R.num(fb.psf.med)} (approx.)</p>${evHtml(fb.evidence)}
+        <p class="kpr-label" style="margin-top:16px">By floor band</p><p class="kpr-note" style="margin-top:0">${esc(M.floors.note)} Full history.</p>
+        ${M.floors.rows.length ? M.floors.rows.map((r) => `<div class="kpr-fl"><b>${esc(r.band)}</b><div>${bar(r.psf, fax)}<span class="n">${esc(r.evidence.line)} · median $${R.num(r.psf.med)}</span>${r.evidence.tags.length ? `<div>${tagHtml(r.evidence.tags)}</div>` : ''}</div></div>`).join('') : '<p class="kpr-note">No floor-band detail for this size.</p>'}
+        ${M.history.band && M.history.band.points.length ? `<p class="kpr-label" style="margin-top:16px">${esc(fb.short)} band over time</p>${chart([{ pts: M.history.band.points }])}<p class="kpr-note">${esc(M.history.band.text)} ${esc(M.history.note)}</p>` : ''}</div>`;
+    } else if (f.requested) {
+      panel = `<div class="kpr-panel"><h3>No sales in the ${esc(f.requestedLabel)} band</h3><p class="kpr-note">${f.nearest && f.nearest.length ? 'The nearest bands with sales are ' + f.nearest.map((x) => `<button class="kpr-link" type="button" data-bin="${x.bin}">${esc(x.label)} (${x.n})</button>`).join(' and ') + '.' : ''}</p></div>`;
+    }
+    const allH = M.history.all.points.length ? `<details class="kpr-d"><summary>History across all sizes</summary><div class="inner">${chart([{ pts: M.history.all.points }])}<p>${esc(M.history.all.text)}</p><div class="kpr-warn">Overall PSF mixes every size sold, and that mix changes over time. ${M.history.mixShift ? esc(M.history.mixShift.text) : ''}</div><p class="kpr-note">${esc(M.history.note)} ${esc(M.evidence.note)}${M.history.earlierNote ? ' ' + esc(M.history.earlierNote) : ''}</p></div></details>` : '';
+    const ctx = M.context ? ctxHtml(M) : '';
+    const hasBands = M.bands.length > 0;
+    return `<button class="kpr-back" data-act="home">← Search another project</button>
+      <p class="kpt-eyebrow">Project research</p><h1 class="kpr-h" tabindex="-1">${esc(M.name)}</h1>
+      <p class="kpr-meta">${esc(M.street)} · ${esc(M.districtLabel)} · ${esc(M.region)} · ${esc(M.tenure.label)}${M.tenure.mixed ? ' · mixed tenure in the data' : ''}</p>
+      ${saleBlock}${focusHtml(M, 'project')}
+      <section class="kpr-sec" style="border-top:none"><p class="kpr-label">What's happening here</p><div class="kpr-read">${M.read.map((r) => `<p>${esc(r.text)}</p>`).join('') || '<p>No sales found for this sale type.</p>'}</div>${M.evidence.recent ? `<p class="kpr-ev">${esc(M.evidence.recent.line)}</p>` : ''}${tiles}<p class="kpr-note">${esc(M.evidence.note)}</p></section>
+      ${hasBands ? `<section class="kpr-sec"><h2 class="kpr-h2">Size matters</h2><p class="kpr-lead" style="margin-bottom:6px">One overall PSF can describe units you aren't looking at. Here is how each size band has transacted. Tap a size to focus on it.</p><div class="kpr-twopane"><div class="kpr-rows">${rows}</div>${panel}</div></section>` : ''}
+      <section class="kpr-sec" style="padding-top:8px">${allH}${ctx}</section>
+      ${notMeasuredHtml(M)}${kenHtml(M.ken)}
+      <section class="kpr-sec"><div class="kpr-cta"><a class="kpt-cta" id="cmp" href="#/compare/${esc(M.id)}">Compare with another project →</a><a class="kpt-cta kpt-cta--wa" id="wa" href="#">Get Ken's view →</a></div></section>`;
+  }
+  function ctxHtml(M) {
+    const c = M.context;
+    const line = (w) => `${w.label}: <b>${w.n} ${w.n === 1 ? 'sale' : 'sales'}</b> from ${w.projects} ${w.projects === 1 ? 'project' : 'projects'} · middle range $${R.num(w.psf.q1)}–${R.num(w.psf.q3)}, median $${R.num(w.psf.med)}${w.older ? ' <span class="kpr-tag kpr-tag--older">Older evidence: ' + esc(w.label) + '</span>' : ''}${w.mostlyOwn ? ` <span class="kpr-tag kpr-tag--own">Mostly this project's own sales (${w.ownN} of ${w.n})</span>` : ''}`;
+    return `<details class="kpr-d"><summary>Market context</summary><div class="inner"><p class="kpr-label kpr-label--ctx">Market context — not direct comparables</p>
+      <p>${esc(c.note)} Matched on sale type (${esc(c.sale)})${c.tenureText ? ', ' + esc(c.tenureText) : ''} and size (${esc(c.band)}).</p>
+      ${c.rows.map((r) => `<div class="kpr-ctx-row"><b>${esc(r.label)}</b>${r.windows.map((w) => `<div style="margin-top:6px">${line(w)}</div>`).join('') || '<div>No matching sales.</div>'}</div>`).join('')}</div></details>`;
+  }
+
+  function wireCommon(M, kind) {
+    const wa = document.getElementById('wa');
+    if (wa) { wa.href = KPT.waLink({ message: M.wa }); wa.addEventListener('click', () => track('research_whatsapp_clicked', kind === 'project' ? { context: 'project', project_id: M.id } : { context: 'comparison', project_a: M.a.id, project_b: M.b.id })); }
+    const b = $app.querySelector('[data-act=home]'); if (b) b.addEventListener('click', () => { location.hash = '#/'; });
+    const go = document.getElementById('sizeGo'), inp = document.getElementById('sizeIn'), err = document.getElementById('sizeErr');
+    if (go) {
+      const apply = () => { const v = inp.value.replace(/[^0-9.]/g, ''); if (R.focusBin(v, { bin: 100 }) === null) { err.textContent = 'Enter a size in square feet, for example 1,000.'; return; } S.size = v; saveSize(); rerender(); };
+      go.addEventListener('click', apply); inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); apply(); } });
+      const cl = document.getElementById('sizeClear'); if (cl) cl.addEventListener('click', () => { S.size = ''; saveSize(); rerender(); });
+    }
+  }
+  function sizeEvent(M, kind) { if (S.size) once('size:' + S.size + ':' + kind, () => track('research_size_focus', { has_evidence: kind === 'project' ? !!(M.focus && M.focus.hasEvidence) : M.bands.some((b) => b.isFocus) })); }
+
+  function rerender() { if (S.cur) S.cur.draw(); }
+  function showProject(id, saleHash) {
+    $app.innerHTML = '<div class="kpr-state"><div class="kpr-skel"></div><div class="kpr-skel" style="width:60%"></div><div class="kpr-skel" style="width:80%"></div></div>';
+    store.manifest().then((m) => store.index().then((ix) => { const r = P.findById(ix, id); if (!r) throw new Error('nf'); return store.shard(id, m).then((d) => ({ m, p: d.projects[id], ix })); }))
+      .then((x) => Promise.all([loadPeers(x.p), loadNotes()]).then((y) => ({ m: x.m, p: x.p, ix: x.ix, peers: y[0], notes: y[1] })))
+      .then((d) => {
+        const draw = () => {
+          const M = R.analyseProject(d.p, d.m, { sale: saleHash || undefined, sizeSqft: S.size || undefined, peers: d.peers, notes: d.notes, today: TODAY });
+          document.body.dataset.view = 'project'; document.title = M.name + ' — Research — Ken Property Tools';
+          $app.innerHTML = projectHtml(M); wireCommon(M, 'project'); sizeEvent(M, 'project');
+          $app.querySelectorAll('[data-sale]').forEach((b) => b.addEventListener('click', () => { location.hash = R.buildHash({ view: 'project', id, sale: b.dataset.sale }); }));
+          $app.querySelectorAll('.kpr-row[data-bin], button.kpr-link[data-bin]').forEach((b) => b.addEventListener('click', () => { S.size = b.dataset.bin; saveSize(); draw(); const h = $app.querySelector('.kpr-panel'); if (h && window.innerWidth < 960) h.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }));
+          const cmp = document.getElementById('cmp'); if (cmp) cmp.addEventListener('click', () => track('research_compare_started', { project_id: id }));
+          once('sel:' + id, () => track('research_project_selected', { project_id: id, sale_types: M.sale.options.length }));
+          window.__kptResearchModel = M;
+        };
+        S.cur = { draw }; draw(); const h = $app.querySelector('h1'); if (h) h.focus({ preventScroll: true });
+      }).catch((e) => { $app.innerHTML = `<div class="kpr-state"><p class="kpt-eyebrow">Project research</p><h1 class="kpr-h">${e.message === 'nf' ? 'We couldn’t find that project' : 'We couldn’t load the data'}</h1><p class="kpr-lead">${e.message === 'nf' ? 'It may have no transactions in the last 5 years, or the link may be out of date.' : 'Please refresh and try again.'}</p><div id="sb"></div></div>`; const sb = $app.querySelector('#sb'); if (sb) sb.appendChild(searchBox(null, (pid) => { location.hash = '#/p/' + pid; })); });
+  }
+
+  // ---------------------------------------------------------------- compare
+  function pickView(aId) {
+    $app.innerHTML = '<div class="kpr-state"><div class="kpr-skel"></div></div>';
+    store.manifest().then((m) => store.index().then((ix) => { const r = P.findById(ix, aId); if (!r) throw new Error('nf'); return { ix, r }; })).then(({ ix, r }) => {
+      const sg = R.sameDistrict(ix, aId, 6), name = R.displayName(r.name);
+      document.body.dataset.view = 'pick'; document.title = 'Compare ' + name + ' — Ken Property Tools';
+      $app.innerHTML = `<button class="kpr-back" data-act="back">← Back to ${esc(name)}</button><p class="kpt-eyebrow">Compare</p><h1 class="kpr-h" tabindex="-1">Compare ${esc(name)} with…</h1><p class="kpr-lead">Search for the other project.</p><div id="sb"></div>
+        ${sg.rows.length ? `<p class="kpr-sugg-h">${esc(sg.label)}</p><ul class="kpr-results" role="list">${sg.rows.map((x) => `<li><button type="button" data-id="${esc(x.id)}"><b>${esc(x.name)}</b><span>${x.n} sales · latest ${esc(R.fmtMonth(x.last))}</span></button></li>`).join('')}</ul><p class="kpr-note">Being in the same district doesn't make two projects comparable. We check that next.</p>` : ''}`;
+      const go = (id) => { S.win = null; location.hash = '#/compare/' + aId + '/' + id; };
+      $app.querySelector('#sb').appendChild(searchBox(aId, go));
+      $app.querySelectorAll('.kpr-results button[data-id]').forEach((b) => { if (!b.closest('#sb')) b.addEventListener('click', () => go(b.dataset.id)); });
+      $app.querySelector('[data-act=back]').addEventListener('click', () => { location.hash = '#/p/' + aId; });
+    }).catch(() => { location.hash = '#/'; });
+  }
+  function compareHtml(M) {
+    const A = esc(M.a.name), B = esc(M.b.name), none = M.overlap === 'none';
+    const saleBlock = M.sale.options.length > 1 ? `<div class="kpr-tools"><span class="kpr-note" style="margin:0">Compared on:</span>${seg(M.sale.options, M.sale.selected, 'data-sale')}</div>` : M.sale.selected ? `<span class="kpr-pill">Compared on ${esc(M.sale.label)} sales · ${esc(M.sale.options[0].note)}</span>` : '';
+    const ladder = M.ladder.length ? `<p class="kpr-label" style="margin-top:20px">How far back the matched evidence goes</p><div class="kpr-ladder" role="group" aria-label="Time window">${M.ladder.map((l) => `<button type="button" data-win="${l.win}" aria-pressed="${l.win === M.activeWindow}"><span class="w">${esc(l.label.charAt(0).toUpperCase() + l.label.slice(1))}</span><span class="c${l.hasMatch ? '' : ' none'}">${l.hasMatch ? l.bands + ' shared ' + (l.bands === 1 ? 'band' : 'bands') : 'No shared band'}</span></button>`).join('')}</div>` : '';
+    const noMatchHere = M.ladder.length && !M.ladder[M.activeWindow].hasMatch;
+    const banner = M.older ? `<div class="kpr-banner"><b>${esc(M.olderTag)}.</b> This is not the last 12 months. ${M.firstWindowWithMatch === M.activeWindow ? 'It is the first window with a shared size band.' : ''}</div>` : '';
+    const nomatch = noMatchHere ? `<div class="kpr-banner">No shared size band in the ${esc(M.windowLabel)}. Try a longer window above.</div>` : '';
+    const axAll = axisOf(M.bands.flatMap((b) => [b.a.psf, b.b.psf]));
+    const cards = M.bands.map((b) => `<div class="kpr-card${b.isFocus ? ' focus' : ''}"><h3>${esc(b.label)}${b.isFocus ? ' <span class="kpr-pill" style="vertical-align:2px">Your size focus</span>' : ''}</h3>
+      <div class="kpr-side"><div class="nm"><span>${A}</span><i>median $${R.num(b.a.psf.med)}</i></div>${bar(b.a.psf, axAll)}<span class="kpr-ev">Middle range ${rangeText(b.a.psf)} · ${esc(b.a.evidence.line)}</span><div>${tagHtml(b.a.evidence.tags)}</div></div>
+      <div class="kpr-side"><div class="nm"><span>${B}</span><i>median $${R.num(b.b.psf.med)}</i></div>${bar(b.b.psf, axAll, 'b')}<span class="kpr-ev">Middle range ${rangeText(b.b.psf)} · ${esc(b.b.evidence.line)}</span><div>${tagHtml(b.b.evidence.tags)}</div></div>
+      <div class="kpr-gap">${esc(b.gap.text)}${b.gap.dir !== 'level' ? ` The middle ranges ${b.gap.rangesOverlap ? 'overlap' : 'do not overlap'}.` : ''}${b.gap.caution ? `<em>${esc(b.gap.caution)}</em>` : ''}</div></div>`).join('');
+    const hist = M.history.bands.length ? `<details class="kpr-d"><summary>Matched sizes over time</summary><div class="inner">${M.history.bands.slice(0, 3).map((h) => `<p class="kpr-label" style="margin-top:6px">${esc(h.label)}</p>${chart([{ pts: h.points.map((p) => ({ label: p.label, n: p.a.n, med: p.a.med, q1: p.a.med, q3: p.a.med })), cls: 'a' }, { pts: h.points.map((p) => ({ label: p.label, n: p.b.n, med: p.b.med, q1: p.b.med, q3: p.b.med })), cls: 'b' }])}<p class="kpr-note"><span style="color:#16213E">●</span> ${A} &nbsp; <span style="color:#A9822F">●</span> ${B}</p><p>${esc(h.text)}</p>`).join('')}<p class="kpr-note">${esc(M.history.note)}</p></div></details>` : '';
+    const floors = M.floors.rows.length ? `<details class="kpr-d"><summary>Floor bands (full history)</summary><div class="inner"><p>${esc(M.floors.note)} Shown for sizes both projects share, over full history only.</p><ul class="kpr-list">${M.floors.rows.slice(0, 8).map((r) => `<li>${esc(r.short)}, floors ${esc(r.band)}: ${A} ${r.a.n} ${r.a.n === 1 ? 'sale' : 'sales'} (median $${R.num(r.a.psf.med)}), ${B} ${r.b.n} ${r.b.n === 1 ? 'sale' : 'sales'} (median $${R.num(r.b.psf.med)})</li>`).join('')}</ul></div></details>` : '';
+    const diff = `<details class="kpr-d"><summary>What differs between them</summary><div class="inner"><table class="kpr-diff"><tbody><tr><th></th><th>${A}</th><th>${B}</th></tr>${M.differences.map((d) => `<tr><th>${esc(d.label)}</th><td>${esc(d.a)}</td><td>${esc(d.b)}</td></tr>`).join('')}</tbody></table><p class="kpr-note">These are facts from the records. They are not an explanation of any PSF gap.</p></div></details>`;
+    const ov = M.overall && M.overall.a && M.overall.b ? `<details class="kpr-d"><summary>Why not just compare overall PSF?</summary><div class="inner"><p>${esc(M.overall.note)}</p><ul class="kpr-list"><li>${A}: middle range $${R.num(M.overall.a.psf.q1)}–${R.num(M.overall.a.psf.q3)}, median $${R.num(M.overall.a.psf.med)}, typical unit about ${R.num(M.overall.a.sqft.med)} sqft (${M.overall.a.n} sales)</li><li>${B}: middle range $${R.num(M.overall.b.psf.q1)}–${R.num(M.overall.b.psf.q3)}, median $${R.num(M.overall.b.psf.med)}, typical unit about ${R.num(M.overall.b.sqft.med)} sqft (${M.overall.b.n} sales)</li></ul><p>${esc(M.overall.mixText)}</p></div></details>` : '';
+    return `<button class="kpr-back" data-act="back">← Back to ${A}</button><p class="kpt-eyebrow">Compare</p><h1 class="kpr-vs" tabindex="-1">${A} <span>vs</span> ${B}</h1>
+      ${saleBlock}${focusHtml(M, 'compare')}
+      <section class="kpr-sec" style="border-top:none"><span class="kpr-verdict ${M.overlap}" id="verdict">${esc(M.headline)}</span><ul class="kpr-why">${M.reasons.map((r, i) => `<li class="${r === M.notes.substitute ? 'sub' : ''}">${esc(r)}</li>`).join('')}</ul>${ladder}${banner}${nomatch}</section>
+      ${M.bands.length ? `<section class="kpr-sec"><h2 class="kpr-h2">Matched on size</h2><p class="kpr-lead" style="margin-bottom:0">Same sale type, same size band, same time window. Overall PSF is not the comparison.</p>${M.focusNote ? `<div class="kpr-banner">${esc(M.focusNote)}</div>` : ''}<div class="kpr-bands">${cards}</div><p class="kpr-dir">${esc(M.direction.text)}</p><p class="kpr-note">${esc(M.notes.psf)}</p></section>` : ''}
+      <section class="kpr-sec" style="padding-top:8px">${hist}${floors}${diff}${ov}</section>
+      ${notMeasuredHtml(M)}${kenHtml(M.ken)}
+      <section class="kpr-sec"><div class="kpr-cta"><a class="kpt-cta" id="cmp" href="#/compare/${esc(M.a.id)}">Compare a different project →</a><a class="kpt-cta kpt-cta--wa" id="wa" href="#">Get Ken's view →</a></div></section>`;
+  }
+  function showCompare(aId, bId, saleHash) {
+    if (aId === bId) { location.hash = '#/p/' + aId; return; }
+    const key = [aId, bId].sort().join('|'); if (S.pairKey !== key) { S.pairKey = key; S.win = null; }
+    $app.innerHTML = '<div class="kpr-state"><div class="kpr-skel"></div><div class="kpr-skel" style="width:60%"></div><div class="kpr-skel" style="width:80%"></div></div>';
+    store.manifest().then((m) => store.index().then((ix) => { if (!P.findById(ix, aId) || !P.findById(ix, bId)) throw new Error('nf'); return Promise.all([store.shard(aId, m), store.shard(bId, m)]).then((s) => ({ m, A: s[0].projects[aId], B: s[1].projects[bId] })); }))
+      .then((x) => loadNotes().then((notes) => Object.assign(x, { notes })))
+      .then((d) => {
+        const draw = () => {
+          const M = R.analyseComparison(d.A, d.B, d.m, { sale: saleHash || undefined, window: S.win, sizeSqft: S.size || undefined, notes: d.notes, today: TODAY });
+          document.body.dataset.view = 'compare'; document.title = M.a.name + ' vs ' + M.b.name + ' — Research — Ken Property Tools';
+          $app.innerHTML = compareHtml(M); wireCommon(M, 'compare'); sizeEvent(M, 'compare');
+          $app.querySelector('[data-act=back]').addEventListener('click', () => { location.hash = '#/p/' + aId; });
+          $app.querySelectorAll('[data-sale]').forEach((b) => b.addEventListener('click', () => { S.win = null; location.hash = R.buildHash({ view: 'compare', a: aId, b: bId, sale: b.dataset.sale }); }));
+          $app.querySelectorAll('[data-win]').forEach((b) => b.addEventListener('click', () => { S.win = Number(b.dataset.win); draw(); const t = $app.querySelector('.kpr-ladder button[aria-pressed=true]'); if (t) t.focus({ preventScroll: true }); }));
+          const cmp = document.getElementById('cmp'); if (cmp) cmp.addEventListener('click', () => track('research_compare_started', { project_id: aId }));
+          const wk = M.activeWindow == null ? null : R.windowKey(d.m, M.activeWindow);
+          once('cv:' + M.pairKey + ':' + M.sale.selected + ':' + wk, () => track('research_comparison_viewed', { project_a: aId, project_b: bId, sale_type: M.sale.selected, window: wk, overlap: M.overlap }));
+          window.__kptResearchModel = M;
+        };
+        S.cur = { draw }; draw(); const h = $app.querySelector('h1'); if (h) h.focus({ preventScroll: true });
+      }).catch(() => { $app.innerHTML = `<div class="kpr-state"><h1 class="kpr-h">We couldn’t load that comparison</h1><p class="kpr-lead">One of the projects may not be in our data, or the link is out of date.</p><div id="sb"></div></div>`; $app.querySelector('#sb').appendChild(searchBox(null, (id) => { location.hash = '#/p/' + id; })); });
+  }
+
+  // ---------------------------------------------------------------- router
+  function route() {
+    const v = R.parseHash(location.hash); window.scrollTo(0, 0);
+    if (v.view === 'project') showProject(v.id, v.sale);
+    else if (v.view === 'compare') showCompare(v.a, v.b, v.sale);
+    else if (v.view === 'pick') pickView(v.a);
+    else renderHome();
+  }
+  window.addEventListener('hashchange', route);
+  route();
+})();
+</script>
+</body>
+</html>
