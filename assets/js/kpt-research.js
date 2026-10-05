@@ -59,10 +59,12 @@
   const list = (a) => (a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]);
   const ROMAN = /^(I|II|III|IV|V|VI|VII|VIII|IX|X)$/;
   // URA writes names in capitals. Title-case for reading; short tokens, numerals and tokens with digits stay upper-case.
+  // Reviewed initialisms that must stay upper-case (3+ letters; 1-2 letter tokens already do). Not inferred: short real words (ONE, SKY, BAY) must still title-case. Extend this list when a name is found.
+  const ACRONYMS = { AMO: 1, RVG: 1, JLB: 1, OUE: 1, PLQ: 1, SCK: 1, SKT: 1, TMW: 1, YGK: 1, MKZ: 1 };
   function displayName(name) {
     const SMALL = { AT: 1, OF: 1, THE: 1, BY: 1, ON: 1 };
     return String(name || '').split(' ').map((w, i) => {
-      if (w === '@' || /\d/.test(w) || ROMAN.test(w)) return w;
+      if (w === '@' || /\d/.test(w) || ROMAN.test(w) || ACRONYMS[w]) return w;
       if (i > 0 && SMALL[w]) return w.toLowerCase();
       if (w.length <= 2 && /^[A-Z]+$/.test(w)) return w;
       return w.toLowerCase().replace(/(^|[-'(])([a-z])/g, (_, x, y) => x + y.toUpperCase());
@@ -277,8 +279,14 @@
       { label: 'Sales in the data', a: String(A.sale[sale] || 0), b: String(B.sale[sale] || 0) }];
     if (!shared.length) {
       model.overlap = 'none'; model.headline = HEADLINE.none; model.status = 'none'; model.sale.selected = null;
-      model.reasons = [cmp.reasons[0] || 'No shared sale type.'];
+      const has = (p) => { const l = SALE_ORDER.filter((x) => (p.sale[x] || 0) > 0).map((x) => SALES_PL[x]); return l.length ? list(l) : 'no sales'; };
+      model.reasons = ['No shared sale type. ' + nameA + ' has ' + has(A) + '; ' + nameB + ' has ' + has(B) + '. Sales are only matched within the same sale type, so there is nothing to match here.'];
       model.differences = facts(defaultSale(A) || 'resale'); model.ladder = []; model.bands = []; model.activeWindow = null;
+      // Complete the model so the page can render this valid result (no shared evidence) instead of failing.
+      model.firstWindowWithMatch = null; model.windowLabel = null; model.older = false; model.olderTag = null; model.focusNote = null;
+      model.direction = { kind: 'none', a: 0, b: 0, level: 0, text: '' }; model.history = { note: HISTORY_NOTE, bands: [] }; model.floors = { note: FLOOR_NOTE, window: 'full history', rows: [] }; model.overall = null;
+      model.overlapRule = { version: 'v1', kind: 'kpt-presentation-rule', minSalesEachSide: MIN_SALES, minMonthsEachSide: MIN_MONTHS, window: m.windows[W12], minShareExclusive: MIN_SHARE, inputs: null, result: 'none' };
+      model.interpretation = null;
       return model;
     }
     const tot = (p, s) => saleN12(p, s) * 1;
@@ -310,11 +318,11 @@
     const like = bs.windows[active].like;
     const bands = like.map((c) => {
       const ea = evidence({ n: c.a.n, act: c.a.act, last: c.overlap.lastMonthA }, m, { win: active }), eb = evidence({ n: c.b.n, act: c.b.act, last: c.overlap.lastMonthB }, m, { win: active });
-      const ma = c.a.psf.med, mb = c.b.psf.med, pct = ma ? Math.round((mb - ma) / ma * 100) : 0, dir = pct > 0 ? 'b' : pct < 0 ? 'a' : 'level';
+      const ma = c.a.psf.med, mb = c.b.psf.med, lo = Math.min(ma, mb), pct = lo ? Math.round(Math.abs(mb - ma) / lo * 100) : 0, dir = pct === 0 ? 'level' : mb > ma ? 'b' : 'a';   // % is of the LOWER median, so A vs B and B vs A agree
       const overlapQ = Math.max(c.a.psf.q1, c.b.psf.q1) <= Math.min(c.a.psf.q3, c.b.psf.q3);
       return { bin: c.bin, label: bandLabel(c.bin, m.bin), short: bandShort(c.bin), isFocus: fbin !== null && c.bin === fbin, supported: supported(c),
         a: { n: c.a.n, psf: c.a.psf, evidence: ea }, b: { n: c.b.n, psf: c.b.psf, evidence: eb },
-        gap: { pct: Math.abs(pct), dir, rangesOverlap: overlapQ, caution: cautionText(nameA, ea, nameB, eb), text: dir === 'level' ? 'Middle PSF is about the same.' : (dir === 'b' ? nameB : nameA) + ' middle PSF is ' + Math.abs(pct) + '% higher in this band.' } };
+        gap: { pct, dir, rangesOverlap: overlapQ, caution: cautionText(nameA, ea, nameB, eb), text: dir === 'level' ? 'Middle PSF is about the same.' : (dir === 'b' ? nameB : nameA) + ' middle PSF is ' + pct + '% higher in this band.' } };
     });
     bands.sort((x, y) => (y.isFocus ? 1 : 0) - (x.isFocus ? 1 : 0) || Math.min(y.a.n, y.b.n) - Math.min(x.a.n, x.b.n) || x.bin - y.bin);
     model.bands = bands;
@@ -370,7 +378,62 @@
       mixText: dA && dB ? (ladder[active].coverage.a > 0.5 && ladder[active].coverage.b > 0.5 ? 'In this window, most sales in both projects sit in the shared bands, so the unit mixes overlap.' : 'The unit mixes differ: ' + poss(nameA) + ' typical unit is about ' + num(dA.sqft[2]) + ' sqft and ' + poss(nameB) + ' about ' + num(dB.sqft[2]) + ' sqft.') : '' };
     model.differences = facts(sale);
     model.state = model.overlap;
+    model.interpretation = interpret(model);
     return model;
+  }
+
+  /* ---------- "What the numbers suggest": deterministic reading of an existing comparison model ----------
+     Reads only fields already on the model. No new data, no thresholds: "supported" is the existing KPT cell rule (2+ sales in 2+ months on both sides),
+     and "small vs wider" is structural (middle PSF ranges overlap, or they do not). Never says better/cheaper/undervalued and never predicts. */
+  const INTERP_VERSION = 'v1';
+  const hi = (b, A, B) => (b.gap.dir === 'b' ? B : b.gap.dir === 'a' ? A : null);
+  function interpret(M) {
+    if (!M || M.overlap === 'none' || !M.bands || !M.bands.length) return null;
+    const A = M.a.name, B = M.b.name, sup = M.bands.filter((b) => b.supported), unsup = M.bands.length - sup.length, w = M.ladder[M.activeWindow], win = M.windowLabel;
+    const byBin = (x, y) => x.bin - y.bin, sb = sup.slice().sort(byBin), sqft = (arr) => list(arr.map((b) => b.short)) + ' sqft';
+    const nA = sb.filter((b) => b.gap.dir === 'a').length, nB = sb.filter((b) => b.gap.dir === 'b').length, nL = sb.filter((b) => b.gap.dir === 'level').length;
+    const kind = !sb.length ? 'none' : sb.length === 1 ? 'single' : nA && nB ? 'mixed' : nA === sb.length ? 'a' : nB === sb.length ? 'b' : nA || nB ? 'mostly' : 'level';
+    const higherId = kind === 'a' ? M.a.id : kind === 'b' ? M.b.id : kind === 'mostly' ? (nA ? M.a.id : M.b.id) : null;
+    const hiName = higherId === M.a.id ? A : higherId === M.b.id ? B : null, loName = hiName === A ? B : A;
+    const overl = sb.filter((b) => b.gap.rangesOverlap && b.gap.dir !== 'level'), sepr = sb.filter((b) => !b.gap.rangesOverlap && b.gap.dir !== 'level');
+    const withGap = sb.filter((b) => b.gap.dir !== 'level').slice().sort((x, y) => y.gap.pct - x.gap.pct || x.bin - y.bin);
+    const widest = withGap[0] || null, narrowest = withGap.length > 1 ? withGap[withGap.length - 1] : null;
+    // evidence line: counts, coverage, recency (facts only)
+    const latest = M.bands.reduce((t, b) => [b.a.evidence, b.b.evidence].reduce((u, e) => (e.latest > u.latest ? e : u), t), M.bands[0].a.evidence);
+    const evLine = plural(M.bands.length, 'shared size band') + ' in the ' + win + ' (' + sqft(M.bands.slice().sort(byBin)) + '). ' + (sup.length ? plural(sup.length, 'band') + ' ' + (sup.length === 1 ? 'has' : 'have') : 'No band has') + ' at least 2 sales in at least 2 months for both projects. The shared bands cover ' + w.coverage.aN + ' of ' + poss(A) + ' ' + w.coverage.aOf + ' sales and ' + w.coverage.bN + ' of ' + poss(B) + ' ' + w.coverage.bOf + '. Latest matched sale: ' + latest.latestLabel + '.';
+    const out = { version: INTERP_VERSION, kind: 'full', state: 'full', title: 'What the numbers suggest', paragraphs: [], evidence: { text: evLine, sharedBands: M.bands.length, supportedBands: sup.length, window: win, coverage: w.coverage }, question: '', basis: { direction: kind, higher: higherId, higherName: hiName, bandsA: nA, bandsB: nB, bandsLevel: nL, overlapBands: overl.map((b) => b.bin), separateBands: sepr.map((b) => b.bin), widest: widest ? { bin: widest.bin, pct: widest.gap.pct, higher: hi(widest, M.a.id, M.b.id) } : null, narrowest: narrowest ? { bin: narrowest.bin, pct: narrowest.gap.pct } : null, overlap: M.overlap, olderWindow: M.older } };
+    const P_ = out.paragraphs, add = (id, text) => P_.push({ id, text });
+    const windowNote = M.older ? 'There is no shared size band in the last 12 months. This uses the ' + win + ', which is older evidence. ' : '';
+    // ---- thin evidence is the main message
+    if (M.overlap === 'limited' || !sup.length) {
+      out.kind = out.state = 'thin';
+      add('lead', windowNote + (!sup.length ? 'The evidence here is thin. ' + plural(M.bands.length, 'shared size band') + ' in the ' + win + ' ' + (M.bands.length === 1 ? 'has' : 'have') + ' too few sales on at least one side to describe a direction.'
+        : 'The matched evidence is limited: ' + plural(M.bands.length, 'shared size band') + ' in the ' + win + ', covering only part of the sales. Read the direction below as indicative only.'));
+      if (sup.length && kind !== 'none') add('direction', kind === 'mixed' ? 'In the ' + plural(sup.length, 'band') + ' with enough sales (' + sqft(sb) + '), the direction is mixed: ' + A + ' is higher in ' + nA + ' and ' + B + ' in ' + nB + '.'
+        : kind === 'single' ? 'In the one band with enough sales (' + sqft(sb) + '), ' + (hiName ? hiName + ' has the higher middle PSF by about ' + sb[0].gap.pct + '%' : 'the middle PSF is about the same') + '. One band is a single data point, not a pattern.'
+        : 'In the ' + plural(sup.length, 'band') + ' with enough sales (' + sqft(sb) + '), ' + (hiName ? hiName + ' has the higher middle PSF' + (kind === 'mostly' ? ' in ' + (nA || nB) + ' of ' + sb.length : '') : 'the middle PSF is about the same') + '.');
+      out.question = 'Before reading anything into the gap, look for more like-for-like evidence: a longer window, or the size you would actually consider. The numbers cannot yet say whether the projects price differently.';
+      return out;
+    }
+    // ---- supported evidence: direction, size of gap, ranges, strength
+    add('lead', windowNote + (kind === 'mixed' ? 'The direction is mixed across comparable sizes: ' + A + ' has the higher middle PSF in ' + plural(nA, 'band') + ' (' + sqft(sb.filter((b) => b.gap.dir === 'a')) + ') and ' + B + ' in ' + plural(nB, 'band') + ' (' + sqft(sb.filter((b) => b.gap.dir === 'b')) + ')' + (nL ? ', with ' + nL + ' about level' : '') + '.'
+      : kind === 'single' ? 'There is one band with enough sales to compare (' + sqft(sb) + '), so this is a single data point, not a pattern. ' + (hiName ? hiName + ' has the higher middle PSF there, by about ' + sb[0].gap.pct + '%.' : 'The middle PSF is about the same.')
+      : kind === 'level' ? 'Across the ' + plural(sb.length, 'comparable size band') + ', the middle PSF is about the same.'
+      : hiName + ' generally transacts at a higher PSF than ' + loName + ' across comparable unit sizes' + (kind === 'mostly' ? ': higher in ' + (nA || nB) + ' of ' + sb.length + ' bands, the rest about level' : ' (' + sqft(sb) + ')') + '.'));
+    if (kind !== 'single' && withGap.length) {
+      const parts = [];
+      if (overl.length && sepr.length) parts.push('The middle ranges overlap in ' + sqft(overl) + ', so those gaps sit within the spread of sales. They do not overlap in ' + sqft(sepr) + ', where the two projects\' sales separate.');
+      else if (overl.length) parts.push('The middle ranges overlap in ' + (overl.length === sb.length ? 'every comparable band' : sqft(overl)) + ', so the gaps sit within the spread of sales seen.');
+      else if (sepr.length) parts.push('The middle ranges do not overlap in ' + (sepr.length === sb.length ? 'any comparable band' : sqft(sepr)) + ', so the separation is visible in the sales themselves.');
+      parts.push('The gap in middle PSF is ' + (narrowest && narrowest.gap.pct !== widest.gap.pct ? 'about ' + narrowest.gap.pct + '% in the ' + narrowest.short + ' band and about ' + widest.gap.pct + '% in the ' + widest.short + ' band' : 'about ' + widest.gap.pct + '% in the ' + widest.short + ' band') + '.');
+      add('size', parts.join(' '));
+    }
+    add('strength', 'This reads transactions only. ' + (unsup ? plural(unsup, 'other shared band') + ' ' + (unsup === 1 ? 'has' : 'have') + ' too few sales and ' + (unsup === 1 ? 'is' : 'are') + ' left out of this reading. ' : '') + 'The cards below show every band.');
+    add('caution', hiName ? 'This does not mean ' + hiName + ' is the better buy, and it does not mean ' + loName + ' is. Transaction PSF cannot tell you whether the difference is justified.' : 'This does not mean either project is the better buy. Transaction PSF cannot tell you whether a difference is justified.');
+    out.question = kind === 'mixed' ? 'Because the direction depends on size, the question to investigate is which band matches the unit you would actually consider, and what differs between the projects at that size: layout, floor, facing, product and location.'
+      : hiName ? 'The question to investigate is whether the higher PSF at ' + hiName + ' is justified for your specific unit, layout, floor, facing and the other differences between the projects. That judgement is not in the transactions.'
+      : 'The question to investigate is what differs between the projects for your specific unit: layout, floor, facing, product and location. That judgement is not in the transactions.';
+    return out;
   }
 
   /* ---------- suggestions, WhatsApp, analytics, routes ---------- */
@@ -412,6 +475,6 @@
   }
   const buildHash = (v) => (v.view === 'project' ? '#/p/' + v.id + (v.sale ? '/' + v.sale : '') : v.view === 'compare' ? '#/compare/' + v.a + '/' + v.b + (v.sale ? '/' + v.sale : '') : v.view === 'pick' ? '#/compare/' + v.a : '#/');
 
-  return { analyseProject, analyseComparison, evidence, defaultSale, saleOptions, focusBin, movement, matchNote, pairKey, sameDistrict, waMessage, analytics, parseHash, buildHash, displayName, bandLabel, bandShort, fmtMonth, monthsAgo, windowKey, num, psf,
+  return { analyseProject, analyseComparison, interpret, evidence, defaultSale, saleOptions, focusBin, movement, matchNote, pairKey, sameDistrict, waMessage, analytics, parseHash, buildHash, displayName, bandLabel, bandShort, fmtMonth, monthsAgo, windowKey, num, psf,
     SALE_LABEL, NOT_MEASURED, HEADLINE, ANALYTICS_EVENTS, ANALYTICS_KEYS, SUBSTITUTE_NOTE, CONTEXT_NOTE, HISTORY_NOTE, PSF_NOTE, FLOOR_NOTE };
 });

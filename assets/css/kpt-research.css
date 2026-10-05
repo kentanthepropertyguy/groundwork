@@ -167,3 +167,12 @@
   .kpr .kpr-read p{ font-size:21px; }
 }
 @media (max-width:640px){ .kpr .kpt-header.kpt-shell{ padding:22px 20px 0; } .kpr .kpr-search input{ font-size:20px; } }
+
+/* What the numbers suggest (comparison) */
+.kpr .kpr-interp .kpr-ip{ margin:0 0 10px; line-height:1.55; }
+.kpr .kpr-interp .kpr-ip.lead{ font-size:17px; color:var(--ink); }
+.kpr .kpr-interp.thin .kpr-ip.lead{ font-weight:600; }
+.kpr .kpr-interp .kpr-ip.caution{ color:var(--muted); font-size:14.5px; }
+.kpr .kpr-interp .kpr-iev{ margin:6px 0 14px; }
+.kpr .kpr-interp .kpr-q{ border-left:3px solid var(--gold,#b08d3c); padding:2px 0 2px 12px; }
+.kpr .kpr-interp .kpr-q p{ margin:2px 0 0; line-height:1.55; }

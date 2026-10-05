@@ -203,7 +203,7 @@
           window.__kptResearchModel = M;
         };
         S.cur = { draw }; draw(); const h = $app.querySelector('h1'); if (h) h.focus({ preventScroll: true });
-      }).catch((e) => { $app.innerHTML = `<div class="kpr-state"><p class="kpt-eyebrow">Project research</p><h1 class="kpr-h">${e.message === 'nf' ? 'We couldn’t find that project' : 'We couldn’t load the data'}</h1><p class="kpr-lead">${e.message === 'nf' ? 'It may have no transactions in the last 5 years, or the link may be out of date.' : 'Please refresh and try again.'}</p><div id="sb"></div></div>`; const sb = $app.querySelector('#sb'); if (sb) sb.appendChild(searchBox(null, (pid) => { location.hash = '#/p/' + pid; })); });
+      }).catch((e) => { if (e && e.message !== 'nf') console.error('KPT research: project failed', e); $app.innerHTML = `<div class="kpr-state"><p class="kpt-eyebrow">Project research</p><h1 class="kpr-h">${e.message === 'nf' ? 'We couldn’t find that project' : 'We couldn’t load the data'}</h1><p class="kpr-lead">${e.message === 'nf' ? 'It may have no transactions in the last 5 years, or the link may be out of date.' : 'Please refresh and try again.'}</p><div id="sb"></div></div>`; const sb = $app.querySelector('#sb'); if (sb) sb.appendChild(searchBox(null, (pid) => { location.hash = '#/p/' + pid; })); });
   }
 
   // ---------------------------------------------------------------- compare
@@ -219,6 +219,13 @@
       $app.querySelectorAll('.kpr-results button[data-id]').forEach((b) => { if (!b.closest('#sb')) b.addEventListener('click', () => go(b.dataset.id)); });
       $app.querySelector('[data-act=back]').addEventListener('click', () => { location.hash = '#/p/' + aId; });
     }).catch(() => { location.hash = '#/'; });
+  }
+  function interpHtml(I) {
+    if (!I) return '';
+    return `<section class="kpr-sec kpr-interp ${esc(I.state)}" id="interp" aria-labelledby="interpH"><h2 class="kpr-h2" id="interpH">${esc(I.title)}</h2>
+      <p class="kpr-label">From the transactions</p>${I.paragraphs.map((p) => `<p class="kpr-ip ${esc(p.id)}">${esc(p.text)}</p>`).join('')}
+      <p class="kpr-note kpr-iev"><b>Evidence behind this.</b> ${esc(I.evidence.text)}</p>
+      <div class="kpr-q"><p class="kpr-label">Still needs judgement</p><p>${esc(I.question)}</p></div></section>`;
   }
   function compareHtml(M) {
     const A = esc(M.a.name), B = esc(M.b.name), none = M.overlap === 'none';
@@ -239,6 +246,7 @@
     return `<button class="kpr-back" data-act="back">← Back to ${A}</button><p class="kpt-eyebrow">Compare</p><h1 class="kpr-vs" tabindex="-1">${A} <span>vs</span> ${B}</h1>
       ${saleBlock}${focusHtml(M, 'compare')}
       <section class="kpr-sec" style="border-top:none"><span class="kpr-verdict ${M.overlap}" id="verdict">${esc(M.headline)}</span><ul class="kpr-why">${M.reasons.map((r, i) => `<li class="${r === M.notes.substitute ? 'sub' : ''}">${esc(r)}</li>`).join('')}</ul>${ladder}${banner}${nomatch}</section>
+      ${interpHtml(M.interpretation)}
       ${M.bands.length ? `<section class="kpr-sec"><h2 class="kpr-h2">Matched on size</h2><p class="kpr-lead" style="margin-bottom:0">Same sale type, same size band, same time window. Overall PSF is not the comparison.</p>${M.focusNote ? `<div class="kpr-banner">${esc(M.focusNote)}</div>` : ''}<div class="kpr-bands">${cards}</div><p class="kpr-dir">${esc(M.direction.text)}</p><p class="kpr-note">${esc(M.notes.psf)}</p></section>` : ''}
       <section class="kpr-sec" style="padding-top:8px">${hist}${floors}${diff}${ov}</section>
       ${notMeasuredHtml(M)}${kenHtml(M.ken)}
@@ -264,7 +272,7 @@
           window.__kptResearchModel = M;
         };
         S.cur = { draw }; draw(); const h = $app.querySelector('h1'); if (h) h.focus({ preventScroll: true });
-      }).catch(() => { $app.innerHTML = `<div class="kpr-state"><h1 class="kpr-h">We couldn’t load that comparison</h1><p class="kpr-lead">One of the projects may not be in our data, or the link is out of date.</p><div id="sb"></div></div>`; $app.querySelector('#sb').appendChild(searchBox(null, (id) => { location.hash = '#/p/' + id; })); });
+      }).catch((e) => { console.error('KPT research: compare failed', e); $app.innerHTML = `<div class="kpr-state"><h1 class="kpr-h">We couldn’t load that comparison</h1><p class="kpr-lead">One of the projects may not be in our data, or the link is out of date.</p><div id="sb"></div></div>`; $app.querySelector('#sb').appendChild(searchBox(null, (id) => { location.hash = '#/p/' + id; })); });
   }
 
   // ---------------------------------------------------------------- router
