@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>What can this budget buy? · Ken Property Tools</title>
+<meta name="description" content="Where your budget works in the Singapore property market, what you trade off, and what Ken would look at.">
+<link rel="stylesheet" href="../../assets/css/kpt-system.css">
+<link rel="stylesheet" href="../../assets/css/kpt-journey.css">
+</head>
+<body class="kpj" data-view="result">
+<header class="kpt-header kpt-shell"><a class="brand" href="../../">KEN PROPERTY TOOLS</a>
+  <div class="kpt-byline"><img src="../../assets/img/ken-portrait.jpg" alt="Ken Tan"></div></header>
+
+<main class="kpt-shell" style="max-width:760px;">
+  <div id="root"><p class="kpt-note" style="padding:40px 0;">Loading…</p></div>
+</main>
+
+<footer class="kpt-footer kpt-shell">
+  Ken Tan · Property agent since 2007 · CEA R007903D · Huttons Asia Pte Ltd (L3008899K) ·
+  Indicative market ranges and planning estimates only, not financial advice.
+</footer>
+
+<script src="../../assets/js/kpt-analytics.js"></script>
+<script src="../../assets/js/kpt-components.js"></script>
+<script src="../../assets/js/kpt-market.js"></script>
+<script src="../../assets/js/kpt-engine.js"></script>
+<script src="../../assets/js/kpt-result.js"></script>
+<script src="../../data/market/config.js"></script>
+<script>
+(function () {
+  const M = window.KPT_MARKET, R = window.KPT_RESULT, ENG = window.KPT_ENGINE, CFG = window.KPT_MARKET_CONFIG;
+  KPT.setContext({ tool_name: 'what-can-i-buy', tool_category: 'research', project_name: null });
+
+  const $ = (id) => document.getElementById(id);
+  const params = new URLSearchParams(location.search), test = CFG.mode === 'test';
+  const TODAY = (test && /^\d{4}-\d{2}-\d{2}$/.test(params.get('today') || '')) ? params.get('today') : new Date().toISOString().slice(0, 10);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  // test mode only: ?scenario=worked uses the real $1.32m aggregates (single budget) instead of the synthetic set
+  const worked = test && params.get('scenario') === 'worked';
+  const nolens = test && params.get('scenario') === 'nolens';
+  const statsBase = test ? (worked ? '../../data/market/test/route-stats-worked/' : nolens ? '../../data/market/test/route-stats-nolens/' : CFG.testRouteStatsBase) : CFG.routeStatsBase;
+  const notesUrl = test ? CFG.testKenNotes : CFG.kenNotes;
+
+  let handoff = M.readHandoff(window.sessionStorage), budget = handoff ? R.budgetFromHandoff(handoff.budget) : null, viewed = false;
+
+  // ---------------------------------------------------------------- entry (unchanged)
+  function askBudgetHtml() {
+    return `<div class="kpt-section" style="padding-top:16px;">
+      <p class="kpt-eyebrow">What this budget can buy</p>
+      <h1 class="kpt-h1" style="font-size:32px;">What budget would you like to explore?</h1>
+      <div class="kpt-field" style="margin-top:22px;max-width:320px;">
+        <label for="budgetInput">An approximate purchase budget</label>
+        <input id="budgetInput" type="text" inputmode="numeric" placeholder="e.g. 1,300,000" autocomplete="off">
+        <div class="kpt-error" id="budgetErr"></div>
+      </div>
+      <button class="kpt-cta kpj-btn" id="budgetGo" type="button" style="max-width:320px;margin-top:6px;">Show me →</button>
+      <p class="kpt-note" style="margin-top:18px;">Not sure of your budget? <a href="../hdb-upgrade/" style="text-decoration:underline;">Work out your planning position first.</a></p>
+    </div>`;
+  }
+  function wireAsk() {
+    const i = $('budgetInput');
+    i.addEventListener('input', () => { const d = i.value.replace(/[^0-9]/g, ''); i.value = d ? Number(d).toLocaleString('en-SG') : ''; });
+    $('budgetGo').addEventListener('click', () => {
+      const v = Number(i.value.replace(/[^0-9]/g, ''));
+      if (!v || v < 300000 || v > 20000000) { $('budgetErr').textContent = 'Enter a budget between $300,000 and $20,000,000.'; return; }
+      budget = Math.round(v / 10000) * 10000; handoff = null; viewed = false; start();
+    });
+  }
+
+  // ---------------------------------------------------------------- result
+  function resultHtml(v) {
+    const flag = test ? `<span class="kpt-testflag">Test data · illustrative figures, not market evidence</span><br>` : '';
+    const chipInner = `About ${esc(v.budgetText)} <i>your budget</i>`;
+    const chip = handoff && handoff.from === 'hdb-upgrade'
+      ? `<a class="res-chip" href="../hdb-upgrade/?resume=1" aria-label="Back to your position">← ${chipInner}</a>`
+      : `<span class="res-chip">${chipInner}</span>`;
+    const indicative = handoff && handoff.state === 'indicative' ? `<p class="res-bud-note">Based on your indicative planning position.</p>` : '';
+    const tag = v.tag ? `<p class="res-bud-note">${esc(v.tag)}</p>` : '';
+    let main = '';
+    if (v.hero) {
+      const h = v.hero;
+      main += `<h1 class="res-h">${esc(h.headline)}</h1><p class="res-ctx">${esc(h.context)}</p>
+        <div class="res-card">${h.bars.map((b, i) => `<div class="res-bar m${Math.min(i, 2)}"><div class="l"><span>${esc(b.label)}${b.tag ? `<span class="tag">${esc(b.tag)}</span>` : ''}</span><span class="v">${esc(b.text)} <small>sq ft</small></span></div><div class="res-trk" aria-hidden="true"><div class="res-fill" style="width:${b.width}%"></div></div></div>`).join('')}
+        <p class="res-cap">Typical size sold</p></div>
+        ${h.tradeoff ? `<p class="res-trade"><b>The trade-off:</b> ${esc(h.tradeoff)}</p>` : ''}`;
+    } else if (v.summary) {
+      const u = v.summary, pos = (x) => Math.max(0, Math.min(100, ((x - u.scale.min) / (u.scale.max - u.scale.min)) * 100));
+      main += `<h1 class="res-h">${esc(u.headline)}</h1>
+        ${u.hasRange ? `<div class="res-card res-sum"><div class="res-big">${esc(String(u.median).replace(/\B(?=(\d{3})+(?!\d))/g, ','))} <small>sq ft</small></div><p class="res-cap" style="margin:2px 0 18px;">Typical size sold</p>
+          <div class="res-rng" aria-hidden="true"><i class="band" style="left:${pos(u.lo)}%;width:${pos(u.hi) - pos(u.lo)}%"></i><i class="dot" style="left:${pos(u.median)}%"></i></div>
+          <p class="res-rtxt">${esc(u.rangeText)}</p></div>` : ''}
+        <p class="res-sumtxt">${esc(u.body)}</p>`;
+    } else if (v.message) {
+      main += `<h1 class="res-h">${esc(v.message.title)}</h1><p class="kpt-lede" style="max-width:46ch;">${esc(v.message.body)}</p>`;
+    }
+    const rows = [];
+    if (v.also.length) rows.push(`<details class="res-also" id="also"><summary>Also at this budget</summary>${v.also.map((a) => `<div class="res-f"><b>${esc(a.title)}</b>${a.lines.map((l) => `<span>${esc(l)}</span>`).join('')}</div>`).join('')}</details>`);
+    if (v.ec) rows.push(`<div class="res-ecrow">Another route: ${esc(v.ec.label)}<span>${esc(v.ec.text)}</span></div>`);
+    if (rows.length) main += `<div class="res-list">${rows.join('')}</div>`;
+    if (v.ken) main += `<section class="res-ken" aria-label="Ken's Take"><img src="../../assets/img/ken-portrait.jpg" alt="Ken Tan"><div><h3>Ken's Take <span>My judgement, not URA data</span></h3><p>“${esc(v.ken.note)}”</p></div></section>`;
+    return `<div class="kpt-section" style="padding-top:0;">${flag}${chip}${indicative}${tag}${main}
+        <div class="res-cta"><a class="kpt-cta kpj-btn kpj-btn--wa" id="kenView" href="#">Get Ken's view →</a></div>
+        ${v.footer ? `<p class="res-src">${esc(v.footer)} Source: URA.</p>` : ''}
+        <button class="kpj-link kpj-link--muted" id="changeBudget" type="button">Change budget</button>
+      </div>`;
+  }
+  function show(res, step) {
+    const v = R.view(res, { step: step, sizeRounding: ENG.DEFAULTS.size_rounding }), root = $('root');
+    root.innerHTML = resultHtml(v);
+    const pl = R.analytics(res, v, budget);
+    const kv = $('kenView');
+    kv.href = KPT.waLink({ message: R.waMessage(budget) });
+    kv.addEventListener('click', () => KPT.track('ken_view_click', Object.assign({}, pl, { placement: 'result' })));
+    $('changeBudget').addEventListener('click', () => { budget = null; handoff = null; render(); });
+    if (!viewed) { viewed = true; KPT.track('market_view', pl); }
+    window.__kptView = v;   // read by tests
+  }
+  function failed() {
+    const root = $('root');
+    root.innerHTML = resultHtml({ budgetText: R.budgetText(budget), hero: null, also: [], ec: null, ken: null, footer: null, tag: null, message: { title: "Market figures aren't available just now.", body: "I can still give you my view on this budget." } });
+    const kv = $('kenView'); kv.href = KPT.waLink({ message: R.waMessage(budget) });
+    $('changeBudget').addEventListener('click', () => { budget = null; handoff = null; render(); });
+  }
+  function start() {
+    $('root').innerHTML = '<p class="kpt-note" style="padding:40px 0;">Loading…</p>';
+    const f = (u) => fetch(u);
+    Promise.all([R.loadStats(statsBase, budget, ENG, f), R.loadNotes(notesUrl, f)])
+      .then((a) => show(ENG.run({ budget, step: a[0].step, index: a[0].index, today: TODAY, notes: a[1] }, ENG.DEFAULTS), a[0].step))
+      .catch(failed);
+  }
+  function render() { if (!budget) { $('root').innerHTML = askBudgetHtml(); wireAsk(); } else start(); }
+  render();
+})();
+</script>
+</body>
+</html>

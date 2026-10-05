@@ -1,0 +1,25 @@
+{
+  "_note": "Pipeline assumptions. These are KPT assumptions, not URA rules. Ken to confirm before first production run.",
+  "windowMonths": 12,
+  "minN": 30,
+  "propertyTypes": [
+    "Condominium",
+    "Apartment"
+  ],
+  "ageBands": [
+    {
+      "label": "0–10",
+      "maxAge": 10
+    },
+    {
+      "label": "10–25",
+      "maxAge": 25
+    },
+    {
+      "label": "25+",
+      "maxAge": null
+    }
+  ],
+  "maxLeaseYearsForAge": 110,
+  "freeholdLabel": "Freehold / 999-yr"
+}
