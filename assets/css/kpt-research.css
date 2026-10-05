@@ -1,0 +1,169 @@
+/* ==========================================================================
+   KPT Research journey. Scoped to body.kpr so no other page changes. Uses the shared tokens in kpt-system.css.
+   Mobile first (one column, 16px+ inputs, no tables). Wider screens add side-by-side A | B and a two-pane size view.
+   ========================================================================== */
+.kpr{ --card:#FFFFFF; --track:#EFEDE6; --soft:#B7BAC2; --a:#16213E; --b:#A9822F; --r:16px; --shadow:0 1px 2px rgba(22,33,62,.04),0 8px 24px rgba(22,33,62,.06); }
+.kpr main{ max-width:680px; padding-bottom:12px; }
+.kpr .kpt-header.kpt-shell{ padding:22px 20px 0; min-height:58px; flex-wrap:nowrap; }
+.kpr .kpt-header .brand{ font-size:11px; letter-spacing:.16em; }
+.kpr .kpt-byline{ width:auto; } .kpr .kpt-byline img{ width:30px; height:30px; }
+.kpr h1.kpr-h{ font-family:var(--serif); font-weight:400; font-size:29px; line-height:1.15; letter-spacing:-.01em; margin:0 0 8px; }
+.kpr h2.kpr-h2{ font-family:var(--serif); font-weight:400; font-size:21px; margin:0 0 4px; }
+.kpr .kpr-sec{ padding:22px 0; border-top:1px solid var(--line); }
+.kpr .kpr-sec:first-of-type{ border-top:none; }
+.kpr .kpr-lead{ font-size:15px; color:var(--muted); margin:0 0 14px; line-height:1.5; }
+.kpr .kpr-meta{ font-size:13px; color:var(--muted); margin:0 0 10px; }
+.kpr .kpr-back{ display:inline-block; font-size:13px; color:var(--navy-soft); margin:6px 0 14px; padding:6px 0; background:none; border:none; cursor:pointer; font-family:inherit; }
+.kpr .kpr-back:hover{ color:var(--gold); }
+.kpr .kpr-note{ font-size:12.5px; color:var(--muted); line-height:1.5; margin:8px 0 0; }
+.kpr .kpr-label{ font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); margin:0 0 8px; }
+.kpr .kpr-label--ctx{ color:var(--navy-soft); }
+
+/* ---- search ---- */
+.kpr .kpr-search{ position:relative; margin:14px 0 6px; }
+.kpr .kpr-search input{ width:100%; font-family:var(--serif); font-size:22px; color:var(--ink); background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; outline:none; box-shadow:var(--shadow); }
+.kpr .kpr-search input:focus{ border-color:var(--gold); }
+.kpr .kpr-search input::placeholder{ color:var(--soft); }
+.kpr .kpr-results{ list-style:none; margin:8px 0 0; padding:0; background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; box-shadow:var(--shadow); }
+.kpr .kpr-results li{ margin:0; }
+.kpr .kpr-results button{ display:block; width:100%; text-align:left; background:none; border:none; border-top:1px solid var(--line); padding:12px 16px; font-family:inherit; cursor:pointer; color:var(--ink); }
+.kpr .kpr-results li:first-child button{ border-top:none; }
+.kpr .kpr-results button:hover, .kpr .kpr-results button[aria-selected="true"]{ background:var(--gold-wash); }
+.kpr .kpr-results b{ display:block; font-family:var(--serif); font-weight:400; font-size:18px; }
+.kpr .kpr-results span{ display:block; font-size:12.5px; color:var(--muted); margin-top:1px; }
+.kpr .kpr-empty{ font-size:14px; color:var(--muted); padding:14px 16px; line-height:1.5; }
+.kpr .kpr-sugg-h{ font-size:12px; font-weight:700; color:var(--muted); margin:22px 0 4px; letter-spacing:.04em; }
+
+/* ---- chips, toggles ---- */
+.kpr .kpr-seg{ display:inline-flex; background:var(--track); border-radius:12px; padding:3px; gap:0; flex-wrap:wrap; }
+.kpr .kpr-seg button{ border:none; background:none; border-radius:10px; padding:9px 14px; font:inherit; font-size:14px; color:var(--muted); cursor:pointer; line-height:1.2; }
+.kpr .kpr-seg button[aria-pressed="true"]{ background:var(--card); color:var(--ink); font-weight:600; box-shadow:0 1px 3px rgba(22,33,62,.12); }
+.kpr .kpr-seg small{ display:block; font-size:11px; font-weight:400; color:var(--muted); }
+.kpr .kpr-pill{ display:inline-block; font-size:12px; font-weight:600; color:var(--navy-soft); background:var(--gold-wash); border-radius:999px; padding:4px 11px; margin:0 6px 6px 0; }
+.kpr .kpr-tag{ display:inline-block; font-size:11px; font-weight:600; color:var(--gold); border:1px solid var(--gold); border-radius:999px; padding:2px 8px; margin:4px 6px 0 0; line-height:1.3; }
+.kpr .kpr-tag--older{ color:var(--navy-soft); border-color:#9AA3C0; }
+.kpr .kpr-tag--own{ color:#7a5a15; border-color:#c9a45a; background:var(--gold-wash); }
+.kpr .kpr-tools{ display:flex; gap:10px 16px; align-items:center; flex-wrap:wrap; margin:0 0 4px; }
+
+/* ---- size focus ---- */
+.kpr details.kpr-focus{ border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:12px 0; margin:12px 0 0; }
+.kpr details.kpr-focus summary{ cursor:pointer; font-size:14px; font-weight:600; color:var(--navy-soft); list-style:none; display:flex; justify-content:space-between; align-items:center; }
+.kpr details.kpr-focus summary::-webkit-details-marker{ display:none; }
+.kpr details.kpr-focus summary::after{ content:"+"; font-size:18px; font-weight:400; color:var(--muted); }
+.kpr details.kpr-focus[open] summary::after{ content:"\2013"; }
+.kpr .kpr-focus-row{ display:flex; gap:10px; align-items:center; margin-top:12px; flex-wrap:wrap; }
+.kpr .kpr-focus-row input{ width:140px; font-size:18px; font-family:var(--serif); border:1px solid var(--line); border-radius:10px; padding:9px 12px; background:var(--card); color:var(--ink); outline:none; }
+.kpr .kpr-focus-row input:focus{ border-color:var(--gold); }
+.kpr .kpr-btn{ border:1px solid var(--ink); background:transparent; color:var(--ink); border-radius:999px; padding:9px 18px; font:inherit; font-size:14px; font-weight:600; cursor:pointer; }
+.kpr .kpr-btn:hover{ background:var(--ink); color:#fff; }
+.kpr .kpr-link{ background:none; border:none; padding:6px 0; font:inherit; font-size:13px; color:var(--navy-soft); cursor:pointer; text-decoration:underline; text-decoration-color:var(--line); text-underline-offset:3px; }
+.kpr .kpr-link:hover{ color:var(--gold); }
+.kpr .kpr-err{ font-size:12.5px; color:var(--gold); margin-top:6px; }
+
+/* ---- the read ---- */
+.kpr .kpr-read{ margin:6px 0 0; }
+.kpr .kpr-read p{ font-family:var(--serif); font-size:19px; line-height:1.4; margin:0 0 10px; color:var(--ink); }
+.kpr .kpr-read p.sm{ font-family:var(--sans); font-size:15px; color:var(--muted); }
+.kpr .kpr-ev{ font-size:13px; color:var(--muted); margin:2px 0 0; }
+
+/* ---- tiles ---- */
+.kpr .kpr-tiles{ display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden; margin:12px 0 0; }
+.kpr .kpr-tile{ background:var(--card); padding:14px 14px 12px; }
+.kpr .kpr-tile .k{ font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin:0 0 4px; }
+.kpr .kpr-tile .v{ font-family:var(--serif); font-size:24px; line-height:1.1; color:var(--ink); margin:0; }
+.kpr .kpr-tile .s{ font-size:12px; color:var(--muted); margin:4px 0 0; line-height:1.35; }
+
+/* ---- PSF bars (shared axis) ---- */
+.kpr .kpr-bar{ position:relative; display:block; height:18px; margin:6px 0 4px; }
+.kpr .kpr-bar::before{ content:""; position:absolute; left:0; right:0; top:8px; height:2px; background:var(--track); border-radius:2px; }
+.kpr .kpr-bar .r{ position:absolute; top:8px; height:2px; background:#B9C0D6; }
+.kpr .kpr-bar .iq{ position:absolute; top:4px; height:10px; background:var(--a); opacity:.78; border-radius:5px; min-width:4px; }
+.kpr .kpr-bar .md{ position:absolute; top:1px; height:16px; width:2px; background:var(--gold); transform:translateX(-1px); }
+.kpr .kpr-bar--b .iq{ background:var(--b); opacity:.8; } .kpr .kpr-bar--b .md{ background:var(--a); }
+
+/* ---- size rows ---- */
+.kpr .kpr-rows{ margin:10px 0 0; }
+.kpr .kpr-row{ display:block; width:100%; text-align:left; background:none; border:none; border-top:1px solid var(--line); padding:12px 4px 12px 0; font:inherit; color:var(--ink); cursor:pointer; }
+.kpr .kpr-row:hover{ background:rgba(244,238,225,.45); }
+.kpr .kpr-row[aria-pressed="true"]{ background:var(--gold-wash); padding-left:10px; margin-left:-10px; padding-right:10px; border-radius:6px; }
+.kpr .kpr-row .t{ display:flex; justify-content:space-between; gap:12px; align-items:baseline; }
+.kpr .kpr-row .t b{ font-weight:600; font-size:15px; }
+.kpr .kpr-row .t span{ font-size:13px; color:var(--muted); text-align:right; }
+.kpr .kpr-row .e{ font-size:12.5px; color:var(--muted); }
+.kpr .kpr-panel{ margin-top:16px; padding:16px; background:var(--card); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); }
+.kpr .kpr-panel h3{ font-family:var(--serif); font-weight:400; font-size:19px; margin:0 0 2px; }
+.kpr .kpr-fl{ display:grid; grid-template-columns:62px 1fr; gap:4px 12px; align-items:center; margin:8px 0; font-size:13px; }
+.kpr .kpr-fl .n{ color:var(--muted); font-size:12px; }
+
+/* ---- history chart ---- */
+.kpr .kpr-hist{ margin:10px 0 0; }
+.kpr .kpr-hist svg{ width:100%; height:auto; display:block; }
+.kpr .kpr-hist text{ font-family:var(--sans); fill:var(--muted); font-size:10.5px; }
+.kpr .kpr-hist text.m{ fill:var(--ink); font-weight:600; }
+.kpr .kpr-warn{ border-left:2px solid var(--gold); padding:2px 0 2px 12px; font-size:13.5px; color:var(--ink); line-height:1.5; margin:12px 0 0; }
+
+/* ---- disclosures ---- */
+.kpr details.kpr-d{ border-top:1px solid var(--line); padding:14px 0; }
+.kpr details.kpr-d summary{ cursor:pointer; font-size:15px; font-weight:600; color:var(--navy-soft); list-style:none; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.kpr details.kpr-d summary::-webkit-details-marker{ display:none; }
+.kpr details.kpr-d summary::after{ content:"+"; font-size:18px; font-weight:400; color:var(--muted); }
+.kpr details.kpr-d[open] summary::after{ content:"\2013"; }
+.kpr details.kpr-d .inner{ padding-top:12px; font-size:14px; color:var(--muted); line-height:1.55; }
+.kpr .kpr-ctx-row{ padding:10px 0; border-top:1px solid var(--line); }
+.kpr .kpr-ctx-row:first-of-type{ border-top:none; }
+.kpr .kpr-ctx-row b{ color:var(--ink); font-weight:600; }
+.kpr ul.kpr-list{ margin:4px 0 0; padding-left:18px; font-size:14px; color:var(--muted); line-height:1.55; }
+.kpr ul.kpr-list li{ margin:0 0 4px; }
+
+/* ---- comparison ---- */
+.kpr .kpr-vs{ font-family:var(--serif); font-size:26px; line-height:1.2; margin:0 0 10px; }
+.kpr .kpr-vs span{ color:var(--muted); font-size:.7em; padding:0 4px; }
+.kpr .kpr-verdict{ display:block; font-family:var(--serif); font-size:22px; line-height:1.25; margin:12px 0 6px; padding-left:14px; border-left:3px solid var(--gold); }
+.kpr .kpr-verdict.good{ border-left-color:var(--navy-soft); } .kpr .kpr-verdict.none{ border-left-color:var(--soft); color:var(--ink); }
+.kpr .kpr-why{ list-style:none; margin:0; padding:0; }
+.kpr .kpr-why li{ font-size:14.5px; color:var(--ink); line-height:1.5; margin:0 0 8px; }
+.kpr .kpr-why li.sub{ color:var(--muted); font-size:13px; }
+.kpr .kpr-ladder{ display:flex; gap:8px; overflow-x:auto; padding:2px 0 8px; margin:8px 0 0; -webkit-overflow-scrolling:touch; }
+.kpr .kpr-ladder button{ flex:none; text-align:left; border:1px solid var(--line); background:var(--card); border-radius:12px; padding:9px 12px; font:inherit; cursor:pointer; min-width:112px; color:var(--ink); }
+@media (max-width:639px){ .kpr .kpr-ladder{ display:grid; grid-template-columns:1fr 1fr; overflow:visible; } .kpr .kpr-ladder button{ min-width:0; } }
+.kpr .kpr-ladder button[aria-pressed="true"]{ border-color:var(--ink); box-shadow:0 0 0 1px var(--ink); }
+.kpr .kpr-ladder .w{ display:block; font-size:12.5px; font-weight:600; }
+.kpr .kpr-ladder .c{ display:block; font-size:12px; color:var(--muted); margin-top:2px; }
+.kpr .kpr-ladder .c.none{ color:var(--soft); }
+.kpr .kpr-banner{ background:var(--gold-wash); border-radius:10px; padding:10px 14px; font-size:13.5px; color:var(--ink); margin:10px 0 0; line-height:1.45; }
+.kpr .kpr-bands{ display:grid; grid-template-columns:1fr; gap:14px; margin:14px 0 0; }
+.kpr .kpr-card{ background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:16px; box-shadow:var(--shadow); }
+.kpr .kpr-card.focus{ border-color:var(--gold); }
+.kpr .kpr-card h3{ font-family:var(--serif); font-weight:400; font-size:19px; margin:0 0 8px; }
+.kpr .kpr-side{ margin:0 0 10px; }
+.kpr .kpr-side .nm{ font-size:13px; font-weight:600; display:flex; justify-content:space-between; gap:10px; }
+.kpr .kpr-side .nm i{ font-style:normal; font-weight:400; color:var(--muted); }
+.kpr .kpr-gap{ font-size:13.5px; line-height:1.5; color:var(--ink); border-top:1px solid var(--line); padding-top:10px; margin-top:6px; }
+.kpr .kpr-gap em{ display:block; font-style:normal; color:var(--muted); font-size:12.5px; margin-top:3px; }
+.kpr .kpr-dir{ font-size:15px; line-height:1.5; color:var(--ink); margin:16px 0 0; padding-left:14px; border-left:2px solid var(--gold); }
+.kpr table.kpr-diff{ width:100%; border-collapse:collapse; font-size:13.5px; }
+.kpr table.kpr-diff th, .kpr table.kpr-diff td{ text-align:left; padding:7px 8px 7px 0; border-top:1px solid var(--line); vertical-align:top; }
+.kpr table.kpr-diff th{ font-weight:600; color:var(--ink); width:34%; }
+
+/* ---- Ken + CTAs ---- */
+.kpr .kpr-ken{ display:flex; gap:14px; align-items:flex-start; margin:0; }
+.kpr .kpr-ken img{ width:46px; height:46px; border-radius:50%; object-fit:cover; object-position:center 20%; flex:none; }
+.kpr .kpr-ken h3{ font-size:13px; margin:0 0 4px; font-weight:600; } .kpr .kpr-ken h3 span{ font-weight:400; color:var(--muted); }
+.kpr .kpr-ken p{ margin:0; font-family:var(--serif); font-style:italic; font-size:18px; line-height:1.45; }
+.kpr .kpr-cta{ display:flex; flex-direction:column; align-items:flex-start; gap:12px; margin-top:6px; }
+.kpr .kpr-cta .kpt-cta{ font-size:15px; }
+.kpr .kpr-state{ padding:24px 0; color:var(--muted); font-size:15px; }
+.kpr .kpr-skel{ height:14px; background:var(--track); border-radius:7px; margin:10px 0; max-width:420px; }
+
+/* ---- wider screens ---- */
+@media (min-width:960px){
+  .kpr main{ max-width:960px; }
+  .kpr h1.kpr-h{ font-size:36px; }
+  .kpr .kpr-tiles{ grid-template-columns:repeat(4,1fr); }
+  .kpr .kpr-twopane{ display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:start; }
+  .kpr .kpr-twopane .kpr-panel{ margin-top:10px; position:sticky; top:16px; }
+  .kpr .kpr-bands{ grid-template-columns:1fr 1fr; }
+  .kpr .kpr-cta{ flex-direction:row; align-items:center; gap:24px; }
+  .kpr .kpr-read p{ font-size:21px; }
+}
+@media (max-width:640px){ .kpr .kpt-header.kpt-shell{ padding:22px 20px 0; } .kpr .kpr-search input{ font-size:20px; } }

@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>What can this budget buy? · Ken Property Tools</title>
 <meta name="description" content="Where your budget works in the Singapore property market, what you trade off, and what Ken would look at.">
+<meta name="theme-color" content="#FAFAF8">
+<link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/css/kpt-system.css">
 <link rel="stylesheet" href="../../assets/css/kpt-journey.css">
 </head>
@@ -74,6 +76,8 @@
     const chipInner = `About ${esc(v.budgetText)} <i>your budget</i>`;
     const chip = handoff && handoff.from === 'hdb-upgrade'
       ? `<a class="res-chip" href="../hdb-upgrade/?resume=1" aria-label="Back to your position">← ${chipInner}</a>`
+      : handoff && handoff.from === 'buy'
+      ? `<a class="res-chip" href="../../buy/?resume=1" aria-label="Back to your search">← ${chipInner}</a>`
       : `<span class="res-chip">${chipInner}</span>`;
     const indicative = handoff && handoff.state === 'indicative' ? `<p class="res-bud-note">Based on your indicative planning position.</p>` : '';
     const tag = v.tag ? `<p class="res-bud-note">${esc(v.tag)}</p>` : '';

@@ -1,0 +1,32 @@
+{
+  "_note": "Project-level data layer settings. Exclusions are an EXPLICIT, REVIEWED list matched on the exact URA project name. No pattern matching. A name in 'hold' is kept OUT of the generated data until Ken rules on it (move it to 'exclude' to drop it for good, or delete it from 'hold' to include it).",
+  "schema": 1,
+  "bin": 100,
+  "windows": [12, 24, 36, "all"],
+  "periodMonths": 12,
+  "periods": 5,
+  "shards": 64,
+  "exclude": [
+    { "name": "RESIDENTIAL APARTMENTS", "reason": "Catch-all bucket: 82 streets, 14 districts, mixed tenures" },
+    { "name": "LANDED HOUSING DEVELOPMENT", "reason": "Catch-all bucket for landed sales (no condo/apartment rows expected)" },
+    { "name": "EMERALD HILL CONSERVATION AREA", "reason": "Conservation-area bucket, not a development" },
+    { "name": "LITTLE INDIA CONSERVATION AREA", "reason": "Conservation-area bucket, not a development" },
+    { "name": "BOAT QUAY CONSERVATION AREA", "reason": "Conservation-area bucket, not a development" },
+    { "name": "SENNETT ESTATE", "reason": "Old-estate location label (inferred from name); mixes freehold with a 9999-yr lease" },
+    { "name": "TIONG BAHRU ESTATE", "reason": "Old-estate location label (inferred from name)" },
+    { "name": "FRANKEL ESTATE", "reason": "Old-estate location label (inferred from name)" },
+    { "name": "OPERA ESTATE", "reason": "Old-estate location label (inferred from name)" },
+    { "name": "PEAKVIEW ESTATE", "reason": "Old-estate location label (inferred from name)" },
+    { "name": "JALAN KAYU ESTATE", "reason": "Old-estate location label (inferred from name)" },
+    { "name": "TEACHERS' HOUSING ESTATE", "reason": "Old-estate location label (inferred from name)" },
+    { "name": "HILLVIEW GARDEN ESTATE", "reason": "Old-estate location label (inferred from name)" }
+  ],
+  "hold": [
+    { "name": "LAKEVIEW ESTATE", "reason": "Questionable: 'Estate' name but 99-yr lease on Upper Thomson Rd; may be a real development" },
+    { "name": "THOMSON HILLS ESTATE", "reason": "Questionable: freehold, Sembawang Hills Dr; may be a real development or an estate label" },
+    { "name": "CONDOMINIUM DEVELOPMENT", "reason": "Questionable: generic name, single street (Holland Rd)" },
+    { "name": "TOWNHOUSE APARTMENTS", "reason": "Questionable: generic name, single street (Cavenagh Rd)" },
+    { "name": "GARDEN APARTMENTS", "reason": "Questionable: generic name, single street (Orange Grove Rd)" },
+    { "name": "DUBLIN ROAD FLATS", "reason": "Questionable: generic name, 1 transaction" }
+  ]
+}

@@ -143,3 +143,24 @@
 .kpj .kpj-row-h span{ font-size:14px; color:var(--muted); }
 .kpj .kpj-row-h b{ font:400 20px var(--serif); text-align:right; }
 .kpj .kpj-row p{ margin:6px 0 0; font-size:13px; line-height:1.5; color:var(--muted); }
+
+/* ---- Buyer journey (/buy/): one-screen inputs, diagnosis result ---- */
+.kpj .kpb-block{ margin-top:30px; }
+.kpj .kpb-q{ font-size:13px; color:var(--muted); margin:0 0 8px; }
+.kpj .kpb-quiet-head{ font:600 11px var(--sans); letter-spacing:.12em; text-transform:uppercase; color:var(--gold); margin:38px 0 0; padding-top:22px; border-top:1px solid var(--line); }
+.kpj .kpb-chips{ display:flex; flex-wrap:wrap; gap:8px; }
+.kpj .kpb-chip{ border:none; background:var(--track); color:var(--muted); font:500 14px var(--sans); padding:10px 14px; border-radius:999px; cursor:pointer; line-height:1.2; }
+.kpj .kpb-chip[aria-pressed="true"]{ background:var(--ink); color:#fff; }
+.kpj .kpb-chip[aria-disabled="true"]{ opacity:.45; cursor:default; }
+.kpj .kpb-hint{ font-size:12px; color:var(--muted); margin:8px 0 0; }
+.kpj .kpb-text{ margin-top:12px; }
+.kpj .kpb-text input{ font-size:17px; padding:8px 0 10px; }
+.kpj .kpb-constraint{ font-size:17px; line-height:1.5; color:var(--ink); margin:0 0 10px; font-weight:600; }
+.kpj .kpb-meaning{ font-size:15px; line-height:1.55; color:var(--muted); margin:0; max-width:56ch; }
+.kpj .kpb-routes{ margin-top:6px; }
+.kpj .kpb-route{ padding:16px 0; border-top:1px solid var(--line); }
+.kpj .kpb-route:last-child{ border-bottom:1px solid var(--line); }
+.kpj .kpb-route b{ display:block; font:400 19px var(--serif); }
+.kpj .kpb-route p{ margin:5px 0 0; font-size:14px; line-height:1.5; color:var(--muted); }
+.kpj .kpb-route p.give{ color:var(--navy-soft); }
+.kpj .kpb-head{ margin:34px 0 8px; }

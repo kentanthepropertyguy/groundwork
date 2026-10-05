@@ -3,96 +3,55 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Own an HDB flat, condo or landed home in Singapore? Work out where you stand and what your next move could look like.">
+<meta name="description" content="Ken Property Tools helps you work out a property decision in Singapore: HDB upgrade, what your budget buys, and the trade-offs behind it.">
 <meta name="theme-color" content="#FAFAF8">
-<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
-<title>I own a property — Ken Property Tools</title>
-<link rel="stylesheet" href="../assets/css/kpt-system.css">
-<link rel="stylesheet" href="../assets/css/kpt-site.css">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<title>Ken Property Tools — Property decisions, analysed.</title>
+<link rel="stylesheet" href="assets/css/kpt-system.css">
+<link rel="stylesheet" href="assets/css/kpt-site.css">
 </head>
 <body class="kps">
 <header class="kpt-header kpt-shell">
-  <a class="brand" href="../">KEN PROPERTY TOOLS</a>
+  <div class="brand">KEN PROPERTY TOOLS</div>
 </header>
 
-<main class="kpt-shell" style="max-width:640px;">
-  <section class="kpt-section" style="padding-top:20px;">
-    <p class="kpt-eyebrow">I own a property</p>
-    <h1 class="kpt-h2" style="font-size:31px;">What do you own?</h1>
+<main class="kpt-shell">
+  <section class="kpt-section kps-hero">
+    <p class="kpt-eyebrow">Property decisions, analysed.</p>
+    <h1 class="kpt-h1">Make sense of your next property move.</h1>
+    <p class="kpt-lede">Start from where you are. See what the numbers mean for you, and what trade-offs sit behind them.</p>
   </section>
 
-  <section id="step-type" class="kpt-section" style="padding-top:0;">
-    <div class="kps-opts">
-      <button class="kpt-cta" data-type="hdb">HDB flat</button>
-      <button class="kpt-cta" data-type="condo">Private condo</button>
-      <button class="kpt-cta" data-type="landed">Landed</button>
-    </div>
-  </section>
+  <nav class="kpt-router" aria-label="Start your question">
+    <a href="own/" data-journey="own">
+      <h3>I own a property</h3>
+      <p>Upgrading, selling, or just want to know where you stand.</p>
+    </a>
+    <a href="buy/" data-journey="buy">
+      <h3>I'm looking to buy</h3>
+      <p>Figure out what you can comfortably afford, and where.</p>
+    </a>
+    <a href="research/" data-journey="research">
+      <h3>I'm researching a property</h3>
+      <p>Understand a project through its transactions, or compare it with another.</p>
+    </a>
+  </nav>
 
-  <section id="step-intent" class="kpt-section" style="display:none; padding-top:0;">
-    <p class="kpt-quickread" id="type-echo"></p>
-    <h2 class="kpt-h2" style="margin-top:18px;">What's on your mind?</h2>
-    <div class="kps-opts">
-      <button class="kpt-cta" data-intent="upgrading">Thinking about upgrading</button>
-      <button class="kpt-cta" data-intent="selling">Thinking about selling</button>
-      <button class="kpt-cta" data-intent="checking">Just checking where I stand</button>
-    </div>
-  </section>
-
-  <section id="step-result" class="kpt-section" style="display:none; padding-top:0;">
-    <div id="result-inner"></div>
-  </section>
+  <p class="kps-credit"><img src="assets/img/ken-portrait.jpg" alt="Ken Tan"><span>Ken Tan · Property agent since 2007</span></p>
 </main>
 
 <footer class="kpt-footer kpt-shell">
   Ken Tan · Property agent since 2007 · CEA R007903D · Huttons Asia Pte Ltd (L3008899K)
 </footer>
 
-<script src="../assets/js/kpt-analytics.js"></script>
-<script src="../assets/js/kpt-components.js"></script>
+<script src="assets/js/kpt-analytics.js"></script>
+<script src="assets/js/kpt-components.js"></script>
 <script>
-  KPT.setContext({ tool_category: "own" });
-  KPT.track("page_view", { page: "own" });
-
-  var ownedType = null;
-
-  document.querySelectorAll('#step-type button').forEach(function (b) {
-    b.addEventListener('click', function () {
-      ownedType = b.dataset.type;
-      KPT.track('tool_started', { tool_name: 'own-router', step: 'type', value: ownedType });
-      document.getElementById('type-echo').textContent =
-        'Got it — a ' + ({hdb:'HDB flat', condo:'private condo', landed:'landed home'}[ownedType]) + '.';
-      document.getElementById('step-intent').style.display = '';
-      document.getElementById('step-intent').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  });
-
-  document.querySelectorAll('#step-intent button').forEach(function (b) {
-    b.addEventListener('click', function () {
-      var intent = b.dataset.intent;
-      KPT.track('tool_started', { tool_name: 'own-router', step: 'intent', value: intent, owned_type: ownedType });
-
-      // Only one path is actually built right now: HDB + upgrading.
-      // Every other combination gets an honest answer, not a fake tool.
-      if (ownedType === 'hdb' && intent === 'upgrading') {
-        window.location.href = '../tools/hdb-upgrade/?from=own';
-        return;
-      }
-
-      var inner = document.getElementById('result-inner');
-      inner.innerHTML =
-        '<p class="kps-lead">I\'m still building out this exact path on the site — but tell me a bit ' +
-        'about your situation on WhatsApp and I\'ll walk you through it directly.</p>' +
-        '<a class="kpt-cta kpt-cta--wa" id="wa-stub" style="margin-top:10px;">Get Ken\'s view →</a>';
-      document.getElementById('wa-stub').href = KPT.waLink({
-        message: "Hi Ken, I own a " + ({hdb:'HDB flat',condo:'private condo',landed:'landed home'}[ownedType]) +
-          " and I'm " + ({upgrading:'thinking about upgrading',selling:'thinking about selling',checking:'just checking where I stand'}[intent]) + "."
-      });
-      document.getElementById('wa-stub').addEventListener('click', function () {
-        KPT.track('whatsapp_click', { tool_name: 'own-router' });
-      });
-      document.getElementById('step-result').style.display = '';
-      document.getElementById('step-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  KPT.setContext({ tool_category: "homepage" });
+  KPT.track("page_view", { page: "homepage" });
+  document.querySelectorAll('.kpt-router a').forEach(function (a) {
+    a.addEventListener('click', function () {
+      KPT.track('journey_started', { journey: a.dataset.journey });
     });
   });
 </script>
