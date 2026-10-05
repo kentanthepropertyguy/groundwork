@@ -386,6 +386,8 @@
      Reads only fields already on the model. No new data, no thresholds: "supported" is the existing KPT cell rule (2+ sales in 2+ months on both sides),
      and "small vs wider" is structural (middle PSF ranges overlap, or they do not). Never says better/cheaper/undervalued and never predicts. */
   const INTERP_VERSION = 'v1';
+  // Build stamp. research/index.html checks it matches, so a stale cached copy of one file can never silently pair with a newer other file.
+  const BUILD = '2026-10-06.4';
   const hi = (b, A, B) => (b.gap.dir === 'b' ? B : b.gap.dir === 'a' ? A : null);
   function interpret(M) {
     if (!M || M.overlap === 'none' || !M.bands || !M.bands.length) return null;
@@ -475,6 +477,6 @@
   }
   const buildHash = (v) => (v.view === 'project' ? '#/p/' + v.id + (v.sale ? '/' + v.sale : '') : v.view === 'compare' ? '#/compare/' + v.a + '/' + v.b + (v.sale ? '/' + v.sale : '') : v.view === 'pick' ? '#/compare/' + v.a : '#/');
 
-  return { analyseProject, analyseComparison, interpret, evidence, defaultSale, saleOptions, focusBin, movement, matchNote, pairKey, sameDistrict, waMessage, analytics, parseHash, buildHash, displayName, bandLabel, bandShort, fmtMonth, monthsAgo, windowKey, num, psf,
+  return { BUILD, analyseProject, analyseComparison, interpret, evidence, defaultSale, saleOptions, focusBin, movement, matchNote, pairKey, sameDistrict, waMessage, analytics, parseHash, buildHash, displayName, bandLabel, bandShort, fmtMonth, monthsAgo, windowKey, num, psf,
     SALE_LABEL, NOT_MEASURED, HEADLINE, ANALYTICS_EVENTS, ANALYTICS_KEYS, SUBSTITUTE_NOTE, CONTEXT_NOTE, HISTORY_NOTE, PSF_NOTE, FLOOR_NOTE };
 });

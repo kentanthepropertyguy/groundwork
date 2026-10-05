@@ -8,7 +8,7 @@
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <title>I'm researching a property — Ken Property Tools</title>
 <link rel="stylesheet" href="../assets/css/kpt-system.css">
-<link rel="stylesheet" href="../assets/css/kpt-research.css">
+<link rel="stylesheet" href="../assets/css/kpt-research.css?v=2026-10-06.4">
 </head>
 <body class="kpr" data-view="home">
 <header class="kpt-header kpt-shell"><a class="brand" href="../">KEN PROPERTY TOOLS</a>
@@ -24,9 +24,9 @@
 
 <script src="../assets/js/kpt-analytics.js"></script>
 <script src="../assets/js/kpt-components.js"></script>
-<script src="../assets/js/kpt-project.js"></script>
-<script src="../assets/js/kpt-research.js"></script>
-<script src="../data/research/config.js"></script>
+<script src="../assets/js/kpt-project.js?v=2026-10-06.4"></script>
+<script src="../assets/js/kpt-research.js?v=2026-10-06.4"></script>
+<script src="../data/research/config.js?v=2026-10-06.4"></script>
 <script>
 // Presentation only. All reasoning is in assets/js/kpt-research.js; all numbers come from the generated project data.
 (function () {
@@ -34,10 +34,12 @@
   KPT.setContext({ tool_name: 'research-journey', tool_category: 'research', project_name: null });
   KPT.track('page_view', { page: 'research' });
 
-  const $app = document.getElementById('app');
+  const BUILD = '2026-10-06.4', $app = document.getElementById('app');
+  // The page and its logic file must be the same build. If the browser holds a stale copy of either, say so plainly rather than failing in a misleading way.
+  if (R.BUILD !== BUILD) { console.warn('KPT research: build mismatch. page ' + BUILD + ', script ' + R.BUILD); $app.innerHTML = '<div class="kpr-state"><h1 class="kpr-h">This page needs a refresh</h1><p class="kpr-lead">Your browser has an out-of-date copy of this page. Please refresh to load the latest version. On a phone, close the tab and reopen the link.</p></div>'; return; }
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const base = new URL(CFG.projects, location.href).href, notesUrl = new URL(CFG.kenNotes, location.href).href;
-  const getJson = (u) => fetch(u).then((r) => { if (!r.ok) throw new Error(u + ' ' + r.status); return r.json(); });
+  const getJson = (u) => fetch(u + (u.indexOf('?') > -1 ? '&' : '?') + 'v=' + BUILD).then((r) => { if (!r.ok) throw new Error(u + ' ' + r.status); return r.json(); });
   const store = P.createStore(base, getJson);
   const TODAY = new Date().toISOString().slice(0, 10);
   const S = { size: '', win: null, pairKey: null, cur: null };
