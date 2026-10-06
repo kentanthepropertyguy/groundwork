@@ -182,4 +182,126 @@ t('displayName parity with Research across every project name', () => {
   realDoc.projects.forEach((p) => { assert.strictEqual(F.displayName(p.name), RS.displayName(p.name), p.name); assert.strictEqual(F.displayName(p.street), RS.displayName(p.street), p.street); });
 });
 
+
+console.log('V9.1 location: reviewed alias table');
+const RA = (x) => F.resolveArea(x);
+t('every alias in the reviewed table resolves to exactly its approved district', () => {
+  F.AREA_ALIASES.forEach((row) => row[1].forEach((a) => { const r = RA(a); assert.strictEqual(r.kind, 'single', a); assert.deepStrictEqual(r.districts, [row[0]], a); }));
+});
+t('the 14 places Ken asked about', () => {
+  const exp = { 'Ang Mo Kio': ['single', ['20']], Bishan: ['single', ['20']], Thomson: ['several', ['11', '26']], Tampines: ['single', ['18']], Bedok: ['single', ['16']], Hougang: ['single', ['19']], Punggol: ['single', ['19']],
+    Sengkang: ['single', ['19']], Clementi: ['several', ['05', '21']], Jurong: ['single', ['22']], Queenstown: ['single', ['03']], 'Bukit Timah': ['several', ['10', '21']], Orchard: ['single', ['09']], Novena: ['single', ['11']] };
+  Object.keys(exp).forEach((k) => { const r = RA(k); assert.strictEqual(r.kind, exp[k][0], k); assert.deepStrictEqual(r.districts, exp[k][1], k); });
+});
+t('approved corrections: Serangoon asks (D12/D19), Serangoon Gardens is D19, Kallang is unresolved', () => {
+  assert.deepStrictEqual(RA('Serangoon'), { kind: 'several', districts: ['12', '19'], places: ['Serangoon'] });
+  assert.deepStrictEqual(RA('Serangoon Gardens').districts, ['19']); assert.strictEqual(RA('Serangoon Gardens').kind, 'single');
+  assert.strictEqual(RA('Kallang').kind, 'none'); assert.strictEqual(RA('near Kallang Riverside').kind, 'none');
+});
+t('approved choice places: East Coast, Bukit Merah, CBD, Yio Chu Kang', () => {
+  assert.deepStrictEqual(RA('East Coast').districts, ['15', '16']); assert.deepStrictEqual(RA('Bukit Merah').districts, ['03', '04']); assert.deepStrictEqual(RA('CBD').districts, ['01', '02']); assert.deepStrictEqual(RA('Yio Chu Kang').districts, ['26', '28']);
+});
+t('approved single mappings: Paya Lebar D14, Lentor D26, Tengah D24, Kembangan D16, Beauty World D21', () => {
+  [['Paya Lebar', '14'], ['Lentor', '26'], ['Tengah', '24'], ['Kembangan', '16'], ['Beauty World', '21']].forEach((x) => assert.deepStrictEqual(RA(x[0]).districts, [x[1]], x[0]));
+});
+t('no fragment or fuzzy matching: the V9 mistakes are gone', () => {
+  ['Bukit', 'East', 'Pasir', 'West', 'Upper', 'Road', 'Garden', 'Park', 'Tim', 'Thom', 'angmokio', 'Bishn'].forEach((x) => assert.strictEqual(RA(x).kind, 'none', x));
+  assert.deepStrictEqual(RA('Bukit Merah').districts.indexOf('23'), -1); assert.deepStrictEqual(RA('Jurong East').districts, ['22']); assert.deepStrictEqual(RA('Pasir Ris').districts, ['18']);
+});
+t('longest phrase wins; several places combine; the same district is not duplicated', () => {
+  assert.deepStrictEqual(RA('Upper Thomson').districts, ['26']); assert.deepStrictEqual(RA('Upper Bukit Timah').districts, ['21']);
+  assert.deepStrictEqual(RA('AMK or Bishan').districts, ['20']); assert.strictEqual(RA('AMK or Bishan').kind, 'single');
+  assert.deepStrictEqual(RA('Tampines / Bedok').districts, ['16', '18']); assert.strictEqual(RA('Tampines / Bedok').kind, 'several');
+});
+t('empty, odd and long text never throws', () => {
+  [null, undefined, '', '   ', '###', 'x'.repeat(5000), '<script>alert(1)</script>', 'Ang   Mo\tKio!!'].forEach((x) => { const r = RA(x); assert.ok(['single', 'several', 'none'].indexOf(r.kind) > -1); });
+  assert.deepStrictEqual(RA('ang   mo\tkio!!').districts, ['20']);
+});
+t('every district in the table exists in the reviewed D01–D28 names', () => {
+  F.AREA_ALIASES.forEach((r) => assert.ok(F.DISTRICT_AREAS[r[0]], r[0])); F.AREA_CHOICES.forEach((r) => r[1].forEach((d) => assert.ok(F.DISTRICT_AREAS[d], d)));
+});
+
+console.log('V9.1 location: never silently ignored');
+t('Specific area, Near work, Near family and Near school are each listed, before and after an area is chosen', () => {
+  ['areas', 'work', 'family', 'school'].forEach((w) => {
+    const p = F.unsupported({ where: w, priorities: [] }); assert.ok(p.some((u) => u.id === w), w + ' pending');
+    const c = F.unsupported({ where: w, priorities: [] }, { districts: ['20'] }).find((u) => u.id === w); assert.ok(/District 20/.test(c.text), w + ' confirmed');
+    const k = F.unsupported({ where: w, priorities: [] }, { districts: [], skipped: true }).find((u) => u.id === w); assert.ok(/all of Singapore/.test(k.text), w + ' skipped');
+  });
+  assert.strictEqual(F.unsupported({ where: 'flexible', priorities: [] }).length, 0);
+});
+t('wording never claims distance: only “can’t show distance” and “narrowed to a district”', () => {
+  ['work', 'family', 'school'].forEach((w) => [{ districts: ['20'] }, { districts: [], skipped: true }, {}].forEach((c) => {
+    const x = F.unsupported({ where: w, priorities: [] }, c).find((u) => u.id === w).text; assert.ok(/can’t show distance/.test(x)); assert.ok(!/(minutes?|walking|nearby|close to you|within \d)/i.test(x), x);
+  }));
+});
+t('the card line lists the location requirement on every card', () => {
+  const ix2 = mk([R1('a', 6), R1('b', 6)]);
+  const r = run(ix2, { answers: { where: 'work', size: 'not-sure', priorities: [] }, loc: { districts: ['15'] } });
+  r.groups[0].cards.forEach((c) => assert.ok(/workplace/.test(c.notEvaluated)));
+  const a = run(ix2, { answers: { where: 'areas', size: 'not-sure', priorities: [] }, loc: { districts: ['15'] } }); a.groups[0].cards.forEach((c) => assert.ok(/exact area within the district/.test(c.notEvaluated)));
+});
+
+console.log('V9.1 New launch wording');
+t('New launch group heading and note use the approved wording', () => {
+  assert.strictEqual(F.NEW_LABEL, 'New launch projects with recent developer sales');
+  assert.strictEqual(F.NEW_NOTE, 'Based on developer sales recorded by URA in the last 12 months. This data cannot tell us whether units are still available from the developer.');
+  const n = P('n1', 'N1', 'NS', '15', 4, 'new', [row(1000, 6, 3, 202609, 1700000, 1900000)]);
+  const r = run(mk([n]), { openTo: 'new' }); assert.strictEqual(r.groups[0].label, F.NEW_LABEL); assert.strictEqual(r.groups[0].note, F.NEW_NOTE);
+  const b = run(mk([n, R1('r1', 6)]), { openTo: 'both' }); assert.strictEqual(b.groups.find((g) => g.sale === 'new').note, F.NEW_NOTE); assert.strictEqual(b.groups.find((g) => g.sale === 'resale').note, null);
+});
+t('new-launch cards never imply current availability and say the developer may have no units', () => {
+  const n = P('n1', 'N1', 'NS', '15', 4, 'new', [row(1000, 6, 3, 202609, 1700000, 1900000)]);
+  const c = run(mk([n]), { openTo: 'new' }).groups[0].cards[0];
+  assert.ok(/developer sales/.test(c.evidence)); assert.ok(/whether the developer still has units to sell/.test(c.notEvaluated)); assert.ok(/don’t show whether the developer still has units to sell/.test(c.indicative));
+  assert.ok(!/\b(available|in stock|on sale|launching now|currently selling)\b/i.test(JSON.stringify(c)), JSON.stringify(c));
+  assert.strictEqual(c.saleLabel, 'Developer sales');
+});
+t('methodology states that recent New Sale evidence is not proof of developer inventory, and explains the 900+ year tenure rule', () => {
+  const m = F.METHOD.join(' '); assert.ok(/not proof that the developer still has units to sell/.test(m)); assert.ok(/900 years or more/.test(m)); assert.ok(/ask you to confirm it/.test(m));
+});
+t('real data: every new-sale card on a grid says so; sale types are still never mixed', () => {
+  let n = 0;
+  [1200000, 2000000, 3000000, 5000000].forEach((b) => ['new', 'resale', 'both'].forEach((o) => {
+    const r = F.shortlist(ixr, { budget: b, openTo: o, size: { lo: 700, hi: 1500, source: 'explicit', line: '' }, districts: [], answers: {} });
+    r.groups.forEach((g) => g.cards.forEach((c) => { n++; assert.strictEqual(c.sale, g.sale); if (o !== 'both') assert.strictEqual(c.sale, o); if (c.sale === 'new') assert.ok(/developer still has units to sell/.test(c.notEvaluated) && /developer sales/.test(c.evidence)); else assert.ok(!/developer/.test(JSON.stringify(c))); }));
+  }));
+  assert.ok(n > 30);
+});
+t('ELTA stays eligible when it qualifies under the rules (not hard-coded in or out)', () => {
+  const src = fs.readFileSync(path.join(root, 'assets/js/kpt-find.js'), 'utf8') + fs.readFileSync(path.join(root, 'tools/what-can-i-buy/index.html'), 'utf8'); assert.ok(!/elta/i.test(src));
+  const r = F.shortlist(ixr, { budget: 3000000, openTo: 'new', size: { lo: 1040, hi: 1160, source: 'explicit', line: '' }, districts: [], answers: {} });
+  assert.ok(F.eligible(ixr, 'new', { budget: 3000000, pct: T.budgetPct, lo: 1040, hi: 1160, districts: [], freehold: false, text: '' }).some((c) => c.id === 'elta'));
+  assert.ok(r.state === 'list');
+});
+
+console.log('V9.1 page wiring and privacy');
+const page = fs.readFileSync(path.join(root, 'tools/what-can-i-buy/index.html'), 'utf8');
+t('location panel gates the list: no cards and no analytics until the buyer chooses', () => {
+  const i = page.indexOf("if (FS.loc === 'pending')"), j = page.indexOf('FI.shortlist(findIx'), k = page.indexOf("KPT.track('find_shown'");
+  assert.ok(i > -1 && i < j && j < k); assert.ok(/FS\.loc === 'pending'\) \{ root\.innerHTML = [^;]*locPanel\(\)[^;]*; return; \}/.test(page));
+});
+t('a district is applied only by an explicit click (locuse); never from the text alone', () => {
+  assert.ok(/f === 'locuse'\) \{ FS\.districts = \[t\.dataset\.d\]; FS\.loc = 'confirmed'/.test(page)); assert.ok(!/FS\.districts = .*resolveArea/.test(page)); assert.ok(!/districts: .*resolveArea/.test(page));
+  assert.ok(/f === 'locskip'\) \{ FS\.districts = \[\]; FS\.loc = 'skipped'/.test(page));
+});
+t('location text is read only for display and matching, and never reaches analytics, WhatsApp or the URL', () => {
+  const uses = page.split('\n').filter((l) => /whereTextNow|whereText/.test(l));
+  uses.forEach((l) => assert.ok(!/track\(|waLink|waMessage|location\.href|location\.hash|history\./.test(l), l));
+  const after = page.slice(page.indexOf('function locPanel')); assert.ok(!/KPT\.track\([^)]*(txt|whereText|FS\.text)/.test(after));
+  assert.ok(/handoff\.from === 'buy' && handoff\.where !== 'flexible'/.test(page));
+  const a = F.analytics(F.shortlist(ixr, { budget: 3000000, openTo: 'both', size: SZ, districts: ['20'], text: '', answers: { where: 'work' }, loc: { districts: ['20'] } }), '3.0-3.2m');
+  assert.deepStrictEqual(Object.keys(a).sort(), F.ANALYTICS_KEYS.slice().sort());
+});
+t('Buyer analytics and WhatsApp still exclude the text; only the session handoff carries it', () => {
+  const B = require(path.join(root, 'assets/js/kpt-buyer.js')); const A = { budget: 3000000, purpose: 'own-stay', size: 'not-sure', where: 'work', whereText: 'Ang Mo Kio', priorities: [], openTo: 'both' };
+  assert.strictEqual(B.buildHandoff(A).whereText, 'Ang Mo Kio'); assert.ok(!/Ang Mo Kio/.test(B.waMessage(A)));
+  const buyPage = fs.readFileSync(path.join(root, 'buy/index.html'), 'utf8'); assert.ok(/writeHandoff\(window\.sessionStorage/.test(buyPage));
+});
+t('HDB and budget-only handoffs have no location step', () => {
+  assert.ok(/locIntent = \(\) => \['areas', 'family', 'work', 'school'\]\.indexOf\(answersNow\(\)\.where\) > -1/.test(page));
+  assert.ok(/: \{ where: 'flexible', size: 'not-sure', priorities: \[\] \}/.test(page));
+});
+t('freehold tag wording corrected to 900+ year lease', () => { assert.ok(/Freehold or 900\+ year lease \(you chose tenure\)/.test(page)); assert.ok(!/999-year only/.test(page)); });
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed'); process.exit(fail ? 1 : 0);

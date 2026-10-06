@@ -28,7 +28,7 @@
 <script src="../../assets/js/kpt-market.js"></script>
 <script src="../../assets/js/kpt-engine.js"></script>
 <script src="../../assets/js/kpt-result.js"></script>
-<script src="../../assets/js/kpt-find.js?v=2026-10-06.9"></script>
+<script src="../../assets/js/kpt-find.js?v=2026-10-06.9.1"></script>
 <script src="../../data/market/config.js"></script>
 <script>
 (function () {
@@ -144,12 +144,29 @@
   let findIx, findStep = null, FS = null;
   const loadFind = () => (findIx !== undefined ? Promise.resolve(findIx) : fetch(FIND_URL).then((r) => (r.ok ? r.json() : null)).then((d) => (findIx = FI.prepare(d))).catch(() => (findIx = null)));
   const answersNow = () => (handoff && handoff.from === 'buy' ? { where: handoff.where, size: handoff.size, priorities: handoff.priorities || [] } : { where: 'flexible', size: 'not-sure', priorities: [] });
+  const whereTextNow = () => (handoff && handoff.from === 'buy' && handoff.where !== 'flexible' ? String(handoff.whereText || '').replace(/\s+/g, ' ').trim().slice(0, 60) : '');
+  const locIntent = () => ['areas', 'family', 'work', 'school'].indexOf(answersNow().where) > -1;
   const openToNow = () => (handoff && handoff.from === 'buy' && ['new', 'resale', 'both'].indexOf(handoff.openTo) > -1 ? handoff.openTo : 'both');
   function initFind(step) {
     const root = $('findRoot'); if (!root || !FI || !budget) return;
-    findStep = step; FS = { explicit: null, widen: false, districts: [], text: '', freehold: answersNow().priorities.indexOf('freehold') > -1, sizeOpen: false, areaOpen: false, seen: {} };
+    findStep = step; FS = { explicit: null, widen: false, loc: locIntent() ? 'pending' : 'none', locPick: false, districts: [], text: '', freehold: answersNow().priorities.indexOf('freehold') > -1, sizeOpen: false, areaOpen: false, seen: {} };
     root.onclick = findClick; root.onkeydown = (e) => { if (e.key === 'Enter' && e.target && e.target.matches && e.target.matches('input')) { e.preventDefault(); findClick({ target: e.target.closest('.kpf-box').querySelector('[data-f=apply]') }); } };
     loadFind().then(() => renderFind());
+  }
+  const WHERE_SAY = { areas: 'You chose a specific area', work: 'You said you want to be near work', family: 'You said you want to be near family', school: 'You said you want to be near a particular school' };
+  const WHERE_WHAT = { work: 'your workplace', family: 'where your family lives', school: 'schools' };
+  /** Asks the buyer to confirm the district before any location is applied. Never applies one silently, never claims distance. */
+  function locPanel() {
+    const w = answersNow().where, txt = whereTextNow(), r = txt ? FI.resolveArea(txt) : { kind: 'none', districts: [], places: [] };
+    const say = esc(WHERE_SAY[w]) + (txt ? ', and mentioned <b>' + esc(txt) + '</b>' : '') + '.';
+    const dBtn = (d) => `<button class="kpf-btn" type="button" data-f="locuse" data-d="${esc(d)}">Use ${esc(FI.districtShort(d))}</button>`;
+    const chips = `<div class="kpf-chips" role="group" aria-label="Choose a district">${findIx.districts.map((d) => `<button class="kpf-chip" type="button" data-f="locuse" data-d="${esc(d)}">${esc(FI.districtShort(d))}</button>`).join('')}</div>`;
+    const noDist = WHERE_WHAT[w] ? `We can’t measure distance to ${WHERE_WHAT[w]}. We can narrow the list to the part of Singapore you name.` : 'We can narrow the list to the district you choose.';
+    let body;
+    if (r.kind === 'single') body = `<p><b>${esc(r.places.join(' and '))}</b> is in <b>District ${Number(r.districts[0])}</b> (generally ${esc(FI.DISTRICT_AREAS[r.districts[0]])}).</p><div class="kpf-acts">${dBtn(r.districts[0])}<button class="kpf-link" type="button" data-f="locpick">Choose a different area</button></div>`;
+    else if (r.kind === 'several') body = `<p><b>${esc(r.places.join(' and '))}</b> can sit in more than one district. Which would you like to use?</p><div class="kpf-acts">${r.districts.map(dBtn).join('')}</div><p><button class="kpf-link" type="button" data-f="locpick">Choose a different area</button></p>`;
+    else body = `<p>${txt ? 'We couldn’t match that to a district.' : 'You didn’t name a place.'} Please choose the district you want to use.</p>`;
+    return `<div class="kpf-loc" role="group" aria-label="Confirm the area"><p><b>${say}</b></p><p>${esc(noDist)}</p>${body}${r.kind === 'none' || FS.locPick ? chips : ''}<p class="kpf-note">A district is a general area. It contains places not named here.</p><p class="kpf-skip"><button class="kpf-link" type="button" data-f="locskip">Show all of Singapore instead</button></p></div>`;
   }
   function renderFind() {
     const root = $('findRoot'); if (!root) return;
@@ -165,17 +182,18 @@
       <div class="kpf-chips" role="group" aria-label="Districts">${findIx.districts.map((d) => `<button class="kpf-chip" type="button" data-f="dist" data-d="${esc(d)}" aria-pressed="${FS.districts.indexOf(d) > -1}">${esc(FI.districtShort(d))}</button>`).join('')}</div>
       <p class="kpf-note">Area names are general. A district contains places not named here.</p></div>`;
     const wdChip = FS.widen ? `<p class="kpf-line"><span class="kpf-tag">Budget range widened to ±15%</span> <button class="kpf-link" type="button" data-f="nowiden">Remove</button></p>` : '';
-    const frChip = FS.freehold ? `<p class="kpf-line"><span class="kpf-tag">Freehold or 999-year only (you chose tenure)</span> <button class="kpf-link" type="button" data-f="nofree">Remove</button></p>` : '';
+    const frChip = FS.freehold ? `<p class="kpf-line"><span class="kpf-tag">Freehold or 900+ year lease (you chose tenure)</span> <button class="kpf-link" type="button" data-f="nofree">Remove</button></p>` : '';
+    if (FS.loc === 'pending') { root.innerHTML = `<section class="kpf" aria-labelledby="kpfH">${head}${lede}${locPanel()}</section>`; return; }
     if (!sz) {
       root.innerHTML = `<section class="kpf" aria-labelledby="kpfH">${head}${lede}<p class="kpf-line">Tell us the size you have in mind, in square feet, to see developments. We don't convert bedrooms into square feet.</p>${sizeBox(null)}</section>`; return;
     }
     const typical = FI.inferSize(findStep, openTo);
-    const res = FI.shortlist(findIx, { budget, openTo, size: sz, districts: FS.districts, text: FS.text, freehold: FS.freehold, pct: FS.widen ? FI.T.widenBudgetPct : FI.T.budgetPct, answers: answersNow(), typical });
+    const res = FI.shortlist(findIx, { budget, openTo, size: sz, districts: FS.districts, text: FS.text, freehold: FS.freehold, loc: { districts: FS.districts, skipped: FS.loc !== 'none' && !FS.districts.length }, pct: FS.widen ? FI.T.widenBudgetPct : FI.T.budgetPct, answers: answersNow(), typical });
     const cardHtml = (c) => `<article class="kpf-card"><h3>${esc(c.name)}${res.groups.length > 1 ? ` <span class="kpf-sale">${esc(c.saleLabel)}</span>` : ''}</h3><p class="kpf-meta">${esc(c.meta)}</p>
       <p class="kpf-why"><b>Why it appeared:</b> ${esc(c.why)}</p><p><b>Recent evidence:</b> ${esc(c.evidence)}</p><p class="kpf-price">${esc(c.prices)}</p>${c.indicative ? `<p class="kpf-quiet">${esc(c.indicative)}</p>` : ''}
       <p class="kpf-quiet"><b>Couldn't evaluate:</b> ${esc(c.notEvaluated)}</p><a class="kpf-go" data-f="go" data-id="${esc(c.id)}" href="${esc(c.link)}">${esc(c.linkText)}</a></article>`;
-    const list = res.groups.map((g) => (res.groups.length > 1 ? `<h3 class="kpf-gh">${esc(g.label)}</h3>` : '') + g.cards.map(cardHtml).join('')).join('');
-    const un = res.unsupported.length ? `<div class="kpf-un"><p class="kpf-unh">What we didn't use to build this list</p><ul>${res.unsupported.map((u) => `<li><b>${esc(u.title)}:</b> ${esc(u.text)}</li>`).join('')}</ul>${answersNow().where === 'school' || answersNow().where === 'family' || answersNow().where === 'work' || answersNow().where === 'areas' ? '<p class="kpf-note">If you know the area, choose a district and we’ll narrow the list.</p>' : ''}</div>` : '';
+    const list = res.groups.map((g) => (res.groups.length > 1 || g.sale === 'new' ? `<h3 class="kpf-gh">${esc(g.label)}</h3>` : '') + (g.note ? `<p class="kpf-quiet kpf-gnote">${esc(g.note)}</p>` : '') + g.cards.map(cardHtml).join('')).join('');
+    const un = res.unsupported.length ? `<div class="kpf-un"><p class="kpf-unh">What we didn't use to build this list</p><ul>${res.unsupported.map((u) => `<li><b>${esc(u.title)}:</b> ${esc(u.text)}</li>`).join('')}</ul></div>` : '';
     const chg = res.changes.length ? `<ul class="kpf-chg">${res.changes.map((c) => `<li><button class="kpf-link" type="button" data-f="chg" data-id="${esc(c.id)}">${esc(c.label)}</button> <span>${esc(c.text)}</span></li>`).join('')}</ul>` : '';
     let body = '';
     if (res.state === 'none') body = `<div class="kpf-msg"><p><b>We couldn't list any development for this budget and size.</b></p><p>${esc(res.noneText)}</p>${res.reference ? `<p>${esc(res.reference.text)}</p>` : ''}${chg}<p class="kpf-note">You can change the size or the budget, or <a href="#" data-f="ken">ask Ken what's realistic</a>.</p></div>`;
@@ -205,6 +223,9 @@
     else if (f === 'text') { FS.text = ($('kpfText').value || '').replace(/\s+/g, ' ').trim().slice(0, 40); FS.areaOpen = true; }
     else if (f === 'dist') { const d = t.dataset.d, i = FS.districts.indexOf(d); if (i > -1) FS.districts.splice(i, 1); else FS.districts.push(d); FS.areaOpen = true; }
     else if (f === 'adddist') { if (FS.districts.indexOf(t.dataset.d) < 0) FS.districts.push(t.dataset.d); FS.text = ''; FS.areaOpen = true; }
+    else if (f === 'locuse') { FS.districts = [t.dataset.d]; FS.loc = 'confirmed'; FS.locPick = false; }
+    else if (f === 'locpick') FS.locPick = true;
+    else if (f === 'locskip') { FS.districts = []; FS.loc = 'skipped'; }
     else if (f === 'nofree') FS.freehold = false;
     else if (f === 'nowiden') FS.widen = false;
     else if (f === 'chg') {

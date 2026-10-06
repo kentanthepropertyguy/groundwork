@@ -305,7 +305,7 @@
   function buildHandoff(answers) {
     const a = normalise(answers);
     return { v: 1, from: 'buy', state: 'ok', budget: { low: a.budget, high: a.budget, single: true },
-      purpose: a.purpose || null, openTo: a.openTo, size: a.size, where: a.where, priorities: a.priorities.slice() };
+      purpose: a.purpose || null, openTo: a.openTo, size: a.size, where: a.where, whereText: a.whereText, priorities: a.priorities.slice() };
   }
   const ANALYTICS_KEYS = ['budget_band', 'purpose', 'open_to', 'size', 'where_type', 'priority_1', 'priority_2', 'result_state', 'lens', 'routes_shown', 'ken_take_shown'];
   /** Anonymous, bucketed, categorical. Never the exact budget, never the free text. */

@@ -182,10 +182,12 @@ t('WhatsApp message is minimal: purpose and approximate budget only', () => {
   const m = B.waMessage(ANS); ['AMK', 'Thomson', '3BR', 'space', 'location', 'resale', '2,345,000', '2345000'].forEach((x) => assert.ok(m.indexOf(x) < 0, x));
   assert.strictEqual(B.waMessage({ budget: 2000000 }), "Hi Ken, I'm looking at a purchase around $2m and would like your view.");
 });
-t('handoff to What Can I Buy is valid for the existing reader and carries no free text', () => {
+t('handoff to What Can I Buy is valid for the existing reader and carries the location text for FIND only (session storage, never sent anywhere)', () => {
   const h = B.buildHandoff(ANS);
   assert.ok(MK.validHandoff(h)); assert.strictEqual(R.budgetFromHandoff(h.budget), B.normalise(ANS).budget); assert.strictEqual(h.from, 'buy');
-  assert.ok(!JSON.stringify(h).includes('AMK'));
+  assert.strictEqual(h.whereText, 'AMK / Thomson'); assert.strictEqual(h.where, 'areas');
+  assert.strictEqual(B.buildHandoff(Object.assign({}, ANS, { where: 'flexible' })).whereText, '');     // text is dropped when location is flexible
+  assert.ok(B.buildHandoff(Object.assign({}, ANS, { whereText: 'x'.repeat(200) })).whereText.length <= 60);
 });
 t('analytics: allow-listed categorical keys only, bucketed budget, no free text', () => {
   const m = B.analyse(ANS, fake([OUT_LARGER], ALL)), p = B.analytics(m);

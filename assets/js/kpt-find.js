@@ -11,7 +11,7 @@
   else root.KPT_FIND = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
-  const VERSION = 'find-v1';
+  const VERSION = 'find-v1.1';
   // Thresholds (all in one place so tests and the methodology read the same numbers).
   const T = { budgetPct: 0.10, widenBudgetPct: 0.15, minSales: 3, goodSales: 5, minActiveMonths: 2, recencyMonths: 6, perStreet: 2, maxCards: 5, bothResale: 3, bothNew: 2, sizePad: 100,
     inferMinDeals: 15, referenceStep: 50000, referenceMaxUp: 0.5 };
@@ -78,21 +78,55 @@
 
   /* ---------------------------------------------------------------- area */
   function words(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter(Boolean); }
-  /** District suggestions for typed text (whole-word match against the reviewed names). Shown as chips to confirm; never applied silently. */
-  function matchDistricts(text) {
-    const q = words(text).filter((w) => w.length >= 3); if (!q.length) return [];
-    return Object.keys(DISTRICT_AREAS).filter((d) => { const names = DISTRICT_AREAS[d].split(',').map((x) => words(x)); return names.some((nw) => q.some((w) => nw.indexOf(w) > -1)); });
+  /* Reviewed alias table (approved by Ken, 6 Oct 2026). Postal DISTRICTS only, never distance and never planning areas.
+   * One district = offered as a single suggestion. Two or more = the buyer must choose. A place that is not listed (for example Kallang) is unresolved: the buyer is asked to choose a district.
+   * Whole contiguous phrases only; the longest phrase wins ("Serangoon Gardens" beats "Serangoon"). No fuzzy matching and no single-word fragments. */
+  const AREA_ALIASES = [
+    ['01', ['Raffles Place', 'Marina Bay', 'Marina Centre', 'Marina South', 'Marina', 'Shenton Way']], ['02', ['Tanjong Pagar', 'Chinatown']],
+    ['03', ['Queenstown', 'Tiong Bahru', 'Alexandra', 'Redhill', 'Commonwealth', 'Dawson']], ['04', ['Telok Blangah', 'Harbourfront', 'Mount Faber', 'Sentosa', 'Sentosa Cove']],
+    ['05', ['Pasir Panjang', 'Buona Vista', 'one-north', 'one north', 'Dover', 'Ghim Moh', 'Kent Ridge', 'West Coast']], ['06', ['City Hall', 'High Street', 'Clarke Quay']],
+    ['07', ['Bugis', 'Golden Mile', 'Beach Road', 'Bras Basah']], ['08', ['Little India', 'Farrer Park', 'Lavender']], ['09', ['Orchard', 'Orchard Road', 'River Valley', 'Somerset', 'Cairnhill']],
+    ['10', ['Holland', 'Holland Village', 'Holland Road', 'Tanglin']], ['11', ['Novena', 'Newton']], ['12', ['Toa Payoh', 'Balestier', 'Boon Keng', 'Bendemeer', 'Whampoa']],
+    ['13', ['Macpherson', 'Potong Pasir', 'Woodleigh']], ['14', ['Geylang', 'Eunos', 'Paya Lebar', 'Ubi', 'Aljunied', 'Sims Avenue']],
+    ['15', ['Katong', 'Joo Chiat', 'Marine Parade', 'Tanjong Rhu', 'Mountbatten', 'Amber Road']], ['16', ['Bedok', 'Upper East Coast', 'Siglap', 'Kembangan', 'Bayshore']],
+    ['17', ['Changi', 'Loyang', 'Upper Changi', 'Flora']], ['18', ['Tampines', 'Pasir Ris']],
+    ['19', ['Hougang', 'Punggol', 'Serangoon Gardens', 'Sengkang', 'Kovan', 'Buangkok', 'Lorong Chuan', 'Tai Seng']], ['20', ['Bishan', 'Ang Mo Kio', 'AMK', 'Marymount', 'Braddell']],
+    ['21', ['Upper Bukit Timah', 'Clementi Park', 'Beauty World']], ['22', ['Jurong', 'Jurong East', 'Jurong West', 'Boon Lay', 'Lakeside', 'Chinese Garden']],
+    ['23', ['Bukit Batok', 'Bukit Panjang', 'Choa Chu Kang', 'CCK', 'Bukit Gombak', 'Hillview', 'Dairy Farm']], ['24', ['Lim Chu Kang', 'Tengah']],
+    ['25', ['Woodlands', 'Kranji', 'Admiralty', 'Marsiling']], ['26', ['Upper Thomson', 'Springleaf', 'Lentor']], ['27', ['Yishun', 'Sembawang', 'Khatib', 'Canberra']], ['28', ['Seletar']],
+  ];
+  // Places that sit in more than one district: the buyer chooses.
+  const AREA_CHOICES = [['Thomson', ['11', '26']], ['Clementi', ['05', '21']], ['Bukit Timah', ['10', '21']], ['East Coast', ['15', '16']], ['Bukit Merah', ['03', '04']], ['CBD', ['01', '02']],
+    ['Serangoon', ['12', '19']], ['Yio Chu Kang', ['26', '28']]];
+  const ALIAS_LIST = [].concat.apply([], AREA_ALIASES.map((r) => r[1].map((n) => ({ name: n, key: words(n).join(' '), d: [r[0]] })))).concat(AREA_CHOICES.map((r) => ({ name: r[0], key: words(r[0]).join(' '), d: r[1].slice() })));
+  /** Resolve free text to districts. Returns { kind: 'single'|'several'|'none', districts: ['20'], places: ['Ang Mo Kio'] }. Never throws. */
+  function resolveArea(text) {
+    const norm = ' ' + words(text).join(' ') + ' ', hits = [];
+    ALIAS_LIST.forEach((a) => { let from = 0, at; while ((at = norm.indexOf(' ' + a.key + ' ', from)) > -1) { hits.push({ a, start: at, end: at + a.key.length + 2 }); from = at + 1; } });
+    const keep = hits.filter((h) => !hits.some((o) => o !== h && o.start <= h.start && o.end >= h.end && (o.end - o.start) > (h.end - h.start)));
+    const places = [], ds = [];
+    keep.forEach((h) => { if (places.indexOf(h.a.name) < 0) places.push(h.a.name); h.a.d.forEach((d) => { if (ds.indexOf(d) < 0) ds.push(d); }); });
+    ds.sort();
+    return { kind: !ds.length ? 'none' : ds.length === 1 ? 'single' : 'several', districts: ds, places };
   }
+  /** District suggestions for typed text. Shown as chips to confirm; never applied silently. */
+  function matchDistricts(text) { return resolveArea(text).districts; }
   const textMatch = (p, text) => { const q = String(text || '').toLowerCase().replace(/\s+/g, ' ').trim(); return !q || q.length < 3 || (p.name + ' ' + p.street).toLowerCase().indexOf(q) > -1; };
 
   /* ---------------------------------------------------------------- unsupported answers */
   const BASE_NOT_EVAL = ['bedrooms and layout', 'floor and facing', 'whether any unit is for sale', 'asking prices'];
-  /** What the buyer chose that sales data cannot evaluate. Nothing here is ever used to filter. */
-  function unsupported(a) {
-    a = a || {}; const out = [], pr = a.priorities || [];
-    if (a.where === 'school') out.push({ id: 'school', title: 'Near a particular school', text: 'Our sales data can’t show distance to schools, so this list doesn’t consider it.', card: 'how close this is to your school' });
-    if (a.where === 'family') out.push({ id: 'family', title: 'Near family', text: 'Our sales data can’t show distance to where your family lives, so this list doesn’t consider it.', card: 'how close this is to your family' });
-    if (a.where === 'work') out.push({ id: 'work', title: 'Near work', text: 'Our sales data can’t show distance to your workplace, so this list doesn’t consider it.', card: 'how close this is to your workplace' });
+  const BASE_NOT_EVAL_NEW = ['bedrooms and layout', 'floor and facing', 'whether the developer still has units to sell', 'asking prices'];
+  /** What the buyer chose that sales data cannot evaluate. Nothing here is ever used to filter, except the district the buyer confirmed.
+   *  ctx (optional): { districts: ['20'], skipped: bool }  the area the buyer confirmed, or that they chose not to narrow by area. */
+  function unsupported(a, ctx) {
+    a = a || {}; ctx = ctx || {}; const out = [], pr = a.priorities || [], ds = ctx.districts || [];
+    const dtxt = ds.length ? (ds.length === 1 ? 'District ' + Number(ds[0]) : 'Districts ' + ds.map(Number).join(' and ')) : '';
+    const dist = (what, card) => ds.length ? 'We narrowed the list to ' + dtxt + ' (generally ' + ds.map((d) => DISTRICT_AREAS[d]).join('; ') + ') because of the area you chose. Our sales data can’t show distance to ' + what + ', so a district is as close as this list gets.'
+      : ctx.skipped ? 'Our sales data can’t show distance to ' + what + ', and the list isn’t narrowed by area, so it covers all of Singapore.' : 'Our sales data can’t show distance to ' + what + ', so this list doesn’t consider it.';
+    if (a.where === 'areas') out.push({ id: 'areas', title: 'Specific area', text: ds.length ? 'We narrowed the list to ' + dtxt + ' (generally ' + ds.map((d) => DISTRICT_AREAS[d]).join('; ') + '). A district contains places not named here, so this doesn’t reach street or neighbourhood level.' : ctx.skipped ? 'The list isn’t narrowed by area, so it covers all of Singapore.' : 'Choose an area to narrow the list.', card: 'your exact area within the district' });
+    if (a.where === 'school') out.push({ id: 'school', title: 'Near a particular school', text: dist('schools'), card: 'how close this is to your school' });
+    if (a.where === 'family') out.push({ id: 'family', title: 'Near family', text: dist('where your family lives'), card: 'how close this is to your family' });
+    if (a.where === 'work') out.push({ id: 'work', title: 'Near work', text: dist('your workplace'), card: 'how close this is to your workplace' });
     if (pr.indexOf('schools') > -1) out.push({ id: 'schools', title: 'Schools', text: 'Not measured by our sales data.', card: 'schools' });
     if (pr.indexOf('location') > -1) out.push({ id: 'location', title: 'Better location', text: 'We can’t define a better location from sales data.', card: 'location quality' });
     if (pr.indexOf('investment') > -1) out.push({ id: 'investment', title: 'Investment potential', text: 'We hold no rental or yield data, so this list describes sales and prices only.', card: 'investment potential' });
@@ -105,7 +139,7 @@
   }
   const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
   const joinAnd = (a) => (a.length <= 1 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]);
-  const notEvaluated = (un) => cap(joinAnd((un || []).map((u) => u.card).filter(Boolean).concat(BASE_NOT_EVAL))) + '.';
+  const notEvaluated = (un, sale) => cap(joinAnd((un || []).map((u) => u.card).filter(Boolean).concat(sale === 'new' ? BASE_NOT_EVAL_NEW : BASE_NOT_EVAL))) + '.';
 
   /* ---------------------------------------------------------------- matching */
   /** One project, one sale type. Returns null unless it meets every evidence rule. */
@@ -121,6 +155,8 @@
     return { id: p.id, sale, name: p.name, street: p.street, district: p.d, seg: p.seg, tenure: p.tl, mixed: !!p.m, tenGroup: p.tg, n, strength: n >= T.goodSales ? 'good' : 'limited', last, q1, q3,
       fit: B >= q1 && B <= q3 ? 'inside' : B > q3 ? 'above' : 'below', bandLo: Math.min.apply(null, bins), bandHi: Math.max.apply(null, bins) + ix.bin, multi: fit.length > 1 };
   }
+  const NEW_LABEL = 'New launch projects with recent developer sales';
+  const NEW_NOTE = 'Based on developer sales recorded by URA in the last 12 months. This data cannot tell us whether units are still available from the developer.';
   const FIT = { inside: 0, above: 1, below: 2 };
   const compare = (x, y) => (x.strength === y.strength ? 0 : x.strength === 'good' ? -1 : 1) || FIT[x.fit] - FIT[y.fit] || y.n - x.n || y.last - x.last || (x.name < y.name ? -1 : x.name > y.name ? 1 : 0);
 
@@ -151,14 +187,14 @@
   }
   function card(c, o, un, ix) {
     return {
-      id: c.id, name: displayName(c.name), sale: c.sale, saleLabel: c.sale === 'new' ? 'New launch' : 'Resale',
+      id: c.id, name: displayName(c.name), sale: c.sale, saleLabel: c.sale === 'new' ? 'Developer sales' : 'Resale',
       meta: [displayName(c.street), 'District ' + Number(c.district), c.seg, c.tenure + (c.mixed ? ' (mixed tenure in the data)' : '')].join(' · '),
       why: why(c, o),
-      evidence: c.n + ' sales in the last 12 months · latest ' + ymLabel(c.last) + ' · ' + (c.strength === 'good' ? 'Good' : 'Limited') + ' recent evidence',
+      evidence: c.n + (c.sale === 'new' ? ' developer sales' : ' sales') + ' in the last 12 months · latest ' + ymLabel(c.last) + ' · ' + (c.strength === 'good' ? 'Good' : 'Limited') + ' recent evidence',
       strength: c.strength,
       prices: 'Typical prices for these: ' + p2(c.q1) + '–' + p2(c.q3) + (c.multi ? ' (across ' + sizeText(c.bandLo, c.bandHi) + ')' : ''),
-      indicative: c.sale === 'new' ? 'New-launch prices are indicative: they depend on the unit and the launch phase.' : null,
-      notEvaluated: notEvaluated(un),
+      indicative: c.sale === 'new' ? 'These are developer sales recorded by URA. They don’t show whether the developer still has units to sell, and new-launch prices depend on the unit and the launch phase.' : null,
+      notEvaluated: notEvaluated(un, c.sale),
       link: '../../research/index.html#/p/' + c.id + '/' + c.sale, linkText: 'Research ' + c.name.toLowerCase().replace(/\b\w/g, (m) => m.toUpperCase()) + ' →',
     };
   }
@@ -167,7 +203,7 @@
   /** input: { budget, openTo:'new'|'resale'|'both', size:{lo,hi,source,line}, districts:[], text, freehold:bool, answers:{where,size,priorities}, typical:{lo,hi}|null }
    *  Returns the whole view model. Never throws on a usable index. */
   function shortlist(ix, input) {
-    const un = unsupported(input.answers), base = { budget: input.budget, pct: input.pct === T.widenBudgetPct ? T.widenBudgetPct : T.budgetPct, lo: input.size.lo, hi: input.size.hi, districts: input.districts || [], freehold: !!input.freehold, text: input.text || '', openTo: input.openTo };
+    const un = unsupported(input.answers, input.loc || { districts: input.districts || [] }), base = { budget: input.budget, pct: input.pct === T.widenBudgetPct ? T.widenBudgetPct : T.budgetPct, lo: input.size.lo, hi: input.size.hi, districts: input.districts || [], freehold: !!input.freehold, text: input.text || '', openTo: input.openTo };
     const types = saleTypes(input.openTo), lists = {}; types.forEach((s) => { lists[s] = eligible(ix, s, base); });
     const eligibleN = {}; types.forEach((s) => { eligibleN[s] = lists[s].length; });
     const total = types.reduce((a, s) => a + eligibleN[s], 0);
@@ -180,7 +216,7 @@
       if (n.length < T.bothNew) r = takeCapped(lists.resale, T.maxCards - n.length);
       chosen = { resale: r, new: n };
     }
-    const groups = types.map((s) => ({ sale: s, label: s === 'new' ? 'New launches' : 'Resale', note: s === 'new' ? 'New-launch prices are indicative.' : null, eligible: eligibleN[s], cards: (chosen[s] || []).map((c) => card(c, base, un, ix)) })).filter((g) => g.cards.length);
+    const groups = types.map((s) => ({ sale: s, label: s === 'new' ? NEW_LABEL : 'Resale', note: s === 'new' ? NEW_NOTE : null, eligible: eligibleN[s], cards: (chosen[s] || []).map((c) => card(c, base, un, ix)) })).filter((g) => g.cards.length);
     const shown = groups.reduce((a, g) => a + g.cards.length, 0);
     const state = total === 0 ? 'none' : total < T.minSales ? 'few' : 'list';
     const out = { version: VERSION, state, total, shown, groups, eligible: eligibleN, size: input.size, unsupported: un, filters: { districts: base.districts, freehold: base.freehold, text: base.text, pct: base.pct }, dataTo: ix.latestMonth, window: ix.window,
@@ -211,6 +247,7 @@
 
   /* ---------------------------------------------------------------- methodology (plain words; the only place the technical meaning lives) */
   const METHOD = [
+    'New launch projects: choosing “New launch” lists projects with developer sales (URA “New Sale”) in the last 12 months. Recent developer sales are not proof that the developer still has units to sell. URA’s data has no unit counts or inventory, so a project can appear here after most of its units have sold.',
     'Where the sales come from: private condominium and apartment sales recorded by URA, for new launches and resale. Sub-sales, Executive Condominiums and landed homes are not included.',
     'The window: the last 12 months of recorded sales. Older sales are never used to put a development on the list.',
     '“Typical prices” means the middle half of the sales: the range between the price a quarter of the sales were below and the price a quarter were above. Half of those sales fell inside it. It is not a price anyone should expect to pay for a particular unit.',
@@ -218,7 +255,8 @@
     '“Good recent evidence” means 5 or more such sales. “Limited recent evidence” means 3 or 4.',
     'The order: evidence first (Good before Limited), then where your budget sits within the typical prices, then the number of such sales, then the most recent sale, then the development’s name A to Z. There is no score and nothing is weighted.',
     'If you gave no size in square feet, we used the sizes that typically sold at your budget. We never turn bedrooms into square feet, because our data doesn’t record bedrooms.',
-    'Area filters use postal districts. The area names are general: a district contains places not named. We don’t match schools, workplaces, family locations, exact distances or neighbourhoods.',
+    'If freehold or a longer tenure was a priority, only freehold and leases of 900 years or more are shown, and you can remove that filter.',
+    'Area filters use postal districts. If you told us where you want to be, we suggest a district and ask you to confirm it before it is used; places that sit in more than one district, or that we don’t recognise, are left for you to choose. The area names are general: a district contains places not named. We don’t match schools, workplaces, family locations, exact distances or neighbourhoods.',
     'This is a shortlist of developments worth investigating. It is not a recommendation or a valuation, and it doesn’t show what is for sale now or its asking price.',
   ];
 
@@ -229,6 +267,6 @@
     return { budget_band: budgetBand, result_bucket: bucket(res.shown), size_source: res.size.source, area_filter: !!(res.filters.districts.length || res.filters.text), sale_groups: res.groups.map((g) => g.sale).join('+') || 'none' };
   }
 
-  return { VERSION, T, DISTRICT_AREAS, districtLabel, districtShort, BASE_NOT_EVAL, METHOD, ANALYTICS_KEYS,
+  return { VERSION, T, DISTRICT_AREAS, AREA_ALIASES, AREA_CHOICES, NEW_LABEL, NEW_NOTE, resolveArea, districtLabel, districtShort, BASE_NOT_EVAL, METHOD, ANALYTICS_KEYS,
     displayName, prepare, inferSize, sizeWindow, matchDistricts, unsupported, notEvaluated, matchProject, eligible, shortlist, count, compare, why, card, analytics, bucket, m2, p2, num, sizeText, ymLabel, monthsBetween };
 });
