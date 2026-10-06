@@ -172,9 +172,9 @@ t('analytics are bucketed: only the five allowed keys, no names, text or exact f
   const a = F.analytics(r, '1.8-2.0m'); assert.deepStrictEqual(Object.keys(a).sort(), F.ANALYTICS_KEYS.slice().sort());
   const s = JSON.stringify(a); assert.ok(!/secret|1834567|1,834/.test(s)); assert.ok(['0', '1-2', '3-4', '5+'].indexOf(a.result_bucket) > -1);
 });
-t('page tracks only find_shown and find_research_click (project_id only); typed text never reaches analytics or WhatsApp', () => {
+t('page tracks only find_shown, find_research_click and (V10) find_ask_click (project slugs only); typed text never reaches analytics or WhatsApp', () => {
   const html = fs.readFileSync(path.join(root, 'tools/what-can-i-buy/index.html'), 'utf8');
-  const tr = html.match(/KPT\.track\('find_[a-z_]+'[^)]*\)/g); assert.deepStrictEqual(tr.sort(), ["KPT.track('find_research_click', { project_id: t.dataset.id })", "KPT.track('find_shown', pl)"].sort());
+  const tr = html.match(/KPT\.track\('find_[a-z_]+'[^)]*\)/g); assert.deepStrictEqual(tr.sort(), ["KPT.track('find_ask_click', ev)", "KPT.track('find_ask_click', ev)", "KPT.track('find_research_click', { project_id: t.dataset.id })", "KPT.track('find_shown', pl)"].sort());
   assert.ok(!/waLink\([^)]*FS\./.test(html));
 });
 t('displayName parity with Research across every project name', () => {

@@ -1,0 +1,19 @@
+{
+ "v": 2,
+ "kind": "kpt-huttons-public-inventory",
+ "tool": "phase2-2",
+ "source": "Units currently shown in Huttons inventory",
+ "note": "SIMULATED fixture for review and tests only. Not real Huttons data. Built to resemble the earlier type-level results; replace with the real re-export.",
+ "checkedAt": "2026-10-06T09:33:00.000Z",
+ "projects": [
+  {
+   "slug": "amberwood-at-holland", "name": "Amberwood at Holland", "checkedAt": "2026-10-06T09:33:00.000Z", "status": "ok",
+   "byBedrooms": [ { "bedrooms": 3, "label": "3 bedrooms", "ceiling": 3100000, "bands": [[800, 2500000], [900, 2600000]] } ]
+  },
+  {
+   "slug": "lucerne-grand", "name": "Lucerne Grand", "checkedAt": "2026-10-06T09:33:00.000Z", "status": "ok",
+   "district": "22", "tenureGroup": 1, "tenure": "99 yrs from 2025", "street": "LAKESIDE DRIVE",
+   "byBedrooms": [ { "bedrooms": 3, "label": "3 bedrooms", "ceiling": 2550000, "bands": [[800, 2000000], [900, 2250000], [1000, 2500000]] } ]
+  }
+ ]
+}

@@ -213,3 +213,24 @@
 .kpf-acts{ display:flex; flex-wrap:wrap; align-items:center; gap:10px 16px; margin:10px 0; }
 .kpf-skip{ margin-top:12px; }
 .kpf-gnote{ margin:4px 0 0; font-size:13.5px; line-height:1.5; }
+
+/* ---- V10: Huttons inventory block on New launch cards, tick boxes, bottom bar ---- */
+.kpf-basis{ display:inline-block; font:600 11.5px var(--sans); color:var(--navy-soft); border:1px solid var(--line); border-radius:999px; padding:2px 9px; margin:8px 0 2px; }
+.kpf-hut, .kpf-src{ margin:12px 0 0; padding-top:10px; border-top:1px solid var(--line); }
+.kpf-hl{ display:block; font:600 12px var(--sans); letter-spacing:.02em; color:var(--muted); margin-bottom:2px; }
+.kpf-card .kpf-hsize{ margin:4px 0 0; }
+.kpf-card .kpf-from{ font:400 26px/1.2 var(--serif); color:var(--ink); margin:8px 0 2px; }
+.kpf-card .kpf-hbud{ margin:2px 0 0; }
+.kpf-card .kpf-hnote, .kpf-card .kpf-hq{ margin-top:4px; }
+.kpf-card .kpf-hq{ color:var(--muted); font-size:13.5px; }
+.kpf-src p{ margin:2px 0 0; }
+.kpf-acts2{ display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-top:14px; }
+.kpf-acts2 .kpf-go{ margin-top:0; }
+.kpf-tick{ display:flex; align-items:center; gap:10px; margin-top:12px; font:500 14px var(--sans); color:var(--ink); cursor:pointer; min-height:44px; }
+.kpf-tick input{ width:22px; height:22px; accent-color:var(--ink); flex:0 0 auto; }
+.kpf-tick.is-off{ color:var(--muted); cursor:default; }
+.kpf-moreb{ margin:6px 0 0; }
+.kpf-pick{ margin:6px 0 0; font-size:12.5px; }
+.kpf-bar{ position:sticky; bottom:0; z-index:5; background:#fff; border-top:1px solid var(--line); padding:12px 0 14px; margin-top:16px; text-align:center; }
+.kpf-wa{ display:flex; align-items:center; justify-content:center; width:100%; padding:15px 20px; font:600 16px var(--sans); border-radius:999px; background:var(--wa); color:#fff; text-decoration:none; }
+.kpf-bar p{ margin:8px 0 0; font-size:12.5px; line-height:1.5; color:var(--muted); }

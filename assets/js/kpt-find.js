@@ -2,6 +2,9 @@
  * Pure functions. Reads only: the buyer's budget / answers, the existing budget engine's route statistics (typical size), and data/projects/find.json
  * (ACTUAL price quartiles per project, sale type and 100 sqft band for the last 12 months; see tools/market-data/build-find-index.js).
  *
+ * V10 (find-v2) adds an OPTIONAL Huttons inventory layer for New launch (data/projects/inventory.json, schema v2: price floors by 100 sqft band, one ceiling per type,
+ * rounded to $50k, no counts). With no usable inventory file every output is identical to V9.1 (version string aside).
+ *
  * What it is NOT: a recommendation, a valuation, a ranking of quality or value, or an indication of current availability.
  * There is no score. Order is: evidence strength, budget fit, matching recent sales, recency, then name A to Z.
  * Bedrooms are never inferred and never converted to square feet. School, workplace and family proximity are never evaluated.
@@ -11,10 +14,11 @@
   else root.KPT_FIND = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
-  const VERSION = 'find-v1.1';
+  const VERSION = 'find-v2';
   // Thresholds (all in one place so tests and the methodology read the same numbers).
   const T = { budgetPct: 0.10, widenBudgetPct: 0.15, minSales: 3, goodSales: 5, minActiveMonths: 2, recencyMonths: 6, perStreet: 2, maxCards: 5, bothResale: 3, bothNew: 2, sizePad: 100,
-    inferMinDeals: 15, referenceStep: 50000, referenceMaxUp: 0.5 };
+    inferMinDeals: 15, referenceStep: 50000, referenceMaxUp: 0.5,
+    invFreshHours: 48, invMaxDays: 7, invFutureMs: 3600000, invBand: 100, invSchema: 2, moreMax: 5, maxMessage: 400 };
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   // Reviewed district to general-area names. UI orientation only: a district contains places not named here, and no project is ever said to be "in" a named neighbourhood.
@@ -157,6 +161,7 @@
   }
   const NEW_LABEL = 'New launch projects with recent developer sales';
   const NEW_NOTE = 'Based on developer sales recorded by URA in the last 12 months. This data cannot tell us whether units are still available from the developer.';
+  const NEW_NOTE_INV = 'URA sales show what sold, not what is for sale. Where we checked current Huttons inventory, we say so and when.';
   const FIT = { inside: 0, above: 1, below: 2 };
   const compare = (x, y) => (x.strength === y.strength ? 0 : x.strength === 'good' ? -1 : 1) || FIT[x.fit] - FIT[y.fit] || y.n - x.n || y.last - x.last || (x.name < y.name ? -1 : x.name > y.name ? 1 : 0);
 
@@ -173,12 +178,12 @@
   }
   function takeCapped(list, n) {
     const per = {}, out = [];
-    for (const x of list) { if ((per[x.street] || 0) >= T.perStreet) continue; per[x.street] = (per[x.street] || 0) + 1; out.push(x); if (out.length >= n) break; }
+    for (const x of list) { if (x.street) { if ((per[x.street] || 0) >= T.perStreet) continue; per[x.street] = (per[x.street] || 0) + 1; } out.push(x); if (out.length >= n) break; }
     return out;
   }
   const saleTypes = (openTo) => (openTo === 'new' ? ['new'] : openTo === 'resale' ? ['resale'] : ['resale', 'new']);
 
-  function count(ix, o) { return saleTypes(o.openTo).reduce((a, s) => a + eligible(ix, s, o).length, 0); }
+  function count(ix, o) { return saleTypes(o.openTo).reduce((a, s) => a + (o.inv && s === 'new' ? newCandidates(ix, o).length : eligible(ix, s, o).length), 0); }
 
   /* ---------------------------------------------------------------- wording */
   function why(c, o) {
@@ -199,12 +204,164 @@
     };
   }
 
+
+  /* ================================================================ V10: Huttons inventory layer (New launch only) ================================================================ */
+  const INV_KIND = 'kpt-huttons-public-inventory';
+  const DAY = 86400000, HOUR = 3600000, SGT = 8 * HOUR, WEEKDAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const dayNo = (ms) => Math.floor((ms + SGT) / DAY);
+  /** "today", "yesterday" or "Fri 2 Oct", in Singapore time. No clock time is ever shown. */
+  function whenText(checkedMs, nowMs) {
+    const d = dayNo(nowMs) - dayNo(checkedMs); if (d === 0) return 'today'; if (d === 1) return 'yesterday';
+    const dt = new Date(checkedMs + SGT); return WEEKDAY[dt.getUTCDay()] + ' ' + dt.getUTCDate() + ' ' + MON[dt.getUTCMonth()];
+  }
+  /** Validates and indexes inventory.json (schema v2). Returns null when the file is unusable, so FIND behaves exactly as V9.1. */
+  function prepareInventory(doc, nowMs) {
+    try {
+      if (!doc || doc.kind !== INV_KIND || doc.v !== T.invSchema || !Array.isArray(doc.projects) || typeof nowMs !== 'number' || !isFinite(nowMs)) return null;
+      const fileAt = Date.parse(doc.checkedAt); if (!isFinite(fileAt)) return null;
+      if (fileAt - nowMs > T.invFutureMs) return null;                       // check time more than an hour in the future
+      const by = {};
+      doc.projects.forEach((p) => { if (p && typeof p.slug === 'string' && /^[a-z0-9-]+$/.test(p.slug) && typeof p.name === 'string') by[p.slug] = p; });
+      return { fileAt, now: nowMs, clockBehind: nowMs < fileAt, bySlug: by, slugs: Object.keys(by).sort() };
+    } catch (e) { return null; }
+  }
+  /** 'fresh' (within 48 hours), 'dated' (48 hours to 7 days) or null (older, future, or no usable time). A missing project is never fresh. */
+  function freshness(inv, ip) {
+    const at = Date.parse(ip && ip.checkedAt ? ip.checkedAt : inv.fileAt); if (!isFinite(at) || inv.clockBehind) return null;
+    const age = inv.now - at; if (age < 0) return null;
+    return age <= T.invFreshHours * HOUR ? 'fresh' : age <= T.invMaxDays * DAY ? 'dated' : null;
+  }
+  /** Price evidence for one project against the buyer's size window and budget window. Uses only size bands whose centre is in the window.
+   *  Returns null, or { types:[{bedrooms,floor,ceiling,fit}], primary, fit }. Prices are never used to rank. */
+  function invMatch(ip, o) {
+    const B = o.budget, pct = o.pct, half = T.invBand / 2, types = [];
+    (ip.byBedrooms || []).forEach((t) => {
+      if (!t || typeof t.ceiling !== 'number' || !Array.isArray(t.bands) || typeof t.bedrooms !== 'number') return;
+      const inc = t.bands.filter((b) => Array.isArray(b) && typeof b[0] === 'number' && typeof b[1] === 'number' && b[0] + half >= o.lo && b[0] + half < o.hi);
+      if (!inc.length) return;                                                       // no band of about this size: this type does not match
+      const floor = Math.min.apply(null, inc.map((b) => b[1])), ceiling = t.ceiling;
+      if (!(floor <= B * (1 + pct) && ceiling >= B * (1 - pct))) return;            // same overlap test V9.1 uses for URA prices
+      types.push({ bedrooms: t.bedrooms, floor, ceiling, fit: B >= floor && B <= ceiling ? 'inside' : B > ceiling ? 'above' : 'below' });
+    });
+    if (!types.length) return null;
+    const dist = (x) => (x.fit === 'inside' ? 0 : x.fit === 'below' ? x.floor - B : B - x.ceiling);
+    const ranked = types.slice().sort((a, b) => (a.fit === 'inside' ? 0 : 1) - (b.fit === 'inside' ? 0 : 1) || dist(a) - dist(b) || a.bedrooms - b.bedrooms);
+    return { types: types.sort((a, b) => a.bedrooms - b.bedrooms), primary: ranked[0], fit: ranked[0].fit };
+  }
+  const typeNoun = (b) => (b === 0 ? 'Studio' : b >= 5 ? '5+ bedroom' : b + '-bedroom');
+  /** URA developer-sales support for an inventory candidate. Sales of about the buyer's size (price fit is stated separately, under its own source).
+   *  Looser than path A on purpose: sales in a single month are "early evidence". */
+  function support(ix, p, o) {
+    const rows = (p.new || []).filter((r) => r[0] + ix.bin / 2 >= o.lo && r[0] + ix.bin / 2 < o.hi);
+    const n = rows.reduce((a, r) => a + r[1], 0); if (!n) return { kind: 'none', n: 0 };
+    const last = Math.max.apply(null, rows.map((r) => r[3])), q1 = Math.min.apply(null, rows.map((r) => r[4])), q3 = Math.max.apply(null, rows.map((r) => r[6]));
+    if (n < T.minSales || monthsBetween(ix.latest, last) > T.recencyMonths) return { kind: 'few', n };
+    const months = rows.some((r) => r[2] >= T.minActiveMonths) || new Set(rows.map((r) => r[3])).size > 1;
+    return { kind: !months ? 'early' : n >= T.goodSales ? 'good' : 'limited', n, last, q1, q3 };
+  }
+  const SUP_RANK = { good: 0, limited: 1, early: 2, few: 3, none: 3 };
+  /** A usable record for any inventory project: URA's own facts win; otherwise the reviewed metadata the export joined in. Null = cannot be placed, so it is not shown. */
+  function recordFor(ix, ip) {
+    const u = ix.projects.find((p) => p.id === ip.slug); if (u) return { rec: u, ura: u };
+    if (ip.status !== 'ok' || !/^(0[1-9]|1\d|2[0-8])$/.test(String(ip.district)) || typeof ip.tenureGroup !== 'number' || typeof ip.tenure !== 'string' || !ip.tenure) return null;
+    return { rec: { id: ip.slug, name: ip.name, street: ip.street || '', d: String(ip.district), seg: null, tg: ip.tenureGroup, tl: ip.tenure, m: 0, new: [], resale: [] }, ura: null };
+  }
+  /** New launch candidates when the inventory layer is on, in order. Tiers: (a) budget inside the range shown, (b) a little above or below, (c) URA only, Huttons not checked, (d) URA only, Huttons checked and nothing matches (or zero). */
+  function newCandidates(ix, o) {
+    const inv = o.inv, uraAll = {}; eligible(ix, 'new', o).forEach((m) => { uraAll[m.id] = m; });
+    const out = [], seen = {};
+    const pass = (rec) => !((o.districts && o.districts.length && o.districts.indexOf(rec.d) < 0) || (o.freehold && rec.tg !== 4) || !textMatch(rec, o.text));
+    inv.slugs.forEach((slug) => {
+      const ip = inv.bySlug[slug], r = recordFor(ix, ip); if (!r || !pass(r.rec)) return;
+      const fr = freshness(inv, ip), usable = fr && ip.status === 'ok', m = usable ? invMatch(ip, o) : null, u = uraAll[slug] || null;
+      if (m) { seen[slug] = 1; out.push({ id: slug, sale: 'new', rec: r.rec, ip, fresh: fr, inv: m, ura: u, sup: r.ura ? support(ix, r.ura, o) : { kind: 'none', n: 0 }, tier: m.fit === 'inside' ? 'a' : 'b', name: r.rec.name, street: r.rec.street }); return; }
+      if (u) { seen[slug] = 1; const zero = fr && ip.status === 'zero_returned', nomatch = usable;
+        out.push({ id: slug, sale: 'new', rec: r.rec, ip, fresh: fr, ura: u, tier: zero || nomatch ? 'd' : 'c', hut: zero ? 'zero' : nomatch ? 'nomatch' : 'unchecked', name: u.name, street: u.street }); }
+    });
+    Object.keys(uraAll).forEach((id) => { if (!seen[id]) { const u = uraAll[id]; out.push({ id, sale: 'new', rec: null, ip: null, fresh: null, ura: u, tier: 'c', hut: 'unchecked', name: u.name, street: u.street }); } });
+    const TIER = { a: 0, b: 1, c: 2, d: 3 };
+    return out.sort((x, y) => TIER[x.tier] - TIER[y.tier] || (x.tier === 'a' || x.tier === 'b'
+      ? SUP_RANK[x.sup.kind] - SUP_RANK[y.sup.kind] || (x.fresh === y.fresh ? 0 : x.fresh === 'fresh' ? -1 : 1) || (x.name < y.name ? -1 : x.name > y.name ? 1 : 0)
+      : compare(x.ura, y.ura)));
+  }
+
+  /* ---- V10 wording (one place). {B} is the buyer's own budget; the only price ever shown from Huttons is the single rounded "From around" figure. */
+  const HUT = {
+    label: (when) => 'HUTTONS INVENTORY' + (when ? ' · CHECKED ' + when.toUpperCase() : ''),
+    unchecked: 'We couldn’t check current Huttons inventory for this project. That doesn’t mean nothing is listed.',
+    zero: 'No units currently shown in Huttons inventory for this project.',
+    nomatch: (when) => 'Checked ' + when + ': none of the units currently shown in Huttons inventory are about your size and budget.',
+    note: 'Lowest price currently shown for these homes, rounded. Prices vary by unit.',
+    notePast: 'Lowest price shown then for these homes, rounded. Prices vary by unit.',
+    dated: 'Units may have changed since. Ask Ken for the latest.',
+    none: 'None in our data yet, so there is no sales history to show.',
+    sizeNote: 'around the size used for this list',
+  };
+  const typesPhrase = (types) => joinAnd(types.map((t) => typeNoun(t.bedrooms))) + ' homes';
+  function huttonsBlock(c, o) {
+    const when = whenText(Date.parse(c.ip.checkedAt || new Date(o.inv.fileAt).toISOString()), o.inv.now), past = c.fresh === 'dated', inferred = o.sizeSource === 'inferred', multi = c.inv.types.length > 1, p = c.inv.primary;
+    const size = typesPhrase(c.inv.types) + (past ? (inferred ? ' were ' + HUT.sizeNote + '.' : ' matched the size you’re looking for.') : (inferred ? ' are ' + HUT.sizeNote + '.' : ' match the size you’re looking for.'));
+    const homes = multi ? typeNoun(p.bedrooms) + ' homes' : 'homes', pre = 'Your ~' + m2(o.budget) + ' budget ';
+    const budget = {
+      inside: pre + (past ? 'fell within what we saw then for ' + homes + ' around this size.' : 'falls within what we’re currently seeing for ' + homes + ' around this size.'),
+      above: pre + (past ? 'gave you room within the ' + homes + ' we saw then around this size.' : 'gives you room within the ' + homes + ' we’re currently seeing around this size.'),
+      below: pre + (past ? 'was slightly below what we saw then for ' + homes + ' around this size.' : 'is slightly below what we’re currently seeing for ' + homes + ' around this size.'),
+    }[p.fit];
+    return { kind: past ? 'dated' : 'fresh', label: HUT.label(when), when, size, from: 'From around ' + m2(p.floor) + (past ? ' (as shown then).' : ''), budget, note: past ? HUT.notePast : HUT.note, datedNote: past ? HUT.dated : null, fit: p.fit };
+  }
+  function supportRow(c, o) {
+    const s = c.sup, label = 'URA DEVELOPER SALES';
+    // Disagreement rule: if URA's typical prices put the budget somewhere else than the Huttons conclusion, URA's prices are stated here, under URA.
+    const disagree = (s.kind === 'good' || s.kind === 'limited' || s.kind === 'early') && (o.budget < s.q1 || o.budget > s.q3) ? ' Typical prices for these: ' + p2(s.q1) + '–' + p2(s.q3) + '.' : '';
+    if (s.kind === 'good' || s.kind === 'limited') return { label, text: s.n + ' developer sales of about this size in the last 12 months · latest ' + ymLabel(s.last) + ' · ' + (s.kind === 'good' ? 'Good' : 'Limited') + ' recent evidence.' + disagree, kind: s.kind };
+    if (s.kind === 'early') return { label, text: s.n + ' sales of about this size, all in ' + ymLabel(s.last) + '. Early evidence: the first sales were recorded then.' + disagree, kind: 'early' };
+    if (s.kind === 'few') return { label, text: 'Fewer than ' + T.minSales + ' developer sales of about this size in the last 12 months, so there is no sales history to show.', kind: 'none' };
+    return { label, text: HUT.none, kind: 'none' };
+  }
+  function metaLine(rec) { return [displayName(rec.street), 'District ' + Number(rec.d), rec.seg, rec.tl + (rec.m ? ' (mixed tenure in the data)' : '')].filter(Boolean).join(' · '); }
+  const askFor = (name, hasCheck) => (hasCheck ? 'Ask Ken what he’d shortlist here →' : 'Ask Ken about ' + name + ' →');
+  function cardInv(c, o, un) {
+    const name = displayName(c.name), isUra = !!(o._uraIds && o._uraIds[c.id]);
+    const base = { id: c.id, slug: c.id, name, sale: 'new', saleLabel: 'Developer sales', notEvaluated: notEvaluated(un, 'new'), tier: c.tier, tick: 'Add to Get Ken’s view',
+      link: isUra ? '../../research/index.html#/p/' + c.id + '/new' : null, linkText: isUra ? 'Research ' + name + ' →' : null };
+    if (c.tier === 'a' || c.tier === 'b') {
+      const rated = c.sup.kind === 'good' || c.sup.kind === 'limited' || c.sup.kind === 'early';
+      return Object.assign(base, { basis: rated ? 'Current Huttons inventory and URA sales' : 'Current Huttons inventory only', meta: metaLine(c.rec), huttons: huttonsBlock(c, o), ura: supportRow(c, o), hasCheck: true, ask: askFor(name, true),
+        why: null, evidence: null, prices: null, indicative: null, strength: rated ? c.sup.kind : null });
+    }
+    // URA-only: the V9.1 card, plus one honest status line about Huttons
+    const v = card(c.ura, o, un, null), when = c.fresh ? whenText(Date.parse(c.ip.checkedAt || new Date(o.inv.fileAt).toISOString()), o.inv.now) : null;
+    const hut = c.hut === 'zero' ? { kind: 'zero', label: HUT.label(when), text: HUT.zero } : c.hut === 'nomatch' ? { kind: 'nomatch', label: HUT.label(when), text: HUT.nomatch(when) } : { kind: 'unchecked', label: HUT.label(null), text: HUT.unchecked };
+    return Object.assign(v, { slug: c.id, basis: 'URA developer sales only', huttons: hut, hasCheck: false, ask: askFor(name, false), tier: c.tier, tick: base.tick, link: base.link, linkText: base.linkText });
+  }
+  function resaleDecor(cd) { return Object.assign(cd, { slug: cd.id, hasCheck: false, ask: 'Ask Ken about ' + cd.name + ' →', tick: 'Add to Get Ken’s view' }); }
+
+  /* ---- Get Ken's view handoff (pure; the page passes only what the buyer chose). Project names come from our own index or inventory file, never typed text. */
+  const budgetPhrase = (b) => '$' + String(Math.round(b / 10000) / 100).replace(/(\.\d)0$/, '$1') + 'm';
+  function handoffMessage(o) {
+    const names = (o.names || []).filter(Boolean).slice(0, 2); if (!names.length) return null;
+    const head = names.length === 1 ? 'Hi Ken, I’m looking at ' + names[0] + ' and would like to know what you’d shortlist.' : 'Hi Ken, I’m looking at ' + names.join(' vs ') + ' and would like your view.';
+    const parts = [];
+    if (o.budget > 0) parts.push('around ' + budgetPhrase(o.budget));
+    if (o.size && o.size.from > 0 && o.size.to > o.size.from) parts.push('about ' + num(o.size.from) + '–' + num(o.size.to) + ' sqft');
+    if (o.district && /^(0[1-9]|1\d|2[0-8])$/.test(String(o.district))) parts.push('District ' + Number(o.district));
+    const full = parts.length ? head + ' My search: ' + parts.join(', ') + '.' : head;
+    return full.length > T.maxMessage ? head : full;
+  }
+  /** The one new analytics event: the ticked project slugs only (letters, digits, hyphens). Never budget, size or district. */
+  function askEvent(slugs) {
+    const ok = (slugs || []).filter((x) => typeof x === 'string' && /^[a-z0-9-]+$/.test(x)).slice(0, 2); if (!ok.length) return null;
+    const o = { project_id: ok[0] }; if (ok[1]) o.project_id_2 = ok[1]; return o;
+  }
+
   /* ---------------------------------------------------------------- the shortlist */
   /** input: { budget, openTo:'new'|'resale'|'both', size:{lo,hi,source,line}, districts:[], text, freehold:bool, answers:{where,size,priorities}, typical:{lo,hi}|null }
    *  Returns the whole view model. Never throws on a usable index. */
   function shortlist(ix, input) {
+    const inv = input.inv || null;
     const un = unsupported(input.answers, input.loc || { districts: input.districts || [] }), base = { budget: input.budget, pct: input.pct === T.widenBudgetPct ? T.widenBudgetPct : T.budgetPct, lo: input.size.lo, hi: input.size.hi, districts: input.districts || [], freehold: !!input.freehold, text: input.text || '', openTo: input.openTo };
-    const types = saleTypes(input.openTo), lists = {}; types.forEach((s) => { lists[s] = eligible(ix, s, base); });
+    if (inv) { base.inv = inv; base.sizeSource = input.size.source; base._uraIds = {}; ix.projects.forEach((p) => { base._uraIds[p.id] = 1; }); }
+    const types = saleTypes(input.openTo), lists = {}; types.forEach((s) => { lists[s] = inv && s === 'new' ? newCandidates(ix, base) : eligible(ix, s, base); });
     const eligibleN = {}; types.forEach((s) => { eligibleN[s] = lists[s].length; });
     const total = types.reduce((a, s) => a + eligibleN[s], 0);
     // 3 resale + 2 new when both qualify; any gap is filled from the other group; one chosen type gets up to 5
@@ -216,12 +373,23 @@
       if (n.length < T.bothNew) r = takeCapped(lists.resale, T.maxCards - n.length);
       chosen = { resale: r, new: n };
     }
-    const groups = types.map((s) => ({ sale: s, label: s === 'new' ? NEW_LABEL : 'Resale', note: s === 'new' ? NEW_NOTE : null, eligible: eligibleN[s], cards: (chosen[s] || []).map((c) => card(c, base, un, ix)) })).filter((g) => g.cards.length);
+    const mk = (c) => (inv && c.sale === 'new' ? cardInv(c, base, un) : inv ? resaleDecor(card(c, base, un, ix)) : card(c, base, un, ix));
+    const groups = types.map((s) => {
+      const g = { sale: s, label: s === 'new' ? NEW_LABEL : 'Resale', note: s === 'new' ? (inv ? NEW_NOTE_INV : NEW_NOTE) : null, eligible: eligibleN[s], cards: (chosen[s] || []).map(mk) };
+      if (inv && types.length === 2) { const all = takeCapped(lists[s], T.moreMax); g.more = all.slice((chosen[s] || []).length).map(mk); }
+      return g;
+    }).filter((g) => g.cards.length);
     const shown = groups.reduce((a, g) => a + g.cards.length, 0);
     const state = total === 0 ? 'none' : total < T.minSales ? 'few' : 'list';
     const out = { version: VERSION, state, total, shown, groups, eligible: eligibleN, size: input.size, unsupported: un, filters: { districts: base.districts, freehold: base.freehold, text: base.text, pct: base.pct }, dataTo: ix.latestMonth, window: ix.window,
       dataLine: 'Based on actual sales in the last 12 months (to ' + ymLabel(ix.latest) + ') around your budget and size.',
       orderLine: 'Listed by how much recent evidence there is, not by quality or value.', changes: [], reference: null, noneText: null };
+    if (inv && types.indexOf('new') > -1) {
+      out.inventory = { active: true, checkedAt: new Date(inv.fileAt).toISOString() };
+      out.dataLine = 'Based on actual URA sales in the last 12 months (to ' + ymLabel(ix.latest) + ') around your budget and size, plus a check of current Huttons inventory where we could make one. This is a starting list, not a recommendation.';
+      out.orderLine = types.length === 2 ? 'Resale: listed by how much recent evidence there is. New launch: listed by whether your budget sits within the range currently shown in Huttons, then by how much URA evidence there is. Not by quality, value or price.'
+        : 'Listed by whether your budget sits within the range currently shown in Huttons, then by how much URA evidence there is. Not by quality, value or price.';
+    } else if (inv) out.inventory = { active: true, checkedAt: new Date(inv.fileAt).toISOString() };
 
     const asText = (n) => n + (n === 1 ? ' development' : ' developments');
     if (state === 'few') {
@@ -260,6 +428,13 @@
     'This is a shortlist of developments worth investigating. It is not a recommendation or a valuation, and it doesn’t show what is for sale now or its asking price.',
   ];
 
+  const METHOD_INV = METHOD.slice(0, METHOD.length - 1).concat([
+    'Huttons inventory is the list of units currently shown in Huttons’ own system when we last checked, with the date. It may not include every unit the developer has, and it excludes other agents’ listings. We show it only for new launch projects.',
+    'The “From around” figure is the lowest price currently shown for homes about your size, rounded to $50k. We don’t publish a range, the number of units or which units. Prices vary by unit, and only Ken can say what you could actually get.',
+    'Checks older than 7 days aren’t used. If we couldn’t check a project, we say so. That isn’t the same as there being no units.',
+    'We check Huttons inventory for new launch projects only, so resale cards show URA sales only. That is a difference in the data we hold, not in the options.',
+    'This is a shortlist of developments worth investigating. It is not a recommendation or a valuation. Apart from the Huttons check, it doesn’t show what is for sale now, and the Huttons price is only a rounded starting point.',
+  ]);
   const ANALYTICS_KEYS = ['budget_band', 'result_bucket', 'size_source', 'area_filter', 'sale_groups'];
   const bucket = (n) => (n === 0 ? '0' : n < 3 ? '1-2' : n < 5 ? '3-4' : '5+');
   /** Bucketed and anonymous. Never the exact budget, typed text, size or project names. */
@@ -267,6 +442,7 @@
     return { budget_band: budgetBand, result_bucket: bucket(res.shown), size_source: res.size.source, area_filter: !!(res.filters.districts.length || res.filters.text), sale_groups: res.groups.map((g) => g.sale).join('+') || 'none' };
   }
 
-  return { VERSION, T, DISTRICT_AREAS, AREA_ALIASES, AREA_CHOICES, NEW_LABEL, NEW_NOTE, resolveArea, districtLabel, districtShort, BASE_NOT_EVAL, METHOD, ANALYTICS_KEYS,
+  return { VERSION, T, DISTRICT_AREAS, AREA_ALIASES, AREA_CHOICES, NEW_LABEL, NEW_NOTE, NEW_NOTE_INV, resolveArea, districtLabel, districtShort, BASE_NOT_EVAL, METHOD, METHOD_INV, ANALYTICS_KEYS, HUT,
+    prepareInventory, freshness, invMatch, support, newCandidates, whenText, handoffMessage, askEvent, typeNoun,
     displayName, prepare, inferSize, sizeWindow, matchDistricts, unsupported, notEvaluated, matchProject, eligible, shortlist, count, compare, why, card, analytics, bucket, m2, p2, num, sizeText, ymLabel, monthsBetween };
 });

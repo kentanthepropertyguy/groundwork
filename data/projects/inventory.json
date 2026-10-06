@@ -1,0 +1,2154 @@
+{
+ "v": 2,
+ "kind": "kpt-huttons-public-inventory",
+ "tool": "phase2-2",
+ "source": "Units currently shown in Huttons inventory",
+ "checkedAt": "2026-10-06T13:59:36.319Z",
+ "projects": [
+  {
+   "slug": "21-anderson",
+   "name": "21 ANDERSON",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 10000000,
+     "bands": [
+      [
+       3100,
+       10000000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "26-newton",
+   "name": "26 NEWTON",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1750000,
+     "bands": [
+      [
+       900,
+       1700000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2750000,
+     "bands": [
+      [
+       1400,
+       2650000
+      ],
+      [
+       1500,
+       2700000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "8-at-bt",
+   "name": "8@BT",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1550000,
+     "bands": [
+      [
+       500,
+       1450000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2250000,
+     "bands": [
+      [
+       600,
+       1900000
+      ],
+      [
+       700,
+       1950000
+      ],
+      [
+       800,
+       2100000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 5350000,
+     "bands": [
+      [
+       1300,
+       3700000
+      ],
+      [
+       1500,
+       3950000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "amberwood-at-holland",
+   "name": "AMBERWOOD AT HOLLAND",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 3100000,
+     "bands": [
+      [
+       800,
+       2500000
+      ],
+      [
+       900,
+       2800000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 4100000,
+     "bands": [
+      [
+       1000,
+       3100000
+      ],
+      [
+       1100,
+       3300000
+      ],
+      [
+       1200,
+       3600000
+      ],
+      [
+       1300,
+       3950000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 4900000,
+     "bands": [
+      [
+       1300,
+       3950000
+      ],
+      [
+       1400,
+       4500000
+      ],
+      [
+       1500,
+       4650000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "ardor-residence",
+   "name": "ARDOR RESIDENCE",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 3500000,
+     "bands": [
+      [
+       1200,
+       3450000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "arina-east-residences",
+   "name": "ARINA EAST RESIDENCES",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 4500000,
+     "bands": [
+      [
+       1300,
+       3950000
+      ],
+      [
+       1600,
+       4250000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "aurea",
+   "name": "AUREA",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2200000,
+     "bands": [
+      [
+       600,
+       1750000
+      ],
+      [
+       700,
+       1950000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 3250000,
+     "bands": [
+      [
+       1000,
+       2650000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 6200000,
+     "bands": [
+      [
+       1400,
+       4050000
+      ],
+      [
+       1700,
+       5150000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "bagnall-haus",
+   "name": "BAGNALL HAUS",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1400000,
+     "bands": [
+      [
+       400,
+       1350000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 3400000,
+     "bands": [
+      [
+       1200,
+       3350000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "canberra-crescent-residences",
+   "name": "CANBERRA CRESCENT RESIDENCES",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 2150000,
+     "bands": [
+      [
+       900,
+       1950000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 2700000,
+     "bands": [
+      [
+       1100,
+       2250000
+      ],
+      [
+       1200,
+       2350000
+      ],
+      [
+       1300,
+       2650000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "canninghill-piers",
+   "name": "CANNINGHILL PIERS",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1750000,
+     "bands": [
+      [
+       400,
+       1300000
+      ],
+      [
+       500,
+       1700000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 9000000,
+     "bands": [
+      [
+       2700,
+       8600000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "chuan-park",
+   "name": "CHUAN PARK",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 3350000,
+     "bands": [
+      [
+       1200,
+       3200000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "dunearn-house",
+   "name": "DUNEARN HOUSE",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2100000,
+     "bands": [
+      [
+       500,
+       1500000
+      ],
+      [
+       600,
+       1800000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 3400000,
+     "bands": [
+      [
+       1000,
+       3050000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 4700000,
+     "bands": [
+      [
+       1100,
+       3550000
+      ],
+      [
+       1300,
+       4000000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "elta",
+   "name": "ELTA",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1450000,
+     "bands": [
+      [
+       500,
+       1400000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 2750000,
+     "bands": [
+      [
+       900,
+       2650000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 4100000,
+     "bands": [
+      [
+       1100,
+       3300000
+      ],
+      [
+       1300,
+       3400000
+      ],
+      [
+       1500,
+       3700000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 4650000,
+     "bands": [
+      [
+       1700,
+       4100000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "faber-residence",
+   "name": "FABER RESIDENCE",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 2950000,
+     "bands": [
+      [
+       1200,
+       2750000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 3500000,
+     "bands": [
+      [
+       1400,
+       3300000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "grand-dunman",
+   "name": "GRAND DUNMAN",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1650000,
+     "bands": [
+      [
+       500,
+       1350000
+      ],
+      [
+       700,
+       1550000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 7500000,
+     "bands": [
+      [
+       2200,
+       5600000
+      ],
+      [
+       2400,
+       6200000
+      ],
+      [
+       2600,
+       6450000
+      ],
+      [
+       2700,
+       7450000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "grange-1866",
+   "name": "GRANGE 1866",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1650000,
+     "bands": [
+      [
+       500,
+       1600000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "j-den",
+   "name": "J'DEN",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 3100000,
+     "bands": [
+      [
+       1100,
+       3050000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 3900000,
+     "bands": [
+      [
+       1400,
+       3800000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "jansen-house",
+   "name": "JANSEN HOUSE",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 2050000,
+     "bands": [
+      [
+       1000,
+       2000000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "kallang-riverside",
+   "name": "KALLANG RIVERSIDE",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1350000,
+     "bands": [
+      [
+       500,
+       1250000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 7000000,
+     "bands": [
+      [
+       2500,
+       6950000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 9050000,
+     "bands": [
+      [
+       3100,
+       9050000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "kassia",
+   "name": "KASSIA",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 1650000,
+     "bands": [
+      [
+       700,
+       1550000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 2250000,
+     "bands": [
+      [
+       1000,
+       2100000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 2750000,
+     "bands": [
+      [
+       1300,
+       2650000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "lentor-gardens-residences",
+   "name": "LENTOR GARDENS RESIDENCES",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 1900000,
+     "bands": [
+      [
+       600,
+       1550000
+      ],
+      [
+       700,
+       1700000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 2350000,
+     "bands": [
+      [
+       900,
+       2200000
+      ],
+      [
+       1000,
+       2250000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 3400000,
+     "bands": [
+      [
+       1100,
+       2700000
+      ],
+      [
+       1300,
+       3100000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 3550000,
+     "bands": [
+      [
+       1400,
+       3500000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "lentoria",
+   "name": "LENTORIA",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1450000,
+     "bands": [
+      [
+       500,
+       1250000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 1850000,
+     "bands": [
+      [
+       700,
+       1800000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 2400000,
+     "bands": [
+      [
+       900,
+       2250000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "meyer-blue",
+   "name": "MEYER BLUE",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 3600000,
+     "bands": [
+      [
+       1100,
+       3550000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 5850000,
+     "bands": [
+      [
+       1500,
+       4550000
+      ],
+      [
+       1700,
+       5350000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 6150000,
+     "bands": [
+      [
+       1900,
+       5750000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "midtown-bay",
+   "name": "MIDTOWN BAY",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 2000000,
+     "bands": [
+      [
+       400,
+       1450000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 4150000,
+     "bands": [
+      [
+       700,
+       2450000
+      ],
+      [
+       900,
+       2800000
+      ],
+      [
+       1000,
+       3050000
+      ],
+      [
+       1100,
+       3250000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 5500000,
+     "bands": [
+      [
+       1300,
+       5050000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "nava-grove",
+   "name": "NAVA GROVE",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2200000,
+     "bands": [
+      [
+       700,
+       2150000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "newport-residences",
+   "name": "NEWPORT RESIDENCES",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1850000,
+     "bands": [
+      [
+       400,
+       1400000
+      ],
+      [
+       500,
+       1750000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 3800000,
+     "bands": [
+      [
+       900,
+       3500000
+      ],
+      [
+       1200,
+       3700000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 103700000,
+     "bands": [
+      [
+       2000,
+       8250000
+      ],
+      [
+       12900,
+       103650000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "norwood-grand",
+   "name": "NORWOOD GRAND",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 2900000,
+     "bands": [
+      [
+       1300,
+       2600000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "one-marina-gardens",
+   "name": "ONE MARINA GARDENS",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2300000,
+     "bands": [
+      [
+       600,
+       1850000
+      ],
+      [
+       700,
+       2000000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 3750000,
+     "bands": [
+      [
+       900,
+       2550000
+      ],
+      [
+       1000,
+       2800000
+      ],
+      [
+       1100,
+       3400000
+      ],
+      [
+       1200,
+       3600000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 5450000,
+     "bands": [
+      [
+       1600,
+       4750000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "parktown-residence",
+   "name": "PARKTOWN RESIDENCE",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 3700000,
+     "bands": [
+      [
+       1400,
+       3300000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 4200000,
+     "bands": [
+      [
+       1600,
+       3850000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "penrith",
+   "name": "PENRITH",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 1800000,
+     "bands": [
+      [
+       600,
+       1750000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "river-green",
+   "name": "RIVER GREEN",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1600000,
+     "bands": [
+      [
+       400,
+       1350000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2350000,
+     "bands": [
+      [
+       600,
+       2150000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 3200000,
+     "bands": [
+      [
+       800,
+       3100000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "river-modern",
+   "name": "RIVER MODERN",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2300000,
+     "bands": [
+      [
+       500,
+       1850000
+      ],
+      [
+       600,
+       2250000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 3450000,
+     "bands": [
+      [
+       900,
+       3350000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 7100000,
+     "bands": [
+      [
+       1800,
+       6150000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "skies-miltonia",
+   "name": "SKIES MILTONIA",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 0,
+     "label": "Studio",
+     "ceiling": 3700000,
+     "bands": [
+      [
+       4600,
+       3450000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 2600000,
+     "bands": [
+      [
+       2500,
+       2600000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 3300000,
+     "bands": [
+      [
+       2700,
+       3300000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "sora",
+   "name": "SORA",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2100000,
+     "bands": [
+      [
+       600,
+       1650000
+      ],
+      [
+       700,
+       1700000
+      ],
+      [
+       800,
+       1750000
+      ],
+      [
+       900,
+       2000000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 3150000,
+     "bands": [
+      [
+       900,
+       2100000
+      ],
+      [
+       1000,
+       2250000
+      ],
+      [
+       1100,
+       2500000
+      ],
+      [
+       1300,
+       2750000
+      ],
+      [
+       1400,
+       3050000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 3900000,
+     "bands": [
+      [
+       1500,
+       3100000
+      ],
+      [
+       1700,
+       3850000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 4200000,
+     "bands": [
+      [
+       1600,
+       3400000
+      ],
+      [
+       1900,
+       4150000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "springleaf-residence",
+   "name": "SPRINGLEAF RESIDENCE",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 2850000,
+     "bands": [
+      [
+       1200,
+       2700000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 3550000,
+     "bands": [
+      [
+       1400,
+       3200000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "terra-hill",
+   "name": "TERRA HILL",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 4750000,
+     "bands": [
+      [
+       1800,
+       3800000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 7300000,
+     "bands": [
+      [
+       2100,
+       4700000
+      ],
+      [
+       3000,
+       7250000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "the-arcady-at-boon-keng",
+   "name": "THE ARCADY AT BOON KENG",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1450000,
+     "bands": [
+      [
+       500,
+       1400000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2200000,
+     "bands": [
+      [
+       600,
+       1900000
+      ],
+      [
+       700,
+       1950000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 3550000,
+     "bands": [
+      [
+       1000,
+       2750000
+      ],
+      [
+       1100,
+       3000000
+      ],
+      [
+       1200,
+       3250000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 6900000,
+     "bands": [
+      [
+       2400,
+       6500000
+      ],
+      [
+       2500,
+       6850000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "the-collective-at-one-sophia",
+   "name": "THE COLLECTIVE AT ONE SOPHIA",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1600000,
+     "bands": [
+      [
+       400,
+       1250000
+      ],
+      [
+       500,
+       1400000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2300000,
+     "bands": [
+      [
+       600,
+       1700000
+      ],
+      [
+       700,
+       1850000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 3700000,
+     "bands": [
+      [
+       1000,
+       2800000
+      ],
+      [
+       1200,
+       3450000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "the-hillshore",
+   "name": "THE HILLSHORE",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2550000,
+     "bands": [
+      [
+       700,
+       1900000
+      ],
+      [
+       800,
+       1850000
+      ],
+      [
+       900,
+       2150000
+      ],
+      [
+       1000,
+       2400000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 3150000,
+     "bands": [
+      [
+       1000,
+       2550000
+      ],
+      [
+       1100,
+       2550000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 4250000,
+     "bands": [
+      [
+       1400,
+       3900000
+      ],
+      [
+       1700,
+       4050000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "the-line-at-tanjong-rhu",
+   "name": "THE LINE @ TANJONG RHU",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1850000,
+     "bands": [
+      [
+       800,
+       1800000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2750000,
+     "bands": [
+      [
+       1000,
+       2700000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 5000000,
+     "bands": [
+      [
+       2800,
+       4850000
+      ],
+      [
+       2900,
+       5000000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 5800000,
+     "bands": [
+      [
+       3400,
+       5750000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "the-myst",
+   "name": "THE MYST",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 3750000,
+     "bands": [
+      [
+       1500,
+       3250000
+      ],
+      [
+       1800,
+       3400000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 4100000,
+     "bands": [
+      [
+       1600,
+       3600000
+      ],
+      [
+       2000,
+       4050000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "the-orie",
+   "name": "THE ORIE",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1600000,
+     "bands": [
+      [
+       500,
+       1450000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 3150000,
+     "bands": [
+      [
+       1100,
+       3000000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "the-residences-at-w-singapore-sentosa-cove",
+   "name": "THE RESIDENCES AT W SINGAPORE SENTOSA COVE",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 4100000,
+     "bands": [
+      [
+       2200,
+       4050000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 4750000,
+     "bands": [
+      [
+       1600,
+       2900000
+      ],
+      [
+       1900,
+       3300000
+      ],
+      [
+       2400,
+       4000000
+      ],
+      [
+       2500,
+       4450000
+      ],
+      [
+       2600,
+       4250000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 7300000,
+     "bands": [
+      [
+       2000,
+       3550000
+      ],
+      [
+       2100,
+       3550000
+      ],
+      [
+       2400,
+       4000000
+      ],
+      [
+       3300,
+       5750000
+      ],
+      [
+       3900,
+       6950000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 10900000,
+     "bands": [
+      [
+       4800,
+       8550000
+      ],
+      [
+       4900,
+       8600000
+      ],
+      [
+       5000,
+       8600000
+      ],
+      [
+       6200,
+       10850000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "the-robertson-opus",
+   "name": "THE ROBERTSON OPUS",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1750000,
+     "bands": [
+      [
+       400,
+       1250000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2650000,
+     "bands": [
+      [
+       600,
+       2300000
+      ],
+      [
+       700,
+       2150000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 3500000,
+     "bands": [
+      [
+       900,
+       3200000
+      ],
+      [
+       1000,
+       3250000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "the-sen",
+   "name": "THE SEN",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2000000,
+     "bands": [
+      [
+       600,
+       1500000
+      ],
+      [
+       700,
+       1650000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 3250000,
+     "bands": [
+      [
+       800,
+       2200000
+      ],
+      [
+       900,
+       2400000
+      ],
+      [
+       1100,
+       2650000
+      ],
+      [
+       1200,
+       2950000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 3800000,
+     "bands": [
+      [
+       1400,
+       3450000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "the-shorefront",
+   "name": "THE SHOREFRONT",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 1650000,
+     "bands": [
+      [
+       700,
+       1550000
+      ],
+      [
+       800,
+       1600000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 1950000,
+     "bands": [
+      [
+       900,
+       1800000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 2950000,
+     "bands": [
+      [
+       1500,
+       2900000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "union-square-residences",
+   "name": "UNION SQUARE RESIDENCES",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1700000,
+     "bands": [
+      [
+       400,
+       1300000
+      ],
+      [
+       500,
+       1400000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2150000,
+     "bands": [
+      [
+       700,
+       1850000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 4700000,
+     "bands": [
+      [
+       1500,
+       4150000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 9500000,
+     "bands": [
+      [
+       2400,
+       9500000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "upperhouse-at-orchard-boulevard",
+   "name": "UPPERHOUSE AT ORCHARD BOULEVARD",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1750000,
+     "bands": [
+      [
+       400,
+       1550000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2600000,
+     "bands": [
+      [
+       700,
+       2500000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 7750000,
+     "bands": [
+      [
+       2000,
+       7100000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "v-on-shenton",
+   "name": "V ON SHENTON",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 16000000,
+     "bands": [
+      [
+       6200,
+       16000000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "vela-bay",
+   "name": "VELA BAY",
+   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1600000,
+     "bands": [
+      [
+       400,
+       1450000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2100000,
+     "bands": [
+      [
+       500,
+       1650000
+      ],
+      [
+       600,
+       1850000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 3100000,
+     "bands": [
+      [
+       800,
+       2300000
+      ],
+      [
+       1000,
+       2800000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 4400000,
+     "bands": [
+      [
+       1100,
+       3150000
+      ],
+      [
+       1300,
+       3800000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 5750000,
+     "bands": [
+      [
+       1500,
+       4500000
+      ],
+      [
+       1700,
+       5700000
+      ]
+     ]
+    }
+   ]
+  }
+ ]
+}
