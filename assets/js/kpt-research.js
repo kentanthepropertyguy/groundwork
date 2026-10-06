@@ -388,7 +388,7 @@
      and "small vs wider" is structural (middle PSF ranges overlap, or they do not). Never says better/cheaper/undervalued and never predicts. */
   const INTERP_VERSION = 'v1';
   // Build stamp. research/index.html checks it matches, so a stale cached copy of one file can never silently pair with a newer other file.
-  const BUILD = '2026-10-06.7';
+  const BUILD = '2026-10-06.8';
   const hi = (b, A, B) => (b.gap.dir === 'b' ? B : b.gap.dir === 'a' ? A : null);
   function interpret(M) {
     if (!M || M.overlap === 'none' || !M.bands || !M.bands.length) return null;

@@ -31,7 +31,7 @@ with sync_playwright() as p:
             check(pg.evaluate("document.getElementById('evidence').open"), name + ': choosing a size inside the evidence keeps it open')
         check(not errs, name + ': no console errors ' + str(errs[:1]))
         hy = lambda sel: pg.locator(sel).bounding_box()['y']
-        check(hy('#answer') < hy('#evidence') < hy('#wa'), name + ': order is answer, then See why, then the Ken handoff')
+        check(hy('#answer') < hy('#evidence') < hy('#wa'), name + ': order is answer, then How KPT analysed this, then the Ken handoff')
         ctx.close()
     # desktop (1280): same simplified hierarchy, hero number on one line, no overflow, two-column answer
     for name, h, size in [('desktop strong', '#/p/thomson-grand', None), ('desktop thin', '#/p/bartley-ridge', '550')]:

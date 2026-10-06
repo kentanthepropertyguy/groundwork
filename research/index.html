@@ -8,7 +8,7 @@
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <title>I'm researching a property — Ken Property Tools</title>
 <link rel="stylesheet" href="../assets/css/kpt-system.css">
-<link rel="stylesheet" href="../assets/css/kpt-research.css?v=2026-10-06.7">
+<link rel="stylesheet" href="../assets/css/kpt-research.css?v=2026-10-06.8">
 </head>
 <body class="kpr" data-view="home">
 <header class="kpt-header kpt-shell"><a class="brand" href="../">KEN PROPERTY TOOLS</a>
@@ -24,9 +24,10 @@
 
 <script src="../assets/js/kpt-analytics.js"></script>
 <script src="../assets/js/kpt-components.js"></script>
-<script src="../assets/js/kpt-project.js?v=2026-10-06.7"></script>
-<script src="../assets/js/kpt-research.js?v=2026-10-06.7"></script>
-<script src="../data/research/config.js?v=2026-10-06.7"></script>
+<script src="../assets/js/kpt-project.js?v=2026-10-06.8"></script>
+<script src="../assets/js/kpt-research.js?v=2026-10-06.8"></script>
+<script src="../assets/js/kpt-intel.js?v=2026-10-06.8"></script>
+<script src="../data/research/config.js?v=2026-10-06.8"></script>
 <script>
 // Presentation only. All reasoning is in assets/js/kpt-research.js; all numbers come from the generated project data.
 (function () {
@@ -34,7 +35,7 @@
   KPT.setContext({ tool_name: 'research-journey', tool_category: 'research', project_name: null });
   KPT.track('page_view', { page: 'research' });
 
-  const BUILD = '2026-10-06.7', $app = document.getElementById('app');
+  const BUILD = '2026-10-06.8', $app = document.getElementById('app');
   // The page and its logic file must be the same build. If the browser holds a stale copy of either, say so plainly rather than failing in a misleading way.
   if (R.BUILD !== BUILD) { console.warn('KPT research: build mismatch. page ' + BUILD + ', script ' + R.BUILD); $app.innerHTML = '<div class="kpr-state"><h1 class="kpr-h">This page needs a refresh</h1><p class="kpr-lead">Your browser has an out-of-date copy of this page. Please refresh to load the latest version. On a phone, close the tab and reopen the link.</p></div>'; return; }
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -173,18 +174,22 @@
     const hero = heroM ? `<p class="kpr-a-hero">${esc(heroM[1])} <span>psf</span></p>` : `<p class="kpr-a-hero kpr-a-hero--txt">${esc(A.price.value)}</p>`;
     const stg = A.strength ? `<p class="kpr-a-str"><i class="kpr-dot ${esc(A.strength.dot)}" aria-hidden="true"></i><b>${esc(A.strength.label)}</b></p>` : '';
     const rangeLine = A.range ? `<p class="kpr-a-range"><span>${esc(A.range.label)}:</span> <b>${esc(A.range.value)}</b>${A.range.note ? ` <span>${esc(A.range.note)}</span>` : ''}</p>` : '';
+    let IN = null; try { IN = window.KPTIntel ? KPTIntel.analyse(M, S.rawP, { sizeSqft: S.size || undefined, today: TODAY, monthStart: S.rawM && S.rawM.monthStart }) : null; } catch (e) { console.error('KPT intel failed', e); }
+    const foundHtml = IN && IN.found.length ? `<div class="kpr-found" role="region" aria-labelledby="fndH"><h2 class="kpr-found-h" id="fndH">What KPT found</h2><ul>${IN.found.map((f) => `<li data-ins="${esc(f.id)}">${esc(f.text)}</li>`).join('')}</ul></div>` : '';
+    const checkHtml = IN ? `<div class="kpr-chk" aria-label="What KPT checked">${IN.checklist.map((c) => `<div class="kpr-chk-row" data-area="${esc(c.id)}"><h4>${esc(c.label)}</h4>${c.lines.map((l) => `<p class="kpr-chk-${esc(l.status)}">${esc(l.text)}${l.note ? ` <span class="kpr-chk-note">${esc(l.note)}</span>` : ''}</p>`).join('')}</div>`).join('')}</div>` : '';
     const answer = `<section class="kpr-answer kpr-a-${esc(A.state)}" id="answer" aria-labelledby="ansH">
       <div class="kpr-a-grid"><div class="kpr-a-main">
       <p class="kpr-label">${esc(A.eyebrow)}</p>${A.size && A.size.label ? `<h2 class="kpr-a-size" id="ansH">Around ${esc(A.size.label)}</h2>` : '<h2 class="kpr-a-size" id="ansH">What it transacts at</h2>'}${A.sizeNote ? `<p class="kpr-a-sn">${esc(A.sizeNote)}</p>` : ''}
       <p class="kpr-a-head"><span class="k">${esc(A.price.label)}:</span></p>${hero}${stg}${A.lines.map((l) => `<p class="kpr-a-line ${esc(l.id)}">${esc(l.text)}</p>`).join('')}${near}${A.next ? `<p class="kpr-a-next">${esc(A.next)}</p>` : ''}</div>
       <div class="kpr-a-viz">${rangeLine}${strip}<p class="kpr-note kpr-a-cav">${esc(A.caveat)}</p></div></div>
+      ${foundHtml}
       <div class="kpr-a-actions">${focusHtml(M, 'project')}
       <a class="kpt-cta kpr-a-cmp" id="cmp" href="#/compare/${esc(M.id)}">Compare another project →</a></div></section>`;
     const handoff = `<section class="kpr-handoff" aria-label="Ask Ken"><div class="kpr-ho-id"><img src="../assets/img/ken-portrait.jpg" alt="Ken Tan"><span>Ken Tan | The Property Guy · Property agent since 2007</span></div>
       <div class="kpr-ho-body"><h3>Looking at a particular unit?</h3><p>The transactions can't tell us its facing, layout or whether its asking price is justified.</p></div>
       <div class="kpr-ho-act"><a class="kpt-cta kpt-cta--wa" id="wa" href="#">Get Ken's view →</a><p class="kpr-note">Only the project name is sent to WhatsApp, nothing you typed.</p></div></section>`;
     // Layer 2: everything the page used to show up front, unchanged, behind one disclosure.
-    const evidence = `<details class="kpr-d kpr-evidence" id="evidence"${S.evOpen ? ' open' : ''}><summary><span class="kpr-ev-t">See why →</span><span class="kpr-ev-s">Sizes · price history · floors · recent transactions</span></summary><div class="inner">
+    const evidence = `<details class="kpr-d kpr-evidence" id="evidence"${S.evOpen ? ' open' : ''}><summary><span class="kpr-ev-t">How KPT analysed this →</span><span class="kpr-ev-s">Size · recency · price history · floor bands · transaction activity</span></summary><div class="inner">${checkHtml}
       <section class="kpr-sec kpr-sec--in" style="border-top:none"><p class="kpr-label">What's happening here</p><div class="kpr-read">${M.read.map((r) => `<p>${esc(r.text)}</p>`).join('') || '<p>No sales found for this sale type.</p>'}</div>${M.evidence.recent ? `<p class="kpr-ev">${esc(M.evidence.recent.line)}</p>` : ''}${tiles}<p class="kpr-note">${esc(M.evidence.note)}</p></section>
       ${hasBands ? `<section class="kpr-sec kpr-sec--in"><h2 class="kpr-h2">Size matters</h2><p class="kpr-lead" style="margin-bottom:6px">One overall PSF can describe units you aren't looking at. Here is how each size band has transacted. Tap a size to focus on it.</p><div class="kpr-twopane"><div class="kpr-rows">${rows}</div>${panel}</div></section>` : ''}
       <section class="kpr-sec kpr-sec--in" style="padding-top:8px">${allH}${ctx}</section>
@@ -227,7 +232,7 @@
       .then((x) => Promise.all([loadPeers(x.p), loadNotes()]).then((y) => ({ m: x.m, p: x.p, ix: x.ix, peers: y[0], notes: y[1] })))
       .then((d) => {
         const draw = () => {
-          const M = R.analyseProject(d.p, d.m, { sale: saleHash || undefined, sizeSqft: S.size || undefined, peers: d.peers, notes: d.notes, today: TODAY });
+          S.rawP = d.p; S.rawM = d.m; const M = R.analyseProject(d.p, d.m, { sale: saleHash || undefined, sizeSqft: S.size || undefined, peers: d.peers, notes: d.notes, today: TODAY });
           document.body.dataset.view = 'project'; document.title = M.name + ' — Research — Ken Property Tools';
           $app.innerHTML = projectHtml(M); wireCommon(M, 'project'); sizeEvent(M, 'project');
           const evd = document.getElementById('evidence'); if (evd) evd.addEventListener('toggle', () => { S.evOpen = evd.open; });

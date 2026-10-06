@@ -31,7 +31,8 @@ async function render(hash, opts) {
   ctx.window = ctx; ctx.self = ctx; ctx.addEventListener = () => {}; ctx.scrollTo = () => {}; ctx.innerWidth = 390; ctx.dataLayer = []; ctx.navigator = { userAgent: 'node' };
   ctx.KPT = { setContext() {}, track: (e, p) => events.push([e, p]), waLink: (o) => 'https://wa.me/x?text=' + encodeURIComponent((o && o.message) || '') };
   vm.createContext(ctx);
-  ['assets/js/kpt-project.js', 'assets/js/kpt-research.js', 'data/research/config.js'].forEach((f) => vm.runInContext(lib(f), ctx, { filename: f }));
+  ['assets/js/kpt-project.js', 'assets/js/kpt-research.js', 'assets/js/kpt-intel.js', 'data/research/config.js'].forEach((f) => vm.runInContext(lib(f), ctx, { filename: f }));
+  if (opts.breakIntel) ctx.KPTIntel.analyse = () => { throw new Error('boom'); };
   if (opts.staleScript) ctx.KPT_RESEARCH.BUILD = opts.staleScript;
   vm.runInContext(inline, ctx, { filename: 'research/index.html' });
   for (let i = 0; i < 200; i++) { await new Promise((r) => setTimeout(r, 15)); if (app.innerHTML && !/kpr-skel/.test(app.innerHTML)) break; }
@@ -68,7 +69,7 @@ const CANT = /couldn’t load|couldn't load|couldn’t find/;
   });
   await t('page and script carry the same build stamp, and assets and data requests are versioned with it', async () => {
     const R = require(path.join(root, 'assets/js/kpt-research.js')), m = html.match(/const BUILD = '([^']+)'/); assert.ok(m && m[1] === R.BUILD, 'page ' + (m && m[1]) + ' vs script ' + R.BUILD);
-    ['kpt-research.css', 'kpt-project.js', 'kpt-research.js', 'config.js'].forEach((f) => assert.ok(new RegExp(f.replace('.', '\\.') + '\\?v=' + R.BUILD.replace(/\./g, '\\.')).test(html), f + ' not versioned'));
+    ['kpt-research.css', 'kpt-project.js', 'kpt-research.js', 'kpt-intel.js', 'config.js'].forEach((f) => assert.ok(new RegExp(f.replace('.', '\\.') + '\\?v=' + R.BUILD.replace(/\./g, '\\.')).test(html), f + ' not versioned'));
     assert.ok(/'v=' \+ BUILD/.test(html));
   });
 
@@ -84,9 +85,58 @@ const CANT = /couldn’t load|couldn't load|couldn’t find/;
     assert.ok(r.html.indexOf('id="evidence"') < r.html.indexOf('id="wa"') && /Looking at a particular unit\?/.test(r.html) && /The transactions can't tell us its facing, layout or whether its asking price is justified\./.test(textOf(r.html)) && /Only the project name is sent to WhatsApp, nothing you typed\./.test(r.html));
     assert.ok(!/Project research/.test(r.html) && !/kpr-handoff[^>]*box-shadow/.test(r.html));
     assert.ok(r.html.indexOf('id="answer"') < r.html.indexOf('id="evidence"'), 'answer must come first');
-    assert.ok(/<details class="kpr-d kpr-evidence" id="evidence">/.test(r.html), 'evidence must be collapsed by default'); assert.ok(/See why →/.test(r.html) && /Sizes · price history · floors · recent transactions/.test(r.html) && !/See transaction details/.test(r.html));
+    assert.ok(/<details class="kpr-d kpr-evidence" id="evidence">/.test(r.html), 'evidence must be collapsed by default'); assert.ok(/How KPT analysed this →/.test(r.html) && /Size · recency · price history · floor bands · transaction activity/.test(r.html) && !/See why →|See transaction details/.test(r.html));
   });
-  await t('layer 1 uses no analytical jargon (no "middle PSF", "median", "band", "sample")', async () => { for (const [h, size] of [['#/p/thomson-grand'], ['#/p/bartley-ridge', '550'], ['#/p/3-at-phillips'], ['#/p/thomson-grand', '2600'], ['#/p/thomson-grand', '1050']]) { const r = await render(h, { size }); const a = textOf(answerOf(r.html)).replace(/Looking at a particular size\?.*?(?=Next|Try|$)/, ''); const m = a.match(JARGON); assert.ok(!m, h + ' ' + size + ': "' + (m && m[0]) + '" in ' + a.slice(0, 300)); } });
+
+  console.log('Page render: Project Intelligence V1 (What KPT found + How KPT analysed this)');
+  const foundOf = (h) => { const m = h.match(/<div class="kpr-found"[\s\S]*?<\/ul><\/div>/); return m ? m[0] : ''; };
+  const items = (h) => (foundOf(h).match(/<li data-ins="[^"]*">([\s\S]*?)<\/li>/g) || []).map((x) => textOf(x).trim());
+  const chk = (h) => { const i = h.indexOf('class="kpr-chk"'); return i < 0 ? '' : textOf(h.slice(i, h.indexOf('<section class="kpr-sec', i))); };
+  const BANNED = /\b(liquid|illiquid|active|quiet|appreciat\w*|depreciat\w*|premium|discount|fair value|comparables?|rose|fell|undervalued|overvalued|bargain|hot|cheap)\b/i;
+  const six = [['Thomson Grand default', '#/p/thomson-grand', undefined, ['13 of the 19 recent sales were around 1,300–1,399 sqft.', '99-year lease from 2010, with about 83 years remaining.']],
+    ['Bartley Ridge 550', '#/p/bartley-ridge', '550', ['The middle half of resale sales here (since Sep 2021) were between 495 and 1,033 sqft. 550 sqft is within that range. 4 of the 243 sales were in the 500–599 sqft band.', 'The nearest size with firmer recent evidence is 400–499 sqft (9 sales across 6 months).', '99-year lease from 2012, with about 85 years remaining.']],
+    ['Leedon Green default', '#/p/leedon-green', undefined, ['Recent sales were spread across 5 size bands. The most sales (3 of 11) were in 800–899 sqft, level with 1,000–1,099 sqft.', 'Also recorded since Sep 2021: 391 new-sale (developer) and 33 sub-sale transactions. They are priced differently, so they are shown separately, not mixed in.']],
+    ['Grand Dunman default', '#/p/grand-dunman', undefined, ['Recent sales were spread across 16 size bands. The most sales (13 of 72) were in 2,100–2,199 sqft, level with 1,700–1,799 sqft.', 'Only new-sale and sub-sale transactions are recorded so far. There are no resale transactions yet.', '99-year lease from 2022, with about 95 years remaining.']],
+    ['Thomson Grand 1,050', '#/p/thomson-grand', '1050', ['The middle half of resale sales here (since Sep 2021) were between 1,023 and 1,410 sqft. 1,050 sqft is within that range. 8 of the 99 sales were in the 1,000–1,099 sqft band.', '13 of the 19 recent sales across the project were around 1,300–1,399 sqft.', '99-year lease from 2010, with about 83 years remaining.']],
+    ['3@Phillips default', '#/p/3-at-phillips', undefined, []]];
+  for (const [name, h, size, want] of six) {
+    await t('approved Layer-1 output, exactly: ' + name, async () => {
+      const r = await render(h, { size }); assert.strictEqual(r.errors.length, 0, r.errors.join('|')); const got = items(r.html);
+      assert.deepStrictEqual(got, want); if (!want.length) assert.ok(!/What KPT found/.test(r.html), 'no block at all when nothing qualifies');
+    });
+  }
+  await t('block sits inside the answer, after the hero and before the size control; max 3 items; no banned judgement words', async () => {
+    for (const [, h, size] of six) { const r = await render(h, { size }); const a = answerOf(r.html); if (foundOf(r.html)) { assert.ok(a.indexOf('class="kpr-a-grid"') < a.indexOf('class="kpr-found"') && a.indexOf('class="kpr-found"') < a.indexOf('class="kpr-a-actions"')); assert.ok(items(r.html).length <= 3); assert.ok(/<h2 class="kpr-found-h"[^>]*>What KPT found<\/h2>/.test(a)); } assert.ok(!BANNED.test(items(r.html).join(' ')), h + ' ' + items(r.html).join(' ')); assert.ok(!BANNED.test(chk(r.html).replace(/Transaction activity/g, '')), h + ' checklist: ' + chk(r.html).match(BANNED)); }
+  });
+  await t('Layer 1 never carries S5/S6/S1/S10 or the lease-start caveat', async () => {
+    for (const [, h, size] of six) { const r = await render(h, { size }); const f = items(r.html).join(' '); assert.ok(!/previous 12 months|floor bands|in the last 12 months across the project|First new sale recorded|counted from the lease start year/.test(f), f); }
+  });
+  await t('S3 never restates the hero when every recent sale sits in the hero band (and never duplicates S2b)', async () => {
+    const r = await render('#/p/bartley-ridge', { size: '550' }); assert.ok(!/spread across 10 size bands/.test(items(r.html).join(' ')));
+  });
+  await t('How KPT analysed this: collapsed by default, five areas, checklist first, existing evidence kept after it', async () => {
+    const r = await render('#/p/thomson-grand'); const ev = r.html.slice(r.html.indexOf('id="evidence"')); assert.ok(/<details class="kpr-d kpr-evidence" id="evidence">/.test(r.html));
+    ['size', 'recency', 'price', 'floors', 'activity'].forEach((k) => assert.ok(new RegExp('data-area="' + k + '"').test(ev), 'missing area ' + k));
+    assert.ok(ev.indexOf('class="kpr-chk"') < ev.indexOf("What's happening here") && ev.indexOf('class="kpr-chk"') > -1);
+    const c = chk(r.html); assert.ok(/Different units, floors and dates: not a measure of how any one unit changed\./.test(c) && /does not show what a floor is worth/.test(c) && /counted from the lease start year, not the completion year/.test(c), c);
+    assert.ok(/previous 12 months was \$1,765–\$1,812 psf \(10 sales\), so the two ranges overlap/.test(c));
+  });
+  await t('absence lines: checked-but-insufficient areas say so explicitly (3@Phillips, Bartley Ridge)', async () => {
+    const c = chk((await render('#/p/3-at-phillips')).html); assert.ok(/Not enough recent sales to say which size sells most\./.test(c) && /Not enough sales in both periods for a reliable comparison\./.test(c) && /Not enough sales across floor bands to say\./.test(c) && /No resale sales in the last 12 months\. The latest in the project was/.test(c), c);
+    const b = chk((await render('#/p/bartley-ridge', { size: '550' })).html); assert.ok(/Not enough sales in both periods/.test(b) && /Not enough sales across floor bands/.test(b));
+  });
+  await t('new-sale project: price history and floors say "not compared" (not "not enough"), and first new sale is labelled as in-data, not launch', async () => {
+    const c = chk((await render('#/p/grand-dunman')).html); assert.ok(/Not compared across periods for new-sale transactions\./.test(c) && /Not compared by floor for new-sale transactions\./.test(c) && /First new sale recorded: Jul 2023\./.test(c) && /not the project’s launch/.test(c), c);
+  });
+  await t('lease caveat applies to every leasehold project; freehold and 999-year get no lease line', async () => {
+    assert.ok(/counted from the lease start year/.test(chk((await render('#/p/bartley-ridge', { size: '550' })).html)));
+    assert.ok(!/Lease/.test(chk((await render('#/p/leedon-green')).html)) && !/Lease/.test(chk((await render('#/p/3-at-phillips')).html)));
+  });
+  await t('typed size never reaches analytics or WhatsApp via the new block', async () => { const r = await render('#/p/bartley-ridge', { size: '550' }); assert.ok(!r.events.some((e) => JSON.stringify(e).indexOf('550') > -1)); assert.ok(r.wa === undefined || r.wa.indexOf('550') === -1); });
+  await t('if the intelligence module throws, the page still renders the answer (no block, no checklist)', async () => {
+    const r = await render('#/p/thomson-grand', { breakIntel: true }); assert.ok(/id="answer"/.test(r.html) && !/What KPT found/.test(r.html) && /id="evidence"/.test(r.html));
+  });
+  await t('layer 1 uses no analytical jargon (no "middle PSF", "median", "band", "sample")', async () => { for (const [h, size] of [['#/p/thomson-grand'], ['#/p/bartley-ridge', '550'], ['#/p/3-at-phillips'], ['#/p/thomson-grand', '2600'], ['#/p/thomson-grand', '1050']]) { const r = await render(h, { size }); const a = textOf(answerOf(r.html).replace(/<div class="kpr-found"[\s\S]*?<\/ul><\/div>/, '')).replace(/Looking at a particular size\?.*?(?=Next|Try|$)/, ''); const m = a.match(JARGON); assert.ok(!m, h + ' ' + size + ': "' + (m && m[0]) + '" in ' + a.slice(0, 300)); } });
   await t('every piece of the previous page is still there inside layer 2', async () => {
     const r = await render('#/p/thomson-grand'); const ev = r.html.slice(r.html.indexOf('id="evidence"')); ["What's happening here", 'Sales, last 12 months', 'Middle PSF (approx.)', 'Size matters', 'kpr-rows', 'kpr-panel', 'By floor band', 'over time', 'History across all sizes', 'Market context', "What the transactions don't tell you"].forEach((k) => assert.ok(ev.indexOf(k) > -1 || ev.indexOf(k.replace("'", '&#39;')) > -1, 'missing in layer 2: ' + k));
   });
