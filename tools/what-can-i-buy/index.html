@@ -28,6 +28,7 @@
 <script src="../../assets/js/kpt-market.js"></script>
 <script src="../../assets/js/kpt-engine.js"></script>
 <script src="../../assets/js/kpt-result.js"></script>
+<script src="../../assets/js/kpt-find.js?v=2026-10-06.9"></script>
 <script src="../../data/market/config.js"></script>
 <script>
 (function () {
@@ -104,6 +105,7 @@
     if (rows.length) main += `<div class="res-list">${rows.join('')}</div>`;
     if (v.ken) main += `<section class="res-ken" aria-label="Ken's Take"><img src="../../assets/img/ken-portrait.jpg" alt="Ken Tan"><div><h3>Ken's Take <span>My judgement, not URA data</span></h3><p>“${esc(v.ken.note)}”</p></div></section>`;
     return `<div class="kpt-section" style="padding-top:0;">${flag}${chip}${indicative}${tag}${main}
+        <div id="findRoot"></div>
         <div class="res-cta"><a class="kpt-cta kpj-btn kpj-btn--wa" id="kenView" href="#">Get Ken's view →</a></div>
         ${v.footer ? `<p class="res-src">${esc(v.footer)} Source: URA.</p>` : ''}
         <button class="kpj-link kpj-link--muted" id="changeBudget" type="button">Change budget</button>
@@ -112,6 +114,7 @@
   function show(res, step) {
     const v = R.view(res, { step: step, sizeRounding: ENG.DEFAULTS.size_rounding }), root = $('root');
     root.innerHTML = resultHtml(v);
+    initFind(step);
     const pl = R.analytics(res, v, budget);
     const kv = $('kenView');
     kv.href = KPT.waLink({ message: R.waMessage(budget) });
@@ -125,6 +128,7 @@
     root.innerHTML = resultHtml({ budgetText: R.budgetText(budget), hero: null, also: [], ec: null, ken: null, footer: null, tag: null, message: { title: "Market figures aren't available just now.", body: "I can still give you my view on this budget." } });
     const kv = $('kenView'); kv.href = KPT.waLink({ message: R.waMessage(budget) });
     $('changeBudget').addEventListener('click', () => { budget = null; handoff = null; render(); });
+    initFind(null);
   }
   function start() {
     $('root').innerHTML = '<p class="kpt-note" style="padding:40px 0;">Loading…</p>';
@@ -132,6 +136,83 @@
     Promise.all([R.loadStats(statsBase, budget, ENG, f), R.loadNotes(notesUrl, f)])
       .then((a) => show(ENG.run({ budget, step: a[0].step, index: a[0].index, today: TODAY, notes: a[1] }, ENG.DEFAULTS), a[0].step))
       .catch(failed);
+  }
+
+  // ---------------------------------------------------------------- FIND V1: Developments worth investigating
+  // All rules, ranking and wording are in assets/js/kpt-find.js. This is presentation and wiring only. Nothing typed here is sent to analytics or WhatsApp.
+  const FIND_URL = '../../data/projects/find.json?v=2026-10-06.9', FI = window.KPT_FIND;
+  let findIx, findStep = null, FS = null;
+  const loadFind = () => (findIx !== undefined ? Promise.resolve(findIx) : fetch(FIND_URL).then((r) => (r.ok ? r.json() : null)).then((d) => (findIx = FI.prepare(d))).catch(() => (findIx = null)));
+  const answersNow = () => (handoff && handoff.from === 'buy' ? { where: handoff.where, size: handoff.size, priorities: handoff.priorities || [] } : { where: 'flexible', size: 'not-sure', priorities: [] });
+  const openToNow = () => (handoff && handoff.from === 'buy' && ['new', 'resale', 'both'].indexOf(handoff.openTo) > -1 ? handoff.openTo : 'both');
+  function initFind(step) {
+    const root = $('findRoot'); if (!root || !FI || !budget) return;
+    findStep = step; FS = { explicit: null, widen: false, districts: [], text: '', freehold: answersNow().priorities.indexOf('freehold') > -1, sizeOpen: false, areaOpen: false, seen: {} };
+    root.onclick = findClick; root.onkeydown = (e) => { if (e.key === 'Enter' && e.target && e.target.matches && e.target.matches('input')) { e.preventDefault(); findClick({ target: e.target.closest('.kpf-box').querySelector('[data-f=apply]') }); } };
+    loadFind().then(() => renderFind());
+  }
+  function renderFind() {
+    const root = $('findRoot'); if (!root) return;
+    if (!findIx) { root.innerHTML = ''; return; }                                   // data file missing: the section is simply absent and the page is exactly as before
+    const openTo = openToNow(), sz = FI.sizeWindow(FS.explicit, findStep, openTo);
+    const head = `<h2 class="kpf-h" id="kpfH">Developments worth investigating</h2>`;
+    const lede = `<p class="kpf-lede">${esc('Based on actual sales in the last 12 months (to ' + FI.ymLabel(findIx.latest) + ') around your budget and size.')} This is a starting list, not a recommendation, and it doesn't show what is for sale now.</p>`;
+    const sizeBox = (v) => `<div class="kpf-box" id="kpfSizeBox"${FS.sizeOpen || !sz ? '' : ' hidden'}><label>From <input id="kpfFrom" type="text" inputmode="numeric" value="${esc(v ? v.lo : '')}" aria-label="Smallest size in square feet"></label><label>To <input id="kpfTo" type="text" inputmode="numeric" value="${esc(v ? v.hi : '')}" aria-label="Largest size in square feet"></label><span>sqft</span><button class="kpf-btn" type="button" data-f="apply">Apply</button>${FS.explicit ? '<button class="kpf-link" type="button" data-f="typical">Use the typical size</button>' : ''}<p class="kpf-err" id="kpfErr" role="alert"></p></div>`;
+    const typed = FS.text && FS.text.trim().length >= 3 ? FI.matchDistricts(FS.text).filter((d) => FS.districts.indexOf(d) < 0 && findIx.districts.indexOf(d) > -1) : [];
+    const areaLine = FS.districts.length ? FS.districts.map((d) => FI.districtLabel(d)).join(' · ') : FS.text ? 'Matching “' + FS.text + '”' : 'Anywhere in Singapore';
+    const areaBox = `<div class="kpf-box kpf-area" id="kpfAreaBox"${FS.areaOpen ? '' : ' hidden'}><label class="kpf-wide">Street or project name <input id="kpfText" type="text" maxlength="40" value="${esc(FS.text)}" placeholder="e.g. Thomson"></label><button class="kpf-btn" type="button" data-f="text">Apply</button>
+      ${typed.length ? `<p class="kpf-sugg">Did you mean: ${typed.map((d) => `<button class="kpf-link" type="button" data-f="adddist" data-d="${esc(d)}">${esc(FI.districtShort(d))}</button>`).join(' ')}</p>` : ''}
+      <div class="kpf-chips" role="group" aria-label="Districts">${findIx.districts.map((d) => `<button class="kpf-chip" type="button" data-f="dist" data-d="${esc(d)}" aria-pressed="${FS.districts.indexOf(d) > -1}">${esc(FI.districtShort(d))}</button>`).join('')}</div>
+      <p class="kpf-note">Area names are general. A district contains places not named here.</p></div>`;
+    const wdChip = FS.widen ? `<p class="kpf-line"><span class="kpf-tag">Budget range widened to ±15%</span> <button class="kpf-link" type="button" data-f="nowiden">Remove</button></p>` : '';
+    const frChip = FS.freehold ? `<p class="kpf-line"><span class="kpf-tag">Freehold or 999-year only (you chose tenure)</span> <button class="kpf-link" type="button" data-f="nofree">Remove</button></p>` : '';
+    if (!sz) {
+      root.innerHTML = `<section class="kpf" aria-labelledby="kpfH">${head}${lede}<p class="kpf-line">Tell us the size you have in mind, in square feet, to see developments. We don't convert bedrooms into square feet.</p>${sizeBox(null)}</section>`; return;
+    }
+    const typical = FI.inferSize(findStep, openTo);
+    const res = FI.shortlist(findIx, { budget, openTo, size: sz, districts: FS.districts, text: FS.text, freehold: FS.freehold, pct: FS.widen ? FI.T.widenBudgetPct : FI.T.budgetPct, answers: answersNow(), typical });
+    const cardHtml = (c) => `<article class="kpf-card"><h3>${esc(c.name)}${res.groups.length > 1 ? ` <span class="kpf-sale">${esc(c.saleLabel)}</span>` : ''}</h3><p class="kpf-meta">${esc(c.meta)}</p>
+      <p class="kpf-why"><b>Why it appeared:</b> ${esc(c.why)}</p><p><b>Recent evidence:</b> ${esc(c.evidence)}</p><p class="kpf-price">${esc(c.prices)}</p>${c.indicative ? `<p class="kpf-quiet">${esc(c.indicative)}</p>` : ''}
+      <p class="kpf-quiet"><b>Couldn't evaluate:</b> ${esc(c.notEvaluated)}</p><a class="kpf-go" data-f="go" data-id="${esc(c.id)}" href="${esc(c.link)}">${esc(c.linkText)}</a></article>`;
+    const list = res.groups.map((g) => (res.groups.length > 1 ? `<h3 class="kpf-gh">${esc(g.label)}</h3>` : '') + g.cards.map(cardHtml).join('')).join('');
+    const un = res.unsupported.length ? `<div class="kpf-un"><p class="kpf-unh">What we didn't use to build this list</p><ul>${res.unsupported.map((u) => `<li><b>${esc(u.title)}:</b> ${esc(u.text)}</li>`).join('')}</ul>${answersNow().where === 'school' || answersNow().where === 'family' || answersNow().where === 'work' || answersNow().where === 'areas' ? '<p class="kpf-note">If you know the area, choose a district and we’ll narrow the list.</p>' : ''}</div>` : '';
+    const chg = res.changes.length ? `<ul class="kpf-chg">${res.changes.map((c) => `<li><button class="kpf-link" type="button" data-f="chg" data-id="${esc(c.id)}">${esc(c.label)}</button> <span>${esc(c.text)}</span></li>`).join('')}</ul>` : '';
+    let body = '';
+    if (res.state === 'none') body = `<div class="kpf-msg"><p><b>We couldn't list any development for this budget and size.</b></p><p>${esc(res.noneText)}</p>${res.reference ? `<p>${esc(res.reference.text)}</p>` : ''}${chg}<p class="kpf-note">You can change the size or the budget, or <a href="#" data-f="ken">ask Ken what's realistic</a>.</p></div>`;
+    else body = list + (res.state === 'few' ? `<div class="kpf-msg"><p>${esc(res.fewText)}</p>${chg}</div>` : '');
+    const meth = `<details class="kpf-meth"><summary>How this shortlist was made →</summary><div class="inner">${FI.METHOD.map((t) => `<p>${esc(t)}</p>`).join('')}</div></details>`;
+    root.innerHTML = `<section class="kpf" aria-labelledby="kpfH">${head}${lede}
+      <p class="kpf-line">${esc(sz.line)} <button class="kpf-link" type="button" data-f="sizeToggle">Change size</button></p>${sizeBox(sz)}
+      <p class="kpf-line">Area: ${esc(areaLine)} <button class="kpf-link" type="button" data-f="areaToggle">Narrow by area</button></p>${areaBox}${frChip}${wdChip}
+      ${un}${body}${res.state !== 'none' ? `<p class="kpf-order">${esc(res.orderLine)}</p>` : ''}${meth}</section>`;
+    const pl = FI.analytics(res, bandOf(budget)), key = JSON.stringify(pl);
+    if (!FS.seen[key]) { FS.seen[key] = 1; KPT.track('find_shown', pl); }
+    window.__kptFind = res;   // read by tests
+  }
+  function bandOf(b) { const m = b, step = 200000; if (m < 600000) return 'under-0.6m'; if (m >= 4000000) return '4m-plus'; const lo = Math.floor(m / step) * step; return (lo / 1e6).toFixed(1) + '-' + ((lo + step) / 1e6).toFixed(1) + 'm'; }
+  function findClick(e) {
+    const t = e.target.closest ? e.target.closest('[data-f]') : e.target; if (!t || !t.dataset) return; const f = t.dataset.f, num = (v) => Number(String(v || '').replace(/[^0-9.]/g, ''));
+    if (f === 'go') { KPT.track('find_research_click', { project_id: t.dataset.id }); return; }
+    if (f === 'ken') { e.preventDefault(); const kv = $('kenView'); if (kv) kv.click(); return; }
+    e.preventDefault && e.preventDefault();
+    if (f === 'sizeToggle') FS.sizeOpen = !FS.sizeOpen;
+    else if (f === 'areaToggle') FS.areaOpen = !FS.areaOpen;
+    else if (f === 'apply') {
+      const a = num($('kpfFrom').value), b = num($('kpfTo').value);
+      if (!(a >= 100 && b > a && b <= 20000)) { $('kpfErr').textContent = 'Enter a range in square feet, for example 900 to 1,100.'; return; }
+      FS.explicit = { from: a, to: b }; FS.sizeOpen = false;
+    } else if (f === 'typical') { FS.explicit = null; FS.sizeOpen = false; }
+    else if (f === 'text') { FS.text = ($('kpfText').value || '').replace(/\s+/g, ' ').trim().slice(0, 40); FS.areaOpen = true; }
+    else if (f === 'dist') { const d = t.dataset.d, i = FS.districts.indexOf(d); if (i > -1) FS.districts.splice(i, 1); else FS.districts.push(d); FS.areaOpen = true; }
+    else if (f === 'adddist') { if (FS.districts.indexOf(t.dataset.d) < 0) FS.districts.push(t.dataset.d); FS.text = ''; FS.areaOpen = true; }
+    else if (f === 'nofree') FS.freehold = false;
+    else if (f === 'nowiden') FS.widen = false;
+    else if (f === 'chg') {
+      const id = t.dataset.id; if (id === 'area') { FS.districts = []; FS.text = ''; }
+      else if (id === 'size') { const sz = FI.sizeWindow(FS.explicit, findStep, openToNow()); if (sz) FS.explicit = { from: sz.lo - FI.T.sizePad, to: sz.hi + FI.T.sizePad, widened: true }; }
+      else if (id === 'budget') FS.widen = true;
+    }
+    renderFind();
   }
   function render() { if (!budget) { $('root').innerHTML = askBudgetHtml(); wireAsk(); } else start(); }
   render();
