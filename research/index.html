@@ -8,11 +8,11 @@
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <title>I'm researching a property — Ken Property Tools</title>
 <link rel="stylesheet" href="../assets/css/kpt-system.css">
-<link rel="stylesheet" href="../assets/css/kpt-research.css?v=2026-10-06.4">
+<link rel="stylesheet" href="../assets/css/kpt-research.css?v=2026-10-06.7">
 </head>
 <body class="kpr" data-view="home">
 <header class="kpt-header kpt-shell"><a class="brand" href="../">KEN PROPERTY TOOLS</a>
-  <div class="kpt-byline"><img src="../assets/img/ken-portrait.jpg" alt="Ken Tan"></div></header>
+  <div class="kpt-byline"><img src="../assets/img/ken-portrait.jpg" alt="Ken Tan"><span>Ken Tan | The Property Guy · Property agent since 2007</span></div></header>
 
 <main class="kpt-shell" id="app"></main>
 
@@ -24,9 +24,9 @@
 
 <script src="../assets/js/kpt-analytics.js"></script>
 <script src="../assets/js/kpt-components.js"></script>
-<script src="../assets/js/kpt-project.js?v=2026-10-06.4"></script>
-<script src="../assets/js/kpt-research.js?v=2026-10-06.4"></script>
-<script src="../data/research/config.js?v=2026-10-06.4"></script>
+<script src="../assets/js/kpt-project.js?v=2026-10-06.7"></script>
+<script src="../assets/js/kpt-research.js?v=2026-10-06.7"></script>
+<script src="../data/research/config.js?v=2026-10-06.7"></script>
 <script>
 // Presentation only. All reasoning is in assets/js/kpt-research.js; all numbers come from the generated project data.
 (function () {
@@ -34,7 +34,7 @@
   KPT.setContext({ tool_name: 'research-journey', tool_category: 'research', project_name: null });
   KPT.track('page_view', { page: 'research' });
 
-  const BUILD = '2026-10-06.4', $app = document.getElementById('app');
+  const BUILD = '2026-10-06.7', $app = document.getElementById('app');
   // The page and its logic file must be the same build. If the browser holds a stale copy of either, say so plainly rather than failing in a misleading way.
   if (R.BUILD !== BUILD) { console.warn('KPT research: build mismatch. page ' + BUILD + ', script ' + R.BUILD); $app.innerHTML = '<div class="kpr-state"><h1 class="kpr-h">This page needs a refresh</h1><p class="kpr-lead">Your browser has an out-of-date copy of this page. Please refresh to load the latest version. On a phone, close the tab and reopen the link.</p></div>'; return; }
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -92,8 +92,11 @@
   const notMeasuredHtml = (M) => `<section class="kpr-sec"><p class="kpr-label">What the transactions don't tell you</p><ul class="kpr-list">${M.notMeasured.map((x) => `<li>${esc(x)}</li>`).join('')}</ul><p class="kpr-note">These are judgement calls. That is where Ken's view comes in.</p></section>`;
   const focusHtml = (M, kind) => {
     const f = M.focus; let st = '';
-    if (kind === 'project' && f && f.requested) st = f.hasEvidence ? `<span class="kpr-pill">Focused on ${esc(f.label)}</span>` : `<span class="kpr-pill">No sales in the ${esc(f.requestedLabel)} band</span>`;
+    if (false) st = f.hasEvidence ? `<span class="kpr-pill">Focused on ${esc(f.label)}</span>` : `<span class="kpr-pill">No sales in the ${esc(f.requestedLabel)} band</span>`;
     if (kind === 'compare' && S.size) { const b = R.focusBin(S.size, { bin: 100 }); st = b === null ? '' : `<span class="kpr-pill">Focused on ${esc(R.bandLabel(b, 100))}</span>`; }
+    if (kind === 'project') return `<div class="kpr-focus kpr-focus--open"><label class="kpr-focus-h" for="sizeIn">Check another size</label>
+      <div class="kpr-focus-row"><input id="sizeIn" inputmode="numeric" autocomplete="off" placeholder="e.g. 1,000" value="${esc(S.size)}" aria-describedby="sizeNote"><button class="kpr-btn" type="button" id="sizeGo">Check →</button></div>
+      <p class="kpr-note" id="sizeNote">${S.size ? '<button class="kpr-link" type="button" id="sizeClear">Clear</button> · ' : ''}Square feet only. Kept on this device, never sent to analytics or WhatsApp.</p><div class="kpr-err" id="sizeErr" role="alert"></div>${st ? `<div style="margin-top:6px">${st}</div>` : ''}</div>`;
     return `<details class="kpr-focus"${S.size ? ' open' : ''}><summary>Looking at a particular size?</summary>
       <div class="kpr-focus-row"><label class="kpr-note" for="sizeIn" style="margin:0">Size in sqft</label><input id="sizeIn" inputmode="numeric" autocomplete="off" placeholder="e.g. 1,000" value="${esc(S.size)}" aria-describedby="sizeNote"><button class="kpr-btn" type="button" id="sizeGo">Focus</button>${S.size ? '<button class="kpr-link" type="button" id="sizeClear">Clear</button>' : ''}</div>
       <p class="kpr-note" id="sizeNote">Square feet only. We don't estimate bedrooms. This is kept on this device and is never sent to analytics or WhatsApp.</p><div class="kpr-err" id="sizeErr" role="alert"></div>${st ? `<div style="margin-top:8px">${st}</div>` : ''}</details>`;
@@ -157,15 +160,43 @@
     const allH = M.history.all.points.length ? `<details class="kpr-d"><summary>History across all sizes</summary><div class="inner">${chart([{ pts: M.history.all.points }])}<p>${esc(M.history.all.text)}</p><div class="kpr-warn">Overall PSF mixes every size sold, and that mix changes over time. ${M.history.mixShift ? esc(M.history.mixShift.text) : ''}</div><p class="kpr-note">${esc(M.history.note)} ${esc(M.evidence.note)}${M.history.earlierNote ? ' ' + esc(M.history.earlierNote) : ''}</p></div></details>` : '';
     const ctx = M.context ? ctxHtml(M) : '';
     const hasBands = M.bands.length > 0;
+    const A = M.answer;
+    const near = A.nearest && A.nearest.length ? `<p class="kpr-a-near"><span>Closest sizes with sales:</span> ${A.nearest.map((x) => `<button class="kpr-link" type="button" data-bin="${x.bin}">${esc(x.label)} (${x.n})</button>`).join(' · ')}</p>` : '';
+    const strip = (() => {
+      const k = A.strip; if (!k) return '';
+      const vals = [k.histLow, k.histHigh, k.recLow, k.recHigh, k.recMed].filter((v) => v != null);
+      const lo = Math.floor((Math.min.apply(null, vals) - 60) / 100) * 100, hi = Math.ceil((Math.max.apply(null, vals) + 60) / 100) * 100, pc = (v) => (((v - lo) / (hi - lo)) * 100).toFixed(1) + '%';
+      const w = (a, b) => (((b - a) / (hi - lo)) * 100).toFixed(1) + '%';
+      return `<div class="kpr-strip" aria-hidden="true"><i class="h" style="left:${pc(k.histLow)};width:${w(k.histLow, k.histHigh)}"></i>${k.recMed != null ? `<i class="r" style="left:${pc(k.recLow)};width:${w(k.recLow, k.recHigh)}"></i><i class="m${A.strength && A.strength.dot === 'hollow' ? '' : ' solid'}" style="left:${pc(k.recMed)}"></i>` : ''}</div><div class="kpr-strip-ax" aria-hidden="true"><span>$${R.num(lo)}</span><span>$${R.num(hi)} psf</span></div>`;
+    })();
+    const heroM = /^(.*\S)\s+psf$/.exec(A.price.value);
+    const hero = heroM ? `<p class="kpr-a-hero">${esc(heroM[1])} <span>psf</span></p>` : `<p class="kpr-a-hero kpr-a-hero--txt">${esc(A.price.value)}</p>`;
+    const stg = A.strength ? `<p class="kpr-a-str"><i class="kpr-dot ${esc(A.strength.dot)}" aria-hidden="true"></i><b>${esc(A.strength.label)}</b></p>` : '';
+    const rangeLine = A.range ? `<p class="kpr-a-range"><span>${esc(A.range.label)}:</span> <b>${esc(A.range.value)}</b>${A.range.note ? ` <span>${esc(A.range.note)}</span>` : ''}</p>` : '';
+    const answer = `<section class="kpr-answer kpr-a-${esc(A.state)}" id="answer" aria-labelledby="ansH">
+      <div class="kpr-a-grid"><div class="kpr-a-main">
+      <p class="kpr-label">${esc(A.eyebrow)}</p>${A.size && A.size.label ? `<h2 class="kpr-a-size" id="ansH">Around ${esc(A.size.label)}</h2>` : '<h2 class="kpr-a-size" id="ansH">What it transacts at</h2>'}${A.sizeNote ? `<p class="kpr-a-sn">${esc(A.sizeNote)}</p>` : ''}
+      <p class="kpr-a-head"><span class="k">${esc(A.price.label)}:</span></p>${hero}${stg}${A.lines.map((l) => `<p class="kpr-a-line ${esc(l.id)}">${esc(l.text)}</p>`).join('')}${near}${A.next ? `<p class="kpr-a-next">${esc(A.next)}</p>` : ''}</div>
+      <div class="kpr-a-viz">${rangeLine}${strip}<p class="kpr-note kpr-a-cav">${esc(A.caveat)}</p></div></div>
+      <div class="kpr-a-actions">${focusHtml(M, 'project')}
+      <a class="kpt-cta kpr-a-cmp" id="cmp" href="#/compare/${esc(M.id)}">Compare another project →</a></div></section>`;
+    const handoff = `<section class="kpr-handoff" aria-label="Ask Ken"><div class="kpr-ho-id"><img src="../assets/img/ken-portrait.jpg" alt="Ken Tan"><span>Ken Tan | The Property Guy · Property agent since 2007</span></div>
+      <div class="kpr-ho-body"><h3>Looking at a particular unit?</h3><p>The transactions can't tell us its facing, layout or whether its asking price is justified.</p></div>
+      <div class="kpr-ho-act"><a class="kpt-cta kpt-cta--wa" id="wa" href="#">Get Ken's view →</a><p class="kpr-note">Only the project name is sent to WhatsApp, nothing you typed.</p></div></section>`;
+    // Layer 2: everything the page used to show up front, unchanged, behind one disclosure.
+    const evidence = `<details class="kpr-d kpr-evidence" id="evidence"${S.evOpen ? ' open' : ''}><summary><span class="kpr-ev-t">See why →</span><span class="kpr-ev-s">Sizes · price history · floors · recent transactions</span></summary><div class="inner">
+      <section class="kpr-sec kpr-sec--in" style="border-top:none"><p class="kpr-label">What's happening here</p><div class="kpr-read">${M.read.map((r) => `<p>${esc(r.text)}</p>`).join('') || '<p>No sales found for this sale type.</p>'}</div>${M.evidence.recent ? `<p class="kpr-ev">${esc(M.evidence.recent.line)}</p>` : ''}${tiles}<p class="kpr-note">${esc(M.evidence.note)}</p></section>
+      ${hasBands ? `<section class="kpr-sec kpr-sec--in"><h2 class="kpr-h2">Size matters</h2><p class="kpr-lead" style="margin-bottom:6px">One overall PSF can describe units you aren't looking at. Here is how each size band has transacted. Tap a size to focus on it.</p><div class="kpr-twopane"><div class="kpr-rows">${rows}</div>${panel}</div></section>` : ''}
+      <section class="kpr-sec kpr-sec--in" style="padding-top:8px">${allH}${ctx}</section>
+      ${notMeasuredHtml(M)}</div></details>`;
     return `<button class="kpr-back" data-act="home">← Search another project</button>
-      <p class="kpt-eyebrow">Project research</p><h1 class="kpr-h" tabindex="-1">${esc(M.name)}</h1>
+      <h1 class="kpr-h" tabindex="-1">${esc(M.name)}</h1>
       <p class="kpr-meta">${esc(M.street)} · ${esc(M.districtLabel)} · ${esc(M.region)} · ${esc(M.tenure.label)}${M.tenure.mixed ? ' · mixed tenure in the data' : ''}</p>
-      ${saleBlock}${focusHtml(M, 'project')}
-      <section class="kpr-sec" style="border-top:none"><p class="kpr-label">What's happening here</p><div class="kpr-read">${M.read.map((r) => `<p>${esc(r.text)}</p>`).join('') || '<p>No sales found for this sale type.</p>'}</div>${M.evidence.recent ? `<p class="kpr-ev">${esc(M.evidence.recent.line)}</p>` : ''}${tiles}<p class="kpr-note">${esc(M.evidence.note)}</p></section>
-      ${hasBands ? `<section class="kpr-sec"><h2 class="kpr-h2">Size matters</h2><p class="kpr-lead" style="margin-bottom:6px">One overall PSF can describe units you aren't looking at. Here is how each size band has transacted. Tap a size to focus on it.</p><div class="kpr-twopane"><div class="kpr-rows">${rows}</div>${panel}</div></section>` : ''}
-      <section class="kpr-sec" style="padding-top:8px">${allH}${ctx}</section>
-      ${notMeasuredHtml(M)}${kenHtml(M.ken)}
-      <section class="kpr-sec"><div class="kpr-cta"><a class="kpt-cta" id="cmp" href="#/compare/${esc(M.id)}">Compare with another project →</a><a class="kpt-cta kpt-cta--wa" id="wa" href="#">Get Ken's view →</a></div></section>`;
+      ${saleBlock}
+      ${answer}
+      ${evidence}
+      ${kenHtml(M.ken)}
+      ${handoff}`;
   }
   function ctxHtml(M) {
     const c = M.context;
@@ -190,6 +221,7 @@
 
   function rerender() { if (S.cur) S.cur.draw(); }
   function showProject(id, saleHash) {
+    if (S.projId !== id) { S.evOpen = false; S.projId = id; }
     $app.innerHTML = '<div class="kpr-state"><div class="kpr-skel"></div><div class="kpr-skel" style="width:60%"></div><div class="kpr-skel" style="width:80%"></div></div>';
     store.manifest().then((m) => store.index().then((ix) => { const r = P.findById(ix, id); if (!r) throw new Error('nf'); return store.shard(id, m).then((d) => ({ m, p: d.projects[id], ix })); }))
       .then((x) => Promise.all([loadPeers(x.p), loadNotes()]).then((y) => ({ m: x.m, p: x.p, ix: x.ix, peers: y[0], notes: y[1] })))
@@ -198,6 +230,7 @@
           const M = R.analyseProject(d.p, d.m, { sale: saleHash || undefined, sizeSqft: S.size || undefined, peers: d.peers, notes: d.notes, today: TODAY });
           document.body.dataset.view = 'project'; document.title = M.name + ' — Research — Ken Property Tools';
           $app.innerHTML = projectHtml(M); wireCommon(M, 'project'); sizeEvent(M, 'project');
+          const evd = document.getElementById('evidence'); if (evd) evd.addEventListener('toggle', () => { S.evOpen = evd.open; });
           $app.querySelectorAll('[data-sale]').forEach((b) => b.addEventListener('click', () => { location.hash = R.buildHash({ view: 'project', id, sale: b.dataset.sale }); }));
           $app.querySelectorAll('.kpr-row[data-bin], button.kpr-link[data-bin]').forEach((b) => b.addEventListener('click', () => { S.size = b.dataset.bin; saveSize(); draw(); const h = $app.querySelector('.kpr-panel'); if (h && window.innerWidth < 960) h.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }));
           const cmp = document.getElementById('cmp'); if (cmp) cmp.addEventListener('click', () => track('research_compare_started', { project_id: id }));

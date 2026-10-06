@@ -71,6 +71,44 @@ const CANT = /couldn’t load|couldn't load|couldn’t find/;
     ['kpt-research.css', 'kpt-project.js', 'kpt-research.js', 'config.js'].forEach((f) => assert.ok(new RegExp(f.replace('.', '\\.') + '\\?v=' + R.BUILD.replace(/\./g, '\\.')).test(html), f + ' not versioned'));
     assert.ok(/'v=' \+ BUILD/.test(html));
   });
+
+  console.log('Page render: single-project page, two layers');
+  const answerOf = (h) => { const i = h.indexOf('id="answer"'); return h.slice(i, h.indexOf('</section>', i)); };
+  const textOf = (h) => h.replace(/<[^>]+>/g, ' ').replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ');
+  const JARGON = /middle psf|median|quartile|percentile|interquartile|\bband\b|sample|distribution|standard deviation/i;
+  await t('STRONG recent evidence: layer 1 leads with the number and facts; evidence is collapsed behind "See transaction details"', async () => {
+    const r = await render('#/p/thomson-grand'); assert.strictEqual(r.errors.length, 0, r.errors.join('|'));
+    const a = textOf(answerOf(r.html)); assert.ok(/Around 1,300–1,399 sqft/.test(a)); assert.ok(/Recent sales: around \$1,882 psf/.test(a)); assert.ok(/13 sales across 8 of the last 12 months\./.test(a)); assert.ok(/Historical range: \$1,635–\$1,858 psf/.test(a) && /Most active size recently/i.test(a) && /most commonly transacted size in the last 12 months/.test(a) && /Good recent evidence/.test(a) && !/\(13 sales\)|Historically|approximate/.test(a)); assert.ok(!/Try a different size/.test(a));
+    assert.ok(/class="kpr-focus kpr-focus--open"/.test(answerOf(r.html)) && /id="sizeIn"/.test(answerOf(r.html)) && !/<details[^>]*kpr-focus/.test(answerOf(r.html)), 'size control must be visible by default');
+    assert.ok(/Compare another project →/.test(a) && /Check another size/.test(a) && !/Get Ken's view/.test(a), 'Ken CTA now lives in the handoff, after the disclosure');
+    assert.ok(r.html.indexOf('id="evidence"') < r.html.indexOf('id="wa"') && /Looking at a particular unit\?/.test(r.html) && /The transactions can't tell us its facing, layout or whether its asking price is justified\./.test(textOf(r.html)) && /Only the project name is sent to WhatsApp, nothing you typed\./.test(r.html));
+    assert.ok(!/Project research/.test(r.html) && !/kpr-handoff[^>]*box-shadow/.test(r.html));
+    assert.ok(r.html.indexOf('id="answer"') < r.html.indexOf('id="evidence"'), 'answer must come first');
+    assert.ok(/<details class="kpr-d kpr-evidence" id="evidence">/.test(r.html), 'evidence must be collapsed by default'); assert.ok(/See why →/.test(r.html) && /Sizes · price history · floors · recent transactions/.test(r.html) && !/See transaction details/.test(r.html));
+  });
+  await t('layer 1 uses no analytical jargon (no "middle PSF", "median", "band", "sample")', async () => { for (const [h, size] of [['#/p/thomson-grand'], ['#/p/bartley-ridge', '550'], ['#/p/3-at-phillips'], ['#/p/thomson-grand', '2600'], ['#/p/thomson-grand', '1050']]) { const r = await render(h, { size }); const a = textOf(answerOf(r.html)).replace(/Looking at a particular size\?.*?(?=Next|Try|$)/, ''); const m = a.match(JARGON); assert.ok(!m, h + ' ' + size + ': "' + (m && m[0]) + '" in ' + a.slice(0, 300)); } });
+  await t('every piece of the previous page is still there inside layer 2', async () => {
+    const r = await render('#/p/thomson-grand'); const ev = r.html.slice(r.html.indexOf('id="evidence"')); ["What's happening here", 'Sales, last 12 months', 'Middle PSF (approx.)', 'Size matters', 'kpr-rows', 'kpr-panel', 'By floor band', 'over time', 'History across all sizes', 'Market context', "What the transactions don't tell you"].forEach((k) => assert.ok(ev.indexOf(k) > -1 || ev.indexOf(k.replace("'", '&#39;')) > -1, 'missing in layer 2: ' + k));
+  });
+  await t('THIN recent evidence (Bartley Ridge, ~500 sqft): says plainly the evidence is thin and shows the history range', async () => {
+    const r = await render('#/p/bartley-ridge', { size: '550' }); const a = textOf(answerOf(r.html)); assert.ok(/Around 500–599 sqft/.test(a) && /Recent sales: around \$1,594 psf/.test(a) && /The size you asked about/i.test(a) && /Limited recent evidence/.test(a) && /Only 1 sale in the last 12 months\. Treat this as a reference\./.test(a) && /Historical range: \$1,415–\$1,591 psf/.test(a) && !/Most active size recently/i.test(a), a.slice(0, 500));
+    assert.ok(/kpr-a-recent-thin/.test(r.html));
+  });
+  await t('NO RECENT size evidence but older evidence exists: no recent price, latest month, older caveat', async () => {
+    for (const [h, size] of [['#/p/thomson-grand', '1050'], ['#/p/3-at-phillips']]) { const r = await render(h, { size }); const a = textOf(answerOf(r.html)); assert.ok(/Recent sales: none in the last 12 months/.test(a) && /latest sale around this size was in/.test(a), a.slice(0, 300)); assert.ok(!/Recent sales: around/.test(a)); assert.ok(/may not reflect today's prices/.test(a)); assert.ok(/kpr-a-older/.test(r.html)); }
+  });
+  await t('OLDER evidence only: truthful eyebrow (never "Most active size recently"), strength label, no recent price, same simplified order', async () => {
+    const r = await render('#/p/3-at-phillips'); const a = textOf(answerOf(r.html)); assert.ok(/Older evidence only/.test(a) && !/Most active size recently/i.test(a) && /Recent sales: none in the last 12 months/.test(a) && /Compare another project/.test(a));
+    assert.ok(r.html.indexOf('id="answer"') < r.html.indexOf('id="evidence"') && r.html.indexOf('id="evidence"') < r.html.indexOf('id="wa"'));
+  });
+  await t('NO USEFUL size evidence: says so, offers the nearest sizes as buttons, gives no mixed overall price', async () => {
+    const r = await render('#/p/thomson-grand', { size: '2600' }); const a = textOf(answerOf(r.html)); assert.ok(/Recent sales: none recorded around this size/.test(a) && /Around 2,600–2,699 sqft/.test(a)); assert.ok(/would mix different unit sizes/.test(a)); assert.ok(!/Recent sales: around/.test(a));
+    assert.ok(/class="kpr-link" type="button" data-bin="\d+"/.test(answerOf(r.html)), 'nearest sizes must be clickable'); assert.ok(/kpr-a-no-size/.test(r.html)); assert.ok(/Compare another project/.test(a) && /Not enough comparable evidence/.test(a) && !/Most active size recently/i.test(a));
+  });
+  await t("Ken's Take is absent with the empty notes file, and the sale type stays visible above the answer", async () => { const r = await render('#/p/thomson-grand'); assert.ok(!/Ken's Take/.test(r.html.replace(/Get Ken's view/g, ''))); assert.ok(r.html.indexOf('Showing resale sales') > -1 && r.html.indexOf('Showing resale sales') < r.html.indexOf('id="answer"')); const m = await render('#/p/19-nassim'); assert.ok(/data-sale="new"/.test(m.html) && /data-sale="resale"/.test(m.html) && m.html.indexOf('data-sale="new"') < m.html.indexOf('id="answer"')); });
+  await t('the size control now sits inside the answer, and no size or typed text reaches analytics or WhatsApp', async () => { const r = await render('#/p/bartley-ridge', { size: '550' }); assert.ok(answerOf(r.html).indexOf('Check another size') > -1 && /id="sizeClear"/.test(answerOf(r.html))); assert.ok(r.wa === undefined || r.wa.indexOf('550') === -1); assert.ok(!r.events.some((e) => JSON.stringify(e).indexOf('550') > -1)); });
+  await t('comparison page is unchanged by this work (no answer card, still has its verdict)', async () => { const r = await render('#/compare/thomson-impressions/thomson-three'); assert.ok(!/id="answer"/.test(r.html) && /id="verdict"/.test(r.html) && /id="interp"/.test(r.html)); });
+
   console.log('Page render: other comparisons and projects still render (no regressions)');
   const GOOD = [['#/compare/thomson-impressions/thomson-three', /Good recent overlap for comparison/], ['#/compare/thomson-three/thomson-impressions', /Good recent overlap for comparison/], ['#/compare/thomson-grand/thomson-impressions', /Limited recent overlap/], ['#/compare/bartley-ridge/botanique-at-bartley', /What the numbers suggest/]];
   for (const [h, re] of GOOD) await t(h + ' renders', async () => { const r = await render(h); assert.ok(!CANT.test(r.html) && re.test(r.html), r.errors.join('|')); assert.strictEqual(r.errors.length, 0); });

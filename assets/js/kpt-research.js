@@ -236,6 +236,7 @@
     const nt = matchNote(o.notes, [p.id], o.today);
     model.ken = nt.ken; model.attention = nt.attention;
     model.wa = waMessage([name]);
+    model.answer = summarise(model);
     return model;
   }
 
@@ -387,7 +388,7 @@
      and "small vs wider" is structural (middle PSF ranges overlap, or they do not). Never says better/cheaper/undervalued and never predicts. */
   const INTERP_VERSION = 'v1';
   // Build stamp. research/index.html checks it matches, so a stale cached copy of one file can never silently pair with a newer other file.
-  const BUILD = '2026-10-06.4';
+  const BUILD = '2026-10-06.7';
   const hi = (b, A, B) => (b.gap.dir === 'b' ? B : b.gap.dir === 'a' ? A : null);
   function interpret(M) {
     if (!M || M.overlap === 'none' || !M.bands || !M.bands.length) return null;
@@ -438,6 +439,84 @@
     return out;
   }
 
+  /* ---------- Single-project answer (layer 1): plain-English wording built only from the existing project model ----------
+     Presentation wording, not analysis: every number below is already on the model (focus band, its last-12-month cell, its full-history cell).
+     "Enough recent evidence" reuses the approved KPT cell rule (2+ sales in 2+ months); there are no new thresholds. Never valuation language or forecasts. */
+  const ANSWER_VERSION = 'v3';
+  const money = (n) => '$' + num(Math.round(n));
+  const psfRange = (d) => (Math.round(d.q1) === Math.round(d.q3) ? 'around ' + money(d.med) : 'around ' + money(d.q1) + '–' + money(d.q3));
+  const REFERENCE = 'Treat this as a reference.';
+  const rangeTxt = (d) => (Math.round(d.q1) === Math.round(d.q3) ? 'around ' + money(d.med) : money(d.q1) + '–' + money(d.q3)) + ' psf';
+  const STRENGTH = { recent: { id: 'good', label: 'Good recent evidence', dot: 'solid' }, 'recent-thin': { id: 'limited', label: 'Limited recent evidence', dot: 'hollow' }, older: { id: 'older', label: 'Older evidence only', dot: 'hollow' }, 'no-size': { id: 'none', label: 'Not enough comparable evidence', dot: 'none' } };
+  function summarise(M) {
+    if (!M || M.kind !== 'project') return null;
+    const sales = SALES_PL[M.sale.selected], f = M.focus, name = M.name, bands = M.bands || [];
+    const b = f && f.bin != null ? bands.find((x) => x.bin === f.bin) : null, r = b && b.recent;
+    const out = { version: ANSWER_VERSION, state: null, size: null, eyebrow: '', price: null, headline: '', lines: [], caveat: 'Based on transactions only. Actual units may differ by floor, facing and layout.', next: '', nearest: [], facts: {}, strength: null, sizeNote: '', range: null, strip: null };
+    const add = (id, text) => out.lines.push({ id, text });
+    const setPrice = (label, value) => { out.price = { label, value }; out.headline = label + ': ' + value; };
+    // ---- no size evidence to anchor on
+    if (!b) {
+      out.state = 'no-size';
+      if (f && f.requested) {
+        out.size = { label: f.requestedLabel, short: null, userChosen: true, bin: null };
+        out.eyebrow = 'The size you asked about';
+        setPrice('Recent sales', 'none recorded around this size');
+        out.nearest = (f.nearest || []).map((x) => ({ bin: x.bin, label: x.label, n: x.n }));
+        add('why', out.nearest.length ? 'One overall price would mix different unit sizes, so we don\'t show one.' : 'There are no sales at other sizes either.');
+        out.next = out.nearest.length ? 'Try one of those sizes, or compare with another project.' : 'Compare with another project instead.';
+      } else {
+        out.size = { label: null, short: null, userChosen: false, bin: null };
+        out.eyebrow = 'What this project transacts at';
+        setPrice('Recent sales', 'not available yet');
+        add('why', M.state === 'no-sales' ? 'There are no ' + sales + ' on record.' : 'There are not enough ' + sales + ' with a recorded size to show a price for any one size.');
+        out.next = 'Compare with another project instead.';
+      }
+      out.strength = STRENGTH['no-size'];
+      return out;
+    }
+    const h = b.psf, he = b.evidence, one = 'sale';
+    out.size = { label: b.label, short: b.short, userChosen: !!f.userChosen, bin: b.bin };
+    out.eyebrow = f.userChosen ? 'The size you asked about' : (r ? 'Most active size recently' : 'The size with the most sales on record');
+    if (!f.userChosen && r) out.sizeNote = 'The most commonly transacted size in the last 12 months.';
+    out.facts = { sizeBin: b.bin, recentN: r ? r.n : 0, recentMonths: r ? r.evidence.months : 0, recentLatest: r ? r.evidence.latest : null, recentMedian: r ? r.psf.med : null, historyN: b.n, historyLow: h.q1, historyHigh: h.q3, historyMedian: h.med, historyLatest: he.latest, historyMonths: he.months };
+    const oneMonth = he.tags.some((t) => t.id === 'one-month');
+    const history = (tail) => {
+      if (b.n === 1) return;
+      if (r && b.n === r.n) { add('history', 'All ' + b.n + ' ' + sales + ' on record at this size were in the last 12 months.'); return; }
+      out.range = { label: 'Historical range', value: rangeTxt(h), note: oneMonth ? 'All in one month.' : '', n: b.n };
+      if (tail) add('older', tail);
+    };
+    if (!r) {
+      out.state = 'older';
+      setPrice('Recent sales', 'none in the last 12 months');
+      add('recent', 'The latest ' + one + ' around this size was in ' + he.latestLabel + '.');
+      if (b.n === 1) add('history', 'Only 1 sale on record at this size, at around ' + money(h.med) + ' psf. ' + REFERENCE + ' Older sales may not reflect today\'s prices.');
+      else history('Older sales may not reflect today\'s prices.');
+      out.next = 'Try a different size, or compare with another project.';
+      out.strength = STRENGTH.older;
+      out.strip = { histLow: h.q1, histHigh: h.q3, recLow: null, recHigh: null, recMed: null };
+      return out;
+    }
+    const ev = r.evidence, thin = !(r.n >= MIN_SALES && ev.months >= MIN_MONTHS);
+    setPrice('Recent sales', 'around ' + money(r.psf.med) + ' psf');
+    if (!thin) {
+      out.state = 'recent';
+      add('confidence', plural(r.n, 'sale') + ' across ' + ev.months + ' of the last 12 months.');
+      history();
+      out.next = '';
+    } else {
+      out.state = 'recent-thin';
+      add('confidence', r.n === 1 ? 'Only 1 sale in the last 12 months. ' + REFERENCE
+        : 'Only ' + r.n + ' sales in the last 12 months, all in ' + ev.latestLabel + '. ' + REFERENCE);
+      history();
+      out.next = '';
+    }
+    out.strength = STRENGTH[out.state];
+    out.strip = { histLow: h.q1, histHigh: h.q3, recLow: r.psf.q1, recHigh: r.psf.q3, recMed: r.psf.med };
+    return out;
+  }
+
   /* ---------- suggestions, WhatsApp, analytics, routes ---------- */
   // D10: same district only, labelled as such. Same district does not establish comparability.
   function sameDistrict(index, id, limit) {
@@ -477,6 +556,6 @@
   }
   const buildHash = (v) => (v.view === 'project' ? '#/p/' + v.id + (v.sale ? '/' + v.sale : '') : v.view === 'compare' ? '#/compare/' + v.a + '/' + v.b + (v.sale ? '/' + v.sale : '') : v.view === 'pick' ? '#/compare/' + v.a : '#/');
 
-  return { BUILD, analyseProject, analyseComparison, interpret, evidence, defaultSale, saleOptions, focusBin, movement, matchNote, pairKey, sameDistrict, waMessage, analytics, parseHash, buildHash, displayName, bandLabel, bandShort, fmtMonth, monthsAgo, windowKey, num, psf,
+  return { BUILD, analyseProject, analyseComparison, interpret, summarise, evidence, defaultSale, saleOptions, focusBin, movement, matchNote, pairKey, sameDistrict, waMessage, analytics, parseHash, buildHash, displayName, bandLabel, bandShort, fmtMonth, monthsAgo, windowKey, num, psf,
     SALE_LABEL, NOT_MEASURED, HEADLINE, ANALYTICS_EVENTS, ANALYTICS_KEYS, SUBSTITUTE_NOTE, CONTEXT_NOTE, HISTORY_NOTE, PSF_NOTE, FLOOR_NOTE };
 });

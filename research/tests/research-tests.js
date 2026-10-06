@@ -61,7 +61,7 @@ console.log('Evidence: facts plus structural tags, no tiers');
 t('single sale tag', () => { const e = AP('SINGLE').recent.noRecent; assert.strictEqual(e, false); const ev = AP('SINGLE').evidence.recent; assert.ok(ev.tags.some((x) => x.id === 'single')); assert.ok(/^1 sale · 1 month · latest Sep 2026$/.test(ev.line), ev.line); });
 t('one month only tag', () => { const ev = AP('ONEMO').evidence.recent; assert.ok(ev.tags.some((x) => x.id === 'one-month')); assert.ok(!ev.tags.some((x) => x.id === 'single')); });
 t('no-recent project is flagged and says so in plain words', () => { const m = AP('OLDPJ'); assert.strictEqual(m.state, 'no-recent'); assert.ok(m.recent.noRecent); assert.ok(/No resale sales in the last 12 months/.test(m.read[0].text)); assert.ok(m.bands.every((b) => b.tags.some((x) => x.id === 'none-recent'))); });
-t('no Strong/Medium/Weak tier wording anywhere in the model', () => { const s = JSON.stringify([AP('GRAND'), AP('SINGLE'), AC('IMP', 'TRI'), AC('GRAND', 'IMP')]); assert.ok(!/\b(strong|medium|weak)\b/i.test(s.replace(/Good recent overlap/g, ''))); });
+t('no Strong/Medium/Weak tier wording anywhere in the model', () => { const s = JSON.stringify([AP('GRAND'), AP('SINGLE'), AC('IMP', 'TRI'), AC('GRAND', 'IMP')]); assert.ok(!/\b(strong|medium|weak)\b/i.test(s.replace(/Good recent overlap/g, '').replace(/strong price indication/g, ''))); });
 t('evidence on an older window is tagged with its window', () => { const e = RS.evidence({ n: 2, act: 1, last: 202503 }, M, { win: 1 }); assert.ok(e.tags.some((x) => x.id === 'older' && /Older evidence: /.test(x.text))); });
 
 console.log('Single project read');
@@ -162,6 +162,57 @@ t('interpretation follows the selected window and says when it is older evidence
 t('interpretation adds no new fields to existing evidence: bands, ladder and reasons are unchanged by it', () => { const c = AC('LOA', 'HIA'); const j = JSON.stringify(Object.assign({}, c, { interpretation: undefined })); assert.ok(j.indexOf('"bands"') > -1 && c.reasons.length > 0 && c.ladder.length === 4); });
 t('page renders the section after the evidence assessment and before matched sizes, and nothing for "none"', () => { const src = fs.readFileSync(root + '/research/index.html', 'utf8'); assert.ok(src.indexOf('${interpHtml(M.interpretation)}') > src.indexOf('id="verdict"') && src.indexOf('${interpHtml(M.interpretation)}') < src.indexOf('Matched on size</h2>')); assert.ok(/if \(!I\) return ''/.test(src)); });
 
+console.log('Single-project answer (layer 1 wording)');
+const ANS = (n, o) => AP(n, o || {}).answer, ansText = (a) => [a.eyebrow, a.headline].concat(a.lines.map((l) => l.text), [a.next, a.caveat]).join(' ');
+const BANNED_A = /undervalu|overvalu|good buy|bad buy|bargain|cheap|expensive|apprecia|forecast|predict|will (rise|fall|grow|go)|outperform|worth (it|more)|\bwinner\b|\bbetter\b|\bbest\b|should (buy|sell)|recommend/i;
+t('STRONG recent evidence: short labelled price, the facts behind it, and no next-step sentence', () => {
+  const a = ANS('GRAND'); assert.strictEqual(a.state, 'recent'); assert.ok(/^Recent sales: around \$[\d,]+ psf$/.test(a.headline), a.headline); assert.strictEqual(a.price.label, 'Recent sales');
+  const c = a.lines.find((l) => l.id === 'confidence').text; assert.ok(/^3 sales across 3 of the last 12 months\.$/.test(c), c);
+  assert.strictEqual(a.strength.label, 'Good recent evidence'); assert.strictEqual(a.eyebrow, 'Most active size recently'); assert.strictEqual(a.sizeNote, 'The most commonly transacted size in the last 12 months.');
+  assert.strictEqual(a.size.label, '1,300–1,399 sqft'); assert.strictEqual(a.next, ''); assert.ok(!/reference rather than|only been|Only \d/.test(ansText(a)));
+  const h = a.lines.find((l) => l.id === 'history'); if (a.range) assert.ok(/^(\$[\d,]+–\$[\d,]+|around \$[\d,]+) psf$/.test(a.range.value) && a.range.label === 'Historical range', a.range.value); if (h) assert.ok(/^All \d+ (resale |new |sub-)?sales on record at this size were in the last 12 months\.$/.test(h.text), h.text);
+});
+t('THIN recent evidence (1 sale): says so plainly with the reference sentence', () => {
+  const a = ANS('SINGLE'); assert.strictEqual(a.state, 'recent-thin'); const c = a.lines.find((l) => l.id === 'confidence').text;
+  assert.strictEqual(c, 'Only 1 sale in the last 12 months. Treat this as a reference.'); assert.strictEqual(a.next, ''); assert.strictEqual(a.strength.label, 'Limited recent evidence'); assert.strictEqual(a.strength.dot, 'hollow');
+  assert.ok(!/isn't enough recent evidence|rely heavily/.test(ansText(a)));
+});
+t('THIN recent evidence (several sales, one month): says all were in that month', () => { const a = ANS('ONEMO'); assert.strictEqual(a.state, 'recent-thin'); assert.strictEqual(a.lines[0].text, 'Only 3 sales in the last 12 months, all in Sep 2026. Treat this as a reference.'); });
+t('NO RECENT size evidence but older evidence exists: no recent price is given, latest month is named, older-sales caveat shown', () => {
+  const a = ANS('OLDPJ'); assert.strictEqual(a.state, 'older'); assert.strictEqual(a.headline, 'Recent sales: none in the last 12 months'); assert.ok(!/around \$[\d,]+ psf$/.test(a.headline));
+  assert.ok(/^The latest sale around this size was in Feb 2023\.$/.test(a.lines[0].text), a.lines[0].text); assert.ok(/may not reflect today's prices/.test(ansText(a))); assert.ok(/different size|another project/.test(a.next));
+  assert.strictEqual(a.facts.recentN, 0);
+});
+t('NO USEFUL size evidence (size asked for has no sales): says so, offers the nearest sizes, refuses to give one mixed overall price', () => {
+  const a = ANS('GRAND', { sizeSqft: 2500 }); assert.strictEqual(a.state, 'no-size'); assert.strictEqual(a.headline, 'Recent sales: none recorded around this size'); assert.strictEqual(a.size.label, '2,500–2,599 sqft'); assert.ok(a.nearest.length > 0 && a.nearest.every((x) => x.bin && x.label));
+  assert.ok(/would mix different unit sizes/.test(ansText(a))); assert.ok(!/around \$[\d,]+ psf/.test(a.headline));
+});
+t('answer follows the selected sale type, and the size control stays available in every state', () => { assert.strictEqual(AP('MULTI').sale.selected, 'new'); const a = ANS('MULTI'), r = ANS('MULTI', { sale: 'resale' }); assert.ok(JSON.stringify(a) !== JSON.stringify(r)); assert.ok(a.price && r.price); });
+t('user-chosen size vs default size is labelled differently', () => { assert.strictEqual(ANS('GRAND').eyebrow, 'Most active size recently'); assert.strictEqual(ANS('GRAND', { sizeSqft: 1350 }).eyebrow, 'The size you asked about'); });
+t('answer states use the approved cell rule, not new thresholds (2 sales in 2 months)', () => { assert.strictEqual(ANS('GRAND').facts.recentN >= 2 && ANS('GRAND').facts.recentMonths >= 2, true); assert.strictEqual(ANS('SINGLE').facts.recentN, 1); });
+t('strength label maps 1:1 from the existing state (no new scoring); "Most active size recently" is never used without recent sales', () => {
+  const MAP = { recent: 'Good recent evidence', 'recent-thin': 'Limited recent evidence', older: 'Older evidence only', 'no-size': 'Not enough comparable evidence' }; const seen = {};
+  ['GRAND', 'SINGLE', 'ONEMO', 'OLDPJ', 'OTHERD', 'BIG'].forEach((x) => [undefined, 700, 2500].forEach((sz) => { const a = ANS(x, sz ? { sizeSqft: sz } : {}); seen[a.state] = 1; assert.strictEqual(a.strength.label, MAP[a.state], x + ' ' + sz);
+    if (a.state === 'older' || a.state === 'no-size') assert.ok(a.eyebrow !== 'Most active size recently', x); if (a.eyebrow === 'Most active size recently') assert.ok(a.facts.recentN > 0 && !a.size.userChosen); }));
+  assert.ok(seen.recent && seen['recent-thin'] && seen.older && seen['no-size']);
+});
+t('caveat is the short approved line; the PSF approximation lives in the evidence note, not the default answer', () => {
+  const a = ANS('GRAND'); assert.strictEqual(a.caveat, 'Based on transactions only. Actual units may differ by floor, facing and layout.'); assert.ok(!/approximate/i.test(ansText(a)));
+  assert.ok(/approximate/.test(AP('GRAND', {}).evidence.note));
+});
+t('no valuation language, no forecasts, no verdicts in any state, any project', () => {
+  const names = ['GRAND', 'IMP', 'TRI', 'MULTI', 'TIE', 'SINGLE', 'OLDPJ', 'ONEMO', 'NEWONLY', 'OTHERD', 'SUBP', 'SUBONLY', 'AMOLIKE', 'BIG', 'HIA', 'LOA']; let n = 0;
+  names.forEach((x) => [undefined, 700, 1000, 1350, 2500].forEach((sz) => { const a = ANS(x, sz ? { sizeSqft: sz } : {}); n++; assert.ok(!BANNED_A.test(ansText(a)), x + ' ' + sz + ': ' + (ansText(a).match(BANNED_A) || [])[0]); assert.ok(a.headline && a.eyebrow && (a.state === 'recent' || a.state === 'recent-thin' ? a.next === '' : a.next)); assert.ok(['recent', 'recent-thin', 'older', 'no-size'].indexOf(a.state) > -1); }));
+  assert.ok(n >= 80);
+});
+t('deterministic, nothing hard-coded to a project name, no sizes or names typed by the user leak into the text', () => {
+  assert.strictEqual(JSON.stringify(ANS('GRAND')), JSON.stringify(ANS('GRAND'))); const src = fs.readFileSync(root + '/assets/js/kpt-research.js', 'utf8'); const i = src.indexOf('function summarise'), j = src.indexOf('suggestions, WhatsApp'); const body = src.slice(i, j);
+  assert.ok(!/bartley|thomson|botanique|amo residence|ridge|grand/i.test(body), 'project name hard-coded'); assert.ok(!/Math\.random|Date\.now|new Date/.test(body));
+  assert.ok(ANS('GRAND', { sizeSqft: 1357 }).headline.indexOf('1357') === -1);
+});
+t('the existing evidence is still on the model, untouched, alongside the answer', () => { const m = AP('GRAND'); ['read', 'recent', 'bands', 'history', 'floors', 'context', 'evidence', 'notMeasured', 'focus', 'sale'].forEach((k) => assert.ok(m[k] !== undefined, k)); assert.ok(m.answer); });
+t('only the project view carries an answer; comparisons are unchanged', () => { assert.strictEqual(AC('IMP', 'TRI').answer, undefined); assert.strictEqual(RS.summarise(AC('IMP', 'TRI')), null); });
+
 console.log("Ken's Take (D9): Active, review_by, symmetry");
 const notes = [
   { scope: 'project', project: 'imp', status: 'Active', note: 'Authored project note.', review_by: '2027-01-01' },
@@ -247,6 +298,18 @@ if (fs.existsSync(dir + 'manifest.json')) {
         const txt = stripDisclaimer(allText(x.interpretation)); assert.ok(!BANNED.test(txt) && !/\bbetter\b/i.test(txt), a + '/' + b); }));
       assert.ok(n > 100);
     });
+    t('REAL: Bartley Ridge around 500 sqft reproduces the thin-evidence example from the brief, generated not hard-coded', () => {
+      if (!has('bartley-ridge')) return; const m = RS.analyseProject(get('bartley-ridge'), man, { sizeSqft: 550 }), a = m.answer;
+      assert.strictEqual(a.state, 'recent-thin'); assert.strictEqual(a.size.label, '500–599 sqft'); assert.strictEqual(a.headline, 'Recent sales: around $1,594 psf');
+      assert.strictEqual(a.lines[0].text, 'Only 1 sale in the last 12 months. Treat this as a reference.');
+      assert.strictEqual(a.range.label + ': ' + a.range.value, 'Historical range: $1,415–$1,591 psf'); assert.strictEqual(a.eyebrow, 'The size you asked about'); assert.strictEqual(a.sizeNote, '');
+    });
+    t('REAL: every project, default size: an answer is always produced in one of the four states, with no banned wording', () => {
+      const rows = idx.rows.map((x, k) => P.rowObject(idx, k)); const seen = {}; let n = 0;
+      rows.forEach((r, k) => { if (k % 4) return; const a = RS.analyseProject(get(r.id), man, {}).answer; n++; seen[a.state] = (seen[a.state] || 0) + 1; assert.ok(a.headline && !BANNED_A.test(ansText(a)), r.id); });
+      assert.ok(n > 400); assert.ok(seen.recent && seen['recent-thin'] && seen.older, JSON.stringify(seen));
+    });
+    t('REAL: Grand 1,000s band has older evidence only (no sale in 12 months)', () => { const a = RS.analyseProject(g, man, { sizeSqft: 1050 }).answer; assert.strictEqual(a.state, 'older'); assert.ok(/latest sale around this size was in Mar 2025/.test(a.lines[0].text)); });
   } else console.log('  skip Thomson projects not in data');
 } else console.log('  skip no data/projects');
 
