@@ -29,7 +29,7 @@ const ALL = [route('OCR resale 25+', 'core'), route('RCR resale 10–25', 'core'
 console.log('Answers');
 t('only budget is required; everything else defaults neutrally', () => {
   const a = B.normalise({ budget: 2300000 });
-  assert.strictEqual(a.openTo, 'both'); assert.strictEqual(a.size, 'not-sure'); assert.strictEqual(a.where, 'flexible'); assert.deepStrictEqual(a.priorities, []); assert.strictEqual(a.purpose, '');
+  assert.strictEqual(a.openTo, 'both'); assert.strictEqual(a.size, 'not-sure'); assert.strictEqual(a.where, 'flexible'); assert.deepStrictEqual(a.priorities, []); assert.ok(!('purpose' in a));
 });
 t('budget bounds and rounding match What Can I Buy', () => {
   assert.ok(!B.validateBudget(0).ok); assert.ok(!B.validateBudget(250000).ok); assert.ok(!B.validateBudget(25000000).ok);
@@ -41,41 +41,39 @@ t('free text only kept when a location is named, trimmed and capped', () => {
   assert.strictEqual(B.normalise({ budget: 1e6, where: 'flexible', whereText: 'AMK' }).whereText, '');
   assert.strictEqual(B.normalise({ budget: 1e6, where: 'areas', whereText: ' ' + 'x'.repeat(100) }).whereText.length, 60);
 });
+t('the removed questions are gone; older saved answers still read', () => {
+  assert.deepStrictEqual(B.normalise({ budget: 1e6, priorities: ['investment', 'schools', 'monthly', 'facilities', 'freehold'] }).priorities, ['freehold']);
+  ['family', 'work', 'school'].forEach((w) => assert.strictEqual(B.normalise({ budget: 1e6, where: w, whereText: 'x' }).where, 'areas'));
+  assert.deepStrictEqual(Object.keys(B.PRIORITY), ['space', 'location', 'newer', 'freehold']); assert.strictEqual(B.PRIORITY.location, 'Closer to the centre');
+});
 t('invalid budget gives no diagnosis', () => assert.strictEqual(B.analyse({ budget: 10 }, null).state, 'invalid'));
 
 console.log('Coverage and evidence depth');
 t('outside the data range: say so, no market claims, no routes', () => {
   const m = B.analyse({ budget: 7000000 }, { coverage: COV });
-  assert.strictEqual(m.state, 'out-of-range'); assert.strictEqual(m.routes.length, 0); assert.strictEqual(m.tradeoff, null); assert.ok(!m.canSeeMarket);
+  assert.strictEqual(m.state, 'out-of-range'); assert.strictEqual(m.routes.length, 0); assert.strictEqual(m.insight, null); assert.ok(!m.canSeeMarket);
 });
 t('market could not load: honest message, still no claims', () => { const m = B.analyse({ budget: 2300000 }, null); assert.strictEqual(m.state, 'no-market'); assert.strictEqual(m.routes.length, 0); });
 t('thin market (engine says so): no diagnosis from thin data', () => {
   const m = B.analyse({ budget: 650000, priorities: ['space'] }, synth(650000));
-  assert.strictEqual(m.state, 'thin'); assert.strictEqual(m.routes.length, 0); assert.strictEqual(m.constraint, '');
+  assert.strictEqual(m.state, 'thin'); assert.strictEqual(m.routes.length, 0); assert.strictEqual(m.insight, null);
 });
 
 console.log('Real engine: $1.32m');
-t('workable budget, space + newer development is the constraint, backed by the engine\'s own age finding', () => {
-  const m = B.analyse({ budget: 1320000, purpose: 'own-stay', openTo: 'resale', priorities: ['space', 'newer'] }, worked());
+t('no priority: a labelled general market observation in the neutral evidence wording', () => {
+  const w = worked(), m = B.analyse({ budget: 1320000 }, w);
   assert.strictEqual(m.headline, 'Your budget is workable.');
-  assert.strictEqual(m.constraint, 'The bigger constraint is combining more space with a newer development.');
-  assert.strictEqual(m.tradeoff.text, 'Going older opened up roughly 350–450 sq ft more space at this budget.');
+  assert.strictEqual(m.insight.kind, 'market'); assert.strictEqual(m.insight.label, 'What the market shows');
+  assert.strictEqual(m.insight.lines[0], 'Older homes were roughly 350–450 sq ft larger than newer homes at this budget.'); assert.ok(!/opened up|Choosing/.test(m.insight.lines[0])); assert.deepStrictEqual(m.applied, []);
 });
-t('the trade-off line is word for word what What Can I Buy shows for the same finding', () => {
-  const w = worked(), m = B.analyse({ budget: 1320000, priorities: ['space', 'newer'] }, w);
-  assert.strictEqual(m.tradeoff.text, w.view.hero.tradeoff);
+t('one measurable priority: the insight is about that priority, in the evidence wording', () => {
+  const m = B.analyse({ budget: 1320000, openTo: 'resale', priorities: ['newer'] }, worked());
+  assert.strictEqual(m.insight.kind, 'personal'); assert.strictEqual(m.insight.label, 'For what matters to you');
+  assert.deepStrictEqual(m.insight.lines, ['Newer buildings meant less space at this budget.', 'Older homes were roughly 350–450 sq ft larger.']);
 });
-t('no priorities: a calm read from the engine lens, no invented constraint', () => {
-  const m = B.analyse({ budget: 1320000 }, worked()); assert.strictEqual(m.constraint, ''); assert.strictEqual(m.tradeoff.key, 'age:older-larger');
-});
-t('"giving up newness" is only said to someone who chose newer development', () => {
-  const a = B.analyse({ budget: 1320000, openTo: 'resale', priorities: ['space', 'newer'] }, worked()).routes.find((r) => r.id === 'age:older-larger');
-  const b = B.analyse({ budget: 1320000, openTo: 'resale', priorities: ['space'] }, worked()).routes.find((r) => r.id === 'age:older-larger');
-  assert.ok(/giving up some newness/.test(a.giveUp)); assert.ok(!/newness/.test(b.giveUp));
-});
-t('open only to new launches: no resale or older-home route is pushed', () => {
-  const m = B.analyse({ budget: 1320000, openTo: 'new', priorities: ['space'] }, worked());
-  m.routes.forEach((r) => assert.ok(['age:older-larger', 'status:resale-larger', 'age:newer-larger'].indexOf(r.id) < 0, r.id));
+t('space alone is the neutral market observation, not a personal one', () => assert.strictEqual(B.analyse({ budget: 1320000, priorities: ['space'] }, worked()).insight.kind, 'market'));
+t('"opened up" wording is not used for a priority the buyer chose', () => {
+  const m = B.analyse({ budget: 1320000, openTo: 'resale', priorities: ['newer'] }, worked()); assert.ok(!/opened up/.test(m.insight.lines.join(' ')));
 });
 t("Ken's Take only from an Active authored note, via the engine's own gating", () => {
   assert.strictEqual(B.analyse({ budget: 1320000 }, worked()).ken, null);
@@ -83,43 +81,54 @@ t("Ken's Take only from an Active authored note, via the engine's own gating", (
   assert.ok(m.ken && m.ken.note);
   assert.strictEqual(B.analyse({ budget: 1320000 }, worked([{ signature: 'age:older-larger', note: 'x', status: 'Retired' }])).ken, null);
 });
-t('EC is passed through as its own separate route, and hidden for investment-only', () => {
-  assert.ok(B.analyse({ budget: 1320000, purpose: 'own-stay' }, worked()).ec);
-  assert.strictEqual(B.analyse({ budget: 1320000, purpose: 'investment' }, worked()).ec, null);
+t('EC stays out of the main result model fields and is passed through for "How this was worked out"', () => {
+  const m = B.analyse({ budget: 1320000 }, worked()); assert.ok(m.ec); assert.ok(!JSON.stringify([m.insight, m.applied, m.meaning, m.headline]).includes(m.ec.label));
 });
 
 console.log('Rules on hand-built engine outputs');
 const OUT_LARGER = ins('region:outer-larger', 'region', [bar('OCR', 'Resale', '25+', 1200), bar('RCR', 'Resale', '25+', 900), bar('CCR', 'Resale', '25+', 800)], 1);
 const OLD = ins('age:older-larger', 'age', [bar('OCR', 'Resale', '25+', 1150), bar('OCR', 'Resale', '10–25', 800)], 2);
-t('space + better location, with a region finding: that is the tension (the $2.3m AMK/Thomson example)', () => {
-  const m = B.analyse({ budget: 2300000, purpose: 'own-stay', size: '3br-study', where: 'areas', whereText: 'AMK / Thomson', priorities: ['space', 'location'] }, fake([OUT_LARGER, OLD], ALL));
-  assert.strictEqual(m.constraint, 'The bigger constraint is combining more space with a better location.');
-  assert.ok(/Going further out opened up roughly 300–400 sq ft more space/.test(m.tradeoff.text));
+t('closer to the centre with a region finding: recorded evidence, no promise (the $2.6m example)', () => {
+  const m = B.analyse({ budget: 2600000, priorities: ['location'] }, synth(2600000));
+  assert.deepStrictEqual(m.insight.lines, ['Closer to the centre meant less space at this budget.', 'Homes further out were roughly 350 sq ft larger.']);   // synthetic test aggregates; the live $2.6m figure is checked in the browser suite
+  assert.strictEqual(m.insight.label, 'For what matters to you');
 });
-t('location is NOT called a constraint, and no "broaden location" route appears, without a region finding', () => {
-  const m = B.analyse({ budget: 2300000, where: 'areas', priorities: ['space', 'location'] }, fake([OLD], ALL));
-  assert.ok(/did not show a clear conflict/.test(m.constraint)); assert.ok(!m.routes.some((r) => /region/.test(r.id)));
+t('a range is shown as a range', () => {
+  const m = B.analyse({ budget: 2300000, priorities: ['location'] }, fake([OUT_LARGER, OLD], ALL));
+  assert.strictEqual(m.insight.lines[1], 'Homes further out were roughly 300–400 sq ft larger.');
 });
-t('"further from the centre" route is withheld from someone who named an area and wants location, not space', () => {
-  const m = B.analyse({ budget: 2300000, where: 'areas', priorities: ['location', 'newer'] }, fake([OUT_LARGER, OLD], ALL));
-  assert.ok(!m.routes.some((r) => r.id === 'region:outer-larger'));
+t('no matching finding for the chosen priority: no insight at all, never a generic one', () => {
+  const m = B.analyse({ budget: 2300000, priorities: ['location'] }, fake([OLD], ALL)); assert.strictEqual(m.insight, null);
+  assert.strictEqual(B.analyse({ budget: 2300000, priorities: ['freehold'] }, fake([OLD], ALL)).insight, null);
 });
-t('when it is shown for a named area, it says it compares broad regions, not that area', () => {
-  const m = B.analyse({ budget: 2300000, where: 'areas', whereText: 'Thomson', priorities: ['space'] }, fake([OUT_LARGER], ALL));
-  assert.ok(/broad regions, not your specific area/.test(m.routes.find((r) => r.id === 'region:outer-larger').giveUp));
+t('a specific area: no insight; the area and freehold are shown as applied; the lede drops "regions"', () => {
+  const m = B.analyse({ budget: 2600000, where: 'areas', whereText: 'Bishan', priorities: ['freehold'] }, synth(2600000));
+  assert.strictEqual(m.insight, null); assert.deepStrictEqual(m.applied, ['Near Bishan', 'Freehold or long lease']);
+  assert.strictEqual(m.headline, 'Your budget is workable.'); assert.strictEqual(m.meaning, 'New launches and resale homes sold around this budget.');
+  assert.ok(m.rules.indexOf('no-insight') > -1);
 });
-t('two priorities that each cost space are named together', () => {
+t('an area with a measurable priority still shows no insight (the comparison is by region, not that area)', () => {
+  const m = B.analyse({ budget: 2300000, where: 'areas', whereText: 'Thomson', priorities: ['location'] }, fake([OUT_LARGER, OLD], ALL));
+  assert.strictEqual(m.insight, null); assert.deepStrictEqual(m.applied, ['Near Thomson']);
+});
+t('freehold with a tenure finding: the insight, and freehold is still shown as applied', () => {
+  const T = ins('tenure type:leasehold-larger', 'tenure type', [bar('OCR', 'Resale', '99', 1100), bar('OCR', 'Resale', 'Freehold / 999-yr', 900)], 1);
+  const m = B.analyse({ budget: 2300000, priorities: ['freehold'] }, fake([T], ALL));
+  assert.deepStrictEqual(m.insight.lines, ['Freehold or 999-year homes meant less space at this budget.', 'Leasehold homes were roughly 200 sq ft larger.']);
+  assert.deepStrictEqual(m.applied, ['Freehold or long lease']);
+});
+t('two priorities: one supported insight, the other is not turned into a combined conclusion', () => {
   const NEW = ins('status:resale-larger', 'status', [bar('RCR', 'Resale', '25+', 1300), bar('RCR', 'New', '–', 800)], 2);
   const m = B.analyse({ budget: 2300000, priorities: ['location', 'newer'] }, fake([OUT_LARGER, NEW], ALL));
-  assert.ok(/asking for a better location and a newer development together/.test(m.constraint));
+  assert.strictEqual(m.insight.key, 'region:outer-larger'); assert.strictEqual(m.insight.lines.length, 2);
+  assert.ok(!/together|and newer/i.test(JSON.stringify(m.insight)));
+  assert.ok(m.notes.some((n) => /You also chose newer building\. It is not used to filter or rank the list\./.test(n)));
+  const f = B.analyse({ budget: 2300000, priorities: ['location', 'freehold'] }, fake([OUT_LARGER], ALL));
+  assert.strictEqual(f.insight.key, 'region:outer-larger'); assert.deepStrictEqual(f.applied, ['Freehold or long lease']);
 });
-t('priorities sales data cannot measure are acknowledged, never evaluated', () => {
-  const m = B.analyse({ budget: 2300000, priorities: ['schools', 'monthly'] }, fake([OLD], ALL));
-  assert.ok(/goes beyond what sales data can show/.test(m.constraint)); assert.ok(/schools/.test(m.notes.join(' ')) || /schools/.test(m.constraint));
-});
-t('investment: size and price only, with an explicit no-rent/yield statement', () => {
-  const m = B.analyse({ budget: 2300000, purpose: 'investment' }, fake([OLD], ALL));
-  assert.ok(m.notes.some((n) => /rental or yield/.test(n)));
+t('no insight unless the budget is comfortable for what the buyer is open to', () => {
+  const m = B.analyse({ budget: 900000, openTo: 'new', priorities: ['location'] }, fake([OUT_LARGER], [route('OCR new', 'low-end', 'Usable')]));
+  assert.strictEqual(m.insight, null);
 });
 t('entry level: budget below most prices for what the buyer is open to', () => {
   const m = B.analyse({ budget: 900000, openTo: 'new' }, fake([OLD], [route('OCR new', 'low-end', 'Usable'), route('RCR new', 'low-end', 'Usable')]));
@@ -135,9 +144,9 @@ t('Concentrated routes alone never make a budget "workable"', () => {
   const m = B.analyse({ budget: 2300000 }, fake([OLD], [route('OCR resale 25+', 'core', 'Concentrated')]));
   assert.ok(!/workable/.test(m.headline));
 });
-t('no-lens state shows the engine typical size as evidence, not an invented trade-off', () => {
-  const m = B.analyse({ budget: 810000 }, fake([], ALL, { state: 'no-lens', lens: null, hero: null, summary: { headline: 'Around $0.81m, buyers typically got about 500 sq ft.', rangeText: 'The middle half of these sales were about 450–550 sq ft.' } }));
-  assert.strictEqual(m.tradeoff, null); assert.ok(/about 500 sq ft/.test(m.evidence.headline));
+t('no-lens state: no insight and no invented trade-off', () => {
+  const m = B.analyse({ budget: 810000 }, fake([], ALL, { state: 'no-lens', lens: null, hero: null, summary: { headline: 'x', rangeText: 'y' } }));
+  assert.strictEqual(m.insight, null);
 });
 t('at most three routes, each with an engine-backed sentence', () => {
   const m = B.analyse({ budget: 2300000, priorities: ['space'] }, fake([OUT_LARGER, OLD, ins('tenure type:freehold-larger', 'tenure type', [bar('OCR', 'Resale', 'Freehold / 999-yr', 1000), bar('OCR', 'Resale', '25+', 800)], 3), ins('age:newer-larger', 'age', [bar('OCR', 'Resale', '0–10', 1000), bar('OCR', 'Resale', '25+', 800)], 4)], ALL));
@@ -145,22 +154,22 @@ t('at most three routes, each with an engine-backed sentence', () => {
 });
 
 console.log('Not claiming what the data cannot see');
-t('bedroom size and areas are never turned into sq ft or evaluated', () => {
+t('bedroom size and areas are never turned into sq ft or evaluated, and never shown on the result', () => {
   const m = B.analyse({ budget: 2300000, size: '3br-study', where: 'areas', whereText: 'AMK', priorities: ['space'] }, fake([OUT_LARGER], ALL));
-  const text = JSON.stringify([m.headline, m.constraint, m.meaning, m.tradeoff, m.routes, m.notes, m.worked]);
+  const text = JSON.stringify([m.headline, m.meaning, m.insight, m.applied, m.routes, m.notes, m.worked]);
   assert.ok(!/(bedroom|1BR|2BR|3BR|4BR)[^"]{0,40}sq ?ft/i.test(text));
-  assert.ok(m.notes.some((n) => /do not cover bedroom counts and specific areas/.test(n)));
+  assert.ok(m.notes.some((n) => /do not cover bedroom counts and your specific area/.test(n)));
+  assert.ok(!m.summary.some((c) => /BR/.test(c)));
 });
-t('the free-text area appears only in the on-screen summary chips', () => {
-  const m = B.analyse({ budget: 2300000, where: 'school', whereText: 'Nanyang Primary', priorities: ['space'] }, fake([OUT_LARGER], ALL));
-  assert.ok(m.summary.indexOf('Nanyang Primary') > -1);
-  assert.ok(!JSON.stringify([m.headline, m.constraint, m.meaning, m.tradeoff, m.routes, m.notes, m.worked]).includes('Nanyang'));
+t('the chip lists only answers that were used', () => {
+  const m = B.analyse({ budget: 2600000, openTo: 'resale', size: '3br', where: 'areas', whereText: 'Bishan', priorities: ['freehold', 'newer'] }, synth(2600000));
+  assert.deepStrictEqual(m.summary, ['$2.6m', 'Resale', 'Bishan', 'Freehold or long lease']);
 });
 t('wording has no certainty, advice to stretch, or return claims', () => {
   const words = [];
-  [[2300000, ['space', 'location']], [1320000, ['space', 'newer']], [2300000, ['schools']], [900000, []]].forEach(([b, p]) => {
-    const m = B.analyse({ budget: b, purpose: 'investment', priorities: p }, b === 1320000 ? worked() : fake([OUT_LARGER, OLD], ALL));
-    words.push(m.headline, m.constraint, m.meaning, m.tradeoff && m.tradeoff.text, m.routes.map((r) => r.title + r.text + (r.giveUp || '')).join(' '), m.notes.join(' '), m.worked.map((w) => w.text).join(' '));
+  [[2300000, ['space', 'location']], [1320000, ['space', 'newer']], [2300000, ['freehold']], [900000, []]].forEach(([b, p]) => {
+    const m = B.analyse({ budget: b, priorities: p }, b === 1320000 ? worked() : fake([OUT_LARGER, OLD], ALL));
+    words.push(m.headline, m.meaning, m.insight && m.insight.lines.join(' '), m.applied.join(' '), m.routes.map((r) => r.title + r.text + (r.giveUp || '')).join(' '), m.notes.join(' '), m.worked.map((w) => w.text).join(' '));
   });
   const s = words.filter(Boolean).join(' ');
   assert.ok(!/\b(guarantee|will appreciate|best choice|you should buy|stretch|returns?|rental yield of|capital gain|cpf|lender will)\b/i.test(s.replace(/rental or yield data/g, '')), s.match(/\b(guarantee|stretch|cpf)\b/i));
@@ -170,15 +179,15 @@ t('deterministic: same answers and evidence, same output', () => {
   assert.deepStrictEqual(B.analyse(a, worked()), B.analyse(a, worked()));
 });
 t('real synthetic data across budgets never throws and always returns a headline', () => {
-  [800000, 1200000, 1600000, 2000000, 2600000, 3000000, 4500000].forEach((b) => ['space,location', 'newer', 'schools', ''].forEach((p) => {
-    const m = B.analyse({ budget: b, purpose: 'own-stay', priorities: p ? p.split(',') : [] }, synth(b)); assert.ok(m.headline, b + ' ' + p);
+  [800000, 1200000, 1600000, 2000000, 2600000, 3000000, 4500000].forEach((b) => ['space,location', 'newer', 'freehold', ''].forEach((p) => {
+    const m = B.analyse({ budget: b, priorities: p ? p.split(',') : [] }, synth(b)); assert.ok(m.headline, b + ' ' + p);
   }));
 });
 
 console.log('Hand-offs and privacy');
-const ANS = { budget: 2345000, purpose: 'own-stay', size: '3br-study', where: 'areas', whereText: 'AMK / Thomson', priorities: ['space', 'location'], openTo: 'resale' };
-t('WhatsApp message is minimal: purpose and approximate budget only', () => {
-  assert.strictEqual(B.waMessage(ANS), "Hi Ken, I'm looking at an own-stay purchase around $2.35m and would like your view.");
+const ANS = { budget: 2345000, size: '3br-study', where: 'areas', whereText: 'AMK / Thomson', priorities: ['space', 'location'], openTo: 'resale' };
+t('WhatsApp message is minimal: approximate budget only', () => {
+  assert.strictEqual(B.waMessage(ANS), "Hi Ken, I'm looking at a purchase around $2.35m and would like your view.");
   const m = B.waMessage(ANS); ['AMK', 'Thomson', '3BR', 'space', 'location', 'resale', '2,345,000', '2345000'].forEach((x) => assert.ok(m.indexOf(x) < 0, x));
   assert.strictEqual(B.waMessage({ budget: 2000000 }), "Hi Ken, I'm looking at a purchase around $2m and would like your view.");
 });
@@ -206,6 +215,10 @@ t('page contains no reasoning of its own: no thresholds, rules or market maths',
 });
 t('what-can-i-buy back chip knows about the buyer journey', () => {
   assert.ok(/handoff\.from === 'buy'/.test(fs.readFileSync(path.join(__dirname, '../../tools/what-can-i-buy/index.html'), 'utf8')));
+});
+t('the page has the approved questionnaire and none of the removed questions or sections', () => {
+  ['What are you open to?', 'Where are you looking?', 'Anywhere in Singapore', 'Near somewhere specific', 'Area, street or project', 'What matters most?', 'Closer to the centre', 'Newer building', 'Freehold or long lease', "Sales records don't include bedrooms, so for now this doesn't change the list."].forEach((x) => assert.ok(html.indexOf(x) > -1, x));
+  ['Own stay', 'Investment', 'A bit of both', 'Near family', 'Near work', 'Near a particular school', 'Better location', 'Schools', 'Lower monthly', 'Facilities', 'Ways to get more from your budget', 'The main trade-off'].forEach((x) => assert.ok(html.indexOf(x) < 0, x));
 });
 t('the homepage still routes to /buy/', () => assert.ok(/href="buy\/"/.test(fs.readFileSync(path.join(__dirname, '../../index.html'), 'utf8'))));
 

@@ -132,11 +132,11 @@
     if (a.where === 'family') out.push({ id: 'family', title: 'Near family', text: dist('where your family lives'), card: 'how close this is to your family' });
     if (a.where === 'work') out.push({ id: 'work', title: 'Near work', text: dist('your workplace'), card: 'how close this is to your workplace' });
     if (pr.indexOf('schools') > -1) out.push({ id: 'schools', title: 'Schools', text: 'Not measured by our sales data.', card: 'schools' });
-    if (pr.indexOf('location') > -1) out.push({ id: 'location', title: 'Better location', text: 'We can’t define a better location from sales data.', card: 'location quality' });
+    if (pr.indexOf('location') > -1) out.push({ id: 'location', title: 'Closer to the centre', text: 'Not used to filter or rank this list.', card: 'distance from the centre' });
     if (pr.indexOf('investment') > -1) out.push({ id: 'investment', title: 'Investment potential', text: 'We hold no rental or yield data, so this list describes sales and prices only.', card: 'investment potential' });
     if (pr.indexOf('monthly') > -1) out.push({ id: 'monthly', title: 'Lower monthly commitment', text: 'Not measured by our sales data.', card: 'monthly commitment' });
     if (pr.indexOf('facilities') > -1) out.push({ id: 'facilities', title: 'Facilities and lifestyle', text: 'Not measured by our sales data.', card: 'facilities and lifestyle' });
-    if (pr.indexOf('newer') > -1) out.push({ id: 'newer', title: 'Newer development', text: 'Not used to filter. Each card shows the lease start year, which is not the completion year.', card: 'completion year' });
+    if (pr.indexOf('newer') > -1) out.push({ id: 'newer', title: 'Newer building', text: 'Not used to filter. Each card shows the lease start year, which is not the completion year.', card: 'completion year' });
     if (pr.indexOf('space') > -1) out.push({ id: 'space', title: 'More space', text: 'Not used to filter. The market comparison above shows what this budget buys in size.', card: null });
     if (a.size && a.size !== 'not-sure') out.push({ id: 'bedrooms', title: 'Bedroom count', text: 'Our data doesn’t record bedrooms, so this list can’t check it.', card: null });
     return out;

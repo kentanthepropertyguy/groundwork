@@ -337,3 +337,14 @@
 .kpj .kpb-wa:hover{ background:var(--ink); color:#fff; }
 @media (min-width:600px){ .kpj .kpb-wa{ width:auto; display:inline-flex; padding:13px 30px; } }
 .kpj #kpfH{ scroll-margin-top:24px; }
+
+/* ---- V10.3 ---- */
+/* header, content and footer share one column on journey pages (desktop), with a hairline above the footer */
+.kpj .kpt-header.kpt-shell, .kpj .kpt-footer.kpt-shell{ max-width:640px; }
+.kpj.kpj-wide .kpt-header.kpt-shell, .kpj.kpj-wide .kpt-footer.kpt-shell{ max-width:760px; }
+.kpj .kpt-footer.kpt-shell{ padding-top:28px; }
+.kpj .kpt-footer.kpt-shell::before{ content:""; display:block; border-top:1px solid var(--line); margin:0 0 28px; }
+.kpj .kpb-opt{ font:400 13px var(--sans); color:var(--muted); margin-left:6px; }
+.kpj .kpb-help{ margin:10px 0 0; font-size:13px; line-height:1.5; color:var(--muted); }
+.kpj .kpb-text .kpb-help{ margin-top:8px; }
+.kpj .kpb-caption{ margin:12px 0 0; font-size:13px; line-height:1.5; color:var(--muted); text-align:center; }

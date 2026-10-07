@@ -7,8 +7,8 @@
 <meta name="theme-color" content="#FAFAF8">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <title>I'm looking to buy — Ken Property Tools</title>
-<link rel="stylesheet" href="../assets/css/kpt-system.css?v=2026-10-07.2">
-<link rel="stylesheet" href="../assets/css/kpt-journey.css?v=2026-10-07.2">
+<link rel="stylesheet" href="../assets/css/kpt-system.css?v=2026-10-07.3">
+<link rel="stylesheet" href="../assets/css/kpt-journey.css?v=2026-10-07.3">
 </head>
 <body class="kpj" data-view="input">
 <header class="kpt-header kpt-shell"><div class="kpt-brandblock"><a class="brand" href="../">KEN PROPERTY TOOLS</a><span class="kpt-by">by Ken Tan</span></div></header>
@@ -29,15 +29,6 @@
         <div class="kpt-error" id="budgetErr"></div>
       </div>
 
-      <p class="kpt-qlabel">What is this purchase mainly for?</p>
-      <div class="kpt-choices" data-group="purpose">
-        <button type="button" class="kpt-choice" data-value="own-stay" aria-pressed="false">Own stay</button>
-        <button type="button" class="kpt-choice" data-value="investment" aria-pressed="false">Investment</button>
-        <button type="button" class="kpt-choice" data-value="both" aria-pressed="false">A bit of both</button>
-      </div>
-
-      <p class="kpb-quiet-head">A little more about your search</p>
-
       <div class="kpb-block" style="margin-top:20px;">
         <p class="kpb-q">What are you open to?</p>
         <div class="kpt-choices kpj-small" data-group="openTo">
@@ -48,7 +39,30 @@
       </div>
 
       <div class="kpb-block">
-        <p class="kpb-q">What size do you need?</p>
+        <p class="kpb-q">Where are you looking?</p>
+        <div class="kpt-choices kpj-small" data-group="where">
+          <button type="button" class="kpt-choice" data-value="flexible" aria-pressed="true">Anywhere in Singapore</button>
+          <button type="button" class="kpt-choice" data-value="areas" aria-pressed="false">Near somewhere specific</button>
+        </div>
+        <div class="kpt-field kpb-text" id="whereBox" hidden>
+          <label for="whereText">Area, street or project</label>
+          <input id="whereText" type="text" maxlength="60" placeholder="e.g. Bishan" autocomplete="off">
+          <p class="kpb-help">We'll suggest a district for you to confirm.</p>
+        </div>
+      </div>
+
+      <div class="kpb-block">
+        <p class="kpb-q">What matters most? <span class="kpb-opt">Optional, up to 2.</span></p>
+        <div class="kpb-chips" data-group="priorities" id="prio">
+          <button type="button" class="kpb-chip" data-value="space" aria-pressed="false">More space</button>
+          <button type="button" class="kpb-chip" data-value="location" aria-pressed="false">Closer to the centre</button>
+          <button type="button" class="kpb-chip" data-value="newer" aria-pressed="false">Newer building</button>
+          <button type="button" class="kpb-chip" data-value="freehold" aria-pressed="false">Freehold or long lease</button>
+        </div>
+      </div>
+
+      <div class="kpb-block">
+        <p class="kpb-q">Bedrooms <span class="kpb-opt">Optional.</span></p>
         <div class="kpb-chips" data-group="size">
           <button type="button" class="kpb-chip" data-value="1br" aria-pressed="false">1BR</button>
           <button type="button" class="kpb-chip" data-value="2br" aria-pressed="false">2BR</button>
@@ -57,35 +71,7 @@
           <button type="button" class="kpb-chip" data-value="4br-plus" aria-pressed="false">4BR+</button>
           <button type="button" class="kpb-chip" data-value="not-sure" aria-pressed="true">Not sure</button>
         </div>
-      </div>
-
-      <div class="kpb-block">
-        <p class="kpb-q">Where do you need to be?</p>
-        <div class="kpb-chips" data-group="where">
-          <button type="button" class="kpb-chip" data-value="areas" aria-pressed="false">Specific areas in mind</button>
-          <button type="button" class="kpb-chip" data-value="family" aria-pressed="false">Near family</button>
-          <button type="button" class="kpb-chip" data-value="work" aria-pressed="false">Near work</button>
-          <button type="button" class="kpb-chip" data-value="school" aria-pressed="false">Near a particular school</button>
-          <button type="button" class="kpb-chip" data-value="flexible" aria-pressed="true">Location is flexible</button>
-        </div>
-        <div class="kpt-field kpb-text" id="whereBox" hidden>
-          <label for="whereText">Which area, school or workplace? (optional)</label>
-          <input id="whereText" type="text" maxlength="60" placeholder="e.g. Ang Mo Kio / Thomson" autocomplete="off">
-        </div>
-      </div>
-
-      <div class="kpb-block">
-        <p class="kpb-q">What matters most? Choose up to 2.</p>
-        <div class="kpb-chips" data-group="priorities" id="prio">
-          <button type="button" class="kpb-chip" data-value="space" aria-pressed="false">More space</button>
-          <button type="button" class="kpb-chip" data-value="location" aria-pressed="false">Better location</button>
-          <button type="button" class="kpb-chip" data-value="newer" aria-pressed="false">Newer development</button>
-          <button type="button" class="kpb-chip" data-value="investment" aria-pressed="false">Investment potential</button>
-          <button type="button" class="kpb-chip" data-value="schools" aria-pressed="false">Schools</button>
-          <button type="button" class="kpb-chip" data-value="monthly" aria-pressed="false">Lower monthly commitment</button>
-          <button type="button" class="kpb-chip" data-value="freehold" aria-pressed="false">Freehold / tenure</button>
-          <button type="button" class="kpb-chip" data-value="facilities" aria-pressed="false">Facilities / lifestyle</button>
-        </div>
+        <p class="kpb-help">Sales records don't include bedrooms, so for now this doesn't change the list.</p>
       </div>
 
       <button class="kpt-cta kpj-btn" id="analyse" type="button" style="margin-top:30px;">Analyse my search →</button>
@@ -106,7 +92,7 @@
 </footer>
 
 <script src="../assets/js/kpt-analytics.js"></script>
-<script src="../assets/js/kpt-components.js?v=2026-10-07.2"></script>
+<script src="../assets/js/kpt-components.js?v=2026-10-07.3"></script>
 <script src="../assets/js/kpt-market.js"></script>
 <script src="../assets/js/kpt-engine.js"></script>
 <script src="../assets/js/kpt-result.js"></script>
@@ -127,7 +113,7 @@
   const abs = (p) => new URL(p, TWO).href;
   const statsBase = abs(test ? CFG.testRouteStatsBase : CFG.routeStatsBase), notesUrl = abs(test ? CFG.testKenNotes : CFG.kenNotes);
 
-  const sel = { purpose: '', openTo: 'both', size: 'not-sure', where: 'flexible', priorities: [] };
+  const sel = { openTo: 'both', size: 'not-sure', where: 'flexible', priorities: [] };
   let started = false, model = null, answers = null;
   const markStarted = () => { if (!started) { started = true; KPT.track('tool_started', { tool_name: 'buy-journey' }); } };
 
@@ -150,16 +136,18 @@
     if (k === 'priorities') {
       const i = sel.priorities.indexOf(v);
       if (i > -1) sel.priorities.splice(i, 1); else if (sel.priorities.length < 2) sel.priorities.push(v);
-    } else if (k === 'purpose' && sel.purpose === v) sel.purpose = ''; else sel[k] = v;
+    } else sel[k] = v;
     paint();
   }));
 
-  const collect = () => ({ budget: Number($('budget').value.replace(/[^0-9]/g, '')), purpose: sel.purpose, openTo: sel.openTo, size: sel.size,
+  const collect = () => ({ budget: Number($('budget').value.replace(/[^0-9]/g, '')), openTo: sel.openTo, size: sel.size,
     where: sel.where, whereText: $('whereText').value, priorities: sel.priorities.slice() });
   function restore(a) {
     $('budget').value = a.budget ? Number(a.budget).toLocaleString('en-SG') : '';
-    ['purpose', 'openTo', 'size', 'where'].forEach((k) => { sel[k] = a[k] || sel[k]; });
-    sel.priorities = (a.priorities || []).slice(0, 2); $('whereText').value = a.whereText || ''; paint();
+    ['openTo', 'size'].forEach((k) => { sel[k] = a[k] || sel[k]; });
+    sel.where = a.where && a.where !== 'flexible' ? 'areas' : 'flexible';   // older saved answers (family / work / school) read as a specific place
+    sel.priorities = (a.priorities || []).filter((p) => ['space', 'location', 'newer', 'freehold'].indexOf(p) > -1);
+    sel.priorities = sel.priorities.slice(0, 2); $('whereText').value = a.whereText || ''; paint();
   }
 
   // ------------------------------------------------------------ analysis
@@ -190,32 +178,22 @@
   const TAG = { evidence: ['reg', 'Market evidence'], rule: ['ours', 'Our rule'], ken: ['lender', "Ken's judgement"] };
   function resultHtml(m) {
     const flag = test ? '<span class="kpt-testflag">Test data · illustrative figures, not market evidence</span><br>' : '';
-    const chip = `<a class="res-chip" href="#" id="edit" aria-label="Change my answers">← ${esc(m.summary.join(' · '))}</a>`;
-    // V10.2: this page is a bridge into the development list, not a destination. Same facts as before, shorter: the long route paragraphs,
-    // the "what you give up" lines and the notes now sit inside "How this was worked out". Nothing is calculated here.
-    const SHORT = { 'Look further from the centre': 'Further from the centre', 'Look closer in': 'Closer in', 'Consider resale over a new launch': 'Resale', 'Consider a new launch': 'New launch',
-      'Look at older homes': 'Older homes', 'Look at newer resale homes': 'Newer resale homes', 'Look at freehold or 999-year homes': 'Freehold or 999-year homes', 'Look at leasehold homes': 'Leasehold homes' };
-    const gain = (r) => { if (m.tradeoff && r.id === m.tradeoff.key) return 'More space'; const g = /roughly ([\d,]+(?:–[\d,]+)?) sq ft more/.exec(r.text || ''); return g ? 'Around ' + g[1] + ' sq ft more' : r.id === 'widen' ? 'More sales near this budget' : ''; };
-    const row = (t, v) => `<div class="kpb-way"><b>${esc(t)}</b><span>${v.split('\n').map(esc).join('<br>')}</span></div>`;
-    const ecParts = m.ec ? (/^(.*?)(?: at this budget)?\. Eligibility conditions apply\.$/.exec(m.ec.text) || []) : [];
-    const ways = m.routes.map((r) => row(SHORT[r.title] || r.title, gain(r))).join('') + (m.ec ? row(m.ec.label, ecParts[1] ? ecParts[1] + '\nEligibility applies' : m.ec.text) : '');
-    const waysBlock = ways ? `<p class="kpb-sec">Ways to get more from your budget</p><div class="kpb-ways">${ways}</div>` : '';
-    const indic = (m.tradeoff && m.tradeoff.indicative) || m.routes.some((r) => /indicative/.test(r.text || '')) ? `<p class="kpb-indic">New-launch figures are indicative.</p>` : '';
-    const ev = m.evidence ? `<p class="res-sumtxt">${esc(m.evidence.headline)}${m.evidence.range ? ' ' + esc(m.evidence.range) : ''}</p>` : '';
     const meaning = m.meaning ? String(m.meaning).replace(' in all three market regions.', ' across all three market regions.') : '';
-    const tradeBlock = m.tradeoff ? `<p class="kpb-sec">The main trade-off</p><p class="kpb-trade">${esc(m.tradeoff.text)}</p>` : '';
+    // An insight is optional. It appears only when the buyer's answers caused it (personal) or it is a labelled general market observation.
+    const ins = m.insight ? `<p class="kpb-sec">${esc(m.insight.label)}</p><p class="kpb-trade">${m.insight.lines.map(esc).join('<br>')}</p>${m.insight.note ? `<p class="kpb-indic">${esc(m.insight.note)}</p>` : ''}` : '';
+    const app = m.applied && m.applied.length ? `<p class="kpb-sec">Applied to your search</p><p class="kpb-trade">${esc(m.applied.join(' · '))}</p>${m.applied.some((x) => /^Near /.test(x)) ? '<p class="kpb-indic">We’ll suggest a district for you to confirm.</p>' : ''}` : '';
     const kenBtn = m.canSeeMarket ? '' : `<a class="kpt-cta kpj-btn kpj-btn--wa" id="askKen" href="#">Get Ken's view →</a>`;   // only when there is nothing to continue into
-    const buyBtn = m.canSeeMarket ? `<button class="kpt-cta kpj-btn" id="seeBuy" type="button">See what ~${esc(m.budgetText)} actually buys →</button>` : '';
-    const more = []; if (m.routes.length) more.push(`<p><b>The routes in full</b></p><ul class="kpt-list">${m.routes.map((r) => `<li><b>${esc(r.title)}.</b> ${esc(r.text)}${r.giveUp ? ' ' + esc(r.giveUp) : ''}</li>`).join('')}</ul>`);
+    const buyBtn = m.canSeeMarket ? `<button class="kpt-cta kpj-btn" id="seeBuy" type="button">See what ~${esc(m.budgetText)} actually buys →</button><p class="kpb-caption">Developments with recent sales around your budget and size.</p>` : '';
+    const more = [];
+    if (m.other && m.other.length) more.push(`<p><b>Other comparisons</b></p><ul class="kpt-list">${m.other.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>`);
     if (m.ec) more.push(`<p><b>EC</b></p><p class="kpt-quiet">${esc(m.ec.label)}: ${esc(m.ec.text)}</p>`);
     if (m.notes.length) more.push(`<p><b>What this doesn’t show</b></p>${m.notes.map((n) => `<p class="kpt-quiet">${esc(n)}</p>`).join('')}`);
     const worked = `<details class="kpt-disclosure"><summary>How this was worked out</summary><div class="inner">${more.join('')}<ul class="kpt-list">${m.worked.map((w) =>
       `<li><span class="kpt-tag kpt-tag--${TAG[w.kind][0]}">${TAG[w.kind][1]}</span>${esc(w.text)}</li>`).join('')}</ul></div></details>`;
-    return `<div class="kpt-section" style="padding-top:0;">${flag}${chip}
+    return `<div class="kpt-section" style="padding-top:16px;">${flag}
       <h1 class="res-h">${esc(m.headline)}</h1>
-      ${m.constraint ? `<p class="kpb-constraint">${esc(m.constraint)}</p>` : ''}
       ${meaning ? `<p class="kpb-meaning">${esc(meaning)}</p>` : ''}
-      ${ev}${tradeBlock}${waysBlock}${indic}
+      ${ins}${app}
       <div class="res-cta res-cta--bridge">${buyBtn}${kenBtn}</div>
       <button class="kpj-link kpj-link--muted" id="startOver" type="button">Change my answers</button>
     </div>${worked}`;
@@ -227,7 +205,7 @@
     const pl = B.analytics(model);
     KPT.track('tool_completed', Object.assign({ tool_name: 'buy-journey' }, pl));
     const back = (e) => { if (e) e.preventDefault(); $('view-result').style.display = 'none'; $('view-input').style.display = ''; document.body.dataset.view = 'input'; window.scrollTo({ top: 0 }); };
-    $('edit').addEventListener('click', back); $('startOver').addEventListener('click', back);
+    $('startOver').addEventListener('click', back);
     const ask = $('askKen');
     if (ask) { ask.href = KPT.waLink({ message: B.waMessage(answers) }); ask.addEventListener('click', () => KPT.track('whatsapp_click', Object.assign({ tool_name: 'buy-journey' }, pl))); }
     const sb = $('seeBuy');
