@@ -46,6 +46,15 @@ t('the removed questions are gone; older saved answers still read', () => {
   ['family', 'work', 'school'].forEach((w) => assert.strictEqual(B.normalise({ budget: 1e6, where: w, whereText: 'x' }).where, 'areas'));
   assert.deepStrictEqual(Object.keys(B.PRIORITY), ['space', 'location', 'newer', 'freehold']); assert.strictEqual(B.PRIORITY.location, 'Closer to the centre');
 });
+t('priorities that could not change the list are dropped, in the order chosen (V10.3.1)', () => {
+  const n = (x) => B.normalise(Object.assign({ budget: 2600000 }, x)).priorities;
+  assert.deepStrictEqual(n({ priorities: ['newer', 'space'] }), ['newer', 'space']); assert.deepStrictEqual(n({ priorities: ['space', 'location'] }), ['space', 'location']);
+  assert.deepStrictEqual(n({ where: 'areas', whereText: 'Bishan', priorities: ['location', 'space'] }), ['space']);          // a named area already decides the location
+  assert.deepStrictEqual(n({ where: 'areas', whereText: '', priorities: ['location'] }), ['location']);                        // no area entered yet
+  assert.deepStrictEqual(n({ openTo: 'new', priorities: ['newer', 'space'] }), ['space']);                                      // new launches are all new
+  assert.deepStrictEqual(n({ priorities: ['freehold', 'newer'] }), ['freehold']);                                               // freehold has no lease start year
+  assert.deepStrictEqual(B.buildHandoff({ budget: 2600000, priorities: ['location', 'newer'] }).priorities, ['location', 'newer']);
+});
 t('invalid budget gives no diagnosis', () => assert.strictEqual(B.analyse({ budget: 10 }, null).state, 'invalid'));
 
 console.log('Coverage and evidence depth');
@@ -103,7 +112,7 @@ t('no matching finding for the chosen priority: no insight at all, never a gener
 });
 t('a specific area: no insight; the area and freehold are shown as applied; the lede drops "regions"', () => {
   const m = B.analyse({ budget: 2600000, where: 'areas', whereText: 'Bishan', priorities: ['freehold'] }, synth(2600000));
-  assert.strictEqual(m.insight, null); assert.deepStrictEqual(m.applied, ['Near Bishan', 'Freehold or long lease']);
+  assert.strictEqual(m.insight, null); assert.deepStrictEqual(m.applied, ['Near Bishan', 'Freehold or 900+ year lease']);
   assert.strictEqual(m.headline, 'Your budget is workable.'); assert.strictEqual(m.meaning, 'New launches and resale homes sold around this budget.');
   assert.ok(m.rules.indexOf('no-insight') > -1);
 });
@@ -115,16 +124,16 @@ t('freehold with a tenure finding: the insight, and freehold is still shown as a
   const T = ins('tenure type:leasehold-larger', 'tenure type', [bar('OCR', 'Resale', '99', 1100), bar('OCR', 'Resale', 'Freehold / 999-yr', 900)], 1);
   const m = B.analyse({ budget: 2300000, priorities: ['freehold'] }, fake([T], ALL));
   assert.deepStrictEqual(m.insight.lines, ['Freehold or 999-year homes meant less space at this budget.', 'Leasehold homes were roughly 200 sq ft larger.']);
-  assert.deepStrictEqual(m.applied, ['Freehold or long lease']);
+  assert.deepStrictEqual(m.applied, ['Freehold or 900+ year lease']);
 });
 t('two priorities: one supported insight, the other is not turned into a combined conclusion', () => {
   const NEW = ins('status:resale-larger', 'status', [bar('RCR', 'Resale', '25+', 1300), bar('RCR', 'New', '–', 800)], 2);
   const m = B.analyse({ budget: 2300000, priorities: ['location', 'newer'] }, fake([OUT_LARGER, NEW], ALL));
   assert.strictEqual(m.insight.key, 'region:outer-larger'); assert.strictEqual(m.insight.lines.length, 2);
   assert.ok(!/together|and newer/i.test(JSON.stringify(m.insight)));
-  assert.ok(m.notes.some((n) => /You also chose newer building\. It is not used to filter or rank the list\./.test(n)));
+  assert.ok(m.notes.some((n) => /Your priorities order the list and do not remove any development/.test(n)));
   const f = B.analyse({ budget: 2300000, priorities: ['location', 'freehold'] }, fake([OUT_LARGER], ALL));
-  assert.strictEqual(f.insight.key, 'region:outer-larger'); assert.deepStrictEqual(f.applied, ['Freehold or long lease']);
+  assert.strictEqual(f.insight.key, 'region:outer-larger'); assert.deepStrictEqual(f.applied, ['Freehold or 900+ year lease']);
 });
 t('no insight unless the budget is comfortable for what the buyer is open to', () => {
   const m = B.analyse({ budget: 900000, openTo: 'new', priorities: ['location'] }, fake([OUT_LARGER], [route('OCR new', 'low-end', 'Usable')]));
@@ -163,7 +172,7 @@ t('bedroom size and areas are never turned into sq ft or evaluated, and never sh
 });
 t('the chip lists only answers that were used', () => {
   const m = B.analyse({ budget: 2600000, openTo: 'resale', size: '3br', where: 'areas', whereText: 'Bishan', priorities: ['freehold', 'newer'] }, synth(2600000));
-  assert.deepStrictEqual(m.summary, ['$2.6m', 'Resale', 'Bishan', 'Freehold or long lease']);
+  assert.deepStrictEqual(m.summary, ['$2.6m', 'Resale', 'Bishan', 'Freehold or 900+ year lease']);
 });
 t('wording has no certainty, advice to stretch, or return claims', () => {
   const words = [];
@@ -217,7 +226,7 @@ t('what-can-i-buy back chip knows about the buyer journey', () => {
   assert.ok(/handoff\.from === 'buy'/.test(fs.readFileSync(path.join(__dirname, '../../tools/what-can-i-buy/index.html'), 'utf8')));
 });
 t('the page has the approved questionnaire and none of the removed questions or sections', () => {
-  ['What are you open to?', 'Where are you looking?', 'Anywhere in Singapore', 'Near somewhere specific', 'Area, street or project', 'What matters most?', 'Closer to the centre', 'Newer building', 'Freehold or long lease', "Sales records don't include bedrooms, so for now this doesn't change the list."].forEach((x) => assert.ok(html.indexOf(x) > -1, x));
+  ['What are you open to?', 'Where are you looking?', 'Anywhere in Singapore', 'Near somewhere specific', 'Area, street or project', 'What matters most?', 'Closer to the centre', 'Newer building', 'Freehold or 900+ year lease', "Sales records don't include bedrooms, so for now this doesn't change the list."].forEach((x) => assert.ok(html.indexOf(x) > -1, x));
   ['Own stay', 'Investment', 'A bit of both', 'Near family', 'Near work', 'Near a particular school', 'Better location', 'Schools', 'Lower monthly', 'Facilities', 'Ways to get more from your budget', 'The main trade-off'].forEach((x) => assert.ok(html.indexOf(x) < 0, x));
 });
 t('the homepage still routes to /buy/', () => assert.ok(/href="buy\/"/.test(fs.readFileSync(path.join(__dirname, '../../index.html'), 'utf8'))));

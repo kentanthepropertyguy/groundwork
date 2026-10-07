@@ -7,8 +7,8 @@
 <meta name="description" content="Where your budget works in the Singapore property market, what you trade off, and what Ken would look at.">
 <meta name="theme-color" content="#FAFAF8">
 <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../../assets/css/kpt-system.css?v=2026-10-07.3">
-<link rel="stylesheet" href="../../assets/css/kpt-journey.css?v=2026-10-07.3">
+<link rel="stylesheet" href="../../assets/css/kpt-system.css?v=2026-10-07.4">
+<link rel="stylesheet" href="../../assets/css/kpt-journey.css?v=2026-10-07.4">
 </head>
 <body class="kpj kpj-wide" data-view="result">
 <header class="kpt-header kpt-shell"><div class="kpt-brandblock"><a class="brand" href="../../">KEN PROPERTY TOOLS</a><span class="kpt-by">by Ken Tan</span></div></header>
@@ -26,11 +26,11 @@
 </footer>
 
 <script src="../../assets/js/kpt-analytics.js"></script>
-<script src="../../assets/js/kpt-components.js?v=2026-10-07.3"></script>
+<script src="../../assets/js/kpt-components.js?v=2026-10-07.4"></script>
 <script src="../../assets/js/kpt-market.js"></script>
 <script src="../../assets/js/kpt-engine.js"></script>
 <script src="../../assets/js/kpt-result.js"></script>
-<script src="../../assets/js/kpt-find.js?v=2026-10-07.3"></script>
+<script src="../../assets/js/kpt-find.js?v=2026-10-07.4"></script>
 <script src="../../data/market/config.js"></script>
 <script>
 (function () {
@@ -169,6 +169,9 @@
   const answersNow = () => (handoff && handoff.from === 'buy' ? { where: handoff.where, size: handoff.size, priorities: handoff.priorities || [] } : { where: 'flexible', size: 'not-sure', priorities: [] });
   const whereTextNow = () => (handoff && handoff.from === 'buy' && handoff.where !== 'flexible' ? String(handoff.whereText || '').replace(/\s+/g, ' ').trim().slice(0, 60) : '');
   const locIntent = () => ['areas', 'family', 'work', 'school'].indexOf(answersNow().where) > -1;
+  // V10.3.1: priorities that order the list, in the order the buyer chose them (Freehold is a filter and is handled separately)
+  const prefsNow = () => answersNow().priorities.filter((p) => ['space', 'location', 'newer'].indexOf(p) > -1);
+  const sizeOpts = () => ({ space: prefsNow().indexOf('space') > -1 });
   const openToNow = () => (handoff && handoff.from === 'buy' && ['new', 'resale', 'both'].indexOf(handoff.openTo) > -1 ? handoff.openTo : 'both');
   // ---- the buyer's search, remembered in this tab with the handoff (sessionStorage only; never sent to analytics or WhatsApp)
   const DIST_RE = /^(0[1-9]|1\d|2[0-8])$/, LOCS = ['none', 'pending', 'confirmed', 'skipped'], moneyIn = (n) => Number(n).toLocaleString('en-SG');
@@ -230,7 +233,7 @@
     const setKen = (b) => { const be = $('beyond'), lg = $('kenLegacy'); if (be) be.hidden = !b; if (lg) lg.hidden = b || findIx === undefined; };   // Beyond the numbers follows a finished list; the plain button covers every other state
     setKen(false);
     if (!findIx) { root.innerHTML = ''; return; }                                   // data file missing: the section is simply absent and the page is exactly as before
-    const openTo = openToNow(), sz = FI.sizeWindow(FS.explicit, findStep, openTo);
+    const openTo = openToNow(), sz = FI.sizeWindow(FS.explicit, findStep, openTo, sizeOpts());
     const head = `<h2 class="kpf-h" id="kpfH">Developments worth investigating</h2>`;
     const inv = FI.prepareInventory(invDoc, nowMs()), invOn = !!inv && (openTo === 'new' || openTo === 'both');
     if (!sz && !FS.draft) openDraft(null);                                              // no size to show yet: open the panel so the buyer can give one
@@ -259,7 +262,7 @@
     const tickBox = (c) => { const on = FS.ticked.some((t) => t.slug === c.slug), full = FS.ticked.length >= 2 && !on; return `<label class="kpf-tick${full ? ' is-off' : ''}"><input type="checkbox" data-f="tick" data-slug="${esc(c.slug)}"${on ? ' checked' : ''}${full ? ' disabled' : ''}> <span>${esc(c.tick)}</span></label>`; };
     const waFor = (names) => FI.handoffMessage({ names, budget, size: FS.explicit && FS.explicit.typed ? { from: FS.explicit.from, to: FS.explicit.to } : null, district: FS.loc === 'confirmed' && FS.districts.length === 1 ? FS.districts[0] : null });
     const cardHtml = (c) => { const s = c.simple;
-      return `<article class="kpf-card"><h3 class="kpf-name">${esc(c.name)}</h3><p class="kpf-meta">${esc(c.meta.replace(/ from \d{4}/, ""))}</p>
+      return `<article class="kpf-card"><h3 class="kpf-name">${esc(c.name)}</h3><p class="kpf-meta">${esc(c.meta.replace(/ from \d{4}/, "").replace(FS.districts.length ? / · (?:CCR|RCR|OCR)(?= · |$)/ : /$^/, ""))}</p>
       <p class="kpf-sz">${esc(s.size)}</p><p class="kpf-pr"><span class="kpf-pl">${esc(s.priceLead)}</span> <b>${esc(s.figure)}</b>${s.priceNote ? ` <span class="kpf-pn">${esc(s.priceNote)}</span>` : ''}</p>
       <p class="kpf-bud kpf-bud--${s.budget.tone}">${esc(s.budget.text)}</p>
       ${s.sales ? `<p class="kpf-sales">${esc(s.sales)}</p>` : ''}${s.latest ? `<p class="kpf-latest">${esc(s.latest)}</p>` : ''}${s.quiet ? `<p class="kpf-q">${esc(s.quiet)}</p>` : ''}
@@ -278,18 +281,19 @@
     const noneChg = res.changes.length ? `<ul class="kpf-chg kpf-chg--act">${res.changes.map((c) => `<li><button class="kpf-link" type="button" data-f="chg" data-id="${esc(c.id)}">${esc(c.id === 'size' ? 'Include nearby sizes' : c.id === 'area' ? 'Look across all Singapore' : c.id === 'budget' ? 'Widen the budget range' : c.label)} →</button></li>`).join('')}</ul>` : '';
     if (res.state === 'none') body = `<div class="kpf-msg kpf-none"><p class="kpf-nh"><b>Nothing matched this search</b></p><p>Try a nearby size or broaden the area.</p>${noneChg}<p class="kpf-note">Or <a href="#" data-f="ken">ask Ken what may work</a>.</p></div>`;
     else body = list + (res.state === 'few' ? `<div class="kpf-msg"><p>${esc(res.fewText)}</p>${chg}</div>` : '');
-    const sizeWhy = sz.source === 'inferred' ? 'You didn’t give a size in square feet, so we used the sizes that typically sold at your budget (about ' + sizeFmt(sz.lo, sz.hi) + '). We don’t convert bedrooms into square feet.' : 'The size is your own range, ' + sizeFmt(sz.lo, sz.hi) + '. We don’t convert bedrooms into square feet.';
+    const sizeWhy = sz.source === 'inferred' ? 'You didn’t give a size in square feet, so we used the sizes that typically sold at your budget' + (sz.extended ? ', extended upward because you chose More space' : '') + ' (about ' + sizeFmt(sz.lo, sz.hi) + '). We don’t convert bedrooms into square feet.' : 'The size is your own range, ' + sizeFmt(sz.lo, sz.hi) + '. We don’t convert bedrooms into square feet.';
     const unWhy = res.unsupported.length ? `<h4>What we didn’t use to build this list</h4><ul>${res.unsupported.map((u) => `<li><b>${esc(u.title)}:</b> ${esc(u.text)}</li>`).join('')}</ul>` : '';
     const hasNew = openTo === 'new' || openTo === 'both';
     const pricingP = !hasNew ? '' : V10 ? 'The “From around” price is the lowest price currently shown in Huttons inventory for homes about your size, rounded to $50k. Prices vary by unit, and only Ken can say what you could actually get. “Updated” is when we last looked. Where a card says “Current availability not confirmed”, that isn’t the same as there being none.' : 'New launch projects appear because they had developer sales recently. That doesn’t show whether any units are still available. “Current availability not confirmed” means exactly that, and Ken can check for you.';
-    const firstLayer = `<h4>How we built this list</h4><p>We looked at private homes that actually sold in the last 12 months at prices close to your budget and size, and listed the developments with enough recent sales to be meaningful. They are ordered by how much recent evidence there is, not by quality or value.</p>`
+    const firstLayer = `<h4>How we built this list</h4><p>We looked at private homes that actually sold in the last 12 months at prices close to your budget and size, and listed the developments with enough recent sales to be meaningful. ${res.effect && res.effect.length ? 'They are ordered by what you chose to prioritise, then by how much recent evidence there is, not by quality or value.' : 'They are ordered by how much recent evidence there is, not by quality or value.'}</p>`
       + `<h4>About your size</h4><p>${esc(sizeWhy)}</p>`
       + (pricingP ? `<h4>New launch pricing</h4><p>${esc(pricingP)}</p>` : '')
       + `<h4>What this doesn’t tell you</h4><p>This is a starting list of developments worth investigating. It is not a recommendation or a valuation. It doesn’t tell you which unit suits you, what you would pay, or what is for sale right now${V10 ? ' beyond the Huttons check' : ''}. Ken can help with that.</p>` + unWhy;
     const noneWhy = res.state === 'none' ? `<p><b>Why nothing matched</b></p><p>${esc(res.noneText)}</p>${res.reference ? `<p>${esc(res.reference.text)}</p>` : ''}` : '';
     const meth = `<details class="kpf-meth"><summary>How this works <span>· A starting list, not a recommendation</span></summary><div class="inner">${firstLayer}<details class="kpf-data"><summary>More about the data</summary><div class="inner">${noneWhy}<p>${esc(res.orderLine)}</p>${(V10 ? FI.METHOD_INV : FI.METHOD).map((t) => `<p>${esc(t)}</p>`).join('')}</div></details></div></details>`;
     setKen(true);
-    root.innerHTML = `<section class="kpf" aria-labelledby="kpfH">${head}${summary}${body}${meth}${bar}</section>`;
+    const effectHtml = res.effect && res.effect.length ? `<div class="kpf-effect">${res.effect.map((t) => `<p>${esc(t)}</p>`).join('')}</div>` : '';
+    root.innerHTML = `<section class="kpf" aria-labelledby="kpfH">${head}${summary}${effectHtml}${body}${meth}${bar}</section>`;
     const pl = FI.analytics(res, bandOf(budget)), key = JSON.stringify(pl);
     if (!FS.seen[key]) { FS.seen[key] = 1; KPT.track('find_shown', pl); }
     window.__kptFind = res;   // read by tests
@@ -309,7 +313,7 @@
     const d = FS.draft, err = (m) => { const el = $('kpfErr'); if (el) el.textContent = m; };
     const nb = budgetFromInput(d.budget); if (!nb) { err(BUDGET_ERR); return; }
     const num = (v) => Number(String(v || '').replace(/[^0-9.]/g, '')), a = num(d.from), b = num(d.to), blank = !String(d.from).trim() && !String(d.to).trim();
-    const cur = FI.sizeWindow(FS.explicit, findStep, openToNow()), same = cur && String(cur.lo) === String(a) && String(cur.hi) === String(b);
+    const cur = FI.sizeWindow(FS.explicit, findStep, openToNow(), sizeOpts()), same = cur && String(cur.lo) === String(a) && String(cur.hi) === String(b);
     if (!blank && !same && !(a >= 100 && b > a && b <= 20000)) { err('Enter a size range in square feet, for example 900 to 1,100.'); return; }
     if (blank) FS.explicit = null; else if (!same) FS.explicit = { from: a, to: b, typed: true };
     FS.districts = d.districts.slice(); FS.text = d.text.replace(/\s+/g, ' ').trim().slice(0, 40); FS.freehold = !!d.freehold; FS.widen = !!d.widen;
@@ -335,7 +339,7 @@
     if (f === 'dfree') { if (FS.draft) FS.draft.freehold = !!t.checked; return; }
     if (f === 'dwiden') { if (FS.draft) FS.draft.widen = !!t.checked; return; }
     e.preventDefault && e.preventDefault();
-    if (f === 'panel') { if (FS.panel) { FS.panel = false; FS.draft = null; } else openDraft(FI.sizeWindow(FS.explicit, findStep, openToNow())); renderFindView(); return; }
+    if (f === 'panel') { if (FS.panel) { FS.panel = false; FS.draft = null; } else openDraft(FI.sizeWindow(FS.explicit, findStep, openToNow(), sizeOpts())); renderFindView(); return; }
     if (f === 'update') { commitSearch(); return; }
     if (f === 'typical') { FS.draft.from = ''; FS.draft.to = ''; renderFindView(); return; }
     if (f === 'dist') { const dd = t.dataset.d, i = FS.draft.districts.indexOf(dd); if (i > -1) FS.draft.districts.splice(i, 1); else FS.draft.districts.push(dd); renderFindView(); return; }
@@ -345,7 +349,7 @@
     else if (f === 'locskip') { FS.districts = []; FS.loc = 'skipped'; }
     else if (f === 'chg') {
       const id = t.dataset.id; if (id === 'area') { FS.districts = []; FS.text = ''; }
-      else if (id === 'size') { const sz = FI.sizeWindow(FS.explicit, findStep, openToNow()); if (sz) FS.explicit = { from: sz.lo - FI.T.sizePad, to: sz.hi + FI.T.sizePad, widened: true, typed: sz.source === 'explicit' && !!(FS.explicit && FS.explicit.typed) }; }
+      else if (id === 'size') { const sz = FI.sizeWindow(FS.explicit, findStep, openToNow(), sizeOpts()); if (sz) FS.explicit = { from: sz.lo - FI.T.sizePad, to: sz.hi + FI.T.sizePad, widened: true, typed: sz.source === 'explicit' && !!(FS.explicit && FS.explicit.typed) }; }
       else if (id === 'budget') FS.widen = true;
     }
     renderFind();

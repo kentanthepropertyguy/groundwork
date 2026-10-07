@@ -7,8 +7,8 @@
 <meta name="theme-color" content="#FAFAF8">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <title>I'm looking to buy — Ken Property Tools</title>
-<link rel="stylesheet" href="../assets/css/kpt-system.css?v=2026-10-07.3">
-<link rel="stylesheet" href="../assets/css/kpt-journey.css?v=2026-10-07.3">
+<link rel="stylesheet" href="../assets/css/kpt-system.css?v=2026-10-07.4">
+<link rel="stylesheet" href="../assets/css/kpt-journey.css?v=2026-10-07.4">
 </head>
 <body class="kpj" data-view="input">
 <header class="kpt-header kpt-shell"><div class="kpt-brandblock"><a class="brand" href="../">KEN PROPERTY TOOLS</a><span class="kpt-by">by Ken Tan</span></div></header>
@@ -57,8 +57,9 @@
           <button type="button" class="kpb-chip" data-value="space" aria-pressed="false">More space</button>
           <button type="button" class="kpb-chip" data-value="location" aria-pressed="false">Closer to the centre</button>
           <button type="button" class="kpb-chip" data-value="newer" aria-pressed="false">Newer building</button>
-          <button type="button" class="kpb-chip" data-value="freehold" aria-pressed="false">Freehold or long lease</button>
+          <button type="button" class="kpb-chip" data-value="freehold" aria-pressed="false">Freehold or 900+ year lease</button>
         </div>
+        <p class="kpb-help" id="prioHint" hidden></p>
       </div>
 
       <div class="kpb-block">
@@ -92,11 +93,11 @@
 </footer>
 
 <script src="../assets/js/kpt-analytics.js"></script>
-<script src="../assets/js/kpt-components.js?v=2026-10-07.3"></script>
+<script src="../assets/js/kpt-components.js?v=2026-10-07.4"></script>
 <script src="../assets/js/kpt-market.js"></script>
 <script src="../assets/js/kpt-engine.js"></script>
 <script src="../assets/js/kpt-result.js"></script>
-<script src="../assets/js/kpt-buyer.js"></script>
+<script src="../assets/js/kpt-buyer.js?v=2026-10-07.4"></script>
 <script src="../data/market/config.js"></script>
 <script>
 // Presentation only. All reasoning is in assets/js/kpt-buyer.js; all market evidence comes from the existing engine.
@@ -119,19 +120,29 @@
 
   // ------------------------------------------------------------ inputs
   $('budget').addEventListener('input', (e) => { markStarted(); const d = e.target.value.replace(/[^0-9]/g, ''); e.target.value = d ? Number(d).toLocaleString('en-SG') : ''; $('budgetErr').textContent = ''; });
+  // A priority that could not change the list is switched off, with the reason. (Same rules as kpt-buyer.js normalise.)
+  const OFF_TEXT = { location: 'Closer to the centre is off because you chose a specific area, which already decides the location search.',
+    newerNew: 'Newer building is off for New launch only. It orders resale homes.', newerFree: 'Newer building can’t be combined with Freehold or 900+ year lease.' };
+  function offState() {
+    const area = sel.where === 'areas' && $('whereText').value.trim().length > 0, free = sel.priorities.indexOf('freehold') > -1;
+    return { location: area, newer: sel.openTo === 'new' || free, area, free };
+  }
   function paint() {
+    const o = offState(); sel.priorities = sel.priorities.filter((p) => !(p === 'location' && o.location) && !(p === 'newer' && o.newer));
+    const why = []; if (o.location) why.push(OFF_TEXT.location); if (sel.openTo === 'new') why.push(OFF_TEXT.newerNew); else if (o.free) why.push(OFF_TEXT.newerFree);
+    $('prioHint').hidden = !why.length; $('prioHint').textContent = why.join(' ');
     document.querySelectorAll('#view-input [data-group]').forEach((g) => {
       const k = g.dataset.group;
       g.querySelectorAll('button').forEach((b) => {
         const on = k === 'priorities' ? sel.priorities.indexOf(b.dataset.value) > -1 : sel[k] === b.dataset.value;
         b.setAttribute('aria-pressed', on ? 'true' : 'false');
-        if (k === 'priorities') b.setAttribute('aria-disabled', !on && sel.priorities.length >= 2 ? 'true' : 'false');
+        if (k === 'priorities') { const off = (b.dataset.value === 'location' && o.location) || (b.dataset.value === 'newer' && o.newer); b.setAttribute('aria-disabled', off || (!on && sel.priorities.length >= 2) ? 'true' : 'false'); if (off) b.dataset.off = '1'; else delete b.dataset.off; }
       });
     });
     $('whereBox').hidden = sel.where === 'flexible';
   }
   document.querySelectorAll('#view-input [data-group]').forEach((g) => g.addEventListener('click', (e) => {
-    const b = e.target.closest('button'); if (!b) return; markStarted();
+    const b = e.target.closest('button'); if (!b || b.dataset.off) return; markStarted();
     const k = g.dataset.group, v = b.dataset.value;
     if (k === 'priorities') {
       const i = sel.priorities.indexOf(v);
@@ -140,6 +151,7 @@
     paint();
   }));
 
+  $('whereText').addEventListener('input', () => { markStarted(); paint(); });
   const collect = () => ({ budget: Number($('budget').value.replace(/[^0-9]/g, '')), openTo: sel.openTo, size: sel.size,
     where: sel.where, whereText: $('whereText').value, priorities: sel.priorities.slice() });
   function restore(a) {

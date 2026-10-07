@@ -73,10 +73,12 @@
     return lo > 0 && hi > lo ? { lo, hi, source: use.source, n: use.a[0] } : null;
   }
   /** explicit: {from, to} typed by the buyer (sqft). Otherwise the engine's typical size. Bedrooms are never converted. */
-  function sizeWindow(explicit, step, openTo) {
+  function sizeWindow(explicit, step, openTo, opts) {
     if (explicit && explicit.from >= 100 && explicit.to > explicit.from && explicit.to <= 20000)
       return { lo: Math.round(explicit.from), hi: Math.round(explicit.to), source: 'explicit', line: 'Size: ' + sizeText(Math.round(explicit.from), Math.round(explicit.to)) + (explicit.widened ? ' (nearby sizes included)' : ' (your range)') };
     const s = inferSize(step, openTo); if (!s) return null;
+    // V10.3.1: "More space" extends the inferred window upward by one band. A size the buyer typed is never changed (handled above).
+    if (opts && opts.space) return { lo: s.lo, hi: s.hi + T.sizePad, source: 'inferred', basis: s.source, extended: true, line: 'Size: about ' + sizeText(s.lo, s.hi + T.sizePad) + ', extended upward because you chose More space. You didn’t give a size in square feet, so we started from the sizes that typically sold at this budget. We don’t convert bedrooms into square feet.' };
     return { lo: s.lo, hi: s.hi, source: 'inferred', basis: s.source, line: 'Size: about ' + sizeText(s.lo, s.hi) + '. You didn’t give a size in square feet, so we used the sizes that typically sold at this budget. We don’t convert bedrooms into square feet.' };
   }
 
@@ -132,12 +134,10 @@
     if (a.where === 'family') out.push({ id: 'family', title: 'Near family', text: dist('where your family lives'), card: 'how close this is to your family' });
     if (a.where === 'work') out.push({ id: 'work', title: 'Near work', text: dist('your workplace'), card: 'how close this is to your workplace' });
     if (pr.indexOf('schools') > -1) out.push({ id: 'schools', title: 'Schools', text: 'Not measured by our sales data.', card: 'schools' });
-    if (pr.indexOf('location') > -1) out.push({ id: 'location', title: 'Closer to the centre', text: 'Not used to filter or rank this list.', card: 'distance from the centre' });
     if (pr.indexOf('investment') > -1) out.push({ id: 'investment', title: 'Investment potential', text: 'We hold no rental or yield data, so this list describes sales and prices only.', card: 'investment potential' });
     if (pr.indexOf('monthly') > -1) out.push({ id: 'monthly', title: 'Lower monthly commitment', text: 'Not measured by our sales data.', card: 'monthly commitment' });
     if (pr.indexOf('facilities') > -1) out.push({ id: 'facilities', title: 'Facilities and lifestyle', text: 'Not measured by our sales data.', card: 'facilities and lifestyle' });
-    if (pr.indexOf('newer') > -1) out.push({ id: 'newer', title: 'Newer building', text: 'Not used to filter. Each card shows the lease start year, which is not the completion year.', card: 'completion year' });
-    if (pr.indexOf('space') > -1) out.push({ id: 'space', title: 'More space', text: 'Not used to filter. The market comparison above shows what this budget buys in size.', card: null });
+    if (pr.indexOf('newer') > -1) out.push({ id: 'newer', title: 'Newer building', text: 'Used to order resale homes by lease start year. Each card shows the lease start year, which is not the completion year.', card: 'completion year' });
     if (a.size && a.size !== 'not-sure') out.push({ id: 'bedrooms', title: 'Bedroom count', text: 'Our data doesn’t record bedrooms, so this list can’t check it.', card: null });
     return out;
   }
@@ -165,6 +165,38 @@
   const FIT = { inside: 0, above: 1, below: 2 };
   const compare = (x, y) => (x.strength === y.strength ? 0 : x.strength === 'good' ? -1 : 1) || FIT[x.fit] - FIT[y.fit] || y.n - x.n || y.last - x.last || (x.name < y.name ? -1 : x.name > y.name ? 1 : 0);
 
+  /* ---- V10.3.1 buyer preferences. They only ORDER projects that already pass every eligibility and evidence rule; nothing is hidden by them.
+   *  Region is the URA market region (CCR / RCR / OCR), not a distance. Age is the lease start year, which is not the completion year. */
+  const REGION_RANK = { CCR: 0, RCR: 1, OCR: 2 };
+  const leaseYear = (tl) => { const m = /from (\d{4})/.exec(tl || ''); return m ? Number(m[1]) : 0; };
+  /** The facts a preference needs, from either a URA match (resale / new) or an inventory candidate. */
+  function prefFacts(x) {
+    if (x.rec !== undefined) { const r = x.rec || {}, u = x.ura || {}; return { seg: r.seg || u.seg || null, tg: r.tg != null ? r.tg : u.tenGroup, tl: r.tl || u.tenure || '', hi: u.bandHi || 0 }; }
+    return { seg: x.seg, tg: x.tenGroup, tl: x.tenure, hi: x.bandHi || 0 };
+  }
+  const PREF_CMP = {
+    location: (a, b) => (a.seg in REGION_RANK ? REGION_RANK[a.seg] : 3) - (b.seg in REGION_RANK ? REGION_RANK[b.seg] : 3),
+    newer: (a, b) => (b.tg === 4 ? -1 : leaseYear(b.tl)) - (a.tg === 4 ? -1 : leaseYear(a.tl)),          // newest lease start first; freehold and 900+ year leases have no start year, so they follow
+    space: (a, b) => b.hi - a.hi,
+  };
+  /** Comparator for a sale type, or null when no preference applies to it (so the existing order is untouched). */
+  function prefOrder(prefs, sale) {
+    const ks = (prefs || []).filter((p) => PREF_CMP[p] && (p !== 'newer' || sale === 'resale'));
+    if (!ks.length) return null;
+    return (x, y) => { const a = prefFacts(x), b = prefFacts(y); for (const k of ks) { const d = PREF_CMP[k](a, b); if (d) return d; } return 0; };
+  }
+  /** Which of the buyer's priorities actually apply to this search, in the order they were chosen, and which could not. */
+  function effectivePrefs(input) {
+    const pr = (input.answers && input.answers.priorities) || [], on = [], off = [];
+    const area = (input.districts && input.districts.length) || input.text;
+    pr.forEach((p) => {
+      if (p === 'location') (area ? off : on).push(p === 'location' && area ? { id: p, why: 'area' } : p);
+      else if (p === 'newer') (input.openTo === 'new' || input.freehold ? off : on).push(input.openTo === 'new' ? { id: p, why: 'new' } : input.freehold ? { id: p, why: 'freehold' } : p);
+      else if (p === 'space') (input.size && input.size.extended ? on : off).push(input.size && input.size.extended ? p : { id: p, why: 'size' });
+    });
+    return { on, off };
+  }
+
   /** Every eligible project for one sale type, in order. (No cap yet.) */
   function eligible(ix, sale, o) {
     const out = [];
@@ -174,7 +206,8 @@
       if (!textMatch(p, o.text)) return;
       const m = matchProject(ix, p, sale, o); if (m) out.push(m);
     });
-    return out.sort(compare);
+    const po = prefOrder(o.prefs, sale);
+    return out.sort(po ? (x, y) => po(x, y) || compare(x, y) : compare);
   }
   function takeCapped(list, n) {
     const per = {}, out = [];
@@ -286,7 +319,8 @@
     });
     Object.keys(uraAll).forEach((id) => { if (!seen[id]) { const u = uraAll[id]; out.push({ id, sale: 'new', rec: null, ip: null, fresh: null, ura: u, tier: 'c', hut: 'unchecked', name: u.name, street: u.street }); } });
     const TIER = { a: 0, b: 1, c: 2, d: 3 };
-    return out.sort((x, y) => TIER[x.tier] - TIER[y.tier] || (x.tier === 'a' || x.tier === 'b'
+    const po = prefOrder(o.prefs, 'new');     // after the budget-fit tiers, never before them
+    return out.sort((x, y) => TIER[x.tier] - TIER[y.tier] || (po ? po(x, y) : 0) || (x.tier === 'a' || x.tier === 'b'
       ? SUP_RANK[x.sup.kind] - SUP_RANK[y.sup.kind] || (x.fresh === y.fresh ? 0 : x.fresh === 'fresh' ? -1 : 1) || (x.name < y.name ? -1 : x.name > y.name ? 1 : 0)
       : compare(x.ura, y.ura)));
   }
@@ -367,7 +401,9 @@
    *  Returns the whole view model. Never throws on a usable index. */
   function shortlist(ix, input) {
     const inv = input.inv || null;
-    const un = unsupported(input.answers, input.loc || { districts: input.districts || [] }), base = { budget: input.budget, pct: input.pct === T.widenBudgetPct ? T.widenBudgetPct : T.budgetPct, lo: input.size.lo, hi: input.size.hi, districts: input.districts || [], freehold: !!input.freehold, text: input.text || '', openTo: input.openTo };
+    const eff = effectivePrefs(input);
+    const ans = Object.assign({}, input.answers, { priorities: ((input.answers && input.answers.priorities) || []).filter((p) => p !== 'newer' || eff.on.indexOf('newer') > -1) });   // only a priority that is applied is described as applied
+    const un = unsupported(ans, input.loc || { districts: input.districts || [] }), base = { budget: input.budget, pct: input.pct === T.widenBudgetPct ? T.widenBudgetPct : T.budgetPct, lo: input.size.lo, hi: input.size.hi, districts: input.districts || [], freehold: !!input.freehold, text: input.text || '', openTo: input.openTo, prefs: eff.on.slice() };
     if (inv) { base.inv = inv; base.sizeSource = input.size.source; base._uraIds = {}; ix.projects.forEach((p) => { base._uraIds[p.id] = 1; }); }
     const types = saleTypes(input.openTo), lists = {}; types.forEach((s) => { lists[s] = inv && s === 'new' ? newCandidates(ix, base) : eligible(ix, s, base); });
     const eligibleN = {}; types.forEach((s) => { eligibleN[s] = lists[s].length; });
@@ -398,6 +434,27 @@
       out.orderLine = types.length === 2 ? 'Resale: listed by how much recent evidence there is. New launch: listed by whether your budget sits within the range currently shown in Huttons, then by how much URA evidence there is. Not by quality, value or price.'
         : 'Listed by whether your budget sits within the range currently shown in Huttons, then by how much URA evidence there is. Not by quality, value or price.';
     } else if (inv) out.inventory = { active: true, checkedAt: new Date(inv.fileAt).toISOString() };
+
+    // V10.3.1 a short, plain statement of what the priorities did (nothing when no priority applied)
+    const effect = [], say = {};
+    if (eff.on.indexOf('location') > -1) {
+      say.location = 'Closer to the centre: Core Central Region shown first, followed by Rest of Central and Outside Central.';
+    }
+    if (eff.on.indexOf('newer') > -1) say.newer = 'Newer building: resale homes are listed by lease start year, newest first. Lease start is not the completion year.';
+    if (eff.on.indexOf('space') > -1) say.space = 'More space: sizes up to ' + num(input.size.hi) + ' sqft are included, and larger sizes are listed first.';
+    eff.on.forEach((p) => effect.push(say[p]));      // in the order the buyer chose them
+    eff.off.forEach((o) => {
+      if (o.why === 'area') effect.push('Closer to the centre wasn’t applied: the area you chose already sets the location.');
+      else if (o.why === 'new') effect.push('Newer building wasn’t applied: every new launch is a new project.');
+      else if (o.why === 'freehold') effect.push('Newer building wasn’t applied: it can’t be combined with Freehold or 900+ year lease.');
+      else if (o.why === 'size') effect.push('More space wasn’t applied: you chose your own size range.');
+    });
+    if (effect.length) out.effect = effect;      // absent when no priority applied, so the no-priority output is exactly the V10.3 output
+    if (eff.on.length) {
+      if (inv && types.indexOf('new') > -1) out.orderLine = types.length === 2 ? 'Resale: listed by your priorities, then by how much recent evidence there is. New launch: listed by whether your budget sits within the range currently shown in Huttons, then by your priorities, then by how much URA evidence there is. Not by quality, value or price.'
+        : 'Listed by whether your budget sits within the range currently shown in Huttons, then by your priorities, then by how much URA evidence there is. Not by quality, value or price.';
+      else out.orderLine = 'Listed by your priorities, then by how much recent evidence there is. Not by quality or value.';
+    }
 
     const asText = (n) => n + (n === 1 ? ' development' : ' developments');
     if (state === 'few') {
@@ -454,6 +511,6 @@
   }
 
   return { VERSION, T, DISTRICT_AREAS, AREA_ALIASES, AREA_CHOICES, NEW_LABEL, NEW_NOTE, NEW_NOTE_INV, resolveArea, districtLabel, districtShort, BASE_NOT_EVAL, METHOD, METHOD_INV, ANALYTICS_KEYS, HUT,
-    prepareInventory, freshness, invMatch, support, newCandidates, whenText, handoffMessage, askEvent, typeNoun,
+    prepareInventory, freshness, invMatch, effectivePrefs, prefOrder, support, newCandidates, whenText, handoffMessage, askEvent, typeNoun,
     displayName, prepare, inferSize, sizeWindow, matchDistricts, unsupported, notEvaluated, matchProject, eligible, shortlist, count, compare, why, card, analytics, bucket, m2, p2, num, sizeText, ymLabel, monthsBetween };
 });

@@ -28,7 +28,7 @@
   const SIZE = { '1br': '1BR', '2br': '2BR', '3br': '3BR', '3br-study': '3BR + Study / larger', '4br-plus': '4BR+', 'not-sure': 'Not sure' };
   const WHERE = { areas: 'Near somewhere specific', flexible: 'Anywhere in Singapore' };
   const LEGACY_WHERE = { family: 'areas', work: 'areas', school: 'areas' };   // older saved answers still read
-  const PRIORITY = { space: 'More space', location: 'Closer to the centre', newer: 'Newer building', freehold: 'Freehold or long lease' };
+  const PRIORITY = { space: 'More space', location: 'Closer to the centre', newer: 'Newer building', freehold: 'Freehold or 900+ year lease' };
   // priorities that sales data can speak to, and the engine finding that shows what that priority tends to cost in space
   const COST_KEYS = {
     location: ['region:outer-larger'],                         // closer in = less space
@@ -80,13 +80,16 @@
     const where = pick(WHERE, LEGACY_WHERE[raw.where] || raw.where, 'flexible');
     const seen = {}, pr = (Array.isArray(raw.priorities) ? raw.priorities : []).filter((p) => PRIORITY[p] && !seen[p] && (seen[p] = true)).slice(0, 2);
     const b = validateBudget(raw.budget);
+    const openTo = pick(OPEN_TO, raw.openTo, 'both'), whereText = where === 'flexible' ? '' : String(raw.whereText || '').replace(/\s+/g, ' ').trim().slice(0, 60);
+    // V10.3.1: a priority that could not change the list is not kept. A named area already sets the location; "Newer building" orders resale only and needs a lease start year.
+    const pr2 = pr.filter((p) => !(p === 'location' && where === 'areas' && whereText) && !(p === 'newer' && (openTo === 'new' || pr.indexOf('freehold') > -1)));
     return {
       budget: b.ok ? b.value : null,
-      openTo: pick(OPEN_TO, raw.openTo, 'both'),
+      openTo: openTo,
       size: pick(SIZE, raw.size, 'not-sure'),
       where: where,
-      whereText: where === 'flexible' ? '' : String(raw.whereText || '').replace(/\s+/g, ' ').trim().slice(0, 60),
-      priorities: pr,
+      whereText: whereText,
+      priorities: pr2,
     };
   }
 
@@ -190,7 +193,7 @@
     // 3 an insight is optional. Only show a statement the buyer's answers caused, or a clearly labelled general market observation.
     const specificWhere = a.where !== 'flexible', area = specificWhere && a.whereText ? a.whereText : '';
     if (area) model.applied.push('Near ' + area);
-    if (P.indexOf('freehold') > -1) model.applied.push('Freehold or long lease');
+    if (P.indexOf('freehold') > -1) model.applied.push(PRIORITY.freehold);
     let lensFact = null, drove = null;
     if (sc.kind === 'comfortable' && !area) {
       for (let i = 0; i < P.length && !lensFact; i++) {
@@ -247,11 +250,10 @@
     if (a.size !== 'not-sure') blind.push('bedroom counts');
     if (specificWhere && a.whereText) blind.push('your specific area');
     if (blind.length) { rules.push('blind-note'); model.notes.push('Our market figures are grouped by region, age and new-vs-resale. They do not cover ' + list(blind) + ', so they cannot say how those compare.'); }
-    P.forEach((p) => {
-      if (p === 'freehold' || p === drove) return;
-      if (p === 'space' && model.insight && model.insight.kind === 'market') return;
-      model.notes.push('You also chose ' + PRIORITY[p].toLowerCase() + '. It is not used to filter or rank the list.');
-    });
+    if (P.length) {
+      const ord = P.filter((p) => p !== 'freehold');
+      model.notes.push((P.indexOf('freehold') > -1 ? 'Freehold or 900+ year lease limits the next page to those developments. ' : '') + (ord.length ? 'Your ' + (P.indexOf('freehold') > -1 ? 'other ' : '') + 'priorit' + (ord.length > 1 ? 'ies' : 'y') + ' order the list and do not remove any development that otherwise qualifies.' : ''));
+    }
     // other comparisons the engine found, and the separate EC route, for the disclosure only
     model.other = model.routes.filter((r) => !lensFact || r.id !== lensFact.key).map((r) => r.text);
     if (v.ken) model.ken = v.ken;
@@ -280,7 +282,7 @@
     const w = [];
     if (M && M.res && M.res.footer) w.push({ kind: 'evidence', text: M.res.footer + ' Source: URA. These show what sold, not what is for sale now.' });
     w.push({ kind: 'evidence', text: 'A comparison is only used when the market data shows a clear difference: at least about 100 sq ft, with the typical sizes clearly separated.' });
-    w.push({ kind: 'rule', text: 'A priority is only mentioned when the market data has a matching comparison: closer to the centre uses region, newer building uses age and new-vs-resale, freehold or long lease uses tenure.' });
+    w.push({ kind: 'rule', text: 'A priority is only mentioned when the market data has a matching comparison: closer to the centre uses region, newer building uses age and new-vs-resale, freehold or 900+ year lease uses tenure.' });
     w.push({ kind: 'rule', text: 'Bedrooms are not in the sales records, so they do not change this result. A specific area is passed on so you can confirm a district.' });
     w.push({ kind: 'ken', text: 'Which developments suit you and how much to spend are judgement calls, not data.' });
     return w;

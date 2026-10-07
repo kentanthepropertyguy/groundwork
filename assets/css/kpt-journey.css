@@ -348,3 +348,8 @@
 .kpj .kpb-help{ margin:10px 0 0; font-size:13px; line-height:1.5; color:var(--muted); }
 .kpj .kpb-text .kpb-help{ margin-top:8px; }
 .kpj .kpb-caption{ margin:12px 0 0; font-size:13px; line-height:1.5; color:var(--muted); text-align:center; }
+
+/* ---- V10.3.1 what the priorities did, on the FIND list ---- */
+.kpf-effect{ margin:6px 0 4px; }
+.kpf-effect p{ margin:4px 0 0; font-size:13.5px; line-height:1.5; color:var(--muted); }
+.kpj .kpb-chip[data-off="1"]{ opacity:.4; cursor:not-allowed; }
