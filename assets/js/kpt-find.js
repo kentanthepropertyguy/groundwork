@@ -319,8 +319,10 @@
     });
     Object.keys(uraAll).forEach((id) => { if (!seen[id]) { const u = uraAll[id]; out.push({ id, sale: 'new', rec: null, ip: null, fresh: null, ura: u, tier: 'c', hut: 'unchecked', name: u.name, street: u.street }); } });
     const TIER = { a: 0, b: 1, c: 2, d: 3 };
-    const po = prefOrder(o.prefs, 'new');     // after the budget-fit tiers, never before them
-    return out.sort((x, y) => TIER[x.tier] - TIER[y.tier] || (po ? po(x, y) : 0) || (x.tier === 'a' || x.tier === 'b'
+    const po = prefOrder(o.prefs, 'new');
+    // V10.3.2: when a priority is active, a and b (Huttons shows homes around the budget and size) form one band, so the priority orders them together; c and d stay below it. With no priority the four tiers are unchanged.
+    const BAND = po ? { a: 0, b: 0, c: 2, d: 3 } : TIER;
+    return out.sort((x, y) => BAND[x.tier] - BAND[y.tier] || (po ? po(x, y) : 0) || (x.tier === 'a' || x.tier === 'b'
       ? SUP_RANK[x.sup.kind] - SUP_RANK[y.sup.kind] || (x.fresh === y.fresh ? 0 : x.fresh === 'fresh' ? -1 : 1) || (x.name < y.name ? -1 : x.name > y.name ? 1 : 0)
       : compare(x.ura, y.ura)));
   }
@@ -451,8 +453,8 @@
     });
     if (effect.length) out.effect = effect;      // absent when no priority applied, so the no-priority output is exactly the V10.3 output
     if (eff.on.length) {
-      if (inv && types.indexOf('new') > -1) out.orderLine = types.length === 2 ? 'Resale: listed by your priorities, then by how much recent evidence there is. New launch: listed by whether your budget sits within the range currently shown in Huttons, then by your priorities, then by how much URA evidence there is. Not by quality, value or price.'
-        : 'Listed by whether your budget sits within the range currently shown in Huttons, then by your priorities, then by how much URA evidence there is. Not by quality, value or price.';
+      if (inv && types.indexOf('new') > -1) out.orderLine = types.length === 2 ? 'Resale: listed by your priorities, then by how much recent evidence there is. New launch: listed by whether Huttons currently shows homes around your budget and size, then by your priorities, then by how much URA evidence there is. Not by quality, value or price.'
+        : 'Listed by whether Huttons currently shows homes around your budget and size, then by your priorities, then by how much URA evidence there is. Not by quality, value or price.';
       else out.orderLine = 'Listed by your priorities, then by how much recent evidence there is. Not by quality or value.';
     }
 

@@ -1,4 +1,4 @@
-// node tools/what-can-i-buy/tests/priority-tests.js : V10.3.1, "What matters most?" must change the shortlist. Real shipped data.
+// node tools/what-can-i-buy/tests/priority-tests.js : V10.3.2 (V10.3.1 + a/b band), "What matters most?" must change the shortlist. Real shipped data.
 const assert = require('assert'), fs = require('fs'), path = require('path');
 const root = path.join(__dirname, '../../../');
 const ENG = require(root + 'assets/js/kpt-engine.js'), FI = require(root + 'assets/js/kpt-find.js');
@@ -37,7 +37,21 @@ t('the resale top results visibly change at $1.5m, $2.5m and $2.6m, and are all 
 t('Huttons budget-fit tiers stay ahead of the preference: a project that cannot match the budget never outranks one that can', () => BUDGETS.forEach((b) => ['location', 'space', 'newer'].forEach((p) => {
   const st = step(b), sz = FI.sizeWindow(null, st, 'both', { space: p === 'space' });
   const o = { budget: b, pct: FI.T.budgetPct, lo: sz.lo, hi: sz.hi, districts: [], freehold: false, text: '', openTo: 'both', inv: inv(), sizeSource: 'inferred', _uraIds: {}, prefs: [p] }; ix.projects.forEach((x) => { o._uraIds[x.id] = 1; });
-  const list = FI.newCandidates(ix, o), tiers = list.map((c) => c.tier); assert.deepStrictEqual(tiers, tiers.slice().sort());
+  const list = FI.newCandidates(ix, o), band = list.map((c) => (c.tier === 'a' || c.tier === 'b') ? 0 : c.tier === 'c' ? 1 : 2); assert.deepStrictEqual(band, band.slice().sort());   // c/d never above a/b
+})));
+const candsFor = (b, prefs) => { const st = step(b), sz = FI.sizeWindow(null, st, 'both', { space: prefs.indexOf('space') > -1 });
+  const o = { budget: b, pct: FI.T.budgetPct, lo: sz.lo, hi: sz.hi, districts: [], freehold: prefs.indexOf('freehold') > -1, text: '', openTo: 'both', inv: inv(), sizeSource: 'inferred', _uraIds: {}, prefs };
+  ix.projects.forEach((x) => { o._uraIds[x.id] = 1; }); return FI.newCandidates(ix, o); };
+console.log('V10.3.2: a and b form one band when a priority is active');
+t('no priority: tiers a, b, c, d stay strictly in order (V10.3.1)', () => BUDGETS.forEach((b) => { const tiers = candsFor(b, []).map((c) => c.tier); assert.deepStrictEqual(tiers, tiers.slice().sort()); }));
+t('$2.6m Closer: CCR first (Aurea, The Collective), then RCR in the existing evidence order; The Hillshore (limited URA support) follows the other RCR projects', () => {
+  const n = candsFor(2600000, ['location']).map((c) => FI.displayName(c.name)).slice(0, 5);
+  assert.deepStrictEqual(n, ['Aurea', 'The Collective at One Sophia', 'One Marina Gardens', 'The Arcady at Boon Keng', 'The Sen']);
+});
+t('every priority: c/d stay below the a+b band, and Closer as first priority orders the band CCR, RCR, OCR', () => BUDGETS.forEach((b) => [['location'], ['space'], ['newer'], ['freehold'], ['location', 'space'], ['space', 'location'], ['location', 'newer'], ['newer', 'location']].forEach((pr) => {
+  const l = candsFor(b, pr), k = l.findIndex((c) => c.tier === 'c' || c.tier === 'd'), n = k < 0 ? l : l.slice(0, k);
+  assert.ok(n.every((c) => c.tier === 'a' || c.tier === 'b') && l.slice(n.length).every((c) => c.tier === 'c' || c.tier === 'd'), pr.join());
+  if (pr[0] === 'location') { const r = n.map((c) => RR[segOf(FI.displayName(c.name))]); assert.deepStrictEqual(r, r.slice().sort((x, y) => x - y), 'region order ' + pr.join()); }
 })));
 t('the page says what it did, in plain words, without calling regions distances', () => {
   const r = run(2600000, { priorities: ['location'] }); assert.strictEqual(r.effect.length, 1);
