@@ -486,7 +486,7 @@ t('New launch without a current match: Recent sales range from URA and the one q
 });
 t('Resale: Recent sales range, "recent sales", Latest, no quiet line, same shape', () => {
   const cs = allCards(rrun(Object.assign({ openTo: 'both' }, LW))).filter((x) => x.sale === 'resale'); assert.ok(cs.length);
-  cs.forEach((c) => { const s = c.simple; assert.strictEqual(s.priceLead, 'Recent sales'); assert.ok(/^\$\d\.\d\dm–\$\d\.\d\dm$/.test(s.figure)); assert.ok(/^\d+ recent sales around this size$/.test(s.sales)); assert.ok(/^Latest: /.test(s.latest)); assert.strictEqual(s.quiet, null); assert.ok(/^(Within|A little above) your ~\$2\.2m budget$/.test(s.budget.text)); });
+  cs.forEach((c) => { const s = c.simple; assert.strictEqual(s.priceLead, 'Recent sales'); assert.ok(/^\$\d\.\d\dm–\$\d\.\d\dm$/.test(s.figure)); assert.ok(/^\d+ sales in the last 12 months$/.test(s.sales)); assert.ok(/^Recent homes sold: about [\d,]+–[\d,]+ sqft$/.test(s.size)); assert.ok(/^Latest: /.test(s.latest)); assert.strictEqual(s.quiet, null); assert.ok(/^(Within|A little above) your ~\$2\.2m budget$/.test(s.budget.text)); });
 });
 t('dated inventory (3 days): the From figure keeps "(as shown then)"', () => {
   const NOWD = Date.parse('2026-10-10T14:00:00Z'), c = allCards(F.shortlist(real, base(Object.assign({ inv: F.prepareInventory(JSON.parse(fs.readFileSync(path.join(root, 'data/projects/inventory.json'), 'utf8')), NOWD), openTo: 'new' }, LW)))).find((x) => x.slug === 'lentor-gardens-residences');

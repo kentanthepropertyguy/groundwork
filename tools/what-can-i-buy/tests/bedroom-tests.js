@@ -71,7 +71,7 @@ t('every shown inventory match is a requested bedroom type, and no card, effect 
   cand(b, c).filter((x) => x.tier === 'a' || x.tier === 'b').forEach((x) => x.inv.types.forEach((ty) => assert.ok(ok.indexOf(ty.bedrooms) > -1, b + ' ' + c + ' ' + nm(x) + ' ' + ty.bedrooms)));
   assert.ok(!/study/i.test(JSON.stringify(r.groups) + JSON.stringify(r.effect) + JSON.stringify(r.unsupported) + r.orderLine), b + ' ' + c);
   cardsOf(r, 'new').filter((cd) => cd.tier === 'a' || cd.tier === 'b').forEach((cd) => {
-    const bedsShown = (cd.simple.size.match(/\d/g) || []).map(Number); bedsShown.forEach((n) => assert.ok(n === 5 ? ok.indexOf(5) > -1 : ok.indexOf(n) > -1, cd.name + ' ' + cd.simple.size));
+    const bedsShown = (cd.simple.size.split(' · ')[0].match(/\d/g) || []).map(Number); assert.ok(cd.simple.badge && /^✓ Matches /.test(cd.simple.badge), cd.name); bedsShown.forEach((n) => assert.ok(n === 5 ? ok.indexOf(5) > -1 : ok.indexOf(n) > -1, cd.name + ' ' + cd.simple.size));
     assert.ok(!/around your size/.test(cd.simple.size) && !/around this size/.test(cd.huttons.budget), cd.name);
   });
 })));
@@ -94,7 +94,7 @@ t('$2.2m 3BR: the a/b set is the 3BR-matched projects, Sora shows 3 Bedroom only
   const ab = cand(2200000, '3br').filter((x) => x.tier === 'a' || x.tier === 'b').map(nm).sort();
   // V10.3.5 inventory: Gems Ville, Lucerne Grand, Narra Residences and Ocho are new in the 2026-10-07 inventory, each with a 3-bedroom band inside the budget window (Gems Ville/Ocho/Lucerne Grand are reviewed metadata projects)
   assert.deepStrictEqual(ab, ['Canberra Crescent Residences', 'Gems Ville', 'Jansen House', 'Kassia', 'Lentor Gardens Residences', 'Lentoria', 'Lucerne Grand', 'Narra Residences', 'Ocho', 'Sora', 'The Sen', 'Vela Bay']);
-  const sora = cardsOf(run(2200000, { bed: '3br' }), 'new').concat(cardsOf(run(2200000, { bed: '3br' }), 'new')).find((cd) => cd.name === 'Sora'); assert.ok(sora); assert.strictEqual(sora.simple.size, '3 Bedroom');
+  const sora = cardsOf(run(2200000, { bed: '3br' }), 'new').concat(cardsOf(run(2200000, { bed: '3br' }), 'new')).find((cd) => cd.name === 'Sora'); assert.ok(sora); assert.ok(/^3 Bedroom( · about [\d,]+–[\d,]+ sqft)?$/.test(sora.simple.size), sora.simple.size); assert.strictEqual(sora.simple.size.split(' · ')[0], '3 Bedroom');   // V10.3.6 adds the size range of the 3-bedroom homes shown
 });
 t('$2.6m 3BR: The Hillshore stays (its 3BR is inside budget) and shows 3 Bedroom; Canberra Crescent (4BR only) does not qualify', () => {
   const c = cand(2600000, '3br'), h = c.find((x) => nm(x) === 'The Hillshore'), cc = c.find((x) => nm(x) === 'Canberra Crescent Residences');
@@ -144,18 +144,18 @@ t('through shortlist: an explicit size gives the "bedrooms and size" wording', (
 console.log('Resale and Not sure');
 t('resale is size-based and identical with or without a bedroom answer', () => BUDGETS.forEach((b) => CHOICES.forEach((c) => {
   const a = cardsOf(run(b), 'resale').map((x) => x.name), d = cardsOf(run(b, { bed: c }), 'resale').map((x) => x.name); assert.deepStrictEqual(d, a, b + ' ' + c);
-  assert.ok(!/bedroom/i.test(JSON.stringify(cardsOf(run(b, { bed: c }), 'resale').map((x) => x.simple))));
+  cardsOf(run(b, { bed: c }), 'resale').forEach((x) => { const sm = Object.assign({}, x.simple); assert.strictEqual(sm.bedNote, 'Bedroom layout to be confirmed'); delete sm.bedNote; assert.ok(!/bedroom|matches/i.test(JSON.stringify(sm)) && !sm.badge, JSON.stringify(sm)); });   // V10.3.6: the only bedroom wording on a resale card says the layout is still to confirm
 })));
 t('resale-only searches never apply a bedroom to the list', () => BUDGETS.forEach((b) => { const a = run(b, { openTo: 'resale' }), d = run(b, { openTo: 'resale', bed: '3br' }); assert.deepStrictEqual(cardsOf(d, 'resale').map((x) => x.name), cardsOf(a, 'resale').map((x) => x.name)); assert.strictEqual(d.effect, undefined); }));
 t('Not sure: no bedroom effect line, no bedroom note, the order line is unchanged', () => BUDGETS.forEach((b) => { const r = run(b); assert.strictEqual(r.effect, undefined); assert.ok(!r.unsupported.some((u) => u.id === 'bedrooms')); assert.ok(!/bedrooms you chose/.test(r.orderLine)); }));
 
 console.log('Copy');
 t('effect line and notes explain the new-launch / resale distinction simply', () => {
-  const r = run(2200000, { bed: '3br' }); assert.strictEqual(r.effect[0], 'Bedrooms: new launches are matched on 3 bedrooms where we have inventory data. Resale is matched on size, because the transaction data has no bedroom count.');
+  const r = run(2200000, { bed: '3br' }); assert.strictEqual(r.effect, undefined); assert.strictEqual(r.bedroomNote, 'New launches match your selected bedrooms. Resale options match your budget and space; the exact layout still needs checking.');   // V10.3.6: a bedroom note, not a priority effect line
   assert.ok(/bedrooms you chose/.test(r.orderLine));
   assert.strictEqual(r.unsupported.find((u) => u.id === 'bedrooms').text, 'New launch: bedrooms are checked where we have inventory data. Resale: bedroom count isn’t in the transaction data, so size is used.');
-  const n = run(2200000, { bed: '3br', openTo: 'new' }); assert.strictEqual(n.effect[0], 'Bedrooms: new launches are matched on 3 bedrooms where we have inventory data.');
-  assert.ok(run(2200000, { bed: '3br-study' }).effect[0].indexOf('matched on 3 bedrooms or larger where we have inventory data.') > -1);
+  const n = run(2200000, { bed: '3br', openTo: 'new' }); assert.strictEqual(n.bedroomNote, 'New launches are matched on 3 bedrooms where we have inventory data.');
+  assert.ok(run(2200000, { bed: '3br-study', openTo: 'new' }).bedroomNote.indexOf('matched on 3 bedrooms or larger where we have inventory data.') > -1);
   assert.ok(!/doesn’t record bedrooms|doesn't record bedrooms/.test(fs.readFileSync(root + 'assets/js/kpt-find.js', 'utf8')));
 });
 t('every new effect line is short and free of implementation terms', () => BUDGETS.forEach((b) => CHOICES.forEach((c) => run(b, { bed: c, priorities: ['space'] }).effect.forEach((l) => { assert.ok(l.length < 200, l); assert.ok(!/\b(tier|inv|Huttons|band|seg|sort)\b/i.test(l), l); }))));
