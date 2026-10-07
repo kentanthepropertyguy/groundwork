@@ -55,10 +55,14 @@
 
   /* ---------------------------------------------------------------- index */
   /** Normalise find.json into project records with rows grouped by sale type. Returns null when the file is not usable. */
+  /** Projects kept out of FIND on purpose. Pinery Residences: unresolved Huttons (D18) vs URA (D16) identity mismatch, and not in verified Huttons inventory.
+   *  Targeted only: remove an id here once the identity is resolved. It does not change eligibility, ranking or matching for any other project. */
+  const FIND_EXCLUDED = ['pinery-residences'];
   function prepare(doc) {
     if (!doc || doc.kind !== 'kpt-find-index' || doc.v !== 1 || !Array.isArray(doc.projects) || !/^\d{4}-\d{2}$/.test(doc.latestMonth || '')) return null;
     const latest = Number(doc.latestMonth.replace('-', ''));
-    return { latest, latestMonth: doc.latestMonth, window: doc.window, minCell: doc.minCell, bin: doc.bin || 100, projects: doc.projects, districts: Array.from(new Set(doc.projects.map((p) => p.d))).sort() };
+    const projects = doc.projects.filter((p) => !(p && FIND_EXCLUDED.indexOf(p.id) > -1));
+    return { latest, latestMonth: doc.latestMonth, window: doc.window, minCell: doc.minCell, bin: doc.bin || 100, projects, districts: Array.from(new Set(projects.map((p) => p.d))).sort() };
   }
 
   /* ---------------------------------------------------------------- size */
@@ -305,7 +309,7 @@
       const fileAt = Date.parse(doc.checkedAt); if (!isFinite(fileAt)) return null;
       if (fileAt - nowMs > T.invFutureMs) return null;                       // check time more than an hour in the future
       const by = {};
-      doc.projects.forEach((p) => { if (p && typeof p.slug === 'string' && /^[a-z0-9-]+$/.test(p.slug) && typeof p.name === 'string') by[p.slug] = p; });
+      doc.projects.forEach((p) => { if (p && typeof p.slug === 'string' && /^[a-z0-9-]+$/.test(p.slug) && typeof p.name === 'string' && FIND_EXCLUDED.indexOf(p.slug) < 0) by[p.slug] = p; });
       return { fileAt, now: nowMs, clockBehind: nowMs < fileAt, bySlug: by, slugs: Object.keys(by).sort() };
     } catch (e) { return null; }
   }

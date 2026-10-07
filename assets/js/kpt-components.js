@@ -91,7 +91,7 @@ KPT.take = function (el, opts) {
     `<div class="kpt-take">` +
     `<img src="${photo}" alt="Ken Tan">` +
     `<div><blockquote>${opts.quote}</blockquote>` +
-    `<div class="byline">${opts.byline || "Ken Tan | The Property Guy"}</div></div>` +
+    `<div class="byline">${opts.byline || "Ken Tan · The Property Guy"}</div></div>` +
     `</div>`;
 };
 

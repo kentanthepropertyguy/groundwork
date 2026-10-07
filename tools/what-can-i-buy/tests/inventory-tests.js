@@ -8,6 +8,8 @@ const FIND_SHA = 'e4516fd8d6e8f8a0b6494619024e4370dcfa6d7e9305015f760e9fa235c6db
 const H = 3600000, D = 24 * H, NOW = Date.parse('2026-10-06T10:00:00Z');   // 6 Oct 2026, 18:00 Singapore
 const iso = (ms) => new Date(ms).toISOString();
 const real = F.prepare(JSON.parse(fs.readFileSync(path.join(root, 'data/projects/find.json'), 'utf8')));
+// V10.4.1: prepare() now leaves Pinery out on purpose. The V9.1 golden hashes were taken WITH Pinery in the input, so the parity test feeds it the full, unfiltered list. That proves nothing else changed; the exclusion itself is tested in find-tests.js.
+const realAll = (() => { const d = JSON.parse(fs.readFileSync(path.join(root, 'data/projects/find.json'), 'utf8')); return Object.assign({}, real, { projects: d.projects, districts: Array.from(new Set(d.projects.map((p) => p.d))).sort() }); })();
 const SZ = { lo: 870, hi: 1000, source: 'explicit', line: 'x' };
 const base = (o) => Object.assign({ budget: 2600000, openTo: 'new', size: SZ, districts: [], text: '', freehold: false, answers: { where: 'flexible', size: 'not-sure', priorities: [] }, typical: null }, o);
 const IP = (slug, name, types, extra) => Object.assign({ slug, name, checkedAt: iso(NOW - 2 * H), status: 'ok', byBedrooms: types }, extra || {});
@@ -34,7 +36,7 @@ const golden = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/golden-
 t('864 grid cases (budgets x journeys x sizes x areas x freehold x budget window) are byte-identical to V9.1 with no inventory', () => {
   let n = 0, bad = [];
   for (const budget of [900000, 1300000, 1800000, 2600000, 3200000, 5000000]) for (const openTo of ['new', 'resale', 'both']) for (const sz of [[600, 800], [870, 1000], [900, 1100], [1200, 1500]]) for (const ds of [[], ['10'], ['20']]) for (const fh of [false, true]) for (const pct of [0.10, 0.15]) {
-    const r = F.shortlist(real, { budget, openTo, size: { lo: sz[0], hi: sz[1], source: 'explicit', line: 'x' }, districts: ds, text: '', freehold: fh, pct, answers: { where: 'flexible', size: 'not-sure', priorities: [] }, typical: { lo: 900, hi: 1100 } });
+    const r = F.shortlist(realAll, { budget, openTo, size: { lo: sz[0], hi: sz[1], source: 'explicit', line: 'x' }, districts: ds, text: '', freehold: fh, pct, answers: { where: 'flexible', size: 'not-sure', priorities: [] }, typical: { lo: 900, hi: 1100 } });
     stripV101(r); delete r.version; const key = [budget, openTo, sz.join('-'), ds.join('+') || 'all', fh ? 'fh' : 'any', pct].join('|'), h = crypto.createHash('sha256').update(OLDNAMES(JSON.stringify(r))).digest('hex').slice(0, 16);
     n++;
     if (fh && r.constraintNone) { if (r.noneText !== 'No matches found with all your selections.' || r.reference !== null) bad.push(key + ' (constraint text)'); continue; }   // V10.3.4: Freehold is a hard requirement, so an empty result says so instead of the old wording

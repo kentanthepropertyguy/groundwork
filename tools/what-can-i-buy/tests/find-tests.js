@@ -304,4 +304,55 @@ t('HDB and budget-only handoffs have no location step', () => {
 });
 t('freehold wording stays accurate: "Freehold or 900+ year lease" in the summary line and the Change search panel (never plain "Freehold")', () => { assert.ok(/'Freehold or 900\+ year lease'/.test(page)); assert.ok(/Freehold or 900\+ year lease only/.test(page)); assert.ok(!/\['Freehold'\]/.test(page)); assert.ok(!/999-year only/.test(page)); });
 
+console.log('Pinery Residences exclusion (V10.4.1: unresolved Huttons D18 vs URA D16 identity; targeted only)');
+const invRaw = JSON.parse(fs.readFileSync(path.join(root, 'data/projects/inventory.json'), 'utf8'));
+const invP = F.prepareInventory(invRaw, Date.parse(invRaw.checkedAt) + 3600e3);
+const allIds = (r) => r.groups.reduce((a, g) => a.concat(g.cards.map((c) => c.id), (g.more || []).map((c) => c.id)), []);
+t('synthetic: a project with the Pinery id is dropped by prepare(); every other project is untouched', () => {
+  const others = [R1('a', 6), R1('b', 6), R1('c', 6)], pin = P('pinery-residences', 'PINERY RESIDENCES', 'BEDOK RESERVOIR ROAD', '16', 4, 'resale', [row(1000, 9, 3, 202609, 1700000, 1900000)]);
+  const withP = mk(others.concat([pin])), without = mk(others);
+  assert.deepStrictEqual(withP.projects.map((p) => p.id), ['a', 'b', 'c']); assert.deepStrictEqual(withP.districts, without.districts);
+  assert.deepStrictEqual(JSON.stringify(run(withP)), JSON.stringify(run(without)));
+  assert.ok(ids(run(withP)).indexOf('pinery-residences') < 0);
+});
+t('shipped data: Pinery is removed from the FIND index and every other project stays (647 of 648)', () => {
+  assert.ok(realDoc.projects.some((p) => p.id === 'pinery-residences'), 'source file still holds it (data is unchanged)');
+  assert.strictEqual(ixr.projects.length, realDoc.projects.length - 1); assert.ok(!ixr.projects.some((p) => p.id === 'pinery-residences'));
+  assert.strictEqual(ixr.projects.length, 647);
+});
+t('Pinery is never shown across budgets, sale types, sizes and with inventory on', () => {
+  let shown = 0;
+  [900000, 1200000, 1500000, 1800000, 2200000, 3000000, 4000000].forEach((b) => ['new', 'both', 'resale'].forEach((o) => [[500, 700], [640, 750], [900, 1100], [1200, 1600]].forEach((z) => [null, invP].forEach((iv) => [[], ['16'], ['18']].forEach((d) => {
+    const r = F.shortlist(ixr, { budget: b, openTo: o, size: { lo: z[0], hi: z[1], source: 'explicit', line: '' }, sizes: null, districts: d, text: '', freehold: false, answers: { where: 'flexible', size: 'not-sure', priorities: [] }, inv: iv });
+    shown += allIds(r).length; assert.ok(allIds(r).indexOf('pinery-residences') < 0, b + ' ' + o + ' ' + z + ' ' + d);
+  })))));
+  assert.ok(shown > 50, 'grid exercised real results: ' + shown);
+});
+t('other URA-only new launches still appear (Pinery exclusion does not touch tier c/d)', () => {
+  const seen = {};
+  [1200000, 1500000, 1800000, 2200000, 3000000, 4000000].forEach((bd) => [[500, 700], [640, 750], [900, 1100], [1200, 1600]].forEach((z) => {
+    const r = F.shortlist(ixr, { budget: bd, openTo: 'new', size: { lo: z[0], hi: z[1], source: 'explicit', line: '' }, districts: [], text: '', freehold: false, answers: { where: 'flexible', size: 'not-sure', priorities: [] }, inv: invP });
+    ((r.groups[0] || { cards: [] }).cards.concat((r.groups[0] || {}).more || [])).filter((c) => c.tier === 'c').forEach((c) => { seen[c.id] = c.huttons && c.huttons.kind; });
+  }));
+  const k = Object.keys(seen); assert.ok(k.indexOf('tengah-garden-residences') > -1, 'URA-only projects still shown: ' + k);
+  assert.ok(k.indexOf('pinery-residences') < 0); assert.ok(k.every((id) => seen[id] === 'unchecked'));
+});
+t('Pinery is not in the verified Huttons inventory file, and the inventory loader also ignores it if it were added', () => {
+  assert.ok(!invRaw.projects.some((p) => p.slug === 'pinery-residences'));
+  const copy = JSON.parse(JSON.stringify(invRaw)); const donor = copy.projects[0]; copy.projects.push(Object.assign({}, donor, { slug: 'pinery-residences', name: 'Pinery Residences' }));
+  const iv2 = F.prepareInventory(copy, Date.parse(copy.checkedAt) + 3600e3);
+  assert.ok(iv2.slugs.indexOf('pinery-residences') < 0); assert.strictEqual(iv2.slugs.length, invP.slugs.length);
+});
+
+console.log('Brand hierarchy (V10.4.1)');
+['index.html', 'own/index.html', 'buy/index.html', 'research/index.html', 'tools/hdb-upgrade/index.html', 'tools/what-can-i-buy/index.html'].forEach((f) => {
+  const h = fs.readFileSync(path.join(root, f), 'utf8');
+  t(f + ': header = KEN PROPERTY TOOLS / by Ken Tan · The Property Guy; footer identity; credentials and TikTok kept', () => {
+    const hd = /<header class="kpt-header[^>]*>[\s\S]*?<\/header>/.exec(h)[0];
+    assert.ok(/class="brand"[^>]*>KEN PROPERTY TOOLS<\/a>/.test(hd)); assert.ok(/<span class="kpt-tagline">by Ken Tan · The Property Guy<\/span>/.test(hd)); assert.ok(!/Property decisions, analysed/.test(hd));
+    assert.ok(/<p class="kpt-f-name">Ken Tan · The Property Guy<\/p>/.test(h)); assert.ok(/CEA R007903D/.test(h)); assert.ok(/tiktok\.com\/@kennx8898/.test(h)); assert.ok(/Since 2007/.test(h));
+  });
+});
+t('Home keeps its headline and the product positioning', () => { const h = fs.readFileSync(path.join(root, 'index.html'), 'utf8'); assert.ok(/Make sense of your next property move\./.test(h)); assert.ok(/Property decisions, analysed\./.test(h)); });
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed'); process.exit(fail ? 1 : 0);
