@@ -29,13 +29,17 @@ const V101_FIELDS = ['simple', 'slug', 'hasCheck', 'ask', 'tick'];
 const stripV101 = (r) => { r.groups.forEach((g) => g.cards.concat(g.more || []).forEach((c) => V101_FIELDS.forEach((k) => delete c[k]))); return r; };
 
 console.log('Golden parity with V9.1 (inventory absent or unusable)');
+const OLDNAMES = (j) => j.split('Verdé Joo Chiat').join('Verd\uFFFD Joo Chiat').split('Enchanté').join('Enchant\uFFFD');   // V10.3.4 display fix is the only intended text difference
 const golden = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/golden-v91.json'), 'utf8'));
 t('864 grid cases (budgets x journeys x sizes x areas x freehold x budget window) are byte-identical to V9.1 with no inventory', () => {
   let n = 0, bad = [];
   for (const budget of [900000, 1300000, 1800000, 2600000, 3200000, 5000000]) for (const openTo of ['new', 'resale', 'both']) for (const sz of [[600, 800], [870, 1000], [900, 1100], [1200, 1500]]) for (const ds of [[], ['10'], ['20']]) for (const fh of [false, true]) for (const pct of [0.10, 0.15]) {
     const r = F.shortlist(real, { budget, openTo, size: { lo: sz[0], hi: sz[1], source: 'explicit', line: 'x' }, districts: ds, text: '', freehold: fh, pct, answers: { where: 'flexible', size: 'not-sure', priorities: [] }, typical: { lo: 900, hi: 1100 } });
-    stripV101(r); delete r.version; const key = [budget, openTo, sz.join('-'), ds.join('+') || 'all', fh ? 'fh' : 'any', pct].join('|'), h = crypto.createHash('sha256').update(JSON.stringify(r)).digest('hex').slice(0, 16);
-    n++; if (golden[key] !== h) bad.push(key);
+    stripV101(r); delete r.version; const key = [budget, openTo, sz.join('-'), ds.join('+') || 'all', fh ? 'fh' : 'any', pct].join('|'), h = crypto.createHash('sha256').update(OLDNAMES(JSON.stringify(r))).digest('hex').slice(0, 16);
+    n++;
+    if (fh && r.constraintNone) { if (r.noneText !== 'No matches found with all your selections.' || r.reference !== null) bad.push(key + ' (constraint text)'); continue; }   // V10.3.4: Freehold is a hard requirement, so an empty result says so instead of the old wording
+    if (fh && Array.isArray(r.changes)) { const had = r.changes.length; r.changes = r.changes.filter((c) => c.id !== 'freehold'); if (r.changes.length !== had) { stripV101(r); const h2 = crypto.createHash('sha256').update(OLDNAMES(JSON.stringify(r))).digest('hex').slice(0, 16); if (golden[key] === h2) continue; } }   // V10.3.4: the only addition is the explicit 'Include leasehold homes' action
+    if (golden[key] !== h) bad.push(key);
   }
   assert.strictEqual(n, 864); assert.deepStrictEqual(bad, []);
 });

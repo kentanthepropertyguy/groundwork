@@ -61,7 +61,9 @@
   // URA writes names in capitals. Title-case for reading; short tokens, numerals and tokens with digits stay upper-case.
   // Reviewed initialisms that must stay upper-case (3+ letters; 1-2 letter tokens already do). Not inferred: short real words (ONE, SKY, BAY) must still title-case. Extend this list when a name is found.
   const ACRONYMS = { AMO: 1, RVG: 1, JLB: 1, OUE: 1, PLQ: 1, SCK: 1, SKT: 1, TMW: 1, YGK: 1, MKZ: 1 };
+  const NAME_FIX = { 'VERD\uFFFD JOO CHIAT': 'Verdé Joo Chiat', 'ENCHANT\uFFFD': 'Enchanté' };   // same reviewed display-only map as kpt-find.js
   function displayName(name) {
+    if (Object.prototype.hasOwnProperty.call(NAME_FIX, name)) return NAME_FIX[name];
     const SMALL = { AT: 1, OF: 1, THE: 1, BY: 1, ON: 1 };
     return String(name || '').split(' ').map((w, i) => {
       if (w === '@' || /\d/.test(w) || ROMAN.test(w) || ACRONYMS[w]) return w;

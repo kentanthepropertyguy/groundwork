@@ -131,7 +131,8 @@ t('two priorities: one supported insight, the other is not turned into a combine
   const m = B.analyse({ budget: 2300000, priorities: ['location', 'newer'] }, fake([OUT_LARGER, NEW], ALL));
   assert.strictEqual(m.insight.key, 'region:outer-larger'); assert.strictEqual(m.insight.lines.length, 2);
   assert.ok(!/together|and newer/i.test(JSON.stringify(m.insight)));
-  assert.ok(m.notes.some((n) => /Your priorities order the list and do not remove any development/.test(n)));
+  assert.ok(m.notes.some((n) => /Closer to the centre limits the next page to the Core Central and Rest of Central regions/.test(n) && /Your other priority order the list and do not remove any development/.test(n)));
+  const ms = B.analyse({ budget: 2300000, priorities: ['space', 'newer'] }, fake([OUT_LARGER], ALL)); assert.ok(ms.notes.some((n) => /^Your priorities order the list and do not remove any development/.test(n)));
   const f = B.analyse({ budget: 2300000, priorities: ['location', 'freehold'] }, fake([OUT_LARGER], ALL));
   assert.strictEqual(f.insight.key, 'region:outer-larger'); assert.deepStrictEqual(f.applied, ['Freehold or 900+ year lease']);
 });

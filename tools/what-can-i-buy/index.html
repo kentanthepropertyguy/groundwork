@@ -7,8 +7,8 @@
 <meta name="description" content="Where your budget works in the Singapore property market, what you trade off, and what Ken would look at.">
 <meta name="theme-color" content="#FAFAF8">
 <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../../assets/css/kpt-system.css?v=2026-10-07.6">
-<link rel="stylesheet" href="../../assets/css/kpt-journey.css?v=2026-10-07.6">
+<link rel="stylesheet" href="../../assets/css/kpt-system.css?v=2026-10-07.7">
+<link rel="stylesheet" href="../../assets/css/kpt-journey.css?v=2026-10-07.7">
 </head>
 <body class="kpj kpj-wide" data-view="result">
 <header class="kpt-header kpt-shell"><div class="kpt-brandblock"><a class="brand" href="../../">KEN PROPERTY TOOLS</a><span class="kpt-by">by Ken Tan</span></div></header>
@@ -26,11 +26,11 @@
 </footer>
 
 <script src="../../assets/js/kpt-analytics.js"></script>
-<script src="../../assets/js/kpt-components.js?v=2026-10-07.6"></script>
+<script src="../../assets/js/kpt-components.js?v=2026-10-07.7"></script>
 <script src="../../assets/js/kpt-market.js"></script>
 <script src="../../assets/js/kpt-engine.js"></script>
 <script src="../../assets/js/kpt-result.js"></script>
-<script src="../../assets/js/kpt-find.js?v=2026-10-07.6"></script>
+<script src="../../assets/js/kpt-find.js?v=2026-10-07.7"></script>
 <script src="../../data/market/config.js"></script>
 <script>
 (function () {
@@ -167,19 +167,22 @@
   let invDoc;
   const loadInv = () => (invDoc !== undefined ? Promise.resolve(invDoc) : fetch(INV_URL, { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null).then((d) => (invDoc = d)));
   const answersNow = () => (handoff && handoff.from === 'buy' ? { where: handoff.where, size: handoff.size, priorities: handoff.priorities || [] } : { where: 'flexible', size: 'not-sure', priorities: [] });
+  // V10.3.4: the buyer's one-click "include" choices live in this search only; the Buy answers are never rewritten. Include Outside Central removes Closer for this search (regionSoft): all regions, no region ranking; Show any bedroom turns the bedroom off.
+  const answersFind = () => { const a = answersNow(); return FS && FS.bedOff && a.size !== 'not-sure' ? Object.assign({}, a, { size: 'not-sure' }) : a; };
   const whereTextNow = () => (handoff && handoff.from === 'buy' && handoff.where !== 'flexible' ? String(handoff.whereText || '').replace(/\s+/g, ' ').trim().slice(0, 60) : '');
   const locIntent = () => ['areas', 'family', 'work', 'school'].indexOf(answersNow().where) > -1;
   // V10.3.1: priorities that order the list, in the order the buyer chose them (Freehold is a filter and is handled separately)
   const prefsNow = () => answersNow().priorities.filter((p) => ['space', 'location', 'newer'].indexOf(p) > -1);
+  const regionOnNow = () => answersNow().priorities.indexOf('location') > -1 && !FS.regionSoft && !(FS.districts && FS.districts.length) && !FS.text;
   const sizeOpts = () => ({ space: prefsNow().indexOf('space') > -1 });
   const openToNow = () => (handoff && handoff.from === 'buy' && ['new', 'resale', 'both'].indexOf(handoff.openTo) > -1 ? handoff.openTo : 'both');
   // ---- the buyer's search, remembered in this tab with the handoff (sessionStorage only; never sent to analytics or WhatsApp)
   const DIST_RE = /^(0[1-9]|1\d|2[0-8])$/, LOCS = ['none', 'pending', 'confirmed', 'skipped'], moneyIn = (n) => Number(n).toLocaleString('en-SG');
-  const snapFind = () => ({ explicit: FS.explicit ? { from: FS.explicit.from, to: FS.explicit.to, typed: !!FS.explicit.typed, widened: !!FS.explicit.widened } : null, widen: !!FS.widen, freehold: !!FS.freehold, districts: FS.districts.slice(), text: FS.text, loc: FS.loc, ticked: FS.ticked.map((t) => t.slug) });
+  const snapFind = () => ({ explicit: FS.explicit ? { from: FS.explicit.from, to: FS.explicit.to, typed: !!FS.explicit.typed, widened: !!FS.explicit.widened } : null, widen: !!FS.widen, freehold: !!FS.freehold, regionSoft: !!FS.regionSoft, bedOff: !!FS.bedOff, districts: FS.districts.slice(), text: FS.text, loc: FS.loc, ticked: FS.ticked.map((t) => t.slug) });
   function restoreFind(sv) {
     const o = {}, ex = sv && sv.explicit;
     o.explicit = ex && ex.from >= 100 && ex.to > ex.from && ex.to <= 20000 ? { from: Math.round(ex.from), to: Math.round(ex.to), typed: !!ex.typed, widened: !!ex.widened } : null;
-    o.widen = !!(sv && sv.widen); o.freehold = !!(sv && sv.freehold);
+    o.widen = !!(sv && sv.widen); o.freehold = !!(sv && sv.freehold); o.regionSoft = !!(sv && sv.regionSoft); o.bedOff = !!(sv && sv.bedOff);
     o.districts = sv && Array.isArray(sv.districts) ? sv.districts.filter((d) => typeof d === 'string' && DIST_RE.test(d)).slice(0, 8) : [];
     o.text = sv && typeof sv.text === 'string' ? sv.text.replace(/\s+/g, ' ').trim().slice(0, 40) : '';
     o.loc = sv && LOCS.indexOf(sv.loc) > -1 ? sv.loc : null;
@@ -198,7 +201,7 @@
   function initFind(step) {
     const root = $('findRoot'); if (!root || !FI || !budget) return;
     const sv = handoff && handoff.find ? restoreFind(handoff.find) : null;
-    findStep = step; FS = { explicit: sv ? sv.explicit : null, widen: sv ? sv.widen : false, loc: (sv && sv.loc) || (locIntent() ? 'pending' : 'none'), locPick: false, districts: sv ? sv.districts : [], text: sv ? sv.text : '', freehold: sv ? sv.freehold : answersNow().priorities.indexOf('freehold') > -1, panel: false, draft: null, ddOpen: false, seen: {}, ticked: sv ? sv.ticked : [], more: {}, info: false };
+    findStep = step; FS = { explicit: sv ? sv.explicit : null, widen: sv ? sv.widen : false, loc: (sv && sv.loc) || (locIntent() ? 'pending' : 'none'), locPick: false, districts: sv ? sv.districts : [], text: sv ? sv.text : '', freehold: sv ? sv.freehold : answersNow().priorities.indexOf('freehold') > -1, regionSoft: sv ? sv.regionSoft : false, bedOff: sv ? sv.bedOff : false, panel: false, draft: null, ddOpen: false, seen: {}, ticked: sv ? sv.ticked : [], more: {}, info: false };
     root.onclick = findClick; root.onchange = findChange; root.oninput = findInput;
     root.onkeydown = (e) => { if (e.key === 'Enter' && e.target && e.target.matches && e.target.matches('#kpfPanel input[type=text]')) { e.preventDefault(); findClick({ target: root.querySelector('[data-f=update]'), preventDefault() {} }); } };
     if (location.hash === '#developments') { pendingScroll = true; try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} }   // arriving from the Buy result button: land on the list, not the summary above it
@@ -239,7 +242,7 @@
     if (!sz && !FS.draft) openDraft(null);                                              // no size to show yet: open the panel so the buyer can give one
     const typed = FS.draft && FS.draft.text && FS.draft.text.trim().length >= 3 ? FI.matchDistricts(FS.draft.text).filter((d) => FS.draft.districts.indexOf(d) < 0 && findIx.districts.indexOf(d) > -1) : [];
     const areaPart = FS.districts.length ? (FS.districts.length === 1 ? 'District ' : 'Districts ') + listJoin(FS.districts.map(Number)) + (FS.text ? ' · “' + FS.text + '”' : '') : FS.text ? '“' + FS.text + '”' : 'Anywhere in Singapore';
-    const line2 = [sz ? (sz.source === 'inferred' ? 'About ' : '') + sizeFmt(sz.lo, sz.hi) : 'Size not set', areaPart].concat(FS.freehold ? ['Freehold or 900+ year lease'] : []).concat(FS.widen ? ['Budget ±15%'] : []).join(' · ');
+    const line2 = [sz ? (sz.source === 'inferred' ? 'About ' : '') + sizeFmt(sz.lo, sz.hi) : 'Size not set', areaPart].concat(FS.freehold ? ['Freehold or 900+ year lease'] : []).concat(regionOnNow() ? ['Core Central and Rest of Central'] : []).concat(FS.widen ? ['Budget ±15%'] : []).join(' · ');
     const open = FS.panel && FS.draft, d = FS.draft || {};
     const panel = open ? `<div class="kpf-panel" id="kpfPanel" role="group" aria-label="Change search">
       <label class="kpf-fld"><span>Budget</span><input id="kpfBudget" type="text" inputmode="numeric" autocomplete="off" value="${esc(d.budget)}" aria-label="Budget in dollars"></label>
@@ -255,7 +258,7 @@
       root.innerHTML = `<section class="kpf" aria-labelledby="kpfH">${head}${summary}<p class="kpf-quiet">Tell us the size you have in mind, in square feet, to see developments.</p></section>`; return;
     }
     const typical = FI.inferSize(findStep, openTo);
-    const res = FI.shortlist(findIx, { budget, openTo, size: sz, districts: FS.districts, text: FS.text, freehold: FS.freehold, loc: { districts: FS.districts, skipped: FS.loc !== 'none' && !FS.districts.length }, pct: FS.widen ? FI.T.widenBudgetPct : FI.T.budgetPct, answers: answersNow(), typical, inv: invOn ? inv : null });
+    const res = FI.shortlist(findIx, { budget, openTo, size: sz, districts: FS.districts, text: FS.text, freehold: FS.freehold, regionSoft: !!FS.regionSoft, loc: { districts: FS.districts, skipped: FS.loc !== 'none' && !FS.districts.length }, pct: FS.widen ? FI.T.widenBudgetPct : FI.T.budgetPct, answers: answersFind(), typical, inv: invOn ? inv : null });
     const V10 = !!res.inventory;
     const allCards = res.groups.reduce((a, g) => a.concat(g.cards, g.more || []), []);
     FS.ticked = FS.ticked.map((t) => { const c = allCards.find((x) => x.slug === t.slug); return c ? { slug: t.slug, name: c.name, tag: tagOf(c) } : null; }).filter(Boolean);   // only comparison picks that still qualify stay
@@ -279,7 +282,8 @@
     const chg = res.changes.length ? `<ul class="kpf-chg">${res.changes.map((c) => `<li><button class="kpf-link" type="button" data-f="chg" data-id="${esc(c.id)}">${esc(c.label)}</button> <span>${esc(c.text)}</span></li>`).join('')}</ul>` : '';
     let body = '';
     const noneChg = res.changes.length ? `<ul class="kpf-chg kpf-chg--act">${res.changes.map((c) => `<li><button class="kpf-link" type="button" data-f="chg" data-id="${esc(c.id)}">${esc(c.id === 'size' ? 'Include nearby sizes' : c.id === 'area' ? 'Look across all Singapore' : c.id === 'budget' ? 'Widen the budget range' : c.label)} →</button></li>`).join('')}</ul>` : '';
-    if (res.state === 'none') body = `<div class="kpf-msg kpf-none"><p class="kpf-nh"><b>Nothing matched this search</b></p><p>Try a nearby size or broaden the area.</p>${noneChg}<p class="kpf-note">Or <a href="#" data-f="ken">ask Ken what may work</a>.</p></div>`;
+    if (res.state === 'none' && res.constraintNone) body = `<div class="kpf-msg kpf-none"><p class="kpf-nh"><b>${esc(res.noneText)}</b></p>${res.changes.length ? '<p>You can change one thing:</p>' : ''}${noneChg}<p class="kpf-note">Or <a href="#" data-f="ken">ask Ken what may work</a>.</p></div>`;
+    else if (res.state === 'none') body = `<div class="kpf-msg kpf-none"><p class="kpf-nh"><b>Nothing matched this search</b></p><p>Try a nearby size or broaden the area.</p>${noneChg}<p class="kpf-note">Or <a href="#" data-f="ken">ask Ken what may work</a>.</p></div>`;
     else body = list + (res.state === 'few' ? `<div class="kpf-msg"><p>${esc(res.fewText)}</p>${chg}</div>` : '');
     const sizeWhy = sz.source === 'inferred' ? 'You didn’t give a size in square feet, so we used the sizes that typically sold at your budget' + (sz.extended ? ', extended upward because you chose More space' : '') + ' (about ' + sizeFmt(sz.lo, sz.hi) + '). We don’t convert bedrooms into square feet.' : 'The size is your own range, ' + sizeFmt(sz.lo, sz.hi) + '. We don’t convert bedrooms into square feet.';
     const unWhy = res.unsupported.length ? `<h4>What we didn’t use to build this list</h4><ul>${res.unsupported.map((u) => `<li><b>${esc(u.title)}:</b> ${esc(u.text)}</li>`).join('')}</ul>` : '';
@@ -351,6 +355,9 @@
       const id = t.dataset.id; if (id === 'area') { FS.districts = []; FS.text = ''; }
       else if (id === 'size') { const sz = FI.sizeWindow(FS.explicit, findStep, openToNow(), sizeOpts()); if (sz) FS.explicit = { from: sz.lo - FI.T.sizePad, to: sz.hi + FI.T.sizePad, widened: true, typed: sz.source === 'explicit' && !!(FS.explicit && FS.explicit.typed) }; }
       else if (id === 'budget') FS.widen = true;
+      else if (id === 'region') FS.regionSoft = true;
+      else if (id === 'freehold') FS.freehold = false;
+      else if (id === 'bed') FS.bedOff = true;
     }
     renderFind();
   }

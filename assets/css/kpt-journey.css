@@ -347,6 +347,7 @@
 .kpj .kpb-opt{ font:400 13px var(--sans); color:var(--muted); margin-left:6px; }
 .kpj .kpb-help{ margin:10px 0 0; font-size:13px; line-height:1.5; color:var(--muted); }
 .kpj .kpb-text .kpb-help{ margin-top:8px; }
+.kpj .kpb-quiet{ opacity:.8; font-size:12.5px; }
 .kpj .kpb-caption{ margin:12px 0 0; font-size:13px; line-height:1.5; color:var(--muted); text-align:center; }
 
 /* ---- V10.3.1 what the priorities did, on the FIND list ---- */

@@ -251,8 +251,11 @@
     if (specificWhere && a.whereText) blind.push('your specific area');
     if (blind.length) { rules.push('blind-note'); model.notes.push('Our market figures are grouped by region, age and new-vs-resale. They do not cover ' + list(blind) + ', so they cannot say how those compare.'); }
     if (P.length) {
-      const ord = P.filter((p) => p !== 'freehold');
-      model.notes.push((P.indexOf('freehold') > -1 ? 'Freehold or 900+ year lease limits the next page to those developments. ' : '') + (ord.length ? 'Your ' + (P.indexOf('freehold') > -1 ? 'other ' : '') + 'priorit' + (ord.length > 1 ? 'ies' : 'y') + ' order the list and do not remove any development that otherwise qualifies.' : ''));
+      // V10.3.4: Freehold and Closer to the centre are requirements (they limit the next page); More space and Newer building only order it.
+      const lim = [], ord = P.filter((p) => p !== 'freehold' && p !== 'location');
+      if (P.indexOf('location') > -1) lim.push('Closer to the centre limits the next page to the Core Central and Rest of Central regions (URA’s region classification, not physical distance).');
+      if (P.indexOf('freehold') > -1) lim.push('Freehold or 900+ year lease limits the next page to those developments.');
+      model.notes.push(lim.join(' ') + (lim.length && ord.length ? ' ' : '') + (ord.length ? 'Your ' + (lim.length ? 'other ' : '') + 'priorit' + (ord.length > 1 ? 'ies' : 'y') + ' order the list and do not remove any development that otherwise qualifies.' : ''));
     }
     // other comparisons the engine found, and the separate EC route, for the disclosure only
     model.other = model.routes.filter((r) => !lensFact || r.id !== lensFact.key).map((r) => r.text);

@@ -41,7 +41,9 @@
 
   // Same name styling as the Research page (a test keeps the two identical for every project name).
   const ROMAN = /^(I|II|III|IV|V|VI|VII|VIII|IX|X)$/, ACRONYMS = { AMO: 1, RVG: 1, JLB: 1, OUE: 1, PLQ: 1, SCK: 1, SKT: 1, TMW: 1, YGK: 1, MKZ: 1 };
+  const NAME_FIX = { 'VERD\uFFFD JOO CHIAT': 'Verdé Joo Chiat', 'ENCHANT\uFFFD': 'Enchanté' };   // reviewed, exact-match, display only: URA's own source name lost the accented letter
   function displayName(name) {
+    if (Object.prototype.hasOwnProperty.call(NAME_FIX, name)) return NAME_FIX[name];
     const SMALL = { AT: 1, OF: 1, THE: 1, BY: 1, ON: 1 };
     return String(name || '').split(' ').map((w, i) => {
       if (w === '@' || /\d/.test(w) || ROMAN.test(w) || ACRONYMS[w]) return w;
@@ -186,8 +188,9 @@
     space: (a, b) => b.hi - a.hi,
   };
   /** Comparator for a sale type, or null when no preference applies to it (so the existing order is untouched). */
-  function prefOrder(prefs, sale) {
-    const ks = (prefs || []).filter((p) => PREF_CMP[p] && (p !== 'newer' || sale === 'resale'));
+  function prefOrder(prefs, sale, regionRank) {
+    let ks = (prefs || []).filter((p) => PREF_CMP[p] && (p !== 'newer' || sale === 'resale'));
+    if (!ks.length && regionRank) ks = ['location'];      // V10.3.4: Closer filters first; it orders only when no other ranking applies
     if (!ks.length) return null;
     return (x, y) => { const a = prefFacts(x), b = prefFacts(y); for (const k of ks) { const d = PREF_CMP[k](a, b); if (d) return d; } return 0; };
   }
@@ -196,7 +199,8 @@
     const pr = (input.answers && input.answers.priorities) || [], on = [], off = [];
     const area = (input.districts && input.districts.length) || input.text;
     pr.forEach((p) => {
-      if (p === 'location') (area ? off : on).push(p === 'location' && area ? { id: p, why: 'area' } : p);
+      if (p === 'location' && input.regionSoft && !area) off.push({ id: p, why: 'soft' });      // V10.3.4: the buyer chose Include Outside Central, so Closer is removed for this search (neither filter nor ranking)
+      else if (p === 'location') (area ? off : on).push(p === 'location' && area ? { id: p, why: 'area' } : p);
       else if (p === 'newer') (input.openTo === 'new' || input.freehold ? off : on).push(input.openTo === 'new' ? { id: p, why: 'new' } : input.freehold ? { id: p, why: 'freehold' } : p);
       else if (p === 'space') (input.size && input.size.extended ? on : off).push(input.size && input.size.extended ? p : { id: p, why: 'size' });
     });
@@ -209,10 +213,11 @@
     ix.projects.forEach((p) => {
       if (o.districts && o.districts.length && o.districts.indexOf(p.d) < 0) return;
       if (o.freehold && p.tg !== 4) return;
+      if (o.regions && o.regions.indexOf(p.seg) < 0) return;      // V10.3.4: Closer to the centre = Core Central + Rest of Central only
       if (!textMatch(p, o.text)) return;
       const m = matchProject(ix, p, sale, o); if (m) out.push(m);
     });
-    const po = prefOrder(o.prefs, sale);
+    const po = prefOrder(o.prefs, sale, o.regionRank);
     return out.sort(po ? (x, y) => po(x, y) || compare(x, y) : compare);
   }
   function takeCapped(list, n) {
@@ -319,7 +324,7 @@
   function newCandidates(ix, o) {
     const inv = o.inv, uraAll = {}; eligible(ix, 'new', o).forEach((m) => { uraAll[m.id] = m; });
     const out = [], seen = {};
-    const pass = (rec) => !((o.districts && o.districts.length && o.districts.indexOf(rec.d) < 0) || (o.freehold && rec.tg !== 4) || !textMatch(rec, o.text));
+    const pass = (rec) => !((o.regions && o.regions.indexOf(rec.seg) < 0) || (o.districts && o.districts.length && o.districts.indexOf(rec.d) < 0) || (o.freehold && rec.tg !== 4) || !textMatch(rec, o.text));
     inv.slugs.forEach((slug) => {
       const ip = inv.bySlug[slug], r = recordFor(ix, ip); if (!r || !pass(r.rec)) return;
       const fr = freshness(inv, ip), usable = fr && ip.status === 'ok', m = usable ? invMatch(ip, o) : null, u = uraAll[slug] || null;
@@ -329,7 +334,7 @@
     });
     Object.keys(uraAll).forEach((id) => { if (!seen[id]) { const u = uraAll[id]; out.push({ id, sale: 'new', rec: null, ip: null, fresh: null, ura: u, tier: 'c', hut: 'unchecked', name: u.name, street: u.street }); } });
     const TIER = { a: 0, b: 1, c: 2, d: 3 };
-    const po = prefOrder(o.prefs, 'new');
+    const po = prefOrder(o.prefs, 'new', o.regionRank);
     // V10.3.2: when a priority is active, a and b (Huttons shows homes around the budget and size) form one band, so the priority orders them together; c and d stay below it. With no priority the four tiers are unchanged.
     const BAND = po ? { a: 0, b: 0, c: 2, d: 3 } : TIER;
     return out.sort((x, y) => BAND[x.tier] - BAND[y.tier] || (po ? po(x, y) : 0) || (x.tier === 'a' || x.tier === 'b'
@@ -423,6 +428,7 @@
     if (beds) ans.bedMode = types0.length === 2 ? 'both' : 'new';
     const un = unsupported(ans, input.loc || { districts: input.districts || [] }), base = { budget: input.budget, pct: input.pct === T.widenBudgetPct ? T.widenBudgetPct : T.budgetPct, lo: input.size.lo, hi: input.size.hi, districts: input.districts || [], freehold: !!input.freehold, text: input.text || '', openTo: input.openTo, prefs: eff.on.slice() };
     if (beds) base.beds = beds;
+    if (eff.on.indexOf('location') > -1) { base.regions = ['CCR', 'RCR']; base.regionRank = true; base.prefs = base.prefs.filter((p) => p !== 'location'); }   // V10.3.4: Closer is a filter; with regionSoft it never reaches here (removed in effectivePrefs)
     if (inv) { base.inv = inv; base.sizeSource = input.size.source; base._uraIds = {}; ix.projects.forEach((p) => { base._uraIds[p.id] = 1; }); }
     const types = saleTypes(input.openTo), lists = {}; types.forEach((s) => { lists[s] = inv && s === 'new' ? newCandidates(ix, base) : eligible(ix, s, base); });
     const eligibleN = {}; types.forEach((s) => { eligibleN[s] = lists[s].length; });
@@ -458,14 +464,17 @@
     const effect = [], say = {};
     if (beds) effect.push('Bedrooms: new launches are matched on ' + BED_WORDS[input.answers.size] + ' where we have inventory data.' + (types0.length === 2 ? ' Resale is matched on size, because the transaction data has no bedroom count.' : '')); // V10.3.3
     if (eff.on.indexOf('location') > -1) {
-      say.location = 'Closer to the centre: Core Central Region shown first, followed by Rest of Central and Outside Central.';
+      say.location = base.regions
+        ? 'Closer to the centre: Core Central and Rest of Central regions only' + (types.some((sl) => !base.prefs.some((q) => PREF_CMP[q] && (q !== 'newer' || sl === 'resale'))) ? ', Core Central first.' : '.')
+        : '';
     }
     if (eff.on.indexOf('newer') > -1) say.newer = 'Newer building: resale homes are listed by lease start year, newest first. Lease start is not the completion year.';
     if (eff.on.indexOf('space') > -1) say.space = 'More space: sizes up to ' + num(input.size.hi) + ' sqft are included, and larger sizes are listed first.';
     if (beds && say.space) say.space = types0.length === 2 ? say.space + ' New launch: larger homes of your bedroom choice come first.' : 'More space: larger homes of your bedroom choice are listed first.';   // V10.3.3
     eff.on.forEach((p) => effect.push(say[p]));      // in the order the buyer chose them
     eff.off.forEach((o) => {
-      if (o.why === 'area') effect.push('Closer to the centre wasn’t applied: the area you chose already sets the location.');
+      if (o.why === 'soft') effect.push('Closer to the centre was removed for this search: all regions are included.');
+      else if (o.why === 'area') effect.push('Closer to the centre wasn’t applied: the area you chose already sets the location.');
       else if (o.why === 'new') effect.push('Newer building wasn’t applied: every new launch is a new project.');
       else if (o.why === 'freehold') effect.push('Newer building wasn’t applied: it can’t be combined with Freehold or 900+ year lease.');
       else if (o.why === 'size') effect.push('More space wasn’t applied: you chose your own size range.');
@@ -479,12 +488,19 @@
     if (beds) out.orderLine = out.orderLine.replace('whether your budget sits within the range currently shown in Huttons', 'whether Huttons currently shows homes of the bedrooms you chose around your budget').replace('whether Huttons currently shows homes around your budget and size', 'whether Huttons currently shows homes of the bedrooms you chose around your budget');   // V10.3.3
 
     const asText = (n) => n + (n === 1 ? ' development' : ' developments');
+    // V10.3.4: one-click ways to broaden a search that a hard requirement has narrowed. Offered only when they would add results; nothing is ever applied automatically.
+    const relax = [];
+    if (state === 'none' || state === 'few') {
+      [['region', base.regions, { regions: null, regionRank: false }, 'Include Outside Central'], ['freehold', base.freehold, { freehold: false }, 'Include leasehold homes'], ['bed', base.beds, { beds: null }, 'Show any bedroom']].forEach((r) => {
+        if (!r[1]) return; const n = count(ix, Object.assign({}, base, r[2])); if (n > total) relax.push({ id: r[0], label: r[3], count: n, text: asText(n) });
+      });
+    }
     if (state === 'few') {
       const alts = [];
       const sz = count(ix, Object.assign({}, base, { lo: base.lo - T.sizePad, hi: base.hi + T.sizePad })); if (sz > total) alts.push({ id: 'size', label: 'Include nearby sizes (' + sizeText(base.lo - T.sizePad, base.hi + T.sizePad) + ')', count: sz, text: asText(sz) });
       const bd = count(ix, Object.assign({}, base, { pct: T.widenBudgetPct })); if (bd > total) alts.push({ id: 'budget', label: 'Widen the budget range to ±15%', count: bd, text: asText(bd) });
       if (base.districts.length || base.text) { const ar = count(ix, Object.assign({}, base, { districts: [], text: '' })); if (ar > total) alts.push({ id: 'area', label: 'Look across all of Singapore', count: ar, text: asText(ar) }); }
-      out.changes = alts;
+      out.changes = relax.concat(alts);
       out.fewText = 'Only ' + total + (total === 1 ? ' development' : ' developments') + (base.districts.length || base.text ? ' in this area' : '') + ' had enough recent sales to list.' + (alts.length ? ' You can change one thing to see more:' : '');
     }
     if (state === 'none') {
@@ -496,6 +512,7 @@
       for (let b = base.budget + T.referenceStep; b <= base.budget * (1 + T.referenceMaxUp); b += T.referenceStep) { if (count(ix, Object.assign({}, base, { budget: b })) >= T.minSales) { out.reference = { budget: b, text: 'For reference, at about ' + m2(b) + ' we did find developments with enough sales of that size.' }; break; } }
       const widerArea = (base.districts.length || base.text) ? count(ix, Object.assign({}, base, { districts: [], text: '' })) : 0;
       if (widerArea >= T.minSales) out.changes = [{ id: 'area', label: 'Look across all of Singapore', count: widerArea, text: asText(widerArea) }];
+      if (base.regions || base.freehold || base.beds) { out.noneText = 'No matches found with all your selections.'; out.reference = null; out.constraintNone = true; out.changes = relax.concat(out.changes); }
     }
     return out;
   }
@@ -510,6 +527,7 @@
     '“Good recent evidence” means 5 or more such sales. “Limited recent evidence” means 3 or 4.',
     'The order: evidence first (Good before Limited), then where your budget sits within the typical prices, then the number of such sales, then the most recent sale, then the development’s name A to Z. There is no score and nothing is weighted.',
     'If you gave no size in square feet, we used the sizes that typically sold at your budget. We never turn bedrooms into square feet. For new launches, bedrooms are checked where we have inventory data. For resale, bedroom count isn’t in the transaction data, so size is used.',
+    'Closer to the centre limits the list to the Core Central and Rest of Central regions, using URA’s region classification. It is not a measure of physical distance. Core Central is listed before Rest of Central unless another priority orders the list.',
     'If freehold or a longer tenure was a priority, only freehold and leases of 900 years or more are shown, and you can remove that filter.',
     'Area filters use postal districts. If you told us where you want to be, we suggest a district and ask you to confirm it before it is used; places that sit in more than one district, or that we don’t recognise, are left for you to choose. The area names are general: a district contains places not named. We don’t match schools, workplaces, family locations, exact distances or neighbourhoods.',
     'Where a new launch card says “Current availability not confirmed”, URA’s data can’t tell us whether the developer still has units to sell. Where we also check Huttons inventory, a card with no current match for your size and budget says the same. That isn’t the same as there being none.',

@@ -136,7 +136,7 @@ t('page: data failure leaves the section absent (renderFind clears findRoot)', (
 console.log('Unsupported answers');
 t('every unsupported answer is listed and appended to every card', () => {
   const ix = mk([R1('a', 6), R1('b', 6)]);
-  const r = run(ix, { answers: { where: 'school', size: '2', priorities: ['schools', 'location', 'investment', 'monthly', 'facilities', 'newer', 'space'] } });
+  const r = run(ix, { regionSoft: true, answers: { where: 'school', size: '2', priorities: ['schools', 'location', 'investment', 'monthly', 'facilities', 'newer', 'space'] } });
   assert.deepStrictEqual(r.unsupported.map((u) => u.id), ['school', 'schools', 'investment', 'monthly', 'facilities', 'newer', 'bedrooms']);   // V10.3.1: location and space are applied, so they are no longer in the not-used list
   r.groups[0].cards.forEach((c) => { ['school', 'investment', 'monthly', 'facilities'].forEach((w) => assert.ok(c.notEvaluated.toLowerCase().indexOf(w) > -1, w)); });
   ['family', 'work'].forEach((w) => assert.ok(run(ix, { answers: { where: w, size: 'not-sure', priorities: [] } }).unsupported.some((u) => u.id === w)));

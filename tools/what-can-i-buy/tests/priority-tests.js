@@ -12,7 +12,7 @@ const BUDGETS = [1500000, 2500000, 2600000, 4000000];
 function run(b, o) {
   o = o || {}; const st = step(b), openTo = o.openTo || 'both', pr = o.priorities || [];
   const sz = o.size ? { lo: o.size[0], hi: o.size[1], source: 'explicit', line: 'x' } : FI.sizeWindow(null, st, openTo, { space: pr.indexOf('space') > -1 });
-  return FI.shortlist(ix, { budget: b, openTo, size: sz, districts: o.districts || [], text: '', freehold: !!o.freehold, loc: { districts: o.districts || [] }, pct: FI.T.budgetPct, answers: { where: 'flexible', size: 'not-sure', priorities: pr }, typical: FI.inferSize(st, openTo), inv: o.noInv ? null : inv() });
+  return FI.shortlist(ix, { budget: b, openTo, size: sz, districts: o.districts || [], text: '', freehold: !!o.freehold, loc: { districts: o.districts || [] }, pct: FI.T.budgetPct, answers: { where: 'flexible', size: 'not-sure', priorities: pr }, typical: FI.inferSize(st, openTo), inv: o.noInv ? null : inv(), regionSoft: !!o.regionSoft });
 }
 const names = (r, sale) => { const g = r.groups.find((x) => x.sale === sale); return g ? g.cards.concat(g.more || []).map((c) => c.name) : []; };
 const sig = (r) => JSON.stringify([r.groups.map((g) => [g.sale, g.cards.map((c) => c.name), (g.more || []).map((c) => c.name)]), r.total, r.eligible, r.orderLine, r.unsupported]);
@@ -24,15 +24,15 @@ t('no priorities: no effect lines, the original order line, nothing added', () =
 t('Freehold alone is still just the filter: no effect lines, same order within the filtered set', () => BUDGETS.forEach((b) => { const r = run(b, { freehold: true, priorities: ['freehold'] }); assert.strictEqual(r.effect, undefined); }));
 
 console.log('Closer to the centre');
-t('ranks CCR, then RCR, then OCR among the same eligible projects (resale and new launch, within budget-fit tiers)', () => BUDGETS.forEach((b) => {
+t('V10.3.4: Closer is a constraint: OCR never appears, CCR before RCR, and everything else stays eligible', () => BUDGETS.forEach((b) => {
   const a = run(b), c = run(b, { priorities: ['location'] });
-  assert.deepStrictEqual(c.eligible, a.eligible);                                   // nothing hidden
-  const rs = names(c, 'resale').map(segOf).map((s) => RR[s]); assert.deepStrictEqual(rs, rs.slice().sort((x, y) => x - y));
+  ['resale', 'new'].forEach((sale) => { const rs = names(c, sale).map(segOf); rs.forEach((x) => assert.ok(x === 'CCR' || x === 'RCR', sale + ' ' + x)); const o = rs.map((x) => RR[x]); assert.deepStrictEqual(o, o.slice().sort((x, y) => x - y)); });
+  assert.ok(c.eligible <= a.eligible);
 }));
-t('the resale top results visibly change at $1.5m, $2.5m and $2.6m, and are all Core Central where there are enough', () => [1500000, 2500000, 2600000].forEach((b) => {
+t('the resale top results visibly change at $1.5m, $2.5m and $2.6m, and are all Core Central or Rest of Central', () => [1500000, 2500000, 2600000].forEach((b) => {
   const a = run(b), c = run(b, { priorities: ['location'] });
   assert.notDeepStrictEqual(names(c, 'resale').slice(0, 3), names(a, 'resale').slice(0, 3));
-  c.groups.find((g) => g.sale === 'resale').cards.forEach((card) => assert.strictEqual(segOf(card.name), 'CCR', card.name));
+  c.groups.find((g) => g.sale === 'resale').cards.forEach((card) => assert.ok(['CCR', 'RCR'].indexOf(segOf(card.name)) > -1, card.name));
 }));
 t('Huttons budget-fit tiers stay ahead of the preference: a project that cannot match the budget never outranks one that can', () => BUDGETS.forEach((b) => ['location', 'space', 'newer'].forEach((p) => {
   const st = step(b), sz = FI.sizeWindow(null, st, 'both', { space: p === 'space' });
@@ -55,9 +55,11 @@ t('every priority: c/d stay below the a+b band, and Closer as first priority ord
 })));
 t('the page says what it did, in plain words, without calling regions distances', () => {
   const r = run(2600000, { priorities: ['location'] }); assert.strictEqual(r.effect.length, 1);
-  assert.strictEqual(r.effect[0], 'Closer to the centre: Core Central Region shown first, followed by Rest of Central and Outside Central.'); assert.ok(!/\d/.test(r.effect[0]));
+  assert.strictEqual(r.effect[0], 'Closer to the centre: Core Central and Rest of Central regions only, Core Central first.'); assert.ok(!/\d/.test(r.effect[0]));
   assert.ok(!/distance|km|nearer|closest/i.test(JSON.stringify(r.effect)));
   assert.ok(/your priorities/.test(r.orderLine));
+  const m = run(2600000, { priorities: ['location', 'space'] }); assert.strictEqual(m.effect[0], 'Closer to the centre: Core Central and Rest of Central regions only.');
+  assert.ok(/URA.s region classification/.test(FI.METHOD.join(' ')) && /not a measure of physical distance/.test(FI.METHOD.join(' ')));
 });
 
 console.log('Newer building');
@@ -91,16 +93,50 @@ t('a typed size wins: More space is reported as not applied and the list equals 
 });
 
 console.log('Two priorities and a named area');
-t('first chosen is primary, second breaks ties: the order matters', () => BUDGETS.slice(0, 3).forEach((b) => {
+t('Closer + Newer: constrained first, then Newer orders the resale; chip order never changes anything', () => BUDGETS.forEach((b) => {
   const a = run(b, { priorities: ['location', 'newer'] }), c = run(b, { priorities: ['newer', 'location'] });
-  assert.notDeepStrictEqual(names(a, 'resale'), names(c, 'resale'), b);
-  const rr = names(a, 'resale').map(segOf).map((s) => RR[s]); assert.deepStrictEqual(rr, rr.slice().sort((x, y) => x - y));
+  assert.strictEqual(sig(a.effect ? Object.assign({}, a, { effect: 0 }) : a), sig(c.effect ? Object.assign({}, c, { effect: 0 }) : c), b);
+  names(a, 'resale').map(segOf).forEach((x) => assert.ok(x === 'CCR' || x === 'RCR'));
   assert.strictEqual(a.effect.length, 2);
 }));
-t('Freehold filters first, then the other priority orders what is left', () => {
+t('Closer + More space (either order) are identical, and RCR may precede CCR because space ranks the survivors', () => BUDGETS.forEach((b) => {
+  const a = run(b, { priorities: ['location', 'space'] }), c = run(b, { priorities: ['space', 'location'] });
+  assert.strictEqual(sig(a), sig(c), b);
+  ['resale', 'new'].forEach((sale) => names(a, sale).map(segOf).forEach((x) => assert.ok(x === 'CCR' || x === 'RCR')));
+}));
+t('Include Outside Central removes Closer for this search: all regions eligible, no region ranking, other preferences and Freehold keep working', () => BUDGETS.forEach((b) => {
+  const regs = (r) => ['resale', 'new'].reduce((a, sale) => a.concat(names(r, sale).map(segOf)), []);
+  // Closer only -> default ranking, identical to the plain search (apart from the one effect line)
+  const c = run(b, { priorities: ['location'], regionSoft: true }), plain = run(b);
+  assert.deepStrictEqual(c.eligible, plain.eligible); assert.strictEqual(sig(c), sig(plain), 'closer only ' + b);
+  assert.deepStrictEqual(c.effect, ['Closer to the centre was removed for this search: all regions are included.']);
+  // Closer + More space / Newer -> exactly what More space / Newer alone gives
+  [['space'], ['newer']].forEach((o) => { const a = run(b, { priorities: ['location', o[0]], regionSoft: true }), a2 = run(b, { priorities: [o[0], 'location'], regionSoft: true }), only = run(b, { priorities: o });
+    assert.strictEqual(sig(a), sig(only), o + ' ' + b); assert.strictEqual(sig(a), sig(a2), 'order ' + o + ' ' + b); });
+  // Closer + Freehold -> Freehold alone
+  const f = run(b, { freehold: true, priorities: ['location', 'freehold'], regionSoft: true }), fo = run(b, { freehold: true, priorities: ['freehold'] });
+  assert.strictEqual(sig(f), sig(fo), 'freehold ' + b); assert.deepStrictEqual(f.eligible, fo.eligible);
+  // OCR is back among the eligible set when it exists at that budget
+  const all = run(b, { regionSoft: true, priorities: ['location'] }); if (regs(plain).some((x) => x === 'OCR')) assert.ok(regs(all).some((x) => x === 'OCR'), 'OCR returns ' + b);
+}));
+t('Include Outside Central never rewrites the answers: the same search without the override still excludes OCR', () => BUDGETS.forEach((b) => {
+  run(b, { priorities: ['location'], regionSoft: true }); const r = run(b, { priorities: ['location'] });
+  ['resale', 'new'].forEach((sale) => names(r, sale).map(segOf).forEach((x) => assert.ok(x === 'CCR' || x === 'RCR')));
+}));
+t('display names: the corrupted URA names read Verdé Joo Chiat and Enchanté, exact keys only', () => {
+  assert.strictEqual(FI.displayName('VERD\uFFFD JOO CHIAT'), 'Verdé Joo Chiat'); assert.strictEqual(FI.displayName('ENCHANT\uFFFD'), 'Enchanté');
+  assert.strictEqual(FI.displayName('VERD JOO CHIAT'), 'Verd Joo Chiat'); assert.ok(ix.projects.every((p) => FI.displayName(p.name).indexOf('\uFFFD') < 0 || p.name.indexOf('\uFFFD') > -1));
+});
+t('no-match: Closer + Freehold + New launch + $1.8m 3BR names the state and offers only actions that produce results', () => {
+  const r = FI.shortlist(ix, { budget: 1800000, openTo: 'new', size: { lo: 900, hi: 1300, source: 'inferred', line: 'x' }, districts: [], text: '', freehold: true, loc: { districts: [] }, pct: FI.T.budgetPct, beds: [3], answers: { where: 'flexible', size: '3br', priorities: ['location'] }, typical: { lo: 900, hi: 1100 }, inv: inv() });
+  if (r.state === 'none') { assert.strictEqual(r.noneText, 'No matches found with all your selections.'); assert.ok(r.constraintNone); assert.ok(r.changes.length > 0); r.changes.forEach((c) => assert.ok(c.count > 0, c.label)); assert.ok(r.changes.every((c) => !/tier|band|ranking/i.test(c.label + c.text))); }
+  else assert.ok(r.state === 'few' || r.state === 'ok');
+});
+t('Freehold + Closer: both are constraints; the list is CCR/RCR only and freehold only', () => {
   const a = run(2600000, { freehold: true, priorities: ['freehold', 'location'] }), b = run(2600000, { freehold: true, priorities: ['freehold'] });
-  assert.deepStrictEqual(a.eligible, b.eligible); assert.ok(a.effect.length === 1);
-  const rs = names(a, 'resale').map(segOf).map((s) => RR[s]); assert.deepStrictEqual(rs, rs.slice().sort((x, y) => x - y));
+  assert.ok(a.eligible <= b.eligible);
+  const rs = names(a, 'resale').map(segOf); rs.forEach((x) => assert.ok(x === 'CCR' || x === 'RCR')); const o = rs.map((x) => RR[x]); assert.deepStrictEqual(o, o.slice().sort((x, y) => x - y));
+  const c = run(2600000, { freehold: true, priorities: ['location', 'freehold'] }); assert.strictEqual(sig(a), sig(c));
 });
 t('a specific area keeps the list within that area and Closer to the centre is not applied', () => BUDGETS.forEach((b) => {
   const a = run(b, { districts: ['20'] }), c = run(b, { districts: ['20'], priorities: ['location'] });
