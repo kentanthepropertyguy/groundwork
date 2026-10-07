@@ -7,24 +7,26 @@
 <meta name="description" content="Where your budget works in the Singapore property market, what you trade off, and what Ken would look at.">
 <meta name="theme-color" content="#FAFAF8">
 <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../../assets/css/kpt-system.css">
-<link rel="stylesheet" href="../../assets/css/kpt-journey.css?v=2026-10-07.1">
+<link rel="stylesheet" href="../../assets/css/kpt-system.css?v=2026-10-07.2">
+<link rel="stylesheet" href="../../assets/css/kpt-journey.css?v=2026-10-07.2">
 </head>
 <body class="kpj" data-view="result">
-<header class="kpt-header kpt-shell"><a class="brand" href="../../">KEN PROPERTY TOOLS</a>
-  <div class="kpt-byline"><img src="../../assets/img/ken-portrait.jpg" alt="Ken Tan"></div></header>
+<header class="kpt-header kpt-shell"><div class="kpt-brandblock"><a class="brand" href="../../">KEN PROPERTY TOOLS</a><span class="kpt-by">by Ken Tan</span></div></header>
 
 <main class="kpt-shell" style="max-width:760px;">
   <div id="root"><p class="kpt-note" style="padding:40px 0;">Loading…</p></div>
 </main>
 
 <footer class="kpt-footer kpt-shell">
-  Ken Tan · Property agent since 2007 · CEA R007903D · Huttons Asia Pte Ltd (L3008899K) ·
-  Indicative market ranges and planning estimates only, not financial advice.
+  <p class="kpt-f-name">Ken Tan</p>
+  <p class="kpt-f-line">Singapore property agent · Since 2007</p>
+  <p class="kpt-f-line"><a href="https://www.tiktok.com/@kennx8898" target="_blank" rel="noopener" data-kpt-tt="footer">TikTok @kennx8898</a> · Live most nights</p>
+  <p class="kpt-f-reg">CEA R007903D · Huttons Asia Pte Ltd (L3008899K)</p>
+  <p class="kpt-f-dis">Indicative market ranges and planning estimates only, not financial advice.</p>
 </footer>
 
 <script src="../../assets/js/kpt-analytics.js"></script>
-<script src="../../assets/js/kpt-components.js"></script>
+<script src="../../assets/js/kpt-components.js?v=2026-10-07.2"></script>
 <script src="../../assets/js/kpt-market.js"></script>
 <script src="../../assets/js/kpt-engine.js"></script>
 <script src="../../assets/js/kpt-result.js"></script>
@@ -105,23 +107,33 @@
     if (v.also.length) rows.push(`<details class="res-also" id="also"><summary>Also at this budget</summary>${v.also.map((a) => `<div class="res-f"><b>${esc(a.title)}</b>${a.lines.map((l) => `<span>${esc(l)}</span>`).join('')}</div>`).join('')}</details>`);
     if (v.ec) rows.push(`<div class="res-ecrow">Another route: ${esc(v.ec.label)}<span>${esc(v.ec.text)}</span></div>`);
     if (rows.length) main += `<div class="res-list">${rows.join('')}</div>`;
-    if (v.ken) main += `<section class="res-ken" aria-label="Ken's Take"><img src="../../assets/img/ken-portrait.jpg" alt="Ken Tan"><div><h3>Ken's Take <span>My judgement, not URA data</span></h3><p>“${esc(v.ken.note)}”</p></div></section>`;
     return `<div class="kpt-section" style="padding-top:0;">${flag}${chip}${indicative}${tag}${main}
         <div id="findRoot"></div>
-        <div class="res-cta"><a class="kpt-cta kpj-btn kpj-btn--wa" id="kenView" href="#">Get Ken's view →</a></div>
+        <section class="kpb-beyond" id="beyond" aria-labelledby="beyondH" hidden>
+          <p class="kpb-eye">Beyond the numbers</p>
+          <h2 class="kpb-hi" id="beyondH">I'm Ken.</h2>
+          <div class="kpb-who"><img src="../../assets/img/ken-portrait.jpg" alt="Ken Tan" width="48" height="48"><p>I've been in Singapore property since 2007.</p></div>
+          <p class="kpb-txt">I discuss property questions and market decisions live on TikTok most nights.</p>
+          <a class="kpb-tt" href="https://www.tiktok.com/@kennx8898" target="_blank" rel="noopener" data-kpt-tt="beyond">Watch Ken on TikTok @kennx8898 →</a>
+          <div class="kpb-act"><p>Prefer to talk it through?</p><a class="kpb-wa" id="kenBeyond" href="#">Message Ken on WhatsApp →</a></div>
+        </section>
+        <div class="res-cta" id="kenLegacy" hidden><a class="kpt-cta kpj-btn kpj-btn--wa" id="kenView" href="#">Get Ken's view →</a></div>
         ${v.footer ? `<p class="res-src">${esc(v.footer)} Source: URA.</p>` : ''}
         <button class="kpj-link kpj-link--muted" id="changeBudget" type="button" hidden>Change budget</button>
       </div>`;
   }
+  const BEYOND_WA = 'Hi Ken, I was using Ken Property Tools and have a question.';   // generic on purpose: no budget, project or search detail
   function show(res, step) {
     const v = R.view(res, { step: step, sizeRounding: ENG.DEFAULTS.size_rounding }), root = $('root');
     root.innerHTML = resultHtml(v);
     initFind(step);
-    if (!FI || !$('findRoot')) $('changeBudget').hidden = false;
+    if (!FI || !$('findRoot')) { $('changeBudget').hidden = false; $('kenLegacy').hidden = false; }
     const pl = R.analytics(res, v, budget);
     const kv = $('kenView');
     kv.href = KPT.waLink({ message: R.waMessage(budget) });
     kv.addEventListener('click', () => KPT.track('ken_view_click', Object.assign({}, pl, { placement: 'result' })));
+    const kb = $('kenBeyond'); kb.href = KPT.waLink({ message: BEYOND_WA });
+    kb.addEventListener('click', () => KPT.track('ken_view_click', Object.assign({}, pl, { placement: 'beyond' })));
     $('changeBudget').addEventListener('click', () => { budget = null; handoff = null; render(); });
     if (!viewed) { viewed = true; KPT.track('market_view', pl); }
     window.__kptView = v;   // read by tests
@@ -130,6 +142,7 @@
     const root = $('root');
     root.innerHTML = resultHtml({ budgetText: R.budgetText(budget), hero: null, also: [], ec: null, ken: null, footer: null, tag: null, message: { title: "Market figures aren't available just now.", body: "I can still give you my view on this budget." } });
     const kv = $('kenView'); kv.href = KPT.waLink({ message: R.waMessage(budget) });
+    const kb = $('kenBeyond'); kb.href = KPT.waLink({ message: BEYOND_WA });
     $('changeBudget').addEventListener('click', () => { budget = null; handoff = null; render(); });
     initFind(null);
   }
@@ -185,6 +198,7 @@
     findStep = step; FS = { explicit: sv ? sv.explicit : null, widen: sv ? sv.widen : false, loc: (sv && sv.loc) || (locIntent() ? 'pending' : 'none'), locPick: false, districts: sv ? sv.districts : [], text: sv ? sv.text : '', freehold: sv ? sv.freehold : answersNow().priorities.indexOf('freehold') > -1, panel: false, draft: null, ddOpen: false, seen: {}, ticked: sv ? sv.ticked : [], more: {}, info: false };
     root.onclick = findClick; root.onchange = findChange; root.oninput = findInput;
     root.onkeydown = (e) => { if (e.key === 'Enter' && e.target && e.target.matches && e.target.matches('#kpfPanel input[type=text]')) { e.preventDefault(); findClick({ target: root.querySelector('[data-f=update]'), preventDefault() {} }); } };
+    if (location.hash === '#developments') { pendingScroll = true; try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} }   // arriving from the Buy result button: land on the list, not the summary above it
     Promise.all([loadFind(), loadInv()]).then(() => { renderFind(); if (pendingScroll) { pendingScroll = false; const h = $('kpfH'); if (h && h.scrollIntoView) h.scrollIntoView({ block: 'start' }); } });
   }
   const WHERE_SAY = { areas: 'You chose a specific area', work: 'You said you want to be near work', family: 'You said you want to be near family', school: 'You said you want to be near a particular school' };
@@ -213,6 +227,8 @@
   function renderFindView() {
     const root = $('findRoot'); if (!root) return;
     const cb = $('changeBudget'); if (cb) cb.hidden = !!findIx || findIx === undefined;   // the old budget route is only a fallback when the list can't load
+    const setKen = (b) => { const be = $('beyond'), lg = $('kenLegacy'); if (be) be.hidden = !b; if (lg) lg.hidden = b || findIx === undefined; };   // Beyond the numbers follows a finished list; the plain button covers every other state
+    setKen(false);
     if (!findIx) { root.innerHTML = ''; return; }                                   // data file missing: the section is simply absent and the page is exactly as before
     const openTo = openToNow(), sz = FI.sizeWindow(FS.explicit, findStep, openTo);
     const head = `<h2 class="kpf-h" id="kpfH">Developments worth investigating</h2>`;
@@ -272,6 +288,7 @@
       + `<h4>What this doesn’t tell you</h4><p>This is a starting list of developments worth investigating. It is not a recommendation or a valuation. It doesn’t tell you which unit suits you, what you would pay, or what is for sale right now${V10 ? ' beyond the Huttons check' : ''}. Ken can help with that.</p>` + unWhy;
     const noneWhy = res.state === 'none' ? `<p><b>Why nothing matched</b></p><p>${esc(res.noneText)}</p>${res.reference ? `<p>${esc(res.reference.text)}</p>` : ''}` : '';
     const meth = `<details class="kpf-meth"><summary>How this works <span>· A starting list, not a recommendation</span></summary><div class="inner">${firstLayer}<details class="kpf-data"><summary>More about the data</summary><div class="inner">${noneWhy}<p>${esc(res.orderLine)}</p>${(V10 ? FI.METHOD_INV : FI.METHOD).map((t) => `<p>${esc(t)}</p>`).join('')}</div></details></div></details>`;
+    setKen(true);
     root.innerHTML = `<section class="kpf" aria-labelledby="kpfH">${head}${summary}${body}${meth}${bar}</section>`;
     const pl = FI.analytics(res, bandOf(budget)), key = JSON.stringify(pl);
     if (!FS.seen[key]) { FS.seen[key] = 1; KPT.track('find_shown', pl); }

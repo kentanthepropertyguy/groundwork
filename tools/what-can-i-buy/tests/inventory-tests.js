@@ -372,10 +372,21 @@ t('the inventory file is optional: a failed fetch resolves to null and the page 
 t('review hooks (?inventory= and ?now=) work only on localhost or in test mode', () => { assert.ok(/const REVIEW = test \|\| \/\^\(localhost\|127\\\.0\\\.0\\\.1\)\$\/\.test\(location\.hostname\)/.test(page)); assert.ok(/REVIEW && \/\^\[\\w\.\/-\]\+\\\.json\$\//.test(page)); assert.ok(/REVIEW && isFinite\(Date\.parse\(params\.get\('now'\)/.test(page)); });
 t('the page tracks exactly: find_shown, find_research_click, find_ask_click (twice, slugs only)', () => { const tr = page.match(/KPT\.track\('find_[a-z_]+'[^)]*\)/g).sort(); assert.deepStrictEqual(tr, ["KPT.track('find_ask_click', ev)", "KPT.track('find_ask_click', ev)", "KPT.track('find_research_click', { project_id: t.dataset.id })", "KPT.track('find_shown', pl)"]); });
 t('WhatsApp links are built only through the pure handoff builder (names, budget, typed size, confirmed district)', () => {
-  const wa = page.split('\n').filter((l) => /waLink\(/.test(l)); wa.forEach((l) => assert.ok(/waFor\(|R\.waMessage\(budget\)/.test(l), l));
+  const wa = page.split('\n').filter((l) => /waLink\(/.test(l)); wa.forEach((l) => assert.ok(/waFor\(|R\.waMessage\(budget\)|message: BEYOND_WA/.test(l), l));
   assert.ok(/const waFor = \(names\) => FI\.handoffMessage\(\{ names, budget, size: FS\.explicit && FS\.explicit\.typed \? \{ from: FS\.explicit\.from, to: FS\.explicit\.to \} : null, district: FS\.loc === 'confirmed' && FS\.districts\.length === 1 \? FS\.districts\[0\] : null \}\)/.test(page));
   assert.ok(!/waFor\([^)]*(FS\.text|whereText)/.test(page));
 });
+t('V10.2: the Beyond the numbers WhatsApp opener is one fixed sentence with no search, budget, project or Huttons detail', () => { const m = /const BEYOND_WA = '([^']*)';/.exec(page); assert.ok(m && m[1] === 'Hi Ken, I was using Ken Property Tools and have a question.', m && m[1]); });
+t('V10.2: Beyond the numbers has the approved text, the TikTok link is plain, and no TikTok mention sits inside the cards or the list code', () => {
+  const sec = /<section class="kpb-beyond"[\s\S]*?<\/section>/.exec(page)[0];
+  ['Beyond the numbers', "I'm Ken.", "I've been in Singapore property since 2007.", 'I discuss property questions and market decisions live on TikTok most nights.', 'Watch Ken on TikTok @kennx8898 →', 'Prefer to talk it through?', 'Message Ken on WhatsApp →'].forEach((x) => assert.ok(sec.indexOf(x) > -1, x));
+  assert.ok(/href="https:\/\/www\.tiktok\.com\/@kennx8898" target="_blank" rel="noopener"/.test(sec));
+  assert.ok(!/<svg|follower|embed|iframe/i.test(sec));
+  const findJs = fs.readFileSync(path.join(root, 'assets/js/kpt-find.js'), 'utf8'); assert.ok(!/tiktok/i.test(findJs));
+  assert.ok(!/tiktok/i.test(page.replace(sec, '').replace(/<footer[\s\S]*?<\/footer>/, '')), 'TikTok appears only in Beyond the numbers and the footer');
+  assert.strictEqual((page.match(/ken-portrait\.jpg/g) || []).length, 1, 'Ken\'s photo appears once on this page');
+});
+t('V10.2: the FIND page has no Ken\'s Take block, and the Buy result button lands on the list', () => { assert.ok(!/res-ken|Ken's Take/.test(page)); assert.ok(/location\.hash === '#developments'/.test(page)); assert.ok(/what-can-i-buy\/#developments/.test(fs.readFileSync(path.join(root, 'buy/index.html'), 'utf8'))); });
 t('the typed size flag is set only when the buyer typed a range (never for the inferred size)', () => { assert.ok(/FS\.explicit = \{ from: a, to: b, typed: true \}/.test(page)); assert.ok(/typed: sz\.source === 'explicit' && !!\(FS\.explicit && FS\.explicit\.typed\)/.test(page)); });
 t('tick boxes allow at most two projects; the third is disabled', () => { assert.ok(/FS\.ticked\.length >= 2 && !on/.test(page)); assert.ok(/FS\.ticked\.length < 2\) FS\.ticked\.push/.test(page)); });
 t('the page-level Get Ken\'s view button and its message are unchanged', () => { assert.ok(/kv\.href = KPT\.waLink\(\{ message: R\.waMessage\(budget\) \}\)/.test(page)); assert.ok(/id="kenView"[^>]*>Get Ken's view →/.test(page)); });

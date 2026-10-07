@@ -122,3 +122,13 @@ KPT.money = function (n) {
   if (abs >= 1e3) return (n < 0 ? "-" : "") + "$" + Math.round(abs / 1e3) + "k";
   return (n < 0 ? "-" : "") + "$" + Math.round(abs);
 };
+
+/* ---------------------------------------------------------------------
+   TikTok links (V10.2). Any link marked data-kpt-tt records one anonymous
+   tiktok_click with where it sat (footer or beyond). Nothing about the
+   buyer's search is attached.
+------------------------------------------------------------------------ */
+document.addEventListener("click", function (e) {
+  const a = e.target && e.target.closest ? e.target.closest("a[data-kpt-tt]") : null;
+  if (a && window.KPT && KPT.track) KPT.track("tiktok_click", { placement: a.getAttribute("data-kpt-tt") });
+});

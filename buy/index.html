@@ -7,12 +7,11 @@
 <meta name="theme-color" content="#FAFAF8">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <title>I'm looking to buy — Ken Property Tools</title>
-<link rel="stylesheet" href="../assets/css/kpt-system.css">
-<link rel="stylesheet" href="../assets/css/kpt-journey.css">
+<link rel="stylesheet" href="../assets/css/kpt-system.css?v=2026-10-07.2">
+<link rel="stylesheet" href="../assets/css/kpt-journey.css?v=2026-10-07.2">
 </head>
 <body class="kpj" data-view="input">
-<header class="kpt-header kpt-shell"><a class="brand" href="../">KEN PROPERTY TOOLS</a>
-  <div class="kpt-byline"><img src="../assets/img/ken-portrait.jpg" alt="Ken Tan"></div></header>
+<header class="kpt-header kpt-shell"><div class="kpt-brandblock"><a class="brand" href="../">KEN PROPERTY TOOLS</a><span class="kpt-by">by Ken Tan</span></div></header>
 
 <main class="kpt-shell" style="max-width:640px;">
 
@@ -99,12 +98,15 @@
 </main>
 
 <footer class="kpt-footer kpt-shell">
-  Ken Tan · Property agent since 2007 · CEA R007903D · Huttons Asia Pte Ltd (L3008899K) ·
-  Indicative market ranges only, not financial advice.
+  <p class="kpt-f-name">Ken Tan</p>
+  <p class="kpt-f-line">Singapore property agent · Since 2007</p>
+  <p class="kpt-f-line"><a href="https://www.tiktok.com/@kennx8898" target="_blank" rel="noopener" data-kpt-tt="footer">TikTok @kennx8898</a> · Live most nights</p>
+  <p class="kpt-f-reg">CEA R007903D · Huttons Asia Pte Ltd (L3008899K)</p>
+  <p class="kpt-f-dis">Indicative market ranges only, not financial advice.</p>
 </footer>
 
 <script src="../assets/js/kpt-analytics.js"></script>
-<script src="../assets/js/kpt-components.js"></script>
+<script src="../assets/js/kpt-components.js?v=2026-10-07.2"></script>
 <script src="../assets/js/kpt-market.js"></script>
 <script src="../assets/js/kpt-engine.js"></script>
 <script src="../assets/js/kpt-result.js"></script>
@@ -189,26 +191,32 @@
   function resultHtml(m) {
     const flag = test ? '<span class="kpt-testflag">Test data · illustrative figures, not market evidence</span><br>' : '';
     const chip = `<a class="res-chip" href="#" id="edit" aria-label="Change my answers">← ${esc(m.summary.join(' · '))}</a>`;
-    const routes = m.routes.length ? `<p class="kpt-eyebrow kpb-head">Search routes worth considering</p><div class="kpb-routes">${m.routes.map((r) =>
-      `<div class="kpb-route"><b>${esc(r.title)}</b><p>${m.tradeoff && r.id === m.tradeoff.key ? 'This is the trade-off above.' + (r.text.indexOf('indicative') > -1 ? ' New-launch figures are indicative.' : '') : esc(r.text)}</p>${r.giveUp ? `<p class="give">${esc(r.giveUp)}</p>` : ''}</div>`).join('')}</div>` : '';
+    // V10.2: this page is a bridge into the development list, not a destination. Same facts as before, shorter: the long route paragraphs,
+    // the "what you give up" lines and the notes now sit inside "How this was worked out". Nothing is calculated here.
+    const SHORT = { 'Look further from the centre': 'Further from the centre', 'Look closer in': 'Closer in', 'Consider resale over a new launch': 'Resale', 'Consider a new launch': 'New launch',
+      'Look at older homes': 'Older homes', 'Look at newer resale homes': 'Newer resale homes', 'Look at freehold or 999-year homes': 'Freehold or 999-year homes', 'Look at leasehold homes': 'Leasehold homes' };
+    const gain = (r) => { if (m.tradeoff && r.id === m.tradeoff.key) return 'More space'; const g = /roughly ([\d,]+(?:–[\d,]+)?) sq ft more/.exec(r.text || ''); return g ? 'Around ' + g[1] + ' sq ft more' : r.id === 'widen' ? 'More sales near this budget' : ''; };
+    const row = (t, v) => `<div class="kpb-way"><b>${esc(t)}</b><span>${v.split('\n').map(esc).join('<br>')}</span></div>`;
+    const ecParts = m.ec ? (/^(.*?)(?: at this budget)?\. Eligibility conditions apply\.$/.exec(m.ec.text) || []) : [];
+    const ways = m.routes.map((r) => row(SHORT[r.title] || r.title, gain(r))).join('') + (m.ec ? row(m.ec.label, ecParts[1] ? ecParts[1] + '\nEligibility applies' : m.ec.text) : '');
+    const waysBlock = ways ? `<p class="kpb-sec">Ways to get more from your budget</p><div class="kpb-ways">${ways}</div>` : '';
+    const indic = (m.tradeoff && m.tradeoff.indicative) || m.routes.some((r) => /indicative/.test(r.text || '')) ? `<p class="kpb-indic">New-launch figures are indicative.</p>` : '';
     const ev = m.evidence ? `<p class="res-sumtxt">${esc(m.evidence.headline)}${m.evidence.range ? ' ' + esc(m.evidence.range) : ''}</p>` : '';
-    const ec = m.ec ? `<div class="res-ecrow">Another route: ${esc(m.ec.label)}<span>${esc(m.ec.text)}</span></div>` : '';
-    const ken = m.ken ? `<section class="res-ken" aria-label="Ken's Take"><img src="../assets/img/ken-portrait.jpg" alt="Ken Tan"><div><h3>Ken's Take <span>My judgement, not URA data</span></h3><p>“${esc(m.ken.note)}”</p></div></section>` : '';
-    const notes = m.notes.map((n) => `<p class="kpt-quiet">${esc(n)}</p>`).join('');
-    const kenBtn = m.canSeeMarket
-      ? `<a class="kpj-link" id="askKen" href="#">Get Ken's view</a>`
-      : `<a class="kpt-cta kpj-btn kpj-btn--wa" id="askKen" href="#">Get Ken's view →</a>`;
-    const buyBtn = m.canSeeMarket ? `<button class="kpt-cta kpj-btn" id="seeBuy" type="button">See what this budget actually buys →</button>` : '';
-    const worked = `<details class="kpt-disclosure"><summary>How this was worked out</summary><div class="inner"><ul class="kpt-list">${m.worked.map((w) =>
+    const meaning = m.meaning ? String(m.meaning).replace(' in all three market regions.', ' across all three market regions.') : '';
+    const tradeBlock = m.tradeoff ? `<p class="kpb-sec">The main trade-off</p><p class="kpb-trade">${esc(m.tradeoff.text)}</p>` : '';
+    const kenBtn = m.canSeeMarket ? '' : `<a class="kpt-cta kpj-btn kpj-btn--wa" id="askKen" href="#">Get Ken's view →</a>`;   // only when there is nothing to continue into
+    const buyBtn = m.canSeeMarket ? `<button class="kpt-cta kpj-btn" id="seeBuy" type="button">See what ~${esc(m.budgetText)} actually buys →</button>` : '';
+    const more = []; if (m.routes.length) more.push(`<p><b>The routes in full</b></p><ul class="kpt-list">${m.routes.map((r) => `<li><b>${esc(r.title)}.</b> ${esc(r.text)}${r.giveUp ? ' ' + esc(r.giveUp) : ''}</li>`).join('')}</ul>`);
+    if (m.ec) more.push(`<p><b>EC</b></p><p class="kpt-quiet">${esc(m.ec.label)}: ${esc(m.ec.text)}</p>`);
+    if (m.notes.length) more.push(`<p><b>What this doesn’t show</b></p>${m.notes.map((n) => `<p class="kpt-quiet">${esc(n)}</p>`).join('')}`);
+    const worked = `<details class="kpt-disclosure"><summary>How this was worked out</summary><div class="inner">${more.join('')}<ul class="kpt-list">${m.worked.map((w) =>
       `<li><span class="kpt-tag kpt-tag--${TAG[w.kind][0]}">${TAG[w.kind][1]}</span>${esc(w.text)}</li>`).join('')}</ul></div></details>`;
     return `<div class="kpt-section" style="padding-top:0;">${flag}${chip}
       <h1 class="res-h">${esc(m.headline)}</h1>
       ${m.constraint ? `<p class="kpb-constraint">${esc(m.constraint)}</p>` : ''}
-      ${m.meaning ? `<p class="kpb-meaning">${esc(m.meaning)}</p>` : ''}
-      ${ev}
-      ${m.tradeoff ? `<p class="res-trade"><b>The trade-off:</b> ${esc(m.tradeoff.text)}</p>` : ''}
-      ${routes}${ec}${notes}${ken}
-      <div class="res-cta">${buyBtn}${kenBtn}</div>
+      ${meaning ? `<p class="kpb-meaning">${esc(meaning)}</p>` : ''}
+      ${ev}${tradeBlock}${waysBlock}${indic}
+      <div class="res-cta res-cta--bridge">${buyBtn}${kenBtn}</div>
       <button class="kpj-link kpj-link--muted" id="startOver" type="button">Change my answers</button>
     </div>${worked}`;
   }
@@ -221,14 +229,13 @@
     const back = (e) => { if (e) e.preventDefault(); $('view-result').style.display = 'none'; $('view-input').style.display = ''; document.body.dataset.view = 'input'; window.scrollTo({ top: 0 }); };
     $('edit').addEventListener('click', back); $('startOver').addEventListener('click', back);
     const ask = $('askKen');
-    ask.href = KPT.waLink({ message: B.waMessage(answers) });
-    ask.addEventListener('click', () => KPT.track('whatsapp_click', Object.assign({ tool_name: 'buy-journey' }, pl)));
+    if (ask) { ask.href = KPT.waLink({ message: B.waMessage(answers) }); ask.addEventListener('click', () => KPT.track('whatsapp_click', Object.assign({ tool_name: 'buy-journey' }, pl))); }
     const sb = $('seeBuy');
     if (sb) sb.addEventListener('click', () => {
       // Same handoff the HDB journey uses. Stays in this tab (sessionStorage); never sent to analytics or WhatsApp.
       M.writeHandoff(window.sessionStorage, B.buildHandoff(answers));
       KPT.track('see_what_it_can_buy_click', Object.assign({ tool_name: 'buy-journey' }, pl));
-      location.href = '../tools/what-can-i-buy/';
+      location.href = '../tools/what-can-i-buy/#developments';
     });
     window.__kptBuyModel = model;   // read by tests
   }
