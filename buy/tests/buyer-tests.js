@@ -226,7 +226,7 @@ t('what-can-i-buy back chip knows about the buyer journey', () => {
   assert.ok(/handoff\.from === 'buy'/.test(fs.readFileSync(path.join(__dirname, '../../tools/what-can-i-buy/index.html'), 'utf8')));
 });
 t('the page has the approved questionnaire and none of the removed questions or sections', () => {
-  ['What are you open to?', 'Where are you looking?', 'Anywhere in Singapore', 'Near somewhere specific', 'Area, street or project', 'What matters most?', 'Closer to the centre', 'Newer building', 'Freehold or 900+ year lease', "Sales records don't include bedrooms, so for now this doesn't change the list."].forEach((x) => assert.ok(html.indexOf(x) > -1, x));
+  ['What are you open to?', 'Where are you looking?', 'Anywhere in Singapore', 'Near somewhere specific', 'Area, street or project', 'What matters most?', 'Closer to the centre', 'Newer building', 'Freehold or 900+ year lease', "New launches are matched on bedrooms where we have inventory data. Resale uses size, because the transaction data has no bedroom count."].forEach((x) => assert.ok(html.indexOf(x) > -1, x));
   ['Own stay', 'Investment', 'A bit of both', 'Near family', 'Near work', 'Near a particular school', 'Better location', 'Schools', 'Lower monthly', 'Facilities', 'Ways to get more from your budget', 'The main trade-off'].forEach((x) => assert.ok(html.indexOf(x) < 0, x));
 });
 t('the homepage still routes to /buy/', () => assert.ok(/href="buy\/"/.test(fs.readFileSync(path.join(__dirname, '../../index.html'), 'utf8'))));

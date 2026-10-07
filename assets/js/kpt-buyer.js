@@ -283,7 +283,7 @@
     if (M && M.res && M.res.footer) w.push({ kind: 'evidence', text: M.res.footer + ' Source: URA. These show what sold, not what is for sale now.' });
     w.push({ kind: 'evidence', text: 'A comparison is only used when the market data shows a clear difference: at least about 100 sq ft, with the typical sizes clearly separated.' });
     w.push({ kind: 'rule', text: 'A priority is only mentioned when the market data has a matching comparison: closer to the centre uses region, newer building uses age and new-vs-resale, freehold or 900+ year lease uses tenure.' });
-    w.push({ kind: 'rule', text: 'Bedrooms are not in the sales records, so they do not change this result. A specific area is passed on so you can confirm a district.' });
+    w.push({ kind: 'rule', text: 'Bedrooms do not change this market comparison. On the shortlist, new launches are matched on bedrooms where we have inventory data, and resale uses size. A specific area is passed on so you can confirm a district.' });
     w.push({ kind: 'ken', text: 'Which developments suit you and how much to spend are judgement calls, not data.' });
     return w;
   }

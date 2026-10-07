@@ -120,6 +120,10 @@
   const textMatch = (p, text) => { const q = String(text || '').toLowerCase().replace(/\s+/g, ' ').trim(); return !q || q.length < 3 || (p.name + ' ' + p.street).toLowerCase().indexOf(q) > -1; };
 
   /* ---------------------------------------------------------------- unsupported answers */
+  /* V10.3.3: the questionnaire's bedroom answer -> Huttons bedroom numbers (5 = "5+"). "3BR + Study / larger" means 3 bedrooms or larger for matching only; our data cannot say whether any home has a study. Not sure / unknown = no bedroom matching. */
+  const BED_MAP = { '1br': [1], '2br': [2], '3br': [3], '3br-study': [3, 4, 5], '4br-plus': [4, 5] };
+  const bedsFor = (size) => (Object.prototype.hasOwnProperty.call(BED_MAP, size) ? BED_MAP[size].slice() : null);
+  const BED_WORDS = { '1br': '1 bedroom', '2br': '2 bedrooms', '3br': '3 bedrooms', '3br-study': '3 bedrooms or larger', '4br-plus': '4 bedrooms or larger' };
   const BASE_NOT_EVAL = ['bedrooms and layout', 'floor and facing', 'whether any unit is for sale', 'asking prices'];
   const BASE_NOT_EVAL_NEW = ['bedrooms and layout', 'floor and facing', 'whether the developer still has units to sell', 'asking prices'];
   /** What the buyer chose that sales data cannot evaluate. Nothing here is ever used to filter, except the district the buyer confirmed.
@@ -138,12 +142,14 @@
     if (pr.indexOf('monthly') > -1) out.push({ id: 'monthly', title: 'Lower monthly commitment', text: 'Not measured by our sales data.', card: 'monthly commitment' });
     if (pr.indexOf('facilities') > -1) out.push({ id: 'facilities', title: 'Facilities and lifestyle', text: 'Not measured by our sales data.', card: 'facilities and lifestyle' });
     if (pr.indexOf('newer') > -1) out.push({ id: 'newer', title: 'Newer building', text: 'Used to order resale homes by lease start year. Each card shows the lease start year, which is not the completion year.', card: 'completion year' });
-    if (a.size && a.size !== 'not-sure') out.push({ id: 'bedrooms', title: 'Bedroom count', text: 'Our data doesn’t record bedrooms, so this list can’t check it.', card: null });
+    if (a.size && a.size !== 'not-sure') out.push({ id: 'bedrooms', title: 'Bedroom count', card: null, text: a.bedMode === 'new' ? 'New launch: bedrooms are checked where we have inventory data. Projects we couldn’t check are marked.'
+      : a.bedMode === 'both' ? 'New launch: bedrooms are checked where we have inventory data. Resale: bedroom count isn’t in the transaction data, so size is used.' : 'Bedroom count isn’t in our sales data, so this list uses size.' });
     return out;
   }
   const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
   const joinAnd = (a) => (a.length <= 1 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]);
-  const notEvaluated = (un, sale) => cap(joinAnd((un || []).map((u) => u.card).filter(Boolean).concat(sale === 'new' ? BASE_NOT_EVAL_NEW : BASE_NOT_EVAL))) + '.';
+  const BASE_NOT_EVAL_NEW_BED = ['layout', 'floor and facing', 'whether the developer still has units to sell', 'asking prices'];   // V10.3.3: bedrooms were checked for this card
+  const notEvaluated = (un, sale, bedChecked) => cap(joinAnd((un || []).map((u) => u.card).filter(Boolean).concat(sale === 'new' ? (bedChecked ? BASE_NOT_EVAL_NEW_BED : BASE_NOT_EVAL_NEW) : BASE_NOT_EVAL))) + '.';
 
   /* ---------------------------------------------------------------- matching */
   /** One project, one sale type. Returns null unless it meets every evidence rule. */
@@ -171,7 +177,7 @@
   const leaseYear = (tl) => { const m = /from (\d{4})/.exec(tl || ''); return m ? Number(m[1]) : 0; };
   /** The facts a preference needs, from either a URA match (resale / new) or an inventory candidate. */
   function prefFacts(x) {
-    if (x.rec !== undefined) { const r = x.rec || {}, u = x.ura || {}; return { seg: r.seg || u.seg || null, tg: r.tg != null ? r.tg : u.tenGroup, tl: r.tl || u.tenure || '', hi: u.bandHi || 0 }; }
+    if (x.rec !== undefined) { const r = x.rec || {}, u = x.ura || {}; return { seg: r.seg || u.seg || null, tg: r.tg != null ? r.tg : u.tenGroup, tl: r.tl || u.tenure || '', hi: (x.inv && x.inv.hi) || u.bandHi || 0 }; }
     return { seg: x.seg, tg: x.tenGroup, tl: x.tenure, hi: x.bandHi || 0 };
   }
   const PREF_CMP = {
@@ -224,7 +230,7 @@
     return home + (c.fit === 'inside' ? 'is within their typical prices.' : c.fit === 'above' ? 'is a little above their typical prices.' : 'is a little below their typical prices. Expect to look at the lower end.');
   }
   /* ---- V10.1 buyer-facing display layer. Pure wording derived from the same facts; it changes no matching, ranking, freshness or privacy rule. */
-  const QUIET_UNCONFIRMED = 'Current availability not confirmed.', ASK_LABEL = 'Does this suit me? →', TICK_LABEL = 'Compare this with another';
+  const QUIET_BED = 'Bedroom availability not confirmed.', QUIET_UNCONFIRMED = 'Current availability not confirmed.', ASK_LABEL = 'Does this suit me? →', TICK_LABEL = 'Compare this with another';
   const budgetLine = (o, fit) => { const b = '~' + m2(o.budget) + ' budget'; return fit === 'below' ? { tone: 'over', text: 'A little above your ' + b } : { tone: 'ok', text: 'Within your ' + b }; };   // fit 'below' = the prices sit above the budget
   const bedLabel = (types) => { const n = types.map((t) => t.bedrooms); return n.length === 1 && n[0] === 0 ? 'Studio' : joinAnd(n.map((b) => (b === 0 ? 'Studio' : b >= 5 ? '5+' : String(b)))) + ' Bedroom'; };
   const salesLine = (n, isNew) => n + (isNew ? ' recent developer sales' : ' recent sales') + ' around this size';
@@ -273,19 +279,23 @@
   /** Price evidence for one project against the buyer's size window and budget window. Uses only size bands whose centre is in the window.
    *  Returns null, or { types:[{bedrooms,floor,ceiling,fit}], primary, fit }. Prices are never used to rank. */
   function invMatch(ip, o) {
-    const B = o.budget, pct = o.pct, half = T.invBand / 2, types = [];
+    const B = o.budget, pct = o.pct, half = T.invBand / 2, types = [], beds = o.beds || null, needWin = !beds || o.sizeSource === 'explicit';   // V10.3.3: a known bedroom is matched on bedroom + budget; only a size the buyer typed is also required
     (ip.byBedrooms || []).forEach((t) => {
       if (!t || typeof t.ceiling !== 'number' || !Array.isArray(t.bands) || typeof t.bedrooms !== 'number') return;
-      const inc = t.bands.filter((b) => Array.isArray(b) && typeof b[0] === 'number' && typeof b[1] === 'number' && b[0] + half >= o.lo && b[0] + half < o.hi);
+      if (beds && beds.indexOf(t.bedrooms) < 0) return;                              // a known wrong bedroom type never qualifies, whatever its size
+      const inc = t.bands.filter((b) => Array.isArray(b) && typeof b[0] === 'number' && typeof b[1] === 'number' && (!needWin || (b[0] + half >= o.lo && b[0] + half < o.hi)));
       if (!inc.length) return;                                                       // no band of about this size: this type does not match
       const floor = Math.min.apply(null, inc.map((b) => b[1])), ceiling = t.ceiling;
       if (!(floor <= B * (1 + pct) && ceiling >= B * (1 - pct))) return;            // same overlap test V9.1 uses for URA prices
       types.push({ bedrooms: t.bedrooms, floor, ceiling, fit: B >= floor && B <= ceiling ? 'inside' : B > ceiling ? 'above' : 'below' });
+      if (beds) types[types.length - 1].hi = Math.max.apply(null, inc.map((b) => b[0])) + T.invBand;
     });
     if (!types.length) return null;
     const dist = (x) => (x.fit === 'inside' ? 0 : x.fit === 'below' ? x.floor - B : B - x.ceiling);
     const ranked = types.slice().sort((a, b) => (a.fit === 'inside' ? 0 : 1) - (b.fit === 'inside' ? 0 : 1) || dist(a) - dist(b) || a.bedrooms - b.bedrooms);
-    return { types: types.sort((a, b) => a.bedrooms - b.bedrooms), primary: ranked[0], fit: ranked[0].fit };
+    const res = { types: types.sort((a, b) => a.bedrooms - b.bedrooms), primary: ranked[0], fit: ranked[0].fit };
+    if (beds) res.hi = Math.max.apply(null, types.map((t) => t.hi));      // the largest matched band, used only by More space
+    return res;
   }
   const typeNoun = (b) => (b === 0 ? 'Studio' : b >= 5 ? '5+ bedroom' : b + '-bedroom');
   /** URA developer-sales support for an inventory candidate. Sales of about the buyer's size (price fit is stated separately, under its own source).
@@ -332,6 +342,7 @@
     label: (when) => 'HUTTONS INVENTORY' + (when ? ' · CHECKED ' + when.toUpperCase() : ''),
     unchecked: 'We couldn’t check current Huttons inventory for this project. That doesn’t mean nothing is listed.',
     zero: 'No units currently shown in Huttons inventory for this project.',
+    nomatchBed: (when) => 'Checked ' + when + ': none of the units currently shown in Huttons inventory match the bedrooms and budget you chose.',
     nomatch: (when) => 'Checked ' + when + ': none of the units currently shown in Huttons inventory are about your size and budget.',
     note: 'Lowest price currently shown for these homes, rounded. Prices vary by unit.',
     notePast: 'Lowest price shown then for these homes, rounded. Prices vary by unit.',
@@ -342,12 +353,13 @@
   const typesPhrase = (types) => joinAnd(types.map((t) => typeNoun(t.bedrooms))) + ' homes';
   function huttonsBlock(c, o) {
     const when = whenText(Date.parse(c.ip.checkedAt || new Date(o.inv.fileAt).toISOString()), o.inv.now), past = c.fresh === 'dated', inferred = o.sizeSource === 'inferred', multi = c.inv.types.length > 1, p = c.inv.primary;
-    const size = typesPhrase(c.inv.types) + (past ? (inferred ? ' were ' + HUT.sizeNote + '.' : ' matched the size you’re looking for.') : (inferred ? ' are ' + HUT.sizeNote + '.' : ' match the size you’re looking for.'));
-    const homes = multi ? typeNoun(p.bedrooms) + ' homes' : 'homes', pre = 'Your ~' + m2(o.budget) + ' budget ';
+    const bedSz = o.beds ? (o.sizeSource === 'explicit' ? 'the bedrooms and size you chose' : 'the bedrooms you chose') : null;
+    const size = o.beds ? typesPhrase(c.inv.types) + (past ? ' matched ' : ' match ') + bedSz + '.' : typesPhrase(c.inv.types) + (past ? (inferred ? ' were ' + HUT.sizeNote + '.' : ' matched the size you’re looking for.') : (inferred ? ' are ' + HUT.sizeNote + '.' : ' match the size you’re looking for.'));
+    const homes = multi || o.beds ? typeNoun(p.bedrooms) + ' homes' : 'homes', ar = o.beds ? '' : ' around this size', pre = 'Your ~' + m2(o.budget) + ' budget ';
     const budget = {
-      inside: pre + (past ? 'fell within what we saw then for ' + homes + ' around this size.' : 'falls within what we’re currently seeing for ' + homes + ' around this size.'),
-      above: pre + (past ? 'gave you room within the ' + homes + ' we saw then around this size.' : 'gives you room within the ' + homes + ' we’re currently seeing around this size.'),
-      below: pre + (past ? 'was slightly below what we saw then for ' + homes + ' around this size.' : 'is slightly below what we’re currently seeing for ' + homes + ' around this size.'),
+      inside: pre + (past ? 'fell within what we saw then for ' + homes + ar + '.' : 'falls within what we’re currently seeing for ' + homes + ar + '.'),
+      above: pre + (past ? 'gave you room within the ' + homes + ' we saw then' + ar + '.' : 'gives you room within the ' + homes + ' we’re currently seeing' + ar + '.'),
+      below: pre + (past ? 'was slightly below what we saw then for ' + homes + ar + '.' : 'is slightly below what we’re currently seeing for ' + homes + ar + '.'),
     }[p.fit];
     return { kind: past ? 'dated' : 'fresh', label: HUT.label(when), when, size, from: 'From around ' + m2(p.floor) + (past ? ' (as shown then).' : ''), budget, note: past ? HUT.notePast : HUT.note, datedNote: past ? HUT.dated : null, fit: p.fit };
   }
@@ -369,13 +381,15 @@
     if (c.tier === 'a' || c.tier === 'b') {
       const rated = c.sup.kind === 'good' || c.sup.kind === 'limited' || c.sup.kind === 'early';
       const sp = c.sup, hasN = (sp.kind === 'good' || sp.kind === 'limited' || sp.kind === 'early' || sp.kind === 'few') && sp.n > 0, pr = c.inv.primary, pastC = c.fresh === 'dated';
-      base.simple = { size: bedLabel(c.inv.types) + ' · around your size', priceLead: 'From around', figure: m2(pr.floor), priceNote: pastC ? '(as shown then)' : null, budget: budgetLine(o, pr.fit), sales: hasN ? salesLine(sp.n, true) : null, latest: hasN && sp.last ? 'Latest: ' + ymLabel(sp.last) : null, quiet: null };
+      base.simple = { size: bedLabel(c.inv.types) + (o.beds ? '' : ' · around your size'), priceLead: 'From around', figure: m2(pr.floor), priceNote: pastC ? '(as shown then)' : null, budget: budgetLine(o, pr.fit), sales: hasN ? salesLine(sp.n, true) : null, latest: hasN && sp.last ? 'Latest: ' + ymLabel(sp.last) : null, quiet: null };
+      if (o.beds) base.notEvaluated = notEvaluated(un, 'new', true);
       return Object.assign(base, { basis: rated ? 'Current Huttons inventory and URA sales' : 'Current Huttons inventory only', meta: metaLine(c.rec), huttons: huttonsBlock(c, o), ura: supportRow(c, o), hasCheck: true, ask: ASK_LABEL,
         why: null, evidence: null, prices: null, indicative: null, strength: rated ? c.sup.kind : null });
     }
     // URA-only: the V9.1 card, plus one honest status line about Huttons
     const v = card(c.ura, o, un, null), when = c.fresh ? whenText(Date.parse(c.ip.checkedAt || new Date(o.inv.fileAt).toISOString()), o.inv.now) : null;
-    const hut = c.hut === 'zero' ? { kind: 'zero', label: HUT.label(when), text: HUT.zero } : c.hut === 'nomatch' ? { kind: 'nomatch', label: HUT.label(when), text: HUT.nomatch(when) } : { kind: 'unchecked', label: HUT.label(null), text: HUT.unchecked };
+    const hut = c.hut === 'zero' ? { kind: 'zero', label: HUT.label(when), text: HUT.zero } : c.hut === 'nomatch' ? { kind: 'nomatch', label: HUT.label(when), text: o.beds ? HUT.nomatchBed(when) : HUT.nomatch(when) } : { kind: 'unchecked', label: HUT.label(null), text: HUT.unchecked };
+    if (o.beds) v.simple.quiet = QUIET_UNCONFIRMED + ' ' + QUIET_BED;      // V10.3.3: bedroom not confirmed for a project without a matching Huttons bedroom type
     return Object.assign(v, { slug: c.id, basis: 'URA developer sales only', huttons: hut, hasCheck: false, ask: ASK_LABEL, tier: c.tier, tick: base.tick, ask: ASK_LABEL, link: base.link, linkText: base.linkText });
   }
   function resaleDecor(cd) { return Object.assign(cd, { slug: cd.id, hasCheck: false, ask: ASK_LABEL, tick: TICK_LABEL }); }
@@ -405,7 +419,10 @@
     const inv = input.inv || null;
     const eff = effectivePrefs(input);
     const ans = Object.assign({}, input.answers, { priorities: ((input.answers && input.answers.priorities) || []).filter((p) => p !== 'newer' || eff.on.indexOf('newer') > -1) });   // only a priority that is applied is described as applied
+    const types0 = saleTypes(input.openTo), beds = inv && types0.indexOf('new') > -1 ? bedsFor(input.answers && input.answers.size) : null;     // V10.3.3
+    if (beds) ans.bedMode = types0.length === 2 ? 'both' : 'new';
     const un = unsupported(ans, input.loc || { districts: input.districts || [] }), base = { budget: input.budget, pct: input.pct === T.widenBudgetPct ? T.widenBudgetPct : T.budgetPct, lo: input.size.lo, hi: input.size.hi, districts: input.districts || [], freehold: !!input.freehold, text: input.text || '', openTo: input.openTo, prefs: eff.on.slice() };
+    if (beds) base.beds = beds;
     if (inv) { base.inv = inv; base.sizeSource = input.size.source; base._uraIds = {}; ix.projects.forEach((p) => { base._uraIds[p.id] = 1; }); }
     const types = saleTypes(input.openTo), lists = {}; types.forEach((s) => { lists[s] = inv && s === 'new' ? newCandidates(ix, base) : eligible(ix, s, base); });
     const eligibleN = {}; types.forEach((s) => { eligibleN[s] = lists[s].length; });
@@ -439,11 +456,13 @@
 
     // V10.3.1 a short, plain statement of what the priorities did (nothing when no priority applied)
     const effect = [], say = {};
+    if (beds) effect.push('Bedrooms: new launches are matched on ' + BED_WORDS[input.answers.size] + ' where we have inventory data.' + (types0.length === 2 ? ' Resale is matched on size, because the transaction data has no bedroom count.' : '')); // V10.3.3
     if (eff.on.indexOf('location') > -1) {
       say.location = 'Closer to the centre: Core Central Region shown first, followed by Rest of Central and Outside Central.';
     }
     if (eff.on.indexOf('newer') > -1) say.newer = 'Newer building: resale homes are listed by lease start year, newest first. Lease start is not the completion year.';
     if (eff.on.indexOf('space') > -1) say.space = 'More space: sizes up to ' + num(input.size.hi) + ' sqft are included, and larger sizes are listed first.';
+    if (beds && say.space) say.space = types0.length === 2 ? say.space + ' New launch: larger homes of your bedroom choice come first.' : 'More space: larger homes of your bedroom choice are listed first.';   // V10.3.3
     eff.on.forEach((p) => effect.push(say[p]));      // in the order the buyer chose them
     eff.off.forEach((o) => {
       if (o.why === 'area') effect.push('Closer to the centre wasn’t applied: the area you chose already sets the location.');
@@ -457,6 +476,7 @@
         : 'Listed by whether Huttons currently shows homes around your budget and size, then by your priorities, then by how much URA evidence there is. Not by quality, value or price.';
       else out.orderLine = 'Listed by your priorities, then by how much recent evidence there is. Not by quality or value.';
     }
+    if (beds) out.orderLine = out.orderLine.replace('whether your budget sits within the range currently shown in Huttons', 'whether Huttons currently shows homes of the bedrooms you chose around your budget').replace('whether Huttons currently shows homes around your budget and size', 'whether Huttons currently shows homes of the bedrooms you chose around your budget');   // V10.3.3
 
     const asText = (n) => n + (n === 1 ? ' development' : ' developments');
     if (state === 'few') {
@@ -489,7 +509,7 @@
     'A development is listed only if homes of the size you chose sold there in the last 12 months at typical prices that overlap your budget (within about 10% either side), there were at least 3 such sales in the last 12 months, at least one of those sizes sold in two or more different months, and the latest of them was within the last 6 months of the data.',
     '“Good recent evidence” means 5 or more such sales. “Limited recent evidence” means 3 or 4.',
     'The order: evidence first (Good before Limited), then where your budget sits within the typical prices, then the number of such sales, then the most recent sale, then the development’s name A to Z. There is no score and nothing is weighted.',
-    'If you gave no size in square feet, we used the sizes that typically sold at your budget. We never turn bedrooms into square feet, because our data doesn’t record bedrooms.',
+    'If you gave no size in square feet, we used the sizes that typically sold at your budget. We never turn bedrooms into square feet. For new launches, bedrooms are checked where we have inventory data. For resale, bedroom count isn’t in the transaction data, so size is used.',
     'If freehold or a longer tenure was a priority, only freehold and leases of 900 years or more are shown, and you can remove that filter.',
     'Area filters use postal districts. If you told us where you want to be, we suggest a district and ask you to confirm it before it is used; places that sit in more than one district, or that we don’t recognise, are left for you to choose. The area names are general: a district contains places not named. We don’t match schools, workplaces, family locations, exact distances or neighbourhoods.',
     'Where a new launch card says “Current availability not confirmed”, URA’s data can’t tell us whether the developer still has units to sell. Where we also check Huttons inventory, a card with no current match for your size and budget says the same. That isn’t the same as there being none.',
@@ -513,6 +533,6 @@
   }
 
   return { VERSION, T, DISTRICT_AREAS, AREA_ALIASES, AREA_CHOICES, NEW_LABEL, NEW_NOTE, NEW_NOTE_INV, resolveArea, districtLabel, districtShort, BASE_NOT_EVAL, METHOD, METHOD_INV, ANALYTICS_KEYS, HUT,
-    prepareInventory, freshness, invMatch, effectivePrefs, prefOrder, support, newCandidates, whenText, handoffMessage, askEvent, typeNoun,
+    prepareInventory, freshness, invMatch, bedsFor, effectivePrefs, prefOrder, support, newCandidates, whenText, handoffMessage, askEvent, typeNoun,
     displayName, prepare, inferSize, sizeWindow, matchDistricts, unsupported, notEvaluated, matchProject, eligible, shortlist, count, compare, why, card, analytics, bucket, m2, p2, num, sizeText, ymLabel, monthsBetween };
 });
