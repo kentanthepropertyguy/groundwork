@@ -2,7 +2,7 @@
    KPT site pages — homepage, "I own a property", buy and research.
    Scoped to body.kps. Presentation only; matches the rounded look of the journey screens.
    ========================================================================== */
-.kps{ --card:#FFFFFF; --track:#EFEDE6; --r-card:20px; --shadow:0 1px 2px rgba(22,33,62,.04),0 10px 30px rgba(22,33,62,.06); }
+.kps{ --card:#FFFFFF; --track:#EFEDE6; --r-card:16px; --shadow:0 1px 2px rgba(22,33,62,.04),0 10px 30px rgba(22,33,62,.06); }
 .kps .kpt-header.kpt-shell{ padding:26px 24px 0; }
 .kps .kpt-header .brand{ font-size:11px; letter-spacing:.16em; font-weight:700; }
 @media (max-width:640px){ .kps .kpt-header.kpt-shell{ padding:24px 20px 0; } }
@@ -37,6 +37,3 @@
 .kps .kps-opts .kpt-cta--wa::after{ content:none; }
 
 /* quiet identity: one small line, not a banner */
-.kps .kps-credit{ display:flex; align-items:center; gap:10px; font-size:12.5px; color:var(--muted); margin:22px 0 0; }
-.kps .kps-credit img{ width:28px; height:28px; border-radius:50%; object-fit:cover; object-position:center 20%; flex:none; }
-.kps .kpt-footer.kpt-shell{ padding-top:28px; }

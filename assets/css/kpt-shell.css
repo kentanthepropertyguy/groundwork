@@ -1,0 +1,71 @@
+/* ==========================================================================
+   KPT shared page shell (V10.4). Presentation only. Loaded last on every page.
+   One header, one footer identity block, three content widths, one card radius.
+   Page-specific components (route cards, comparison bars, charts, chips) keep their own CSS.
+   Widths: body.kpt-w-focus 640 (Buy, HDB, Own) · kpt-w-read 760 (FIND) · kpt-w-wide 1080 (Home, Research).
+   ========================================================================== */
+
+/* ---- widths: header, content and footer always share one column ---- */
+:root body.kpt-w-focus .kpt-shell{ max-width:640px; }
+:root body.kpt-w-read  .kpt-shell{ max-width:760px; }
+:root body.kpt-w-wide  .kpt-shell{ max-width:1080px; }
+/* Research keeps its narrow reading column below 960px, as before, and widens above it. */
+:root body.kpr.kpt-w-wide .kpt-shell{ max-width:680px; }
+@media (min-width:960px){ :root body.kpr.kpt-w-wide .kpt-shell{ max-width:1080px; } }
+
+/* ---- header: product wordmark + one supporting line ---- */
+:root body .kpt-header.kpt-shell{ display:block; padding:28px 24px 6px; min-height:0; }
+:root body .kpt-header .kpt-brandblock{ display:flex; flex-direction:column; align-items:flex-start; gap:3px; }
+:root body .kpt-header .brand{ font-family:var(--sans); font-size:15px; font-weight:700; letter-spacing:.14em; line-height:1.2; color:var(--ink); text-decoration:none; }
+:root body .kpt-header a.brand:hover{ color:var(--gold); }
+:root body .kpt-header a.brand:focus-visible{ outline:2px solid var(--gold); outline-offset:3px; border-radius:2px; }
+.kpt-tagline{ font-size:12.5px; line-height:1.3; color:var(--muted); letter-spacing:0; font-weight:400; }
+@media (max-width:640px){ :root body .kpt-header.kpt-shell{ padding:24px 20px 6px; } }
+
+/* ---- footer: hairline, then Ken identity block (photo + approved lines), then notices ---- */
+:root body .kpt-footer.kpt-shell{ padding:26px 24px 60px; }
+:root body .kpt-footer.kpt-shell::before{ content:""; display:block; border-top:1px solid var(--line); margin:0 0 26px; }
+@media (max-width:640px){ :root body .kpt-footer.kpt-shell{ padding:24px 20px 56px; } }
+.kpt-ken{ display:flex; align-items:center; gap:16px; }
+.kpt-ken-img{ width:56px; height:56px; border-radius:50%; object-fit:cover; object-position:center 20%; flex:none; display:block; }
+.kpt-ken-txt{ min-width:0; }
+.kpt-ken .kpt-f-name{ margin:0 0 2px; }
+@media (max-width:640px){ .kpt-ken{ gap:14px; } .kpt-ken-img{ width:48px; height:48px; } }
+/* Never show Ken's photo twice in close succession: pages with a conversion block that already carries it keep a text-only footer. */
+body:has(#beyond:not([hidden])) .kpt-ken-img,
+body:has(.kpr-handoff) .kpt-ken-img,
+body:has(.kpt-take) .kpt-ken-img,
+body:has(.kpr-ken) .kpt-ken-img{ display:none; }
+
+/* ---- one card radius (16px); controls stay 12px ---- */
+.kps, .kpj{ --r-card:16px; --r-ctl:12px; }
+.kpr .kpr-answer{ border-radius:16px; }
+
+/* ---- selection controls: segmented choices are full pills, and one text size on Buy and HDB ---- */
+.kpj .kpt-choices{ border-radius:999px; }
+.kpj .kpt-choice{ border-radius:999px; font-size:14px; padding:10px 8px; }
+.kpj .kpj-small .kpt-choice{ font-size:14px; padding:10px 8px; }
+.kpr .kpr-seg{ border-radius:999px; }
+.kpr .kpr-seg button{ border-radius:999px; }
+
+/* Research landing headline: 64px comes down to the shared hero size on wide screens. */
+@media (min-width:960px){ .kpr h1.kpr-h{ font-size:44px; } }
+
+/* ---- desktop wordmark: a modest step up from the mobile size (mobile stays 15px) ---- */
+@media (min-width:641px){
+  :root body .kpt-header .brand{ font-size:16.5px; }
+  .kpt-tagline{ font-size:13px; }
+}
+
+/* ---- Research on the 1080 shell: a deliberate report composition, not full-width stretch ----
+   The two-pane answer, its action row and the Ask Ken hand-off keep the full wide shell (they were designed as wide compositions).
+   Reading content (search, lede, findings, evidence, compare text, lists, accordions) sits in a readable column. */
+@media (min-width:960px){
+  .kpr main#app > .kpr-sec > *,
+  .kpr main#app > details.kpr-focus{ max-width:840px; }
+  .kpr .kpr-search{ max-width:760px; }
+  .kpr .kpr-lead{ max-width:64ch; }
+  .kpr .kpr-answer .kpr-found{ max-width:760px; }
+  .kpr .kpr-evidence{ max-width:840px; }
+  .kpr .kpr-bands{ max-width:840px; }
+}

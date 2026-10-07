@@ -5,7 +5,7 @@
    soft depth on the results hero only, one gold label per screen, navy for action, green for WhatsApp.
    ========================================================================== */
 .kpj{
-  --card:#FFFFFF; --track:#EFEDE6; --soft:#B7BAC2; --r-card:20px; --r-ctl:12px;
+  --card:#FFFFFF; --track:#EFEDE6; --soft:#B7BAC2; --r-card:16px; --r-ctl:12px;
   --shadow:0 1px 2px rgba(22,33,62,.04),0 10px 30px rgba(22,33,62,.07);
 }
 .kpj main{ padding-bottom:8px; }
@@ -340,10 +340,7 @@
 
 /* ---- V10.3 ---- */
 /* header, content and footer share one column on journey pages (desktop), with a hairline above the footer */
-.kpj .kpt-header.kpt-shell, .kpj .kpt-footer.kpt-shell{ max-width:640px; }
-.kpj.kpj-wide .kpt-header.kpt-shell, .kpj.kpj-wide .kpt-footer.kpt-shell{ max-width:760px; }
-.kpj .kpt-footer.kpt-shell{ padding-top:28px; }
-.kpj .kpt-footer.kpt-shell::before{ content:""; display:block; border-top:1px solid var(--line); margin:0 0 28px; }
+/* widths, header and footer shell now live in kpt-shell.css (V10.4) */
 .kpj .kpb-opt{ font:400 13px var(--sans); color:var(--muted); margin-left:6px; }
 .kpj .kpb-help{ margin:10px 0 0; font-size:13px; line-height:1.5; color:var(--muted); }
 .kpj .kpb-text .kpb-help{ margin-top:8px; }

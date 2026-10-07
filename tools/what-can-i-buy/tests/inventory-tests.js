@@ -388,7 +388,13 @@ t('V10.2: Beyond the numbers has the approved text, the TikTok link is plain, an
   assert.ok(!/<svg|follower|embed|iframe/i.test(sec));
   const findJs = fs.readFileSync(path.join(root, 'assets/js/kpt-find.js'), 'utf8'); assert.ok(!/tiktok/i.test(findJs));
   assert.ok(!/tiktok/i.test(page.replace(sec, '').replace(/<footer[\s\S]*?<\/footer>/, '')), 'TikTok appears only in Beyond the numbers and the footer');
-  assert.strictEqual((page.match(/ken-portrait\.jpg/g) || []).length, 1, 'Ken\'s photo appears once on this page');
+  // V10.4: the footer identity block carries a photo too, but the shared shell hides it whenever Beyond the numbers is showing, so only one is ever visible.
+  const inBeyond = (sec.match(/ken-portrait\.jpg/g) || []).length, inFooter = ((page.match(/<footer[\s\S]*?<\/footer>/) || [''])[0].match(/ken-portrait\.jpg/g) || []).length;
+  assert.strictEqual(inBeyond, 1, 'Beyond the numbers carries Ken\'s photo once');
+  assert.strictEqual(inFooter, 1, 'the footer identity block carries one photo');
+  assert.strictEqual((page.match(/ken-portrait\.jpg/g) || []).length, 2, 'no other Ken photo on the page');
+  const shell = fs.readFileSync(path.join(root, 'assets/css/kpt-shell.css'), 'utf8');
+  assert.ok(/body:has\(#beyond:not\(\[hidden\]\)\) \.kpt-ken-img/.test(shell), 'the footer photo is hidden while Beyond the numbers is showing');
 });
 t('V10.2: the FIND page has no Ken\'s Take block, and the Buy result button lands on the list', () => { assert.ok(!/res-ken|Ken's Take/.test(page)); assert.ok(/location\.hash === '#developments'/.test(page)); assert.ok(/what-can-i-buy\/#developments/.test(fs.readFileSync(path.join(root, 'buy/index.html'), 'utf8'))); });
 t('the typed size flag is set only when the buyer typed a range (never for the inferred size)', () => { assert.ok(/FS\.explicit = \{ from: a, to: b, typed: true \}/.test(page)); assert.ok(/typed: sz\.source === 'explicit' && !!\(FS\.explicit && FS\.explicit\.typed\)/.test(page)); });
