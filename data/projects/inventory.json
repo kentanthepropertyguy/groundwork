@@ -1,14 +1,14 @@
 {
  "v": 2,
  "kind": "kpt-huttons-public-inventory",
- "tool": "phase2-2",
+ "tool": "phase2-4",
  "source": "Units currently shown in Huttons inventory",
- "checkedAt": "2026-10-06T13:59:36.319Z",
+ "checkedAt": "2026-10-07T13:57:06.908Z",
  "projects": [
   {
    "slug": "21-anderson",
    "name": "21 ANDERSON",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -27,7 +27,7 @@
   {
    "slug": "26-newton",
    "name": "26 NEWTON",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -61,7 +61,7 @@
   {
    "slug": "8-at-bt",
    "name": "8@BT",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -114,7 +114,7 @@
   {
    "slug": "amberwood-at-holland",
    "name": "AMBERWOOD AT HOLLAND",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -179,7 +179,7 @@
   {
    "slug": "ardor-residence",
    "name": "ARDOR RESIDENCE",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -198,7 +198,7 @@
   {
    "slug": "arina-east-residences",
    "name": "ARINA EAST RESIDENCES",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -219,9 +219,126 @@
    ]
   },
   {
+   "slug": "artisan-8",
+   "name": "Artisan 8",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "20",
+   "tenureGroup": 4,
+   "tenure": "Freehold",
+   "region": "RCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1350000,
+     "bands": [
+      [
+       400,
+       1250000
+      ],
+      [
+       500,
+       1250000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 1900000,
+     "bands": [
+      [
+       700,
+       1850000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 2500000,
+     "bands": [
+      [
+       1000,
+       2450000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 5050000,
+     "bands": [
+      [
+       1300,
+       3150000
+      ],
+      [
+       1700,
+       4000000
+      ],
+      [
+       1800,
+       4050000
+      ],
+      [
+       2100,
+       5000000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 4500000,
+     "bands": [
+      [
+       1800,
+       4450000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "atlassia",
+   "name": "ATLASSIA",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "15",
+   "tenureGroup": 4,
+   "tenure": "Freehold",
+   "region": "RCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 3100000,
+     "bands": [
+      [
+       1200,
+       3050000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 2900000,
+     "bands": [
+      [
+       1200,
+       2850000
+      ]
+     ]
+    }
+   ]
+  },
+  {
    "slug": "aurea",
    "name": "AUREA",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -270,7 +387,7 @@
   {
    "slug": "bagnall-haus",
    "name": "BAGNALL HAUS",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -300,7 +417,7 @@
   {
    "slug": "canberra-crescent-residences",
    "name": "CANBERRA CRESCENT RESIDENCES",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -338,7 +455,7 @@
   {
    "slug": "canninghill-piers",
    "name": "CANNINGHILL PIERS",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -370,9 +487,71 @@
    ]
   },
   {
+   "slug": "cape-royale",
+   "name": "Cape Royale",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "04",
+   "tenureGroup": 2,
+   "tenure": "99 yrs from 2008",
+   "region": "CCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 7300000,
+     "bands": [
+      [
+       1600,
+       3450000
+      ],
+      [
+       1700,
+       3500000
+      ],
+      [
+       1800,
+       3600000
+      ],
+      [
+       1900,
+       3600000
+      ],
+      [
+       2000,
+       4050000
+      ],
+      [
+       2900,
+       6200000
+      ],
+      [
+       3300,
+       7150000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 6050000,
+     "bands": [
+      [
+       2500,
+       5300000
+      ],
+      [
+       2600,
+       5300000
+      ]
+     ]
+    }
+   ]
+  },
+  {
    "slug": "chuan-park",
    "name": "CHUAN PARK",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -389,9 +568,161 @@
    ]
   },
   {
+   "slug": "claydence",
+   "name": "Claydence",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "15",
+   "tenureGroup": 4,
+   "tenure": "Freehold",
+   "region": "RCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1750000,
+     "bands": [
+      [
+       600,
+       1650000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2750000,
+     "bands": [
+      [
+       900,
+       2700000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 4000000,
+     "bands": [
+      [
+       1300,
+       3400000
+      ],
+      [
+       1400,
+       3950000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 5700000,
+     "bands": [
+      [
+       2100,
+       5600000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "coastal-cabana",
+   "name": "Coastal Cabana",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "17",
+   "tenureGroup": 1,
+   "tenure": "99 yrs from 2024",
+   "region": "OCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 1700000,
+     "bands": [
+      [
+       800,
+       1500000
+      ],
+      [
+       900,
+       1550000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 2450000,
+     "bands": [
+      [
+       1300,
+       2400000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "duet-at-emily",
+   "name": "Duet at Emily",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "09",
+   "tenureGroup": 4,
+   "tenure": "Freehold",
+   "region": "CCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1300000,
+     "bands": [
+      [
+       400,
+       1000000
+      ],
+      [
+       500,
+       1250000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 3300000,
+     "bands": [
+      [
+       500,
+       1300000
+      ],
+      [
+       600,
+       1650000
+      ],
+      [
+       800,
+       2200000
+      ],
+      [
+       900,
+       2350000
+      ],
+      [
+       1300,
+       3250000
+      ]
+     ]
+    }
+   ]
+  },
+  {
    "slug": "dunearn-house",
    "name": "DUNEARN HOUSE",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -438,9 +769,32 @@
    ]
   },
   {
+   "slug": "eden-residences-at-capitol",
+   "name": "EDEN Residences at CAPITOL",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "06",
+   "tenureGroup": 0,
+   "tenure": "99 yrs (start year not given)",
+   "region": "CCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 11300000,
+     "bands": [
+      [
+       3000,
+       11250000
+      ]
+     ]
+    }
+   ]
+  },
+  {
    "slug": "elta",
    "name": "ELTA",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -500,7 +854,7 @@
   {
    "slug": "faber-residence",
    "name": "FABER RESIDENCE",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -528,9 +882,47 @@
    ]
   },
   {
+   "slug": "gems-ville",
+   "name": "Gems Ville",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "14",
+   "tenureGroup": 4,
+   "tenure": "Freehold",
+   "region": "RCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 1650000,
+     "bands": [
+      [
+       700,
+       1550000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 2450000,
+     "bands": [
+      [
+       1100,
+       2100000
+      ],
+      [
+       1200,
+       2400000
+      ]
+     ]
+    }
+   ]
+  },
+  {
    "slug": "grand-dunman",
    "name": "GRAND DUNMAN",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -576,7 +968,7 @@
   {
    "slug": "grange-1866",
    "name": "GRANGE 1866",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -593,9 +985,65 @@
    ]
   },
   {
+   "slug": "hudson-place-residences",
+   "name": "HUDSON PLACE RESIDENCES",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 1900000,
+     "bands": [
+      [
+       600,
+       1700000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 2850000,
+     "bands": [
+      [
+       1000,
+       2550000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 3950000,
+     "bands": [
+      [
+       1400,
+       3500000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 6000000,
+     "bands": [
+      [
+       1700,
+       4600000
+      ],
+      [
+       2100,
+       5800000
+      ]
+     ]
+    }
+   ]
+  },
+  {
    "slug": "j-den",
    "name": "J'DEN",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -625,7 +1073,7 @@
   {
    "slug": "jansen-house",
    "name": "JANSEN HOUSE",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -644,7 +1092,7 @@
   {
    "slug": "kallang-riverside",
    "name": "KALLANG RIVERSIDE",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -685,7 +1133,7 @@
   {
    "slug": "kassia",
    "name": "KASSIA",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -724,9 +1172,69 @@
    ]
   },
   {
+   "slug": "koon-seng-house",
+   "name": "KOON SENG HOUSE",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "status": "zero_returned",
+   "byBedrooms": []
+  },
+  {
+   "slug": "kovan-jewel",
+   "name": "Kovan Jewel",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "19",
+   "tenureGroup": 4,
+   "tenure": "Freehold",
+   "region": "OCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1650000,
+     "bands": [
+      [
+       600,
+       1400000
+      ],
+      [
+       700,
+       1600000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 2750000,
+     "bands": [
+      [
+       1200,
+       2700000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 4300000,
+     "bands": [
+      [
+       1900,
+       4050000
+      ],
+      [
+       2100,
+       4250000
+      ]
+     ]
+    }
+   ]
+  },
+  {
    "slug": "lentor-gardens-residences",
    "name": "LENTOR GARDENS RESIDENCES",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -790,7 +1298,7 @@
   {
    "slug": "lentoria",
    "name": "LENTORIA",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -829,9 +1337,139 @@
    ]
   },
   {
+   "slug": "lloyd-sixtyfive",
+   "name": "Lloyd SixtyFive",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "09",
+   "tenureGroup": 4,
+   "tenure": "Freehold",
+   "region": "CCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 6600000,
+     "bands": [
+      [
+       1800,
+       6600000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 9250000,
+     "bands": [
+      [
+       2400,
+       9200000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "lucerne-grand",
+   "name": "Lucerne Grand",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "22",
+   "tenureGroup": 1,
+   "tenure": "99 yrs from 2025",
+   "street": "LAKESIDE DRIVE",
+   "region": "OCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 1900000,
+     "bands": [
+      [
+       600,
+       1500000
+      ],
+      [
+       700,
+       1750000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 2550000,
+     "bands": [
+      [
+       800,
+       2000000
+      ],
+      [
+       900,
+       2150000
+      ],
+      [
+       1000,
+       2300000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 3650000,
+     "bands": [
+      [
+       1100,
+       2800000
+      ],
+      [
+       1300,
+       3200000
+      ],
+      [
+       1400,
+       3400000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "lucida",
+   "name": "Lucida",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "11",
+   "tenureGroup": 4,
+   "tenure": "Freehold",
+   "region": "CCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 5800000,
+     "bands": [
+      [
+       4100,
+       5750000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "lyndenwoods",
+   "name": "LYNDENWOODS",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "status": "zero_returned",
+   "byBedrooms": []
+  },
+  {
    "slug": "meyer-blue",
    "name": "MEYER BLUE",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -876,7 +1514,7 @@
   {
    "slug": "midtown-bay",
    "name": "MIDTOWN BAY",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -927,9 +1565,85 @@
    ]
   },
   {
+   "slug": "narra-residences",
+   "name": "NARRA RESIDENCES",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 1850000,
+     "bands": [
+      [
+       500,
+       1300000
+      ],
+      [
+       600,
+       1400000
+      ],
+      [
+       700,
+       1450000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 2700000,
+     "bands": [
+      [
+       800,
+       2050000
+      ],
+      [
+       900,
+       2100000
+      ],
+      [
+       1000,
+       2050000
+      ],
+      [
+       1100,
+       2500000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 3400000,
+     "bands": [
+      [
+       1100,
+       2400000
+      ],
+      [
+       1300,
+       3150000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 4150000,
+     "bands": [
+      [
+       1600,
+       3850000
+      ]
+     ]
+    }
+   ]
+  },
+  {
    "slug": "nava-grove",
    "name": "NAVA GROVE",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -948,7 +1662,7 @@
   {
    "slug": "newport-residences",
    "name": "NEWPORT RESIDENCES",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -999,9 +1713,32 @@
    ]
   },
   {
+   "slug": "north-gaia",
+   "name": "North Gaia",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "27",
+   "tenureGroup": 0,
+   "tenure": "99 yrs (start year not given)",
+   "region": "OCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 1550000,
+     "bands": [
+      [
+       900,
+       1500000
+      ]
+     ]
+    }
+   ]
+  },
+  {
    "slug": "norwood-grand",
    "name": "NORWOOD GRAND",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -1018,9 +1755,62 @@
    ]
   },
   {
+   "slug": "ocho",
+   "name": "OCHO",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "14",
+   "tenureGroup": 4,
+   "tenure": "Freehold",
+   "region": "RCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 1600000,
+     "bands": [
+      [
+       700,
+       1450000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 2300000,
+     "bands": [
+      [
+       800,
+       1850000
+      ],
+      [
+       1000,
+       1950000
+      ],
+      [
+       1200,
+       2150000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 2300000,
+     "bands": [
+      [
+       1200,
+       2200000
+      ]
+     ]
+    }
+   ]
+  },
+  {
    "slug": "one-marina-gardens",
    "name": "ONE MARINA GARDENS",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -1064,7 +1854,7 @@
     {
      "bedrooms": 4,
      "label": "4 bedrooms",
-     "ceiling": 5450000,
+     "ceiling": 5200000,
      "bands": [
       [
        1600,
@@ -1077,7 +1867,7 @@
   {
    "slug": "parktown-residence",
    "name": "PARKTOWN RESIDENCE",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -1107,7 +1897,7 @@
   {
    "slug": "penrith",
    "name": "PENRITH",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -1124,9 +1914,163 @@
    ]
   },
   {
+   "slug": "pinetree-hill",
+   "name": "PINETREE HILL",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "status": "zero_returned",
+   "byBedrooms": []
+  },
+  {
+   "slug": "promenade-peak",
+   "name": "PROMENADE PEAK",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1700000,
+     "bands": [
+      [
+       500,
+       1450000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2550000,
+     "bands": [
+      [
+       600,
+       2050000
+      ],
+      [
+       700,
+       2150000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 4250000,
+     "bands": [
+      [
+       1000,
+       3200000
+      ],
+      [
+       1100,
+       4050000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 5000000,
+     "bands": [
+      [
+       1400,
+       4600000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 6900000,
+     "bands": [
+      [
+       1800,
+       6400000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "reignwood-hamilton-scotts",
+   "name": "Reignwood Hamilton Scotts",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "09",
+   "tenureGroup": 4,
+   "tenure": "Freehold",
+   "region": "CCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 10450000,
+     "bands": [
+      [
+       2700,
+       10000000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "residences-at-emerald-hill",
+   "name": "Residences At Emerald Hill",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "09",
+   "tenureGroup": 4,
+   "tenure": "Freehold",
+   "region": "CCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 5200000,
+     "bands": [
+      [
+       1600,
+       4300000
+      ],
+      [
+       1800,
+       4700000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 6450000,
+     "bands": [
+      [
+       2100,
+       5650000
+      ],
+      [
+       2200,
+       6000000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 13950000,
+     "bands": [
+      [
+       5700,
+       11900000
+      ]
+     ]
+    }
+   ]
+  },
+  {
    "slug": "river-green",
    "name": "RIVER GREEN",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -1167,7 +2111,7 @@
   {
    "slug": "river-modern",
    "name": "RIVER MODERN",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -1210,9 +2154,75 @@
    ]
   },
   {
+   "slug": "seascape-at-sentosa",
+   "name": "Seascape at Sentosa",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "04",
+   "tenureGroup": 0,
+   "tenure": "99 yrs (start year not given)",
+   "region": "CCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 5050000,
+     "bands": [
+      [
+       2100,
+       4400000
+      ],
+      [
+       2300,
+       5000000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 9950000,
+     "bands": [
+      [
+       2600,
+       5550000
+      ],
+      [
+       2800,
+       6100000
+      ],
+      [
+       2900,
+       6600000
+      ],
+      [
+       3100,
+       6900000
+      ],
+      [
+       3300,
+       7400000
+      ],
+      [
+       4000,
+       9900000
+      ],
+      [
+       4100,
+       9200000
+      ],
+      [
+       4200,
+       9450000
+      ]
+     ]
+    }
+   ]
+  },
+  {
    "slug": "skies-miltonia",
    "name": "SKIES MILTONIA",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -1251,9 +2261,65 @@
    ]
   },
   {
+   "slug": "skye-at-holland",
+   "name": "SKYE AT HOLLAND",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "status": "zero_returned",
+   "byBedrooms": []
+  },
+  {
+   "slug": "sophia-meadow",
+   "name": "Sophia Meadow",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "09",
+   "tenureGroup": 1,
+   "tenure": "103 yrs from 2024",
+   "region": "CCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1450000,
+     "bands": [
+      [
+       400,
+       1250000
+      ],
+      [
+       500,
+       1350000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 1850000,
+     "bands": [
+      [
+       600,
+       1700000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 2600000,
+     "bands": [
+      [
+       800,
+       2450000
+      ]
+     ]
+    }
+   ]
+  },
+  {
    "slug": "sora",
    "name": "SORA",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -1341,7 +2407,7 @@
   {
    "slug": "springleaf-residence",
    "name": "SPRINGLEAF RESIDENCE",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -1369,9 +2435,16 @@
    ]
   },
   {
+   "slug": "tembusu-grand",
+   "name": "TEMBUSU GRAND",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "status": "zero_returned",
+   "byBedrooms": []
+  },
+  {
    "slug": "terra-hill",
    "name": "TERRA HILL",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -1405,7 +2478,7 @@
   {
    "slug": "the-arcady-at-boon-keng",
    "name": "THE ARCADY AT BOON KENG",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -1473,7 +2546,7 @@
   {
    "slug": "the-collective-at-one-sophia",
    "name": "THE COLLECTIVE AT ONE SOPHIA",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -1524,9 +2597,54 @@
    ]
   },
   {
+   "slug": "the-continuum",
+   "name": "THE CONTINUUM",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "status": "zero_returned",
+   "byBedrooms": []
+  },
+  {
+   "slug": "the-giverny-residences",
+   "name": "The Giverny Residences",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "10",
+   "tenureGroup": 4,
+   "tenure": "Freehold",
+   "region": "CCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 6000000,
+     "bands": [
+      [
+       1800,
+       5950000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 10000000,
+     "bands": [
+      [
+       2500,
+       9550000
+      ],
+      [
+       2700,
+       9950000
+      ]
+     ]
+    }
+   ]
+  },
+  {
    "slug": "the-hillshore",
    "name": "THE HILLSHORE",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -1585,9 +2703,16 @@
    ]
   },
   {
+   "slug": "the-lakegarden-residences",
+   "name": "THE LAKEGARDEN RESIDENCES",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "status": "zero_returned",
+   "byBedrooms": []
+  },
+  {
    "slug": "the-line-at-tanjong-rhu",
    "name": "THE LINE @ TANJONG RHU",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -1641,9 +2766,70 @@
    ]
   },
   {
+   "slug": "the-lumos",
+   "name": "The Lumos",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "09",
+   "tenureGroup": 4,
+   "tenure": "Freehold",
+   "region": "CCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 3500000,
+     "bands": [
+      [
+       1100,
+       3400000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 7450000,
+     "bands": [
+      [
+       2400,
+       6900000
+      ],
+      [
+       2500,
+       7100000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 10950000,
+     "bands": [
+      [
+       2400,
+       6950000
+      ],
+      [
+       3200,
+       10900000
+      ],
+      [
+       3300,
+       9750000
+      ],
+      [
+       3400,
+       10100000
+      ]
+     ]
+    }
+   ]
+  },
+  {
    "slug": "the-myst",
    "name": "THE MYST",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -1679,9 +2865,32 @@
    ]
   },
   {
+   "slug": "the-oliv",
+   "name": "The Oliv",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "10",
+   "tenureGroup": 4,
+   "tenure": "Freehold",
+   "region": "CCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 13100000,
+     "bands": [
+      [
+       3300,
+       13050000
+      ]
+     ]
+    }
+   ]
+  },
+  {
    "slug": "the-orie",
    "name": "THE ORIE",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -1711,7 +2920,7 @@
   {
    "slug": "the-residences-at-w-singapore-sentosa-cove",
    "name": "THE RESIDENCES AT W SINGAPORE SENTOSA COVE",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -1805,9 +3014,32 @@
    ]
   },
   {
+   "slug": "the-ritz-carlton-residences",
+   "name": "The Ritz-Carlton Residences",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "09",
+   "tenureGroup": 4,
+   "tenure": "Freehold",
+   "region": "CCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 13900000,
+     "bands": [
+      [
+       2800,
+       13850000
+      ]
+     ]
+    }
+   ]
+  },
+  {
    "slug": "the-robertson-opus",
    "name": "THE ROBERTSON OPUS",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -1856,7 +3088,7 @@
   {
    "slug": "the-sen",
    "name": "THE SEN",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -1913,7 +3145,7 @@
   {
    "slug": "the-shorefront",
    "name": "THE SHOREFRONT",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -1956,9 +3188,78 @@
    ]
   },
   {
+   "slug": "tmw-maxwell",
+   "name": "TMW MAXWELL",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "02",
+   "tenureGroup": 0,
+   "tenure": "99 yrs (start year not given)",
+   "region": "RCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 2350000,
+     "bands": [
+      [
+       400,
+       1300000
+      ],
+      [
+       500,
+       1500000
+      ],
+      [
+       800,
+       2250000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2850000,
+     "bands": [
+      [
+       700,
+       2200000
+      ],
+      [
+       800,
+       2400000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "turquoise",
+   "name": "Turquoise",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "district": "04",
+   "tenureGroup": 0,
+   "tenure": "99 yrs (start year not given)",
+   "region": "CCR",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 0,
+     "label": "Studio",
+     "ceiling": 4700000,
+     "bands": [
+      [
+       3100,
+       4650000
+      ]
+     ]
+    }
+   ]
+  },
+  {
    "slug": "union-square-residences",
    "name": "UNION SQUARE RESIDENCES",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -2014,7 +3315,7 @@
   {
    "slug": "upperhouse-at-orchard-boulevard",
    "name": "UPPERHOUSE AT ORCHARD BOULEVARD",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -2055,7 +3356,7 @@
   {
    "slug": "v-on-shenton",
    "name": "V ON SHENTON",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -2074,7 +3375,7 @@
   {
    "slug": "vela-bay",
    "name": "VELA BAY",
-   "checkedAt": "2026-10-06T13:59:36.319Z",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
    "status": "ok",
    "byBedrooms": [
     {
@@ -2145,6 +3446,181 @@
       [
        1700,
        5700000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "verd-joo-chiat",
+   "name": "Verde Joo Chiat",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2100000,
+     "bands": [
+      [
+       800,
+       2050000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 3950000,
+     "bands": [
+      [
+       1500,
+       3900000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 3950000,
+     "bands": [
+      [
+       1400,
+       3850000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "w-residences-marina-view-singapore",
+   "name": "W RESIDENCES MARINA VIEW - SINGAPORE",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 2450000,
+     "bands": [
+      [
+       500,
+       1750000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 3550000,
+     "bands": [
+      [
+       700,
+       2150000
+      ],
+      [
+       800,
+       2450000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 5200000,
+     "bands": [
+      [
+       1100,
+       3450000
+      ],
+      [
+       1200,
+       4200000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 10750000,
+     "bands": [
+      [
+       2200,
+       8700000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 14300000,
+     "bands": [
+      [
+       2800,
+       11350000
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "zyon-grand",
+   "name": "ZYON GRAND",
+   "checkedAt": "2026-10-07T13:57:06.908Z",
+   "status": "ok",
+   "byBedrooms": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "ceiling": 1550000,
+     "bands": [
+      [
+       400,
+       1450000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "ceiling": 2450000,
+     "bands": [
+      [
+       700,
+       2350000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "ceiling": 2850000,
+     "bands": [
+      [
+       800,
+       2750000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "ceiling": 5750000,
+     "bands": [
+      [
+       1600,
+       5350000
+      ]
+     ]
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "ceiling": 6400000,
+     "bands": [
+      [
+       1800,
+       6000000
       ]
      ]
     }

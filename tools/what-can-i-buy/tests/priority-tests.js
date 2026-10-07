@@ -16,7 +16,7 @@ function run(b, o) {
 }
 const names = (r, sale) => { const g = r.groups.find((x) => x.sale === sale); return g ? g.cards.concat(g.more || []).map((c) => c.name) : []; };
 const sig = (r) => JSON.stringify([r.groups.map((g) => [g.sale, g.cards.map((c) => c.name), (g.more || []).map((c) => c.name)]), r.total, r.eligible, r.orderLine, r.unsupported]);
-const segOf = (name) => { const p = ix.projects.find((x) => FI.displayName(x.name) === name); return p && p.seg; };
+const segOf = (name) => { const p = ix.projects.find((x) => FI.displayName(x.name) === name); if (p) return p.seg; const q = invDoc.projects.find((x) => FI.displayName(x.name) === name); return q && q.region; };   // V10.3.5: URA's seg wins; a project URA does not list uses its reviewed inventory region
 const RR = { CCR: 0, RCR: 1, OCR: 2 };
 
 console.log('No priority: unchanged');
@@ -44,9 +44,9 @@ const candsFor = (b, prefs) => { const st = step(b), sz = FI.sizeWindow(null, st
   ix.projects.forEach((x) => { o._uraIds[x.id] = 1; }); return FI.newCandidates(ix, o); };
 console.log('V10.3.2: a and b form one band when a priority is active');
 t('no priority: tiers a, b, c, d stay strictly in order (V10.3.1)', () => BUDGETS.forEach((b) => { const tiers = candsFor(b, []).map((c) => c.tier); assert.deepStrictEqual(tiers, tiers.slice().sort()); }));
-t('$2.6m Closer: CCR first (Aurea, The Collective), then RCR in the existing evidence order; The Hillshore (limited URA support) follows the other RCR projects', () => {
+t('$2.6m Closer: CCR first (Aurea, The Collective), then RCR (Hudson Place Residences is new in the 2026-10-07 inventory, a URA-listed RCR project) in the existing evidence order; The Hillshore (limited URA support) follows the other RCR projects', () => {
   const n = candsFor(2600000, ['location']).map((c) => FI.displayName(c.name)).slice(0, 5);
-  assert.deepStrictEqual(n, ['Aurea', 'The Collective at One Sophia', 'One Marina Gardens', 'The Arcady at Boon Keng', 'The Sen']);
+  assert.deepStrictEqual(n, ['Aurea', 'The Collective at One Sophia', 'Hudson Place Residences', 'One Marina Gardens', 'The Arcady at Boon Keng']);
 });
 t('every priority: c/d stay below the a+b band, and Closer as first priority orders the band CCR, RCR, OCR', () => BUDGETS.forEach((b) => [['location'], ['space'], ['newer'], ['freehold'], ['location', 'space'], ['space', 'location'], ['location', 'newer'], ['newer', 'location']].forEach((pr) => {
   const l = candsFor(b, pr), k = l.findIndex((c) => c.tier === 'c' || c.tier === 'd'), n = k < 0 ? l : l.slice(0, k);

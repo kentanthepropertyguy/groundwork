@@ -314,11 +314,11 @@
     return { kind: !months ? 'early' : n >= T.goodSales ? 'good' : 'limited', n, last, q1, q3 };
   }
   const SUP_RANK = { good: 0, limited: 1, early: 2, few: 3, none: 3 };
-  /** A usable record for any inventory project: URA's own facts win; otherwise the reviewed metadata the export joined in. Null = cannot be placed, so it is not shown. */
+  /** A usable record for any inventory project: URA's own facts win (including URA's region); otherwise the reviewed metadata the export joined in. V10.3.5: a reviewed inventory `region` is a fallback only, used when URA does not list the project; with no reviewed region seg stays null, so Closer to the centre cannot qualify it (never guessed). Null = cannot be placed, so it is not shown. */
   function recordFor(ix, ip) {
     const u = ix.projects.find((p) => p.id === ip.slug); if (u) return { rec: u, ura: u };
     if (ip.status !== 'ok' || !/^(0[1-9]|1\d|2[0-8])$/.test(String(ip.district)) || typeof ip.tenureGroup !== 'number' || typeof ip.tenure !== 'string' || !ip.tenure) return null;
-    return { rec: { id: ip.slug, name: ip.name, street: ip.street || '', d: String(ip.district), seg: null, tg: ip.tenureGroup, tl: ip.tenure, m: 0, new: [], resale: [] }, ura: null };
+    return { rec: { id: ip.slug, name: ip.name, street: ip.street || '', d: String(ip.district), seg: (ip.region === 'CCR' || ip.region === 'RCR' || ip.region === 'OCR') ? ip.region : null, tg: ip.tenureGroup, tl: ip.tenure, m: 0, new: [], resale: [] }, ura: null };
   }
   /** New launch candidates when the inventory layer is on, in order. Tiers: (a) budget inside the range shown, (b) a little above or below, (c) URA only, Huttons not checked, (d) URA only, Huttons checked and nothing matches (or zero). */
   function newCandidates(ix, o) {

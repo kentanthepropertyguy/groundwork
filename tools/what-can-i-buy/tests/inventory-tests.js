@@ -413,21 +413,25 @@ t('the schema check catches a count, an unrounded price, an exact size and a uni
   assert.ok(schemaErrors(DOC([IP('a', 'A', [TY(3, 2900001, [[900, 2600000]])])])).includes('ceiling'));
 });
 console.log('Real Huttons inventory file (verified public-safe export, 6 Oct 2026)');
-const INV_SHA = '23d01d671b72c13a9a9c1e76c7fb0480b3063f0a4ab04147f9211d1687206cc1', INV_PATH = path.join(root, 'data/projects/inventory.json');
+const INV_SHA = 'e998ef3bd0841d0f723f8da3dd03814daa5561873263c8b9a5920967b3de8f70', INV_PATH = path.join(root, 'data/projects/inventory.json');
 const invBuf = fs.existsSync(INV_PATH) ? fs.readFileSync(INV_PATH) : Buffer.from('{}'), RDOC = JSON.parse(invBuf.toString('utf8'));
 const CHK = Date.parse(RDOC.checkedAt || 0), RNOW = CHK + 12 * H;
 const rinv = (at) => F.prepareInventory(RDOC, at == null ? RNOW : at);
 const rrun = (o, at) => F.shortlist(real, base(Object.assign({ inv: rinv(at) }, o)));
 const KS = { budget: 2200000, size: { lo: 1000, hi: 1100, source: 'explicit', line: 'x' } };
-t('inventory.json is byte-identical to the verified export (SHA-256 pinned): 31,137 bytes', () => { assert.strictEqual(crypto.createHash('sha256').update(invBuf).digest('hex'), INV_SHA); assert.strictEqual(invBuf.length, 31137); });
-t('it passes the schema checks, loads as schema v2 with 50 projects, all with status ok', () => { assert.deepStrictEqual(schemaErrors(RDOC), []); const x = rinv(); assert.ok(x); assert.strictEqual(x.slugs.length, 50); assert.ok(RDOC.projects.every((p) => p.status === 'ok')); });
-t('every one of the 50 projects is in find.json (URA stays the identity source); none relies on metadata; no CHECK or held-back project is present', () => { const ura = new Set(real.projects.map((p) => p.id)); RDOC.projects.forEach((p) => { assert.ok(ura.has(p.slug), p.slug); assert.ok(!('district' in p) && !('tenure' in p)); }); assert.ok(!RDOC.projects.some((p) => p.status !== 'ok')); });
-t('the file carries no private fields: only slug, name, checkedAt, status and byBedrooms [bedrooms, label, ceiling, bands]', () => { RDOC.projects.forEach((p) => { assert.deepStrictEqual(Object.keys(p).sort(), ['byBedrooms', 'checkedAt', 'name', 'slug', 'status']); p.byBedrooms.forEach((b) => assert.deepStrictEqual(Object.keys(b).sort(), ['bands', 'bedrooms', 'ceiling', 'label'])); }); assert.deepStrictEqual(Object.keys(RDOC).sort(), ['checkedAt', 'kind', 'projects', 'source', 'tool', 'v']); });
+t('inventory.json is byte-identical to the verified export (SHA-256 pinned): 53,675 bytes (V10.3.5: 87 projects, 24 with a reviewed region)', () => { assert.strictEqual(crypto.createHash('sha256').update(invBuf).digest('hex'), INV_SHA); assert.strictEqual(invBuf.length, 53675); });
+t('it passes the schema checks, loads as schema v2 with 87 projects: 80 ok and 7 zero_returned (no units currently shown, all URA-listed, no bedroom types)', () => { assert.deepStrictEqual(schemaErrors(RDOC), []); const x = rinv(); assert.ok(x); assert.strictEqual(x.slugs.length, 87); assert.ok(RDOC.projects.every((p) => p.status === 'ok' || p.status === 'zero_returned')); assert.strictEqual(RDOC.projects.filter((p) => p.status === 'ok').length, 80); const z = RDOC.projects.filter((p) => p.status === 'zero_returned'); assert.strictEqual(z.length, 7); z.forEach((p) => assert.deepStrictEqual(p.byBedrooms, [], p.slug)); });
+t('V10.3.5: 63 projects are listed by URA (identity from find.json, no metadata fields); the other 24 are reviewed metadata projects and each carries a valid district, tenure group, tenure and reviewed region; no CHECK, unpriced or held-back project is present', () => { const ura = new Set(real.projects.map((p) => p.id)); const u = RDOC.projects.filter((p) => ura.has(p.slug)), m = RDOC.projects.filter((p) => !ura.has(p.slug)); assert.strictEqual(u.length, 63); assert.strictEqual(m.length, 24);
+  u.forEach((p) => { assert.ok(!('district' in p) && !('tenure' in p) && !('region' in p), p.slug); });
+  m.forEach((p) => { assert.ok(/^(0[1-9]|1\d|2[0-8])$/.test(p.district) && typeof p.tenureGroup === 'number' && p.tenure && ['CCR', 'RCR', 'OCR'].indexOf(p.region) > -1, p.slug); });
+  assert.ok(!RDOC.projects.some((p) => p.status !== 'ok' && p.status !== 'zero_returned')); assert.ok(m.every((p) => p.status === 'ok')); });
+t('the file carries no private fields: only slug, name, checkedAt, status and byBedrooms [bedrooms, label, ceiling, bands], plus district, tenureGroup, tenure, street and region on reviewed metadata projects only', () => { const ura = new Set(real.projects.map((p) => p.id)), ALLOW = ['byBedrooms', 'checkedAt', 'district', 'name', 'region', 'slug', 'status', 'street', 'tenure', 'tenureGroup'];
+  RDOC.projects.forEach((p) => { const k = Object.keys(p).sort(); if (ura.has(p.slug)) assert.deepStrictEqual(k, ['byBedrooms', 'checkedAt', 'name', 'slug', 'status']); else k.forEach((x) => assert.ok(ALLOW.indexOf(x) > -1, p.slug + ' ' + x)); p.byBedrooms.forEach((b) => assert.deepStrictEqual(Object.keys(b).sort(), ['bands', 'bedrooms', 'ceiling', 'label'])); }); assert.deepStrictEqual(Object.keys(RDOC).sort(), ['checkedAt', 'kind', 'projects', 'source', 'tool', 'v']); });
 t('freshness with the real file: fresh to 48 hours, dated to 7 days, then treated as not checked; a clock behind the file is not checked', () => {
   const kinds = (at) => { const r = rrun(KS, at), c = cards(r).find((x) => x.id === 'kassia'); return c && c.huttons ? c.huttons.kind : null; };
   assert.strictEqual(kinds(CHK + 47 * H), 'fresh'); assert.strictEqual(kinds(CHK + 49 * H), 'dated'); assert.strictEqual(kinds(CHK + 7 * D - H), 'dated');
   assert.strictEqual(kinds(CHK + 7 * D + H), 'unchecked'); assert.strictEqual(kinds(CHK - H), 'unchecked');
-  assert.strictEqual(rinv(CHK + 3 * H).slugs.length, 50);
+  assert.strictEqual(rinv(CHK + 3 * H).slugs.length, 87);
 });
 t('bedroom type and 100 sqft band matching with real data: Kassia 3-bedroom band 1,000 sqft (floor $2.1m, ceiling $2.25m) for a 1,000-1,100 sqft window', () => {
   const c = cards(rrun(KS)).find((x) => x.id === 'kassia'); assert.ok(c); assert.strictEqual(c.tier, 'a'); assert.strictEqual(c.huttons.from, 'From around $2.1m'); assert.ok(/3-bedroom/.test(c.huttons.size)); assert.ok(/falls within/.test(c.huttons.budget));
@@ -477,7 +481,7 @@ t('The Sen (price above budget): "A little above" and the rounded From figure', 
   assert.strictEqual(c.simple.budget.text, 'A little above your ~$2.2m budget'); assert.strictEqual(c.simple.budget.tone, 'over'); assert.strictEqual(c.simple.figure, '$2.4m');
 });
 t('New launch without a current match: Recent sales range from URA and the one quiet line, with no technical state', () => {
-  const cs = allCards(rrun({ openTo: 'both', budget: 2600000, size: { lo: 700, hi: 800, source: 'explicit', line: 'x' } })).filter((x) => x.sale === 'new' && (x.tier === 'c' || x.tier === 'd')); assert.ok(cs.length, 'real input with a URA-only new launch card (Promenade Peak at about $2.6m, 700–800 sqft)');
+  const cs = allCards(rrun({ openTo: 'both', budget: 2200000, size: { lo: 1100, hi: 1300, source: 'explicit', line: 'x' } })).filter((x) => x.sale === 'new' && (x.tier === 'c' || x.tier === 'd')); assert.ok(cs.length, 'real input with a URA-only new launch card (Tengah Garden Residences at about $2.2m, 1,100–1,300 sqft; V10.3.5: Promenade Peak is now in the Huttons inventory, so it no longer serves as the URA-only example)');
   cs.forEach((c) => { const s = c.simple; assert.strictEqual(s.priceLead, 'Recent sales'); assert.ok(/^\$\d\.\d\dm–\$\d\.\d\dm$/.test(s.figure), s.figure); assert.strictEqual(s.quiet, 'Current availability not confirmed.'); assert.strictEqual(s.size, 'Around your size'); assert.ok(/^\d+ recent developer sales around this size$/.test(s.sales)); });
 });
 t('Resale: Recent sales range, "recent sales", Latest, no quiet line, same shape', () => {
@@ -485,7 +489,7 @@ t('Resale: Recent sales range, "recent sales", Latest, no quiet line, same shape
   cs.forEach((c) => { const s = c.simple; assert.strictEqual(s.priceLead, 'Recent sales'); assert.ok(/^\$\d\.\d\dm–\$\d\.\d\dm$/.test(s.figure)); assert.ok(/^\d+ recent sales around this size$/.test(s.sales)); assert.ok(/^Latest: /.test(s.latest)); assert.strictEqual(s.quiet, null); assert.ok(/^(Within|A little above) your ~\$2\.2m budget$/.test(s.budget.text)); });
 });
 t('dated inventory (3 days): the From figure keeps "(as shown then)"', () => {
-  const NOWD = Date.parse('2026-10-09T10:00:00Z'), c = allCards(F.shortlist(real, base(Object.assign({ inv: F.prepareInventory(JSON.parse(fs.readFileSync(path.join(root, 'data/projects/inventory.json'), 'utf8')), NOWD), openTo: 'new' }, LW)))).find((x) => x.slug === 'lentor-gardens-residences');
+  const NOWD = Date.parse('2026-10-10T14:00:00Z'), c = allCards(F.shortlist(real, base(Object.assign({ inv: F.prepareInventory(JSON.parse(fs.readFileSync(path.join(root, 'data/projects/inventory.json'), 'utf8')), NOWD), openTo: 'new' }, LW)))).find((x) => x.slug === 'lentor-gardens-residences');
   assert.strictEqual(c.simple.priceNote, '(as shown then)'); assert.strictEqual(c.simple.figure, '$2.2m');
 });
 t('the buyer-facing strings carry no source names, methodology, banned words or extra price figures', () => {

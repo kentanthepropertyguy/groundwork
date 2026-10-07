@@ -21,7 +21,7 @@ const cand = (b, bed, prefs, size) => { const st = step(b), sz = size ? { lo: si
   const o = { budget: b, pct: FI.T.budgetPct, lo: sz.lo, hi: sz.hi, districts: [], freehold: false, text: '', openTo: 'both', inv: inv(), sizeSource: size ? 'explicit' : 'inferred', _uraIds: {}, prefs: prefs || [] };
   const beds = FI.bedsFor(bed); if (beds) o.beds = beds; ix.projects.forEach((x) => { o._uraIds[x.id] = 1; }); return FI.newCandidates(ix, o); };
 const nm = (c) => FI.displayName(c.name), band = (c) => (c.tier === 'a' || c.tier === 'b' ? 0 : c.tier === 'c' ? 1 : 2);
-const segOf = (name) => { const p = ix.projects.find((x) => FI.displayName(x.name) === name); return p && p.seg; };
+const segOf = (name) => { const p = ix.projects.find((x) => FI.displayName(x.name) === name); if (p) return p.seg; const q = invDoc.projects.find((x) => FI.displayName(x.name) === name); return q && q.region; };   // V10.3.5: URA's seg wins; else the reviewed inventory region
 const RR = { CCR: 0, RCR: 1, OCR: 2 };
 // synthetic inventory
 const TY = (b, ceiling, bands) => ({ bedrooms: b, label: b + ' bedrooms', ceiling, bands });
@@ -92,7 +92,8 @@ t('$2.2m 3BR: The Hillshore (2BR fits, its 3BR is far above budget) is not subst
 });
 t('$2.2m 3BR: the a/b set is the 3BR-matched projects, Sora shows 3 Bedroom only', () => {
   const ab = cand(2200000, '3br').filter((x) => x.tier === 'a' || x.tier === 'b').map(nm).sort();
-  assert.deepStrictEqual(ab, ['Canberra Crescent Residences', 'Jansen House', 'Kassia', 'Lentor Gardens Residences', 'Lentoria', 'Sora', 'The Sen', 'Vela Bay']);
+  // V10.3.5 inventory: Gems Ville, Lucerne Grand, Narra Residences and Ocho are new in the 2026-10-07 inventory, each with a 3-bedroom band inside the budget window (Gems Ville/Ocho/Lucerne Grand are reviewed metadata projects)
+  assert.deepStrictEqual(ab, ['Canberra Crescent Residences', 'Gems Ville', 'Jansen House', 'Kassia', 'Lentor Gardens Residences', 'Lentoria', 'Lucerne Grand', 'Narra Residences', 'Ocho', 'Sora', 'The Sen', 'Vela Bay']);
   const sora = cardsOf(run(2200000, { bed: '3br' }), 'new').concat(cardsOf(run(2200000, { bed: '3br' }), 'new')).find((cd) => cd.name === 'Sora'); assert.ok(sora); assert.strictEqual(sora.simple.size, '3 Bedroom');
 });
 t('$2.6m 3BR: The Hillshore stays (its 3BR is inside budget) and shows 3 Bedroom; Canberra Crescent (4BR only) does not qualify', () => {
@@ -108,7 +109,7 @@ t('unknown bedroom (URA only, Huttons not checked): kept, size fallback, and say
   cardsOf(run(2200000), 'new').filter((cd) => cd.tier === 'c').forEach((cd) => assert.strictEqual(cd.simple.quiet, 'Current availability not confirmed.'));
 });
 t('tier d (Huttons checked, no requested bedroom at this budget): kept below, never shows a bedroom as the match', () => {
-  const r = run(1800000, { bed: '3br', openTo: 'new' }), ds = cardsOf(r, 'new').filter((cd) => cd.tier === 'd'); assert.ok(ds.length);
+  const r = run(1800000, { bed: '4br-plus', openTo: 'new' }), ds = cardsOf(r, 'new').filter((cd) => cd.tier === 'd');   // V10.3.5: the larger inventory now fills the five cards with matching 3BR projects at $1.8m, so the tier d check uses 4BR+ where tier d cards are shown assert.ok(ds.length);
   ds.forEach((cd) => { assert.ok(/match the bedrooms and budget you chose/.test(cd.huttons.text) || cd.huttons.kind === 'zero', cd.name); assert.ok(!/\d-bedroom/.test(JSON.stringify(cd.huttons)), cd.name); });
 });
 t('a/b cards: layout only is listed as not evaluated; the other cards keep bedrooms and layout', () => {
