@@ -234,3 +234,78 @@
 .kpf-bar{ position:sticky; bottom:0; z-index:5; background:#fff; border-top:1px solid var(--line); padding:12px 0 14px; margin-top:16px; text-align:center; }
 .kpf-wa{ display:flex; align-items:center; justify-content:center; width:100%; padding:15px 20px; font:600 16px var(--sans); border-radius:999px; background:var(--wa); color:#fff; text-decoration:none; }
 .kpf-bar p{ margin:8px 0 0; font-size:12.5px; line-height:1.5; color:var(--muted); }
+
+/* ---- V10.1 simplified result cards: price first, name second, then the one or two facts that decide. No photos, pills or boxes. ---- */
+.kpf-lede2{ margin:-8px 0 14px; font-size:14px; }
+.kpf-card .kpf-name{ font:400 20px/1.25 var(--serif); margin:0 0 3px; overflow-wrap:anywhere; }
+.kpf-card .kpf-sz{ margin:18px 0 0; font-size:14px; color:var(--muted); }
+.kpf-card .kpf-pr{ margin:2px 0 0; font:400 28px/1.15 var(--serif); color:var(--ink); }
+.kpf-card .kpf-pr b{ font-weight:400; }
+.kpf-card .kpf-pl{ font:400 15px var(--sans); color:var(--muted); }
+.kpf-card .kpf-pn{ font:400 13px var(--sans); color:var(--muted); }
+.kpf-card .kpf-bud{ margin:6px 0 0; font:600 14.5px var(--sans); }
+.kpf-bud--ok{ color:#2F6B4F; }
+.kpf-bud--over{ color:#8A5A12; }
+.kpf-card .kpf-sales{ margin:16px 0 0; font-size:14px; color:var(--ink); }
+.kpf-card .kpf-latest, .kpf-card .kpf-q{ margin:2px 0 0; font-size:13px; color:var(--muted); }
+.kpf-card .kpf-q{ margin-top:8px; }
+.kpf-cta{ display:flex; align-items:center; justify-content:center; width:100%; box-sizing:border-box; margin-top:18px; padding:14px 18px; font:600 15.5px var(--sans); border-radius:var(--r-ctl); background:var(--ink); color:#fff; text-decoration:none; }
+.kpf-cta:hover{ background:var(--navy-soft); }
+.kpf-gh{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; font:400 22px/1.2 var(--serif); margin:30px 0 0; }
+.kpf-upd{ font:400 13px var(--sans); color:var(--muted); white-space:nowrap; }
+.kpf-i{ background:none; border:0; padding:4px; font-size:14px; color:var(--muted); cursor:pointer; }
+.kpf-infotxt{ margin:4px 0 0; font-size:13px; }
+.kpf-meth summary{ list-style:none; }
+.kpf-meth summary::before{ content:"▸ "; }
+.kpf-meth[open] summary::before{ content:"▾ "; }
+.kpf-bar{ text-align:left; box-shadow:0 -6px 18px rgba(0,0,0,.06); padding:12px 16px 14px; }
+.kpf-sel{ list-style:none; margin:0 0 10px; padding:0; display:grid; gap:6px; }
+.kpf-sel li{ display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:14px; }
+.kpf-sel li span{ min-width:0; overflow-wrap:anywhere; }
+.kpf-sel i{ display:block; font-style:normal; color:var(--muted); font-size:13px; margin-top:1px; }
+.kpf-sel button{ flex:0 0 auto; width:32px; height:32px; border:0; background:none; font-size:15px; color:var(--muted); cursor:pointer; }
+.kpf-bar .kpf-wa{ background:var(--ink); }
+.kpf-bar p{ text-align:center; }
+@media (min-width:600px){ .kpf-cta{ width:auto; display:inline-flex; padding:13px 30px; } }
+
+/* ---- V10.1 search summary, Change search panel, quiet reveal, How this works ---- */
+.kpf-h{ margin:0 0 14px; }
+.kpf-sum{ margin:0 0 6px; }
+.kpf-sum p{ margin:0; }
+.kpf-s1{ font-size:15px; color:var(--ink); }
+.kpf-s2{ margin-top:2px; font-size:14px; line-height:1.45; color:var(--muted); }
+.kpf-chg-btn{ margin-top:8px; font:600 14.5px var(--sans); }
+.kpf-panel{ background:var(--track); border-radius:var(--r-card); padding:16px; margin:12px 0 6px; display:grid; gap:14px; }
+.kpf-fld{ display:grid; gap:6px; min-width:0; }
+.kpf-fld > span{ font:600 13px var(--sans); color:var(--muted); }
+.kpf-panel input[type=text]{ width:100%; box-sizing:border-box; font:400 16px var(--sans); padding:11px 12px; border:1px solid var(--line); border-radius:10px; background:#fff; color:var(--ink); }
+.kpf-pair{ display:flex; align-items:center; gap:8px; }
+.kpf-pair input{ flex:1 1 0; min-width:0; }
+.kpf-pair i{ font-style:normal; font-size:14px; color:var(--muted); }
+.kpf-ck{ display:flex; align-items:center; gap:10px; font-size:14px; min-height:36px; }
+.kpf-ck input{ width:20px; height:20px; accent-color:var(--ink); }
+.kpf-update{ width:100%; padding:14px 18px; font-size:15.5px; border-radius:var(--r-ctl); }
+.kpf-more{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; box-sizing:border-box; min-height:48px; margin:2px 0 0; padding:12px 16px; border:0; border-radius:var(--r-ctl); background:var(--track); color:var(--muted); font:600 14.5px var(--sans); cursor:pointer; }
+.kpf-more:hover{ color:var(--ink); }
+.kpf-moreb{ margin:12px 0 0; }
+.kpf-meth summary span{ font-weight:400; color:var(--muted); }
+.kpf-meth .inner ul{ margin:6px 0; padding-left:18px; color:var(--muted); line-height:1.55; font-size:14px; }
+.kpf-meth .inner li{ margin:4px 0; }
+.kpf-dd summary{ cursor:pointer; font:500 14px var(--sans); color:var(--navy-soft); padding:6px 0; }
+.kpf-dd .kpf-chips{ margin-top:8px; }
+#changeBudget[hidden]{ display:none !important; }
+
+/* ---- V10.1 layered How this works and quieter no-results ---- */
+.kpf-meth > .inner h4{ margin:16px 0 2px; font:600 14px var(--sans); color:var(--ink); }
+.kpf-meth > .inner h4:first-child{ margin-top:10px; }
+.kpf-meth > .inner > p{ margin:2px 0 0; }
+.kpf-data{ margin-top:18px; border-top:1px solid var(--line); padding-top:4px; }
+.kpf-meth .kpf-data summary{ font:500 14px var(--sans); color:var(--navy-soft); padding:10px 0; }
+.kpf-meth .kpf-data summary::before{ content:none; }
+.kpf-meth .kpf-data summary::after{ content:" ▸"; }
+.kpf-meth .kpf-data[open] summary::after{ content:" ▾"; }
+.kpf-data .inner p{ font-size:13.5px; }
+.kpf-none{ padding:18px 16px; }
+.kpf-none .kpf-nh{ font-size:17px; margin:0 0 4px; }
+.kpf-chg--act li{ margin:10px 0 0; }
+.kpf-chg--act .kpf-link{ font:600 15px var(--sans); }

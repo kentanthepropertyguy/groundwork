@@ -302,6 +302,6 @@ t('HDB and budget-only handoffs have no location step', () => {
   assert.ok(/locIntent = \(\) => \['areas', 'family', 'work', 'school'\]\.indexOf\(answersNow\(\)\.where\) > -1/.test(page));
   assert.ok(/: \{ where: 'flexible', size: 'not-sure', priorities: \[\] \}/.test(page));
 });
-t('freehold tag wording corrected to 900+ year lease', () => { assert.ok(/Freehold or 900\+ year lease \(you chose tenure\)/.test(page)); assert.ok(!/999-year only/.test(page)); });
+t('freehold wording stays accurate: "Freehold or 900+ year lease" in the summary line and the Change search panel (never plain "Freehold")', () => { assert.ok(/'Freehold or 900\+ year lease'/.test(page)); assert.ok(/Freehold or 900\+ year lease only/.test(page)); assert.ok(!/\['Freehold'\]/.test(page)); assert.ok(!/999-year only/.test(page)); });
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed'); process.exit(fail ? 1 : 0);

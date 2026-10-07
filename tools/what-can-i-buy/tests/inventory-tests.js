@@ -24,6 +24,9 @@ const URAP = (id, name, street, d, rows, tg) => ({ id, name, street, d, seg: 'CC
 const mkIx = (ps) => F.prepare({ v: 1, kind: 'kpt-find-index', latestMonth: '2026-09', window: { from: '2025-10', to: '2026-09', label: 'x' }, bin: 100, minCell: 3, projects: ps });
 const row = (bin, n, act, last, q1, q3) => [bin, n, act, last, q1, Math.round((q1 + q3) / 2), q3];
 const empty = mkIx([]);
+// V10.1 added display-only fields to every card. The parity tests compare everything else, so ranking, matching and every original field must still be byte-identical to V9.1.
+const V101_FIELDS = ['simple', 'slug', 'hasCheck', 'ask', 'tick'];
+const stripV101 = (r) => { r.groups.forEach((g) => g.cards.concat(g.more || []).forEach((c) => V101_FIELDS.forEach((k) => delete c[k]))); return r; };
 
 console.log('Golden parity with V9.1 (inventory absent or unusable)');
 const golden = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/golden-v91.json'), 'utf8'));
@@ -31,7 +34,7 @@ t('864 grid cases (budgets x journeys x sizes x areas x freehold x budget window
   let n = 0, bad = [];
   for (const budget of [900000, 1300000, 1800000, 2600000, 3200000, 5000000]) for (const openTo of ['new', 'resale', 'both']) for (const sz of [[600, 800], [870, 1000], [900, 1100], [1200, 1500]]) for (const ds of [[], ['10'], ['20']]) for (const fh of [false, true]) for (const pct of [0.10, 0.15]) {
     const r = F.shortlist(real, { budget, openTo, size: { lo: sz[0], hi: sz[1], source: 'explicit', line: 'x' }, districts: ds, text: '', freehold: fh, pct, answers: { where: 'flexible', size: 'not-sure', priorities: [] }, typical: { lo: 900, hi: 1100 } });
-    delete r.version; const key = [budget, openTo, sz.join('-'), ds.join('+') || 'all', fh ? 'fh' : 'any', pct].join('|'), h = crypto.createHash('sha256').update(JSON.stringify(r)).digest('hex').slice(0, 16);
+    stripV101(r); delete r.version; const key = [budget, openTo, sz.join('-'), ds.join('+') || 'all', fh ? 'fh' : 'any', pct].join('|'), h = crypto.createHash('sha256').update(JSON.stringify(r)).digest('hex').slice(0, 16);
     n++; if (golden[key] !== h) bad.push(key);
   }
   assert.strictEqual(n, 864); assert.deepStrictEqual(bad, []);
@@ -53,13 +56,12 @@ t('with an unusable inventory the output is exactly the V9.1 output (same JSON a
   const a = F.shortlist(real, base({ openTo: 'both' })), b = F.shortlist(real, base({ openTo: 'both', inv: F.prepareInventory({ v: 9 }, NOW) }));
   assert.strictEqual(JSON.stringify(a), JSON.stringify(b)); assert.ok(!('inventory' in a));
 });
-t('resale cards are identical with inventory present and absent (V10 adds only ask and tick fields)', () => {
+t('resale cards are identical with inventory present and absent', () => {
   const inv = F.prepareInventory(sim, NOW);
   [{ budget: 2600000 }, { budget: 1800000 }, { budget: 3200000, size: { lo: 900, hi: 1100, source: 'explicit', line: 'x' } }].forEach((o) => {
     const off = F.shortlist(real, base(Object.assign({ openTo: 'both' }, o))), on = F.shortlist(real, base(Object.assign({ openTo: 'both', inv }, o)));
-    const strip = (c) => { const x = Object.assign({}, c); ['slug', 'hasCheck', 'ask', 'tick'].forEach((k) => delete x[k]); return x; };
     const ro = (off.groups.find((g) => g.sale === 'resale') || { cards: [] }).cards, rn = (on.groups.find((g) => g.sale === 'resale') || { cards: [] }).cards;
-    assert.deepStrictEqual(rn.map(strip), ro);
+    assert.deepStrictEqual(rn, ro);
     assert.deepStrictEqual(on.groups.map((g) => g.sale), off.groups.map((g) => g.sale));
   });
 });
@@ -274,9 +276,8 @@ t('single-type journeys have no "more" lists; with no inventory there is no "mor
   assert.ok(F.shortlist(real, base({ openTo: 'both' })).groups.every((g) => !g.more));
 });
 t('every card in both groups carries the same actions and tick label (resale and new launch are treated alike)', () => {
-  const r = F.shortlist(real, base({ openTo: 'both', inv: F.prepareInventory(sim, NOW) })); allCards(r).forEach((c) => { assert.ok(c.slug); assert.strictEqual(c.tick, 'Add to Get Ken’s view'); assert.ok(/^Ask Ken /.test(c.ask)); });
-  assert.strictEqual(r.groups[0].cards[0].ask, 'Ask Ken about ' + r.groups[0].cards[0].name + ' →');
-  const n = r.groups[1].cards; assert.strictEqual(n[0].ask, 'Ask Ken what he’d shortlist here →'); assert.strictEqual(n[0].hasCheck, true);
+  const r = F.shortlist(real, base({ openTo: 'both', inv: F.prepareInventory(sim, NOW) })); allCards(r).forEach((c) => { assert.ok(c.slug); assert.strictEqual(c.tick, 'Compare this with another'); assert.strictEqual(c.ask, 'Does this suit me? →'); });
+  const n = r.groups[1].cards; assert.strictEqual(n[0].hasCheck, true);
 });
 t('the New launch lede, group note, order lines and methodology change only when the inventory layer is on', () => {
   const on = F.shortlist(real, base({ openTo: 'both', inv: F.prepareInventory(sim, NOW) }));
@@ -342,24 +343,24 @@ t('the closing methodology line is the V10 line; the Huttons paragraphs are all 
 
 console.log('Get Ken\'s view handoff');
 const HM = F.handoffMessage;
-t('one project: exact approved text, with budget, typed size and confirmed district', () => assert.strictEqual(HM({ names: ['Lucerne Grand'], budget: 2600000, size: { from: 870, to: 1000 }, district: '22' }), 'Hi Ken, I’m looking at Lucerne Grand and would like to know what you’d shortlist. My search: around $2.6m, about 870–1,000 sqft, District 22.'));
+t('one project: exact approved text, with budget, typed size and confirmed district', () => assert.strictEqual(HM({ names: ['Lucerne Grand'], budget: 2600000, size: { from: 870, to: 1000 }, district: '22' }), 'Hi Ken, I was looking at Lucerne Grand on Ken Property Tools. Does this suit what I’m looking for? My search: around $2.6m, about 870–1,000 sqft, District 22.'));
 t('two projects: exact approved text, names in the order ticked, no ranking by type', () => {
-  assert.strictEqual(HM({ names: ['Amberwood at Holland', 'Lucerne Grand'], budget: 2600000, size: { from: 870, to: 1000 }, district: '10' }), 'Hi Ken, I’m looking at Amberwood at Holland vs Lucerne Grand and would like your view. My search: around $2.6m, about 870–1,000 sqft, District 10.');
-  assert.strictEqual(HM({ names: ['Lucerne Grand', 'Amberwood at Holland'], budget: 2600000 }), 'Hi Ken, I’m looking at Lucerne Grand vs Amberwood at Holland and would like your view. My search: around $2.6m.');
+  assert.strictEqual(HM({ names: ['Amberwood at Holland', 'Lucerne Grand'], budget: 2600000, size: { from: 870, to: 1000 }, district: '10' }), 'Hi Ken, I’m comparing Amberwood at Holland and Lucerne Grand. Could you help me understand which may suit me better? My search: around $2.6m, about 870–1,000 sqft, District 10.');
+  assert.strictEqual(HM({ names: ['Lucerne Grand', 'Amberwood at Holland'], budget: 2600000 }), 'Hi Ken, I’m comparing Lucerne Grand and Amberwood at Holland. Could you help me understand which may suit me better? My search: around $2.6m.');
 });
 t('parts the buyer did not give are left out: no size unless typed, no district unless confirmed', () => {
-  assert.strictEqual(HM({ names: ['A'], budget: 2650000 }), 'Hi Ken, I’m looking at A and would like to know what you’d shortlist. My search: around $2.65m.');
-  assert.strictEqual(HM({ names: ['A'], budget: 2600000, district: '10' }), 'Hi Ken, I’m looking at A and would like to know what you’d shortlist. My search: around $2.6m, District 10.');
-  assert.strictEqual(HM({ names: ['A'], budget: 2600000, district: 'Holland' }), 'Hi Ken, I’m looking at A and would like to know what you’d shortlist. My search: around $2.6m.');
-  assert.strictEqual(HM({ names: ['A'], budget: 0 }), 'Hi Ken, I’m looking at A and would like to know what you’d shortlist.');
+  assert.strictEqual(HM({ names: ['A'], budget: 2650000 }), 'Hi Ken, I was looking at A on Ken Property Tools. Does this suit what I’m looking for? My search: around $2.65m.');
+  assert.strictEqual(HM({ names: ['A'], budget: 2600000, district: '10' }), 'Hi Ken, I was looking at A on Ken Property Tools. Does this suit what I’m looking for? My search: around $2.6m, District 10.');
+  assert.strictEqual(HM({ names: ['A'], budget: 2600000, district: 'Holland' }), 'Hi Ken, I was looking at A on Ken Property Tools. Does this suit what I’m looking for? My search: around $2.6m.');
+  assert.strictEqual(HM({ names: ['A'], budget: 0 }), 'Hi Ken, I was looking at A on Ken Property Tools. Does this suit what I’m looking for?');
   assert.strictEqual(HM({ names: [] }), null);
 });
 t('never contains counts, prices from Huttons, check times, basis labels, bedroom data, URA figures, typed location or priorities', () => {
   const m = HM({ names: ['A', 'B'], budget: 2600000, size: { from: 870, to: 1000 }, district: '10', whereText: 'Ang Mo Kio', priorities: ['schools'], from: 'From around $2.5m' });
   assert.ok(!/Ang Mo Kio|schools|From around|inventory|checked|units|bedroom|sales|Huttons/i.test(m), m); assert.ok(/\$2\.6m/.test(m)); assert.ok((m.match(/\$/g) || []).length === 1);
 });
-t('the 400-character guard drops to names only', () => { const long = 'X'.repeat(150), m = HM({ names: [long, long], budget: 2600000, size: { from: 870, to: 1000 }, district: '10' }); assert.ok(m.length <= 400 && !/My search/.test(m)); assert.ok(m.startsWith('Hi Ken, I’m looking at ')); });
-t('at most two project names are ever used', () => assert.ok(!/C/.test(HM({ names: ['A', 'B', 'C'], budget: 2600000 }))));
+t('the 400-character guard drops to names only', () => { const long = 'X'.repeat(150), m = HM({ names: [long, long], budget: 2600000, size: { from: 870, to: 1000 }, district: '10' }); assert.ok(m.length <= 400 && !/My search/.test(m)); assert.ok(m.startsWith('Hi Ken, I’m comparing ')); });
+t('at most two project names are ever used', () => assert.ok(!/Qq/.test(HM({ names: ['A', 'B', 'Qq'], budget: 2600000 }))));
 t('the single new analytics event carries slugs only: letters, digits, hyphens; never budget, size or district', () => {
   assert.deepStrictEqual(F.askEvent(['lucerne-grand']), { project_id: 'lucerne-grand' }); assert.deepStrictEqual(F.askEvent(['a-1', 'b-2']), { project_id: 'a-1', project_id_2: 'b-2' });
   assert.strictEqual(F.askEvent(['Lucerne Grand']), null); assert.strictEqual(F.askEvent([]), null); assert.deepStrictEqual(Object.keys(F.askEvent(['a', 'b', 'c'])), ['project_id', 'project_id_2']);
@@ -442,9 +443,43 @@ t('privacy and wording over a grid with the real file: no counts, no "available"
   assert.ok(n > 500);
 });
 t('the real data gives no exact price: every "From around" and budget sentence uses rounded figures and the buyer\'s own budget only', () => { const out = JSON.stringify(rrun(KS)); const tot = (out.match(/\$\d[\d.,]*m?/g) || []); tot.forEach((x) => assert.ok(/^\$\d+(\.\d{1,2})?m$/.test(x), x)); });
-t('handoff with real project names: no Huttons, counts, prices, ranges, check times or source text', () => { const names = cards(rrun(KS)).slice(0, 2).map((c) => c.name), m = HM({ names, budget: 2200000, size: { from: 1000, to: 1100 }, district: null }); assert.ok(!/huttons|inventory|checked|from around|\bunits?\b|\bavailable\b|\d{2}:\d{2}/i.test(m), m); assert.ok(/^Hi Ken, I’m looking at /.test(m)); assert.ok(/\$2\.2m/.test(m)); assert.strictEqual((m.match(/\$/g) || []).length, 1); });
-t('CTA rules on real cards: candidate (tier a or b) asks "Ask Ken what he\'d shortlist here →"; others "Ask Ken about {name} →"', () => { const cs = allCards(rrun({ budget: 2200000, size: KS.size, openTo: 'new' })); assert.ok(cs.length); cs.forEach((c) => { if (c.tier === 'a' || c.tier === 'b') assert.strictEqual(c.ask, 'Ask Ken what he’d shortlist here →'); else assert.strictEqual(c.ask, 'Ask Ken about ' + c.name + ' →'); }); });
-t('the real file does not touch resale: a resale-only journey is identical with and without it', () => { const a = JSON.stringify(rrun({ openTo: 'resale', budget: 2200000, size: KS.size })), b = JSON.stringify(F.shortlist(real, base({ openTo: 'resale', budget: 2200000, size: KS.size }))); const strip = (x) => JSON.stringify(JSON.parse(x, (k, v) => (['checkedAt', 'slug', 'hasCheck', 'ask', 'tick', 'inventory'].indexOf(k) > -1 ? undefined : v))); assert.strictEqual(strip(a), strip(b)); });
+t('handoff with real project names: no Huttons, counts, prices, ranges, check times or source text', () => { const names = cards(rrun(KS)).slice(0, 2).map((c) => c.name), m = HM({ names, budget: 2200000, size: { from: 1000, to: 1100 }, district: null }); assert.ok(!/huttons|inventory|checked|from around|\bunits?\b|\bavailable\b|\d{2}:\d{2}/i.test(m), m); assert.ok(/^Hi Ken, I’m comparing /.test(m)); assert.ok(/\$2\.2m/.test(m)); assert.strictEqual((m.match(/\$/g) || []).length, 1); });
+t('CTA on real cards: every card, candidate or not, asks "Does this suit me? →" and offers "Compare this with another"', () => { const cs = allCards(rrun({ budget: 2200000, size: KS.size, openTo: 'new' })); assert.ok(cs.length); cs.forEach((c) => { assert.strictEqual(c.ask, 'Does this suit me? →'); assert.strictEqual(c.tick, 'Compare this with another'); assert.strictEqual(c.hasCheck, c.tier === 'a' || c.tier === 'b'); }); });
+t('the real file does not touch resale: a resale-only journey is identical with and without it', () => { const a = JSON.stringify(rrun({ openTo: 'resale', budget: 2200000, size: KS.size })), b = JSON.stringify(F.shortlist(real, base({ openTo: 'resale', budget: 2200000, size: KS.size }))); const strip = (x) => JSON.stringify(JSON.parse(x, (k, v) => (['checkedAt', 'inventory'].indexOf(k) > -1 ? undefined : v))); assert.strictEqual(strip(a), strip(b)); });
 t('find.json is byte-identical to V9.1', () => assert.strictEqual(crypto.createHash('sha256').update(fs.readFileSync(path.join(root, 'data/projects/find.json'))).digest('hex'), FIND_SHA));
+
+
+console.log('V10.1 buyer-facing card text (display layer only)');
+const LW = { budget: 2200000, size: { lo: 920, hi: 1030, source: 'inferred', line: 'x' } };   // the live ~$2.2m / inferred 920-1,030 sqft case
+t('Lentor Gardens Residences (inventory match): exact buyer text, price first', () => {
+  const c = allCards(rrun(Object.assign({ openTo: 'new' }, LW))).find((x) => x.slug === 'lentor-gardens-residences'), s = c.simple;
+  assert.strictEqual(s.size, '3 Bedroom · around your size'); assert.strictEqual(s.priceLead, 'From around'); assert.strictEqual(s.figure, '$2.2m'); assert.strictEqual(s.priceNote, null);
+  assert.deepStrictEqual(s.budget, { tone: 'ok', text: 'Within your ~$2.2m budget' }); assert.ok(/^\d+ recent developer sales around this size$/.test(s.sales), s.sales); assert.ok(/^Latest: [A-Z][a-z]{2} \d{4}$/.test(s.latest)); assert.strictEqual(s.quiet, null);
+  assert.strictEqual(c.ask, 'Does this suit me? →');
+});
+t('The Sen (price above budget): "A little above" and the rounded From figure', () => {
+  const c = allCards(rrun(Object.assign({ openTo: 'new' }, LW))).find((x) => x.slug === 'the-sen'); if (!c) return;   // may sit below the top cards on some windows
+  assert.strictEqual(c.simple.budget.text, 'A little above your ~$2.2m budget'); assert.strictEqual(c.simple.budget.tone, 'over'); assert.strictEqual(c.simple.figure, '$2.4m');
+});
+t('New launch without a current match: Recent sales range from URA and the one quiet line, with no technical state', () => {
+  const cs = allCards(rrun({ openTo: 'both', budget: 2600000, size: { lo: 700, hi: 800, source: 'explicit', line: 'x' } })).filter((x) => x.sale === 'new' && (x.tier === 'c' || x.tier === 'd')); assert.ok(cs.length, 'real input with a URA-only new launch card (Promenade Peak at about $2.6m, 700–800 sqft)');
+  cs.forEach((c) => { const s = c.simple; assert.strictEqual(s.priceLead, 'Recent sales'); assert.ok(/^\$\d\.\d\dm–\$\d\.\d\dm$/.test(s.figure), s.figure); assert.strictEqual(s.quiet, 'Current availability not confirmed.'); assert.strictEqual(s.size, 'Around your size'); assert.ok(/^\d+ recent developer sales around this size$/.test(s.sales)); });
+});
+t('Resale: Recent sales range, "recent sales", Latest, no quiet line, same shape', () => {
+  const cs = allCards(rrun(Object.assign({ openTo: 'both' }, LW))).filter((x) => x.sale === 'resale'); assert.ok(cs.length);
+  cs.forEach((c) => { const s = c.simple; assert.strictEqual(s.priceLead, 'Recent sales'); assert.ok(/^\$\d\.\d\dm–\$\d\.\d\dm$/.test(s.figure)); assert.ok(/^\d+ recent sales around this size$/.test(s.sales)); assert.ok(/^Latest: /.test(s.latest)); assert.strictEqual(s.quiet, null); assert.ok(/^(Within|A little above) your ~\$2\.2m budget$/.test(s.budget.text)); });
+});
+t('dated inventory (3 days): the From figure keeps "(as shown then)"', () => {
+  const NOWD = Date.parse('2026-10-09T10:00:00Z'), c = allCards(F.shortlist(real, base(Object.assign({ inv: F.prepareInventory(JSON.parse(fs.readFileSync(path.join(root, 'data/projects/inventory.json'), 'utf8')), NOWD), openTo: 'new' }, LW)))).find((x) => x.slug === 'lentor-gardens-residences');
+  assert.strictEqual(c.simple.priceNote, '(as shown then)'); assert.strictEqual(c.simple.figure, '$2.2m');
+});
+t('the buyer-facing strings carry no source names, methodology, banned words or extra price figures', () => {
+  const r = rrun(Object.assign({ openTo: 'both' }, LW)); allCards(r).forEach((c) => { const txt = JSON.stringify(c.simple);
+    assert.ok(!/huttons|ura\b|inventory|checked|why it appeared|evidence|couldn|sold out|in stock|units? remaining|developer has|\bunits?\b|\bpsf\b|\bavailable\b/i.test(txt), txt);
+    assert.ok((txt.match(/\$[\d.]+m/g) || []).every((x) => /^\$\d\.\d{1,2}m$/.test(x))); });
+});
+t('ranking and the group order are untouched: same ids in the same order as before the display layer (inventory on)', () => {
+  const r = rrun(Object.assign({ openTo: 'both' }, LW)); assert.deepStrictEqual(r.groups.map((g) => g.sale), ['resale', 'new']); assert.strictEqual(allCards(r).find((x) => x.sale === 'new').slug, 'lentor-gardens-residences');
+});
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed'); process.exit(fail ? 1 : 0);

@@ -190,8 +190,14 @@
     const home = 'Homes of about ' + sizeText(o.lo, o.hi) + ' sold here in the last 12 months, and your ' + m2(o.budget) + ' ';
     return home + (c.fit === 'inside' ? 'is within their typical prices.' : c.fit === 'above' ? 'is a little above their typical prices.' : 'is a little below their typical prices. Expect to look at the lower end.');
   }
+  /* ---- V10.1 buyer-facing display layer. Pure wording derived from the same facts; it changes no matching, ranking, freshness or privacy rule. */
+  const QUIET_UNCONFIRMED = 'Current availability not confirmed.', ASK_LABEL = 'Does this suit me? →', TICK_LABEL = 'Compare this with another';
+  const budgetLine = (o, fit) => { const b = '~' + m2(o.budget) + ' budget'; return fit === 'below' ? { tone: 'over', text: 'A little above your ' + b } : { tone: 'ok', text: 'Within your ' + b }; };   // fit 'below' = the prices sit above the budget
+  const bedLabel = (types) => { const n = types.map((t) => t.bedrooms); return n.length === 1 && n[0] === 0 ? 'Studio' : joinAnd(n.map((b) => (b === 0 ? 'Studio' : b >= 5 ? '5+' : String(b)))) + ' Bedroom'; };
+  const salesLine = (n, isNew) => n + (isNew ? ' recent developer sales' : ' recent sales') + ' around this size';
   function card(c, o, un, ix) {
     return {
+      simple: { size: 'Around your size', priceLead: 'Recent sales', figure: p2(c.q1) + '–' + p2(c.q3), priceNote: null, budget: budgetLine(o, c.fit), sales: salesLine(c.n, c.sale === 'new'), latest: 'Latest: ' + ymLabel(c.last), quiet: c.sale === 'new' ? QUIET_UNCONFIRMED : null },
       id: c.id, name: displayName(c.name), sale: c.sale, saleLabel: c.sale === 'new' ? 'Developer sales' : 'Resale',
       meta: [displayName(c.street), 'District ' + Number(c.district), c.seg, c.tenure + (c.mixed ? ' (mixed tenure in the data)' : '')].join(' · '),
       why: why(c, o),
@@ -322,25 +328,27 @@
   const askFor = (name, hasCheck) => (hasCheck ? 'Ask Ken what he’d shortlist here →' : 'Ask Ken about ' + name + ' →');
   function cardInv(c, o, un) {
     const name = displayName(c.name), isUra = !!(o._uraIds && o._uraIds[c.id]);
-    const base = { id: c.id, slug: c.id, name, sale: 'new', saleLabel: 'Developer sales', notEvaluated: notEvaluated(un, 'new'), tier: c.tier, tick: 'Add to Get Ken’s view',
+    const base = { id: c.id, slug: c.id, name, sale: 'new', saleLabel: 'Developer sales', notEvaluated: notEvaluated(un, 'new'), tier: c.tier, tick: TICK_LABEL,
       link: isUra ? '../../research/index.html#/p/' + c.id + '/new' : null, linkText: isUra ? 'Research ' + name + ' →' : null };
     if (c.tier === 'a' || c.tier === 'b') {
       const rated = c.sup.kind === 'good' || c.sup.kind === 'limited' || c.sup.kind === 'early';
-      return Object.assign(base, { basis: rated ? 'Current Huttons inventory and URA sales' : 'Current Huttons inventory only', meta: metaLine(c.rec), huttons: huttonsBlock(c, o), ura: supportRow(c, o), hasCheck: true, ask: askFor(name, true),
+      const sp = c.sup, hasN = (sp.kind === 'good' || sp.kind === 'limited' || sp.kind === 'early' || sp.kind === 'few') && sp.n > 0, pr = c.inv.primary, pastC = c.fresh === 'dated';
+      base.simple = { size: bedLabel(c.inv.types) + ' · around your size', priceLead: 'From around', figure: m2(pr.floor), priceNote: pastC ? '(as shown then)' : null, budget: budgetLine(o, pr.fit), sales: hasN ? salesLine(sp.n, true) : null, latest: hasN && sp.last ? 'Latest: ' + ymLabel(sp.last) : null, quiet: null };
+      return Object.assign(base, { basis: rated ? 'Current Huttons inventory and URA sales' : 'Current Huttons inventory only', meta: metaLine(c.rec), huttons: huttonsBlock(c, o), ura: supportRow(c, o), hasCheck: true, ask: ASK_LABEL,
         why: null, evidence: null, prices: null, indicative: null, strength: rated ? c.sup.kind : null });
     }
     // URA-only: the V9.1 card, plus one honest status line about Huttons
     const v = card(c.ura, o, un, null), when = c.fresh ? whenText(Date.parse(c.ip.checkedAt || new Date(o.inv.fileAt).toISOString()), o.inv.now) : null;
     const hut = c.hut === 'zero' ? { kind: 'zero', label: HUT.label(when), text: HUT.zero } : c.hut === 'nomatch' ? { kind: 'nomatch', label: HUT.label(when), text: HUT.nomatch(when) } : { kind: 'unchecked', label: HUT.label(null), text: HUT.unchecked };
-    return Object.assign(v, { slug: c.id, basis: 'URA developer sales only', huttons: hut, hasCheck: false, ask: askFor(name, false), tier: c.tier, tick: base.tick, link: base.link, linkText: base.linkText });
+    return Object.assign(v, { slug: c.id, basis: 'URA developer sales only', huttons: hut, hasCheck: false, ask: ASK_LABEL, tier: c.tier, tick: base.tick, ask: ASK_LABEL, link: base.link, linkText: base.linkText });
   }
-  function resaleDecor(cd) { return Object.assign(cd, { slug: cd.id, hasCheck: false, ask: 'Ask Ken about ' + cd.name + ' →', tick: 'Add to Get Ken’s view' }); }
+  function resaleDecor(cd) { return Object.assign(cd, { slug: cd.id, hasCheck: false, ask: ASK_LABEL, tick: TICK_LABEL }); }
 
   /* ---- Get Ken's view handoff (pure; the page passes only what the buyer chose). Project names come from our own index or inventory file, never typed text. */
   const budgetPhrase = (b) => '$' + String(Math.round(b / 10000) / 100).replace(/(\.\d)0$/, '$1') + 'm';
   function handoffMessage(o) {
     const names = (o.names || []).filter(Boolean).slice(0, 2); if (!names.length) return null;
-    const head = names.length === 1 ? 'Hi Ken, I’m looking at ' + names[0] + ' and would like to know what you’d shortlist.' : 'Hi Ken, I’m looking at ' + names.join(' vs ') + ' and would like your view.';
+    const head = names.length === 1 ? 'Hi Ken, I was looking at ' + names[0] + ' on Ken Property Tools. Does this suit what I’m looking for?' : 'Hi Ken, I’m comparing ' + names[0] + ' and ' + names[1] + '. Could you help me understand which may suit me better?';
     const parts = [];
     if (o.budget > 0) parts.push('around ' + budgetPhrase(o.budget));
     if (o.size && o.size.from > 0 && o.size.to > o.size.from) parts.push('about ' + num(o.size.from) + '–' + num(o.size.to) + ' sqft');
@@ -373,7 +381,7 @@
       if (n.length < T.bothNew) r = takeCapped(lists.resale, T.maxCards - n.length);
       chosen = { resale: r, new: n };
     }
-    const mk = (c) => (inv && c.sale === 'new' ? cardInv(c, base, un) : inv ? resaleDecor(card(c, base, un, ix)) : card(c, base, un, ix));
+    const mk = (c) => (inv && c.sale === 'new' ? cardInv(c, base, un) : resaleDecor(card(c, base, un, ix)));
     const groups = types.map((s) => {
       const g = { sale: s, label: s === 'new' ? NEW_LABEL : 'Resale', note: s === 'new' ? (inv ? NEW_NOTE_INV : NEW_NOTE) : null, eligible: eligibleN[s], cards: (chosen[s] || []).map(mk) };
       if (inv && types.length === 2) { const all = takeCapped(lists[s], T.moreMax); g.more = all.slice((chosen[s] || []).length).map(mk); }
@@ -425,10 +433,13 @@
     'If you gave no size in square feet, we used the sizes that typically sold at your budget. We never turn bedrooms into square feet, because our data doesn’t record bedrooms.',
     'If freehold or a longer tenure was a priority, only freehold and leases of 900 years or more are shown, and you can remove that filter.',
     'Area filters use postal districts. If you told us where you want to be, we suggest a district and ask you to confirm it before it is used; places that sit in more than one district, or that we don’t recognise, are left for you to choose. The area names are general: a district contains places not named. We don’t match schools, workplaces, family locations, exact distances or neighbourhoods.',
+    'Where a new launch card says “Current availability not confirmed”, URA’s data can’t tell us whether the developer still has units to sell. Where we also check Huttons inventory, a card with no current match for your size and budget says the same. That isn’t the same as there being none.',
+    '“Does this suit me?” and “Compare these with Ken” open WhatsApp with a message ready to send. It names the project or projects and includes your budget, the size range if you typed one, and the district if you confirmed one. Nothing from Huttons or URA is included, and you can edit it before sending.',
     'This is a shortlist of developments worth investigating. It is not a recommendation or a valuation, and it doesn’t show what is for sale now or its asking price.',
   ];
 
   const METHOD_INV = METHOD.slice(0, METHOD.length - 1).concat([
+    '“Updated today” beside New launch is when we last looked at current Huttons inventory. If the check is more than 2 days old the date is shown instead, and prices are described as “as shown then”.',
     'Huttons inventory is the list of units currently shown in Huttons’ own system when we last checked, with the date. It may not include every unit the developer has, and it excludes other agents’ listings. We show it only for new launch projects.',
     'The “From around” figure is the lowest price currently shown for homes about your size, rounded to $50k. We don’t publish a range, the number of units or which units. Prices vary by unit, and only Ken can say what you could actually get.',
     'Checks older than 7 days aren’t used. If we couldn’t check a project, we say so. That isn’t the same as there being no units.',
