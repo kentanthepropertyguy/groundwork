@@ -10,7 +10,8 @@
 <link rel="stylesheet" href="../assets/css/kpt-system.css?v=2026-10-06.8">
 <link rel="stylesheet" href="../assets/css/kpt-research.css?v=2026-10-06.8">
 <link rel="stylesheet" href="../assets/css/kpt-shell.css?v=2026-10-08.4">
-<link rel="stylesheet" href="../assets/css/kpt-compare-v2.css?v=2026-10-08.p4">
+<link rel="stylesheet" href="../assets/css/kpt-compare-v2.css?v=2026-10-09.lg">
+<link rel="stylesheet" href="../assets/css/kpt-lg.css?v=2026-10-09.lg">
 <link rel="canonical" href="https://tools.kentanthepropertyguy.com/research/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Ken Property Tools">
@@ -22,8 +23,8 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Research a project","url":"https://tools.kentanthepropertyguy.com/research/","description":"Search any Singapore private condo to see what its URA transactions say, then compare it with another development in one clear page. Sources and data dates are shown; limits are stated.","isPartOf":{"@type":"WebSite","name":"Ken Property Tools","url":"https://tools.kentanthepropertyguy.com/"},"inLanguage":"en-SG"}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Ken Property Tools","item":"https://tools.kentanthepropertyguy.com/"},{"@type":"ListItem","position":2,"name":"Research","item":"https://tools.kentanthepropertyguy.com/research/"}]}</script>
 </head>
-<body class="kpr kpt-w-wide" data-view="home">
-<header class="kpt-header kpt-shell"><div class="kpt-brandblock"><a class="brand" href="../">KEN PROPERTY TOOLS</a><span class="kpt-tagline">by Ken Tan · The Property Guy</span></div><nav class="kpt-nav" aria-label="Site"><a href="./" data-kpt-nav="research" aria-current="page">Research</a><a href="../tools/" data-kpt-nav="tools">Tools</a></nav></header>
+<body class="kpr kpt-w-wide lg" data-view="home">
+<header class="lg-nav"><div class="in"><div class="bb"><a class="brand" href="../">Ken Property Tools</a><span class="tag">by Ken Tan · The Property Guy</span></div><nav aria-label="Site"><a class="hide-m" href="../research/" data-kpt-nav="research" aria-current="page">Research</a><a class="hide-m" href="../tools/" data-kpt-nav="tools">Tools</a><a class="ask" href="https://wa.me/6590908898?text=Hi%20Ken%2C%20I%E2%80%99m%20on%20Ken%20Property%20Tools%20and%20would%20like%20to%20talk%20through%20my%20property%20plans.%20My%20situation%20is%20____.%20(Ref%20KPT-HOME)" target="_blank" rel="noopener" data-kpt-nav="ask-ken">Ask Ken</a></nav></div></header>
 
 <main class="kpt-shell" id="app"><section class="kpr-sec" style="padding-top:16px;border-top:none"><p class="kpt-eyebrow">Research a project</p><h1 class="kpr-h">Understand a development, then compare it with another.</h1><p class="kpr-lead">Search any Singapore private condo to see what its URA transactions say, then compare it with a second development and get a clear side-by-side read. <a href="../projects/">Browse every development</a>.</p><ol class="kpr-note" style="padding-left:20px"><li>Search for a development by name.</li><li>See its resale and new-sale transactions: typical prices per square foot, sizes, and how they have moved.</li><li>Choose “Compare a different project” to get a side-by-side read that matches the same sale type, size band and time window.</li></ol><p class="kpr-note">Every figure comes from URA private residential transaction records. Where the evidence is thin, the page says so instead of drawing a conclusion. It describes historical transactions and is not personalised advice, a valuation or a forecast.</p><noscript><p class="kpr-note">Search and comparison need JavaScript. You can still <a href="../projects/">browse every development</a> or <a href="../tools/">use the tools</a>.</p></noscript></section></main>
 
@@ -45,8 +46,9 @@
 <script src="../assets/js/kpt-project.js?v=2026-10-06.8"></script>
 <script src="../assets/js/kpt-research.js?v=2026-10-06.8"></script>
 <script src="../assets/js/kpt-intel.js?v=2026-10-06.8"></script>
-<script src="../assets/js/kpt-evidence.js?v=2026-10-08.p4"></script>
-<script src="../assets/js/kpt-compare-v2.js?v=2026-10-08.p4"></script>
+<script src="../assets/js/kpt-evidence.js?v=2026-10-09.lg"></script>
+<script src="../assets/js/kpt-lg.js?v=2026-10-09.lg"></script>
+<script src="../assets/js/kpt-compare-v2.js?v=2026-10-09.lg"></script>
 <script src="../data/research/config.js?v=2026-10-06.8"></script>
 <script>
 // Presentation only. All reasoning is in assets/js/kpt-research.js; all numbers come from the generated project data.
@@ -126,7 +128,7 @@
   // ---------------------------------------------------------------- home / search
   function searchBox(excludeId, onPick) {
     const wrap = document.createElement('div'); wrap.className = 'kpr-search';
-    wrap.innerHTML = `<input type="text" id="q" role="combobox" aria-expanded="false" aria-controls="res" aria-autocomplete="list" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Search a project name" aria-label="Search a project name"><div id="res" aria-live="polite"></div>`;
+    wrap.innerHTML = `<input type="text" id="q" role="combobox" aria-expanded="false" aria-controls="res" aria-autocomplete="list" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Search a development by name" aria-label="Search a development by name"><div id="res" aria-live="polite"></div>`;
     const input = wrap.querySelector('input'), res = wrap.querySelector('#res'); let timer = null, loaded = null;
     const ready = () => (loaded = loaded || loadSearch());
     function show(q) {
@@ -135,6 +137,7 @@
         input.setAttribute('aria-expanded', rows.length ? 'true' : 'false');
         if (!q.trim()) { res.innerHTML = ''; return; }
         if (!rows.length) { res.innerHTML = `<div class="kpr-results"><div class="kpr-empty">No transactions found under that name in the last 5 years. It may be a launch with no sales yet, or spelled differently.</div></div>`; }
+        else if (window.KPTLG) { const mx = Math.max.apply(null, rows.map((r) => r.n)); res.innerHTML = `<ul class="kpr-results" role="listbox">${rows.map((r, i) => KPTLG.resultRow(r, i, mx, R)).join('')}</ul>`; }
         else res.innerHTML = `<ul class="kpr-results" role="listbox">${rows.map((r, i) => `<li role="option"><button type="button" data-id="${esc(r.id)}" ${i === 0 ? 'aria-selected="true"' : ''}><b>${esc(R.displayName(r.name))}</b><span>${esc(r.street)} · D${Number(r.district)} · ${esc(r.seg)} · ${r.n} sales · latest ${esc(R.fmtMonth(r.last))}${r.new ? ' · new sales' : ''}${r.resale ? ' · resale' : ''}</span></button></li>`).join('')}</ul>`;
         if (window.KPTV2) KPTV2.afterSearch(res, q, rows.length);
         clearTimeout(timer); timer = setTimeout(() => { if (q.trim().length >= 2) track('research_search', { results: rows.length }); }, 1200);
@@ -152,7 +155,10 @@
       <p class="kpr-lead">Search a private condo or apartment project to see what its transactions say, then compare it with another. This uses URA transaction records from the last 5 years.</p><div id="sb"></div>
       <p class="kpr-note">Projects with no transactions yet, such as an unsold launch, won't appear.</p>
       <p class="kpr-note">Prefer to browse? <a href="../projects/">See every development</a>, including new launches with sites of their own.</p></section>`;
+    if (window.KPTLG) { document.title = 'Research a development — Ken Property Tools'; $app.innerHTML = KPTLG.landingHtml(CFG.total || 0); }
     $app.querySelector('#sb').appendChild(searchBox(null, (id) => { location.hash = '#/p/' + id; }));
+    // Arriving from the homepage search: carry the typed name into this search box (it never leaves the browser).
+    try { const q0 = new URLSearchParams(location.search).get('q'); const inp = $app.querySelector('#q'); if (q0 && inp && !S.qUsed) { S.qUsed = 1; inp.value = q0.slice(0, 80); inp.dispatchEvent(new Event('input')); } } catch (e) { /* no query */ }
   }
 
   // ---------------------------------------------------------------- project
@@ -256,8 +262,9 @@
         const draw = () => {
           S.rawP = d.p; S.rawM = d.m; const M = R.analyseProject(d.p, d.m, { sale: saleHash || undefined, sizeSqft: S.size || undefined, peers: d.peers, notes: d.notes, today: TODAY });
           document.body.dataset.view = 'project'; document.title = M.name + ' — Research — Ken Property Tools';
-          $app.innerHTML = projectHtml(M); wireCommon(M, 'project'); sizeEvent(M, 'project');
-          if (window.KPTV2) KPTV2.afterProject(M, $app, d.p, d.m, { R, searchBox, onPick: (x) => { location.hash = '#/p/' + x; } });
+          if (window.KPTLG) { let IN = null; try { IN = window.KPTIntel ? KPTIntel.analyse(M, S.rawP, { sizeSqft: S.size || undefined, today: TODAY, monthStart: S.rawM && S.rawM.monthStart }) : null; } catch (e) { IN = null; } $app.innerHTML = KPTLG.projectHtml(M, { S, IN, root: '../' }); } else $app.innerHTML = projectHtml(M);
+          wireCommon(M, 'project'); sizeEvent(M, 'project');
+          if (window.KPTV2) KPTV2.afterProject(M, $app, d.p, d.m, { R, searchBox, track, onPick: (x) => { location.hash = '#/p/' + x; }, onCompare: (x) => { S.win = null; location.hash = '#/compare/' + id + '/' + x; } });
           const evd = document.getElementById('evidence'); if (evd) evd.addEventListener('toggle', () => { S.evOpen = evd.open; });
           $app.querySelectorAll('[data-sale]').forEach((b) => b.addEventListener('click', () => { location.hash = R.buildHash({ view: 'project', id, sale: b.dataset.sale }); }));
           $app.querySelectorAll('.kpr-row[data-bin], button.kpr-link[data-bin]').forEach((b) => b.addEventListener('click', () => { S.size = b.dataset.bin; saveSize(); draw(); const h = $app.querySelector('.kpr-panel'); if (h && window.innerWidth < 960) h.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }));
@@ -275,8 +282,8 @@
     store.manifest().then((m) => store.index().then((ix) => { const r = P.findById(ix, aId); if (!r) throw new Error('nf'); return { ix, r }; })).then(({ ix, r }) => {
       const sg = R.sameDistrict(ix, aId, 6), name = R.displayName(r.name);
       document.body.dataset.view = 'pick'; document.title = 'Compare ' + name + ' — Ken Property Tools';
-      $app.innerHTML = `<button class="kpr-back" data-act="back">← Back to ${esc(name)}</button><p class="kpt-eyebrow">Compare</p><h1 class="kpr-h" tabindex="-1">Compare ${esc(name)} with…</h1><p class="kpr-lead">Search for the other project.</p><div id="sb"></div>
-        ${sg.rows.length ? `<p class="kpr-sugg-h">${esc(sg.label)}</p><ul class="kpr-results" role="list">${sg.rows.map((x) => `<li><button type="button" data-id="${esc(x.id)}"><b>${esc(x.name)}</b><span>${x.n} sales · latest ${esc(R.fmtMonth(x.last))}</span></button></li>`).join('')}</ul><p class="kpr-note">Being in the same district doesn't make two projects comparable. We check that next.</p>` : ''}`;
+      $app.innerHTML = `<div class="lg-page" data-lg="pick"><header class="lg-hero lg-pickhero"><div class="lg-wrap"><button class="kpr-back lg-back" type="button" data-act="back">← Back to ${esc(name)}</button><p class="lg-kicker">Compare</p><h1 class="md" tabindex="-1">Compare ${esc(name)} with…</h1><p class="lg-sub lg-center">Search for the other development, or choose one with similar recent sales.</p><div class="lg-sb lg-pick"><div id="sb"></div>
+        ${sg.rows.length ? `<p class="kpr-sugg-h">${esc(sg.label)}</p><ul class="kpr-results" role="list">${sg.rows.map((x) => `<li><button type="button" data-id="${esc(x.id)}"><b>${esc(x.name)}</b><span>${x.n} sales · latest ${esc(R.fmtMonth(x.last))}</span></button></li>`).join('')}</ul><p class="kpr-note">Being in the same district doesn't make two projects comparable. We check that next.</p>` : ''}</div></div></header></div>`;
       const go = (id) => { S.win = null; location.hash = '#/compare/' + aId + '/' + id; };
       $app.querySelector('#sb').appendChild(searchBox(aId, go));
       if (window.KPTV2) KPTV2.enhancePick(aId, $app, go);
