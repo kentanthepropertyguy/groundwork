@@ -554,25 +554,35 @@ svg .pt-t3.thin{stroke:var(--t3)} svg .pt-ti.thin{stroke:var(--ti)}
  .band h2,.head,.col h3{break-after:avoid}
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/kpt-lg.css?v=2026-10-09.lg">
 <style>
 body{margin:0}
-.kpt-sbar{background:#fff;border-bottom:1px solid var(--hair)}.kpt-sbar .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:12px;padding-bottom:12px}
-.kb-brand{color:var(--ink);text-decoration:none;font-weight:700;letter-spacing:.14em;font-size:.86rem;display:flex;flex-direction:column}.kb-brand span{letter-spacing:0;font-weight:400;color:var(--muted);font-size:.78rem;margin-top:2px}
-.kb-back{color:var(--link);text-decoration:none;font-weight:600;font-size:.92rem;white-space:nowrap}.kb-back:hover{text-decoration:underline}
-.kpt-snote{background:#fbf8f1;border-bottom:1px solid #eadfca}.kpt-snote .wrap{padding-top:14px;padding-bottom:14px}.kpt-snote p{margin:0;font-size:.92rem;line-height:1.55;color:var(--ink);max-width:75ch}.kpt-snote .kb-legend{margin-top:8px;font-size:.82rem;color:var(--muted)}
+.kb-back{font-weight:600}
+.kpt-disc{display:inline-block;margin:14px 0 0;background:#F0F0F3;color:#6B7280;border-radius:16px;padding:8px 16px;font-size:.92rem;line-height:1.45;max-width:72ch}.kpt-disc a{color:inherit;text-decoration:underline}
+.kpt-hbtns{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 4px}
+@media (max-width:719px){.kpt-hbtns{display:grid}.kpt-hbtns .btn{width:100%;justify-content:center;box-sizing:border-box}.nav .links .kb-back{display:inline}}
 .src li.hit{background:#fff3c4;border-radius:6px;transition:background .3s}.src li{scroll-margin-top:90px}
 .kb-contact b{color:var(--ink)}
 .kpt-sfoot{border-top:1px solid var(--hair);background:var(--band)}.kpt-sfoot .wrap{padding-top:18px;padding-bottom:28px}.kpt-sfoot p{margin:0 0 6px;font-size:.78rem;color:var(--muted);line-height:1.5}.kpt-sfoot a{color:var(--muted)}
+.lg-ask{font-family:var(--kpt-font)}.lg-ask h2{margin:0}.lg-ask .lg-ken span{margin:3px 0 0}
+.lg-sample-hero,#lg-who,#lg-gap,#lg-check,#lg-full{font-family:var(--kpt-font);color:var(--kpt-ink)}
+.lg-sample-hero{background:#fff}.lg-sample-hero h1 .pa,.lg-who.pa h3,.lg-tile.pa .who{color:var(--kpt-a)}.lg-sample-hero h1 .pb,.lg-who.pb h3,.lg-tile.pb .who{color:var(--kpt-b)}
+.lg-sample-hero .lg-pill a{color:inherit;text-decoration:underline}
+.lg-who{border-top:6px solid var(--kpt-a)}.lg-who.pb{border-top-color:var(--kpt-b)}.lg-who h3{font-size:1.6rem;margin:0}.lg-who ul{margin:0;padding-left:18px;display:grid;gap:6px;font-size:1.02rem;line-height:1.5;font-weight:600}
+.lg-gapcards .lg-tile b{font-size:clamp(2.2rem,5vw,3.2rem);letter-spacing:-.04em;line-height:1}.lg-gapcards .lg-tile b small{font-size:1rem;font-weight:400;color:var(--kpt-muted);letter-spacing:0}.lg-gapcards .who{font-weight:600;font-size:.9rem}
+#lg-gap h2{max-width:24ch;margin-left:auto;margin-right:auto}
+.lg-checks{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}.lg-checks li{background:#fff;border-radius:16px;padding:14px 18px;font-weight:600;font-size:.98rem}
+#lg-full .lg-chips{justify-content:center}
 </style>
 <link rel="canonical" href="https://tools.kentanthepropertyguy.com/research/sample/">
 <meta name="robots" content="noindex, follow">
 </head>
 <body>
-<div class="kpt-sbar"><div class="wrap"><a class="kb-brand" href="../../">KEN PROPERTY TOOLS<span>by Ken Tan · The Property Guy</span></a><a class="kb-back" id="kbBack" href="../">← Research</a></div></div><div class="kpt-snote"><div class="wrap"><p><b>An illustrative sample of detailed research.</b> <span id="kbPair">This is the kind of comparison Ken can prepare for two developments you are weighing.</span> Prepared with AI assistance from public sources and URA transaction data to 5 Oct 2026. Not reviewed by Ken, and not his personal view. Where sources disagree, both values are shown and flagged. <a href="#about-sample">About this sample</a></p><p class="kb-legend"><span class="tg f">Fact</span> sourced, numbered · <span class="tg f">Data</span> calculated from URA sales · <span class="tg v">KPT view</span> AI-assisted interpretation · <span class="tg u">Not known</span> gaps and conflicts · <span class="tg k">Ken</span> only where Ken wrote it (none in this sample)</p></div></div>
 <nav class="nav" aria-label="Page">
   <div class="wrap">
-    <b>Ken Property Tools</b>
+    <b><a href="../../" style="color:inherit;text-decoration:none">Ken Property Tools</a></b>
     <div class="links">
+      <a class="kb-back" id="kbBack" href="../">← Research</a>
       <a href="#read">Assessment</a>
       <a href="#choose">Compare</a>
       <a href="#meaning">What it means</a>
@@ -583,42 +593,12 @@ body{margin:0}
   </div>
 </nav>
 
-<header class="herod" id="top">
-  <div class="wrap">
-    <div class="top"><span class="kick">Resale comparison · RCR · District 20</span><span class="dpill">Illustrative sample</span></div>
-    <h1><span class="b">Jadescape</span> or <span class="a">Thomson Three</span>?</h1>
-    <p class="sub">Jadescape and Thomson Three are both RCR resale condominiums in District 20. Jadescape completed later and is larger: completion 2022–23 (sources differ), lease from 2018, 1,206 homes. Thomson Three completed 2016–17 (sources differ), lease from 2012, 445 homes. In the 700–799 sq ft band the indicative price is about $1.74 million at Jadescape and about $1.61 million at Thomson Three. What does the difference reflect, and does it matter to you?</p>
-    <div class="hseg" role="group" aria-label="Show project" id="hseg">
-      <button type="button" data-s="0" aria-pressed="true">Both</button>
-      <button type="button" data-s="2" aria-pressed="false">Jadescape</button>
-      <button type="button" data-s="1" aria-pressed="false">Thomson Three</button>
-    </div>
-    <div class="vs" id="vs">
-      <div class="pc ti">
-        <span class="n">Jadescape</span>
-        <span class="m">Completed <span class="fx">2022–23</span> <span class="tg u">Sources differ</span> · 1,206 homes<sup class="cite"><a href="#s8" aria-label="Source 8">8</a>,<a href="#s12" aria-label="Source 12">12</a>,<a href="#s13" aria-label="Source 13">13</a>,<a href="#s14" aria-label="Source 14">14</a></sup> · RCR</span>
-        <div class="big">$2,323<small> psf · 700–799 sq ft</small></div>
-        <ul><li>Lease from 2018, lease age 8 years</li><li>Marymount (Circle Line): <span class="fx">350–700 m</span> <span class="tg u">Sources differ</span></li><li>Tennis courts listed</li></ul>
-        <div class="best"><i>May suit buyers who want</i>A newer building and on-site tennis courts</div>
-      </div>
-      <span class="vsm">VS</span>
-      <div class="pc t3">
-        <span class="n">Thomson Three</span>
-        <span class="m">Completed <span class="fx">2016–17</span> <span class="tg u">Sources differ</span> · 445 homes<sup class="cite"><a href="#s1" aria-label="Source 1">1</a>,<a href="#s2" aria-label="Source 2">2</a></sup> · RCR</span>
-        <div class="big">$2,152<small> psf · 700–799 sq ft</small></div>
-        <ul><li>Lease from 2012, lease age 14 years</li><li>Upper Thomson (Thomson-East Coast Line): <span class="fx">410–440 m</span> <span class="tg u">Sources differ</span></li><li>Nearer supermarket (portal listings)</li></ul>
-        <div class="best"><i>May suit buyers who want</i>A supermarket within a shorter walk and a primary school nearer (distance only)</div>
-      </div>
-    </div>
-    <div class="verdict"><b>Jadescape is $171 psf (8%) above Thomson Three, before any adjustment for age. The useful question is what the gap reflects.</b>
-      <a class="btn primary" href="#choose">See who each suits</a>
-      <a class="btn ghost" href="#read">Assessment ›</a></div>
-    <p class="ctxt">Prices are median resale prices per sq ft for 700–799 sq ft homes, Oct 2025 to Sep 2026, from 23 and 7 sales. An indicative price is the middle of the size band times the median price per sq ft, not a median price. Resale sales only.</p>
-  </div>
-</header>
-
-<div class="readkey"><div class="wrap"><div class="key"><span>How to read this page:</span><span class="tg f">Fact</span><span class="tg f">Data</span><span class="tg v">KPT view</span><span class="tg u">Not known</span><span class="tg k">Ken</span><span>Unlabelled analysis is KPT view, prepared with AI assistance. Small numbers link to dated sources.</span></div></div></div>
-
+<header class="lg-hero lg-sample-hero" id="top"><div class="lg-wrap"><p class="lg-kicker">Sample detailed research · Illustrative sample · Free to read</p><h1 class="md"><span class="pa">Jadescape</span> or <span class="pb">Thomson Three</span>?</h1><p class="lg-lead"><span id="kbPair">This is the kind of comparison Ken can prepare for two developments you are weighing.</span> Jadescape and Thomson Three are both RCR resale condominiums in District 20. Jadescape completed later and is larger: completion 2022–23 (sources differ), lease from 2018, 1,206 homes. Thomson Three completed 2016–17 (sources differ), lease from 2012, 445 homes. In the 700–799 sq ft band the indicative price is about $1.74 million at Jadescape and about $1.61 million at Thomson Three. What does the difference reflect, and does it matter to you?</p><p class="lg-pill grey">Prepared with AI assistance from public sources and URA transaction data to 5 Oct 2026. Not reviewed by Ken, and not his personal view. Where sources disagree, both values are shown and flagged. <a href="#about-sample">About this sample</a></p><div class="lg-btns"><a class="lg-btn primary" href="#lg-who">Start reading ↓</a><a class="lg-btn" href="#lg-full">Jump to the full report</a></div></div></header>
+<section class="lg-band grey" id="lg-who" aria-labelledby="lg-who-h"><div class="lg-wrap"><div class="lg-head"><p class="lg-kicker">Who might prefer each</p><h2 id="lg-who-h">Choose it if you want…</h2></div><div class="lg-g2"><article class="lg-card lg-who pa"><h3>Jadescape</h3><ul><li>A newer building.</li><li>On-site tennis courts.</li><li>A hawker centre closer.</li><li>A larger community.</li><li>Station access.</li></ul><p class="lg-fine">May not suit: buyers who put a supermarket within a shorter walk and a primary school nearer (distance only) first.</p></article><article class="lg-card lg-who pb"><h3>Thomson Three</h3><ul><li>A supermarket closer.</li><li>A primary school closer by.</li><li>A smaller development.</li><li>Station access.</li><li>Dining halls listed.</li></ul><p class="lg-fine">May not suit: buyers who put a newer building and on-site tennis courts first.</p></article></div><p class="lg-fine lg-center">Each point is set out with its sources in <a href="#choose">Why someone would choose each</a>, below.</p></div></section>
+<section class="lg-band" id="lg-gap" aria-labelledby="lg-gap-h"><div class="lg-wrap"><div class="lg-head"><p class="lg-kicker">What the price gap could mean</p><h2 id="lg-gap-h">Different strengths, and a price gap the sales cannot explain on their own.</h2><p class="lg-sub">Jadescape is $171 psf (8%) above Thomson Three, before any adjustment for age. The useful question is what the gap reflects.</p></div><div class="lg-g2 lg-gapcards"><div class="lg-tile pa"><span class="who">Jadescape</span><b>$2,323 <small>PSF</small></b><span class="lg-fine">700–799 sq ft · may suit buyers who want a newer building and on-site tennis courts</span></div><div class="lg-tile pb"><span class="who">Thomson Three</span><b>$2,152 <small>PSF</small></b><span class="lg-fine">700–799 sq ft · may suit buyers who want a supermarket within a shorter walk and a primary school nearer (distance only)</span></div></div><p class="lg-fine lg-center">Prices are median resale prices per sq ft for 700–799 sq ft homes, Oct 2025 to Sep 2026, from 23 and 7 sales. An indicative price is the middle of the size band times the median price per sq ft, not a median price. Resale sales only.</p></div></section>
+<section class="lg-band grey" id="lg-check" aria-labelledby="lg-check-h"><div class="lg-wrap"><div class="lg-head"><p class="lg-kicker">What to look into</p><h2 id="lg-check-h">Questions to put at a viewing.</h2></div><ul class="lg-checks"><li>Floor and stack</li><li>Facing and noise</li><li>Condition and MCST</li><li>Recent sales</li><li>The walk to the station</li><li>How busy the facilities are</li><li>Entrances and traffic</li><li>Road noise</li><li>Schools</li><li>Layouts you would actually buy</li></ul><p class="lg-fine lg-center"><a href="#questions">What to ask about each, below</a></p></div></section>
+<section class="lg-band" id="lg-full" aria-labelledby="lg-full-h"><div class="lg-wrap"><div class="lg-head"><p class="lg-kicker">The full report continues below</p><h2 id="lg-full-h">Everything above, with the evidence behind it.</h2><p class="lg-sub">The assessment, trade-offs side by side, facilities and location with sources, the prices behind the comparison, and the method. Each fact carries a numbered source; where sources disagree, both values are shown.</p></div><nav class="lg-chips" aria-label="In the full report"><a href="#read">Assessment</a><a href="#choose">Who each may suit</a><a href="#meaning">What the differences mean</a><a href="#tradeoffs">Trade-offs</a><a href="#weigh">What the sales can and cannot show</a><a href="#prices">The prices</a><a href="#you">What matters to you</a><a href="#questions">Viewing questions</a><a href="#conclusion">Conclusion</a><a href="#evidence">Data, sources and method</a></nav></div></section>
+<div class="readkey"><div class="wrap"><div class="key"><span>How to read this page:</span><span class="tg f">Fact</span><span class="tg f">Data</span><span class="tg v">KPT view</span><span class="tg u">Not known</span><span class="tg k">Ken</span><span>only where Ken wrote it (none in this sample).</span><span>Unlabelled analysis is KPT view, prepared with AI assistance. Small numbers link to dated sources.</span></div></div></div>
 <section class="band warm" id="read" aria-labelledby="h-read">
   <div class="wrap">
     <div class="kb">
@@ -873,31 +853,7 @@ body{margin:0}
   </div>
 </section>
 
-<section class="band take" id="request" aria-labelledby="h-next">
-  <div class="wrap">
-    <div class="tk-l">
-      <p class="kicker">Your next step</p>
-      <h2 id="h-next">Get a deeper comparison for your chosen developments.</h2>
-      <p class="lead" id="reqLead">If you are weighing two developments of your own, Ken can look at them in more detail, based on what matters to you. How far it goes depends on the information available for each.</p>
-      <ul class="tk-v">
-        <li><b>What could explain the price gap</b>age, size, facilities, location and the units themselves</li>
-        <li><b>Who each development may suit</b>set against your own priorities</li>
-        <li><b>Location, layouts and facilities</b>where reliable sources allow</li>
-        <li><b>Questions to settle</b>before you commit to a viewing or an offer</li>
-      </ul>
-    </div>
-    <div class="tk-r">
-      <p class="q">Request my detailed research</p>
-      <p class="fine" id="reqPairLine" style="margin:0 0 10px">Tell Ken which two developments you are comparing.</p>
-      <a class="btn primary" id="reqWa" href="https://wa.me/6590908898?text=Hi%20Ken%2C%20I%20viewed%20the%20sample%20research%20on%20Ken%20Property%20Tools.%20I&#39;d%20like%20a%20more%20detailed%20comparison%20of%20two%20developments%20I&#39;m%20considering%3A%20____%20and%20____." target="_blank" rel="noopener" data-kpt-wa="sample-request">Message Ken on WhatsApp</a>
-      <p class="fine">Optional, with no form to fill in. WhatsApp opens with a message you can edit first. Ken replies personally, so this is a conversation rather than an instant report. Please leave income, CPF and debt details out of it.</p>
-      <div class="ava">
-        <img src="../../assets/img/ken-portrait.jpg" alt="Ken Tan" width="64" height="64">
-        <div><h3>Ken Tan · The Property Guy</h3><p>Property agent since 2007 · Huttons Asia · CEA R007903D</p></div>
-      </div>
-    </div>
-  </div>
-</section>
+
 
 <section class="band grey" id="evidence" aria-labelledby="h-ev">
   <div class="wrap">
@@ -1043,7 +999,7 @@ body{margin:0}
   bind('p1chips','p1',function(v){return 'Hi Ken, I read your Jadescape vs Thomson Three report. The size I am looking at is '+(v||'____ sq ft')+'. Is this the right kind of comparison for it? (Ref JDT3-P1)'});
   bind('p3chips','p3',function(v){return 'Hi Ken, I read your Jadescape vs Thomson Three report. My situation: '+(v||'____')+' and my timeline is ____. What would you suggest? (Ref JDT3-P3)'});
   var hs=$('hseg'),herod=document.querySelector('.herod');
-  hs.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;pressed(hs,b);herod.className='herod'+(b.dataset.s==='0'?'':' hero-state-'+b.dataset.s)});
+  if(hs)hs.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;pressed(hs,b);herod.className='herod'+(b.dataset.s==='0'?'':' hero-state-'+b.dataset.s)});
   var pg=$('prio'),res=$('res');
   function showPrio(k){res.querySelectorAll('[data-k]').forEach(function(d){d.hidden=d.dataset.k!==k})}
   pg.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;pressed(pg,b);showPrio(b.dataset.k)});
@@ -1057,6 +1013,7 @@ body{margin:0}
 (function(){function hint(){var els=document.querySelectorAll('.types');els.forEach(function(e){var h=e.previousElementSibling;if(!h||!h.classList||!h.classList.contains('swipe')){h=document.createElement('p');h.className='swipe';h.textContent='Swipe sideways to see all columns →';e.parentNode.insertBefore(h,e)}var over=e.scrollWidth>e.clientWidth+1;h.classList.toggle('on',over)})}
 window.addEventListener('resize',hint);window.addEventListener('load',hint);document.addEventListener('toggle',hint,true);hint()})();
 </script>
+<section class="lg-band grey lg-ask" id="request" aria-labelledby="h-next"><div class="lg-wrap"><p class="lg-kicker">Your shortlist</p><h2 id="h-next">Want a deeper comparison for your shortlisted properties?</h2><p class="lg-sub" id="reqLead">If you are weighing two developments of your own, Ken can look at them in more detail, based on what matters to you. How far it goes depends on the information available for each.</p><p class="lg-fine" id="reqPairLine">Tell Ken which two developments you are comparing.</p><a class="lg-btn wa" id="reqWa" href="https://wa.me/6590908898?text=Hi%20Ken%2C%20I%20viewed%20the%20sample%20research%20on%20Ken%20Property%20Tools.%20I&#39;d%20like%20a%20more%20detailed%20comparison%20of%20two%20developments%20I&#39;m%20considering%3A%20____%20and%20____." target="_blank" rel="noopener" data-kpt-wa="sample-request">Message Ken on WhatsApp</a><p class="lg-fine">Optional, with no form to fill in. WhatsApp opens with a message you can edit first. Ken replies personally. Please leave income, CPF and debt details out of it.</p><div class="lg-ken"><img src="../../assets/img/ken-portrait.jpg" alt="Ken Tan" width="72" height="72"><div><b>Ken Tan</b><span>The Property Guy · Group District Director, Huttons Asia · Property agent since 2007 · CEA R007903D</span><span>Live on TikTok most nights, 8–9.30pm</span></div></div></div></section>
 <div class="kpt-sfoot"><div class="wrap"><p class="kb-contact"><b>Ken Tan · The Property Guy</b> · Property agent since 2007<br>Contact: <a href="https://wa.me/6590908898" target="_blank" rel="noopener">+65 9090 8898</a> · CEA Registration No. R007903D · Huttons Asia Pte Ltd · CEA Licence No. L3008899K</p><p>Data source: URA private residential transaction data (PMI_Resi_Transaction). Analysis and derived statistics by Ken Property Tools. Contains information made available under the <a href="https://www.ura.gov.sg/eservices-info/maps/acceptance-grant-licence" target="_blank" rel="noopener noreferrer">Singapore Open Data Licence v1.0</a>. Not endorsed by URA.</p></div></div>
 <script src="../../assets/js/kpt-analytics.js"></script>
 <script>
