@@ -3,21 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Understand a project through its transactions, or compare it with another.">
+<meta name="description" content="Search any Singapore private condo to see what its URA transactions say, then compare it with another development in one clear page. Sources and data dates are shown; limits are stated.">
 <meta name="theme-color" content="#FAFAF8">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
-<title>I'm researching a property — Ken Property Tools</title>
+<title>Research a Singapore condo — compare two developments | Ken Property Tools</title>
 <link rel="stylesheet" href="../assets/css/kpt-system.css?v=2026-10-06.8">
 <link rel="stylesheet" href="../assets/css/kpt-research.css?v=2026-10-06.8">
 <link rel="stylesheet" href="../assets/css/kpt-shell.css?v=2026-10-08.4">
-<link rel="stylesheet" href="../assets/css/kpt-ecosystem.css?v=2026-10-08.p3">
+<link rel="stylesheet" href="../assets/css/kpt-compare-v2.css?v=2026-10-08.p4">
 <link rel="canonical" href="https://tools.kentanthepropertyguy.com/research/">
-<meta name="robots" content="noindex, follow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ken Property Tools">
+<meta property="og:locale" content="en_SG">
+<meta property="og:title" content="Research a Singapore condo — compare two developments | Ken Property Tools">
+<meta property="og:description" content="Search any Singapore private condo to see what its URA transactions say, then compare it with another development in one clear page. Sources and data dates are shown; limits are stated.">
+<meta property="og:url" content="https://tools.kentanthepropertyguy.com/research/">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Research a project","url":"https://tools.kentanthepropertyguy.com/research/","description":"Search any Singapore private condo to see what its URA transactions say, then compare it with another development in one clear page. Sources and data dates are shown; limits are stated.","isPartOf":{"@type":"WebSite","name":"Ken Property Tools","url":"https://tools.kentanthepropertyguy.com/"},"inLanguage":"en-SG"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Ken Property Tools","item":"https://tools.kentanthepropertyguy.com/"},{"@type":"ListItem","position":2,"name":"Research","item":"https://tools.kentanthepropertyguy.com/research/"}]}</script>
 </head>
 <body class="kpr kpt-w-wide" data-view="home">
-<header class="kpt-header kpt-shell"><div class="kpt-brandblock"><a class="brand" href="../">KEN PROPERTY TOOLS</a><span class="kpt-tagline">by Ken Tan · The Property Guy</span></div><nav class="kpt-nav" aria-label="Site"><a href="library/" data-kpt-nav="research">Research</a><a href="../tools/" data-kpt-nav="tools">Tools</a></nav></header>
+<header class="kpt-header kpt-shell"><div class="kpt-brandblock"><a class="brand" href="../">KEN PROPERTY TOOLS</a><span class="kpt-tagline">by Ken Tan · The Property Guy</span></div><nav class="kpt-nav" aria-label="Site"><a href="./" data-kpt-nav="research" aria-current="page">Research</a><a href="../tools/" data-kpt-nav="tools">Tools</a></nav></header>
 
-<main class="kpt-shell" id="app"></main>
+<main class="kpt-shell" id="app"><section class="kpr-sec" style="padding-top:16px;border-top:none"><p class="kpt-eyebrow">Research a project</p><h1 class="kpr-h">Understand a development, then compare it with another.</h1><p class="kpr-lead">Search any Singapore private condo to see what its URA transactions say, then compare it with a second development and get a clear side-by-side read. <a href="../projects/">Browse every development</a>.</p><ol class="kpr-note" style="padding-left:20px"><li>Search for a development by name.</li><li>See its resale and new-sale transactions: typical prices per square foot, sizes, and how they have moved.</li><li>Choose “Compare a different project” to get a side-by-side read that matches the same sale type, size band and time window.</li></ol><p class="kpr-note">Every figure comes from URA private residential transaction records. Where the evidence is thin, the page says so instead of drawing a conclusion. It describes historical transactions and is not personalised advice, a valuation or a forecast.</p><noscript><p class="kpr-note">Search and comparison need JavaScript. You can still <a href="../projects/">browse every development</a> or <a href="../tools/">use the tools</a>.</p></noscript></section></main>
 
 <footer class="kpt-footer kpt-shell">
   <div class="kpt-ken"><img class="kpt-ken-img" src="../assets/img/ken-portrait.jpg" alt="Ken Tan" width="56" height="56"><div class="kpt-ken-txt">
@@ -37,6 +45,8 @@
 <script src="../assets/js/kpt-project.js?v=2026-10-06.8"></script>
 <script src="../assets/js/kpt-research.js?v=2026-10-06.8"></script>
 <script src="../assets/js/kpt-intel.js?v=2026-10-06.8"></script>
+<script src="../assets/js/kpt-evidence.js?v=2026-10-08.p4"></script>
+<script src="../assets/js/kpt-compare-v2.js?v=2026-10-08.p4"></script>
 <script src="../data/research/config.js?v=2026-10-06.8"></script>
 <script>
 // Presentation only. All reasoning is in assets/js/kpt-research.js; all numbers come from the generated project data.
@@ -126,6 +136,7 @@
         if (!q.trim()) { res.innerHTML = ''; return; }
         if (!rows.length) { res.innerHTML = `<div class="kpr-results"><div class="kpr-empty">No transactions found under that name in the last 5 years. It may be a launch with no sales yet, or spelled differently.</div></div>`; }
         else res.innerHTML = `<ul class="kpr-results" role="listbox">${rows.map((r, i) => `<li role="option"><button type="button" data-id="${esc(r.id)}" ${i === 0 ? 'aria-selected="true"' : ''}><b>${esc(R.displayName(r.name))}</b><span>${esc(r.street)} · D${Number(r.district)} · ${esc(r.seg)} · ${r.n} sales · latest ${esc(R.fmtMonth(r.last))}${r.new ? ' · new sales' : ''}${r.resale ? ' · resale' : ''}</span></button></li>`).join('')}</ul>`;
+        if (window.KPTV2) KPTV2.afterSearch(res, q, rows.length);
         clearTimeout(timer); timer = setTimeout(() => { if (q.trim().length >= 2) track('research_search', { results: rows.length }); }, 1200);
       }).catch(() => { res.innerHTML = `<div class="kpr-results"><div class="kpr-empty">Search is unavailable right now. Please refresh.</div></div>`; });
     }
@@ -140,7 +151,7 @@
     $app.innerHTML = `<section class="kpr-sec" style="padding-top:16px;border-top:none"><p class="kpt-eyebrow">I'm researching a property</p><h1 class="kpr-h" tabindex="-1">Which property are you looking at?</h1>
       <p class="kpr-lead">Search a private condo or apartment project to see what its transactions say, then compare it with another. This uses URA transaction records from the last 5 years.</p><div id="sb"></div>
       <p class="kpr-note">Projects with no transactions yet, such as an unsold launch, won't appear.</p>
-      <p class="kpr-note">Prefer a side-by-side read? <a href="library/">Browse the comparison library</a>, or <a href="../projects/">see every development</a>, including new launches with sites of their own.</p></section>`;
+      <p class="kpr-note">Prefer to browse? <a href="../projects/">See every development</a>, including new launches with sites of their own.</p></section>`;
     $app.querySelector('#sb').appendChild(searchBox(null, (id) => { location.hash = '#/p/' + id; }));
   }
 
@@ -246,6 +257,7 @@
           S.rawP = d.p; S.rawM = d.m; const M = R.analyseProject(d.p, d.m, { sale: saleHash || undefined, sizeSqft: S.size || undefined, peers: d.peers, notes: d.notes, today: TODAY });
           document.body.dataset.view = 'project'; document.title = M.name + ' — Research — Ken Property Tools';
           $app.innerHTML = projectHtml(M); wireCommon(M, 'project'); sizeEvent(M, 'project');
+          if (window.KPTV2) KPTV2.afterProject(M, $app, d.p, d.m, { R, searchBox, onPick: (x) => { location.hash = '#/p/' + x; } });
           const evd = document.getElementById('evidence'); if (evd) evd.addEventListener('toggle', () => { S.evOpen = evd.open; });
           $app.querySelectorAll('[data-sale]').forEach((b) => b.addEventListener('click', () => { location.hash = R.buildHash({ view: 'project', id, sale: b.dataset.sale }); }));
           $app.querySelectorAll('.kpr-row[data-bin], button.kpr-link[data-bin]').forEach((b) => b.addEventListener('click', () => { S.size = b.dataset.bin; saveSize(); draw(); const h = $app.querySelector('.kpr-panel'); if (h && window.innerWidth < 960) h.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }));
@@ -267,6 +279,7 @@
         ${sg.rows.length ? `<p class="kpr-sugg-h">${esc(sg.label)}</p><ul class="kpr-results" role="list">${sg.rows.map((x) => `<li><button type="button" data-id="${esc(x.id)}"><b>${esc(x.name)}</b><span>${x.n} sales · latest ${esc(R.fmtMonth(x.last))}</span></button></li>`).join('')}</ul><p class="kpr-note">Being in the same district doesn't make two projects comparable. We check that next.</p>` : ''}`;
       const go = (id) => { S.win = null; location.hash = '#/compare/' + aId + '/' + id; };
       $app.querySelector('#sb').appendChild(searchBox(aId, go));
+      if (window.KPTV2) KPTV2.enhancePick(aId, $app, go);
       $app.querySelectorAll('.kpr-results button[data-id]').forEach((b) => { if (!b.closest('#sb')) b.addEventListener('click', () => go(b.dataset.id)); });
       $app.querySelector('[data-act=back]').addEventListener('click', () => { location.hash = '#/p/' + aId; });
     }).catch(() => { location.hash = '#/'; });
@@ -311,12 +324,13 @@
       .then((x) => loadNotes().then((notes) => Object.assign(x, { notes })))
       .then((d) => {
         const draw = () => {
-          const M = R.analyseComparison(d.A, d.B, d.m, { sale: saleHash || undefined, window: S.win, sizeSqft: S.size || undefined, notes: d.notes, today: TODAY });
+          const M = R.analyseComparison(d.A, d.B, d.m, { sale: ('_s' in d ? d._s : (d._s = saleHash || (window.KPTV2 ? KPTV2.bestSale(R, d.A, d.B, d.m) : undefined))), window: S.win != null ? S.win : (window.KPTV2 ? KPTV2.defaultWindow(R, d.A, d.B, d.m, d._s) : S.win), sizeSqft: S.size || undefined, notes: d.notes, today: TODAY });
           document.body.dataset.view = 'compare'; document.title = M.a.name + ' vs ' + M.b.name + ' — Research — Ken Property Tools';
-          $app.innerHTML = compareHtml(M); wireCommon(M, 'compare'); sizeEvent(M, 'compare');
+          if (window.KPTV2) { $app.innerHTML = KPTV2.render(M, { R, P, A: d.A, B: d.B, m: d.m, root: '../', focusHtml }); } else $app.innerHTML = compareHtml(M);
+          wireCommon(M, 'compare'); sizeEvent(M, 'compare'); if (window.KPTV2) KPTV2.afterCompare(M, $app, '../');
           $app.querySelector('[data-act=back]').addEventListener('click', () => { location.hash = '#/p/' + aId; });
           $app.querySelectorAll('[data-sale]').forEach((b) => b.addEventListener('click', () => { S.win = null; location.hash = R.buildHash({ view: 'compare', a: aId, b: bId, sale: b.dataset.sale }); }));
-          $app.querySelectorAll('[data-win]').forEach((b) => b.addEventListener('click', () => { S.win = Number(b.dataset.win); draw(); const t = $app.querySelector('.kpr-ladder button[aria-pressed=true]'); if (t) t.focus({ preventScroll: true }); }));
+          $app.querySelectorAll('[data-win]').forEach((b) => b.addEventListener('click', () => { S.win = Number(b.dataset.win); draw(); const t = $app.querySelector('.kpr-ladder button[aria-pressed=true], .v2-ladder button[aria-pressed=true]'); if (t) t.focus({ preventScroll: true }); }));
           const cmp = document.getElementById('cmp'); if (cmp) cmp.addEventListener('click', () => track('research_compare_started', { project_id: aId }));
           const wk = M.activeWindow == null ? null : R.windowKey(d.m, M.activeWindow);
           once('cv:' + M.pairKey + ':' + M.sale.selected + ':' + wk, () => track('research_comparison_viewed', { project_a: aId, project_b: bId, sale_type: M.sale.selected, window: wk, overlap: M.overlap }));
@@ -329,13 +343,15 @@
   // ---------------------------------------------------------------- router
   function route() {
     const v = R.parseHash(location.hash); window.scrollTo(0, 0);
-    if (v.view === 'project') showProject(v.id, v.sale);
+    if (v.view === 'project' && window.KPTV2 && KPTV2.sites[v.id]) KPTV2.showSite(v.id, $app, { searchBox, onPick: (x) => { location.hash = '#/p/' + x; } });
+    else if (v.view === 'project') showProject(v.id, v.sale);
+    else if (v.view === 'compare' && window.KPTV2 && (KPTV2.sites[v.a] || KPTV2.sites[v.b])) KPTV2.showNoData(v.a, v.b, $app, { searchBox, onPick: (x) => { location.hash = '#/p/' + x; } });
     else if (v.view === 'compare') showCompare(v.a, v.b, v.sale);
     else if (v.view === 'pick') pickView(v.a);
     else renderHome();
   }
   window.addEventListener('hashchange', route);
-  route();
+  (window.KPTV2 ? KPTV2.ready : Promise.resolve()).then(route);
 })();
 </script>
 </body>
