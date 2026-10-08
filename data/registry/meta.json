@@ -1,0 +1,49 @@
+{
+ "v": 1,
+ "asOf": "2026-10-05",
+ "policy": {
+  "support": {
+   "minResaleTransactions": 30,
+   "unsupportedReasons": {
+    "same-project": "Choose two different developments.",
+    "no-transaction-data": "has no resale transactions in the current dataset, so there is nothing to compare yet.",
+    "thin-data": "has too few resale transactions in the current dataset for a reliable comparison.",
+    "new-launch": "is a new launch. Comparisons that include a new launch are not available yet.",
+    "no-report": "No comparison has been generated for this pair yet.",
+    "ambiguous": "More than one development matches. Choose the one you mean."
+   }
+  },
+  "enquiry": {
+   "phone": "6590908898",
+   "refPrefix": "KPT",
+   "maxCampaignChars": 16,
+   "note": "Messages never carry income, CPF, cash or debts. Report-level refs (for example JDT3-P1) and their P1 to P3 and S0 to S3 tags are unchanged and stay inside the reports."
+  },
+  "analytics": {
+   "liveHosts": [
+    "tools.kentanthepropertyguy.com"
+   ],
+   "note": "Events are sent to GA4 and Meta only on a live host. Everywhere else they are captured in window.dataLayer and, with KPT_DEBUG, logged.",
+   "events": {
+    "research_library_viewed": "Research library page opened",
+    "research_report_selected": "A report opened from the library, a project page or the homepage (params: report, pair, source)",
+    "research_report_viewed": "A report page opened (params: report, pair, build_id, status)",
+    "research_pair_checked": "Two developments checked in the compare tool (params: project_a, project_b, supported, reason)",
+    "research_project_selected": "A project chosen in the compare tool (existing event name reused; params: project_id, source)",
+    "research_whatsapp_clicked": "WhatsApp enquiry opened from a Research page or inside a report (existing event name reused; params: context, ref)",
+    "project_directory_viewed": "Project directory opened",
+    "project_directory_filtered": "A directory filter used (params: filter)",
+    "project_profile_viewed": "A project profile opened (params: project_id, content_level)",
+    "project_whatsapp_clicked": "WhatsApp enquiry opened from a project profile (params: project_id, ref)",
+    "microsite_clicked": "Outbound click to a project microsite (params: project_id, destination_host, placement)",
+    "tiktok_click": "TikTok link opened (existing event name reused)",
+    "nav_click": "Header navigation used (existing event name reused)"
+   }
+  },
+  "levels": {
+   "BASIC": "Verified basic information and any available transaction analysis. No microsite or floor plans required.",
+   "FEATURED": "More detailed curated information and related comparisons. A content-depth label, not a ranking or an endorsement.",
+   "MICROSITE": "A dedicated, independently maintained project website. KPT links to it and never copies it."
+  }
+ }
+}
