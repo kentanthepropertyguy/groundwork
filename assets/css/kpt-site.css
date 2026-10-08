@@ -37,3 +37,31 @@
 .kps .kps-opts .kpt-cta--wa::after{ content:none; }
 
 /* quiet identity: one small line, not a banner */
+
+/* ---- V11.0: Home two paths and Tools hub ---- */
+.kps .kps-path{ padding:34px 0 0; }
+.kps .kps-path + .kps-path{ padding-top:44px; }
+.kps .kps-path-h{ font-family:var(--serif); font-weight:400; font-size:26px; line-height:1.2; margin:0 0 6px; color:var(--ink); }
+.kps .kps-path-p{ font-size:16px; color:var(--muted); margin:0; max-width:52ch; }
+.kps .kps-path .kpt-router{ margin:18px 0 0; }
+.kps .kps-tools{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:18px 0 0; }
+.kps .kps-tool{ position:relative; display:block; background:var(--card); border-radius:var(--r-card); padding:18px 22px 20px; box-shadow:var(--shadow); text-decoration:none; color:inherit; transition:transform .18s ease, box-shadow .18s ease; }
+.kps .kps-tool:hover{ transform:translateY(-2px); box-shadow:0 1px 2px rgba(22,33,62,.05),0 16px 38px rgba(22,33,62,.10); }
+.kps .kps-tool b{ display:block; font-size:16.5px; font-weight:600; color:var(--ink); margin:0 0 4px; padding-right:24px; }
+.kps .kps-tool span{ display:block; font-size:14.5px; line-height:1.45; color:var(--muted); padding-right:24px; }
+.kps .kps-tool::after{ content:"→"; position:absolute; right:20px; top:18px; color:var(--gold); font-size:17px; }
+.kps .kps-more{ display:inline-block; margin-top:14px; font-size:15px; font-weight:600; color:var(--ink); text-decoration:none; border-bottom:1px solid var(--gold); }
+.kps .kps-more:hover{ color:var(--gold); }
+@media (max-width:760px){ .kps .kps-tools{ grid-template-columns:1fr; gap:10px; } .kps .kps-path{ padding-top:26px; } .kps .kps-path + .kps-path{ padding-top:34px; } .kps .kps-path-h{ font-size:23px; } }
+/* Tools hub: categories, each holding any number of tool cards */
+.kps .kps-cat{ margin:34px 0 0; }
+.kps .kps-cat-h{ font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); font-weight:700; margin:0 0 12px; }
+.kps .kps-cat .kps-hub{ margin:0; }
+.kps .kps-hub{ display:grid; gap:14px; margin:0; }
+.kps .kps-card{ position:relative; display:block; background:var(--card); border-radius:var(--r-card); padding:24px 26px 26px; box-shadow:var(--shadow); text-decoration:none; color:inherit; transition:transform .18s ease, box-shadow .18s ease; }
+.kps .kps-card:hover{ transform:translateY(-2px); box-shadow:0 1px 2px rgba(22,33,62,.05),0 16px 38px rgba(22,33,62,.10); }
+.kps .kps-card h3{ font-family:var(--serif); font-weight:400; font-size:24px; line-height:1.2; margin:0 0 8px; color:var(--ink); padding-right:30px; }
+.kps .kps-card p{ font-size:15.5px; line-height:1.5; color:var(--muted); margin:0; max-width:56ch; }
+.kps .kps-card::after{ content:"→"; position:absolute; right:24px; top:24px; color:var(--gold); font-size:19px; }
+.kps .kps-hubnote{ margin:26px 0 0; font-size:15.5px; color:var(--muted); }
+.kps .kps-hubnote a{ color:var(--ink); font-weight:600; text-decoration:none; border-bottom:1px solid var(--gold); }

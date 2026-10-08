@@ -355,4 +355,38 @@ console.log('Brand hierarchy (V10.4.1)');
 });
 t('Home keeps its headline and the product positioning', () => { const h = fs.readFileSync(path.join(root, 'index.html'), 'utf8'); assert.ok(/Make sense of your next property move\./.test(h)); assert.ok(/Property decisions, analysed\./.test(h)); });
 
+console.log('V11.0 two paths, Tools link and Tools hub');
+const rd = (f) => fs.readFileSync(path.join(root, f), 'utf8');
+const NAVHREF = { 'index.html': 'tools/', 'own/index.html': '../tools/', 'buy/index.html': '../tools/', 'research/index.html': '../tools/', 'tools/hdb-upgrade/index.html': '../', 'tools/what-can-i-buy/index.html': '../' };
+Object.keys(NAVHREF).forEach((f) => t(f + ': header has one Tools link to the hub, wordmark and by-line intact', () => {
+  const hd = /<header class="kpt-header[^>]*>[\s\S]*?<\/header>/.exec(rd(f))[0];
+  assert.strictEqual((hd.match(/<nav class="kpt-nav"/g) || []).length, 1); assert.ok(new RegExp('<a href="' + NAVHREF[f].replace(/\./g, '\\.') + '" data-kpt-nav="tools">Tools</a>').test(hd));
+  assert.ok(/>KEN PROPERTY TOOLS<\/a>/.test(hd) && /by Ken Tan · The Property Guy/.test(hd));
+  const fs2 = require('path'); assert.ok(fs.existsSync(path.join(root, path.dirname(f), NAVHREF[f], 'index.html')), 'link target exists');
+}));
+t('Home: Guided journey and Explore tools paths; three journey cards keep their links and data-journey; buy description updated', () => {
+  const h = rd('index.html');
+  assert.ok(/Not sure where to start\?/.test(h) && /Already know what you need\?/.test(h) && /Make sense of your next property move\./.test(h));
+  [['own/', 'own'], ['buy/', 'buy'], ['research/', 'research']].forEach(([href, j]) => assert.ok(new RegExp('<a href="' + href + '" data-journey="' + j + '">').test(h), j));
+  assert.ok(/Explore properties that fit your budget, priorities and preferred locations\./.test(h)); assert.ok(!/comfortably afford/.test(h));
+  ['tools/hdb-upgrade/', 'tools/what-can-i-buy/', 'research/', 'tools/'].forEach((l) => assert.ok(h.indexOf('href="' + l + '" data-tool=') > -1, l));
+  assert.ok(h.indexOf('Guided journey') < h.indexOf('Explore tools'), 'guided first');
+});
+t('Tools hub: categories hold live tools only, every link resolves, canonical + description + title present', () => {
+  const h = rd('tools/index.html'); const links = [...h.matchAll(/<a class="kps-card" href="([^"]+)" data-tool="([^"]+)"/g)];
+  assert.strictEqual(links.length, 3); assert.ok((h.match(/<section class="kps-cat"/g) || []).length >= 3);
+  links.forEach((m) => assert.ok(fs.existsSync(path.join(root, 'tools', m[1], 'index.html')), m[1]));
+  assert.ok(!/coming soon|placeholder|under construction/i.test(h.replace(/<!--[\s\S]*?-->/g, '')));
+  assert.ok(/<link rel="canonical" href="https:\/\/tools\.kentanthepropertyguy\.com\/tools\/">/.test(h) && /<meta name="description" content="[^"]{40,}/.test(h) && /<title>Tools — Ken Property Tools<\/title>/.test(h));
+  assert.ok(/aria-current="page"/.test(h));
+});
+t('analytics: tool_selected and nav_click carry only a tool/target and a placement; journey_started unchanged', () => {
+  const h = rd('index.html') + rd('tools/index.html');
+  assert.ok(/KPT\.track\('journey_started', \{ journey: a\.dataset\.journey \}\)/.test(rd('index.html')));
+  [...h.matchAll(/KPT\.track\('(tool_selected|nav_click)', (\{[^}]*\})/g)].forEach((m) => assert.ok(/^\{ (tool|target): a\.dataset\.\w+, placement: '(home|hub|header)' \}$/.test(m[2]), m[2]));
+});
+t('Home and the Tools hub load no new script (only analytics and components)', () => {
+  ['index.html', 'tools/index.html'].forEach((f) => (rd(f).match(/<script src="([^"]+)"/g) || []).forEach((m) => assert.ok(/kpt-analytics\.js|kpt-components\.js/.test(m), m)));
+});
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed'); process.exit(fail ? 1 : 0);

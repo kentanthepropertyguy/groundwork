@@ -7,12 +7,12 @@
 <meta name="theme-color" content="#FAFAF8">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <title>Ken Property Tools — Property decisions, analysed.</title>
-<link rel="stylesheet" href="assets/css/kpt-system.css?v=2026-10-08.3">
-<link rel="stylesheet" href="assets/css/kpt-site.css?v=2026-10-08.3">
-<link rel="stylesheet" href="assets/css/kpt-shell.css?v=2026-10-08.3">
+<link rel="stylesheet" href="assets/css/kpt-system.css?v=2026-10-08.4">
+<link rel="stylesheet" href="assets/css/kpt-site.css?v=2026-10-08.4">
+<link rel="stylesheet" href="assets/css/kpt-shell.css?v=2026-10-08.4">
 </head>
 <body class="kps kpt-w-wide">
-<header class="kpt-header kpt-shell"><div class="kpt-brandblock"><a class="brand" href="./">KEN PROPERTY TOOLS</a><span class="kpt-tagline">by Ken Tan · The Property Guy</span></div></header>
+<header class="kpt-header kpt-shell"><div class="kpt-brandblock"><a class="brand" href="./">KEN PROPERTY TOOLS</a><span class="kpt-tagline">by Ken Tan · The Property Guy</span></div><nav class="kpt-nav" aria-label="Site"><a href="tools/" data-kpt-nav="tools">Tools</a></nav></header>
 
 <main class="kpt-shell">
   <section class="kpt-section kps-hero">
@@ -20,20 +20,37 @@
     <p class="kpt-lede">Start from where you are. See what the numbers mean for you, and what trade-offs sit behind them.</p>
   </section>
 
-  <nav class="kpt-router" aria-label="Start your question">
-    <a href="own/" data-journey="own">
-      <h3>I own a property</h3>
-      <p>Upgrading, selling, or just want to know where you stand.</p>
-    </a>
-    <a href="buy/" data-journey="buy">
-      <h3>I'm looking to buy</h3>
-      <p>Figure out what you can comfortably afford, and where.</p>
-    </a>
-    <a href="research/" data-journey="research">
-      <h3>I'm researching a property</h3>
-      <p>Understand a project through its transactions, or compare it with another.</p>
-    </a>
-  </nav>
+  <section class="kps-path" aria-labelledby="guided-h">
+    <p class="kpt-eyebrow">Guided journey</p>
+    <h2 class="kps-path-h" id="guided-h">Not sure where to start?</h2>
+    <p class="kps-path-p">Answer a few questions and we'll point you to the right next step.</p>
+    <nav class="kpt-router" aria-label="Start your question">
+      <a href="own/" data-journey="own">
+        <h3>I own a property</h3>
+        <p>Upgrading, selling, or just want to know where you stand.</p>
+      </a>
+      <a href="buy/" data-journey="buy">
+        <h3>I'm looking to buy</h3>
+        <p>Explore properties that fit your budget, priorities and preferred locations.</p>
+      </a>
+      <a href="research/" data-journey="research">
+        <h3>I'm researching a property</h3>
+        <p>Understand a project through its transactions, or compare it with another.</p>
+      </a>
+    </nav>
+  </section>
+
+  <section class="kps-path" aria-labelledby="tools-h">
+    <p class="kpt-eyebrow">Explore tools</p>
+    <h2 class="kps-path-h" id="tools-h">Already know what you need?</h2>
+    <p class="kps-path-p">Go straight to the numbers. Each tool explains how it works and what it leaves out.</p>
+    <div class="kps-tools">
+      <a class="kps-tool" href="tools/hdb-upgrade/" data-tool="hdb-upgrade"><b>Can I upgrade from my HDB?</b><span>A planning range for your next private home.</span></a>
+      <a class="kps-tool" href="tools/what-can-i-buy/" data-tool="what-can-i-buy"><b>What can this budget buy?</b><span>Developments worth investigating at your budget.</span></a>
+      <a class="kps-tool" href="research/" data-tool="research"><b>Research a project</b><span>See what a condo's transactions say, or compare two.</span></a>
+    </div>
+    <a class="kps-more" href="tools/" data-tool="all">See all tools</a>
+  </section>
 
 </main>
 
@@ -47,7 +64,7 @@
 </footer>
 
 <script src="assets/js/kpt-analytics.js"></script>
-<script src="assets/js/kpt-components.js?v=2026-10-08.3"></script>
+<script src="assets/js/kpt-components.js?v=2026-10-08.4"></script>
 <script>
   KPT.setContext({ tool_category: "homepage" });
   KPT.track("page_view", { page: "homepage" });
@@ -55,6 +72,14 @@
     a.addEventListener('click', function () {
       KPT.track('journey_started', { journey: a.dataset.journey });
     });
+  });
+  document.querySelectorAll('[data-tool]').forEach(function (a) {
+    a.addEventListener('click', function () {
+      KPT.track('tool_selected', { tool: a.dataset.tool, placement: 'home' });
+    });
+  });
+  document.querySelectorAll('[data-kpt-nav]').forEach(function (a) {
+    a.addEventListener('click', function () { KPT.track('nav_click', { target: a.dataset.kptNav, placement: 'header' }); });
   });
 </script>
 </body>

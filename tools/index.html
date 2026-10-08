@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Ken Property Tools: calculators and research tools for Singapore property decisions. Upgrade from your HDB, see what a budget buys, and research any private condo project.">
+<meta name="theme-color" content="#FAFAF8">
+<link rel="canonical" href="https://tools.kentanthepropertyguy.com/tools/">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<title>Tools — Ken Property Tools</title>
+<link rel="stylesheet" href="../assets/css/kpt-system.css?v=2026-10-08.4">
+<link rel="stylesheet" href="../assets/css/kpt-site.css?v=2026-10-08.4">
+<link rel="stylesheet" href="../assets/css/kpt-shell.css?v=2026-10-08.4">
+</head>
+<body class="kps kpt-w-read">
+<header class="kpt-header kpt-shell"><div class="kpt-brandblock"><a class="brand" href="../">KEN PROPERTY TOOLS</a><span class="kpt-tagline">by Ken Tan · The Property Guy</span></div><nav class="kpt-nav" aria-label="Site"><a href="./" data-kpt-nav="tools" aria-current="page">Tools</a></nav></header>
+
+<main class="kpt-shell">
+  <section class="kpt-section kps-hero" style="padding-top:30px;">
+    <p class="kpt-eyebrow">Tools</p>
+    <h1 class="kpt-h1" style="font-size:40px;max-width:16ch;">Explore tools</h1>
+    <p class="kpt-lede">Go straight to the numbers. Each tool explains how it works and what it leaves out.</p>
+  </section>
+
+  <!-- HOW TO ADD A TOOL
+       1. Find the category <section class="kps-cat"> it belongs to, or copy one to start a new category.
+       2. Copy one <a class="kps-card"> inside that category's .kps-hub and change the link, data-tool, title and text.
+       3. Optionally add it to the Home "Explore tools" tiles (index.html). Home shows a short curated list; this page shows all of them.
+       Only list tools that are live. -->
+  <section class="kps-cat" aria-labelledby="cat-own">
+    <h2 class="kps-cat-h" id="cat-own">If you own a property</h2>
+    <div class="kps-hub">
+      <a class="kps-card" href="../tools/hdb-upgrade/" data-tool="hdb-upgrade"><h3>Can I upgrade from my HDB?</h3><p>A planning range for your next private home, worked out from your sale price, loan, income and savings. It also explains what changes if you buy before you sell.</p></a>
+    </div>
+  </section>
+  <section class="kps-cat" aria-labelledby="cat-buy">
+    <h2 class="kps-cat-h" id="cat-buy">If you are buying</h2>
+    <div class="kps-hub">
+      <a class="kps-card" href="../tools/what-can-i-buy/" data-tool="what-can-i-buy"><h3>What can this budget buy?</h3><p>Enter a budget to see developments worth investigating, new launch and resale, with the evidence and the trade-offs behind each.</p></a>
+    </div>
+  </section>
+  <section class="kps-cat" aria-labelledby="cat-research">
+    <h2 class="kps-cat-h" id="cat-research">If you are researching</h2>
+    <div class="kps-hub">
+      <a class="kps-card" href="../research/" data-tool="research"><h3>Research a project</h3><p>Search a private condo or apartment to see what its URA transactions say, then compare it with another.</p></a>
+    </div>
+  </section>
+
+  <p class="kps-hubnote">Not sure which one you need? <a href="../" data-journey-link="guided">Start with a guided journey</a>.</p>
+</main>
+
+<footer class="kpt-footer kpt-shell">
+  <div class="kpt-ken"><img class="kpt-ken-img" src="../assets/img/ken-portrait.jpg" alt="Ken Tan" width="56" height="56"><div class="kpt-ken-txt">
+    <p class="kpt-f-name">Ken Tan · The Property Guy</p>
+    <p class="kpt-f-line">Singapore property agent · Since 2007</p>
+    <p class="kpt-f-line"><a href="https://www.tiktok.com/@kennx8898" target="_blank" rel="noopener" data-kpt-tt="footer">TikTok @kennx8898</a> · Live most nights</p>
+  </div></div>
+  <p class="kpt-f-reg">CEA R007903D · Huttons Asia Pte Ltd (L3008899K)</p>
+</footer>
+
+<script src="../assets/js/kpt-analytics.js"></script>
+<script src="../assets/js/kpt-components.js?v=2026-10-08.4"></script>
+<script>
+  KPT.setContext({ tool_category: "tools-hub" });
+  KPT.track("page_view", { page: "tools" });
+  document.querySelectorAll('[data-tool]').forEach(function (a) {
+    a.addEventListener('click', function () { KPT.track('tool_selected', { tool: a.dataset.tool, placement: 'hub' }); });
+  });
+  document.querySelectorAll('[data-kpt-nav]').forEach(function (a) {
+    a.addEventListener('click', function () { KPT.track('nav_click', { target: a.dataset.kptNav, placement: 'header' }); });
+  });
+</script>
+</body>
+</html>
