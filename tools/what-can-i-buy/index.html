@@ -3,30 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>What can this budget buy? · Ken Property Tools</title>
+<title>What can this budget buy? — Groundwork</title>
 <meta name="description" content="Where your budget works in the Singapore property market, what you trade off, and what Ken would look at.">
 <meta name="theme-color" content="#FAFAF8">
 <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/css/kpt-system.css?v=2026-10-08.4">
 <link rel="stylesheet" href="../../assets/css/kpt-journey.css?v=2026-10-08.4">
 <link rel="stylesheet" href="../../assets/css/kpt-shell.css?v=2026-10-08.4">
+<link rel="stylesheet" href="../../assets/css/gw.css?v=2026-10-09.gw">
 </head>
-<body class="kpj kpj-wide kpt-w-read" data-view="result">
-<header class="kpt-header kpt-shell"><div class="kpt-brandblock"><a class="brand" href="../../">KEN PROPERTY TOOLS</a><span class="kpt-tagline">by Ken Tan · The Property Guy</span></div><nav class="kpt-nav" aria-label="Site"><a href="../" data-kpt-nav="tools">Tools</a></nav></header>
+<body class="kpj kpj-wide kpt-w-read gw-legacy" data-root="../../" data-view="result">
+<header class="gw-nav"><div class="in"><a class="gw-brand" href="../../" data-kpt-nav="home"><b>GROUNDWORK</b><span>by Ken Tan · The Property Guy</span></a><div class="gw-right"><nav class="gw-links" aria-label="Site"><a href="../../research/" data-kpt-nav="research">Research</a><a href="../../journey/" data-kpt-nav="journey">Guided journey</a><a href="../../tools/" data-kpt-nav="tools" aria-current="page">Tools</a></nav><a class="gw-ask" href="https://wa.me/6590908898?text=Hi%20Ken%2C%20I%E2%80%99m%20on%20Groundwork%20and%20would%20like%20to%20talk%20through%20my%20property%20plans.%20My%20situation%20is%20____.%20(Ref%20KPT-HOME)" target="_blank" rel="noopener" data-kpt-nav="ask-ken">Ask Ken</a><details class="gw-menu"><summary aria-label="Menu">Menu</summary><div class="gw-drop"><a href="../../research/" data-kpt-nav="research">Research</a><a href="../../journey/" data-kpt-nav="journey">Guided journey</a><a href="../../tools/" data-kpt-nav="tools" aria-current="page">Tools</a><a href="../../projects/" data-kpt-nav="directory">Browse every development</a></div></details></div></div></header>
 
 <main class="kpt-shell">
   <div id="root"><p class="kpt-note" style="padding:40px 0;">Loading…</p></div>
 </main>
 
-<footer class="kpt-footer kpt-shell">
-  <div class="kpt-ken"><img class="kpt-ken-img" src="../../assets/img/ken-portrait.jpg" alt="Ken Tan" width="56" height="56"><div class="kpt-ken-txt">
-    <p class="kpt-f-name">Ken Tan · The Property Guy</p>
-    <p class="kpt-f-line">Singapore property agent · Since 2007</p>
-    <p class="kpt-f-line"><a href="https://www.tiktok.com/@kennx8898" target="_blank" rel="noopener" data-kpt-tt="footer">TikTok @kennx8898</a> · Live most nights</p>
-  </div></div>
-  <p class="kpt-f-reg">CEA R007903D · Huttons Asia Pte Ltd (L3008899K)</p>
-  <p class="kpt-f-dis">Indicative market ranges and planning estimates only, not financial advice.<br>Data source: URA private residential transaction data (PMI_Resi_Transaction). Analysis and derived statistics by Ken Property Tools. Contains information made available under the <a href="https://www.ura.gov.sg/eservices-info/maps/acceptance-grant-licence" target="_blank" rel="noopener noreferrer">Singapore Open Data Licence v1.0</a>. Not endorsed by URA.</p>
-</footer>
+<footer class="gw-foot"><div class="in"><div class="top"><div class="who"><img src="../../assets/img/ken-portrait.jpg" alt="Ken Tan" width="56" height="56"><div><b>GROUNDWORK · by Ken Tan · The Property Guy</b>Property agent since 2007 · CEA R007903D · Huttons Asia Pte Ltd (L3008899K)<br><a href="https://www.tiktok.com/@kennx8898" target="_blank" rel="noopener" data-kpt-tt="footer">TikTok @kennx8898</a> · <span class="gw-live">LIVE</span> nightly 8–9.30pm</div></div><nav aria-label="Footer"><a href="../../research/">Research</a><a href="../../journey/">Guided journey</a><a href="../../tools/">Tools</a><a href="../../projects/">Browse every development</a></nav></div><p class="dis kpt-f-dis">Indicative market ranges and planning estimates only, not financial advice. Data source: URA private residential transaction data (PMI_Resi_Transaction). Analysis and derived statistics by Groundwork. Contains information made available under the <a href="https://www.ura.gov.sg/eservices-info/maps/acceptance-grant-licence" target="_blank" rel="noopener noreferrer">Singapore Open Data Licence v1.0</a>. Not endorsed by URA.</p></div></footer>
 
 <script src="../../assets/js/kpt-analytics.js"></script>
 <script src="../../assets/js/kpt-components.js?v=2026-10-08.4"></script>
@@ -125,7 +118,7 @@
         <button class="kpj-link kpj-link--muted" id="changeBudget" type="button" hidden>Change budget</button>
       </div>`;
   }
-  const BEYOND_WA = 'Hi Ken, I was using Ken Property Tools and have a question.';   // generic on purpose: no budget, project or search detail
+  const BEYOND_WA = 'Hi Ken, I was using Groundwork and have a question.';   // generic on purpose: no budget, project or search detail
   function show(res, step) {
     const v = R.view(res, { step: step, sizeRounding: ENG.DEFAULTS.size_rounding }), root = $('root');
     root.innerHTML = resultHtml(v);
@@ -274,7 +267,7 @@
       <p class="kpf-sz">${esc(s.size)}</p>${s.bedNote ? `<p class="kpf-bn">${esc(s.bedNote)}</p>` : ''}<p class="kpf-pr"><span class="kpf-pl">${esc(s.priceLead)}</span> <b>${esc(s.figure)}</b>${s.priceNote ? ` <span class="kpf-pn">${esc(s.priceNote)}</span>` : ''}</p>
       <p class="kpf-bud kpf-bud--${s.budget.tone}">${esc(s.budget.text)}</p>
       ${s.sales ? `<p class="kpf-sales">${esc(s.sales)}</p>` : ''}${s.latest ? `<p class="kpf-latest">${esc(s.latest)}</p>` : ''}${s.quiet ? `<p class="kpf-q">${esc(s.quiet)}</p>` : ''}
-      <a class="kpf-cta" data-f="ask" data-slug="${esc(c.slug)}" href="${esc(KPT.waLink({ message: waFor([c.name]) }))}">${esc(c.ask)}</a>${tickBox(c)}</article>`; };
+      <div class="kpf-acts2">${c.link ? `<a class="kpf-research" data-f="go" data-id="${esc(c.id)}" href="${esc(c.link.replace('research/index.html#', 'research/#'))}">Read about this development ›</a>` : ''}<a class="kpf-cta" data-f="ask" data-slug="${esc(c.slug)}" href="${esc(KPT.waLink({ message: waFor([c.name]) }))}">${esc(c.ask)}</a></div>${tickBox(c)}</article>`; };
     const checkedWhen = (() => { if (!V10 || !res.inventory.checkedAt) return null; const g = res.groups.find((x) => x.sale === 'new'); if (!g || !g.cards.concat(g.more || []).some((c) => c.huttons && (c.huttons.kind === 'fresh' || c.huttons.kind === 'dated' || c.huttons.kind === 'zero' || c.huttons.kind === 'nomatch'))) return null; return FI.whenText(Date.parse(res.inventory.checkedAt), nowMs()); })();
     const groupHtml = (g) => {
       const open = !!FS.more[g.sale], extra = g.more || [], name = g.sale === 'new' ? 'New launch' : 'Resale';

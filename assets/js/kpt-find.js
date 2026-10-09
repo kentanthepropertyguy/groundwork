@@ -442,7 +442,7 @@
   const budgetPhrase = (b) => '$' + String(Math.round(b / 10000) / 100).replace(/(\.\d)0$/, '$1') + 'm';
   function handoffMessage(o) {
     const names = (o.names || []).filter(Boolean).slice(0, 2); if (!names.length) return null;
-    const head = names.length === 1 ? 'Hi Ken, I was looking at ' + names[0] + ' on Ken Property Tools. Does this suit what I’m looking for?' : 'Hi Ken, I’m comparing ' + names[0] + ' and ' + names[1] + '. Could you help me understand which may suit me better?';
+    const head = names.length === 1 ? 'Hi Ken, I was looking at ' + names[0] + ' on Groundwork. Does this suit what I’m looking for?' : 'Hi Ken, I’m comparing ' + names[0] + ' and ' + names[1] + '. Could you help me understand which may suit me better?';
     const parts = [];
     if (o.budget > 0) parts.push('around ' + budgetPhrase(o.budget));
     if (o.size && o.size.from > 0 && o.size.to > o.size.from) parts.push('about ' + num(o.size.from) + '–' + num(o.size.to) + ' sqft');
