@@ -82,11 +82,11 @@
   function waMessage(policy, kind, p, attr) {
     const e = policy.enquiry, camp = attr && attr.utm_campaign ? clean(attr.utm_campaign, e.maxCampaignChars) : '';
     const tail = (ref) => ' (Ref ' + e.refPrefix + '-' + ref + (camp ? ' · ' + camp : '') + ')';
-    if (kind === 'project') return 'Hi Ken, I’m looking at ' + p.name + ' on Ken Property Tools. My situation is ____.' + tail('PRJ-' + p.id);
+    if (kind === 'project') return 'Hi Ken, I’m looking at ' + p.name + ' on Groundwork. My situation is ____.' + tail('PRJ-' + p.id);
     if (kind === 'microsite') return 'Hi Ken, I’m looking at ' + p.name + '. I’d like to talk it through.' + tail('MS-' + p.id);
-    if (kind === 'compare') return 'Hi Ken, I’m comparing ' + p.a + ' and ' + p.b + ' on Ken Property Tools. Can you compare them for my situation?' + tail('CMP-' + pairKey(p.aId, p.bId).replace('~', '-'));
-    if (kind === 'home') return 'Hi Ken, I’m on Ken Property Tools and would like to talk through my property plans. My situation is ____.' + tail('HOME');
-    if (kind === 'library') return 'Hi Ken, I’m reading your property comparisons on Ken Property Tools. I’d like your view on ____.' + tail('LIB');
+    if (kind === 'compare') return 'Hi Ken, I’m comparing ' + p.a + ' and ' + p.b + ' on Groundwork. Can you compare them for my situation?' + tail('CMP-' + pairKey(p.aId, p.bId).replace('~', '-'));
+    if (kind === 'home') return 'Hi Ken, I’m on Groundwork and would like to talk through my property plans. My situation is ____.' + tail('HOME');
+    if (kind === 'library') return 'Hi Ken, I’m reading your property comparisons on Groundwork. I’d like your view on ____.' + tail('LIB');
     if (kind === 'report') return 'Hi Ken, I read your ' + p.title + ' comparison. My situation is ____.' + tail('RPT-' + p.slug);
     throw new Error('Unknown enquiry kind: ' + kind);
   }

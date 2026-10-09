@@ -74,7 +74,7 @@
   }
   function requestMessage(M) {
     let seen = false; try { seen = sessionStorage.getItem('kpt_sample_seen') === '1'; } catch (e) { seen = false; }
-    return 'Hi Ken, I\'ve compared ' + M.a.name + ' and ' + M.b.name + ' on Ken Property Tools' + (seen ? ' and viewed the sample research' : '') + '. I\'d like to understand these two developments in more detail.';
+    return 'Hi Ken, I\'ve compared ' + M.a.name + ' and ' + M.b.name + ' on Groundwork' + (seen ? ' and viewed the sample research' : '') + '. I\'d like to understand these two developments in more detail.';
   }
   function evidenceHtml(M, ev, ctx) {
     const cfg = E.CONFIG, s = cfg.stronger, mn = cfg.minimum, q = new Set(ev.qualifying);
@@ -398,7 +398,7 @@
     const h = app.querySelector('h1'); if (h) h.focus({ preventScroll: true });
   }
   function showSite(id, app, hooks) {
-    const x = sites[id]; document.body.dataset.view = 'site'; document.title = x.name + ' — Ken Property Tools';
+    const x = sites[id]; document.body.dataset.view = 'site'; document.title = x.name + ' — Groundwork';
     app.innerHTML = quietPage({ kind: 'site', kick: x.stage === 'new-launch' ? 'New launch' : 'Development', title: x.name,
       lead: x.url ? esc(x.name) + ' keeps its own site for current details. We link to it rather than copy it, so what you read there is always up to date.' : esc(x.name) + (x.status === 'planned' ? ' is planned, with a dedicated site to follow.' : ' is a new development. Its dedicated site is not linked here yet.'),
       pill: 'There are no resale transactions to analyse yet, so there is nothing to compare here.', extra: x.url ? '<div class="lg-sb" style="width:100%;max-width:680px">' + siteCard(x, 'research-project') + '</div>' : '' });
@@ -409,7 +409,7 @@
   const NO_DATA = 'We don’t currently have sufficient transaction data to provide a meaningful comparison.';
   function showNoData(aId, bId, app, hooks) {
     const nm = (id) => (sites[id] ? sites[id].name : null), empty = [aId, bId].filter((id) => sites[id]), other = [aId, bId].find((id) => !sites[id]);
-    document.body.dataset.view = 'compare'; document.title = 'Comparison — Research — Ken Property Tools';
+    document.body.dataset.view = 'compare'; document.title = 'Comparison — Research — Groundwork';
     app.innerHTML = quietPage({ kind: 'nodata', kick: LABEL, title: empty.map(nm).join(' and ') + ' has no transactions to compare yet',
       lead: '<b>' + esc(NO_DATA) + '</b> ' + esc(empty.map(nm).join(' and ')) + (empty.length > 1 ? ' have' : ' has') + ' no URA transactions in the data we hold, so there is nothing to set against ' + (other ? 'the other development' : 'each other') + '. No price gap is shown.',
       extra: '<div class="lg-btns">' + (other ? '<a class="lg-btn primary" href="#/p/' + esc(other) + '">See the other development’s sales ›</a>' : '') + '</div>' + (empty.filter((id) => sites[id].url).length ? '<div class="lg-sb" style="width:100%;max-width:680px">' + empty.filter((id) => sites[id].url).map((id) => siteCard(sites[id], 'research-compare')).join('') + '</div>' : '') });
