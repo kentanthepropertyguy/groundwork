@@ -281,3 +281,5 @@ body[data-view="directory"] h1.kpt-h1{margin-left:auto;margin-right:auto;text-al
   .gw-pps td{border:0;padding:0}.gw-pps td:nth-child(3),.gw-pps td:nth-child(4){grid-column:1/-1;text-align:left;font-size:13px;color:var(--gw-muted)}
   .gw-pps td:nth-child(4)::before{content:"Instalment after this stage: "}
 }
+/* R2 hotfix: the calculator's box is the outer .gw-in; the R1 field rules must not draw a second ring inside it on focus */
+.gw-fld .gw-in input,.gw-fld .gw-in input:focus{border:0;border-radius:0;box-shadow:none;min-height:0;padding:10px 0;background:transparent;outline:0}
