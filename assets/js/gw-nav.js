@@ -66,8 +66,8 @@
       t: ['hdb upgrade', 'upgrade', 'upgrading', 'upgrader', 'hdb to condo', 'hdb to private', 'upgrade from hdb', 'can i afford to upgrade', 'afford a condo', 'private property budget', 'sell hdb buy condo', 'next home budget', 'budget'] },
     { id: 'what-can-i-buy', name: 'What can this budget buy?', tag: 'Homes that sold around your budget', short: 'What homes around your budget sold for', href: 'tools/what-can-i-buy/', icon: 'what-can-i-buy', menu: 1, sec: 'research',
       t: ['what can i buy', 'budget', 'my budget', 'price range', 'find a condo', 'find a home', 'which condo', 'shortlist', 'space', 'size', 'sq ft', 'square feet', 'older condo', 'newer condo'] },
-    { id: 'worth', name: 'HDB and home prices', tag: 'Resales in your block · asking price', short: 'What homes like yours sold for', href: 'journey/worth/', icon: 'worth', menu: 1, sec: 'research',
-      t: ['valuation', 'value', 'home value', 'worth', 'whats my home worth', 'how much is my flat worth', 'how much is my home worth', 'hdb price', 'hdb prices', 'hdb resale', 'resale price', 'resale prices', 'hdb valuation', 'asking price', 'fair price', 'overpriced', 'is the price fair', 'my block', 'block resales', 'recent sales', 'landed', 'landed prices', 'terrace', 'semi d', 'bungalow', 'transacted price'] },
+    { id: 'worth', name: 'Property values & prices', tag: 'HDB, condo and landed sales · asking price', short: 'What comparable homes sold for', href: 'journey/worth/', icon: 'worth', menu: 1, sec: 'research',
+      t: ['valuation', 'value', 'home value', 'worth', 'whats my home worth', 'how much is my flat worth', 'how much is my home worth', 'hdb price', 'hdb prices', 'hdb resale', 'resale price', 'resale prices', 'hdb valuation', 'asking price', 'fair price', 'overpriced', 'is the price fair', 'my block', 'block resales', 'recent sales', 'landed', 'landed prices', 'terrace', 'semi d', 'bungalow', 'transacted price', 'property value', 'property values', 'market price', 'market prices', 'home prices', 'house prices', 'condo price', 'condo prices', 'condo value', 'landed sales', 'landed value', 'comparable sales', 'hdb and home prices', 'what is my home worth', 'what is my house worth', 'how much is my house worth', 'what is my property worth', 'home worth'] },
     { id: 'ask-hdb', name: 'Check an HDB asking price', tag: 'Against resales in the block', href: 'journey/worth/#hdb', icon: 'worth', search: 1, sec: 'research',
       t: ['asking price', 'hdb asking price', 'check asking price', 'is the asking price fair', 'resale flat price', 'buying a resale flat', 'cov', 'cash over valuation', 'overpriced'] },
     { id: 'ask-condo', name: 'Check a condo asking price', tag: 'Pick the development, then “Check an asking price”', href: 'research/', icon: 'research', search: 1, sec: 'research',
@@ -197,7 +197,7 @@
   const row = (e, r, cls) => '<a class="' + (cls || 'gw-mi') + '" href="' + esc(href(e, r)) + '"' + (e.ext ? ' target="_blank" rel="noopener"' : '') + ' data-gw-nav-to="' + e.id + '">' + svg(e.icon) + '<span><b>' + esc(e.name) + (e.ext ? ' <i aria-hidden="true">↗</i>' : '') + '</b><small>' + esc(e.tag) + '</small></span></a>';
   // The search box (hidden until the script runs, so there is never a box that does nothing).
   let sxN = 0;
-  // kind 'devs': developments only (the "Condo or apartment" box on HDB and home prices).
+  // kind 'devs': developments only (the "Condo or apartment" box on Property values & market prices).
   function searchHtml(kind, placeholder, after) {
     const id = 'gwsx-' + kind + '-' + (++sxN);
     return '<div class="gw-sx gw-sx-' + kind + '" data-gw-search="' + kind + '"' + (kind === 'devs' ? ' data-gw-devs' : '') + ' hidden><label class="gw-sx-box" for="' + id + 'i">' + svg('search', 20) + '<span class="gw-vh">' + (kind === 'devs' ? 'Search developments' : 'Search tools and developments') + '</span>' +

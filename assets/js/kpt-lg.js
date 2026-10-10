@@ -136,7 +136,7 @@
       '<section class="lg-band tight" style="padding-top:0"><div class="lg-wrap" style="max-width:760px">' +
       // Everything else in Research, one tap away (the same pages the menu lists under Research).
       '<div class="gw-rmore"><p class="gw-lane">More ways to research</p><div class="gw-rlinks">' +
-      [['../journey/worth/', 'HDB and home prices', 'Resales in your block · asking price', 'worth'], ['../tools/what-can-i-buy/', 'What can this budget buy?', 'Homes that sold around your budget', 'what-can-i-buy'], ['../projects/', 'Browse every development', 'A–Z list', 'directory']]
+      [['../journey/worth/', 'Property values &amp; prices', 'HDB, condo and landed sales · asking price', 'worth'], ['../tools/what-can-i-buy/', 'What can this budget buy?', 'Homes that sold around your budget', 'what-can-i-buy'], ['../projects/', 'Browse every development', 'A–Z list', 'directory']]
         .map((x) => '<a href="' + x[0] + '" data-gw-nav-to="' + x[3] + '"><b>' + x[1] + '</b><small>' + x[2] + '</small></a>').join('') + '</div></div>' + sampleExample() +
       '<p class="lg-fine lg-center" data-lg-scope>Can’t see it? Research covers private condos and apartments with sales in the last five years. Executive condominiums (ECs) and cluster houses aren’t covered in Research yet, and an unsold launch won’t appear. <a href="../projects/">Browse all ' + (total ? num(total) + ' ' : '') + 'developments</a>, including new launches with sites of their own.</p></div></section></div>';
   }

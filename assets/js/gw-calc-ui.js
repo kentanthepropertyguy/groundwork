@@ -49,10 +49,10 @@
   const EXISTING = {
     'hdb-upgrade': { path: 'hdb-upgrade/', title: 'Can I afford to upgrade from my HDB?', name: 'HDB upgrade planner', tag: 'Direct budget calculation', short: 'Your private-home budget if you sell your flat first', group: 'upgrade' },
     'what-can-i-buy': { path: 'what-can-i-buy/', title: 'What can this budget buy?', name: 'What can this budget buy?', tag: 'Homes that sold around your budget', short: 'What homes around your budget have actually sold for', group: 'research' },
-    worth: { path: '../journey/worth/', title: 'HDB and home prices', name: 'HDB and home prices', tag: 'Resales in your block · asking price', short: 'What homes like yours sold for. Check an asking price', group: 'research', icon: 'worth' },
+    worth: { path: '../journey/worth/', title: 'Property values & prices', name: 'Property values & prices', tag: 'HDB, condo and landed sales · asking price', short: 'What comparable homes sold for. Check an asking price', group: 'research', icon: 'worth' },
     research: { path: '../research/', title: 'Research a development', name: 'Research a development', tag: 'Prices by size · compare', short: 'Recent sales by size, an asking-price check, and comparisons', group: 'research', icon: 'research' },
   };
-  // Tools work out a number from your own figures. Looking up what homes sold for (HDB and home prices, Research, What can this
+  // Tools work out a number from your own figures. Looking up what homes sold for (Property values & prices, Research, What can this
   // budget buy?) is listed under Research in the menu and on the homepage, so each feature has one home.
   const ORDER = { buy: ['stamp-duty', 'tdsr', 'msr', 'mortgage', 'progressive'], sell: ['sale-proceeds', 'ssd'], upgrade: ['hdb-upgrade'] };
   const GROUPS = [['buy', 'Buying'], ['sell', 'Selling'], ['upgrade', 'Upgrading from HDB']];

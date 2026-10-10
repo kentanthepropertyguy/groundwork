@@ -29,6 +29,13 @@ window.KPT = window.KPT || {};
     Object.keys(params || {}).forEach(function (k) { if (!FINANCIAL.test(k) && OUTCOME.indexOf(k) < 0) out[k] = params[k]; });
     return out;
   }
+  // R2.2: one identifier per tool, whichever page or button names it. tool_name stays as it was for GA4 reports.
+  const TOOL_ALIAS = { "worth-hdb": "hdb-value", "worth-landed": "landed-sales", "worth-landed-street": "landed-sales", "worth-condo": "condo-value", "up-ken": "upgrade-path", "journey-buy": "buy-journey", "research-journey": "research", "worth-router": "property-values", "worth": "property-values", "move-router": "move-journey" };
+  function toolId(params) {
+    const raw = params && (params.tool || params.tool_name); if (!raw || typeof raw !== "string") return null;
+    const t = raw.replace(/^calc-/, "").replace(/-ask$/, "");
+    return TOOL_ALIAS[t] || t;
+  }
   function forMeta(params) {
     const out = {};
     META_PARAMS.forEach(function (k) { if (params && params[k] != null && !/\$|\d{3,}/.test(String(params[k]))) out[k] = params[k]; });
@@ -90,6 +97,7 @@ window.KPT = window.KPT || {};
    *  merged with the page's tool_name/project_name/tool_category context. */
   KPT.track = function (eventName, params) {
     const payload = clean(Object.assign({}, ctx, params || {}));
+    const tool = toolId(payload); if (tool) payload.tool = tool; // R2.2: the standard tool id, sent to GA4 and Meta
     if (window.gtag) window.gtag("event", eventName, payload);
     // Meta: the PageView above already counts the page, so the page's own page_view is not sent again (A6-12).
     if (window.fbq && eventName !== "page_view") window.fbq("trackCustom", eventName, forMeta(payload));
