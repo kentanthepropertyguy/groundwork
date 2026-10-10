@@ -10,7 +10,9 @@
   'use strict';
   const REGION_NAME = { OCR: 'Outside Central Region', RCR: 'Rest of Central Region', CCR: 'Core Central Region' };
   const FH = 'Freehold / 999-yr';
-  const ageLabel = (t) => (t === '25+' ? '25+ years' : t === '10–25' ? '10–25 years' : t === '0–10' ? 'Under 10 years' : t);
+  // audit A4-13/A4-22: the groups are years since the lease began (under 10, 10 to 24, 25 or more); freehold is grouped separately
+  const ageLabel = (t) => (t === '25+' ? 'lease 25+ years old' : t === '10–25' ? 'lease 10–24 years old' : t === '0–10' ? 'lease under 10 years old' : t);
+  const capFirst = (s) => String(s).charAt(0).toUpperCase() + String(s).slice(1);
   const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
   /** "$1.32m", "$1.3m", "$2m" — never more precision than the budget has. */
@@ -18,6 +20,11 @@
   const money = (v) => { const s = (v / 1e6).toFixed(2).replace(/0+$/, '').replace(/\.$/, ''); return '$' + s + 'm'; };
   /** One budget number for the engine. A planning range from the HDB journey uses its midpoint, to the nearest $10k. */
   function budgetFromHandoff(h) { const m = (h.low + h.high) / 2; return Math.round(m / 10000) * 10000; }
+  /** Audit A3-14: a planner range as the visitor saw it ("$1.31m–$1.53m"); a single figure stays one figure. */
+  // V2-08: a planner range is written exactly as the planner writes it (KPT.money in kpt-components.js; a test keeps them equal),
+  // so "$1.00m–$1.16m" there is "$1.00m–$1.16m" here too.
+  const planMoney = (n) => { const a = Math.abs(n); return (n < 0 ? '-' : '') + '$' + (a >= 1e6 ? (a / 1e6).toFixed(a >= 1e7 ? 1 : 2) + 'm' : a >= 1e3 ? Math.round(a / 1e3) + 'k' : Math.round(a)); };
+  function rangeText(b) { return !b ? '' : b.single || b.low === b.high ? budgetText(b.low) : planMoney(b.low) + '–' + planMoney(b.high); }
   function waMessage(budget) { return "Hi Ken, I checked what a budget of about " + budgetText(budget) + " buys. I'd like your view."; }
   /** Anonymous, bucketed, no exact budget. Categorical engine facts only. */
   function analytics(res, view, budget) {
@@ -38,10 +45,11 @@
     'region:outer-larger': 'Going further out opened up', 'region:inner-larger': 'Going closer in opened up',
     'tenure type:freehold-larger': 'Choosing freehold or 999-year opened up', 'tenure type:leasehold-larger': 'Choosing leasehold opened up',
   };
+  const OUT_OF_RANGE = 'This tool covers budgets from $600,000 to $5 million.';
   const ALSO_TITLE = { age: 'Age', status: 'New launch vs resale', region: 'Location', 'tenure type': 'Tenure' };
 
   function barLabel(b, attr) {
-    if (attr === 'age') return ageLabel(b.tenure);
+    if (attr === 'age') return capFirst(ageLabel(b.tenure));
     if (attr === 'region') return REGION_NAME[b.region];
     if (attr === 'status') return b.status === 'New' ? 'New launch' : 'Resale (' + (b.tenure === FH ? 'freehold / 999-year' : ageLabel(b.tenure)) + ')';
     return b.tenure === FH ? 'Freehold / 999-year' : 'Leasehold (' + ageLabel(b.tenure) + ')';
@@ -50,7 +58,7 @@
     const bars = chart.bars, a = chart.attr, same = (k) => bars.every((b) => b[k] === bars[0][k]), parts = [];
     if (a !== 'region') parts.push(REGION_NAME[bars[0].region]);
     if (a !== 'status' && same('status')) parts.push(bars[0].status === 'New' ? 'New launches' : 'Resale');
-    if (a === 'region' && same('tenure') && bars[0].status === 'Resale') parts.push(bars[0].tenure === FH ? 'Freehold / 999-year' : ageLabel(bars[0].tenure));
+    if (a === 'region' && same('tenure') && bars[0].status === 'Resale') parts.push(bars[0].tenure === FH ? 'Freehold / 999-year' : capFirst(ageLabel(bars[0].tenure)));
     parts.push('Last 12 months');
     return parts.join(' · ');
   }
@@ -86,8 +94,22 @@
     const B = res.budget, v = { state: 'ok', budget: B, budgetText: budgetText(B), lens: null, hero: null, also: [], ec: null, ken: null, footer: res.footer || null, tag: res.tag || null, message: null };
     const first = res.insights[0];
     const bad = res.fallback.some((f) => ['THIN_MARKET', 'EXPIRED'].indexOf(f) > -1);
+    // Audit A4-06/A5-28: say why there is no picture. Budgets outside the tool's range and expired figures are not "not enough sales".
+    const minB = opts.minBudget || 600000, maxB = opts.maxBudget || 5000000;
+    if (bad && res.fallback.indexOf('EXPIRED') > -1) {
+      v.state = 'expired';
+      v.message = { title: 'These market figures are being updated.', body: 'I can still give you my view on this budget.' };
+      v.footer = res.footer ? v.footer : null;
+      return v;
+    }
+    if (bad && (B < minB || B > maxB)) {
+      v.state = 'out-of-range';
+      v.message = { title: OUT_OF_RANGE, body: 'I can still give you my view on this budget.' };
+      v.footer = res.footer ? v.footer : null;
+      return v;
+    }
     if (bad) {
-      v.state = res.fallback.indexOf('EXPIRED') > -1 ? 'expired' : 'thin';
+      v.state = 'thin';
       v.message = { title: 'Not enough recent sales near ' + v.budgetText + ' to compare reliably.', body: "I'd rather look at this with you than show a thin picture." };
       v.footer = res.footer ? v.footer : null;
       return v;
@@ -113,7 +135,8 @@
       v.also.push({ title: ALSO_TITLE[ins.chart.attr], key: ins.key, lines });
     });
     if (v.hero === null && res.insights.length > 1) v.also = [];
-    if (res.ec && res.ec.shown && res.ec.view) v.ec = { label: res.ec.view.label, text: 'Around ' + fmt(res.ec.view.median) + ' sq ft at this budget. Eligibility conditions apply.' };
+    // Audit A3-14: the budget was not tested against EC rules, so the note says what they are.
+    if (res.ec && res.ec.shown && res.ec.view) v.ec = { label: res.ec.view.label, text: 'Around ' + fmt(res.ec.view.median) + ' sq ft at this budget. Eligibility conditions apply, including a household income ceiling, and loan repayments are limited to 30% of income (MSR). This budget wasn’t checked against those rules.' };
     // Ken's Take: an Active authored note matching the selected hero insight (else a budget-wide note). Otherwise nothing.
     if (v.hero && res.ken) {
       const shown = (res.ken.insightNotes || []).filter((n) => n.shown && n.note);
@@ -134,5 +157,5 @@
   function loadNotes(url, fetchFn) {
     return fetchFn(url).then((r) => (r.ok ? r.json() : [])).then((a) => (Array.isArray(a) ? a : [])).catch(() => []);
   }
-  return { view, budgetText, budgetFromHandoff, waMessage, analytics, loadStats, loadNotes, REGION_NAME, money };
+  return { view, budgetText, budgetFromHandoff, rangeText, waMessage, analytics, loadStats, loadNotes, REGION_NAME, money, OUT_OF_RANGE };
 });

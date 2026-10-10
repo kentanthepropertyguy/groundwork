@@ -20,6 +20,11 @@
   const cap = (s) => String(s).charAt(0).toUpperCase() + String(s).slice(1);
   const money = (n) => '$' + num(n);
   const SALE_CODE = { new: 1, sub: 2, resale: 3 };
+  // A4-08, A4-09: the period the URA records cover and when they were retrieved (from the data manifest), with the latest month's caveat.
+  const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const ymLabel = (s) => { const a = String(s || '').split('-').map(Number); return a[1] ? MON[a[1] - 1] + ' ' + a[0] : ''; };
+  const dayLabel = (s) => { const a = String(s || '').split('-').map(Number); return a[2] ? a[2] + ' ' + MON[a[1] - 1] + ' ' + a[0] : ''; };
+  const dataSpan = (m) => (m && m.monthStart && m.latestMonth ? 'URA private residential transactions, ' + ymLabel(m.monthStart) + ' to ' + ymLabel(m.latestMonth) + (m.asOf ? ' (retrieved ' + dayLabel(m.asOf) + ')' : '') + '. ' + ymLabel(m.latestMonth) + ' may be incomplete: sales reported later are added in later updates.' : 'URA private residential transactions.');
 
   /* ---------- a development's own most active size (facts for its card; never compared across projects) ---------- */
   function ownBand(R, P, proj, m, saleLabel) {
@@ -91,7 +96,7 @@
       '<h3 class="v2-h3">The sales behind it</h3>' + bands + lad +
       '<h3 class="v2-h3">The four kinds of statement on this page</h3>' + layers +
       '<h3 class="v2-h3">What the transactions cannot tell you</h3><ul class="v2-list">' + M.notMeasured.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul>' +
-      '<h3 class="v2-h3">Data</h3><p class="v2-p">URA private residential transactions to ' + esc(ctx.m.latestMonth) + '. ' + esc(M.notes.psf) + ' ' + esc(M.notes.history) + ' ' + esc(M.notes.floor) + ' ' + esc(M.notes.substitute) + '</p>' +
+      '<h3 class="v2-h3">Data</h3><p class="v2-p">' + esc(dataSpan(ctx.m)) + esc(newNote(M)) + ' ' + esc(M.notes.psf) + ' ' + esc(M.notes.history) + ' ' + esc(M.notes.floor) + ' ' + esc(M.notes.substitute) + '</p>' +
       '<p class="v2-muted">Rating rules: ' + esc(cfg.version) + '.</p></div></details>';
   }
 
@@ -115,18 +120,26 @@
   /* ---------- the comparison page (KPT redesign, Oct 2026) ----------
      Order: hero (one honest paragraph + evidence pill) · side by side · questions a buyer would ask · show me the numbers · the full sample · Ken.
      Every sentence is assembled from the model (and, after drawing, from the registry's sourced facts); a sentence whose fields are missing is left out. */
+  // A4-24: URA also lists a net price after developer discounts for some new sales; figures here use the recorded price.
+  const newNote = (M) => (M.sale && M.sale.selected === 'new' ? ' New-sale prices are as URA records them, before any developer rebate.' : '');
   const SMALL = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
   const titleCase = (s) => String(s || '').toLowerCase().replace(/\b([a-z])/g, (c) => c.toUpperCase());
   const sqft = (label) => String(label || '').replace(/\s*sqft$/, ' sq ft');
   const REGION = { CCR: 'Core Central Region', RCR: 'Rest of Central Region', OCR: 'Outside Central Region' };
   const diff = (M, l) => M.differences.find((d) => d.label === l) || {};
   const leaseYear = (s) => { const x = /from (\d{4})/.exec(String(s || '')); return x ? Number(x[1]) : null; };
+  // A4-05: a few developments have sales on more than one tenure (Orchard Court: 99 and 993 years). Their lease is never printed as one
+  // value, and lease comparisons leave them out. MIX is set from the raw records when the page is drawn.
+  const MIX = { a: null, b: null };
+  const mixedText = (t) => 'Mixed tenure in these records' + (t && t.variants && t.variants.length ? ' (' + t.variants.map((v) => v[0]).join('; ') + ')' : '');
+  const leaseOf = (M, side) => (MIX[side] ? null : diff(M, 'Lease')[side]);
   const isFree = (s) => /freehold/i.test(String(s || ''));
   const saleWords = (M) => ({ resale: ['resale', 'resales'], 'new sale': ['new sale', 'new sales'], 'sub-sale': ['sub-sale', 'sub-sales'] }[M.sale && M.sale.label] || ['sale', 'sales']);
   const poss = (n) => n + (/s$/i.test(n) ? '’' : '’s');
 
   // S1: what the records say about the two, before prices (lease and tenure; home counts are added from sourced facts after drawing).
   function leadFacts(M) {
+    if (MIX.a || MIX.b) return (MIX.a && MIX.b ? 'Both have' : poss(MIX.a ? M.a.name : M.b.name) + ' records have') + ' sales on more than one tenure, so their leases are not compared here.';
     const l = diff(M, 'Lease'), ya = leaseYear(l.a), yb = leaseYear(l.b), A = M.a.name, B = M.b.name;
     if (ya && yb && ya !== yb) { const later = ya > yb ? A : B; return poss(later) + ' lease started ' + plural(Math.abs(ya - yb), 'year') + ' later (' + Math.max(ya, yb) + ' against ' + Math.min(ya, yb) + ').'; }
     if (ya && yb) return 'Both leases started in ' + ya + '.';
@@ -175,8 +188,8 @@
   function sideCard(side, M, ev, ax) {
     const nm = M[side].name, st = ev.band ? ev.band[side] : null, col = side === 'a' ? '#5a55d6' : '#2f7c97';
     const where = [titleCase(diff(M, 'Street')[side]), diff(M, 'District')[side] ? 'District ' + String(diff(M, 'District')[side]).replace(/^D/, '') : ''].filter(Boolean).join(' · ');
-    const lease = diff(M, 'Lease')[side], size = diff(M, 'Typical unit size')[side], reg = diff(M, 'Region')[side];
-    const facts = [lease ? (isFree(lease) ? 'Freehold' : String(lease).replace(/(\d+) yrs from (\d{4})/, '$1-year lease from $2')) : '', size ? 'Typical home sold here: about ' + sqft(size) : '', REGION[reg] || reg || ''].filter(Boolean);
+    const lease = leaseOf(M, side), size = diff(M, 'Typical unit size')[side], reg = diff(M, 'Region')[side];
+    const facts = [MIX[side] ? mixedText(MIX[side]) : '', lease ? (isFree(lease) ? 'Freehold' : String(lease).replace(/(\d+) yrs from (\d{4})/, '$1-year lease from $2')) : '', size ? 'Typical home sold here: about ' + sqft(size) : '', REGION[reg] || reg || ''].filter(Boolean);
     return '<article class="lg-card lg-pc ' + side + '"><span class="who" data-lg-who="' + side + '">' + esc(where) + '</span><h2>' + esc(nm) + '</h2>' +
       (st ? '<p class="big">' + money(st.med) + '<small>PSF</small></p>' + rangeHtml(st, ax, col, nm)
         : '<p class="none">No price shown: there is nothing like-for-like to set against the other.</p><a class="lg-btn" href="#/p/' + esc(M[side].id) + '" style="justify-self:start">See ' + esc(poss(nm)) + ' own sales ›</a>') +
@@ -186,7 +199,8 @@
     if (!ev.band) return 'Facts from URA records' + (Object.keys(factIds).length ? ' and sourced project pages' : '') + '. Small numbers are sources.';
     const w = saleWords(M), small = [['a', ev.band.a.n], ['b', ev.band.b.n]].filter((x) => x[1] < 10).sort((x, y) => x[1] - y[1])[0];
     return 'Typical price is the median ' + w[0] + ' price per square foot (PSF) for ' + sqft(ev.band.label) + ' homes, ' + ev.windowLabel + '. Not adjusted for age, floor, facing or condition.' +
-      (small ? ' ' + cap(small[1] < 10 ? SMALL[small[1]] : String(small[1])) + ' is a small number of sales, so a few unusual units can move ' + poss(M[small[0]].name) + ' figure.' : '') + ' Small numbers are sources.';
+      (small ? ' ' + cap(small[1] < 10 ? SMALL[small[1]] : String(small[1])) + ' is a small number of sales, so a few unusual units can move ' + poss(M[small[0]].name) + ' figure.' : '') +
+      (MIX.a || MIX.b ? ' ' + (MIX.a && MIX.b ? 'Both figures mix' : poss(MIX.a ? M.a.name : M.b.name) + ' figure mixes') + ' sales on different tenures.' : '') + newNote(M) + ' Small numbers are sources.';
   }
 
   /* questions a buyer would ask: only questions the records can answer are asked */
@@ -194,7 +208,8 @@
     const A = M.a.name, B = M.b.name, out = [];
     // What am I paying more for? (only when there is a price gap)
     if (ev.band && ev.band.gap.dir !== 'level') {
-      const s = [], l = diff(M, 'Lease'), ya = leaseYear(l.a), yb = leaseYear(l.b), hi = ev.band.gap.dir === 'a' ? A : B;
+      const s = [], l = { a: leaseOf(M, 'a'), b: leaseOf(M, 'b') }, ya = leaseYear(l.a), yb = leaseYear(l.b), hi = ev.band.gap.dir === 'a' ? A : B;
+      if (MIX.a || MIX.b) s.push((MIX.a && MIX.b ? 'Both developments have' : (MIX.a ? A : B) + ' has') + ' sales on more than one tenure in these records, and the typical price mixes them. Ask which tenure a unit is on.');
       if (ya && yb && Math.abs(ya - yb) >= 3) s.push(poss(ya > yb ? A : B) + ' lease started ' + plural(Math.abs(ya - yb), 'year') + ' later (' + Math.max(ya, yb) + ' against ' + Math.min(ya, yb) + '). That is lease age, not building age, so check each development’s completion (TOP) date too.');
       else if (isFree(l.a) !== isFree(l.b) && (ya || yb)) s.push((isFree(l.a) ? A : B) + ' is freehold and ' + (isFree(l.a) ? B : A) + ' is leasehold. Tenure can affect price, financing and how long you would want to hold.');
       const rg = diff(M, 'Region'); if (rg.a && rg.b && rg.a !== rg.b) s.push('They sit in different market segments (' + (REGION[rg.a] || rg.a) + ' and ' + (REGION[rg.b] || rg.b) + '), which tend to price differently for reasons beyond the building itself.');
@@ -232,8 +247,9 @@
     if (!q.length) return '';
     const max = Math.max.apply(null, q.map((b) => Math.max(b.a.psf.med, b.b.psf.med))), wpc = (v) => (v / max * 100).toFixed(1);
     const rows = q.map((b) => {
-      const g = E.gapOf(b), lowA = g.dir === 'b', lowB = g.dir === 'a';
-      const lab = (v, low) => money(v) + (low ? ' · ' + E.pctText(g.pct) + ' less' : '');
+      // A4-01: "less" is measured against the higher price (gapOf's pct is against the lower one, which is right for "more").
+      const g = E.gapOf(b), lowA = g.dir === 'b', lowB = g.dir === 'a', hiMed = Math.max(b.a.psf.med, b.b.psf.med), less = hiMed ? g.abs / hiMed * 100 : 0;
+      const lab = (v, low) => money(v) + (low ? ' · ' + E.pctText(less) + ' less' : '');
       return '<div class="lg-row' + (ev.band && ev.band.bin === b.bin ? ' head' : '') + '"><div class="lab">' + esc(sqft(b.label)) + '<small>' + b.a.n + ' and ' + b.b.n + ' sales' + (ev.band && ev.band.bin === b.bin ? ' · headline size' : '') + (b.isFocus ? ' · your size' : '') + '</small></div>' +
         '<div class="bars"><div class="lg-bar" role="img" aria-label="' + esc(M.a.name) + ' ' + money(b.a.psf.med) + ' PSF"><i style="width:' + wpc(b.a.psf.med) + '%;background:#5a55d6"></i><span class="lg-bval">' + lab(b.a.psf.med, lowA) + '</span></div>' +
         '<div class="lg-bar" role="img" aria-label="' + esc(M.b.name) + ' ' + money(b.b.psf.med) + ' PSF"><i style="width:' + wpc(b.b.psf.med) + '%;background:#2f7c97"></i><span class="lg-bval">' + lab(b.b.psf.med, lowB) + '</span></div></div></div>';
@@ -244,7 +260,8 @@
       (left > 0 ? '<p class="lg-fine">' + plural(left, 'other size') + ' had too few sales on one side to compare.</p>' : '') + '</div>';
   }
   function activityHtml(M, ctx, own) {
-    const rows = M.differences.map((d) => (d.label === 'Sales in the data' && ctx ? { label: 'Sales on record', a: salesOnRecord(ctx.A), b: salesOnRecord(ctx.B) } : d));
+    const rows = M.differences.map((d) => (d.label === 'Sales in the data' && ctx ? { label: 'Sales on record', a: salesOnRecord(ctx.A), b: salesOnRecord(ctx.B) }
+      : d.label === 'Lease' && (MIX.a || MIX.b) ? { label: 'Lease', a: MIX.a ? mixedText(MIX.a) : d.a, b: MIX.b ? mixedText(MIX.b) : d.b } : d));
     const ownLine = (side) => { const o = own[side]; if (!o) return 'No sales found.'; return esc(o.label) + ': ' + plural(o.n, o.otherSale ? SALE_WORD[o.sale] : 'sale') + (o.older ? ' (older evidence)' : ' in the last 12 months') + ', median ' + money(o.psf.med) + ' PSF' + (o.otherSale ? '. Not the same sale type as the other, so not compared' : '') + '.'; };
     return '<div class="lg-card"><div class="lg-scroll"><table class="lg-table"><thead><tr><th scope="col"><span class="lg-vh">Fact</span></th><th scope="col">' + esc(M.a.name) + '</th><th scope="col">' + esc(M.b.name) + '</th></tr></thead><tbody>' +
       rows.map((d) => '<tr><th scope="row">' + esc(d.label) + '</th><td>' + esc(d.a) + '</td><td>' + esc(d.b) + '</td></tr>').join('') +
@@ -269,7 +286,7 @@
     if (!ins && M.ladder.length > 1) tabs.push(['window', 'Last 24 or 36 months', windowsHtml(M)]);
     if (M.sale.options && M.sale.options.length > 1) tabs.push(['sale', 'New sales and sub-sales', saleTypeHtml(M)]);
     tabs.push(['how', 'How we worked this out', '<div class="lg-card">' + suggestHtml(M, ev, ctx) + evidenceHtml(M, ev, ctx).replace('<details class="v2-d v2-evidence" id="v2-how">', '<details class="v2-d v2-evidence" id="v2-how" open>') + '</div>']);
-    tabs.push(['sources', 'Sources', '<div class="lg-card"><p>Prices and sales: URA private residential transaction data (PMI_Resi_Transaction), to ' + esc(ctx.m && ctx.m.latestMonth) + '. Project facts carry numbered sources.</p><div id="v2facts"></div></div>']);
+    tabs.push(['sources', 'Sources', '<div class="lg-card"><p>Prices and sales: ' + esc(dataSpan(ctx.m)) + ' Project facts carry numbered sources.</p><div id="v2facts"></div></div>']);
     return '<section class="lg-band grey" id="numbers"><div class="lg-wrap" style="gap:24px"><div class="lg-head"><p class="lg-kicker">Show me the numbers</p><h2>' + (ins ? 'The sales on record.' : 'Price by size.') + '</h2>' +
       '<p class="lg-sub">' + (ins ? 'Each development on its own. Nothing here is set against the other.' : 'Same sale type, same size, same time window. Open the other views if you want more.') + '</p></div>' +
       '<div class="lg-chips" role="group" aria-label="Views" data-lg-tabs>' + tabs.map((t, i) => '<button type="button" data-lg-tab="' + t[0] + '" aria-pressed="' + (i === 0) + '">' + esc(t[1]) + '</button>').join('') + '</div>' +
@@ -300,6 +317,7 @@
   }
   function render(M, ctx) {
     const R = ctx.R, P = ctx.P, ev = E.stateOf(M), root = ctx.root || '../';
+    MIX.a = ctx.A && ctx.A.tenure && ctx.A.tenure.mixed ? ctx.A.tenure : null; MIX.b = ctx.B && ctx.B.tenure && ctx.B.tenure.mixed ? ctx.B.tenure : null;
     const own = { a: ownAny(R, P, ctx.A, ctx.m, M.sale.selected), b: ownAny(R, P, ctx.B, ctx.m, M.sale.selected) };
     let saleFallback = false; try { const d = R.analyseComparison(ctx.A, ctx.B, ctx.m, {}); saleFallback = !!(d.sale && d.sale.selected && M.sale.selected && d.sale.selected !== M.sale.selected); } catch (e) { saleFallback = false; }
     const rg = diff(M, 'Region'), dd = diff(M, 'District');
@@ -423,13 +441,13 @@
     const ex = E.projectExperience(raw, m);
     if (ex.experience === 'directory') {
       const R = hooks.R, last = raw.last ? R.fmtMonth(raw.last) : null, tot = raw.sale ? (raw.sale.new || 0) + (raw.sale.sub || 0) + (raw.sale.resale || 0) : 0;
-      app.innerHTML = quietPage({ kind: 'directory', title: M.name, meta: [M.street, M.districtLabel, M.region, M.tenure.label].filter(Boolean).join(' · '),
-        lead: (last ? 'The last recorded sale was in ' + esc(last) + ', and there have been ' + plural(tot, 'sale') + ' in the data we hold, none in the last ' + E.CONFIG.project.recentMonths + ' months. ' : 'There are no transactions for this development in the data we hold. ') + 'Without recent sales we cannot give a fair read of what it transacts at, so we do not draw one.',
+      app.innerHTML = quietPage({ kind: 'directory', title: M.name, meta: [M.street, M.districtLabel, M.region, M.tenure.mixed ? 'Mixed tenure in these records' : M.tenure.label].filter(Boolean).join(' · '),
+        lead: (last ? 'The last recorded sale was in ' + esc(last) + ', and there ' + (tot === 1 ? 'has' : 'have') + ' been ' + plural(tot, 'sale') + ' in the data we hold, none in the last ' + E.CONFIG.project.recentMonths + ' months. ' : 'There are no transactions for this development in the data we hold. ') + 'Without recent sales we cannot give a fair read of what it transacts at, so we do not draw one.',
         pill: 'Nothing recent to analyse' });
       mountQuiet(app, hooks);
       return;
     }
-    const LG = root.KPTLG; if (LG && app.querySelector('[data-lg="project"]')) LG.afterProject(M, app, { root: ROOT || '../', track: hooks.track, onCompare: hooks.onCompare });
+    const LG = root.KPTLG; if (LG && app.querySelector('[data-lg="project"]')) LG.afterProject(M, app, { root: ROOT || '../', track: hooks.track, onCompare: hooks.onCompare, manifest: m });
     if (typeof fetch !== 'function' || !ROOT) return;
     (factIds[M.id] ? fetch(ROOT + 'data/registry/p/' + M.id + '.json').then((r) => (r.ok ? r.json() : null)).catch(() => null) : Promise.resolve(null)).then((p) => {
       if (!p) return;
@@ -453,5 +471,5 @@
     });
   }
 
-  return { SAMPLE, requestMessage, INSUFFICIENT, LABEL, DISCLAIMER, NO_DATA, render, questions, leadFacts, leadPrice, defaultWindow, bestSale, showNoData, ownAny, salesOnRecord, afterCompare, afterSearch, afterProject, enhancePick, showSite, ready, sites, siteMatches, siteHref, ownBand, factsHtml, sourcedFacts, norm };
+  return { dataSpan, SAMPLE, requestMessage, INSUFFICIENT, LABEL, DISCLAIMER, NO_DATA, render, questions, leadFacts, leadPrice, defaultWindow, bestSale, showNoData, ownAny, salesOnRecord, afterCompare, afterSearch, afterProject, enhancePick, showSite, ready, sites, siteMatches, siteHref, ownBand, factsHtml, sourcedFacts, norm };
 });

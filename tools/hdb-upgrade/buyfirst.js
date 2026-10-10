@@ -4,7 +4,7 @@
    It takes a price the visitor is considering and explains, using only verified rules (rules.js) and the existing
    modelling assumptions, what materially changes when you buy first:
      • the upfront cash/CPF needed before the flat sells,
-     • the MAS loan limit and minimum cash (depends on outstanding housing loans),
+     • the MAS loan limit and minimum cash (set by the flat's outstanding loan, HDB or bank: MAS Notice 632 para 30(o)),
      • ABSD at the second-property rate, and the conditional refund,
      • when the sale proceeds arrive.
    It never says a plan "works": it says what the main issue appears to be, and what it depends on.
@@ -26,20 +26,27 @@
     const A = Object.assign({}, ASSUME, overrides || {});
     // Existing sell-first engine, called as-is, only for validation, net sale proceeds and the sell-first ceiling.
     const sf = ENG.analyse(Object.assign({}, input, { timing: 'sell-first' }));
-    if (sf.state === 'incomplete') return { state: 'incomplete', errors: sf.errors };
+    const flatHasLoan = num(input.outstandingLoan) > 0;
+    // Audit A2-11/A3-04: TDSR counts the flat's own loan instalment while you still own it (MAS Notice 645 para 9), so it is required.
+    // V1-08: a flat that still has a loan has an instalment above $0, or TDSR would leave that loan out.
+    const instOk = typeof input.flatInstalment === 'number' && isFinite(input.flatInstalment) && input.flatInstalment > 0;
+    const instErr = flatHasLoan && !instOk ? [{ field: 'flatInstalment', message: input.flatInstalment === 0 ? "Your flat still has a loan, so enter its monthly instalment (more than $0)." : "Enter your flat's monthly loan instalment." }] : [];
+    if (sf.state === 'incomplete' || instErr.length) return { state: 'incomplete', errors: (sf.errors || []).concat(instErr) };
 
     const buyers = input.buyers, income = buyers.reduce((s, b) => s + b.income, 0), ageW = ENG.weightedAge(buyers);
     const debts = num(input.otherMonthlyDebt), cash = num(input.cashSavings), cpf = num(input.otherCpfOa), avail = cash + cpf;
-    const hasPR = input.residency === 'has-pr';
+    // Joint buyers pay the highest rate: a Citizen + PR couple who still own the flat pays the PR rate (IRAS).
+    const hasPR = input.residency === 'has-pr' || input.residency === 'sc-pr-couple';
     const absdRate = hasPR ? RULES.absdSecondProperty.anyPermanentResident : RULES.absdSecondProperty.allSingaporeCitizens;
     const netProceeds = sf.breakdown.netProceeds;
     const sellFirstRange = sf.planning ? { low: sf.planning.low, high: sf.planning.high, single: sf.planning.single } : null;
     const P = num(input.targetPrice) > 0 ? num(input.targetPrice) : 0;
-    const flatHasLoan = num(input.outstandingLoan) > 0;
+    const flatInst = flatHasLoan ? num(input.flatInstalment) : 0;
     const out = {
-      state: 'ok', hasPrice: P > 0, price: P, absdRate, hasPR, singleBuyer: buyers.length === 1,
+      state: 'ok', hasPrice: P > 0, price: P, absdRate, hasPR, residency: input.residency || 'all-sc', singleBuyer: buyers.length === 1,
       netProceeds: Math.round(netProceeds), sellFirstRange, flatHasLoan, available: avail, cash, cpf,
-      ltvCases: flatHasLoan ? ['none', 'one'] : ['none'],
+      // Audit A2-06: an HDB loan counts as an outstanding housing loan (MAS Notice 632 para 30(o)), so a flat with a loan gives one case only.
+      ltvCases: flatHasLoan ? ['one'] : ['none'], flatInstalment: flatInst,
       tdsr: RULES.tdsrCeiling, rate: RULES.stressRate,
     };
     if (!P) { out.verdict = 'needs-price'; out.headline = 'Buying first needs a lot more cash upfront.'; return out; }
@@ -47,7 +54,7 @@
     // Loan: LTV limit, and the loan income can support under TDSR (55% of income at 4%, standard tenure to age 65).
     const std = RULES.standardStructure;
     const tenure = Math.max(0, Math.min(std.maxTenureYears, Math.floor(std.endAgeLimit - ageW)));
-    const loanCap = Math.max(0, RULES.tdsrCeiling * income - debts) * ENG.annuityFactor(RULES.stressRate, tenure);
+    const loanCap = Math.max(0, RULES.tdsrCeiling * income - debts - flatInst) * ENG.annuityFactor(RULES.stressRate, tenure);
     const bsd = ENG.bsd(P), absd = Math.floor(absdRate * P);
     const cases = out.ltvCases.map((k) => {
       const c = RULES.ltvByOutstandingLoans[k], loan = Math.min(c.ltv * P, loanCap);
@@ -59,16 +66,18 @@
       upfrontLow: Math.min.apply(null, ups), upfrontHigh: Math.max.apply(null, ups), purchaseCosts: A.purchaseCosts });
 
     // Funds the visitor listed (cash + CPF OA not tied to the flat). Sale proceeds are NOT counted: they arrive after.
-    const provided = avail > 0;
-    out.fundsStatus = !provided ? 'unknown' : avail >= out.upfrontHigh ? 'covered' : avail < out.upfrontLow ? 'short' : 'depends';
-    out.shortfall = out.fundsStatus === 'short' ? { low: Math.round(out.upfrontLow - avail), high: Math.round(out.upfrontHigh - avail) } : null;
+    // Audit A2-12: the MAS minimum cash payment has to be cash; CPF can't cover it.
+    const provided = avail > 0, minCash = Math.max.apply(null, cases.map((c) => c.minCash));
+    out.minCash = minCash;
+    out.cashShort = provided && cash < minCash ? Math.round(minCash - cash) : 0;
+    out.fundsStatus = !provided ? 'unknown' : avail >= out.upfrontHigh && !out.cashShort ? 'covered' : 'short';
+    out.shortfall = out.fundsStatus === 'short' ? { low: Math.max(0, Math.round(out.upfrontLow - avail)), high: Math.max(0, Math.round(out.upfrontHigh - avail)) } : null;
     out.sellFirstCovers = !!(sellFirstRange && P <= sellFirstRange.high);
     out.aboveSellFirst = !!(sellFirstRange && P > sellFirstRange.high);
 
     if (out.sellFirstCovers) out.verdict = 'sell-first-cleaner';
     else if (out.fundsStatus === 'short') out.verdict = 'funds-short';
     else if (out.fundsStatus === 'covered') out.verdict = 'potentially-workable';
-    else if (out.fundsStatus === 'depends') out.verdict = 'depends-on-loan-count';
     else out.verdict = 'funds-unknown';
     out.headline = HEADLINE[out.verdict];
     return out;
@@ -78,7 +87,6 @@
     'sell-first-cleaner': 'Selling first looks like the cleaner route at this price.',
     'funds-short': 'Upfront funds are the key constraint.',
     'potentially-workable': 'Buying first looks potentially workable on upfront funds.',
-    'depends-on-loan-count': 'Whether buying first works depends on how your flat\'s loan is counted.',
     'funds-unknown': 'Buying first needs a lot of cash upfront.',
     'needs-price': 'Buying first needs a lot more cash upfront.',
   };

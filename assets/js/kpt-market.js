@@ -383,6 +383,17 @@
     try { const h = JSON.parse(storage.getItem(HANDOFF_KEY)); return validHandoff(h) ? h : null; } catch (e) { return null; }
   }
   function writeHandoff(storage, h) { try { storage.setItem(HANDOFF_KEY, JSON.stringify(h)); } catch (e) { /* storage unavailable: page falls back to asking for a budget */ } }
+  // Audit A3-07: a short fingerprint of the earlier steps' figures a planner budget was worked out from (Sale proceeds and the
+  // shared ages and incomes in this tab's gw.fin.v1). A budget whose stamp no longer matches is out of date. Nothing leaves the
+  // tab; only the fingerprint is kept with the handoff. The same function is in gw-nav.js (a test keeps them equal).
+  const FIN_KEYS = ['homeType', 'sellPrice', 'outstandingLoan', 'cpfPrincipal', 'cpfInterest', 'borrowers.0.age', 'borrowers.0.fixed', 'borrowers.1.age', 'borrowers.1.fixed', 'borrowers.0.variable', 'borrowers.0.rental', 'borrowers.1.variable', 'borrowers.1.rental'];
+  function finStamp(storage) {
+    let s = {}; try { s = JSON.parse(storage.getItem('gw.fin.v1') || '{}') || {}; } catch (e) { s = {}; }
+    const val = (v) => { if (v === undefined || v === null || v === '') return ''; const n = parseFloat(String(v).replace(/[^0-9.]/g, '')); return /^[\d,.\s$]+$/.test(String(v)) && isFinite(n) ? String(n) : String(v); };
+    const str = FIN_KEYS.map((k) => k + '=' + val(s[k])).join('|');
+    let h = 0x811c9dc5; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+    return ('00000000' + h.toString(16)).slice(-8);
+  }
 
   // ---------------------------------------------------------------- diagnostics
   /** Everything Ken should look at in one list: dropped rows, stale data, review-due, held, cross-check, coverage gaps. */
@@ -461,6 +472,7 @@
   return {
     DEFAULT_SETTINGS, parseCSV, normaliseBands, normaliseShortlist, normaliseSettings,
     freshness, verdict, bands, headline, tradeoffs, shortlistSelect, compareHandoff, diagnose,
+    finStamp,
     budgetBand, analyticsPayload, ANALYTICS_KEYS, readHandoff, writeHandoff, validHandoff, HANDOFF_KEY,
     load, money, budgetText, sqftText, monthYear, segmentLabel,
   };
