@@ -78,7 +78,7 @@ body.lg h1:focus{ outline:none; }
 .lg-btns{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
 
 .lg-pill{ display:inline-block; background:#E4F3E8; color:var(--kpt-green); border-radius:var(--kpt-pill); padding:8px 16px; font-size:15px; line-height:1.35; max-width:70ch; }
-.lg-pill.warn{ background:#FDF0E0; color:var(--kpt-orange); }
+.lg-pill.warn{ background:#FDF0E0; color:#9A4A08; } /* V2-07: 4.5:1 or more on its tint (was 4.48) */
 .lg-pill.grey{ background:#F0F0F3; color:var(--kpt-muted); }
 
 .lg-tile{ background:var(--kpt-grey); border-radius:var(--kpt-radius); padding:24px 26px; display:grid; gap:8px; min-width:0; text-decoration:none !important; color:var(--kpt-ink) !important; align-content:start; }

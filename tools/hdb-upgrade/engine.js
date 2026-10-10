@@ -44,6 +44,7 @@
   function floorTo(x, step) { return Math.floor(x / step) * step; }
 
   function isNum(x) { return typeof x === 'number' && isFinite(x); }
+  const MAX_SALE_PRICE = 5000000;
 
   // Largest price P with: P + BSD(P) + ABSD + purchase costs <= (funds - reserve) + loan,
   // where loan = min(LTV * P, loanCap). The left side minus the right side only ever rises
@@ -70,6 +71,8 @@
     // Minimum cash: cash on hand must cover the reserve plus minCashPct of the price.
     const cashCap = Math.max(0, (s.cashAvailable - s.reserve) / s.minCashPct);
     const capped = uncapped > cashCap;
+    // Audit A3-10: when the cap only bites because the reserve is also held in cash, the reserve (our assumption) binds, not MAS's minimum.
+    const reserveBinds = capped && s.reserve > 0 && uncapped <= s.cashAvailable / s.minCashPct;
     const price = capped ? cashCap : uncapped;
     const duties = price > 0 ? bsd(price) + s.absdRate * price : 0;
     const required = price + duties + (price > 0 ? s.purchaseCosts : 0) - (s.funds - s.reserve);
@@ -79,7 +82,7 @@
     else if (loanCap < s.ltv * price - 0.5) binding = 'income';
     else binding = 'cash';
     return {
-      price, uncappedPrice: uncapped, loan, loanCap, binding, capped,
+      price, uncappedPrice: uncapped, loan, loanCap, binding, capped, reserveBinds,
       tenureYears: s.tenureYears, ltv: s.ltv, minCashPct: s.minCashPct,
       bsd: price > 0 ? bsd(price) : 0, absd: Math.floor(s.absdRate * price),
     };
@@ -90,12 +93,14 @@
     const errors = [];
     const need = (cond, field, message) => { if (!cond) errors.push({ field, message }); };
     need(isNum(input.salePrice) && input.salePrice > 0, 'salePrice', 'Enter your expected sale price.');
+    // Audit A3-20: a plausibility bound so a mistyped figure never produces a silently capped result.
+    if (isNum(input.salePrice) && input.salePrice > MAX_SALE_PRICE) errors.push({ field: 'salePrice', message: 'Check this figure: HDB flats sell for well under $5,000,000.' });
     need(isNum(input.outstandingLoan) && input.outstandingLoan >= 0, 'outstandingLoan', 'Enter your outstanding loan (0 if none).');
     const buyers = input.buyers;
     need(Array.isArray(buyers) && (buyers.length === 1 || buyers.length === 2), 'buyers', 'Choose one or two buyers.');
     if (Array.isArray(buyers)) {
       buyers.forEach((b, i) => {
-        need(b && isNum(b.age) && b.age >= 21 && b.age <= 80, `buyers[${i}].age`, 'Enter an age between 21 and 80.');
+        need(b && isNum(b.age) && b.age >= 21 && b.age <= 80, `buyers[${i}].age`, 'Enter an age between 21 and 80. This planner works out a new home loan, so it stops at 80 (the calculators take ages up to 99); Ken can look at other cases with you.'); // V2-12
         need(b && isNum(b.income) && b.income > 0, `buyers[${i}].income`, 'Enter a gross monthly income.');
       });
     }
@@ -130,8 +135,11 @@
     const income = buyers.reduce((s, b) => s + b.income, 0);
     const ageW = weightedAge(buyers);
     const anyAge55 = buyers.some((b) => b.age >= RULES.cpfRetirementAccountAge);
-    const hasPR = residency === 'has-pr';
-    const absdRate = hasPR ? RULES.absd.anyPermanentResident : RULES.absd.allSingaporeCitizens;
+    // Audit A1-01/A3-02: a married couple with at least one Citizen (and a PR spouse), owning nothing once the flat is sold,
+    // has the ABSD remitted in full (IRAS), subject to the conditions the page states. One buyer cannot be that couple.
+    const couple = residency === 'sc-pr-couple' && buyers.length === 2;
+    const hasPR = residency === 'has-pr' || (residency === 'sc-pr-couple' && !couple);
+    const absdRate = hasPR ? RULES.absd.anyPermanentResident : couple ? RULES.absd.marriedCoupleWithCitizen : RULES.absd.allSingaporeCitizens;
 
     const sellCost = S * A.commissionRate * (1 + A.gstRate) + A.saleLegalFees;
     const netProceeds = S - L - sellCost;
@@ -186,6 +194,7 @@
     }
 
     const rLow = floorTo(lowRun.price, A.roundTo), rHigh = floorTo(highRun.price, A.roundTo);
+    const dutiesAt = (P) => ({ bsd: P > 0 ? bsd(P) : 0, absd: Math.floor(absdRate * P) });
     const collapsed = lowRun.binding !== 'income' && highRun.binding !== 'income';
     const instalment = (run) => {
       const af = annuityFactor(A.planningRate, run.tenureYears);
@@ -201,14 +210,16 @@
       binding: { low: lowRun.binding, high: highRun.binding },
       incomeCaps: { low: A.incomeCapLow, high: A.incomeCapHigh },
       instalment: { low: instalment(lowRun), high: instalment(highRun) },
-      duties: { low: { bsd: lowRun.bsd, absd: lowRun.absd }, high: { bsd: highRun.bsd, absd: highRun.absd } },
+      // Audit A1-23: duties at the prices shown on screen (the rounded range), not the unrounded solver prices.
+      duties: { low: dutiesAt(collapsed ? Math.min(rLow, rHigh) : rLow), high: dutiesAt(collapsed ? Math.min(rLow, rHigh) : rHigh) },
       debtBorrowingReduction: otherMonthlyDebt > 0
         ? Math.round(otherMonthlyDebt * annuityFactor(A.planningRate, highRun.tenureYears)) : 0,
     };
 
     // --------------------------------- lender-dependent longer-tenure possibility
     let longerTenure = null;
-    if (A.planningStructure === 'standard') {
+    // Audit A3-11: not offered from a weighted age of 55, where a 25-year loan would run well past usual lending ages.
+    if (A.planningStructure === 'standard' && ageW < LONGER_TENURE_MAX_AGE) {
       const run = planScenario('lowerLtv', A.incomeCapHigh);
       const upTo = floorTo(run.price, A.roundTo);
       if (run.price >= highRun.price * (1 + A.longerTenureMinUpliftPct)) {
@@ -238,6 +249,7 @@
       max: floorTo(regBest.price, A.roundTo),
       structure: reliesOnLongerTenure ? 'lowerLtv' : 'standard',
       tenureYears: regBest.tenureYears, ltv: regBest.ltv,
+      endAge: Math.floor(ageW + regBest.tenureYears),   // audit A2-18: the age the loan would run to, shown with the figure
       reliesOnLongerTenure,
       perStructure: { standard: floorTo(regStd.price, A.roundTo), lowerLtv: floorTo(regLow.price, A.roundTo) },
       lenderCaveat: reliesOnLongerTenure ? 'This relies on the lower-LTV, longer-tenure structure. Actual lender assessment may be more restrictive.' : null,
@@ -254,14 +266,24 @@
     }
     const cash = { status: cashStatus, refundProvided: refund !== null,
       cashAvailable: Math.round(cashAvailable), needForHigh: Math.round(A.reserve + std.minCashPct * highRun.price) };
+    // Audit A3-01: with no CPF refund entered, the range holds only if the refund is at most this much (the cash left after
+    // the refund must still cover the reserve and the minimum cash at the top of the range shown). Rounded down to $1,000.
+    if (refund === null && cashStatus !== 'confirmed') {
+      const top = collapsed ? Math.min(rLow, rHigh) : rHigh;
+      cash.refundAssumedMax = Math.max(0, floorTo(S - L - sellCost + cashSavings - A.reserve - std.minCashPct * top, 1000));
+    }
 
     // ------------------------------------------------------------ diagnosis
     let code;
-    if (lowRun.capped || highRun.capped) code = 'minimum-cash';
+    // Audit A3-10: name what actually binds. A loan term cut short by age (standard loans end by 65) is named as such when it
+    // removes more than a third of what the same income could borrow over the planning term; so is the planning reserve when it,
+    // not MAS's minimum cash, is what caps the price.
+    const tenureShort = lowRun.tenureYears < tenureCap && annuityFactor(A.planningRate, lowRun.tenureYears) < (2 / 3) * annuityFactor(A.planningRate, tenureCap);
+    if (lowRun.capped || highRun.capped) code = [lowRun, highRun].filter((x) => x.capped).every((x) => x.reserveBinds) ? 'reserve' : 'minimum-cash';
     else if (collapsed) code = 'cash';
-    else if (lowRun.binding === 'income' && highRun.binding === 'income') code = 'income';
+    else if (lowRun.binding === 'income' && highRun.binding === 'income') code = tenureShort ? 'tenure' : 'income';
     else code = 'mixed';
-    const diagnosis = { code, text: DIAGNOSIS_TEXT[code] };
+    const diagnosis = { code, text: DIAGNOSIS_TEXT[code], tenureShort };
 
     // ---------------------------------------------------------------- flags
     const flags = [];
@@ -275,15 +297,18 @@
       breakdown: Object.assign({}, base, { cashAvailable: Math.round(cashAvailable) }),
       ui: { showRegulatoryMax: state !== 'indicative', showLongerTenure: !!longerTenure },
       defaultsApplied, assumptions: assumptionsList,
-      hasPR, hasDebts: otherMonthlyDebt > 0,
+      hasPR, coupleRemission: couple, hasDebts: otherMonthlyDebt > 0,
     };
   }
 
+  const LONGER_TENURE_MAX_AGE = 55;
   const DIAGNOSIS_TEXT = {
     income: 'Financing is currently your main constraint: your income limits how much you can borrow more than your cash does.',
-    cash: 'Cash is currently your constraint. More income alone would not materially increase this position.',
-    mixed: 'At the lower end of this range your income is the limit; towards the upper end, your cash is.',
+    cash: 'Your funds (cash and CPF) are currently your constraint. More income alone would not materially increase this position.',
+    mixed: 'At the lower end of this range your income is the limit; towards the upper end, your funds (cash and CPF) are.',
     'minimum-cash': 'The minimum cash downpayment is limiting this result: more of the purchase has to come from cash rather than CPF.',
+    tenure: 'The loan term your age allows is currently your constraint: a standard loan must end by age 65, which limits how much your income can borrow.',
+    reserve: 'The cash buffer is currently your constraint: with the planning buffer also kept in cash, your cash limits the price more than the MAS minimum cash payment alone would.',
   };
 
   function describeAssumptions(A, defaultsApplied) {

@@ -48,9 +48,9 @@
   function routeLabel(r) {
     if (r.status === 'New') return r.region + ' new launches';
     if (r.tenure === FH) return r.region + ' freehold or 999-year resale homes';
-    if (r.tenure === '0–10') return r.region + ' resale homes under 10 years old';
-    if (r.tenure === '10–25') return r.region + ' resale homes 10–25 years old';
-    return r.region + ' resale homes over 25 years old';
+    if (r.tenure === '0–10') return r.region + ' resale homes with a lease under 10 years old'; // audit A4-13/A4-22: lease age, groups that don't overlap
+    if (r.tenure === '10–25') return r.region + ' resale homes with a lease 10–24 years old';
+    return r.region + ' resale homes with a lease 25 or more years old';
   }
   // ---------- grading ----------
   function gradeOf(st, isNew, E) {

@@ -182,7 +182,8 @@
   /** One project, one sale type. Returns null unless it meets every evidence rule. */
   function matchProject(ix, p, sale, o) {
     const B = o.budget, pct = o.pct, rows = (p[sale] || []).filter((r) => r[0] + ix.bin / 2 >= o.lo && r[0] + ix.bin / 2 < o.hi);
-    const fit = rows.filter((r) => r[4] <= B * (1 + pct) && r[6] >= B * (1 - pct));          // the middle half of that size's sale prices overlaps the budget window
+    const top = winTop(o);
+    const fit = rows.filter((r) => r[4] <= top && r[6] >= B * (1 - pct));          // the middle half of that size's sale prices overlaps the budget window
     if (!fit.length) return null;
     const n = fit.reduce((a, r) => a + r[1], 0); if (n < T.minSales) return null;
     const last = Math.max.apply(null, fit.map((r) => r[3])); if (monthsBetween(ix.latest, last) > T.recencyMonths) return null;
@@ -190,8 +191,12 @@
     const q1 = Math.min.apply(null, fit.map((r) => r[4])), q3 = Math.max.apply(null, fit.map((r) => r[6]));
     const bins = fit.map((r) => r[0]);
     return { id: p.id, sale, name: p.name, street: p.street, district: p.d, seg: p.seg, tenure: p.tl, mixed: !!p.m, tenGroup: p.tg, n, strength: n >= T.goodSales ? 'good' : 'limited', last, q1, q3,
-      fit: B >= q1 && B <= q3 ? 'inside' : B > q3 ? 'above' : 'below', bandLo: Math.min.apply(null, bins), bandHi: Math.max.apply(null, bins) + ix.bin, multi: fit.length > 1 };
+      fit: o.cap && q3 > o.cap && B <= q3 ? 'below' : B >= q1 && B <= q3 ? 'inside' : B > q3 ? 'above' : 'below', bandLo: Math.min.apply(null, bins), bandHi: Math.max.apply(null, bins) + ix.bin, multi: fit.length > 1 };
   }
+  // Audit A3-14: a planner range is never stretched past its top. With a cap (the top of the planner's range) the budget window
+  // stops there, and a development whose typical prices run above it says "A little above your … budget".
+  const winTop = (o) => (o.cap > 0 ? Math.min(o.budget * (1 + o.pct), o.cap) : o.budget * (1 + o.pct));
+  const budWord = (o) => (o.range && o.range.high > o.range.low ? m2(o.range.low) + '–' + m2(o.range.high) : '~' + m2(o.budget));
   const NEW_LABEL = 'New launch projects with recent developer sales';
   const NEW_NOTE = 'Based on developer sales recorded by URA in the last 12 months. This data cannot tell us whether units are still available from the developer.';
   const NEW_NOTE_INV = 'URA sales show what sold, not what is for sale. Where we checked current Huttons inventory, we say so and when.';
@@ -266,12 +271,12 @@
 
   /* ---------------------------------------------------------------- wording */
   function why(c, o) {
-    const home = 'Homes of about ' + sizeText(o.lo, o.hi) + ' sold here in the last 12 months, and your ' + m2(o.budget) + ' ';
+    const home = 'Homes of about ' + sizeText(o.lo, o.hi) + ' sold here in the last 12 months, and your ' + budWord(o).replace(/^~/, '') + ' ';
     return home + (c.fit === 'inside' ? 'is within their typical prices.' : c.fit === 'above' ? 'is a little above their typical prices.' : 'is a little below their typical prices. Expect to look at the lower end.');
   }
   /* ---- V10.1 buyer-facing display layer. Pure wording derived from the same facts; it changes no matching, ranking, freshness or privacy rule. */
   const BED_TBC = 'Bedroom layout to be confirmed', QUIET_BED = 'Bedroom availability not confirmed.', QUIET_UNCONFIRMED = 'Current availability not confirmed.', ASK_LABEL = 'Does this suit me? →', TICK_LABEL = 'Compare this with another';
-  const budgetLine = (o, fit) => { const b = '~' + m2(o.budget) + ' budget'; return fit === 'below' ? { tone: 'over', text: 'A little above your ' + b } : { tone: 'ok', text: 'Within your ' + b }; };   // fit 'below' = the prices sit above the budget
+  const budgetLine = (o, fit) => { const b = budWord(o) + ' budget'; return fit === 'below' ? { tone: 'over', text: 'A little above your ' + b } : { tone: 'ok', text: 'Within your ' + b }; };   // fit 'below' = the prices sit above the budget
   const bedLabel = (types) => { const n = types.map((t) => t.bedrooms); return n.length === 1 && n[0] === 0 ? 'Studio' : joinAnd(n.map((b) => (b === 0 ? 'Studio' : b >= 5 ? '5+' : String(b)))) + ' Bedroom'; };
   const salesLine = (n, isNew) => n + (isNew ? ' recent developer sales' : ' recent sales') + ' around this size';
   function card(c, o, un, ix) {
@@ -329,7 +334,7 @@
       const inc = t.bands.filter((b) => Array.isArray(b) && typeof b[0] === 'number' && typeof b[1] === 'number' && (!needWin || (b[0] + half >= o.lo && b[0] + half < o.hi)));
       if (!inc.length) return;                                                       // no band of about this size: this type does not match
       const floor = Math.min.apply(null, inc.map((b) => b[1])), ceiling = t.ceiling;
-      if (!(floor <= B * (1 + pct) && ceiling >= B * (1 - pct))) return;            // same overlap test V9.1 uses for URA prices
+      if (!(floor <= winTop(o) && ceiling >= B * (1 - pct))) return;            // same overlap test V9.1 uses for URA prices (capped at a planner range's top)
       types.push({ bedrooms: t.bedrooms, floor, ceiling, fit: B >= floor && B <= ceiling ? 'inside' : B > ceiling ? 'above' : 'below' });
       if (beds) { types[types.length - 1].hi = Math.max.apply(null, inc.map((b) => b[0])) + T.invBand; types[types.length - 1].lo = Math.min.apply(null, inc.map((b) => b[0])); }
     });
@@ -398,7 +403,7 @@
     const when = whenText(Date.parse(c.ip.checkedAt || new Date(o.inv.fileAt).toISOString()), o.inv.now), past = c.fresh === 'dated', inferred = o.sizeSource === 'inferred', multi = c.inv.types.length > 1, p = c.inv.primary;
     const bedSz = o.beds ? (o.sizeSource === 'explicit' ? 'the bedrooms and size you chose' : 'the bedrooms you chose') : null;
     const size = o.beds ? typesPhrase(c.inv.types) + (past ? ' matched ' : ' match ') + bedSz + '.' : typesPhrase(c.inv.types) + (past ? (inferred ? ' were ' + HUT.sizeNote + '.' : ' matched the size you’re looking for.') : (inferred ? ' are ' + HUT.sizeNote + '.' : ' match the size you’re looking for.'));
-    const homes = multi || o.beds ? typeNoun(p.bedrooms) + ' homes' : 'homes', ar = o.beds ? '' : ' around this size', pre = 'Your ~' + m2(o.budget) + ' budget ';
+    const homes = multi || o.beds ? typeNoun(p.bedrooms) + ' homes' : 'homes', ar = o.beds ? '' : ' around this size', pre = 'Your ' + budWord(o) + ' budget ';
     const budget = {
       inside: pre + (past ? 'fell within what we saw then for ' + homes + ar + '.' : 'falls within what we’re currently seeing for ' + homes + ar + '.'),
       above: pre + (past ? 'gave you room within the ' + homes + ' we saw then' + ar + '.' : 'gives you room within the ' + homes + ' we’re currently seeing' + ar + '.'),
@@ -465,7 +470,7 @@
     const ans = Object.assign({}, input.answers, { priorities: ((input.answers && input.answers.priorities) || []).filter((p) => p !== 'newer' || eff.on.indexOf('newer') > -1) });   // only a priority that is applied is described as applied
     const types0 = saleTypes(input.openTo), bedSel = bedsFor(input.answers && input.answers.size), beds = inv && types0.indexOf('new') > -1 ? bedSel : null;     // V10.3.3
     if (beds) ans.bedMode = types0.length === 2 ? 'both' : 'new';
-    const un = unsupported(ans, input.loc || { districts: input.districts || [] }), base = { budget: input.budget, pct: input.pct === T.widenBudgetPct ? T.widenBudgetPct : T.budgetPct, lo: input.size.lo, hi: input.size.hi, districts: input.districts || [], freehold: !!input.freehold, text: input.text || '', openTo: input.openTo, prefs: eff.on.slice() };
+    const un = unsupported(ans, input.loc || { districts: input.districts || [] }), base = { budget: input.budget, cap: input.range && input.range.high > 0 ? input.range.high : null, range: input.range && input.range.high > 0 ? { low: input.range.low, high: input.range.high } : null, pct: input.pct === T.widenBudgetPct ? T.widenBudgetPct : T.budgetPct, lo: input.size.lo, hi: input.size.hi, districts: input.districts || [], freehold: !!input.freehold, text: input.text || '', openTo: input.openTo, prefs: eff.on.slice() };
     if (beds) { base.beds = beds; base.bedWord = BED_WORDS[input.answers.size]; }
     if (bedSel) base.bedChosen = true;      // V10.3.6: a bedroom was chosen; resale cards say its layout is still to be confirmed
     if (input.sizes) { base.sizes = {}; types0.forEach((s) => { const w = input.sizes[s]; if (w && w.lo > 0 && w.hi > w.lo) base.sizes[s] = { lo: w.lo, hi: w.hi, source: w.source }; }); }      // V10.3.6: one window per sale type
@@ -557,7 +562,7 @@
       if (input.typical && input.typical.lo && !(input.size.source === 'inferred')) t += ' Around ' + m2(base.budget) + ', the homes that sold were typically about ' + sizeText(input.typical.lo, input.typical.hi) + ' (see above).';
       out.noneText = t;
       // reference: the lowest budget (in $50k steps, up to +50%) at which at least 3 developments qualify, with every other choice unchanged
-      for (let b = base.budget + T.referenceStep; b <= base.budget * (1 + T.referenceMaxUp); b += T.referenceStep) { if (count(ix, Object.assign({}, base, { budget: b })) >= T.minSales) { out.reference = { budget: b, text: 'For reference, at about ' + m2(b) + ' we did find developments with enough sales of that size.' }; break; } }
+      for (let b = base.budget + T.referenceStep; b <= base.budget * (1 + T.referenceMaxUp); b += T.referenceStep) { if (count(ix, Object.assign({}, base, { budget: b, cap: null, range: null })) >= T.minSales) { out.reference = { budget: b, text: 'For reference, at about ' + m2(b) + ' we did find developments with enough sales of that size.' }; break; } }
       const widerArea = (base.districts.length || base.text) ? count(ix, Object.assign({}, base, { districts: [], text: '' })) : 0;
       if (widerArea >= T.minSales) out.changes = [{ id: 'area', label: 'Look across all of Singapore', count: widerArea, text: asText(widerArea) }];
       if (base.regions || base.freehold || base.beds) { out.noneText = 'No matches found with all your selections.'; out.reference = null; out.constraintNone = true; out.changes = relax.concat(out.changes); }
