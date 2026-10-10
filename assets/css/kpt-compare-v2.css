@@ -210,3 +210,7 @@ body.kpr[data-view="compare"] main.kpt-shell{ max-width:1040px; }
 .v2-sample .go{ justify-self:start; background:var(--blue); color:#fff; border-radius:999px; padding:11px 18px; font-weight:600; font-size:15px; }
 .v2-sample:hover .go{ filter:brightness(1.06); } .v2-sample:focus-visible{ outline:3px solid rgba(11,99,206,.45); outline-offset:3px; }
 @media (max-width:719px){ .v2-more{ grid-template-columns:1fr; padding:20px; } .v2-sample .fig b{ font-size:19px; } }
+/* Detailed research report link (Oct 2026) */
+.v2-report{ text-decoration:none !important; color:var(--ink,#16213E) !important; border-left:5px solid #A9822F; text-align:left; }
+.v2-report b{ color:var(--ink,#16213E); line-height:1.25; }
+.v2-report:hover{ border-color:#16213E; border-left-color:#A9822F; }

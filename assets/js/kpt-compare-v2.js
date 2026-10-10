@@ -333,7 +333,7 @@
       '</div></header>' +
       '<section class="lg-band grey" id="side" aria-label="Side by side" style="padding-top:64px"><div class="lg-wrap"><div class="lg-side">' + sideCard('a', M, ev, ax) + '<span class="vs" aria-hidden="true">VS</span>' + sideCard('b', M, ev, ax) + '</div>' +
         '<p class="lg-fine lg-center">' + esc(sideNote(M, ev)) + '</p></div></section>' +
-      questionsHtml(M, ev) + numbersHtml(M, ev, ctx, own) + kenTake(M, root) + sampleCard(M) + askBand(M, root) +
+      questionsHtml(M, ev) + numbersHtml(M, ev, ctx, own) + kenTake(M, root) + (reportFor(M.a.id, M.b.id) ? '<section class="lg-band" id="report"><div class="lg-wrap">' + reportCard(reportFor(M.a.id, M.b.id), 'comparison') + '</div></section>' : sampleCard(M)) + askBand(M, root) +
       '<p class="lg-fine" style="max-width:1040px;margin:0 auto;padding:20px 22px 0">' + esc(DISCLAIMER) + '</p></div>';
   }
 
@@ -383,7 +383,12 @@
   (function () { try { const k = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid', 'fbclid'], q = new URLSearchParams(location.search), now = {}; k.forEach((n) => { if (q.get(n)) now[n] = q.get(n).slice(0, 100); }); if (Object.keys(now).length) sessionStorage.setItem('kpt_attr', JSON.stringify(now)); } catch (e) { /* storage unavailable */ } })();
   }
   const sites = {}, factIds = {}; let PHONE = '6590908898';
-  const ready = (typeof fetch === 'function' && ROOT) ? fetch(ROOT + 'data/research/sites.json').then((r) => (r.ok ? r.json() : null)).then((d) => { ((d && d.sites) || []).forEach((x) => { sites[x.id] = x; }); ((d && d.facts) || []).forEach((id) => { factIds[id] = 1; }); if (d && d.sample) SAMPLE.v = d.sample; if (d && d.phone) PHONE = String(d.phone).replace(/[^0-9]/g, ''); }).catch(function () {}) : Promise.resolve();
+  // Detailed research reports (Oct 2026): a pair with a published report gets a link to it, in either order. Listed in data/research/sites.json.
+  const REPORTS = [];
+  const reportFor = (a, b) => REPORTS.find((r) => (r.a === a && r.b === b) || (r.a === b && r.b === a)) || null;
+  const reportCard = (r, placement) => !r ? '' : '<div class="lg-sb" style="width:100%;max-width:680px"><a class="v2-site v2-report" href="' + esc((ROOT || '../') + r.url) + '" data-kpt-report="' + esc(placement) + '"><b>Read the detailed report: ' + esc(r.title) + '</b><span>Lease, layouts, actual resale prices by size, payment timing and trade-offs, with every source shown. Free to read.' + (r.aiAssisted ? ' Prepared with AI assistance, not yet reviewed by Ken.' : '') + '</span><span class="v2-btn pri">Open the report ›</span></a></div>';
+  if (typeof document !== 'undefined') document.addEventListener('click', (e) => { const a = e.target.closest ? e.target.closest('a[data-kpt-report]') : null; if (a) KPT().track('research_report_opened', { placement: a.dataset.kptReport }); }, true);
+  const ready = (typeof fetch === 'function' && ROOT) ? fetch(ROOT + 'data/research/sites.json').then((r) => (r.ok ? r.json() : null)).then((d) => { ((d && d.sites) || []).forEach((x) => { sites[x.id] = x; }); ((d && d.facts) || []).forEach((id) => { factIds[id] = 1; }); if (d && d.sample) SAMPLE.v = d.sample; ((d && d.reports) || []).forEach((x) => { REPORTS.push(x); }); if (d && d.phone) PHONE = String(d.phone).replace(/[^0-9]/g, ''); }).catch(function () {}) : Promise.resolve();
 
   // Developments with their own site: found by name in Research search, linked out, never copied. A link is shown only where an address is configured.
   const siteMatches = (q) => { const nq = norm(q); if (nq.length < 2) return []; return Object.keys(sites).map((k) => sites[k]).filter((x) => x.url && [x.name].concat(x.aliases || []).some((n) => { const k = norm(n); return k.indexOf(nq) === 0 || nq.split(' ').every((t) => k.split(' ').some((w) => w.indexOf(t) === 0)); })); };
@@ -419,7 +424,7 @@
     const x = sites[id]; document.body.dataset.view = 'site'; document.title = x.name + ' — Groundwork';
     app.innerHTML = quietPage({ kind: 'site', kick: x.stage === 'new-launch' ? 'New launch' : 'Development', title: x.name,
       lead: x.url ? esc(x.name) + ' keeps its own site for current details. We link to it rather than copy it, so what you read there is always up to date.' : esc(x.name) + (x.status === 'planned' ? ' is planned, with a dedicated site to follow.' : ' is a new development. Its dedicated site is not linked here yet.'),
-      pill: 'There are no resale transactions to analyse yet, so there is nothing to compare here.', extra: x.url ? '<div class="lg-sb" style="width:100%;max-width:680px">' + siteCard(x, 'research-project') + '</div>' : '' });
+      pill: 'There are no resale transactions to analyse yet, so there is nothing to compare here.', extra: (x.url ? '<div class="lg-sb" style="width:100%;max-width:680px">' + siteCard(x, 'research-project') + '</div>' : '') + REPORTS.filter((r) => r.a === id || r.b === id).map((r) => reportCard(r, 'research-project')).join('') });
     mountQuiet(app, hooks);
   }
 
@@ -430,7 +435,7 @@
     document.body.dataset.view = 'compare'; document.title = 'Comparison — Research — Groundwork';
     app.innerHTML = quietPage({ kind: 'nodata', kick: LABEL, title: empty.map(nm).join(' and ') + ' has no transactions to compare yet',
       lead: '<b>' + esc(NO_DATA) + '</b> ' + esc(empty.map(nm).join(' and ')) + (empty.length > 1 ? ' have' : ' has') + ' no URA transactions in the data we hold, so there is nothing to set against ' + (other ? 'the other development' : 'each other') + '. No price gap is shown.',
-      extra: '<div class="lg-btns">' + (other ? '<a class="lg-btn primary" href="#/p/' + esc(other) + '">See the other development’s sales ›</a>' : '') + '</div>' + (empty.filter((id) => sites[id].url).length ? '<div class="lg-sb" style="width:100%;max-width:680px">' + empty.filter((id) => sites[id].url).map((id) => siteCard(sites[id], 'research-compare')).join('') + '</div>' : '') });
+      extra: reportCard(reportFor(aId, bId), 'comparison-nodata') + '<div class="lg-btns">' + (other ? '<a class="lg-btn primary" href="#/p/' + esc(other) + '">See the other development’s sales ›</a>' : '') + '</div>' + (empty.filter((id) => sites[id].url).length ? '<div class="lg-sb" style="width:100%;max-width:680px">' + empty.filter((id) => sites[id].url).map((id) => siteCard(sites[id], 'research-compare')).join('') + '</div>' : '') });
     mountQuiet(app, hooks);
   }
 
@@ -471,5 +476,5 @@
     });
   }
 
-  return { dataSpan, SAMPLE, requestMessage, INSUFFICIENT, LABEL, DISCLAIMER, NO_DATA, render, questions, leadFacts, leadPrice, defaultWindow, bestSale, showNoData, ownAny, salesOnRecord, afterCompare, afterSearch, afterProject, enhancePick, showSite, ready, sites, siteMatches, siteHref, ownBand, factsHtml, sourcedFacts, norm };
+  return { REPORTS, reportFor, dataSpan, SAMPLE, requestMessage, INSUFFICIENT, LABEL, DISCLAIMER, NO_DATA, render, questions, leadFacts, leadPrice, defaultWindow, bestSale, showNoData, ownAny, salesOnRecord, afterCompare, afterSearch, afterProject, enhancePick, showSite, ready, sites, siteMatches, siteHref, ownBand, factsHtml, sourcedFacts, norm };
 });
