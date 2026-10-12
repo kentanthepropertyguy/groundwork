@@ -25,7 +25,8 @@
     const a = e.target && e.target.closest ? e.target.closest('a') : null; if (!a) return;
     const u = urlFor(a); if (!u) return;
     e.preventDefault();
-    let w = null; try { w = root.open(u, '_blank'); } catch (x) { w = null; }
+    const t = root.KPT && root.KPT.waUrl ? root.KPT.waUrl(u) : u; // R2.4: the message ends with the page's reference (no figures)
+    let w = null; try { w = root.open(t, '_blank'); } catch (x) { w = null; }
     if (w) { try { w.opener = null; } catch (x) { /* ignore */ } } else root.location.href = NEUTRAL; // blocked pop-up: the chat opens without the prepared text
   });
   root.GW_WA = { set, on, NEUTRAL };

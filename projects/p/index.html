@@ -12,6 +12,6 @@
 </head>
 <body>
 <p>This page has moved. <a id="go" href="../../research/">Continue to Research</a>.</p>
-<script>(function(){var ok=/^[a-z0-9][a-z0-9-]{0,80}$/,t="../../research/";var m=location.hash.match(/^#\/([a-z0-9-]+)/);if(m&&ok.test(m[1])){t="../../research/#/p/"+m[1];}document.getElementById("go").href=t;location.replace(t);})();</script>
+<script>(function(){var ok=/^[a-z0-9][a-z0-9-]{0,80}$/,t="../../research/";var m=location.hash.match(/^#\/([a-z0-9-]+)/);if(m&&ok.test(m[1])){t="../../research/#/p/"+m[1];}var s=new URLSearchParams(location.search),k=new URLSearchParams();["utm_source","utm_medium","utm_campaign","utm_term","utm_content","gclid","fbclid"].forEach(function(n){var v=s.get(n);if(v)k.set(n,v.slice(0,200));});var qs=k.toString();if(qs){var i=t.indexOf("#");t=i<0?t+"?"+qs:t.slice(0,i)+"?"+qs+t.slice(i);}document.getElementById("go").href=t;location.replace(t);})();</script>
 </body>
 </html>

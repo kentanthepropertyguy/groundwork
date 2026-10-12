@@ -162,7 +162,8 @@
       const b = e.target.closest && e.target.closest('[data-ask-wa]'); if (!b) return;
       const sec = b.closest('[data-gw-ask]'), c = compute(sec), msg = c.kind === 'condo' ? condoMsg(c.A, c.size.value, c.price.value) : hdbMsg(c.A, c.price.value);
       try { if (root.KPT && root.KPT.track) root.KPT.track('whatsapp_click', { tool_name: 'asking-price-' + c.kind, context: 'asking-price' }); } catch (x) { /* analytics unavailable */ }
-      let w = null; try { w = root.open(waUrl(msg), '_blank'); } catch (x) { w = null; }
+      const tagged = root.KPT && root.KPT.waTag ? root.KPT.waTag(msg) : msg; // R2.4: the page's reference at the end (no figures)
+      let w = null; try { w = root.open(waUrl(tagged), '_blank'); } catch (x) { w = null; }
       if (w) { try { w.opener = null; } catch (x) { /* ignore */ } } else root.location.href = 'https://wa.me/6590908898'; // blocked pop-up: the chat opens without the prepared figures
     });
   }

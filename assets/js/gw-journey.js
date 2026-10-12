@@ -141,7 +141,7 @@
     const rootPath = (document.body && document.body.dataset.root) || '../';
     let hash = (location.hash || '').replace('#', '');
     // Old links: #own → the worth page; #up → moving, with "HDB flat" chosen.
-    if (hash === 'own' && document.querySelector('[data-gw-path]')) { location.replace(rootPath + 'journey/worth/'); return; }
+    if (hash === 'own' && document.querySelector('[data-gw-path]')) { location.replace(rootPath + 'journey/worth/' + (location.search || '')); return; } // R2.4: campaign tags travel with it
     let preset = null;
     // #up (the homepage's "Upgrade from HDB") opens the four-step path directly; older #up links land there too.
     const C = ctx.get();
