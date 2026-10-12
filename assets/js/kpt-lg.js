@@ -286,8 +286,12 @@
         '<div class="lg-folds"><details class="lg-fold"><summary>Every size, in a table<small>' + plural((M.bands || []).length, 'size') + '</small></summary><div class="in">' + sizesTable(M) + '</div></details>' + saleTypes(M) + methodHtml(M, IN) +
         '<details class="lg-fold" id="lgSources"><summary>Sources</summary><div class="in" data-lg-sources><p>Prices and sales: ' + esc(dataSpan(mf)) + (M.recent && M.recent.latestLabel ? ' Latest ' + esc(words(M)[0]) + ' here: ' + esc(M.recent.latestLabel) + '.' : '') + esc(newNote(M)) + ' Small numbers next to a fact link to its source.</p></div></details></div>' +
       '</div></section>' +
-      '<section class="lg-band tight" style="padding-top:0"><div class="lg-wrap"><div class="lg-kenstrip"><div class="who"><img src="' + esc(root) + 'assets/img/ken-portrait.jpg" alt="Ken Tan" width="56" height="56"><div><b>Looking at a particular unit?</b><span>The sales can’t tell us its facing, layout or whether an asking price is justified. Ken replies personally on WhatsApp.</span></div></div>' +
-        '<a class="lg-btn wa" id="wa" href="#" target="_blank" rel="noopener">Ask Ken on WhatsApp</a></div><p class="lg-fine">Only the development’s name goes into the message, nothing you typed. Please leave income, CPF and debt details out of it.</p></div></section>' +
+      '<section class="lg-band tight" style="padding-top:0"><div class="lg-wrap"><div class="lg-kenstrips"><div class="lg-kenstrip"><div class="who"><img src="' + esc(root) + 'assets/img/ken-portrait.jpg" alt="Ken Tan" width="56" height="56"><div><b>Looking at a particular unit?</b><span>The sales can’t tell us its facing, layout or whether an asking price is justified. Ken replies personally on WhatsApp.</span></div></div>' +
+        '<a class="lg-btn wa" id="wa" href="#" target="_blank" rel="noopener">Ask Ken on WhatsApp</a></div>' +
+        // R2.5 (Ken, 12 Oct 2026): a second, separate way in for owners thinking about selling or upgrading. It does not assume the
+        // visitor owns this development; the page wires #waOwn with its own message and reference (KPT-RES-OWN).
+        '<div class="lg-kenstrip" data-lg-options><div class="who"><span class="lg-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 5l8 6.5"/><path d="M6 10.5V19h12v-8.5"/><path d="M10 19v-5h4v5"/></svg></span><div><b>Considering selling or upgrading?</b><span>Discuss your property’s resale position and what your next move could look like.</span></div></div>' +
+        '<a class="lg-btn wa" id="waOwn" href="#" target="_blank" rel="noopener">Ask Ken about my options</a></div></div><p class="lg-fine">Only the development’s name goes into the message, nothing you typed. Please leave income, CPF and debt details out of it.</p></div></section>' +
     '</div>';
   }
 
