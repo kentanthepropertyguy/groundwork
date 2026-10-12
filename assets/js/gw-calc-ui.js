@@ -425,12 +425,16 @@
       sv.hidden = true; recalc();
     });
     // ---- the assessment ----
-    const message = () => C.messages[FN[id]](last.v, last.r) + (last.v.cpfInterestEstimated ? '\n(CPF accrued interest is a rough upper estimate at 2.5% a year on the full amount.)' : '');
+    // R2.4: the assessment ends with the page's reference, e.g. (Ref KPT-CALC-SD · wati/oct): the page and campaign, never a figure
+    const withRef = (m) => (root.KPT && root.KPT.waTag ? root.KPT.waTag(m) : m);
+    const message = () => withRef(C.messages[FN[id]](last.v, last.r) + (last.v.cpfInterestEstimated ? '\n(CPF accrued interest is a rough upper estimate at 2.5% a year on the full amount.)' : ''));
     box.querySelector('[data-send-wa]').addEventListener('click', () => {
       if (!last) return;
       const msg = message();
+      // R2.4 (Ken, 12 Oct 2026): whatsapp_click (and Meta Contact) only when WhatsApp actually opens. A message too long to open is
+      // copied instead, and that is a copy, recorded as assessment_copied like the "Copy" button.
+      if (msg.length > MAX_MESSAGE) { track('assessment_copied', { tool_name: 'calc-' + id, context: 'too-long' }); copy(msg, 'Your assessment is long, so it has been copied instead of cut short. Open WhatsApp, start a chat with Ken (+65 9090 8898) and paste it.'); return; }
       track('whatsapp_click', { tool_name: 'calc-' + id, context: 'assessment' });
-      if (msg.length > MAX_MESSAGE) { copy(msg, 'Your assessment is long, so it has been copied instead of cut short. Open WhatsApp, start a chat with Ken (+65 9090 8898) and paste it.'); return; }
       const url = waUrl(msg); let w = null;
       try { w = root.open(url, '_blank'); } catch (e) { w = null; }
       if (w) { try { w.opener = null; } catch (e) { /* ignore */ } } else root.location.href = 'https://wa.me/6590908898'; // blocked pop-up: open the chat without the prepared figures
@@ -444,7 +448,7 @@
         setTimeout(once(manual), 1500); // some browsers never answer: show the text rather than wait
       } catch (e) { once(manual)(); }
     }
-    box.querySelector('[data-send-copy]').addEventListener('click', () => { if (!last) return; track('whatsapp_click', { tool_name: 'calc-' + id, context: 'assessment-copy' }); copy(message(), 'Copied. Paste it into a WhatsApp chat with Ken (+65 9090 8898).'); });
+    box.querySelector('[data-send-copy]').addEventListener('click', () => { if (!last) return; track('assessment_copied', { tool_name: 'calc-' + id, context: 'copy' }); /* R2.4: a copy is not a WhatsApp tap */ copy(message(), 'Copied. Paste it into a WhatsApp chat with Ken (+65 9090 8898).'); });
     // ---- presets in a link (#pr, #second-home…): a starting choice only, never a figure ----
     const applyPreset = () => { const P = (PRESETS[id] || {})[(root.location.hash || '').replace('#', '')]; if (!P) return false; Object.keys(P).forEach((k) => { const g = box.querySelector('[data-k="' + k + '"]'); if (g && g.dataset.t === 'chip') setChip(g, P[k]); }); return true; };
     if (applyPreset()) { /* the link's choice wins over a choice remembered from another calculator */ }

@@ -96,12 +96,105 @@ window.KPT = window.KPT || {};
    *  whatsapp_click, tiktok_click, plus whatever this journey adds — always
    *  merged with the page's tool_name/project_name/tool_category context. */
   KPT.track = function (eventName, params) {
+    // R2.4: one whatsapp_click per tap, whichever handlers on the page report it (see the WhatsApp section below).
+    if (eventName === "whatsapp_click" && !firstOfTap()) return;
     const payload = clean(Object.assign({}, ctx, params || {}));
     const tool = toolId(payload); if (tool) payload.tool = tool; // R2.2: the standard tool id, sent to GA4 and Meta
+    if (eventName === "whatsapp_click" && !payload.ref) payload.ref = KPT.waRef(); // R2.4: the page's reference, as in the message
     if (window.gtag) window.gtag("event", eventName, payload);
     // Meta: the PageView above already counts the page, so the page's own page_view is not sent again (A6-12).
     if (window.fbq && eventName !== "page_view") window.fbq("trackCustom", eventName, forMeta(payload));
+    // R2.4: each WhatsApp tap is also Meta's standard Contact event, once, with the same figure-free parameters.
+    if (window.fbq && eventName === "whatsapp_click") window.fbq("track", "Contact", forMeta(payload));
     if (eventName === "page_view") pageViewSent = true;
     if (window.KPT_DEBUG) console.log("[KPT.track]", eventName, payload);
   };
+
+  // ---- R2.4 (Ken, 11 Oct 2026): WhatsApp taps and enquiry references ----
+  // A tap is one click. The click is followed from the top of the page (window, capture phase) to the bottom (window, bubble
+  // phase), so every handler on the page has run in between. The first whatsapp_click reported during that click is sent; any
+  // other is dropped. A WhatsApp link that no handler reported is reported at the end, as a header, menu, footer or page link.
+  // Calls outside a click (a page reporting something by itself) are sent as before.
+  const WA_LINK = /^https:\/\/(?:wa\.me|api\.whatsapp\.com)\//;
+  const CAMPAIGN_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "gclid", "fbclid"];
+  let tap = null;
+  function firstOfTap() { if (!tap) return true; if (tap.wa) return false; tap.wa = true; return true; }
+
+  // The campaign a visitor arrived with, kept for this tab only (the same "kpt_attr" Research already used), on every page.
+  (function saveCampaign() {
+    try {
+      const q = new URLSearchParams(location.search), now = {};
+      CAMPAIGN_KEYS.forEach(function (n) { const v = q.get(n); if (v) now[n] = v.slice(0, 100); });
+      if (Object.keys(now).length) sessionStorage.setItem("kpt_attr", JSON.stringify(now));
+    } catch (e) { /* no storage: the message simply carries no campaign */ }
+  })();
+
+  // The page's reference: KPT- plus a short page code. Research adds whether a project or a comparison is open.
+  const PAGE_CODES = [[/\/tools\/stamp-duty$/, "CALC-SD"], [/\/tools\/mortgage$/, "CALC-MORT"], [/\/tools\/tdsr$/, "CALC-TDSR"], [/\/tools\/msr$/, "CALC-MSR"],
+    [/\/tools\/ssd$/, "CALC-SSD"], [/\/tools\/sale-proceeds$/, "CALC-SALE"], [/\/tools\/progressive-payments$/, "CALC-PP"], [/\/tools\/hdb-upgrade$/, "HDB-UP"],
+    [/\/tools\/what-can-i-buy$/, "FIND"], [/\/tools$/, "TOOLS"], [/\/journey\/worth$/, "VALUE"], [/\/journey$/, "JOURNEY"], [/\/buy$/, "BUY"],
+    [/\/research\/reports\/[a-z0-9-]+$/, "RPT"], [/\/research\/sample$/, "SAMPLE"], [/\/research$/, "RES"], [/\/projects$/, "DIR"], [/\/privacy$/, "PRIVACY"], [/^$/, "HOME"]];
+  KPT.waRef = function () {
+    let p = "", h = "";
+    try { p = String(location.pathname || "").replace(/index\.html$/, "").replace(/\/+$/, ""); h = String(location.hash || ""); } catch (e) { /* no address */ }
+    let code = "PAGE";
+    for (let i = 0; i < PAGE_CODES.length; i++) if (PAGE_CODES[i][0].test(p)) { code = PAGE_CODES[i][1]; break; }
+    if (code === "RES") code = /^#\/compare\//.test(h) ? "RES-CMP" : /^#\/p\//.test(h) ? "RES-PRJ" : "RES";
+    return "KPT-" + code;
+  };
+  // The campaign as one short word pair (source/campaign), letters, digits and dashes only. A value with five or more digits
+  // in a row (an amount, a phone number) is left out. A tagged link wins; an ad click id only says which network.
+  function campaignWord(v) {
+    const s = String(v || "").toLowerCase().replace(/[^a-z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 30);
+    return /[0-9]{5,}/.test(s) ? "" : s;
+  }
+  KPT.waCampaign = function () {
+    let a = {}; try { a = JSON.parse(sessionStorage.getItem("kpt_attr") || "{}") || {}; } catch (e) { a = {}; }
+    const src = campaignWord(a.utm_source), camp = campaignWord(a.utm_campaign);
+    if (src || camp) return [src, camp].filter(Boolean).join("/");
+    return a.gclid ? "google-ads" : a.fbclid ? "facebook" : "";
+  };
+  // A message's reference: an existing specific one (a report's, the sample's) is kept; the general home one (KPT-HOME, used by
+  // the header on every page) becomes this page's. Nothing else in the message changes. Running it twice gives the same text.
+  const REF_IN_TEXT = /[ \t]*\(Ref ([A-Za-z0-9-]+)(?: · [^)]*)?\)/;
+  KPT.waTag = function (msg) {
+    let m = String(msg == null ? "" : msg);
+    const here = KPT.waRef(), r = m.match(REF_IN_TEXT); let code = here;
+    if (r) { code = r[1] === "KPT-HOME" ? here : r[1]; m = m.replace(REF_IN_TEXT, ""); }
+    const camp = KPT.waCampaign(), ref = "(Ref " + code + (camp ? " · " + camp : "") + ")";
+    m = m.replace(/\s+$/, "");
+    return m + (m.indexOf("\n") > -1 ? "\n\n" : m ? " " : "") + ref;
+  };
+  // The same for a wa.me address: only its text changes; an address without text (Ken's plain chat address) stays plain.
+  KPT.waUrl = function (url) {
+    const u = String(url || ""), q = u.indexOf("?"); if (!WA_LINK.test(u) || q < 0) return u;
+    let found = false;
+    const parts = u.slice(q + 1).split("&").map(function (p) {
+      if (p.indexOf("text=") !== 0) return p;
+      let t; try { t = decodeURIComponent(p.slice(5).replace(/\+/g, "%20")); } catch (e) { return p; }
+      found = true; return "text=" + encodeURIComponent(KPT.waTag(t));
+    });
+    return found ? u.slice(0, q + 1) + parts.join("&") : u;
+  };
+  function linkOf(e) { const a = e && e.target && e.target.closest ? e.target.closest("a[href]") : null; return a && WA_LINK.test(a.getAttribute("href") || "") ? a : null; }
+  function tapParams(a) {
+    const d = a.dataset || {}, cl = a.classList || { contains: function () { return false; } };
+    const placement = d.grWa || d.gwWa || (cl.contains("gw-ask") ? "header" : cl.contains("gw-mask") || a.closest(".gw-drop") ? "menu" : a.closest(".gw-foot, footer") ? "footer" : "page");
+    let ref = ""; try { const t = decodeURIComponent((a.getAttribute("href").split("text=")[1] || "").split("&")[0]); ref = (t.match(REF_IN_TEXT) || [])[1] || ""; } catch (e) { ref = ""; }
+    return { context: placement === "header" || placement === "menu" ? "ask-ken" : "link", placement: placement, ref: ref || KPT.waRef() };
+  }
+  if (typeof window.addEventListener === "function") {
+    // Top of the click: a new tap, and the link's message gets its reference before the browser follows it.
+    window.addEventListener("click", function (e) {
+      const cur = tap = { wa: false }; setTimeout(function () { if (tap === cur) tap = null; }, 0);
+      const a = linkOf(e); if (!a) return;
+      const h = a.getAttribute("href"), t = KPT.waUrl(h); if (t !== h) a.setAttribute("href", t);
+    }, true);
+    // Bottom of the click: a WhatsApp link no handler reported is reported here.
+    window.addEventListener("click", function (e) {
+      const cur = tap, a = linkOf(e);
+      if (a && cur && !cur.wa) KPT.track("whatsapp_click", tapParams(a));
+      if (tap === cur) tap = null;
+    });
+  }
 })();
