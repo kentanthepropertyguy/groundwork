@@ -20,6 +20,8 @@
   // MAS Notice 632's tests (age + tenure over 65) compare against whole years, so rounding up keeps every LTV and tenure
   // result identical to the exact age; rounding to nearest could turn a loan that runs past 65 into one that doesn't.
   const ageUp = (a) => Math.ceil(a * 10 - 1e-9) / 10;
+  // R1.2.2: the two ways of weighting joint borrowers' ages (gross income, or income after the 30% reduction) give different ages; MAS's meaning is not confirmed
+  const iwaaDiffers = (B) => B.list.length > 1 && B.iwaa !== null && B.iwaaGross !== null && ageUp(B.iwaa) !== ageUp(B.iwaaGross);
 
   /* ---------------- the tools ---------------- */
   const ICON = {
@@ -29,6 +31,7 @@
     'sale-proceeds': '<path d="M4 7h16v10H4z"/><circle cx="12" cy="12" r="2.4"/><path d="M7 7v10M17 7v10" opacity=".45"/>',
     tdsr: '<path d="M4 19h16"/><path d="M6 19V11M10 19V7M14 19v-9M18 19V5"/>',
     msr: '<path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/><path d="M4 12h16" opacity=".45"/>',
+    'payment-planner': '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/><path d="M8 14h3M13 14h3M8 17h3"/>',
     progressive: '<path d="M4 20h16"/><path d="M6 20v-4h3v4M10.5 20v-8h3v8M15 20V8h3v12"/>',
     'hdb-upgrade': '<path d="M3 12 9 7l6 5"/><path d="M5 11v8h8v-8"/><path d="M15 9l3-2 3 2v10h-6"/>',
     'what-can-i-buy': '<circle cx="11" cy="11" r="6"/><path d="m20 20-4.2-4.2"/>',
@@ -47,6 +50,7 @@
     ssd: { path: 'ssd/', title: 'Seller’s Stamp Duty (SSD)', name: 'Selling within 4 years?', tag: 'SSD', short: 'Seller’s Stamp Duty on a private home', h1: 'Selling within 4 years?', intro: 'Whether Seller’s Stamp Duty (SSD) applies when you sell a private home, and how much.', group: 'sell' },
   };
   const EXISTING = {
+    'payment-planner': { path: 'payment-planner/', title: 'Payment timeline & cash-flow planner', name: 'Payment timeline planner', tag: 'Cash-flow by date', short: 'Every payment on its date, the largest shortfall and what covers it, buying first or selling first', group: 'buy', icon: 'payment-planner' },
     'hdb-upgrade': { path: 'hdb-upgrade/', title: 'Can I afford to upgrade from my HDB?', name: 'HDB upgrade planner', tag: 'Direct budget calculation', short: 'Your private-home budget if you sell your flat first', group: 'upgrade' },
     'what-can-i-buy': { path: 'what-can-i-buy/', title: 'What can this budget buy?', name: 'What can this budget buy?', tag: 'Homes that sold around your budget', short: 'What homes around your budget have actually sold for', group: 'research' },
     worth: { path: '../journey/worth/', title: 'Property values & prices', name: 'Property values & prices', tag: 'HDB, condo and landed sales · asking price', short: 'What comparable homes sold for. Check an asking price', group: 'research', icon: 'worth' },
@@ -54,7 +58,7 @@
   };
   // Tools work out a number from your own figures. Looking up what homes sold for (Property values & prices, Research, What can this
   // budget buy?) is listed under Research in the menu and on the homepage, so each feature has one home.
-  const ORDER = { buy: ['stamp-duty', 'tdsr', 'msr', 'mortgage', 'progressive'], sell: ['sale-proceeds', 'ssd'], upgrade: ['hdb-upgrade'] };
+  const ORDER = { buy: ['stamp-duty', 'tdsr', 'msr', 'mortgage', 'progressive', 'payment-planner'], sell: ['sale-proceeds', 'ssd'], upgrade: ['hdb-upgrade'] };
   const GROUPS = [['buy', 'Buying'], ['sell', 'Selling'], ['upgrade', 'Upgrading from HDB']];
 
   // The tools page: a compact directory. Plain names first, the term people know as a tag (r = path from /tools/, i.e. '').
@@ -136,7 +140,7 @@
       chips('loans', 'Housing loans you still have', LOANS, { value: '0', share: 'housingLoans', when: 'scenario:hdb-bank,ec', hint: LOANS_HINT }),
     // A2-02: the borrower's age decides whether the loan runs past 65 (shared with the other calculators' first borrower)
     progressive: () => chips('kind', 'What are you buying?', KIND_STAMP.slice(0, 2), { value: 'private' }) + grid(money('price', 'Purchase price', { share: 'buyPrice', ph: 'e.g. 1,800,000' }) +
-      numf('age', 'Borrower’s age', 'years', { share: 'borrowers.0.age', ph: 'e.g. 35', when: 'entity:0', hint: 'Two borrowers: their income-weighted average age. For example, aged 30 earning $3,000 and aged 50 earning $12,000 gives 46. How much can I borrow? works it out.' }) +
+      numf('age', 'Borrower’s age', 'years', { share: 'borrowers.0.age', ph: 'e.g. 35', when: 'entity:0', hint: 'Two borrowers: their income-weighted average age. For example, aged 30 earning $3,000 and aged 50 earning $12,000 gives 46. How much can I borrow? works it out. Whether MAS weights by gross income or by the income banks count (after the 30% reduction on variable and rental income) is not confirmed, so results for two borrowers with variable or rental income are unverified.' }) +
       numf('ratePct', 'Interest rate', '% a year', { value: '4', hint: '4% is the banks’ stress-test rate. Use the rate you’ve been quoted.' }) +
       numf('years', 'Loan tenure', 'years', { value: '30' }) + money('cpf', 'CPF OA you can use', { opt: true, share: 'cpfOa', ph: 'all buyers' })) +
       chips('loans', 'Housing loans you still have', LOANS, { value: '0', share: 'housingLoans', hint: LOANS_HINT }) + chips('entity', 'Who is buying?', [['0', 'Individuals'], ['1', 'A company or other entity']], { value: '0' }) + buyersBlock(),
@@ -259,8 +263,8 @@
         // A2-01: an HDB flat with a bank loan is held to MSR 30% as well as TDSR 55%; the lower one sets the loan
         notes([hm ? 'For an HDB flat, the loan must fit both TDSR 55% and MSR 30% of income. ' + (r.binding === 'msr' ? 'MSR is the lower one here, so it sets the loan.' : 'TDSR is the lower one here, so it sets the loan.') : ''].filter(Boolean)) +
         work(rows([['Income counted (after haircuts)', $(r.B.assessable) + ' a month'], ['TDSR limit, 55%', $(r.cap) + ' a month'], ['Less your monthly debts', '−' + $(r.debts)], hm ? ['Left under TDSR', $(r.forNewTdsr) + ' a month'] : null, hm ? ['MSR limit, 30%, less property loans', $(r.forNewMsr) + ' a month'] : null, ['Left for the new loan', $(r.forNew) + ' a month' + (hm ? ' (' + r.binding.toUpperCase() + ' is the limit)' : ''), 'tot'],
-          ['Income-weighted age', ageUp(r.B.iwaa) + ' years'], ['Standard tenure for your age', t.std + ' years (up to ' + t.max + ' with a lower loan limit)', 'w'], ['Loan limit (LTV) used', pc(r.ltv) + ', at least ' + pc(r.minCash) + ' in cash', 'w']])) +
-        sources([r.B.haircut > 0 ? 'Banks count only 70% of variable and rental income.' : '', r.B.list.length > 1 ? 'Joint borrowers’ age is weighted by income as banks count it, after the haircut.' : '', t.capped ? 'Tenure capped at ' + t.max + ' years, the MAS maximum here.' : '', t.lower ? 'Your tenure is past the standard limit, so the lower loan limit applies.' : '', 'Income from financial assets, which banks can also count, isn’t included here.', 'Banks test the new loan at 4% or their own higher rate. They decide the final amount.'].filter(Boolean),
+          ['Income-weighted age', ageUp(r.B.iwaa) + ' years' + (iwaaDiffers(r.B) ? ' (unverified)' : '')], iwaaDiffers(r.B) ? ['Weighted by gross income instead', ageUp(r.B.iwaaGross) + ' years'] : null, ['Standard tenure for your age', t.std + ' years (up to ' + t.max + ' with a lower loan limit)', 'w'], ['Loan limit (LTV) used', pc(r.ltv) + ', at least ' + pc(r.minCash) + ' in cash', 'w']])) +
+        sources([r.B.haircut > 0 ? 'Banks count only 70% of variable and rental income.' : '', r.B.list.length > 1 ? (iwaaDiffers(r.B) ? 'Joint borrowers: the age is weighted here by the income banks count, after the 30% reduction (' + ageUp(r.B.iwaa) + ' years). Weighted by gross income it would be ' + ageUp(r.B.iwaaGross) + ' years. MAS’s wording does not settle which is meant, so this joint-borrower result is unverified: ask your bank which age it uses.' : 'Joint borrowers’ age is weighted by each borrower’s income. With no variable or rental income, weighting by gross income or by counted income gives the same age.') : '', t.capped ? 'Tenure capped at ' + t.max + ' years, the MAS maximum here.' : '', t.lower ? 'Your tenure is past the standard limit, so the lower loan limit applies.' : '', 'Income from financial assets, which banks can also count, isn’t included here.', 'Banks test the new loan at 4% or their own higher rate. They decide the final amount.'].filter(Boolean),
           'Rules: MAS Notice 645 (TDSR 55%, MSR 30% for HDB flats, 4% medium-term rate, 30% haircut on variable and rental income); MAS Notice 632 (LTV and tenure limits). Checked 9 Oct 2026.') +
         next(r.msrApplies ? [['../msr/', 'Check the MSR limit', 'calc-msr'], ['../mortgage/', 'Monthly instalment', 'calc-mortgage']] : [['../../tools/what-can-i-buy/', 'What can this budget buy?', 'what-can-i-buy'], ['../mortgage/', 'Monthly instalment', 'calc-mortgage']]);
     },

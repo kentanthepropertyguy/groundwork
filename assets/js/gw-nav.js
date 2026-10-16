@@ -25,6 +25,7 @@
     'sale-proceeds': '<path d="M4 7h16v10H4z"/><circle cx="12" cy="12" r="2.4"/><path d="M7 7v10M17 7v10" opacity=".45"/>',
     tdsr: '<path d="M4 19h16"/><path d="M6 19V11M10 19V7M14 19v-9M18 19V5"/>',
     msr: '<path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/><path d="M4 12h16" opacity=".45"/>',
+    'payment-planner': '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/><path d="M8 14h3M13 14h3M8 17h3"/>',
     progressive: '<path d="M4 20h16"/><path d="M6 20v-4h3v4M10.5 20v-8h3v8M15 20V8h3v12"/>',
     'hdb-upgrade': '<path d="M3 12 9 7l6 5"/><path d="M5 11v8h8v-8"/><path d="M15 9l3-2 3 2v10h-6"/>',
     'what-can-i-buy': '<circle cx="11" cy="11" r="6"/><path d="m20 20-4.2-4.2"/>',
@@ -58,6 +59,8 @@
       t: ['msr', 'mortgage servicing ratio', 'hdb loan', 'hdb loan limit', 'ec', 'executive condo', 'executive condominium', 'hfe', 'hdb flat eligibility', 'bto', 'resale flat loan', 'hdb flat loan', 'hdb borrow'] },
     { id: 'progressive', name: 'New launch payments', tag: 'Progressive payments', short: 'Cash, CPF and loan at each stage', href: 'tools/progressive-payments/', icon: 'progressive', menu: 1, sec: 'tools',
       t: ['progressive payment', 'progressive payments', 'progressive', 'new launch', 'new launch payment', 'payment schedule', 'under construction', 'uncompleted', 'booking fee', 'option fee', 'developer', 'construction stages', 'stages', 'top', 'temporary occupation permit', 'downpayment', 'down payment', 'cash needed'] },
+    { id: 'payment-planner', name: 'Payment timeline planner', tag: 'Cash-flow by date', short: 'Largest shortfall, when, and what covers it', href: 'tools/payment-planner/', icon: 'payment-planner', menu: 1, sec: 'tools',
+      t: ['payment timeline', 'cash flow', 'cashflow', 'timeline', 'planner', 'payment planner', 'shortfall', 'funding gap', 'buy first', 'sell first', 'buy first sell later', 'sell first buy later', 'bridging', 'absd refund', 'when to pay', 'payment dates', 'how much cash do i need', 'cash needed', 'cpf needed', 'upgrade timing'] },
     { id: 'sale-proceeds', name: 'Sale proceeds', tag: 'Cash and CPF back', short: 'What you get back when you sell', href: 'tools/sale-proceeds/', icon: 'sale-proceeds', menu: 1, quick: 1, sec: 'tools',
       t: ['sale proceeds', 'proceeds', 'selling', 'sell', 'sell my flat', 'sell my hdb', 'sell my condo', 'cash proceeds', 'net proceeds', 'cpf refund', 'refund cpf', 'accrued interest', 'cpf accrued interest', 'how much will i get', 'cash from sale', 'agent commission', 'selling costs'] },
     { id: 'ssd', name: 'Selling within 4 years?', tag: 'SSD', short: 'Seller’s Stamp Duty', href: 'tools/ssd/', icon: 'ssd', menu: 1, sec: 'tools',
@@ -99,7 +102,7 @@
   // The three ways in, named the same everywhere (header, menu, homepage, footer, search results).
   const SECTIONS = {
     guide: { name: 'Guide me', href: 'journey/', nav: 'journey', q: 'Not sure where to start?', say: 'Pick your goal. We take you through the right tools, step by step.', ids: ['guide-buy', 'guide-up', 'guide-sell', 'guide-move'] },
-    tools: { name: 'Tools', href: 'tools/', nav: 'tools', q: 'Know what to work out?', say: 'Calculators for stamp duty, loans, sale proceeds and more.', ids: ['stamp-duty', 'tdsr', 'msr', 'mortgage', 'progressive', 'sale-proceeds', 'ssd', 'hdb-upgrade'] },
+    tools: { name: 'Tools', href: 'tools/', nav: 'tools', q: 'Know what to work out?', say: 'Calculators for stamp duty, loans, sale proceeds and more.', ids: ['stamp-duty', 'tdsr', 'msr', 'mortgage', 'progressive', 'payment-planner', 'sale-proceeds', 'ssd', 'hdb-upgrade'] },
     research: { name: 'Research', href: 'research/', nav: 'research', q: 'Looking at a property?', say: 'What homes really sold for, from URA and HDB records.', ids: ['research', 'worth', 'what-can-i-buy', 'directory', 'sample'] },
   };
   const SEC_ORDER = ['guide', 'tools', 'research'];
@@ -242,7 +245,7 @@
     const nx = UP[i + 1], D = done || {};
     return '<nav class="gw-strip" aria-label="Upgrading from HDB, step ' + (i + 1) + ' of 4" data-gw-strip><div class="gw-strip-h"><b>Upgrading from HDB <span>· Step ' + (i + 1) + ' of 4</span></b><button type="button" class="gw-link" data-gw-strip-off>Hide</button></div><ol>' +
       UP.map((x, k) => { const ok = k !== i && D[x[0]]; return '<li' + (k === i ? ' aria-current="step"' : ok ? ' class="done"' : '') + '><a href="' + r + x[2] + '" data-gw-nav-to="up-' + x[0] + '"><i>' + (ok ? '✓' : k + 1) + '</i>' + x[1] + '</a></li>'; }).join('') + '</ol>' +
-      (nx ? '<a class="gw-strip-next" href="' + r + nx[2] + '" data-gw-nav-to="up-' + nx[0] + '">Next: ' + nx[1] + ' ›</a>' : '<span class="gw-strip-next done">Last step. Ken can look at the whole picture with you.</span>') + '</nav>';
+      (nx ? '<a class="gw-strip-next" href="' + r + nx[2] + '" data-gw-nav-to="up-' + nx[0] + '">Next: ' + nx[1] + ' ›</a>' : '<a class="gw-strip-next" href="' + r + 'tools/payment-planner/" data-gw-nav-to="up-payment-planner">Next: plan the payments ›</a>') + '</nav>';
   }
   const UP_GO = { worth: 'Start: look up my block', 'sale-proceeds': 'Next: work out my sale proceeds', 'hdb-upgrade': 'Next: work out my budget', 'what-can-i-buy': 'Next: see what it buys' };
   // What this tab has finished on the upgrade path (sessionStorage only; nothing leaves the page).
@@ -372,14 +375,40 @@
       [].slice.call(box.querySelectorAll('[data-gw-try]')).forEach((b) => b.addEventListener('click', () => { inp.value = b.dataset.gwTry; inp.focus(); run(); }));
     });
 
-    // Audit V3-05: the Menu's "Clear my figures" removes every figure this tab holds (clearJourney: all gw.* and kpt.* keys; only which
-    // path the visitor is on and what they own stay), empties the boxes on this page, then reloads it so no figure is left on screen.
+    // Audit V3-05 / R1.2.2 (Ken, 16 Oct 2026, Option B): "Clear my figures" (the Menu) and "Clear all my figures" (the Planner) are one action.
+    // It asks first, in the page (no dialog), says what goes and what stays, then removes every figure this tab holds (clearJourney: all gw.* and
+    // kpt.* keys; only which path the visitor is on and what they own stay), empties the boxes on this page and reloads it so no figure is left on screen.
+    const CONFIRM = 'gw-confirm-clear';
+    // the confirmation's look, added when it is first shown (R1.2.2): light, restrained, 44px targets; nothing in the shared stylesheet changes
+    const CONFIRM_CSS = '.gw-confirm{flex-basis:100%;width:100%;box-sizing:border-box;margin:10px 0 0;padding:14px 16px 16px;border:1px solid #E3E3E8;border-left:4px solid #A9822F;border-radius:14px;background:#fff;text-align:left}.gw-confirm-h{margin:0 0 6px;font-size:16px;font-weight:700;color:#16213E}.gw-confirm-p{margin:0 0 8px;font-size:14px;line-height:1.5;color:#3B4256}.gw-confirm-b{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.gw-confirm-b .gw-btn{min-height:44px;padding:10px 18px;font-size:15px;width:auto;max-width:100%}@media (max-width:719px){.gw-confirm-b .gw-btn{flex:1 1 100%}}body.gw-confirming .pl-strip{display:none!important}@media print{.gw-confirm{display:none!important}}';
+    const closeConfirm = (focusBack) => {
+      const p = document.getElementById(CONFIRM); if (!p) return; const from = p.__from; p.remove(); document.body.classList.remove('gw-confirming');
+      if (from) { from.setAttribute('aria-expanded', 'false'); if (focusBack && from.focus) from.focus(); }
+    };
     document.addEventListener('click', (e) => {
-      const b = e.target.closest && e.target.closest('[data-gw-clear-all]'); if (!b) return;
-      clearJourney();
-      [].slice.call(document.querySelectorAll('main input, main textarea')).forEach((x) => { if (!/^(search|checkbox|radio|button|submit|hidden|date)$/.test(x.type)) x.value = x.dataset.default !== undefined ? x.dataset.default : ''; });
-      try { root.location.reload(); } catch (x) { /* ignore */ }
+      const t = e.target; if (!t || !t.closest) return;
+      const b = t.closest('[data-gw-clear-all]');
+      if (b) {
+        if (document.getElementById(CONFIRM)) { closeConfirm(true); return; }
+        if (!document.getElementById(CONFIRM + '-css')) { const st = document.createElement('style'); st.id = CONFIRM + '-css'; st.textContent = CONFIRM_CSS; document.head.appendChild(st); }
+        const p = document.createElement('div'); p.id = CONFIRM; p.className = 'gw-confirm'; p.setAttribute('role', 'group'); p.setAttribute('aria-labelledby', CONFIRM + '-h'); p.__from = b;
+        p.innerHTML = '<p class="gw-confirm-h" id="' + CONFIRM + '-h">Clear all my figures?</p>' +
+          '<p class="gw-confirm-p"><b>This removes</b> every figure Groundwork holds for you in this browser tab: the payment planner, every calculator (prices, CPF, income, debts, loans, sale figures), and the figures carried into the HDB upgrade tool and the What can I buy? tool. Nothing was sent to a server, so nothing else needs deleting.</p>' +
+          '<p class="gw-confirm-p"><b>This keeps</b> which path you are on and the type of home you chose, with no figures. It cannot be undone.</p>' +
+          '<div class="gw-confirm-b"><button type="button" class="gw-btn pri" data-gw-clear-yes>Yes, clear all my figures</button><button type="button" class="gw-btn sec" data-gw-clear-no>Keep my figures</button></div>';
+        const host = b.closest('.pl-startover, .gw-mclear') || b; host.insertAdjacentElement('afterend', p);
+        b.setAttribute('aria-expanded', 'true'); document.body.classList.add('gw-confirming'); // the phone result bar steps aside so nothing covers the buttons
+        const y = p.querySelector('[data-gw-clear-yes]'); if (y) y.focus({ preventScroll: true }); try { p.scrollIntoView({ block: 'center' }); } catch (x) { /* ignore */ }
+        return;
+      }
+      if (t.closest('[data-gw-clear-no]')) { closeConfirm(true); return; }
+      if (t.closest('[data-gw-clear-yes]')) {
+        clearJourney();
+        [].slice.call(document.querySelectorAll('main input, main textarea')).forEach((x) => { if (!/^(search|checkbox|radio|button|submit|hidden|date)$/.test(x.type)) x.value = x.dataset.default !== undefined ? x.dataset.default : ''; });
+        try { root.location.reload(); } catch (x) { /* ignore */ }
+      }
     });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && document.getElementById(CONFIRM)) { e.stopPropagation(); closeConfirm(true); } }, true);
     // Every calculator's "Clear them" ([data-clear]) also removes the rest of this tab's journey figures (audit A3-07).
     document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('[data-clear]')) clearJourney(); });
 

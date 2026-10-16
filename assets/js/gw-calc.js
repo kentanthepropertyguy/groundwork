@@ -242,19 +242,25 @@
     const aged = bs.filter((b) => pos(b.age));
     // MAS Notice 632 footnote 6: weighted by income as counted under Notice 645, i.e. after the 30% haircuts (A2-05)
     const iwaa = aged.length === bs.length && AS > 0 ? bs.reduce((s, b) => s + b.age * assess(b), 0) / AS : null;
+    // R1.2.2: the same age weighted by gross income, for disclosure only. Which of the two MAS means (Notice 632 fn. 3: "gross monthly income ... as determined in accordance with Notice 645") is not confirmed, so the engine's result (iwaa, above) is unchanged and is labelled unverified wherever two borrowers differ.
+    const iwaaGross = aged.length === bs.length && G > 0 ? bs.reduce((s, b) => s + b.age * gross(b), 0) / G : null;
     const badAge = (list || []).some((b) => b && num(b.age) !== null && outOf('age', b.age));
     const badMoney = (list || []).some((b) => b && ['fixed', 'variable', 'rental'].some((k) => num(b[k]) !== null && (b[k] < 0 || b[k] > LIMITS.income.max)));
     const everyone = (list || []).filter((b) => b && pos(b.age)); // HDB averages every applicant's age, earning or not
     const avgAge = everyone.length ? everyone.reduce((s, b) => s + b.age, 0) / everyone.length : null;
     const youngest = everyone.length ? Math.min.apply(null, everyone.map((b) => b.age)) : null;
     const bad = (badAge ? [{ field: 'age', text: LIMITS.age.text }] : []).concat(badMoney ? [{ field: 'income', text: LIMITS.income.text }] : []);
-    return { list: bs, gross: G, assessable: AS, iwaa, avgAge, youngest, haircut: G - AS, bad };
+    return { list: bs, gross: G, assessable: AS, iwaa, iwaaGross, avgAge, youngest, haircut: G - AS, bad };
   }
   function bankTenure(kind, age, wanted) {
     const L = R.bankLtv, std = Math.max(0, Math.min(L.standardTenure[kind], Math.floor(L.endAge - age))), max = L.maxTenure[kind];
     const years = pos(wanted) ? Math.min(wanted, max) : std;
     return { std, max, years, lower: years > std, capped: pos(wanted) && wanted > max };
   }
+
+  // R1.2: MAS Notice 645 para 10(b), table row 5 (residential, OTP on or after 30 Sep 2022): the instalment is tested at the higher of 4% and the
+  // thereafter interest rate. Optional i.quotedRatePct (the rate the borrower was quoted); absent, or not above 4%, the 4% floor applies as before.
+  const testRate = (i) => (num(i.quotedRatePct) !== null && i.quotedRatePct / 100 > R.stressRate ? i.quotedRatePct / 100 : R.stressRate);
 
   /* ---------------- 5. TDSR ---------------- */
   // i: { kind: 'private'|'hdb', borrowers: [...], debts, tenure, loans: 0|1|2 }
@@ -270,9 +276,9 @@
     const forNew = kind === 'hdb' ? Math.min(forNewTdsr, forNewMsr) : forNewTdsr, binding = kind === 'hdb' && forNewMsr < forNewTdsr ? 'msr' : 'tdsr';
     const t = bankTenure(kind, B.iwaa, i.tenure);
     if (t.years < 1) return { ok: true, noTenure: true, cause: 'age', kind, B, cap, debts, forNew, tenure: t };
-    const loan = forNew * AF(R.stressRate, t.years), row = (t.lower ? R.bankLtv.lower : R.bankLtv.standard)[Math.min(nn(i.loans), 2)];
+    const sr = testRate(i), loan = forNew * AF(sr, t.years), row = (t.lower ? R.bankLtv.lower : R.bankLtv.standard)[Math.min(nn(i.loans), 2)];
     if (loan > LIMITS.loan.max) return invalid([{ field: 'income', text: LIMITS.loan.text }]);
-    return { ok: true, kind, B, cap, debts, prop, forNew, forNewTdsr, forNewMsr, msrCap, binding, overLimit: debts > cap, tenure: t, rate: R.stressRate, maxLoan: loan, ltv: row.ltv, minCash: row.minCash, priceAtLtv: loan / row.ltv, msrApplies: kind === 'hdb' };
+    return { ok: true, kind, B, cap, debts, prop, forNew, forNewTdsr, forNewMsr, msrCap, binding, overLimit: debts > cap, tenure: t, rate: sr, maxLoan: loan, ltv: row.ltv, minCash: row.minCash, priceAtLtv: loan / row.ltv, msrApplies: kind === 'hdb' };
   }
 
   /* ---------------- 6. MSR ---------------- */
@@ -322,11 +328,11 @@
     const msrCap = R.msr * B.assessable, tdsrCap = R.tdsr * B.assessable;
     const forNewMsr = Math.max(0, msrCap - prop), forNewTdsr = Math.max(0, tdsrCap - prop - other), forNew = Math.min(forNewMsr, forNewTdsr);
     if (t.years < 1) return { ok: true, noTenure: true, cause: 'age', scenario: sc, B, rate: R.stressRate, tenure: t, msrCap, tdsrCap, prop, other, forNew, maxLoan: 0, notes };
-    const loan = forNew * AF(R.stressRate, t.years), row = (t.lower ? R.bankLtv.lower : R.bankLtv.standard)[Math.min(nn(i.loans), 2)];
+    const sr = testRate(i), loan = forNew * AF(sr, t.years), row = (t.lower ? R.bankLtv.lower : R.bankLtv.standard)[Math.min(nn(i.loans), 2)];
     if (loan > LIMITS.loan.max) return invalid([{ field: 'income', text: LIMITS.loan.text }]);
     if (sc === 'ec') notes.push({ id: 'ec-ceiling', text: 'New EC buyers have a household income ceiling: $16,000 a month, or $18,000 for EC sites whose land tender closed on or after 24 Aug 2026. MSR applies to ECs bought from the developer.' });
     if (t.capped) notes.push({ id: 'capped', text: 'Tenure capped at ' + t.max + ' years, the MAS maximum here.' });
-    return { ok: true, scenario: sc, B, rate: R.stressRate, tenure: t, msrCap, tdsrCap, prop, other, forNewMsr, forNewTdsr, forNew, maxLoan: loan, ltv: row.ltv, minCash: row.minCash, priceAtLtv: loan / row.ltv, binding: forNewMsr <= forNewTdsr ? 'msr' : 'tdsr', notes };
+    return { ok: true, scenario: sc, B, rate: sr, tenure: t, msrCap, tdsrCap, prop, other, forNewMsr, forNewTdsr, forNew, maxLoan: loan, ltv: row.ltv, minCash: row.minCash, priceAtLtv: loan / row.ltv, binding: forNewMsr <= forNewTdsr ? 'msr' : 'tdsr', notes };
   }
 
   /* ---------------- 7. Progressive payments (uncompleted private home or EC) ---------------- */
@@ -343,7 +349,10 @@
     const lower = !!i.lowerLtv || longTenure || pastAge;
     const stdYears = i.entity ? null : Math.max(0, Math.min(R.bankLtv.standardTenure.private, Math.floor(R.bankLtv.endAge - i.age)));
     const row = i.entity ? { ltv: R.entityLtv, minCash: 1 - R.entityLtv } : (lower ? R.bankLtv.lower : R.bankLtv.standard)[Math.min(nn(i.loans), 2)];
-    const loanMax = P * row.ltv, cashMin = P * row.minCash, cpfOrCash = P - loanMax - cashMin;
+    // R1.2: an optional ceiling on the loan in dollars (e.g. what the borrower's income supports). Absent or not lower than the rule limit, nothing changes.
+    // The rule limit and minimum cash stay as the table sets them; whatever the smaller loan does not cover is cash or CPF.
+    const ruleLoanMax = P * row.ltv, loanCapped = num(i.loanCap) !== null && i.loanCap >= 0 && i.loanCap < ruleLoanMax;
+    const loanMax = loanCapped ? i.loanCap : ruleLoanMax, cashMin = P * row.minCash, cpfOrCash = P - loanMax - cashMin;
     const rate = num(i.ratePct) === null ? R.stressRate : i.ratePct / 100;
     const duty = stampDuty({ price: P, kind: i.kind === 'ec' ? 'ec' : 'private', buyers: i.buyers, entity: i.entity });
     let cashLeft = cashMin, flexLeft = cpfOrCash, cpfLeft = num(i.cpf) === null ? null : Math.max(0, i.cpf), drawn = 0;
@@ -360,7 +369,7 @@
     const sum = (k) => stages.reduce((s, x) => s + x[k], 0);
     const upfront = stages[0].amount + stages[1].amount + (duty.ok ? duty.total : 0);
     return {
-      ok: true, price: P, ltv: row.ltv, minCash: row.minCash, loanMax, cashMin, cpfOrCash, rate, years, stages, duty, lower, entity: !!i.entity, tenureCapped: wanted > years, autoLower: !i.lowerLtv && lower,
+      ok: true, price: P, ltv: row.ltv, minCash: row.minCash, loanMax, ruleLoanMax, loanCapped, cashMin, cpfOrCash, rate, years, stages, duty, lower, entity: !!i.entity, tenureCapped: wanted > years, autoLower: !i.lowerLtv && lower,
       lowerWhy: longTenure ? 'tenure' : pastAge ? 'age' : (i.lowerLtv ? 'chosen' : null), age: i.entity ? null : i.age, stdYears,
       totals: { cash: sum('cash'), cpf: sum('cpf'), flex: sum('flex'), loan: sum('loan') }, upfront8wk: upfront,
       finalMonthly: instal(loanMax, rate, years), cpfGiven: cpfLeft !== null,
