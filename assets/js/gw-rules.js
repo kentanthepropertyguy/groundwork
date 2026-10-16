@@ -140,6 +140,11 @@
     hdbSingleMinAge: 35,
     hdbIncomeCeilingFrom: '2026-08-24',
 
+    // New EC (bought from the developer) household income ceiling, HDB income-ceiling announcement and its annex (checked 16 Oct 2026, R1.2):
+    // $18,000 a month for new units in ECs whose land sale tender closes on or after 24 Aug 2026; the earlier $16,000 for units from sites
+    // tendered before that date. The test is the tender closing date, not the date of booking. Resale ECs are not covered by this ceiling.
+    ecIncomeCeiling: { before: 16000, onOrAfter: 18000, tenderClosingFrom: '2026-08-24' },
+
     // Housing Developers Rules (Housing Developers (Control and Licensing) Act): the standard progressive payment schedule
     // for uncompleted private homes and ECs. 5% on the Option to Purchase, 15% to make 20% within 8 weeks (on signing
     // the S&P), then by construction stage. Stamp duty is payable within 14 days of signing. Your S&P sets the actual terms.
@@ -158,6 +163,32 @@
 
     // GST on an agent's commission (IRAS: 9% from 1 Jan 2024), as the planner's assumptions already use.
     gst: 0.09,
+
+    // ------------------------------------------------------------------------------------------------------------------
+    // PLANNING CONVENTIONS for the Payment Timeline & Cash-Flow Planner (R2.6, Ken 15 Oct 2026, decision S2-1).
+    // NOT statutory rules: none of these is a rate, band or limit. They are dates and defaults the planner uses when the
+    // real date is not known, each shown on the page as an estimate or assumption and replaceable by the visitor's own
+    // figure. They sit here so that one file holds everything a reviewer checks. Checked 2026-10-15.
+    plannerConventions: {
+      checked: '2026-10-15',
+      // Uncompleted home (new launch, new EC): the Housing Developers Rules fix the percentages (pps above) and the 8-week
+      // window for the S&P; IRAS: stamp duty within 14 days of signing. Construction-stage dates are the developer's and are
+      // unknown at the option, so the headline tests every undated stage at the earliest date it could be called: 4 weeks
+      // after the S&P (D2, 14 Oct 2026). The illustration months are typical only and never set the headline (S2-2).
+      newLaunch: { snpDays: 56, dutyDays: 14, earliestStageDays: 28, topMonths: 48, cscMonths: 60, illustrationMonths: { foundation: 10, frame: 18, walls: 22, roof: 26, fittings: 30, roads: 34 } },
+      // Completed private home (D5 defaults, S2-3): 1% option fee, 4% on exercising within 14 days, stamp duty within 14 days
+      // of exercising, completion 12 weeks after the option. The option and S&P set the actual terms; every date is editable.
+      completed: { optionPct: 0.01, exercisePct: 0.04, exerciseDays: 14, dutyDays: 14, completionDays: 84 },
+      // Final 15% (R1, provisional): the prescribed S&P pays the final 15% in parts around the Certificate of Statutory
+      // Completion and legal completion; the exact split is not yet verified against the Housing Developers Rules or a
+      // conveyancing confirmation. Until it is, the planner shows the whole 15% at the earliest trigger and labels it.
+      finalStage: { id: 'csc', provisional: true, label: 'Final payment (CSC / legal completion)', note: 'Provisional: shown as one payment at the earliest trigger. The standard S&P pays the final 15% in parts around CSC and legal completion; the exact split is to be verified before this label is removed.' },
+      // ABSD refund (married couple, second home sold in time): eligibility is IRAS’s decision; the application follows the
+      // sale; the receipt date is not a rule. Assumed default: two months after the sale completes (R2). Never used before then.
+      refund: { monthsAfterSale: 2 },
+      // Horizon: the month-by-month view runs to the last payment plus 12 months (S2-5); whatever is still uncovered then is said so.
+      horizonMonthsAfterLast: 12,
+    },
 
     // CPF Board, refunds on selling (audit A3-05, A3-06, A3-08, A3-09). Checked 2026-10-09.
     // Refund = principal withdrawn (including CPF housing grants) + accrued interest, and for an owner 55+ who pledged the
@@ -182,6 +213,7 @@
       ltv: 'MAS Notice 632 (rev. 21 Aug 2025): loan tenure and loan-to-value limits',
       cpf: 'CPF Board: refund of CPF principal plus accrued interest on sale; no cash top-up if sold at market value; OA rate 2.5%',
       pps: 'Housing Developers Rules: standard progressive payment schedule',
+      plannerConventions: 'Planning conventions (not statutory rules): dates and defaults the Payment Timeline Planner uses when the real date is unknown; each is shown as an estimate and editable',
     },
   };
   return R;

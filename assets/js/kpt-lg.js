@@ -253,7 +253,7 @@
       // The line is filled after the page is drawn, once find.json has given the median price (afterProject); until then it is hidden.
       // V2-01: on a first-look page (no typical price) the line is still there, hidden, so an asking price typed above can be sent on.
       (T || canAsk ? '<p class="lg-run" data-lg-run-line data-typical="" hidden><span data-lg-run-what></span> ' +
-        '<a href="../tools/stamp-duty/" data-lg-run="stamp-duty">Stamp duty</a> · <a href="../tools/mortgage/" data-lg-run="mortgage">Mortgage (75% loan)</a>' + (M.sale && M.sale.selected === 'new' ? ' · <a href="../tools/progressive-payments/" data-lg-run="progressive">New launch payments</a>' : '') + '</p>' : '');
+        '<a href="../tools/payment-planner/" data-lg-run="payment-planner"><b>Plan the payments</b></a> · <a href="../tools/stamp-duty/" data-lg-run="stamp-duty">Stamp duty</a> · <a href="../tools/mortgage/" data-lg-run="mortgage">Mortgage (75% loan)</a>' + (M.sale && M.sale.selected === 'new' ? ' · <a href="../tools/progressive-payments/" data-lg-run="progressive">New launch payments</a>' : '') + '</p>' : '');
   }
   // ctx: { S, IN, root }
   function projectHtml(M, ctx) {
