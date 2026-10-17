@@ -25,6 +25,7 @@
     'sale-proceeds': '<path d="M4 7h16v10H4z"/><circle cx="12" cy="12" r="2.4"/><path d="M7 7v10M17 7v10" opacity=".45"/>',
     tdsr: '<path d="M4 19h16"/><path d="M6 19V11M10 19V7M14 19v-9M18 19V5"/>',
     msr: '<path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/><path d="M4 12h16" opacity=".45"/>',
+    'planner': '<path d="M4 19V9M10 19V5M16 19v-7M21 19H3"/>',
     'payment-planner': '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/><path d="M8 14h3M13 14h3M8 17h3"/>',
     progressive: '<path d="M4 20h16"/><path d="M6 20v-4h3v4M10.5 20v-8h3v8M15 20V8h3v12"/>',
     'hdb-upgrade': '<path d="M3 12 9 7l6 5"/><path d="M5 11v8h8v-8"/><path d="M15 9l3-2 3 2v10h-6"/>',
@@ -59,7 +60,9 @@
       t: ['msr', 'mortgage servicing ratio', 'hdb loan', 'hdb loan limit', 'ec', 'executive condo', 'executive condominium', 'hfe', 'hdb flat eligibility', 'bto', 'resale flat loan', 'hdb flat loan', 'hdb borrow'] },
     { id: 'progressive', name: 'New launch payments', tag: 'Progressive payments', short: 'Cash, CPF and loan at each stage', href: 'tools/progressive-payments/', icon: 'progressive', menu: 1, sec: 'tools',
       t: ['progressive payment', 'progressive payments', 'progressive', 'new launch', 'new launch payment', 'payment schedule', 'under construction', 'uncompleted', 'booking fee', 'option fee', 'developer', 'construction stages', 'stages', 'top', 'temporary occupation permit', 'downpayment', 'down payment', 'cash needed'] },
-    { id: 'payment-planner', name: 'Payment timeline planner', tag: 'Cash-flow by date', short: 'Largest shortfall, when, and what covers it', href: 'tools/payment-planner/', icon: 'payment-planner', menu: 1, sec: 'tools',
+    { id: 'planner', name: 'Planner: what can I afford?', tag: 'Comfortable budget', short: 'Your comfortable budget and the highest the numbers allow', href: 'tools/planner/', icon: 'planner', menu: 1, sec: 'tools',
+      t: ['planner', 'what can i afford', 'afford', 'affordability', 'comfortable budget', 'budget', 'how much can i afford', 'highest price', 'cushion', 'new launch budget', 'upgrade budget', 'keep my flat', 'sell first'] },
+    { id: 'payment-planner', name: 'Payment timeline', tag: 'Payment dates', short: 'See when and how much you need to pay.', href: 'tools/payment-planner/', icon: 'payment-planner', menu: 1, sec: 'tools',
       t: ['payment timeline', 'cash flow', 'cashflow', 'timeline', 'planner', 'payment planner', 'shortfall', 'funding gap', 'buy first', 'sell first', 'buy first sell later', 'sell first buy later', 'bridging', 'absd refund', 'when to pay', 'payment dates', 'how much cash do i need', 'cash needed', 'cpf needed', 'upgrade timing'] },
     { id: 'sale-proceeds', name: 'Sale proceeds', tag: 'Cash and CPF back', short: 'What you get back when you sell', href: 'tools/sale-proceeds/', icon: 'sale-proceeds', menu: 1, quick: 1, sec: 'tools',
       t: ['sale proceeds', 'proceeds', 'selling', 'sell', 'sell my flat', 'sell my hdb', 'sell my condo', 'cash proceeds', 'net proceeds', 'cpf refund', 'refund cpf', 'accrued interest', 'cpf accrued interest', 'how much will i get', 'cash from sale', 'agent commission', 'selling costs'] },
@@ -102,7 +105,7 @@
   // The three ways in, named the same everywhere (header, menu, homepage, footer, search results).
   const SECTIONS = {
     guide: { name: 'Guide me', href: 'journey/', nav: 'journey', q: 'Not sure where to start?', say: 'Pick your goal. We take you through the right tools, step by step.', ids: ['guide-buy', 'guide-up', 'guide-sell', 'guide-move'] },
-    tools: { name: 'Tools', href: 'tools/', nav: 'tools', q: 'Know what to work out?', say: 'Calculators for stamp duty, loans, sale proceeds and more.', ids: ['stamp-duty', 'tdsr', 'msr', 'mortgage', 'progressive', 'payment-planner', 'sale-proceeds', 'ssd', 'hdb-upgrade'] },
+    tools: { name: 'Tools', href: 'tools/', nav: 'tools', q: 'Know what to work out?', say: 'Calculators for stamp duty, loans, sale proceeds and more.', ids: ['planner', 'stamp-duty', 'tdsr', 'msr', 'mortgage', 'progressive', 'payment-planner', 'sale-proceeds', 'ssd', 'hdb-upgrade'] },
     research: { name: 'Research', href: 'research/', nav: 'research', q: 'Looking at a property?', say: 'What homes really sold for, from URA and HDB records.', ids: ['research', 'worth', 'what-can-i-buy', 'directory', 'sample'] },
   };
   const SEC_ORDER = ['guide', 'tools', 'research'];
