@@ -50,7 +50,7 @@
     ssd: { path: 'ssd/', title: 'Seller’s Stamp Duty (SSD)', name: 'Selling within 4 years?', tag: 'SSD', short: 'Seller’s Stamp Duty on a private home', h1: 'Selling within 4 years?', intro: 'Whether Seller’s Stamp Duty (SSD) applies when you sell a private home, and how much.', group: 'sell' },
   };
   const EXISTING = {
-    'payment-planner': { path: 'payment-planner/', title: 'Payment timeline & cash-flow planner', name: 'Payment timeline planner', tag: 'Cash-flow by date', short: 'Every payment on its date, the largest shortfall and what covers it, buying first or selling first', group: 'buy', icon: 'payment-planner' },
+    'payment-planner': { path: 'payment-planner/', title: 'Payment timeline', name: 'Payment timeline', tag: 'Payment dates', short: 'See when and how much you need to pay.', group: 'buy', icon: 'payment-planner' },
     'hdb-upgrade': { path: 'hdb-upgrade/', title: 'Can I afford to upgrade from my HDB?', name: 'HDB upgrade planner', tag: 'Direct budget calculation', short: 'Your private-home budget if you sell your flat first', group: 'upgrade' },
     'what-can-i-buy': { path: 'what-can-i-buy/', title: 'What can this budget buy?', name: 'What can this budget buy?', tag: 'Homes that sold around your budget', short: 'What homes around your budget have actually sold for', group: 'research' },
     worth: { path: '../journey/worth/', title: 'Property values & prices', name: 'Property values & prices', tag: 'HDB, condo and landed sales · asking price', short: 'What comparable homes sold for. Check an asking price', group: 'research', icon: 'worth' },
