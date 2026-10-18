@@ -109,14 +109,21 @@
   function timeline(i) {
     const v = validate(i); if (!v.ok) return v;
     const { kind, otp, order } = v;
-    const P = i.price, years0 = pos(i.years) ? i.years : R.bankLtv.standardTenure.private, years = Math.min(years0, R.bankLtv.maxTenure.private);
+    const P = i.price, years0 = pos(i.years) ? i.years : undefined;   // no tenure given: GW_CALC.progressive picks the longest one that keeps the standard limit at this age
     const assumptions = [], warnings = [];
 
     // --- loan count and LTV: counted by GW_CALC.progressive from (loans, age, years) — MAS table via gw-rules ---
     const flatLoan = order === 'sell' ? 'sold' : (order === 'none' ? 'none' : (i.flatLoan || 'outstanding'));
     if (order === 'buy' && !i.flatLoan) assumptions.push({ id: 'flat-loan-default', text: 'Flat loan status not given: assumed still outstanding at the bank’s assessment (conservative).' });
-    const loans = nn(i.loansOther) + (flatLoan === 'outstanding' ? 1 : 0);
-    const loanBasis = MAS_LOAN_BASIS[flatLoan];
+    // Notice 632's exclusions for a contracted sale and for an HDB undertaking are not verified against the Notice itself, so they do not lift the headline: the loan is counted as
+    // outstanding unless the caller states the bank has accepted the exclusion (flatLoanAccepted: true). The figures if the bank accepts it are returned beside the headline.
+    const unverifiedExcl = order === 'buy' && (flatLoan === 'contracted' || flatLoan === 'undertaking');
+    const accepted = i.flatLoanAccepted === true;
+    const loans = nn(i.loansOther) + (flatLoan === 'outstanding' || (unverifiedExcl && !accepted) ? 1 : 0);
+    const loanBasis = unverifiedExcl && !accepted ? 'Counted as an outstanding housing loan. The Notice 632 exclusion for a ' + (flatLoan === 'contracted' ? 'contracted sale' : 'signed undertaking to HDB') + ' is not confirmed here, so it is not relied on until your bank accepts it in writing.' : MAS_LOAN_BASIS[flatLoan];
+    if (unverifiedExcl && !accepted) assumptions.push({ id: 'unverified-exclusion', text: 'Special case not confirmed: the flat’s loan is counted as outstanding. Ask your bank whether it will exclude it before relying on the higher loan limit.' });
+    const capPref = num(i.prefLoan) === null ? undefined : Math.max(0, i.prefLoan);
+    const loanCapIn = num(i.loanCap) === null ? capPref : (capPref === undefined ? i.loanCap : Math.min(i.loanCap, capPref));
 
     // --- buyers for duty: sell-first completes the flat sale before the purchase, so each buyer who owned it owns one fewer ---
     const removes = !(i.sale && i.sale.removesOwnership === false);
@@ -124,10 +131,11 @@
     if (order === 'sell' && removes) assumptions.push({ id: 'sold-ownership', text: 'Sold first: the flat is no longer owned when the new home is bought, so it is not counted for ABSD.' });
 
     // --- the stage split and duty come from the live engine, unchanged ---
-    const prog = C.progressive({ price: P, age: i.age, years: years0, ratePct: num(i.ratePct) === null ? undefined : i.ratePct, loans, cpf: undefined, kind: kind === 'ec' ? 'ec' : 'private', buyers, loanCap: i.loanCap });
+    const prog = C.progressive({ price: P, age: i.age, years: years0, ratePct: num(i.ratePct) === null ? undefined : i.ratePct, loans, cpf: undefined, kind: kind === 'ec' ? 'ec' : 'private', buyers, loanCap: loanCapIn });
     if (!prog.ok) return prog;
+    const years = prog.years;
     const duty = prog.duty; if (!duty.ok) return duty;
-    const rate = prog.rate, ltvRow = { ltv: prog.ltv, minCash: prog.minCash, lower: prog.lower, lowerWhy: prog.lowerWhy, loans, flatLoan, basis: loanBasis, capped: prog.loanCapped, ruleLoanMax: prog.ruleLoanMax };
+    const rate = prog.rate, ltvRow = { ltv: prog.ltv, minCash: prog.minCash, lower: prog.lower, lowerWhy: prog.lowerWhy, loans, flatLoan, basis: loanBasis, endAge: R.bankLtv.endAge, special: unverifiedExcl ? { state: flatLoan, accepted: accepted, ifAccepted: (function () { const a = C.progressive({ price: P, age: i.age, years: years0, ratePct: num(i.ratePct) === null ? undefined : i.ratePct, loans: Math.max(0, loans - (accepted ? 0 : 1)), kind: kind === 'ec' ? 'ec' : 'private', buyers, loanCap: loanCapIn }); return a.ok ? { ltv: a.ltv, minCash: a.minCash, loanMax: a.loanMax, lower: a.lower } : null; })() } : null, capped: prog.loanCapped, ruleLoanMax: prog.ruleLoanMax };
     const loanMax = prog.loanMax, cashMin = prog.cashMin;
 
     // --- events: obligations (rule), developer dates (developer), conventions (estimate), assumptions (assumption) ---
