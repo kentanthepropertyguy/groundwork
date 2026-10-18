@@ -142,7 +142,7 @@
     progressive: () => chips('kind', 'What are you buying?', KIND_STAMP.slice(0, 2), { value: 'private' }) + grid(money('price', 'Purchase price', { share: 'buyPrice', ph: 'e.g. 1,800,000' }) +
       numf('age', 'Borrower’s age', 'years', { share: 'borrowers.0.age', ph: 'e.g. 35', when: 'entity:0', hint: 'Two borrowers: their income-weighted average age. For example, aged 30 earning $3,000 and aged 50 earning $12,000 gives 46. How much can I borrow? works it out. Whether MAS weights by gross income or by the income banks count (after the 30% reduction on variable and rental income) is not confirmed, so results for two borrowers with variable or rental income are unverified.' }) +
       numf('ratePct', 'Interest rate', '% a year', { value: '4', hint: '4% is the banks’ stress-test rate. Use the rate you’ve been quoted.' }) +
-      numf('years', 'Loan tenure', 'years', { value: '30' }) + money('cpf', 'CPF OA you can use', { opt: true, share: 'cpfOa', ph: 'all buyers' })) +
+      numf('years', 'Loan tenure', 'years', { opt: true, ph: 'longest standard', hint: 'Leave blank for the longest tenure that keeps the standard loan limit at your age.' }) + money('cpf', 'CPF OA you plan to use', { opt: true, share: 'cpfOa', hint: 'What CPF allows you to use, not necessarily your whole balance.', ph: 'all buyers' })) +
       chips('loans', 'Housing loans you still have', LOANS, { value: '0', share: 'housingLoans', hint: LOANS_HINT }) + chips('entity', 'Who is buying?', [['0', 'Individuals'], ['1', 'A company or other entity']], { value: '0' }) + buyersBlock(),
   };
 

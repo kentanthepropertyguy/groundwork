@@ -232,6 +232,45 @@
     };
   }
 
+  /* ---------------- 4b. The sale estimate used by the Planner and the Payment Timeline ---------------- */
+  // f: { type: 'hdb'|'private'|'ec', price, loan, cpfRefund (the CPF to be refunded INCLUDING accrued interest), cpfPrincipal + cpfInterest (the same, in two parts), costs (selling costs, replaces the usual estimate),
+  //      overrideCash, overrideCpf (the buyer's own figures; used as entered), heldOver4 (private/EC: owned for more than 4 years, so no Seller's Stamp Duty) }; o: { owner55, today }.
+  // Nothing is invented. The CPF interest is never estimated from an assumed holding period: the refund is what the buyer enters, or the sale is NOT counted (counted: false) and the
+  // part that is already known (the price less selling costs and the loan, before any CPF refund) is returned as beforeCpf, with the list of what is missing.
+  // Cash and CPF returned are kept apart. Cash may be negative (the sale would not cover the loan and costs).
+  function saleEstimate(f, o) {
+    f = f || {}; o = o || {};
+    const type = f.type === 'private' || f.type === 'ec' ? f.type : 'hdb', owner55 = !!o.owner55;
+    const out = { type, counted: false, source: null, missing: [], reason: null, owner55, price: pos(f.price) ? f.price : null, loan: num(f.loan) !== null ? f.loan : null, refund: null, cash: 0, cpf: 0, beforeCpf: null, costs: null, net: null, cpfRefund: null, ownCashNeeded: 0 };
+    if (num(f.overrideCash) !== null || num(f.overrideCpf) !== null) {
+      out.counted = true; out.source = 'entered'; out.cash = num(f.overrideCash) !== null ? f.overrideCash : 0; out.cpf = owner55 ? 0 : (num(f.overrideCpf) !== null ? f.overrideCpf : 0);
+      out.net = out.cash; out.cpfRefund = num(f.overrideCpf) !== null ? f.overrideCpf : 0;
+      if (num(f.overrideCash) === null) out.missing.push('cash');
+      if (num(f.overrideCpf) === null) out.missing.push('cpf');
+      return out;
+    }
+    const refund = num(f.cpfRefund) !== null ? f.cpfRefund : (num(f.cpfPrincipal) !== null && num(f.cpfInterest) !== null ? f.cpfPrincipal + f.cpfInterest : null);
+    out.refund = refund;
+    if (out.price === null) out.missing.push('price');
+    if (out.loan === null) out.missing.push('loan');
+    if (refund === null) out.missing.push('refund');
+    let held = null;
+    if (type !== 'hdb') { if (f.heldOver4 === true) held = { bought: '2000-01-01', sold: o.today || '2026-01-01' }; else out.missing.push('held'); }
+    if (out.price === null) { out.reason = 'missing'; return out; }
+    const base = { type, price: out.price, loan: nn(f.loan), gst: num(f.costs) === null, owner55 };
+    if (num(f.costs) !== null) { base.commissionPct = 0; base.legal = 0; base.other = f.costs; }
+    if (held) { base.bought = held.bought; base.sold = held.sold; }
+    if (out.loan !== null) { const r0 = saleProceeds(Object.assign({}, base, { cpfPrincipal: 0, cpfInterest: 0 })); if (r0.ok) { out.beforeCpf = r0.netCash; out.costs = r0.costs.total; } }
+    if (out.missing.length) { out.reason = 'missing'; return out; }
+    const r = saleProceeds(Object.assign({}, base, { cpfPrincipal: refund, cpfInterest: 0 }));
+    if (!r.ok) { out.reason = 'invalid'; return out; }
+    if (r.ssdMissing) { out.missing.push('held'); out.reason = 'missing'; return out; }
+    out.counted = true; out.source = 'estimated';
+    out.cash = r.netCash; out.cpf = owner55 ? 0 : r.cpfRefund; out.net = r.netCash; out.cpfRefund = r.cpfRefund; out.costs = r.costs.total; out.commission = r.costs.commission + r.costs.gst; out.legal = r.costs.legal; out.ssd = r.costs.ssd;
+    out.ownCashNeeded = r.ownCashNeeded; out.shortfall = r.loanShortfall; out.cpfShortfall = r.cpfShortfall;
+    return out;
+  }
+
   /* ---------------- shared: borrowers, ages and tenure ---------------- */
   // b: [{ age, fixed, variable, rental }]  -> gross and assessable (after the MAS 30% haircuts) income, income-weighted age
   function borrowers(list) {
@@ -250,7 +289,11 @@
     const avgAge = everyone.length ? everyone.reduce((s, b) => s + b.age, 0) / everyone.length : null;
     const youngest = everyone.length ? Math.min.apply(null, everyone.map((b) => b.age)) : null;
     const bad = (badAge ? [{ field: 'age', text: LIMITS.age.text }] : []).concat(badMoney ? [{ field: 'income', text: LIMITS.income.text }] : []);
-    return { list: bs, gross: G, assessable: AS, iwaa, iwaaGross, avgAge, youngest, haircut: G - AS, bad };
+    // Phase B (Oct 2026): which weighting MAS means is unconfirmed, so the age that sets the tenure and the loan limit is the HIGHER of the two (the older age can only
+    // shorten the tenure or lower the limit). iwaa and iwaaGross keep their meaning; iwaaUse is what the loan work uses. ageUnverified: the two differ, so the choice mattered.
+    const iwaaUse = iwaa === null ? null : (iwaaGross === null ? iwaa : Math.max(iwaa, iwaaGross));
+    const ageUnverified = bs.length > 1 && iwaa !== null && iwaaGross !== null && Math.abs(iwaa - iwaaGross) > 1e-9;
+    return { list: bs, gross: G, assessable: AS, iwaa, iwaaGross, iwaaUse, ageUnverified, avgAge, youngest, haircut: G - AS, bad };
   }
   function bankTenure(kind, age, wanted) {
     const L = R.bankLtv, std = Math.max(0, Math.min(L.standardTenure[kind], Math.floor(L.endAge - age))), max = L.maxTenure[kind];
@@ -274,7 +317,7 @@
     // An HDB flat with a bank loan is also held to MSR 30% of income, less existing property-loan instalments (MAS 645 para 6; A2-01)
     const msrCap = kind === 'hdb' ? R.msr * B.assessable : null, forNewMsr = kind === 'hdb' ? Math.max(0, msrCap - prop) : null;
     const forNew = kind === 'hdb' ? Math.min(forNewTdsr, forNewMsr) : forNewTdsr, binding = kind === 'hdb' && forNewMsr < forNewTdsr ? 'msr' : 'tdsr';
-    const t = bankTenure(kind, B.iwaa, i.tenure);
+    const t = bankTenure(kind, B.iwaaUse, i.tenure);
     if (t.years < 1) return { ok: true, noTenure: true, cause: 'age', kind, B, cap, debts, forNew, tenure: t };
     const sr = testRate(i), loan = forNew * AF(sr, t.years), row = (t.lower ? R.bankLtv.lower : R.bankLtv.standard)[Math.min(nn(i.loans), 2)];
     if (loan > LIMITS.loan.max) return invalid([{ field: 'income', text: LIMITS.loan.text }]);
@@ -324,7 +367,7 @@
       notes.push({ id: 'commitments', text: 'HDB also looks at your other loans and commitments, such as car loans and card bills, so it may lend less than this.' });
       return { ok: true, scenario: sc, household, ceiling: ceil, B, rate, tenure: { years, max: maxT, lease: pos(i.lease) ? i.lease : null }, msrCap, prop, forNew, maxLoan: loan, ltv, priceAtLtv: loan / ltv, binding: 'msr', notes };
     }
-    const kind = sc === 'ec' ? 'private' : 'hdb', t = bankTenure(kind, B.iwaa, i.tenure);
+    const kind = sc === 'ec' ? 'private' : 'hdb', t = bankTenure(kind, B.iwaaUse, i.tenure);
     const msrCap = R.msr * B.assessable, tdsrCap = R.tdsr * B.assessable;
     const forNewMsr = Math.max(0, msrCap - prop), forNewTdsr = Math.max(0, tdsrCap - prop - other), forNew = Math.min(forNewMsr, forNewTdsr);
     if (t.years < 1) return { ok: true, noTenure: true, cause: 'age', scenario: sc, B, rate: R.stressRate, tenure: t, msrCap, tdsrCap, prop, other, forNew, maxLoan: 0, notes };
@@ -342,7 +385,10 @@
     const bad = moneyBad(i, ['price', 'cpf']).concat(rangeBad(i, ['ratePct', 'years']), !i.entity ? rangeBad(i, ['age']) : []); if (bad.length) return invalid(bad);
     const need = []; if (!pos(i.price)) need.push('price'); if (!i.entity && !pos(i.age)) need.push('age');
     if (need.length) return missing(need);
-    const P = i.price, wanted = pos(i.years) ? i.years : R.bankLtv.standardTenure.private, years = Math.min(wanted, R.bankLtv.maxTenure.private);
+    // no tenure given: the longest one that keeps the standard limit at this age (30 years or less AND ending by 65); where there is none (65 or over) the
+    // 30-year convention applies and takes the lower limit, so a standard limit is never shown for a loan that runs past 65
+    const stdNow = i.entity ? null : Math.max(0, Math.min(R.bankLtv.standardTenure.private, Math.floor(R.bankLtv.endAge - i.age + 1e-9)));
+    const P = i.price, wanted = pos(i.years) ? i.years : (stdNow >= 1 ? stdNow : R.bankLtv.standardTenure.private), years = Math.min(wanted, R.bankLtv.maxTenure.private);
     // MAS Notice 632: a tenure over 30 years, or a loan running past age 65, takes the lower limit (A2-02); a company borrower is
     // limited to 15% and has no CPF
     const pastAge = !i.entity && i.age + years > R.bankLtv.endAge, longTenure = years > R.bankLtv.standardTenure.private;
@@ -461,5 +507,5 @@
   };
   const ASK = (tool) => 'Hi Ken, I’m using the ' + tool + ' on Groundwork and have a question.';
 
-  return { mortgage, stampDuty, bsdLines, ssd, saleProceeds, cpfInterestEstimate, tdsr, msr, progressive, borrowers, bankTenure, messages, ASK, instal, parseDate: D, parseMoney, parseNum, LIMITS, dutyAt };
+  return { mortgage, stampDuty, bsdLines, ssd, saleProceeds, saleEstimate, cpfInterestEstimate, tdsr, msr, progressive, borrowers, bankTenure, messages, ASK, instal, parseDate: D, parseMoney, parseNum, LIMITS, dutyAt };
 });

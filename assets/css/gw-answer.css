@@ -225,3 +225,25 @@ body.gw-confirming .pa-bar{display:none !important}
   .pa-fig{padding:12px 16px}.pa-fig .v{font-size:28px;margin-top:2px}.pa-fig .s{margin-top:4px;font-size:13px}
   .pa-hdt{margin-bottom:-4px}
 }
+
+/* Phase B (Oct 2026): preferred borrowing and the sale estimate */
+.pa-borrow{display:flex;flex-direction:column;gap:8px;padding:16px 18px;border:1px solid var(--gw-line);border-radius:16px;background:#fff}
+.pa-borrow[hidden]{display:none}
+.pa-borrow-r{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px}
+.pa-borrow-r .pa-pin{flex:0 1 260px}
+.pa-brange{--pos:100%}
+.pa-brange::-webkit-slider-runnable-track{background:linear-gradient(90deg,var(--gw-ink) 0,var(--gw-ink) var(--pos),#C9CBD3 var(--pos),#C9CBD3 100%)}
+.pa-brange::-moz-range-track{background:linear-gradient(90deg,var(--gw-ink) 0,var(--gw-ink) var(--pos),#C9CBD3 var(--pos),#C9CBD3 100%)}
+.pa-adv{border:0;padding:0}
+.pa-adv summary{cursor:pointer;font-size:14px;color:var(--gw-blue);min-height:44px;display:flex;align-items:center}
+.pa-adv summary:focus-visible{outline:2px solid var(--gw-blue);outline-offset:2px}
+.pa-adv-b{display:flex;flex-direction:column;gap:12px;padding:4px 0 6px}
+.pa-own>div[hidden],.pa-sale>div[hidden]{display:none}
+@media (max-width:899px){.pa-borrow{padding:14px}}
+/* HDB route and CPF note (final correction) */
+.pa-route{display:flex;flex-direction:column;gap:10px;align-items:flex-start;margin:2px 0 0;padding:12px 14px;border:1px solid var(--gw-line);border-radius:12px;background:var(--pa-lead)}
+.pa-route p{margin:0;font-size:14px;line-height:1.45;color:var(--gw-body)}
+.pa-route .gw-btn,.pa-hdb .gw-btn{min-height:44px;height:auto;white-space:normal;text-align:center;line-height:1.3;padding-top:10px;padding-bottom:10px}
+.pa-hdb{gap:10px}
+.pa-cpfnote{margin:10px 0 0;font-size:13px;line-height:1.45;color:var(--gw-muted)}
+.pa-cpfnote b{color:var(--gw-ink);font-weight:700}
