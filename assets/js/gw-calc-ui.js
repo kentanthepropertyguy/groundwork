@@ -31,6 +31,7 @@
     'sale-proceeds': '<path d="M4 7h16v10H4z"/><circle cx="12" cy="12" r="2.4"/><path d="M7 7v10M17 7v10" opacity=".45"/>',
     tdsr: '<path d="M4 19h16"/><path d="M6 19V11M10 19V7M14 19v-9M18 19V5"/>',
     msr: '<path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/><path d="M4 12h16" opacity=".45"/>',
+    planner: '<path d="M4 19V9M10 19V5M16 19v-7M21 19H3"/>',
     'payment-planner': '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/><path d="M8 14h3M13 14h3M8 17h3"/>',
     progressive: '<path d="M4 20h16"/><path d="M6 20v-4h3v4M10.5 20v-8h3v8M15 20V8h3v12"/>',
     'hdb-upgrade': '<path d="M3 12 9 7l6 5"/><path d="M5 11v8h8v-8"/><path d="M15 9l3-2 3 2v10h-6"/>',
@@ -50,6 +51,7 @@
     ssd: { path: 'ssd/', title: 'Seller’s Stamp Duty (SSD)', name: 'Selling within 4 years?', tag: 'SSD', short: 'Seller’s Stamp Duty on a private home', h1: 'Selling within 4 years?', intro: 'Whether Seller’s Stamp Duty (SSD) applies when you sell a private home, and how much.', group: 'sell' },
   };
   const EXISTING = {
+    planner: { path: 'planner/', title: 'What can I afford?', name: 'What can I afford?', tag: 'Comfortable budget', short: 'Your comfortable budget and the highest the numbers allow', group: 'buy', icon: 'planner' },
     'payment-planner': { path: 'payment-planner/', title: 'Payment timeline', name: 'Payment timeline', tag: 'Payment dates', short: 'See when and how much you need to pay.', group: 'buy', icon: 'payment-planner' },
     'hdb-upgrade': { path: 'hdb-upgrade/', title: 'Can I afford to upgrade from my HDB?', name: 'HDB upgrade planner', tag: 'Direct budget calculation', short: 'Your private-home budget if you sell your flat first', group: 'upgrade' },
     'what-can-i-buy': { path: 'what-can-i-buy/', title: 'What can this budget buy?', name: 'What can this budget buy?', tag: 'Homes that sold around your budget', short: 'What homes around your budget have actually sold for', group: 'research' },
@@ -58,7 +60,7 @@
   };
   // Tools work out a number from your own figures. Looking up what homes sold for (Property values & prices, Research, What can this
   // budget buy?) is listed under Research in the menu and on the homepage, so each feature has one home.
-  const ORDER = { buy: ['stamp-duty', 'tdsr', 'msr', 'mortgage', 'progressive', 'payment-planner'], sell: ['sale-proceeds', 'ssd'], upgrade: ['hdb-upgrade'] };
+  const ORDER = { buy: ['planner', 'stamp-duty', 'tdsr', 'msr', 'mortgage', 'payment-planner', 'progressive'], sell: ['sale-proceeds', 'ssd'], upgrade: ['hdb-upgrade'] };
   const GROUPS = [['buy', 'Buying'], ['sell', 'Selling'], ['upgrade', 'Upgrading from HDB']];
 
   // The tools page: a compact directory. Plain names first, the term people know as a tag (r = path from /tools/, i.e. '').
@@ -202,7 +204,7 @@
         work(rows([['Total interest', $(r.interest)], ['Total repaid', $(r.total)], ['Interest share of repayments', pc(r.interestShare)], ['First year', $(r.firstYear.interest) + ' interest · ' + $(r.firstYear.principal) + ' principal', 'w'],
           r.balanceAfter[5] !== undefined ? ['Still owed after 5 years', $(r.balanceAfter[5])] : null, r.balanceAfter[10] !== undefined ? ['Still owed after 10 years', $(r.balanceAfter[10])] : null])) +
         sources(['Assumes the same rate for the whole tenure; most bank rates change after a few years.', 'Income figures assume no other debts. Your lender decides.'].concat(r.lender === 'hdb' ? ['HDB’s loan rate of 2.6% a year is valid to 31 Dec 2026.'] : []), 'Rules: MAS TDSR 55% and MSR 30%, tested at the higher of 4% and your rate (MAS Notice 645); HDB loan tested at the higher of 3% and its loan rate. Checked 9 Oct 2026.') +
-        next([['../tdsr/', 'How much could I borrow?', 'calc-tdsr'], ['../progressive-payments/', 'New launch payments', 'calc-progressive']]);
+        next([['../tdsr/', 'How much could I borrow?', 'calc-tdsr'], ['../payment-planner/', 'Plan your payments', 'payment-planner']]);
     },
     'stamp-duty'(r, v) {
       const who = (r.profile.res === 'ENTITY' ? 'entity' : ({ SC: 'Singapore Citizen', PR: 'Permanent Resident', FR: 'foreigner' })[r.profile.res] + (r.profile.res === 'FR' ? '' : ', ' + ['first', 'second', 'third or later'][r.profile.owned] + ' property')) + (r.absdRate < r.absdRateFull ? ', remitted for ' + (r.kind === 'hdb' ? 'an HDB flat' : 'a new EC') : '');
@@ -214,7 +216,7 @@
         work('<h3 class="gw-sh">Buyer’s Stamp Duty</h3>' + rows(r.bsdLines.map((l) => [(l.from ? 'Next ' : 'First ') + $(l.to - l.from) + ' at ' + pc(l.rate), $(l.duty)]).concat([['BSD (rounded down)', $(r.bsd), 'tot']])) +
           '<h3 class="gw-sh">Additional Buyer’s Stamp Duty</h3>' + rows([['Rate (' + esc(who) + ')', pc(r.absdRate)], ['ABSD', $(r.absd), 'tot']])) +
         sources([{ text: r.basis }, 'Not covered: buying more than one home in a contract, buying out a co-owner’s share, gifts and inheritance.'], 'Rates: BSD for homes bought from 15 Feb 2023; ABSD from 27 Apr 2023; ABSD remissions for married couples, HDB flats and new ECs, and free trade agreements; refunds for second homes (IRAS, MOF). Checked 9 Oct 2026.') +
-        next([['../mortgage/', 'Monthly instalment', 'calc-mortgage'], ['../progressive-payments/', 'New launch payments', 'calc-progressive']]);
+        next([['../mortgage/', 'Monthly instalment', 'calc-mortgage'], ['../payment-planner/', 'Plan your payments', 'payment-planner']]);
     },
     ssd(r, v) {
       if (!r.ok && r.error === 'ssd-2010') return '<p class="gw-warn">Homes bought between 20 Feb 2010 and 13 Jan 2011 had their own SSD rates for a sale within 1 or 3 years. This calculator doesn’t cover them: see IRAS’s SSD page.</p>';
@@ -251,7 +253,7 @@
           r.netCash < 0 ? ['Cash you’d need to add', $(-r.netCash), 'tot'] : ['Cash left after costs', $(r.netCash), 'tot']])) +
         sources(['The CPF refund goes back to the owners’ CPF accounts' + (r.owner55 ? '; owners aged 55 and above have it go first to their Retirement Account, up to the Full Retirement Sum' : '') + '. It can go towards your next home, subject to CPF rules.', 'Option money you receive in cash is part of the selling price, and goes back to CPF if a refund is due.', 'Commission and legal fees are your estimates.'].concat(r.type === 'hdb' ? ['SSD isn’t included: most HDB flats are past the SSD period when sold, but a SERS replacement flat sold within its SSD period can still attract it (IRAS).'] : []),
           'Rules: CPF refund of principal (including housing grants) plus accrued interest, and any amount pledged at 55; no cash top-up if sold at market value (CPF Board). SSD (IRAS). GST 9%. Checked 9 Oct 2026.') +
-        next(r.type === 'hdb' || !r.ssd ? [['../hdb-upgrade/', 'Budget for my next home', 'hdb-upgrade', r.type === 'hdb'], ['../progressive-payments/', 'Buying a new launch next?', 'calc-progressive']] : [['../ssd/', 'Seller’s Stamp Duty in detail', 'calc-ssd'], ['../tdsr/', 'How much could I borrow next?', 'calc-tdsr']]);
+        next(r.type === 'hdb' || !r.ssd ? [['../hdb-upgrade/', 'Budget for my next home', 'hdb-upgrade', r.type === 'hdb'], ['../payment-planner/', 'Buying a new launch next?', 'payment-planner']] : [['../ssd/', 'Seller’s Stamp Duty in detail', 'calc-ssd'], ['../tdsr/', 'How much could I borrow next?', 'calc-tdsr']]);
     },
     tdsr(r) {
       if (r.noTenure) return '<p class="gw-warn">The standard loan tenure ends at age 65, so at this age there is none. Enter a loan tenure to see the limit: a loan that runs past 65 takes the lower loan limit.</p>';
