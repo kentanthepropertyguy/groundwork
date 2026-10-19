@@ -602,3 +602,12 @@ table.pl-evs{display:table;width:100%;border-collapse:collapse;font-size:14px;fo
   .pl-jr:not(.pl-jr-f) tbody th.nm,.pl-jr:not(.pl-jr-f) tbody td{padding-top:13px;padding-bottom:13px}
 }
 @media (max-width:759px){.pl-moreopts>summary em{display:block;margin-top:2px}}
+/* Mortgage summary: the loan used, then the monthly figure (two blocks, no new section) */
+.pl-sumtop-1 .pl-sf+.pl-sf{border-left:0;border-top:1px solid var(--gw-line)}
+.pl-sumtop-1 .pl-sf:nth-child(n+3){border-top:1px solid var(--gw-line)}
+@media (min-width:760px){.pl-sumtop-1:has(.pl-sf-loan){grid-template-columns:minmax(0,1fr) minmax(0,1.25fr)}.pl-sumtop-1:has(.pl-sf-loan) .pl-sf+.pl-sf{border-top:0;border-left:1px solid var(--gw-line)}}
+.pl-sf-loan .s{font-size:14px}
+.pl-sf .s .pl-sf-rt{display:block;margin-bottom:3px;font-weight:600;color:var(--gw-ink)}
+.pl-sf .pl-adj{display:block;margin-top:10px;padding:9px 11px;border:1px solid #E5C77A;border-left-width:4px;border-radius:6px;background:#FFF8E6;color:#5C3A00;font-size:14px;line-height:1.45}
+.pl-sf .pl-adj b{color:#3F2800;font-variant-numeric:tabular-nums}
+.pl-sumtop-1 .pl-sf-w .v small{display:inline;margin:0 0 0 2px}
