@@ -509,3 +509,96 @@ table.pl-evs{display:table;width:100%;border-collapse:collapse;font-size:14px;fo
 /* eleven chart columns on a desktop: the amounts under a bar wrap inside it instead of running past the page */
 .pl-split li{min-width:0}.pl-split .pl-lg{white-space:normal;min-width:0;overflow-wrap:anywhere}
 .pl-mo-lab{min-width:0;overflow-wrap:anywhere}
+
+/* UX pass 3: first scheduled payment, one answer tile, short payments listed once, one plain line instead of a list, one closed section for the table */
+.pl-sumtop-1{grid-template-columns:minmax(0,1fr)}
+.pl-sumbox>.pl-sf-then{margin:0;padding:9px 18px 11px;border-top:1px solid var(--gw-line);font-size:13px;line-height:1.45;color:var(--gw-muted)}
+@media (max-width:899px){.pl-sumbox>.pl-sf-then{padding:8px 16px 10px}}
+.pl-sf-rows{display:flex;flex-direction:column;margin-top:8px}
+.pl-sf-row{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n a" "w w";gap:2px 14px;align-items:baseline;padding:7px 0;border-top:1px solid #F0DCA8;font-size:15px;color:#5C3A00}
+.pl-sf-row .n{grid-area:n;font-weight:600}.pl-sf-row .w{grid-area:w;font-size:13.5px;color:#5C3A00}.pl-sf-row .a{grid-area:a;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pl-sf-row.more{display:block;font-size:13.5px}
+@media (min-width:640px){.pl-sf-row{grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"n w a";gap:0 18px}}
+.pl-sf-row .pl-prog{font-weight:400}
+.pl-needline{margin:0 0 4px;font-size:14.5px;line-height:1.5;color:var(--gw-muted)}
+.pl-need0 .pl-how{margin-top:4px;border-top:0;padding-top:0}
+.pl-grp[hidden]{display:none}
+@media (min-width:900px){.pl-fform .pl-moreopts{grid-column:1/-1}}
+.pl-moreopts>summary em{display:inline}
+/* The single stage-by-stage list (19 Oct 2026): plain rows, a small order number, no bars. Phones: each payment is a compact block. */
+.pl-journey{margin:6px 0 14px}.pl-journey:empty{display:none}
+.pl-jr-h{font-size:19px;line-height:1.25;color:var(--gw-ink);letter-spacing:-.01em;margin:22px 0 4px}
+.pl-jr{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;counter-reset:pj}
+.pl-jr thead th{font-size:12px;font-weight:600;color:var(--gw-muted);text-align:left;padding:10px 10px 8px;border-bottom:1px solid var(--gw-line)}
+.pl-jr th.n,.pl-jr td.n{text-align:right}
+.pl-jr tbody th,.pl-jr tbody td,.pl-jr tfoot th,.pl-jr tfoot td{padding:12px 10px;border-top:1px solid var(--gw-line);vertical-align:top;font-weight:400;text-align:left}
+.pl-jr tbody tr:first-child>*{border-top:0}
+.pl-jr tbody td.n,.pl-jr tfoot td.n{text-align:right}
+.pl-jr tr.pay{counter-increment:pj}
+.pl-nw{display:flex;align-items:flex-start;gap:10px;min-width:0}
+.pl-no{flex:none;width:24px;height:24px;border:1px solid #CBD0DA;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--gw-muted);margin-top:0}
+.pl-no::before{content:counter(pj)}.pl-no.in::before{content:"+"}
+.pl-nt{display:flex;flex-direction:column;align-items:flex-start;min-width:0;line-height:1.35}
+.pl-nb{font-size:15.5px;font-weight:650;color:var(--gw-ink)}
+.pl-nt small{font-size:12.5px;color:var(--gw-muted);font-weight:500}
+.pl-jr .pl-wh{display:block;font-size:13px;color:var(--gw-muted);margin-top:1px;line-height:1.4}
+.pl-jr .pl-wh .pl-early{display:inline;margin-left:6px}
+.pl-jr td.a{font-size:16px;font-weight:700;color:var(--gw-ink);white-space:nowrap}
+.pl-jr td.by{font-size:14px;color:var(--gw-body);line-height:1.45}
+.pl-pay+.pl-pay::before{content:" · ";color:var(--gw-muted)}
+.pl-pay.bad{color:#8A5200;font-weight:700}
+.pl-jr td.mo{font-size:15px;font-weight:600;color:var(--gw-ink);white-space:nowrap}.pl-jr td.mo.none{color:#9AA0AB;font-weight:400}
+.pl-jr tr.short>*{background:#FFF8E8}
+.pl-jr tfoot th,.pl-jr tfoot td{border-top:2px solid var(--gw-line);font-weight:700;color:var(--gw-ink)}
+.pl-jr-f .nm{width:36%}.pl-jr-f td.a{width:13%}.pl-jr-f td.by{width:31%}
+.pl-journey+.gw-fine{margin-top:0}
+@media (max-width:759px){
+  .pl-jr thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .pl-jr,.pl-jr tbody,.pl-jr tfoot{display:block}
+  .pl-jr tr{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:3px 0;padding:11px 6px;border-top:1px solid var(--gw-line)}
+  .pl-jr tbody tr:first-child{border-top:0}
+  .pl-jr tbody th,.pl-jr tbody td,.pl-jr tfoot th,.pl-jr tfoot td{display:block;padding:0;border:0;background:none}
+  .pl-jr tr.short{background:#FFF8E8;border-radius:10px}
+  .pl-jr tr.short>*{background:none}
+  .pl-jr th.nm{grid-column:1/3;grid-row:1}
+  .pl-jr td.a{grid-column:3;grid-row:1;text-align:right}
+  .pl-jr td.by{grid-column:2;grid-row:2;font-size:13.5px}
+  .pl-jr td.mo{grid-column:3;grid-row:2;text-align:right;font-size:13.5px}
+  .pl-jr td.mo{line-height:1.3}
+  .pl-jr td.mo::before{content:"Est. mortgage";display:block;font-size:12px;line-height:1.3;font-weight:400;color:var(--gw-muted)}
+  .pl-jr td.mo.none,.pl-jr td.by:empty{display:none}
+  .pl-jr tfoot tr{border-top:2px solid var(--gw-line)}.pl-jr tfoot th{grid-column:1/3}.pl-jr tfoot td.a{grid-column:3;grid-row:1}.pl-jr tfoot td.by,.pl-jr tfoot td.mo{display:none}
+  .pl-jr tfoot th.nm{width:auto}
+}
+
+.pl-nl{display:block}.pl-nl small{white-space:nowrap}
+.pl-jr .pl-wh .pl-prog{font-weight:400;color:var(--gw-muted)}
+@media (max-width:759px){.pl-jr-f .nm,.pl-jr-f td.a,.pl-jr-f td.by{width:auto}}
+
+.pl-jr .pl-wh .pl-basis{margin-left:6px}
+@media (max-width:759px){.pl-jr tbody tr:has(td.mo.none) td.by{grid-column:2/4}}
+.pl-jr:not(.pl-jr-f){max-width:760px}
+
+/* Contextual help (19 Oct, later): the short line stays visible under the field; an (i) at the end of the label row opens the technical detail below the field, so the closed state adds no extra row */
+.pl-fw,.gw-fld:has(>.pl-help){position:relative;min-width:0}
+.pl-fw:has(>.pl-help)>label>span:first-child,.gw-fld:has(>.pl-help)>.l{padding-right:38px}
+.pl-help{margin:0}
+.pl-help>summary{position:absolute;top:-10px;right:-10px;width:44px;height:44px;display:grid;place-items:center;cursor:pointer;list-style:none;font-size:13px;color:var(--gw-blue);border-radius:50%}
+.pl-help>summary::-webkit-details-marker{display:none}
+.pl-help>summary::before{content:"i";display:inline-grid;place-items:center;width:20px;height:20px;border:1.5px solid currentColor;border-radius:50%;font-size:12px;font-weight:700;font-style:italic;line-height:1;font-family:Georgia,serif}
+.pl-help[open]>summary::before{background:var(--gw-blue);color:#fff;border-color:var(--gw-blue)}
+.pl-help>summary:focus-visible{outline:2px solid var(--gw-blue);outline-offset:-4px}
+.pl-help>p{margin:8px 0 0;padding:10px 12px;font-size:13px;line-height:1.45;color:var(--gw-body);background:#fff;border:1px solid var(--gw-line);border-radius:10px}
+
+/* Desktop schedule (19 Oct, later): the timing gets its own column on the same numbered row, so the list uses the width; phones and tablets are unchanged */
+@media (min-width:900px){
+  .pl-jr:not(.pl-jr-f){max-width:none;--wh:330px}
+  .pl-jr:not(.pl-jr-f) th.nm{position:relative}
+  .pl-jr:not(.pl-jr-f) .pl-nw{align-items:center}
+  .pl-jr:not(.pl-jr-f) .pl-nt{display:grid;grid-template-columns:minmax(0,1fr) var(--wh);column-gap:24px;align-items:center;flex:1 1 auto;width:100%}
+  .pl-jr:not(.pl-jr-f) .pl-nl{grid-column:1}
+  .pl-jr:not(.pl-jr-f) .pl-wh{grid-column:2;margin-top:0}
+  .pl-jr:not(.pl-jr-f) thead th.nm::after{content:"When";position:absolute;right:10px;width:var(--wh);text-align:left;font-size:12px;font-weight:600;color:var(--gw-muted)}
+  .pl-jr:not(.pl-jr-f) tbody th.nm,.pl-jr:not(.pl-jr-f) tbody td{padding-top:13px;padding-bottom:13px}
+}
+@media (max-width:759px){.pl-moreopts>summary em{display:block;margin-top:2px}}
