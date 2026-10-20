@@ -13,7 +13,7 @@
 })(typeof self !== 'undefined' ? self : this, function (root) {
   'use strict';
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const MAIN = 'https://kentanthepropertyguy.com/', LAUNCHES = 'https://kentanthepropertyguy.com/developments/';
+  const MAIN = 'https://kentanthepropertyguy.com/', LAUNCHES = 'https://kentanthepropertyguy.com/#developments';
   const ASK_MSG = 'Hi Ken, I’m on Groundwork and would like to talk through my property plans. My situation is ____. (Ref KPT-HOME)';
   const ASK = 'https://wa.me/6590908898?text=' + encodeURIComponent(ASK_MSG);
 
@@ -283,7 +283,7 @@
   function secSwitch(cur, r) {
     return '<nav class="gw-secs" aria-label="Ways to use Groundwork">' + SEC_ORDER.map((k) => { const S = SECTIONS[k]; return '<a href="' + r + S.href + '" data-gw-nav-to="' + S.nav + '"' + (k === cur ? ' aria-current="page"' : '') + '>' + S.name + '</a>'; }).join('') + '</nav>';
   }
-  function researchRows(r) { return '<div class="gw-ml gw-rrows">' + SECTIONS.research.ids.slice(0, 4).map((id) => row(byId[id], r)).join('') + '</div>'; }
+  function researchRows(r) { return '<div class="gw-ml gw-rrows"><a class="gw-mi gw-mi-map" href="' + r + 'research/map/" data-gw-nav-to="map"><img src="' + r + 'assets/img/map-thumb.webp" alt="" width="720" height="298" loading="lazy" decoding="async"><span><b>Map</b><small>Search a place, road or development. See what is nearby.</small></span></a>' + SECTIONS.research.ids.filter((id) => id !== 'map').slice(0, 3).map((id) => row(byId[id], r)).join('') + '</div>'; }
   // Homepage quick tools: five tools and "All tools".
   function quickHtml(r) {
     return '<div class="gw-qt">' + QUICK.map((id) => { const e = byId[id]; return '<a href="' + r + e.href + '" data-tool="' + id + '">' + svg(e.icon, 26) + '<b>' + esc(e.quickName || e.name) + '</b><small>' + esc(e.tag) + '</small></a>'; }).join('') +
