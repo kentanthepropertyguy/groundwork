@@ -79,7 +79,7 @@
       '<div class="pa-route" data-when="kind:hdb" hidden>' + hdbRoute(true) + '</div>' +
       '<p class="pa-note">Buying an EC, or buying before you sell? Use the <a href="../payment-planner/">payment timeline</a>.</p></section>' +
       '<details class="pa-adj" data-adj><summary><span>Adjust assumptions</span><em data-adj-sum></em></summary><div class="pa-adj-b">' +
-      '<div class="pa-pair">' + numf('ratePct', 'Interest rate you expect', '% a year', { ph: '4', hint: 'Your instalment uses this. Banks test what you can borrow at the higher of 4% and this rate.' }) + numf('years', 'Loan years', 'years', { ph: 'suggested for you', hint: 'Leave it empty and we suggest one. A number here is always used as typed.' }) + '</div>' +
+      '<div class="pa-pair">' + numf('ratePct', 'Interest rate you expect', '% a year', { ph: '4', hint: 'Your instalment uses this. Banks test what you can borrow at the higher of 4% and this rate.' }) + numf('years', 'Loan years', 'years', { ph: 'suggested for you', hint: 'Leave it empty and we suggest one. A number here is used as typed, up to the most a bank allows at your age; a longer one is changed to that maximum.' }) + '</div>' +
       chips('buyers.0.res', 'Residency, you', RES, { value: 'SC', share: 'buyers.0.res' }) + chips('buyers.1.res', 'Residency, second buyer', RES, { value: 'SC', share: 'buyers.1.res', when: 'who:two' }) +
       datef('otp', 'Option date') + money('setAside', 'Set aside for fees and renovation', { opt: true, ph: '0', hint: 'Kept out of the money used for the purchase.' }) + '</div></details>';
   }
@@ -222,20 +222,24 @@
   }
   // The loan tenure: what is used and why, the offer of a longer (or better) one when it adds 5% or more, and every valid alternative side by side.
   // The 5% rule only decides what is offered; the table always lists the others.
-  function tenureHtml(res, cmpOpen) {
+  function tenureHtml(res, cmpOpen, adj) {
     const t = res.tenure; if (!t) return '';
     const rows = rowsOf(res);
     const cur = rows.filter((r) => r.isCurrent)[0] || {}, stdRow = rows.filter((r) => r.isStd)[0] || {}, sugRow = rows.filter((r) => r.isSuggested)[0] || {};
     const std = stdRow.ltv ? pc(stdRow.ltv) : '75%';
     let lead, why;
     const mAge = root.GW_RULES && root.GW_RULES.bankLtv ? root.GW_RULES.bankLtv.maturityAge : 75, ageLine = 'Banks usually end a loan by age ' + mAge + ' (lender policy, not a MAS rule).';
-    if (t.cappedFrom) { lead = 'Loan tenure: <b>' + plural(t.years) + '</b>, not the ' + plural(t.cappedFrom) + ' you entered.'; why = t.cappedBy === 'age' ? ageLine : 'Thirty-five years is the longest a bank loan can run.'; }
+    // the one sentence for the most allowed and why, and the loan limit it takes, are the calculators' own (gw-calc.js), the same words on every screen
+    const maxLine = root.GW_CALC.tenureMaxText({ allowed: t.allowed, age: t.age, joint: t.joint }), tierLine = t.lower ? root.GW_CALC.tenureTierText({ std: t.std, allowed: t.allowed, ltvStd: stdRow.ltv, ltvLow: t.ltv }) : '', atMost = t.allowed >= 1 && t.years >= t.allowed;
+    if (t.cappedFrom) { lead = 'Loan tenure: <b>' + plural(t.years) + '</b>, not the ' + plural(t.cappedFrom) + ' you entered.'; why = maxLine + (tierLine ? ' ' + tierLine : ''); }
+    else if (t.manual && adj) { lead = 'Loan tenure: <b>' + plural(t.years) + '</b>, changed from the ' + plural(adj) + ' you entered.'; why = maxLine + (tierLine ? ' ' + tierLine : ''); }
+    else if (t.manual && atMost) { lead = 'Loan tenure: <b>' + plural(t.years) + '</b>, the most allowed.'; why = maxLine + (tierLine ? ' ' + tierLine : ''); }
     else if (t.manual) { lead = 'Loan tenure: <b>' + plural(t.years) + '</b>, as you chose.'; why = ''; }
     else { lead = 'Loan tenure: <b>' + plural(t.years) + '</b>.'; why = t.std < 1 ? 'No tenure keeps the standard loan limit at your age, so the longest a bank usually lends is used, at the lower limit. ' + ageLine : 'The longest loan that keeps the standard loan limit at your age.'; }
     const facts = 'Loan ends at about age ' + t.endAge + (t.ltv ? ' · loan limit ' + pc(t.ltv) + ' of the price' : '') + (t.lower && t.lowerWhy ? ', the lower limit because ' + (t.lowerWhy === 'age' ? 'the loan runs past age 65' : 'the tenure is over 30 years') : '') + '.';
     let nudge = '';
     if (t.nudge) {
-      const n = t.nudge, lim = n.lower && n.ltv ? ' The loan limit would drop to <b>' + pc(n.ltv) + '</b> of the price (from ' + std + ') because ' + (n.lowerWhy === 'age' ? 'the loan would run past age 65' : 'the tenure would be over 30 years') + '. Banks set their own age limits, so check with yours.' : '';
+      const n = t.nudge, lim = n.lower && n.ltv && !t.lower ? ' The loan limit would drop to <b>' + pc(n.ltv) + '</b> of the price (from ' + std + ') because ' + (n.lowerWhy === 'age' ? 'the loan would run past age 65' : 'the tenure would be over 30 years') + '. Banks set their own age limits, so check with yours.' : '';
       const head = t.manual ? '<b>A ' + n.years + '-year tenure would suit you better.</b> Your budget would be ' + $s(n.budget) + ', ' + $(n.gain) + ' more.' : '<b>A longer loan could add to your budget.</b> ' + plural(n.years) + ' would give ' + $s(n.budget) + ', ' + $(n.gain) + ' more.';
       nudge = '<div class="pa-tnudge"><p>' + head + lim + '</p>' +
         '<div class="pa-tn-b"><button type="button" class="pa-btn pri" data-use="' + (n.years === t.std ? 'auto' : n.years) + '">Use ' + plural(n.years) + '</button><button type="button" class="pa-link" data-cmp aria-expanded="' + !!cmpOpen + '">Compare tenures</button></div></div>';
@@ -403,10 +407,14 @@
     function fitSticky() { if (outEl) outEl.classList.toggle('pa-tall', outEl.scrollHeight > (root.innerHeight || 800) - 100); }
     root.addEventListener('resize', fitSticky); box.addEventListener('toggle', fitSticky, true);
     let heldHtml = null;
+    let tenureFld = null; const yAdj = () => { const y = field('years'); return y && +y.dataset.adjustedFrom > 0 ? +y.dataset.adjustedFrom : 0; };
     function recalc() {
       dirty = false; applyWhen();
       const s = readEntries(); stDirty = false;
-      const r = A.assess(s); res = r; const st = { monthly: s.saveMo === undefined ? 0 : (s.saveMo || 0) + (s.cpfMo || 0), twoBuyers: s.buyers.length > 1 };
+      const r = A.assess(s);
+      // the tenure field shows the tenure the calculation used (gw-money.js): a longer one typed is replaced by it once the field is not being typed in
+      if (tenureFld) { const applied = r.state === 'ok' ? r.years : 0; if (tenureFld.settle(applied)) { recalc(); return; } tenureFld.hint(applied); }
+      res = r; const st = { monthly: s.saveMo === undefined ? 0 : (s.saveMo || 0) + (s.cpfMo || 0), twoBuyers: s.buyers.length > 1 };
       const hasErr = Object.keys(errs).length > 0, bad = r.state === 'invalid' || hasErr;
       paintErrors(r.errors); sale(A.read(s)); adjSummary(s);
       const ok = r.state === 'ok' && !hasErr;
@@ -416,7 +424,7 @@
         out.foot.hidden = true; out.ask.hidden = true;
       } else if (ok) {
         last = r; lastOk = r;
-        out.head.className = 'pa-head'; out.head.innerHTML = headHtml(r) + cushionHtml(r, cush); out.tenure.innerHTML = tenureHtml(r, cmpOpen);
+        out.head.className = 'pa-head'; out.head.innerHTML = headHtml(r) + cushionHtml(r, cush); out.tenure.innerHTML = tenureHtml(r, cmpOpen, yAdj());
         restoreCushionUi(s);
         setPriceUi(r); setBorrowUi(r); out.status.innerHTML = statusHtml(r); out.tiles.innerHTML = tilesHtml(r); out.next.innerHTML = nextHtml(r, st); out.how.innerHTML = howHtml(r, st);
         out.foot.hidden = false; out.ask.hidden = false; heldHtml = out.head.innerHTML;
@@ -490,6 +498,7 @@
 
     // ---- inputs: live commas on money fields (one behaviour for every calculator: gw-money.js) ----
     if (root.GW_MONEY) $$('input[data-t="money"]').forEach((x) => root.GW_MONEY.wire(x, { parse: (t) => { const p = parseMoney(t); return !p.error && p.value !== undefined ? p.value : null; }, max: C.LIMITS.money.max }));
+    { const yEl = field('years'); if (root.GW_MONEY && root.GW_MONEY.tenureField && yEl) tenureFld = root.GW_MONEY.tenureField(yEl, { read: () => { const p = C.parseNum(yEl.value); return p.error ? null : (p.value || null); }, max: () => C.LIMITS.years.max, recalc: () => { clearTimeout(tmr); recalc(); } }); }
     box.addEventListener('input', (e) => { const t = e.target; if (!t.matches || !t.matches('input')) return; if (t.matches('[data-borrow-range]')) { borrowFromRange(); return; } if (t.matches('[data-range]')) return; if (t.dataset.k === 'price') { ptouched = t.value.trim() !== ''; if (!ptouched) { changed(); return; } changedPrice(); return; } changed(); });
     box.addEventListener('change', (e) => { if (e.target.matches && e.target.matches('input[data-k]') && !e.target.matches('[data-range]')) changed(); });
     // chips (static in the form; the cushion chips are redrawn with the head)
@@ -503,7 +512,7 @@
         const v = cu.dataset.cush; if (v === 'amount') { const cur = res && res.atComfortable ? Math.round(res.atComfortable.cushion / 1000) * 1000 : 0; cush = { amount: cur }; } else cush = { months: +v };
         track('planner_cushion', { choice: v }); const keepOpen = true; clearTimeout(tmr); recalc(); const o = q('[data-cush-o]'); if (o && keepOpen) { o.hidden = false; const tg = q('[data-cush-toggle]'); if (tg) tg.setAttribute('aria-expanded', 'true'); } const af = field('cushionAmount'); if (af && cush.amount !== undefined) { af.value = cush.amount ? fmtMoney(cush.amount) : ''; af.focus(); } return; }
       const cm = t('[data-cmp]'); if (cm) { cmpOpen = !cmpOpen; const bx = q('[data-cmp-box]'); if (bx) bx.hidden = !cmpOpen; $$('[data-cmp]').forEach((x) => { x.setAttribute('aria-expanded', String(cmpOpen)); const ar = x.querySelector('[aria-hidden]'); if (ar) ar.textContent = cmpOpen ? '▴' : '▾'; }); if (cmpOpen) track('planner_tenure_compare', {}); fitSticky(); return; }
-      const us = t('[data-use]'); if (us) { const f = field('years'); if (f) { f.value = us.dataset.use === 'auto' ? '' : us.dataset.use; } track('planner_tenure_use', { choice: us.dataset.use === 'auto' ? 'suggested' : 'own' }); clearTimeout(tmr); recalc(); return; }
+      const us = t('[data-use]'); if (us) { const f = field('years'); if (f) { f.value = us.dataset.use === 'auto' ? '' : us.dataset.use; delete f.dataset.adjustedFrom; } track('planner_tenure_use', { choice: us.dataset.use === 'auto' ? 'suggested' : 'own' }); clearTimeout(tmr); recalc(); return; }
       const fo = t('[data-focus]'); if (fo) { const f = field(fo.dataset.focus); if (f) { f.scrollIntoView({ block: 'center', behavior: 'smooth' }); f.focus({ preventScroll: true }); } return; }
       const oh = t('[data-open-how]'); if (oh) { const d = q('[data-how-d]'); if (d) { d.open = true; d.scrollIntoView({ block: 'start', behavior: 'smooth' }); } return; }
       const bm = t('[data-borrow-max]'); if (bm) { field('prefLoan').value = ''; track('planner_borrow', { choice: 'most' }); clearTimeout(tmr); recalc(); return; }

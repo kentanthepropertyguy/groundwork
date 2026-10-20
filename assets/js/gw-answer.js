@@ -331,7 +331,7 @@
   function tenureInfo(n, ten, basis, head) {
     const at = head.comfortable !== null ? evaluate(n, basis, head.comfortable) : evaluate(n, basis, head.highest);
     const iw = n.B.iwaaUse;
-    return { years: n.years, allowed: n.allowed, cappedFrom: n.cappedFrom, cappedBy: n.cappedBy, manual: ten.manual, std: ten.std, cap: ten.cap, suggested: ten.suggested, longer: !!ten.longer, gain: ten.gain || 0, vsStdBudget: ten.fromBudget === undefined ? null : ten.fromBudget, nudge: ten.nudge, endAge: Math.round(iw + n.years), lower: n.years > ten.std, ltv: at.ok ? at.ltv : null, lowerWhy: at.ok ? at.lowerWhy : null };
+    return { years: n.years, allowed: n.allowed, cappedFrom: n.cappedFrom, cappedBy: n.cappedBy, manual: ten.manual, std: ten.std, cap: ten.cap, suggested: ten.suggested, longer: !!ten.longer, gain: ten.gain || 0, vsStdBudget: ten.fromBudget === undefined ? null : ten.fromBudget, nudge: ten.nudge, endAge: Math.round(iw + n.years), age: Math.ceil(iw * 10 - 1e-9) / 10, joint: n.buyers.length > 1, lower: n.years > ten.std, ltv: at.ok ? at.ltv : null, lowerWhy: at.ok ? at.lowerWhy : null };
   }
   // every valid tenure side by side, for the compare table: standard, the suggested, the buyer's own and a ladder up to the 35-year maximum.
   function tenureRows(s, n, ten, basis, solveC) {

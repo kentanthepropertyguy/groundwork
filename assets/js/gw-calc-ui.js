@@ -382,22 +382,28 @@
     // ---- the tenure line under the tenure field (TDSR, MSR, New launch payments) ----
     function paintTenure(v, r) {
       const el = box.querySelector('[data-tenure-note]'); if (!el) return;
-      const chosen = C.parseNum(((box.querySelector('[data-k="tenure"],[data-k="years"]') || {}).value) || '').value || 0, ok = r && r.ok;
+      const fld = box.querySelector('[data-k="tenure"],[data-k="years"]'), adj = fld && +fld.dataset.adjustedFrom > 0 ? +fld.dataset.adjustedFrom : 0;
+      const chosen = C.parseNum((fld && fld.value) || '').value || 0, ok = r && r.ok;
       const LA = C.LIMITS.age, okAge = (a) => typeof a === 'number' && a >= LA.min && a <= LA.max;
       const ofAge = (a, extra) => { const t = C.bankTenure('private', a); return Object.assign({ age: a, std: t.std, allowed: t.allowed, chosen: chosen > 0 ? chosen : 0 }, extra || {}); };
       let o = { chosen: chosen > 0 ? chosen : 0 };
       if (id === 'progressive') {
         if (v.entity) o.entity = true; else if (okAge(v.age)) o = ofAge(v.age);
       } else if (id === 'msr' && v.scenario === 'hdb-loan') {
-        o.hdbLoan = true; if (ok && r.tenure && r.tenure.years >= 1) o.years = r.tenure.years;
+        o.hdbLoan = true; if (ok && r.tenure && r.tenure.years >= 1) { o.years = r.tenure.years; o.max = r.tenure.max; }
       } else if (ok && r.B && r.tenure && r.tenure.std !== undefined) {
-        o = { age: ageUp(r.B.iwaaUse), std: r.tenure.std, allowed: r.tenure.allowed, chosen: o.chosen, joint: r.B.list && r.B.list.length > 1 };
+        o = { age: ageUp(r.B.iwaaUse), std: r.tenure.std, allowed: r.tenure.allowed, chosen: o.chosen, joint: r.B.list && r.B.list.length > 1, max: r.tenure.max, hdb: r.kind === 'hdb' || r.scenario === 'hdb-bank' };
       } else {
         const b0 = Array.isArray(v.borrowers) && v.borrowers.length === 1 ? v.borrowers[0] : null;
         if (b0 && okAge(b0.age)) o = ofAge(b0.age);
       }
+      if (adj) o.adjustedFrom = adj;
+      if (typeof v.loans === 'number') o.loans = v.loans;
       const t = C.tenureNote(o); if (el.textContent !== t) el.textContent = t;
     }
+    // New launch payments, TDSR and MSR: the loan-tenure field (the ones with a line under them) shows the tenure used (gw-money.js)
+    const tenureEl = box.querySelector('[data-tenure-note]') && box.querySelector('[data-k="tenure"],[data-k="years"]');
+    let tenureFld = null;
     const FN = { mortgage: 'mortgage', 'stamp-duty': 'stampDuty', ssd: 'ssd', 'sale-proceeds': 'saleProceeds', tdsr: 'tdsr', msr: 'msr', progressive: 'progressive' };
     let last = null, lastSig = '', startedT = false, doneT = false;
     function recalc() {
@@ -406,6 +412,12 @@
       if (estimated) v.cpfInterestEstimated = true;
       if (inputErrs.length) r = { ok: false, missing: [], invalid: inputErrs };
       else { try { r = C[FN[id]](v); } catch (e) { r = { ok: false, missing: [] }; } }
+      // the tenure field shows the tenure the calculation used: a longer one typed is replaced by it once the field is not being typed in
+      if (tenureFld) {
+        const applied = r.ok ? (id === 'progressive' ? r.years : r.tenure && r.tenure.years) : 0;
+        if (tenureFld.settle(applied)) { recalc(); return; }
+        tenureFld.hint(applied);
+      }
       if (r.ok || r.error) { out.innerHTML = RENDER[id](r, v); }
       else if (r.invalid && r.invalid.length) {
         // a value we can't use: say which and why, and show no result (A5-02, A5-06, A5-07, A5-22)
@@ -426,6 +438,7 @@
     // money fields: commas appear as you type, the same behaviour as the Payment Timeline (gw-money.js)
     if (root.GW_MONEY) { $$('input[data-t="money"]').forEach((x) => root.GW_MONEY.wire(x, { parse: parseMoney, max: C.LIMITS.money.max })); $$('input[data-t="num"]').forEach((x) => root.GW_MONEY.selectOnFocus(x)); }
     $$('input').forEach((x) => { x.addEventListener('input', () => changed(x)); x.addEventListener('change', () => changed(x)); });
+    if (tenureEl && root.GW_MONEY && root.GW_MONEY.tenureField) tenureFld = root.GW_MONEY.tenureField(tenureEl, { read: () => C.parseNum(tenureEl.value).value || null, max: () => (id === 'progressive' ? C.LIMITS.years.max : C.LIMITS.tenure.max), recalc: () => { clearTimeout(tmr); recalc(); } });
     // CPF accrued interest: a rough estimate only when the visitor asks for one, and only until they type their own figure
     let estimated = false;
     const est = box.querySelector('[data-estimate]');

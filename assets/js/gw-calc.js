@@ -313,16 +313,37 @@
   // The line under a tenure field, in words. It adds no rule: every number is read from bankTenure (std, allowed) and the rules file.
   // o: { age, std, allowed, chosen (years typed, or 0), joint, entity, hdbLoan, years (HDB loan: the tenure used) }
   const yrs = (n) => n + (n === 1 ? ' year' : ' years');
+  // The most a bank loan can run, and why, in one sentence: "Maximum 15 years based on age 60 and assumed bank maturity age 75 (lender policy, not a MAS rule)."
+  // o: { allowed (from bankTenure), age, joint, hdb, max }. The age line is used only when the age, not the MAS maximum, is what limits it.
+  function tenureMaxText(o) {
+    const L = R.bankLtv, max = o.max || L.maxTenure[o.hdb ? 'hdb' : 'private'];
+    if (!(o.allowed >= 1)) return '';
+    if (o.allowed < max) return 'Maximum ' + yrs(o.allowed) + ' based on ' + (o.joint ? 'income-weighted age ' : 'age ') + o.age + ' and assumed bank maturity age ' + L.maturityAge + ' (lender policy, not a MAS rule).';
+    return 'Maximum ' + yrs(max) + (o.hdb ? ' for an HDB flat bank loan.' : ' for a bank loan.');
+  }
+  // Which loan limit the longest tenure takes. The tenure is never moved to keep the standard limit: it is only cut to the most allowed, and this says what that costs.
+  // o: { std, allowed, loans (housing loans the buyer has: 0, 1, 2+; gives the two limits in figures), ltvStd, ltvLow (or the figures directly) }
+  function tenureTierText(o) {
+    if (!(o.allowed > o.std)) return '';
+    const L = R.bankLtv, k = typeof o.loans === 'number' && o.loans >= 0 ? Math.min(Math.floor(o.loans), 2) : null;
+    const hi = o.ltvStd || (k === null ? null : L.standard[k].ltv), lo = o.ltvLow || (k === null ? null : L.lower[k].ltv), pc0 = (x) => Math.round(x * 100) + '%';
+    return (o.std >= 1 ? 'Over ' + yrs(o.std) + ' takes the lower loan limit' : 'Every tenure takes the lower loan limit') + (lo ? ' of ' + pc0(lo) : '') + (hi && o.std >= 1 ? ' (' + pc0(hi) + ' up to ' + yrs(o.std) + ')' : '') + '.';
+  }
   function tenureNote(o) {
     const L = R.bankLtv, cap = L.standardTenure.private, max = L.maxTenure.private, ma = L.maturityAge;
-    if (o.hdbLoan) return (o.years ? 'Using ' + yrs(o.years) + ', the longest HDB allows here. ' : '') + 'An HDB loan runs up to ' + R.hdbLoan.maxTenureYears + ' years, ends by age ' + R.hdbLoan.endAge + ' and ends at least ' + R.hdbLoan.leaseBufferYears + ' years before the lease does. A shorter tenure is allowed.';
+    if (o.hdbLoan) return (o.adjustedFrom ? 'Changed from ' + yrs(o.adjustedFrom) + '. ' : '') + (o.years && (o.max === undefined ? (!o.chosen || o.chosen >= o.years) : o.years >= o.max) ? 'Using ' + yrs(o.years) + ', the longest HDB allows here. ' : '') + 'An HDB loan runs up to ' + R.hdbLoan.maxTenureYears + ' years, ends by age ' + R.hdbLoan.endAge + ' and ends at least ' + R.hdbLoan.leaseBufferYears + ' years before the lease does. A shorter tenure is allowed.';
     if (o.entity) return 'A company’s loan limit does not depend on the tenure. ' + yrs(cap) + ' is used if you leave this blank; up to ' + yrs(max) + ' is allowed.';
     if (o.age === null || o.age === undefined || o.std === null || o.std === undefined) return 'Banks can lend for up to ' + yrs(max) + ' and usually end a loan by age ' + ma + ' (lender policy, not a MAS rule). Over ' + cap + ' years, or past age ' + L.endAge + ', the lower loan limit applies. Enter your age to see where that line falls.';
     const at = (o.joint ? 'At an income-weighted age of ' : 'At age ') + o.age, allowed = o.allowed === undefined ? max : o.allowed;
     if (allowed < 1) return at + ', banks usually end a loan by age ' + ma + ', so no bank loan tenure fits.';
     if (o.chosen) {
-      if (o.chosen > allowed) return at + ', banks usually end a loan by age ' + ma + ' (lender policy, not a MAS rule), so ' + yrs(allowed) + ' is the most, and ' + yrs(allowed) + ' is used' + (allowed > o.std ? ' (the lower loan limit applies).' : '.');
-      return o.chosen > o.std ? at + ', ' + yrs(o.std) + ' is the longest that keeps the standard loan limit. ' + yrs(o.chosen) + ' takes the lower limit.' : at + ', ' + yrs(o.chosen) + ' keeps the standard loan limit.';
+      // At or over the most allowed: say what the most is and why (one sentence, the same on every screen), then which loan limit it takes.
+      if (o.chosen >= allowed) {
+        const tier = tenureTierText({ std: o.std, allowed, loans: o.loans });
+        return (o.adjustedFrom ? 'Changed from ' + yrs(o.adjustedFrom) + '. ' : '') + tenureMaxText({ allowed, age: o.age, joint: o.joint, hdb: o.hdb, max: o.max }) + (o.chosen > allowed ? ' Using ' + yrs(allowed) + '.' : '') + (tier ? ' ' + tier : '');
+      }
+      if (o.std < 1) return at + ', no tenure keeps the standard loan limit, so every tenure takes the lower limit.';
+      return o.chosen > o.std ? at + ', ' + yrs(o.std) + ' is the longest that keeps the standard loan limit. ' + (tenureTierText({ std: o.std, allowed, loans: o.loans }) || yrs(o.chosen) + ' takes the lower limit.') : at + ', ' + yrs(o.chosen) + ' keeps the standard loan limit.';
     }
     return o.std >= 1 ? at + ', ' + yrs(o.std) + ' is the longest that keeps the standard loan limit, and is used if you leave this blank. Longer, up to ' + yrs(allowed) + ', is allowed but takes the lower limit.' : at + ', no tenure keeps the standard loan limit, so ' + yrs(allowed) + ', the longest a bank usually lends, is used at the lower limit if you leave this blank. You can enter fewer years.';
   }
@@ -543,5 +564,5 @@
   };
   const ASK = (tool) => 'Hi Ken, I’m using the ' + tool + ' on Groundwork and have a question.';
 
-  return { mortgage, stampDuty, bsdLines, ssd, saleProceeds, saleEstimate, cpfInterestEstimate, tdsr, msr, progressive, borrowers, bankTenure, tenureNote, messages, ASK, instal, parseDate: D, parseMoney, parseNum, LIMITS, dutyAt };
+  return { mortgage, stampDuty, bsdLines, ssd, saleProceeds, saleEstimate, cpfInterestEstimate, tdsr, msr, progressive, borrowers, bankTenure, tenureNote, tenureMaxText, tenureTierText, messages, ASK, instal, parseDate: D, parseMoney, parseNum, LIMITS, dutyAt };
 });

@@ -5,7 +5,11 @@
    so each tool's existing validation speaks. On leaving the field a readable amount is tidied (1,250,000 or 2,500.75).
    GW_MONEY.wire(input, { parse, max })  parse: text → number or null; max: the largest amount to tidy.
    GW_MONEY.selectOnFocus(input)         keyboard focus selects the value so typing replaces it.
-   No calculation here.
+   GW_MONEY.tenureField(input, o)        a loan-tenure field shows the tenure that is used. While you type nothing moves. When you leave the field, or a
+                                         calculation finishes with the field not in use, a tenure above what is allowed is replaced by the tenure applied.
+                                         o.read(): the typed number or null; o.max(): the most the field takes; o.recalc(): run the screen's calculation;
+                                         o.changed(): the screen's own save after the value was changed here. Returns { settle(applied), hint(applied) }.
+   No calculation here: the tenure applied and the most allowed are always passed in from the calculators (gw-calc.js bankTenure).
    ========================================================================== */
 (function (root, factory) {
   const api = factory(root);
@@ -51,5 +55,33 @@
     });
     selectOnFocus(x);
   }
-  return { wire, selectOnFocus, fmt, liveMoney, tidy, group };
+  function tenureField(x, o) {
+    o = o || {};
+    const read = () => { if (o.read) return o.read(); const t = String(x.value).replace(/[,\s]/g, ''); return /^\d+(\.\d+)?$/.test(t) && +t > 0 ? +t : null; };
+    const put = (v, from) => { x.value = String(v); x.dataset.adjustedFrom = x.dataset.adjustedFrom || String(from); if (o.changed) o.changed(); }; // keeps what was first typed through a second adjustment
+    const idle = () => root.document.activeElement !== x;
+    x.addEventListener('input', () => { delete x.dataset.adjustedFrom; }); // typing again starts afresh: the "Changed from" line goes
+    x.addEventListener('blur', () => {
+      const asked = read(), most = o.max ? o.max() : null;
+      // more than any tenure can be: the most, at once. The screen then recalculates after the short delay its own changes use, so a click
+      // that caused the blur is not moved from under the pointer; a changed entry reaches the same recalculation through its change event.
+      if (asked !== null && most && asked > most) put(most, asked);
+      if (o.recalc) root.setTimeout(o.recalc, 120); // also for an entry that did not change: a blank field then shows the tenure used
+    });
+    // Called after every calculation with the tenure the calculation applied (a number of years, or 0/null when there is none).
+    function settle(applied) {
+      if (!idle() || !(applied >= 1)) return false;
+      const asked = read();
+      if (asked !== null && asked > applied) { put(applied, asked); return true; }
+      return false;
+    }
+    // A blank field shows the tenure that will be used, in the placeholder, so what is seen is what is calculated.
+    function hint(applied) {
+      if (!idle() || read() !== null || String(x.value).trim() !== '') return;
+      const base = x.dataset.ph0 === undefined ? (x.dataset.ph0 = x.getAttribute('placeholder') || '') : x.dataset.ph0;
+      x.setAttribute('placeholder', applied >= 1 ? applied + (applied === 1 ? ' year used' : ' years used') : base);
+    }
+    return { settle, hint };
+  }
+  return { wire, selectOnFocus, tenureField, fmt, liveMoney, tidy, group };
 });
