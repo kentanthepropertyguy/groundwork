@@ -1,9 +1,9 @@
 /* ==========================================================================
    GROUNDWORK — Guided journey (R1, Ken 9 Oct 2026). Routing and wording only: no calculations here.
-   Three paths, sorted by what the visitor will do:
+   Four paths, sorted by what the visitor will do:
      /journey/#buy   I'm looking to buy        (not selling a home)
      /journey/#move  I'm thinking of moving    (selling and buying)
-     /journey/worth/ What's my home worth?     (selling, or just checking: recent sales, gw-value.js)
+     /journey/#sell Sell, or check my home’s value (a short journey: Property Values, then Sale Proceeds; the values tool stays at /journey/worth/)
    Old links keep working: #up opens the moving path with "HDB flat" chosen; #own goes to /journey/worth/.
    Journey context (GWJ.ctx): what the visitor has told any Groundwork page in this browser tab (home type, block or street),
    so the next page doesn't ask again. sessionStorage only, cleared when the tab closes, never sent to analytics.
@@ -160,7 +160,8 @@
       if (k === 'up') ctx.set({ type: 'hdb', path: 'upgrade' }); else ctx.set({ path: null });
       // Audit fix A5-24: a new history entry, so Back returns to the choices instead of leaving the page.
       if (user) { track('journey_started', { journey: k, placement: 'journey' }); try { if (location.hash !== '#' + k) history.pushState(null, '', '#' + k); } catch (e) { /* ignore */ } }
-      if (scroll) { const p = panelOf(k); if (p) p.scrollIntoView({ behavior: user ? 'smooth' : 'auto', block: 'start' }); }
+      // Wide screens: the four choices stay in view at the top and the guidance sits under them. Phones (choices stacked): the guidance comes into view.
+      if (scroll) { const wide = root.matchMedia && root.matchMedia('(min-width:720px)').matches, p = wide ? document.querySelector('.gw-paths') : panelOf(k); if (p) p.scrollIntoView({ behavior: user ? 'smooth' : 'auto', block: 'start' }); }
     };
     tabs.forEach((t) => t.addEventListener('click', (e) => { e.preventDefault(); show(t.dataset.gwPath, true, true); }));
     if (tabs.length) show(hash, false, !!hash && tabs.some((t) => t.dataset.gwPath === hash));

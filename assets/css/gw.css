@@ -200,7 +200,7 @@ body[data-view="directory"] .kpe-hero{text-align:left}
 body[data-view="directory"] .kpe-hero .kpt-h1,body[data-view="directory"] .kpe-hero .kpt-lede{margin-left:0;margin-right:0;text-align:left}
 body[data-view="directory"] .kpe-count{text-align:left}
 @media (min-width:900px){body[data-view="directory"] .kpe-hero .kpt-h1{max-width:none}body[data-view="directory"] .kpe-hero .kpt-lede{max-width:74ch}}
-.gw-panel{scroll-margin-top:76px}
+.gw-panel,.gw-paths{scroll-margin-top:76px}
 .gw-guide>div:not(.gw-paths){display:grid;gap:22px;align-content:start}
 /* LIVE badge (as on the Lucerne Grand site): a fixed schedule label, always shown with the time beside it */
 .gw-live{display:inline-flex;align-items:center;gap:5px;background:#D42A3C;color:#fff !important;font-weight:700;font-size:11px;letter-spacing:.06em;line-height:1;padding:4px 7px 4px 6px;border-radius:6px;vertical-align:1px;white-space:nowrap}
@@ -211,7 +211,7 @@ body[data-view="directory"] .kpe-count{text-align:left}
 .gw-path-link{position:relative;padding-right:34px}.gw-path-link::after{content:"›";position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--gw-blue);font-size:22px}
 
 /* ---------- R1 refinements (Ken, 9 Oct 2026): journey chooser, compact steps, Value Explorer ---------- */
-.gw-hero-s{padding:56px 0 22px}.gw-h1-s{font-size:56px;max-width:17ch}
+.gw-hero-s{padding:56px 0 22px}.gw-h1-s{font-size:56px}
 .gw-jsec{padding:8px 0 76px}.gw-jwrap{max-width:880px}
 .gw-paths{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;position:static}
 .gw-path{position:relative;align-content:start;gap:4px;padding:18px 18px 18px}
@@ -294,7 +294,10 @@ body[data-view="directory"] .kpe-count{text-align:left}
 .gw-tl b{font-size:16px;line-height:1.25}.gw-tl span{font-size:13.5px;color:var(--gw-muted);line-height:1.4}
 .gw-tl:hover{border-color:var(--gw-ink)}
 .gw-calc-hero{padding:40px 0 14px}.gw-calc-hero .gw-wrap{justify-items:start;text-align:left;gap:10px}
-.gw-h1-c{font-size:44px;line-height:1.05;max-width:22ch}
+.gw-h1-c{font-size:44px;line-height:1.05}
+/* page headings and their one-line descriptions use the page width on desktop (the heading wraps only when it has to; text-wrap:balance above keeps it even) */
+@media (min-width:900px){.gw-calc-hero .gw-sub{max-width:80ch}}
+body.gw-legacy .kpt-hero-sub{max-width:none}
 .gw-csec{padding:6px 0 64px}
 .gw-calc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
 .gw-calc-in{display:grid;gap:16px;background:#fff;border:1px solid var(--gw-line);border-radius:22px;padding:22px;min-width:0}

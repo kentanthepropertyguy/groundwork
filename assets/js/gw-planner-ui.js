@@ -835,36 +835,11 @@
       out.note.textContent = ''; dirty = true;
       clearTimeout(tmr); tmr = setTimeout(recalc, 120);
     };
-    // ---- money fields: commas appear as you type. Only the display changes: the caret stays with its digits and the number is the same one
-    //      C.parseMoney reads. Letters (1.2m, 800k), a minus or a second dot are left exactly as typed so the existing validation speaks. ----
-    const tidy = (t) => String(t).replace(/[\s ]/g, '').replace(/^(sgd|s\$)/i, '').replace(/\$/g, '');
-    const group = (n) => n.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    function liveMoney(t) { // t: tidied text; returns the display text, or null to leave the field as typed
-      if (!/^[\d,]*\.?\d*$/.test(t)) return null;
-      const dot = t.indexOf('.'); let n = (dot < 0 ? t : t.slice(0, dot)).replace(/,/g, '');
-      n = n.replace(/^0+(?=\d)/, ''); if (dot >= 0 && n === '') n = '0';
-      return group(n) + (dot >= 0 ? '.' + t.slice(dot + 1) : '');
-    }
-    $$('input[data-t="money"]').forEach((x) => {
-      let prev = x.value;
-      x.addEventListener('focus', () => { prev = x.value; });
-      x.addEventListener('input', (e) => {
-        const raw = x.value; let txt = raw, over = false, caret = x.selectionStart == null ? raw.length : x.selectionStart; const type = (e && e.inputType) || '';
-        // Backspace or Delete over a comma only moves the caret past it (the value is unchanged); the next key deletes the digit
-        if ((type === 'deleteContentBackward' || type === 'deleteContentForward') && raw.length === prev.length - 1 && prev.charAt(caret) === ',') { txt = prev; if (type === 'deleteContentForward') { caret += 1; over = true; } }
-        const out = liveMoney(tidy(txt));
-        if (out === null) { prev = x.value; return; }
-        let sig = (tidy(txt.slice(0, caret)).match(/[\d.]/g) || []).length; if (/^\./.test(tidy(txt)) && out.indexOf('0.') === 0) sig += 1;
-        if (out !== raw) {
-          x.value = out;
-          if (root.document.activeElement === x && x.setSelectionRange) { let n = 0, pos = sig ? out.length : 0; for (let k = 0; sig && k < out.length; k++) { if (/[\d.]/.test(out.charAt(k)) && ++n === sig) { pos = k + 1; break; } } if (over && out.charAt(pos) === ',') pos += 1; try { x.setSelectionRange(pos, pos); } catch (er) { /* ignore */ } }
-        }
-        prev = x.value;
-      });
-    });
+    // ---- money fields: commas appear as you type (one behaviour for every calculator: gw-money.js) ----
+    const MONEY = root.GW_MONEY;
+    if (MONEY) $$('input[data-t="money"]').forEach((x) => MONEY.wire(x, { parse: (t) => parseMoney(t), max: C.LIMITS.money.max }));
     $$('input').forEach((x) => { x.addEventListener('input', () => changed(x)); x.addEventListener('change', () => changed(x)); });
-    $$('input[data-t="money"]').forEach((x) => x.addEventListener('blur', () => { const v = parseMoney(x.value.replace(/\.$/, '')); if (v !== null && v <= C.LIMITS.money.max) x.value = fmtMoney(v); }));
-    $$('input[data-t="money"],input[data-t="num"]').forEach((x) => x.addEventListener('focus', () => { if (x.matches(':focus-visible')) try { x.select(); } catch (e) { /* ignore */ } }));
+    if (MONEY) $$('input[data-t="num"]').forEach((x) => MONEY.selectOnFocus(x));
     // ---- restore: shared details from the other calculators, then the planner's own ----
     const sv = shared.get();
     $$('[data-share]').forEach((x) => { const val = sv[x.dataset.share]; if (val === undefined || val === null || val === '') return; const m = /^buyers\.1\./.exec(x.dataset.share); if (m) showRow('buyers.1', true); if (x.dataset.t === 'chip') setChip(x, val); else x.value = x.dataset.t === 'money' && parseMoney(val) !== null ? fmtMoney(parseMoney(val)) : val; });

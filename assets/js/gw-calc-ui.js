@@ -101,9 +101,24 @@
   }
   const LOANS = [['0', 'None'], ['1', 'One'], ['2', 'Two or more']];
   // A2-14: MAS counts HDB loans, and applies the limits to each joint borrower
+  // The loan tenure line under the tenure field: filled in as the buyer types (see tenureNote). This is the text before there is anything to say.
+  const TENURE_NOTE = '<span data-tenure-note>Banks can lend for up to 35 years. Over 30 years, or past age 65, the lower loan limit applies. Enter your age to see where that line falls.</span>';
   const LOANS_HINT = 'HDB loans count too. With two borrowers, use the number for whoever has more.';
   const SSD_DATE_HINT = 'Resale: the date you exercised the Option to Purchase. New launch: your S&P date, not the booking date. Inherited homes, divorce transfers and HDB family transfers use special dates: see IRAS.';
   const KIND_STAMP = [['private', 'Private home'], ['ec', 'New EC from the developer'], ['hdb', 'HDB flat']];
+
+  // The tenure line, the same words as the Payment Timeline's. Says which tenure is used when the field is blank, why, and what a longer one does.
+  // age: the borrower's age (income-weighted for joint borrowers), or null; std: the longest tenure that keeps the standard loan limit at that age, or null;
+  // max: the longest a loan can run; chosen: the years the buyer typed, if any. The numbers come from the engine; this only words them.
+  function tenureText(o, RL) {
+    const cap = RL.standardTenure.private, max = o.max || RL.maxTenure.private;
+    if (o.hdbLoan) return (o.years ? 'Using ' + o.years + ' years, the longest HDB allows here. ' : '') + 'An HDB loan runs up to ' + RL.hdbMax + ' years, ends by age 65 and ends at least 20 years before the lease does. A shorter tenure is allowed.';
+    if (o.entity) return 'A company’s loan limit does not depend on the tenure. ' + cap + ' years is used if you leave this blank; up to ' + max + ' years is allowed.';
+    if (o.age === null || o.age === undefined || o.std === null || o.std === undefined) return 'Banks can lend for up to ' + max + ' years. Over ' + cap + ' years, or past age 65, the lower loan limit applies. Enter your age to see where that line falls.';
+    const at = (o.joint ? 'At an income-weighted age of ' : 'At age ') + o.age;
+    if (o.chosen) return o.chosen > o.std ? at + ', ' + o.std + (o.std === 1 ? ' year is' : ' years is') + ' the longest that keeps the standard loan limit. ' + o.chosen + ' years takes the lower limit.' : at + ', ' + o.chosen + ' years keeps the standard loan limit.';
+    return o.std >= 1 ? at + ', ' + o.std + ' years is the longest that keeps the standard loan limit, and is used if you leave this blank. Longer, up to ' + max + ' years, is allowed but takes the lower limit.' : at + ', any loan runs past age 65, so the lower limit applies. Enter the years you want, up to ' + max + '.';
+  }
 
   const FORMS = {
     mortgage: () => chips('lender', 'Loan', [['bank', 'Bank loan'], ['hdb', 'HDB loan']], { value: 'bank' }) + grid(
@@ -131,20 +146,20 @@
     tdsr: () => chips('kind', 'Buying', [['private', 'A private home'], ['hdb', 'An HDB flat with a bank loan']], { value: 'private' }) + borrowersBlock({ rental: true }) + grid(
       money('debts', 'Monthly debt repayments now', { opt: true, share: 'debts', ph: '0 if none', hint: 'Car, personal and student loans, credit card minimums, existing home loans, and at least 20% of the instalment on any loan you guarantee.' }) +
       money('propertyLoans', 'Of which, property loan instalments', { opt: true, when: 'kind:hdb', ph: '0 if none', hint: 'MSR counts only property loans.' }) +
-      numf('tenure', 'Loan tenure', 'years', { opt: true, ph: 'longest standard', hint: 'Leave blank for the longest standard tenure for your age.' })) +
+      numf('tenure', 'Loan tenure', 'years', { opt: true, ph: 'longest standard', hint: TENURE_NOTE })) +
       chips('loans', 'Housing loans you still have', LOANS, { value: '0', share: 'housingLoans', hint: LOANS_HINT }),
     msr: () => chips('scenario', 'Buying', [['hdb-loan', 'HDB flat, HDB loan'], ['hdb-bank', 'HDB flat, bank loan'], ['ec', 'New EC, bank loan']], { value: 'hdb-loan' }) +
       chips('household', 'Household', [['family', 'Family'], ['extended', 'Extended family'], ['single', 'Single, 35 or older']], { value: 'family', when: 'scenario:hdb-loan', hint: 'Income ceilings for an HDB loan: $16,000 a month for families, $24,000 for extended families, $8,000 for singles.' }) + borrowersBlock() + grid(
       money('propertyLoans', 'Existing property loan instalments', { opt: true, ph: 'per month, 0 if none' }) +
       money('otherDebts', 'Other monthly debt repayments', { opt: true, when: 'scenario:hdb-bank,ec', ph: 'car, cards, other loans' }) +
       numf('lease', 'Remaining lease of the flat', 'years', { opt: true, when: 'scenario:hdb-loan', ph: 'e.g. 70' }) +
-      numf('tenure', 'Loan tenure', 'years', { opt: true, ph: 'longest allowed' })) +
+      numf('tenure', 'Loan tenure', 'years', { opt: true, ph: 'longest allowed', hint: TENURE_NOTE })) +
       chips('loans', 'Housing loans you still have', LOANS, { value: '0', share: 'housingLoans', when: 'scenario:hdb-bank,ec', hint: LOANS_HINT }),
     // A2-02: the borrower's age decides whether the loan runs past 65 (shared with the other calculators' first borrower)
     progressive: () => chips('kind', 'What are you buying?', KIND_STAMP.slice(0, 2), { value: 'private' }) + grid(money('price', 'Purchase price', { share: 'buyPrice', ph: 'e.g. 1,800,000' }) +
-      numf('age', 'Borrower’s age', 'years', { share: 'borrowers.0.age', ph: 'e.g. 35', when: 'entity:0', hint: 'Two borrowers: their income-weighted average age. For example, aged 30 earning $3,000 and aged 50 earning $12,000 gives 46. How much can I borrow? works it out. Whether MAS weights by gross income or by the income banks count (after the 30% reduction on variable and rental income) is not confirmed, so results for two borrowers with variable or rental income are unverified.' }) +
+      numf('age', 'Borrower’s age', 'years', { share: 'borrowers.0.age', ph: 'e.g. 35', when: 'entity:0', hint: 'Two borrowers: their income-weighted average age (30 earning $3,000 and 50 earning $12,000 gives 46). How much can I borrow? works it out. MAS’s weighting is not confirmed, so results for two borrowers with variable or rental income are unverified.' }) +
       numf('ratePct', 'Interest rate', '% a year', { value: '4', hint: '4% is the banks’ stress-test rate. Use the rate you’ve been quoted.' }) +
-      numf('years', 'Loan tenure', 'years', { opt: true, ph: 'longest standard', hint: 'Leave blank for the longest tenure that keeps the standard loan limit at your age.' }) + money('cpf', 'CPF OA you plan to use', { opt: true, share: 'cpfOa', hint: 'What CPF allows you to use, not necessarily your whole balance.', ph: 'all buyers' })) +
+      numf('years', 'Loan tenure', 'years', { opt: true, ph: 'longest standard', hint: TENURE_NOTE }) + money('cpf', 'CPF OA you plan to use', { opt: true, share: 'cpfOa', hint: 'What CPF allows you to use, not necessarily your whole balance.', ph: 'all buyers' })) +
       chips('loans', 'Housing loans you still have', LOANS, { value: '0', share: 'housingLoans', hint: LOANS_HINT }) + chips('entity', 'Who is buying?', [['0', 'Individuals'], ['1', 'A company or other entity']], { value: '0' }) + buyersBlock(),
   };
 
@@ -296,7 +311,7 @@
       const by = (s) => [s.cash ? 'cash ' + $(s.cash) : '', s.cpf ? 'CPF ' + $(s.cpf) : '', s.flex ? 'cash or CPF ' + $(s.flex) : '', s.loan ? 'loan ' + $(s.loan) : ''].filter(Boolean).join(' · ');
       return head('Within 8 weeks of booking', $(r.stages[0].amount + r.stages[1].amount), '20% of the price' + (r.duty.ok ? ', plus ' + $(r.duty.total) + ' stamp duty within 14 days of signing' : '')) +
         stack('How the price is paid', [['Cash (the minimum)', r.cashMin, 'c3'], ['Cash or CPF', r.cpfOrCash, 'c2'], ['Bank loan (' + pc(r.ltv) + ')', r.loanMax, 'c1']]) +
-        rows([['Instalment once fully drawn', $(r.finalMonthly) + ' a month', 'tot']]) +
+        rows([['Loan tenure', r.years + ' years'], ['Instalment once fully drawn', $(r.finalMonthly) + ' a month', 'tot']]) +
         // A2-02: a loan running past 65 takes the lower limit; A1-03: the stamp duty remissions and notes, as on Stamp duty
         notes([r.entity ? 'A company or other entity can borrow up to 15% (MAS) and has no CPF, so the rest is cash.' : '',
           r.lowerWhy === 'age' ? 'At age ' + r.age + ', a ' + r.years + '-year loan runs past 65, so the lower loan limit applies (MAS).' + (r.stdYears >= 1 ? ' A tenure of ' + r.stdYears + ' years or less keeps the standard limit.' : '') : '',
@@ -368,6 +383,26 @@
       if (v.loans !== undefined) v.loans = +v.loans;
       return v;
     }
+    // ---- the tenure line under the tenure field (TDSR, MSR, New launch payments) ----
+    const stdYearsOf = (age) => { try { const p = C.progressive({ price: 1000000, age: age, kind: 'private', loans: 0 }); return p.ok ? p.stdYears : null; } catch (e) { return null; } }; // the engine's own figure
+    function paintTenure(v, r) {
+      const el = box.querySelector('[data-tenure-note]'); if (!el) return;
+      const RL = Object.assign({ hdbMax: (root.GW_RULES && root.GW_RULES.hdbLoan && root.GW_RULES.hdbLoan.maxTenureYears) || 25 }, root.GW_RULES.bankLtv);
+      const chosen = C.parseNum(((box.querySelector('[data-k="tenure"],[data-k="years"]') || {}).value) || '').value || 0;
+      let o = { chosen: chosen > 0 ? chosen : 0 }; const ok = r && r.ok;
+      if (id === 'progressive') {
+        if (v.entity) o.entity = true;
+        else if (typeof v.age === 'number' && v.age >= C.LIMITS.age.min && v.age <= C.LIMITS.age.max) { o.age = v.age; o.std = stdYearsOf(v.age); }
+      } else if (id === 'msr' && v.scenario === 'hdb-loan') {
+        o.hdbLoan = true; if (ok && r.tenure && r.tenure.years >= 1) o.years = r.tenure.years;
+      } else if (ok && r.B && r.tenure && r.tenure.std !== undefined) {
+        o.age = ageUp(r.B.iwaaUse); o.std = r.tenure.std; o.max = r.tenure.max; o.joint = r.B.list && r.B.list.length > 1;
+      } else {
+        const b0 = Array.isArray(v.borrowers) && v.borrowers.length === 1 ? v.borrowers[0] : null;
+        if (b0 && typeof b0.age === 'number' && b0.age >= C.LIMITS.age.min && b0.age <= C.LIMITS.age.max) { o.age = b0.age; o.std = stdYearsOf(b0.age); }
+      }
+      const t = tenureText(o, RL); if (el.textContent !== t) el.textContent = t;
+    }
     // ---- compute ----
     const FN = { mortgage: 'mortgage', 'stamp-duty': 'stampDuty', ssd: 'ssd', 'sale-proceeds': 'saleProceeds', tdsr: 'tdsr', msr: 'msr', progressive: 'progressive' };
     let last = null, lastSig = '', startedT = false, doneT = false;
@@ -383,6 +418,7 @@
         const named = (x) => { const el = box.querySelector('[data-k="' + x.field + '"]'); const n = el && !/^(age|income|buyers)$/.test(x.field) ? fieldName(el) : ''; return n && x.text.indexOf(n + ':') !== 0 ? n + ': ' + x.text : x.text; };
         out.innerHTML = '<p class="gw-warn" role="alert">' + r.invalid.map((x) => esc(named(x))).join('<br>') + '</p>';
       } else { out.innerHTML = '<p class="gw-fine">Enter ' + (r.missing || []).map((m) => LABEL[m] || m).join(', ').replace(/, ([^,]*)$/, ' and $1') + ' to see the result.</p>'; }
+      paintTenure(v, r);
       last = r.ok && !r.noTenure ? { v, r } : null; send.hidden = !last; pinRefresh(); // nothing to send when there is no loan to show (A2-08)
       const sig = JSON.stringify(v); if (sig !== lastSig) { note.innerHTML = ''; lastSig = sig; } // a copied message stays until the details change
       if (last && !doneT) { doneT = true; track('tool_completed', { tool_name: 'calc-' + id }); }
@@ -393,8 +429,9 @@
       const s = store.get(), jointNl = id === 'progressive' && joint(s); $$('[data-share]').forEach((x) => { if (!live(x) || (jointNl && x.dataset.share === 'borrowers.0.age')) return; const val = x.dataset.t === 'chip' ? chipVal(x) : x.value; if (val !== null && val !== '') s[x.dataset.share] = val; else delete s[x.dataset.share]; }); store.set(s);
       clearTimeout(tmr); tmr = setTimeout(recalc, 120);
     };
+    // money fields: commas appear as you type, the same behaviour as the Payment Timeline (gw-money.js)
+    if (root.GW_MONEY) { $$('input[data-t="money"]').forEach((x) => root.GW_MONEY.wire(x, { parse: parseMoney, max: C.LIMITS.money.max })); $$('input[data-t="num"]').forEach((x) => root.GW_MONEY.selectOnFocus(x)); }
     $$('input').forEach((x) => { x.addEventListener('input', () => changed(x)); x.addEventListener('change', () => changed(x)); });
-    $$('input[data-t="money"]').forEach((x) => x.addEventListener('blur', () => { const v = parseMoney(x.value); if (v !== null && v <= C.LIMITS.money.max) x.value = fmtMoney(v); })); // an unreadable entry stays as typed, with its message
     // CPF accrued interest: a rough estimate only when the visitor asks for one, and only until they type their own figure
     let estimated = false;
     const est = box.querySelector('[data-estimate]');
