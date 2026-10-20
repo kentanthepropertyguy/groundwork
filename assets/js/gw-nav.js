@@ -32,6 +32,7 @@
     'what-can-i-buy': '<circle cx="11" cy="11" r="6"/><path d="m20 20-4.2-4.2"/>',
     worth: '<path d="M5 20V12m5 8V7m5 13v-6m5 6V4"/>',
     research: '<path d="M4 20V8l6-4v16M10 20V10l6 3v7M16 20v-6l4 2v4"/><path d="M3 20h18"/>',
+    map: '<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/>',
     dev: '<path d="M6 20V5h8v15M14 9h4v11"/><path d="M9 8h2M9 11h2M9 14h2M3 20h18"/>',
     guide: '<circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>',
     home: '<path d="M4 11.5 12 5l8 6.5V20h-5v-5h-6v5H4z"/>',
@@ -70,6 +71,8 @@
       t: ['ssd', 'sellers stamp duty', 'seller stamp duty', 'selling stamp duty', 'sell within', 'sell early', 'selling early', 'holding period', 'minimum holding', 'stamp duty selling'] },
     { id: 'hdb-upgrade', name: 'HDB upgrade planner', tag: 'Direct budget calculation', short: 'Your private-home budget if you sell first', href: 'tools/hdb-upgrade/', icon: 'hdb-upgrade', menu: 1, sec: 'tools',
       t: ['hdb upgrade', 'upgrade', 'upgrading', 'upgrader', 'hdb to condo', 'hdb to private', 'upgrade from hdb', 'can i afford to upgrade', 'afford a condo', 'private property budget', 'sell hdb buy condo', 'next home budget', 'budget'] },
+    { id: 'map', name: 'Map', tag: 'Homes, prices and what is nearby', short: 'See what is around a home, and what nearby homes sold for', href: 'research/map/', icon: 'map', menu: 1, sec: 'research',
+      t: ['map', 'maps', 'on a map', 'nearby', 'near me', 'around', 'neighbourhood', 'neighborhood', 'location', 'area', 'schools', 'school', 'mrt', 'near mrt', 'amenities', 'supermarket', 'park', 'explore', 'where'] },
     { id: 'what-can-i-buy', name: 'What can this budget buy?', tag: 'Homes that sold around your budget', short: 'What homes around your budget sold for', href: 'tools/what-can-i-buy/', icon: 'what-can-i-buy', menu: 1, sec: 'research',
       t: ['what can i buy', 'budget', 'my budget', 'price range', 'find a condo', 'find a home', 'which condo', 'shortlist', 'space', 'size', 'sq ft', 'square feet', 'older condo', 'newer condo'] },
     { id: 'worth', name: 'Property values & prices', tag: 'HDB, condo and landed sales · asking price', short: 'What comparable homes sold for', href: 'journey/worth/', icon: 'worth', menu: 1, sec: 'research',
@@ -106,7 +109,7 @@
   const SECTIONS = {
     guide: { name: 'Guide me', href: 'journey/', nav: 'journey', q: 'Not sure where to start?', say: 'Pick your goal. We take you through the right tools, step by step.', ids: ['guide-buy', 'guide-up', 'guide-sell', 'guide-move'] },
     tools: { name: 'Tools', href: 'tools/', nav: 'tools', q: 'Know what to work out?', say: 'Calculators for stamp duty, loans, sale proceeds and more.', ids: ['planner', 'stamp-duty', 'tdsr', 'msr', 'mortgage', 'progressive', 'payment-planner', 'sale-proceeds', 'ssd', 'hdb-upgrade'] },
-    research: { name: 'Research', href: 'research/', nav: 'research', q: 'Looking at a property?', say: 'What homes really sold for, from URA and HDB records.', ids: ['research', 'worth', 'what-can-i-buy', 'directory', 'sample'] },
+    research: { name: 'Research', href: 'research/', nav: 'research', q: 'Looking at a property?', say: 'What homes really sold for, from URA and HDB records.', ids: ['research', 'map', 'worth', 'what-can-i-buy', 'directory', 'sample'] },
   };
   const SEC_ORDER = ['guide', 'tools', 'research'];
   const MENU_TOOLS = SECTIONS.tools.ids;
