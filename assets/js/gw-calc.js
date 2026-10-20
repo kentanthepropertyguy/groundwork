@@ -425,7 +425,8 @@
     // MAS Notice 632: a tenure over 30 years, or a loan running past age 65, takes the lower limit (A2-02); a company borrower is
     // limited to 15% and has no CPF
     const pastAge = !i.entity && i.age + years > R.bankLtv.endAge, longTenure = years > R.bankLtv.standardTenure.private;
-    const lower = !!i.lowerLtv || longTenure || pastAge;
+    // a company's limit is a flat 15% whatever the tenure or age (MAS), so the lower-limit flag and its reason never apply to it
+    const lower = !i.entity && (!!i.lowerLtv || longTenure || pastAge);
     const stdYears = i.entity ? null : Math.max(0, Math.min(R.bankLtv.standardTenure.private, Math.floor(R.bankLtv.endAge - i.age)));
     const row = i.entity ? { ltv: R.entityLtv, minCash: 1 - R.entityLtv } : (lower ? R.bankLtv.lower : R.bankLtv.standard)[Math.min(nn(i.loans), 2)];
     // R1.2: an optional ceiling on the loan in dollars (e.g. what the borrower's income supports). Absent or not lower than the rule limit, nothing changes.
@@ -451,7 +452,7 @@
     const longer = !i.entity && !pos(i.years) && !i._noLonger && allowed > years ? (() => { const x = progressive(Object.assign({}, i, { years: allowed, _noLonger: true })); return x.ok ? { years: x.years, ltv: x.ltv, loanMax: x.loanMax, finalMonthly: x.finalMonthly } : null; })() : null;
     return {
       ok: true, price: P, ltv: row.ltv, minCash: row.minCash, loanMax, ruleLoanMax, loanCapped, cashMin, cpfOrCash, rate, years, stages, duty, lower, entity: !!i.entity, tenureCapped: wanted > years, tenureCappedBy: wanted > years ? (ageCap < R.bankLtv.maxTenure.private ? 'age' : 'max') : null, tenureAllowed: allowed, maturityAge: R.bankLtv.maturityAge, tenureAsked: pos(i.years) ? i.years : null, defaulted: !pos(i.years), longer, autoLower: !i.lowerLtv && lower,
-      lowerWhy: longTenure ? 'tenure' : pastAge ? 'age' : (i.lowerLtv ? 'chosen' : null), age: i.entity ? null : i.age, stdYears,
+      lowerWhy: !lower ? null : longTenure ? 'tenure' : pastAge ? 'age' : (i.lowerLtv ? 'chosen' : null), age: i.entity ? null : i.age, stdYears,
       totals: { cash: sum('cash'), cpf: sum('cpf'), flex: sum('flex'), loan: sum('loan') }, upfront8wk: upfront,
       finalMonthly: instal(loanMax, rate, years), cpfGiven: cpfLeft !== null,
     };

@@ -61,8 +61,15 @@
   const $k = (n) => (n >= 1e6 ? '$' + String(Math.floor(n / 1000) / 1000) + 'm' : n >= 1000 ? '$' + Math.floor(n / 1000).toLocaleString('en-US') + 'k' : $(n));
   const pc = (x, d) => (Math.round(x * 100 * Math.pow(10, d || 0)) / Math.pow(10, d || 0)) + '%';
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const day = (iso) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ''); return m ? +m[3] + ' ' + MON[+m[2] - 1] + ' ' + m[1] : (iso || ''); };
-  const mon = (iso) => { const m = /^(\d{4})-(\d{2})/.exec(iso || ''); return m ? MON[+m[2] - 1] + ' ' + m[1] : (iso || ''); };
+  // No option date (Ken, 21 Oct 2026): the engine counts from a fixed reference day, which is never shown. While a result without an option date is drawn,
+  // every date is read back as a timing after the option ("8 weeks after the option"), so a calendar date can never appear that the buyer did not enter.
+  let UND = false;
+  const afterOpt = (iso) => (root.GW_SCHEDULE && root.GW_SCHEDULE.after ? root.GW_SCHEDULE.after(iso) : '');
+  const day = (iso) => { if (UND) return afterOpt(iso); const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ''); return m ? +m[3] + ' ' + MON[+m[2] - 1] + ' ' + m[1] : (iso || ''); };
+  const mon = (iso) => { if (UND) return afterOpt(iso); const m = /^(\d{4})-(\d{2})/.exec(iso || ''); return m ? MON[+m[2] - 1] + ' ' + m[1] : (iso || ''); };
+  // "on 3 Mar 2027" becomes "10 weeks after the option" (no "on") when there is no option date
+  const onDay = (iso) => (UND ? afterOpt(iso) : 'on ' + day(iso));
+  const optionText = (iso) => (UND ? 'no option date' : 'option ' + day(iso));
   const KIND = { new: 'new launch, private', ec: 'new EC from the developer', resaleec: 'resale EC', completed: 'completed private home' };
   const kindText = (r, v) => KIND[(v && v.uiKind) || r.kind];
   const TENDER_T = { before: 'before 24 Aug 2026', after: 'on or after 24 Aug 2026' };
@@ -89,7 +96,7 @@
   const money = (k, label, o) => { o = o || {}; return withHelp('<label class="gw-fld"><span>' + label + (o.opt ? ' <em>optional</em>' : '') + '</span><div class="gw-in gw-in-m"><i>$</i><input type="text" inputmode="decimal" autocomplete="off" data-k="' + k + '" data-t="money"' + (o.share ? ' data-share="' + o.share + '"' : '') + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') + (o.value ? ' value="' + esc(o.value) + '" data-default="' + esc(o.value) + '"' : '') + ' aria-invalid="false"></div>' + hint(o.hint) + '</label>', o, label); };
   const numf = (k, label, unit, o) => { o = o || {}; return withHelp('<label class="gw-fld"><span>' + label + (o.opt ? ' <em>optional</em>' : '') + '</span><div class="gw-in"><input type="text" inputmode="decimal" autocomplete="off" data-k="' + k + '" data-t="num"' + (o.share ? ' data-share="' + o.share + '"' : '') + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') + (o.value !== undefined ? ' value="' + esc(o.value) + '" data-default="' + esc(o.value) + '"' : '') + ' aria-invalid="false">' + (unit ? '<i class="u">' + unit + '</i>' : '') + '</div>' + hint(o.hint) + '</label>', o, label); };
   const datef = (k, label, o) => { o = o || {}; return '<label class="gw-fld"><span>' + label + (o.opt ? ' <em>optional</em>' : '') + '</span><div class="gw-in"><input type="date" data-k="' + k + '" data-t="date"' + (o.today ? ' data-today="1"' : '') + '></div>' + hint(o.hint) + '</label>'; };
-  const chips = (k, label, opts, o) => { o = o || {}; return '<div class="gw-q gw-fld"><span class="l">' + label + '</span><div class="gw-chips" role="group" aria-label="' + esc(label) + '" data-k="' + k + '" data-t="chip"' + (o.share ? ' data-share="' + o.share + '"' : '') + ' data-default="' + esc(o.value) + '">' + opts.map((x) => '<button type="button" class="gw-chip" data-v="' + x[0] + '" aria-pressed="' + (x[0] === o.value) + '">' + x[1] + '</button>').join('') + '</div>' + hint(o.hint) + help(o.help, label) + '</div>'; };
+  const chips = (k, label, opts, o) => { o = o || {}; return '<div class="gw-q gw-fld"><span class="l">' + label + '</span><div class="gw-chips" role="group" aria-label="' + esc(label) + '" data-k="' + k + '" data-t="chip"' + (o.share ? ' data-share="' + o.share + '"' : '') + ' data-default="' + esc(o.value) + '">' + opts.map((x) => '<button type="button" class="gw-chip" data-v="' + x[0] + '"' + (x[2] ? ' data-when="' + x[2] + '"' : '') + ' aria-pressed="' + (x[0] === o.value) + '">' + x[1] + '</button>').join('') + '</div>' + hint(o.hint) + help(o.help, label) + '</div>'; };
   const check = (k, label, o) => { o = o || {}; return '<label class="gw-ck"><input type="checkbox" data-k="' + k + '" data-t="check"' + (o.checked ? ' checked data-default="1"' : ' data-default="0"') + '><span>' + label + '</span></label>'; };
   const grid = (inner) => '<div class="gw-grid">' + inner + '</div>';
   function buyersBlock() {
@@ -106,19 +113,22 @@
   function parts() {
     const purchase = grp('purchase', 'Your property',
       '<p class="pl-lead pl-prop-lead">Three details give you the whole payment schedule. Nothing about your money is needed.</p>' +
-      chips('kind', 'What are you buying?', [['new', 'New launch'], ['ec', 'New EC'], ['resaleec', 'Resale EC'], ['completed', 'Completed private home'], ['hdb', 'HDB flat']], { value: 'new', hint: 'New EC means bought from the developer. A resale EC is bought from its owner and follows different rules.' }) +
+      chips('kind', 'What are you buying?', [['new', 'New launch'], ['ec', 'New EC', 'entity:0'], ['resaleec', 'Resale EC', 'entity:0'], ['completed', 'Completed private home'], ['hdb', 'HDB flat', 'entity:0']], { value: 'new', hint: 'New EC means bought from the developer. A resale EC is bought from its owner and follows different rules.' }) +
       '<div class="pl-route" data-when="kind:hdb" hidden>' + hdbRoute() + '</div>' +
-      grid(money('price', 'Purchase price', { share: 'buyPrice', ph: 'e.g. 1,800,000' }) + datef('otp', 'Option date', { today: true, hint: 'The day you pay the booking or option fee. Every other date counts from here.' })) +
-      '<details class="pl-buyer" data-buyer><summary><span data-buyer-line>' + BUYER_DEFAULT + '</span> <em>Change</em></summary><div class="pl-buyer-b">' + buyersBlock() + '</div></details>', { h: 2 });
-    const dates = '<details class="pl-adv pl-dates" data-dates><summary><span data-when="kind:new,ec">Add the developer’s dates</span><span data-when="kind:completed,resaleec">Add the completion date</span> <em>optional</em></summary>' +
+      grid(money('price', 'Purchase price', { share: 'buyPrice', ph: 'e.g. 1,800,000' }) + '<div data-when="noOtp:0">' + datef('otp', 'Option date', { today: true, hint: 'The day you pay the booking or option fee. Every other date counts from here.' }) + '</div>') +
+      check('noOtp', 'I don’t have an option date yet') +
+      '<details class="pl-buyer" data-buyer><summary><span data-buyer-line>' + BUYER_DEFAULT + '</span> <em>Change</em></summary><div class="pl-buyer-b">' +
+      chips('entity', 'Who is buying?', [['0', 'Individuals'], ['1', 'A company or other entity']], { value: '0', hint: 'A company or other entity can borrow up to 15% of the price and has no CPF. It can buy a new launch or a completed private home.' }) +
+      '<p class="gw-fine" data-entity-note aria-live="polite" hidden></p><div data-when="entity:0">' + buyersBlock() + '</div></div></details>', { h: 2 });
+    const dates = '<details class="pl-adv pl-dates" data-dates data-when="noOtp:0"><summary><span data-when="kind:new,ec">Add the developer’s dates</span><span data-when="kind:completed,resaleec">Add the completion date</span> <em>optional</em></summary>' +
       grp('dates', '<span data-when="kind:new,ec">The developer’s dates</span><span data-when="kind:completed,resaleec">Completion date</span>',
         '<div data-when="kind:new,ec">' + grid(datef('top', 'Developer’s expected TOP', { opt: true }) + datef('csc', 'Expected final payment (CSC)', { opt: true, hint: 'From the developer. Without them, the earliest possible dates are used and marked as earliest dates.' })) + '</div>' +
         '<div data-when="kind:completed,resaleec">' + grid(datef('completion', 'Completion date', { opt: true, hint: 'Without it: 12 weeks after the option (a planning convention).' })) + '</div>', { sr: true }) + '</details>';
     const moneyG = grp('money', 'Your money',
-      grid(money('cash', 'Cash available now', { ph: 'e.g. 300,000' }) + money('cpf', 'CPF OA you plan to use', { share: 'cpfOa', ph: 'all buyers', hint: CPF_HINT, help: CPF_HELP })));
+      grid(money('cash', 'Cash available now', { ph: 'e.g. 300,000' }) + '<div data-when="entity:0">' + money('cpf', 'CPF OA you plan to use', { share: 'cpfOa', ph: 'all buyers', hint: CPF_HINT, help: CPF_HELP }) + '</div>'));
     const loanG = grp('buyers', 'You and your loan',
-      money('income', 'Monthly fixed income, both borrowers', { ph: 'salary, gross, before CPF', hint: 'Fixed pay before CPF, for everyone buying. Type 0 if none: no bank loan is then assumed.', help: 'It sets the loan a bank could lend, and checks a new EC against the household income ceiling. Stays on this device.' }) +
-      grid(numf('age', 'Borrower’s age', 'years', { share: 'borrowers.0.age', ph: 'e.g. 35', hint: 'Two borrowers: use their income-weighted average age (results for two borrowers are unverified).', help: 'How much can I borrow? works it out and shows both ways of weighting it. The age sets the loan limit together with the tenure. Which income MAS weights by is not confirmed.' })) +
+      '<div data-when="entity:0">' + money('income', 'Monthly fixed income, both borrowers', { ph: 'salary, gross, before CPF', hint: 'Fixed pay before CPF, for everyone buying. Type 0 if none: no bank loan is then assumed.', help: 'It sets the loan a bank could lend, and checks a new EC against the household income ceiling. Stays on this device.' }) +
+      grid(numf('age', 'Borrower’s age', 'years', { share: 'borrowers.0.age', ph: 'e.g. 35', hint: 'Two borrowers: use their income-weighted average age (results for two borrowers are unverified).', help: 'How much can I borrow? works it out and shows both ways of weighting it. The age sets the loan limit together with the tenure. Which income MAS weights by is not confirmed.' })) + '</div>' +
       grid(numf('ratePct', 'Interest rate you expect', '% a year', { value: '4', hint: 'Used to estimate your monthly mortgage. Borrowing eligibility is assessed at 4% or a higher applicable rate.' }) + numf('years', 'Loan tenure', 'years', { opt: true, ph: 'longest standard', hint: '<span data-tenure-note>Banks can lend for up to 35 years and usually end a loan by age 75 (lender policy, not a MAS rule). Over 30 years, or past age 65, the lower loan limit applies. Enter your age to see where that line falls.</span>' })) +
       money('prefLoan', 'How much would you like to borrow?', { opt: true, ph: 'blank = maximum estimated loan', hint: 'Leave blank to assume the maximum estimated loan. That is not a bank approval.', help: 'Type an amount to borrow less. A smaller loan means more cash and CPF now and a smaller instalment. An amount above the estimated limit is not used: the result shows the limit that applies.' }) +
       '<div data-when="kind:ec">' + chips('tender', 'When did the EC site’s land tender close?', [['unsure', 'Not sure'], ['before', 'Before 24 Aug 2026'], ['after', 'On or after 24 Aug 2026']], { value: 'unsure', hint: 'It sets the household income ceiling for a new EC. A balance unit in an older EC project keeps the lower ceiling, so choose “Before 24 Aug 2026” for it.', help: 'The ceiling is $16,000 a month if the tender closed before 24 Aug 2026, $18,000 if on or after. The developer or HDB can tell you.' }) +
@@ -128,10 +138,10 @@
       '<div data-when="msr:1">' + money('propertyLoans', 'Monthly housing-loan instalments', { opt: true, ph: 'loans you will still have', hint: 'For a new EC, the bank counts every housing-loan instalment you will still have.', help: 'Include the loan on a home you are selling only if the bank will still count it.' }) + '</div>');
     const moreG =
       '<details class="pl-adv pl-loanmore pl-moreopts" data-loanmore><summary>More options <em data-loan-em>monthly savings, CPF top-ups, other income and debts</em></summary><div class="pl-adv-b">' +
-        grid(money('saveMo', 'Cash set aside each month', { opt: true, ph: 'e.g. 3,000' }) + money('cpfMo', 'CPF OA added each month', { opt: true, ph: 'all buyers', hint: 'Your monthly OA contributions. Not worked out from your income.' })) +
-        check('payInstalmentFromCpf', 'Pay monthly instalments from CPF OA first, then cash', { checked: true }) +
-        money('varIncome', 'Monthly variable income, both borrowers', { opt: true, ph: 'bonus, commission, allowances', hint: 'Bonus, commission and allowances, as a monthly average over the last 12 months (a yearly total ÷ 12). Banks count only 70% of it. Type 0 if none; leave it blank and all the income above is treated as fixed salary.' }) +
-        money('debts', 'Other monthly debt repayments', { opt: true, ph: 'car, cards, other loans', hint: 'Car, card and other loan repayments, and the instalment on any housing loan you will still have, reduce the loan your income supports.' }) +
+        grid(money('saveMo', 'Cash set aside each month', { opt: true, ph: 'e.g. 3,000' }) + '<div data-when="entity:0">' + money('cpfMo', 'CPF OA added each month', { opt: true, ph: 'all buyers', hint: 'Your monthly OA contributions. Not worked out from your income.' }) + '</div>') +
+        '<div data-when="entity:0">' + check('payInstalmentFromCpf', 'Pay monthly instalments from CPF OA first, then cash', { checked: true }) + '</div>' +
+        '<div data-when="entity:0">' + money('varIncome', 'Monthly variable income, both borrowers', { opt: true, ph: 'bonus, commission, allowances', hint: 'Bonus, commission and allowances, as a monthly average over the last 12 months (a yearly total ÷ 12). Banks count only 70% of it. Type 0 if none; leave it blank and all the income above is treated as fixed salary.' }) +
+        money('debts', 'Other monthly debt repayments', { opt: true, ph: 'car, cards, other loans', hint: 'Car, card and other loan repayments, and the instalment on any housing loan you will still have, reduce the loan your income supports.' }) + '</div>' +
       '</div></details>';
     const sale = grp('sale', 'A home to sell',
       chips('order', 'Do you have a home to sell?', [['buy', 'Buy first, then sell'], ['sell', 'Sell first, then buy'], ['none', 'Nothing to sell']], { value: '', hint: 'Choose one. Nothing is assumed.' }) +
@@ -275,14 +285,15 @@
     else if (req > limit + 0.5) { basis = 'Limited by lending limits · ' + (why === 'income' ? 'what your income supports' : why === 'mop' ? 'the lower of two income limits' : limitWords); adj = '<span class="pl-adj" role="status">You requested <b>' + $(req) + '</b>. Your estimated loan limit is <b>' + $(limit) + '</b>, so calculations use <b>' + $(used) + '</b>.</span>'; }
     else basis = req < 0.5 ? 'Your choice · no bank loan' : 'Your choice' + (req < limit - 0.5 ? ' · the estimated limit is ' + $(limit) : ' · the same as the estimated limit');
     const loanBlock = t('pl-sf-loan', 'Estimated bank loan', $(used), esc(basis) + adj);
-    const first = steps[0], startTail = first && !first.undated ? ' The first is on ' + esc(day(first.date)) + '.' : '';
+    const first = steps[0], startTail = first && !first.undated ? ' The first is ' + esc(onDay(first.date)) + '.' : '';
     const mo = last ? t('pl-sf-w', 'Estimated monthly mortgage after full disbursement', $(last.instalment) + '<small>/month</small>', '<span class="pl-sf-rt">' + pc(L.ratePct / 100, 2) + ' interest · ' + L.years + ' years</span>' + (steps.length > 1 ? 'Starts at about <b>' + $(first.instalment) + '</b>/month after the bank’s first release and rises with each release as construction progresses.' + startTail : 'From ' + esc(day(last.date)) + '.') + '<span class="pl-sf-l">Illustrative estimates, not bank approval or confirmed instalments.</span>') : '';
     // a $0 the buyer typed is "No bank loan selected": it says nothing about whether cash and CPF cover the purchase, so any shortfall above still stands.
     // "No mortgage needed" is said only when the calculation confirms there is no shortfall to borrow for.
     const chosenZero = req !== null && req < 0.5, covered = !r.headline.firstGap;
     const mo0 = last ? mo : (L.loanMax < 0.5 ? (chosenZero ? t('pl-sf-w', 'Estimated monthly mortgage', 'No bank loan selected', 'You entered $0, so no monthly repayment is shown.' + (covered ? '' : ' The shortfall above still applies.')) : covered ? t('pl-sf-w', 'Estimated monthly mortgage', 'No mortgage needed', 'You are not borrowing, so there is no monthly repayment.') : t('pl-sf-w', 'Estimated monthly mortgage', 'No mortgage estimated', 'On these figures the loan limit is $0, so no repayment is shown. The bank decides what it actually lends.')) : '');
     return (carried ? '<p class="pl-carried">Started from <a href="../planner/" data-pl-back>What can I afford?</a> Change any detail here.</p>' : '') +
-      '<div class="pl-sumbox"><div class="pl-sumtop pl-sumtop-1">' + loanBlock + mo0 + '</div></div>' + joint;
+      '<div class="pl-sumbox"><div class="pl-sumtop pl-sumtop-1">' + loanBlock + mo0 + '</div></div>' + joint +
+      (r.entity ? '<p class="pl-note">A company or other entity can borrow up to 15% of the price (MAS), with no income test here and no CPF, so the rest of each payment is cash.</p>' : '');
   }
   // screen 1: what to pay up front and when, and the total (the rows below are the answer to "when")
   function schedSumHtml(s) {
@@ -290,8 +301,8 @@
     // the first scheduled payment, then the others that fall due by the stamp duty date, each with its own date (the calculator does not know what has already been paid)
     const NM = { snp: 'S&P', bsd: 'stamp duty', absd: 'stamp duty', exercise: 'option exercise' }, then = [];
     s.events.filter((e, k) => k > 0 && e.date <= s.duty.date).forEach((e) => { const nm = esc(NM[e.id] || lcFirst(SHORT_NAME[e.id] || e.label)), key = nm + '|' + e.date, g = then.filter((x) => x.key === key)[0]; if (g) g.amount += e.amount; else then.push({ key: key, nm: nm, date: e.date, amount: e.amount }); });
-    const thenItems = then.map((x) => $(x.amount) + ' on ' + esc(day(x.date)) + ' (' + x.nm + ')'), thenTxt = thenItems.length > 1 ? thenItems.slice(0, -1).join(', ') + ' and ' + thenItems[thenItems.length - 1] : (thenItems[0] || '');
-    const firstSub = esc(SHORT_NAME[f0.id] || f0.label) + ', due ' + esc(day(f0.date)) + '';
+    const thenItems = then.map((x) => $(x.amount) + ' ' + esc(onDay(x.date)) + ' (' + x.nm + ')'), thenTxt = thenItems.length > 1 ? thenItems.slice(0, -1).join(', ') + ' and ' + thenItems[thenItems.length - 1] : (thenItems[0] || '');
+    const firstSub = esc(SHORT_NAME[f0.id] || f0.label) + ', due ' + esc(UND ? 'on the option date' : day(f0.date)) + '';
     const t = (k, val, sub) => '<div class="pl-sf"><span class="k">' + k + '</span><span class="v">' + val + '</span><span class="s">' + sub + '</span></div>';
     return '<div class="pl-sumbox"><div class="pl-sumtop pl-sumtop-2">' + t('First scheduled payment', $(f0.amount), firstSub) + t('Total to pay', $(s.totals.amount), 'Last payment ' + esc(dateLabel(lastE.date, lastE.basis, lastE.id)) + (lastE.basis === 'estimate' ? ', estimated' : '')) + '</div>' + (thenTxt ? '<p class="pl-sf-then">Then ' + thenTxt + '.</p>' : '') + '</div>';
   }
@@ -325,10 +336,10 @@
   };
   function assumeHtml(r, v) {
     const rows = [
-      ['purchase', 'Purchase', $(r.price) + ' · ' + kindText(r, v) + ' · option ' + day(r.otp)],
+      ['purchase', 'Purchase', $(r.price) + ' · ' + kindText(r, v) + ' · ' + optionText(r.otp)],
       datesRow(r, v),
-      ['money', 'Money now', 'cash ' + $(v.cash || 0) + ' · CPF OA ' + $(v.cpf || 0) + (v.saveMo || v.cpfMo ? ' · +' + $(v.saveMo || 0) + ' / +' + $(v.cpfMo || 0) + ' a month' : ' · no monthly savings added')],
-      ['buyers', 'Loan', 'Estimated bank loan: ' + $(r.loan.loanMax) + ' over ' + r.loan.years + ' years · interest ' + pc(r.loan.ratePct / 100, 2) + ' · borrower age ' + (Number.isInteger(+v.age) ? v.age : (+v.age).toFixed(1))],
+      ['money', 'Money now', r.entity ? 'cash ' + $(v.cash || 0) + (v.saveMo ? ' · +' + $(v.saveMo) + ' a month' : ' · no monthly savings added') : 'cash ' + $(v.cash || 0) + ' · CPF OA ' + $(v.cpf || 0) + (v.saveMo || v.cpfMo ? ' · +' + $(v.saveMo || 0) + ' / +' + $(v.cpfMo || 0) + ' a month' : ' · no monthly savings added')],
+      ['buyers', 'Loan', 'Estimated bank loan: ' + $(r.loan.loanMax) + ' over ' + r.loan.years + ' years · interest ' + pc(r.loan.ratePct / 100, 2) + (r.entity ? ' · company or other entity' : ' · borrower age ' + (Number.isInteger(+v.age) ? v.age : (+v.age).toFixed(1)))],
       ['sale', r.order === 'none' ? 'Sale' : 'Home you are selling', r.order === 'none' ? 'nothing to sell' : (r.order === 'sell' ? 'sold before the option · ' : 'completes ' + day(r.saleDate) + ' · ') + (v.saleEst && !v.saleEst.counted ? 'not counted yet · ' : '') + $(v.sale.cash || 0) + ' cash · ' + $(v.sale.cpf || 0) + ' to CPF · loan ' + (r.loan.flatLoan === 'sold' ? 'discharged on sale' : r.loan.flatLoan === 'outstanding' ? (v.flatUnsure ? 'counted as owed (not sure)' : 'still owed') : r.loan.flatLoan)],
       ['refund', r.order === 'sell' ? 'Interim rent' : 'ABSD refund', r.order === 'sell' ? (v.rent && v.rent.monthly ? $(v.rent.monthly) + ' a month until the keys' : 'none entered') : r.order === 'none' ? '—' : (r.duty.absd > 0 ? (v.refund && v.refund.assume ? 'assumed ' + (v.refund.monthsAfterSale || 2) + ' months after the sale · never guaranteed' : 'not assumed') : 'no ABSD on this purchase')],
     ];
@@ -347,7 +358,10 @@
   // Every date, amount and split below is read from the schedule adapter (screen 1) or the audited engine (screen 2). The page formats them and adds up what it shows.
   const SHORT_NAME = { otp: 'Booking fee', snp: 'S&P signed', bsd: 'Stamp duty', absd: 'Stamp duty', top: 'TOP', csc: 'Final payment', option: 'Option fee', exercise: 'Option exercised', completion: 'Completion' };
   // an estimated date is shown as a month, never a day it could be mistaken for a deadline (the buyer's own option date stays a day)
-  const dateLabel = (date, basis, id) => (basis === 'estimate' && id !== 'option' ? mon(date) : day(date));
+  let KIND_NOW = 'new';
+  // with no option date, a payment fixed by rule says how long after what it falls; the rest are read as a timing after the option
+  const undatedLabel = (date, id) => (id === 'otp' || id === 'option' ? 'On the option date' : id === 'snp' ? 'Within 8 weeks of the option' : id === 'exercise' ? 'Within 14 days of the option' : id === 'bsd' || id === 'absd' ? 'Within 14 days of ' + (KIND_NOW === 'completed' ? 'exercising' : 'signing the S&P') : afterOpt(date));
+  const dateLabel = (date, basis, id) => (UND ? undatedLabel(date, id) : basis === 'estimate' && id !== 'option' ? mon(date) : day(date));
   // Construction stages with no developer date are shown one by one, and no date is invented for them: when each falls due depends on construction progress.
   // The engine tests them one after another from the earliest date a stage could be called, so only the first carries that date, as a floor ("earliest").
   const PROGRESS = 'As construction progresses';
@@ -374,7 +388,7 @@
       return '<tr class="pl-jrow pay' + (e.uncovered > 0 ? ' short' : '') + '"><th scope="row" class="nm p">' + nameCell(e) + '</th><td class="n a">' + $(e.amount) + '</td><td class="by" data-l="How it is paid">' + paidBy(e) + '</td>' + (e.bank > 0 && e.instalment ? '<td class="n mo" data-l="Est. monthly mortgage after">' + $(e.instalment) + '/mo</td>' : '<td class="n mo none" data-l="Est. monthly mortgage after">–</td>') + '</tr>';
     }).join('');
     const est = newL && ev.some((e) => e.type === 'pay' && estConf(e.confidence)), prov = ev.filter((e) => e.provisional)[0];
-    const notes = 'Dates count from your option on ' + day(r.otp) + '.' + (est ? ' Construction stages are shown in order with no dates: when each falls due depends on construction progress. For this check they are tested one after another from the earliest date a stage could be called' + (prov ? '. The final 15% is provisional.' : '.') : prov ? ' The final 15% is provisional until the developer’s schedule is confirmed.' : '');
+    const notes = (UND ? 'Timings count from your option date, which you have not entered.' : 'Dates count from your option on ' + day(r.otp) + '.') + (est ? ' Construction stages are shown in order with no dates: when each falls due depends on construction progress. For this check they are tested one after another from the earliest date a stage could be called' + (prov ? '. The final 15% is provisional.' : '.') : prov ? ' The final 15% is provisional until the developer’s schedule is confirmed.' : '');
     return withRoles('<h3 class="pl-jr-h" id="pl-fund-h">Your payments, stage by stage</h3><div class="pl-jr-w"><table class="pl-jr pl-jr-f" id="pl-fund-table" aria-labelledby="pl-fund-h"><thead><tr><th scope="col" class="nm">Payment</th><th scope="col" class="n">Amount</th><th scope="col">How it is paid</th><th scope="col" class="n">Est. monthly mortgage after</th></tr></thead><tbody>' + rows + '</tbody><tfoot><tr><th scope="row" class="nm p">Total</th><td class="n a">' + $(r.totals.amount) + '</td><td class="by"></td><td class="n mo none"></td></tr></tfoot></table></div><p class="gw-fine">' + notes + '</p>');
   }
   // the earliest shortfall: how much, which payment, and what its date is (a rule, the developer's, the earliest possible, or an estimate): never an illustrative date called a deadline
@@ -389,8 +403,8 @@
     }
     else head = '<b>Your payments are covered, but the monthly instalment is not from ' + day(sf.firstGap) + '</b><span class="pl-sf-s">Monthly instalments start the month after the first loan release' + (r.order === 'sell' ? ', and rent runs until the keys' : '') + '.</span>';
     // 18 Oct, evening: Ken replaced his 17 Oct rule (first shortfall only) with the total on the payments as the main answer, and the first short payment beside it
-    if (sf.coveredOn && !(sf.stillOpenAtEnd > 0.5)) sub = '<span class="pl-sf-l">Money arriving later closes it on ' + day(sf.coveredOn) + ' (' + esc(sf.coveredBy) + '). Until then it is a shortfall.</span>';
-    return '<div class="pl-st warn" role="status"><span class="pl-st-t"><i class="pl-ic" aria-hidden="true">!</i><span>' + head + sub + '</span></span><a class="pl-link" href="../planner/" data-pl-back>Fix it in What can I afford? →</a></div>';
+    if (sf.coveredOn && !(sf.stillOpenAtEnd > 0.5)) sub = '<span class="pl-sf-l">Money arriving later closes it ' + onDay(sf.coveredOn) + ' (' + esc(sf.coveredBy) + '). Until then it is a shortfall.</span>';
+    return '<div class="pl-st warn" role="status"><span class="pl-st-t"><i class="pl-ic" aria-hidden="true">!</i><span>' + head + sub + '</span></span>' + (v.entity ? '' : '<a class="pl-link" href="../planner/" data-pl-back>Fix it in What can I afford? →</a>') + '</div>';
   }
   // monthly repayments: how the instalment builds up as the bank releases the loan (a closed section; the answer itself is the Monthly mortgage figure above)
   function instalHtml(r, v) {
@@ -420,11 +434,11 @@
   function howHtml2(s) {
     const S = root.GW_SCHEDULE, seen = {}, out = [];
     s.events.forEach((e) => { if (!seen[e.basis]) { seen[e.basis] = 1; out.push('<dt>' + basisTag(e.basis) + '</dt><dd>' + esc(S.dateSentence(e, s.kind)) + '</dd>'); } });
-    return '<dl class="pl-how2-l">' + out.join('') + '</dl><p class="gw-fine">Amounts: the booking fee and stage percentages come from the Housing Developers Rules; stamp duty is worked out by IRAS’s rates. ' + (s.assumedBuyer ? 'Duty assumes a Singapore Citizen buying a first home until you change the buyer.' : 'Duty uses the buyer details you entered.') + ' Nothing here depends on your income, cash, CPF or loan.</p>';
+    return '<dl class="pl-how2-l">' + out.join('') + '</dl><p class="gw-fine">Amounts: the booking fee and stage percentages come from the Housing Developers Rules; stamp duty is worked out by IRAS’s rates. ' + (s.entity ? 'Duty is worked out at the rates for a company or other entity.' : s.assumedBuyer ? 'Duty assumes a Singapore Citizen buying a first home until you change the buyer.' : 'Duty uses the buyer details you entered.') + ' Nothing here depends on your income, cash, CPF or loan.</p>';
   }
   function scheduleText(s, v) {
     const S = root.GW_SCHEDULE;
-    return ['Payment schedule (Groundwork): ' + $(s.price) + ' ' + (KIND[(v && v.uiKind) || s.kind] || s.kind) + ', option ' + day(s.otp) + '.',
+    return ['Payment schedule (Groundwork): ' + $(s.price) + ' ' + (KIND[(v && v.uiKind) || s.kind] || s.kind) + ', ' + optionText(s.otp) + '.',
       stageMark(s.events).map((e) => '- ' + (e.undated ? PROGRESS.toLowerCase() + (e.firstUndated ? ', earliest ' + day(e.date) : '') : day(e.date)) + ' ' + e.label + ' ' + $(e.amount) + (e.undated ? (e.provisional ? ' (provisional)' : '') : ' (' + S.BASIS_TAG[e.basis].toLowerCase() + (e.provisional ? ', provisional' : '') + ')')).join('\n'),
       'Total ' + $(s.totals.amount) + '.',
       'An illustrative schedule: it does not confirm a loan or that funds are enough. Dates marked estimated or provisional are planning dates, and construction stages have no dates because they depend on construction progress; none is the developer’s confirmed schedule. Estimates from my own assumptions, not advice. tools.kentanthepropertyguy.com/tools/payment-planner/'].join('\n');
@@ -504,15 +518,15 @@
   function entriesHtml(raw) {
     const m = (k) => (raw[k] == null ? 'not entered' : $(raw[k]));
     const rows = [['purchase', 'Purchase', m('price') + (raw.otp ? ' · option ' + day(raw.otp) : '')], ['money', 'Money now', 'cash ' + m('cash') + ' · CPF OA ' + m('cpf')],
-      ['buyers', 'Buyers and loan', 'age ' + (raw.age == null ? 'not entered' : raw.age) + ' · ' + (raw.years == null ? 'tenure not entered' : raw.years + ' years') + (raw.ratePct == null ? '' : ' at ' + raw.ratePct + '%')], ['sale', 'Home you are selling', raw.order ? ORDER_T[raw.order] : 'not chosen']];
+      ['buyers', 'Buyers and loan', (raw.entity === '1' ? 'company or other entity' : 'age ' + (raw.age == null ? 'not entered' : raw.age)) + ' · ' + (raw.years == null ? 'tenure not entered' : raw.years + ' years') + (raw.ratePct == null ? '' : ' at ' + raw.ratePct + '%')], ['sale', 'Home you are selling', raw.order ? ORDER_T[raw.order] : 'not chosen']];
     return '<p class="pl-kick">Your entries</p><div class="pl-arows">' + rows.map((x) => '<button type="button" class="pl-arow" data-open="' + x[0] + '"><span><b>' + x[1] + '</b><em>' + esc(x[2]) + '</em></span><i aria-hidden="true">Edit</i></button>').join('') + '</div>';
   }
   // the first short payment is a construction stage with no developer date (the same test the schedule adapter uses for its "earliest" basis)
   const undatedStage = (r, date) => { const e = r.events.filter((x) => x.type === 'pay' && x.date === date && x.uncovered > 0)[0]; return !!e && (r.kind === 'new' || r.kind === 'ec') && e.confidence === 'estimate' && e.id !== 'top' && e.id !== 'csc'; };
   function summaryText(r, v, scn) {
     const h = r.headline;
-    return ['Payment timeline (Groundwork): ' + $(r.price) + ' ' + kindText(r, v) + ', ' + ORDER_T[r.order] + ', option ' + day(r.otp) + '.',
-      h.peak > 0 ? (firstMiss(r).amount > 0 ? 'Not covered: ' + $(r.totals.uncovered) + ' in total; the first short payment is ' + firstMiss(r).label + (undatedStage(r, h.firstGap) ? ' (timing depends on construction progress)' : ' on ' + day(h.firstGap)) + '.' : 'First shortfall: ' + $(h.peak) + ' on ' + day(h.peakAt) + (h.peakCause ? ', ' + h.peakCause : '') + '.') : 'Every payment covered on its due date at the earliest dates.',
+    return ['Payment timeline (Groundwork): ' + $(r.price) + ' ' + kindText(r, v) + ', ' + ORDER_T[r.order] + ', ' + optionText(r.otp) + '.',
+      h.peak > 0 ? (firstMiss(r).amount > 0 ? 'Not covered: ' + $(r.totals.uncovered) + ' in total; the first short payment is ' + firstMiss(r).label + (undatedStage(r, h.firstGap) ? ' (timing depends on construction progress)' : ' ' + onDay(h.firstGap)) + '.' : 'First shortfall: ' + $(h.peak) + ' ' + onDay(h.peakAt) + (h.peakCause ? ', ' + h.peakCause : '') + '.') : 'Every payment covered on its due date at the earliest dates.',
       'Loan ' + (r.loan.capped ? 'sized to what the entered income supports (figure not included; rule limit ' + pc(r.loan.ltv) + ')' : pc(r.loan.ltv)) + ' over ' + r.loan.years + ' years at ' + pc(r.loan.ratePct / 100, 2) + ' (' + r.loan.loans + ' housing loan' + (r.loan.loans === 1 ? '' : 's') + ' counted); estimated instalment ' + $(r.instalment.final) + '/mo once the whole loan is paid out.',
       (v.buyers || []).length > 1 && r.loan.capped ? 'Two buyers: the income-weighted average age basis is not confirmed, so this joint-borrower loan is unverified.' : '',
       scn && scn.cap && scn.view === 'rule' ? 'Note: the income entered supports less than the loan assumed here; the planner shows both cases.' : '',
@@ -574,7 +588,7 @@
     // whether any buyer already owns a home: only then is the question about selling one asked. With none owned the answer is "nothing to sell", and the buyer's earlier choice (if any) is kept, not read.
     const ownAny = () => { let n = 0; [0, 1].forEach((k) => { const g = box.querySelector('[data-k="buyers.' + k + '.owned"]'); if (g && live(rowOf('buyers.' + k))) n += (+chipVal(g)) || 0; }); return n >= 1; };
     const effOrder = () => (ownAny() ? (chipVal(box.querySelector('[data-k="order"]')) || '') : 'none');
-    const applyWhen = () => { $$('[data-when]').forEach((el) => { const [k, vs] = el.dataset.when.split(':'); const g = box.querySelector('[data-k="' + k + '"]'); const v = k === 'msr' ? msrFlag() : k === 'own' ? ownFlag() : k === 'ownany' ? (ownAny() ? '1' : '0') : k === 'order' ? effOrder() : g ? (g.dataset.t === 'chip' ? chipVal(g) : g.value) : null; el.hidden = vs.split(',').indexOf(v) < 0; }); };
+    const applyWhen = () => { $$('[data-when]').forEach((el) => { const [k, vs] = el.dataset.when.split(':'); const g = box.querySelector('[data-k="' + k + '"]'); const v = k === 'msr' ? msrFlag() : k === 'own' ? ownFlag() : k === 'ownany' ? (ownAny() ? '1' : '0') : k === 'order' ? effOrder() : g ? (g.dataset.t === 'chip' ? chipVal(g) : g.dataset.t === 'check' ? (g.checked ? '1' : '0') : g.value) : null; el.hidden = vs.split(',').indexOf(v) < 0; }); };
     // the order switch above the result and the chips in the sale sheet are one control
     const orderGroup = box.querySelector('[data-k="order"]'), orderSwitch = q('[data-order-switch]'), ackGroup = box.querySelector('[data-k="ecIllus"]');
     function syncOrder(v) { setChip(orderGroup, v); $$('button', orderSwitch).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.order === v))); orderSwitch.hidden = v === 'none'; }
@@ -609,7 +623,8 @@
       });
       raw = v;
       const buyers = []; [0, 1].forEach((n) => { if (v['buyers.' + n + '.res'] !== undefined && live(rowOf('buyers.' + n))) buyers.push({ res: v['buyers.' + n + '.res'], owned: +v['buyers.' + n + '.owned'] }); });
-      const i = { kind: v.kind === 'resaleec' ? 'completed' : v.kind, uiKind: v.kind, tender: v.tender || 'unsure', mop: v.mop || 'unsure', propertyLoans: v.propertyLoans || 0, price: v.price, otp: v.otp, buyers, age: v.age, ratePct: v.ratePct, years: v.years, loansOther: +(v.loansOther || 0), cash: v.cash || 0, cpf: v.cpf || 0, saveMo: v.saveMo || 0, cpfMo: v.cpfMo || 0, payInstalmentFromCpf: v.payInstalmentFromCpf !== false, order: buyers.length && !buyers.some((b) => b.owned >= 1) ? 'none' : (v.order || ''),
+      const entity = v.entity === '1', undated = v.noOtp === true;
+      const i = { entity, undated, kind: v.kind === 'resaleec' ? 'completed' : v.kind, uiKind: v.kind, tender: v.tender || 'unsure', mop: v.mop || 'unsure', propertyLoans: v.propertyLoans || 0, price: v.price, otp: undated ? undefined : v.otp, buyers, age: entity ? undefined : v.age, ratePct: v.ratePct, years: v.years, loansOther: +(v.loansOther || 0), cash: v.cash || 0, cpf: v.cpf || 0, saveMo: v.saveMo || 0, cpfMo: v.cpfMo || 0, payInstalmentFromCpf: v.payInstalmentFromCpf !== false, order: entity || (buyers.length && !buyers.some((b) => b.owned >= 1)) ? 'none' : (v.order || ''),
         sale: { month: v.saleDate ? undefined : v.saleMonth, date: v.saleDate || undefined, cash: 0, cpf: 0, removesOwnership: v.removesOwnership !== false },
         // 'unsure' is counted as owed; a special case (contracted, undertaking) is counted as owed unless the bank has confirmed it
         flatLoan: v.flatLoanSpecial || (v.flatLoan === 'unsure' ? 'outstanding' : v.flatLoan) || 'outstanding', flatUnsure: v.flatLoan === 'unsure' && !v.flatLoanSpecial, flatAnswered: !!(v.flatLoan || v.flatLoanSpecial), flatLoanAccepted: v.flatLoanAccepted === true, prefLoan: v.prefLoan,
@@ -629,8 +644,15 @@
     // what the planner still needs before it will show a result: nothing is assumed for these (0 is a valid, explicit answer)
     const has = (k) => raw[k] !== undefined && raw[k] !== null;
     function needList(i) {
+      if (i.entity) {
+        // a company has no age, CPF, income or home to sell: the price, the option date (unless none yet) and the cash it has
+        const E = [{ id: 'price', label: 'Purchase price', hint: 'What the company will pay for the property.', done: has('price'), shown: has('price') ? $(raw.price) : '' }];
+        if (!i.undated && !has('otp')) E.push({ id: 'otp', label: 'Option date', hint: 'The day you pay the booking or option fee.', done: false, shown: '' });
+        E.push({ id: 'cash', label: 'Cash you have now', hint: 'Cash the company can use. Type 0 if none.', done: has('cash'), shown: has('cash') ? $(raw.cash) : '' });
+        return E;
+      }
       const L = [{ id: 'order', label: 'Do you have a home to sell?', hint: 'Choose one above. Nothing is assumed.', done: !!i.order, shown: i.order ? ORDER_T[i.order] : '' }, { id: 'price', label: 'Purchase price', hint: 'What you will pay for the home.', done: has('price'), shown: has('price') ? $(raw.price) : '' }];
-      if (!has('otp')) L.push({ id: 'otp', label: 'Option date', hint: 'The day you pay the booking or option fee.', done: false, shown: '' });
+      if (!has('otp') && !i.undated) L.push({ id: 'otp', label: 'Option date', hint: 'The day you pay the booking or option fee.', done: false, shown: '' });
       L.push({ id: 'age', label: 'Borrower’s age', hint: 'Sets how much the bank can lend. Two borrowers: use the average.', done: has('age'), shown: has('age') ? raw.age + ' years' : '' },
         { id: 'cash', label: 'Cash you have now', hint: 'Savings you can use. Type 0 if none.', done: has('cash'), shown: has('cash') ? $(raw.cash) : '' },
         { id: 'cpf', label: 'CPF OA you plan to use', hint: 'Type 0 if none.', done: has('cpf'), shown: has('cpf') ? $(raw.cpf) : '' });
@@ -646,6 +668,12 @@
       // buy first: whether the home still has a loan decides how the bank counts it, so it is asked (not sure is an answer; a blank is not)
       if (i.order === 'buy') L.push({ id: 'flatLoan', label: 'Loan on the home you are selling', hint: 'Do you still owe a housing loan on it? Not sure is fine.', done: i.flatAnswered, shown: i.flatLoan === 'none' ? 'fully paid' : i.flatUnsure ? 'not sure, counted as owed' : i.flatLoan === 'outstanding' ? 'still owed' : i.flatLoan });
       return L;
+    }
+    // A company can buy a new launch or a completed private home. If another type was selected, New launch is selected and the page says so.
+    function syncEntity() {
+      const eg = box.querySelector('[data-k="entity"]'), kg = box.querySelector('[data-k="kind"]'), n = q('[data-entity-note]'); if (!eg || !kg || !n) return;
+      if (chipVal(eg) === '1') { if (['ec', 'resaleec', 'hdb'].indexOf(chipVal(kg)) >= 0) { setChip(kg, 'new'); n.textContent = 'A company or other entity can buy a new launch or a completed private home, so New launch is selected.'; n.hidden = false; } }
+      else n.hidden = true;
     }
     // ---- compute ----
     let last = null, startedT = false, doneT = false, issues = [], dirty = false;
@@ -670,6 +698,7 @@
     function sized(inp) {
       const rule = run(inp); if (!rule.r.ok) return { rule: rule, cap: null, sp: null, spRaw: null };
       const ceil = rule.r.loan.loanMax;
+      if (inp.entity) return { rule: rule, cap: null, sp: null, spRaw: null, limit: rule.r.loan.ruleLoanMax, limitWhy: 'rule' };   // a company's loan is the flat 15% limit: no income test
       if (!(inp.gross > 0)) { const o0 = run(Object.assign({}, inp, { loanCap: 0 })); return { rule: rule, cap: o0.r && o0.r.ok ? o0 : null, sp: null, spRaw: null, zero: true, limit: 0, limitWhy: 'zero' }; }
       const raw = supportRes(inp, rule.r.loan.loans, inp.years), sp = good(raw);
       let lim = sp ? sp.maxLoan : null, mopLoan = null;
@@ -717,6 +746,7 @@
     }
     function paintTenureNote(vals) {
       const el = q('[data-tenure-note]'); if (!el) return;
+      if (vals.entity === '1') { const t0 = C.tenureNote({ entity: true }); if (el.textContent !== t0) el.textContent = t0; return; }
       const age = vals.age, L = C.LIMITS.age, chosen = typeof vals.years === 'number' && vals.years > 0 ? vals.years : 0;
       let o = {};
       if (typeof age === 'number' && age >= L.min && age <= L.max) { const t = C.bankTenure('private', age); o = { age: age, std: t.std, allowed: t.allowed, chosen: chosen }; }
@@ -729,11 +759,11 @@
     const buyerWords = (b) => (b.length > 1 ? 'Two buyers' : (RESN[b[0].res] || b[0].res) + ', ' + (b[0].owned === 0 ? 'first home' : b[0].owned === 1 ? 'owns one home' : 'owns two or more homes'));
     function setProp(open) { propOpen = open; prop.classList.toggle('is-collapsed', !open); propEdit.setAttribute('aria-expanded', String(open)); }
     function paintProp(i) {
-      const b = i.buyers.length ? i.buyers : [{ res: 'SC', owned: 0 }], touched = buyerTouched || b.length > 1 || b[0].res !== 'SC' || b[0].owned !== 0;
-      propOk = i.uiKind !== 'hdb' && has('price') && !errMap.price && !!raw.otp && !errMap.otp;
-      const bits = [KIND_SHORT[i.uiKind] || '', has('price') ? $(raw.price) : '', raw.otp ? 'Option ' + day(raw.otp) : '', buyerWords(b)].filter(Boolean);
+      const b = i.buyers.length ? i.buyers : [{ res: 'SC', owned: 0 }], touched = buyerTouched || i.entity || b.length > 1 || b[0].res !== 'SC' || b[0].owned !== 0;
+      propOk = i.uiKind !== 'hdb' && has('price') && !errMap.price && (i.undated || (!!raw.otp && !errMap.otp));
+      const bits = [KIND_SHORT[i.uiKind] || '', has('price') ? $(raw.price) : '', i.undated ? 'No option date yet' : raw.otp ? 'Option ' + day(raw.otp) : '', i.entity ? 'Company or other entity' : buyerWords(b)].filter(Boolean);
       propSum.innerHTML = bits.map((x, k) => (k === 0 ? '<b>' + esc(x) + '</b>' : '<span>' + esc(x) + '</span>')).join('');
-      if (buyerLine) buyerLine.textContent = touched ? 'Buyer: ' + buyerWords(b) + '.' : BUYER_DEFAULT;
+      if (buyerLine) buyerLine.textContent = i.entity ? 'Buyer: a company or other entity. Stamp duty and ABSD are worked out at the entity rates.' : touched ? 'Buyer: ' + buyerWords(b) + '.' : BUYER_DEFAULT;
     }
     // a stage table with nothing in it takes no room; the sections open on a wide screen, closed on a phone (the reader's choice is kept after that)
     const wide = () => !!(root.matchMedia && root.matchMedia('(min-width:900px)').matches);
@@ -746,11 +776,11 @@
       if (errMap.price || errMap.otp) return clear('Fix the ' + (errMap.price ? 'price' : 'option date') + ' above to see your payment schedule.');
       if (errMap.top || errMap.csc || errMap.completion) return clear('One of the dates you added does not work. Fix it below, or clear it, to see your payment schedule.');
       if (!has('price')) return clear('Enter the purchase price to see every payment and when it falls.');
-      if (!i.otp) return clear('Enter the option date to see every payment and when it falls.');
-      const s = SCH.schedule({ kind: i.kind, price: i.price, otp: i.otp, buyers: i.buyers.length ? i.buyers : undefined, order: i.order === 'sell' ? 'sell' : undefined, removesOwnership: i.sale.removesOwnership, dates: i.dates });
+      if (!i.otp && !i.undated) return clear('Enter the option date to see every payment and when it falls, or tick that you don’t have one yet.');
+      const s = SCH.schedule({ kind: i.kind, price: i.price, otp: i.otp, undated: i.undated, entity: i.entity, buyers: i.entity ? undefined : i.buyers.length ? i.buyers : undefined, order: i.order === 'sell' ? 'sell' : undefined, removesOwnership: i.sale.removesOwnership, dates: i.dates });
       if (!s.ok) return clear((s.invalid && s.invalid[0] && s.invalid[0].text) || 'Check the property details above to see your payment schedule.');
       O.sum.innerHTML = schedSumHtml(s);
-      O.lead.textContent = $(s.totals.amount) + ' in total, starting with ' + $(s.events[0].amount) + ' on ' + day(s.events[0].date) + '. The timing of each payment is in the list below.';
+      O.lead.textContent = $(s.totals.amount) + ' in total, starting with ' + $(s.events[0].amount) + ' ' + onDay(s.events[0].date) + '. The timing of each payment is in the list below.';
       O.note.innerHTML = i.uiKind === 'ec' ? '<p class="pl-note">EC eligibility is not checked in this schedule. The funding check tests your income against the new-EC ceiling.</p>' : i.uiKind === 'resaleec' ? '<p class="pl-note">A resale EC is planned like a completed home. Whether you can buy one depends on HDB’s rules for the unit, which are not checked here.</p>' : '';
       O.table.innerHTML = scheduleTableHtml(s); O.how.innerHTML = howHtml2(s);
       O.quote.hidden = false; O.cta.hidden = false;
@@ -761,8 +791,9 @@
     }
     // ---- screen 2: the funding check, from the audited engine ----
     function recalc() {
-      applyWhen();
+      syncEntity(); applyWhen();
       const i = values();
+      UND = !!i.undated; KIND_NOW = i.kind;
       if (pendingUnder) { waitBlur = true; return; } // a number is still being typed: keep the screen steady until it is complete or the field is left
       waitBlur = false; dirty = false;
       orderSwitch.hidden = i.order === 'none';
@@ -796,7 +827,7 @@
         // 2. which loan the timeline uses: the income-supported one by default, and a plain label whenever the loan is only an illustration
         const ill = [];
         if (ecOut === 'exceeds' && ack) ill.push('ec-income'); else if (ecOut === 'unknown') ill.push('ec-unknown');
-        if (!(i.gross > 0)) ill.push('zero'); else if (mc === 'unknown') ill.push('mop');
+        if (i.entity) { /* no income test for a company */ } else if (!(i.gross > 0)) ill.push('zero'); else if (mc === 'unknown') ill.push('mop');
         const RR = sc.rule.r.loan, why = ill.indexOf('zero') >= 0 ? 'zero' : ill.indexOf('mop') >= 0 ? 'mop' : '';
         const note = why ? illusHtml({ why: why, ruleLoan: RR.loanMax, ltv: RR.ltv, used: r.loan.loanMax, a: both && both.msr, b: both && both.tdsr }) : '';
         const sf = SCH.shortfall(r);
@@ -860,6 +891,7 @@
       h.fresh = false; hand.set(h);
       save();
     })();
+    if (root.location && String(root.location.hash) === '#company') { const eg0 = box.querySelector('[data-k="entity"]'); if (eg0) setChip(eg0, '1'); }
     syncOrder(chipVal(orderGroup) || '');
     // ---- the two screens: an ARIA tablist; the one not shown is not displayed (never removed), so every entry stays live ----
     const tabs = $$('[data-tab]'), panels = $$('[data-panel]');
