@@ -627,3 +627,6 @@ body.gw-legacy .gw-strip-host{max-width:760px;padding:0}
 /* ---- audit R2 ---- */
 /* V3-05: "Clear my figures" at the foot of the Menu */
 .gw-mclear{margin:8px 0 0;font-size:13.5px;color:var(--gw-muted);line-height:1.4}.gw-mclear .gw-link{display:inline-block;min-height:44px;padding:12px 0;font-size:14.5px}
+.gw-vx-near-c{border-top:0;padding-top:4px}.gw-vx-near .gw-vx-t b{color:var(--gw-ink);font-weight:600}
+@media (max-width:640px){.gw-vx-near .gw-vx-t td:first-child{white-space:normal}.gw-vx-near .gw-vx-t td{padding:8px 6px}}
+@media (max-width:340px){.gw-vx-near .gw-vx-t{font-size:12.5px}.gw-vx-near .gw-vx-t td{padding:8px 4px}}
