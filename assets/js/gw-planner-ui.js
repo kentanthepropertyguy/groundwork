@@ -750,6 +750,8 @@
       const age = vals.age, L = C.LIMITS.age, chosen = typeof vals.years === 'number' && vals.years > 0 ? vals.years : 0;
       let o = {};
       if (typeof age === 'number' && age >= L.min && age <= L.max) { const t = C.bankTenure('private', age); o = { age: age, std: t.std, allowed: t.allowed, chosen: chosen }; }
+      const yEl = q('[data-k="years"]'), adj = yEl && +yEl.dataset.adjustedFrom > 0 ? +yEl.dataset.adjustedFrom : 0; if (adj && o.chosen) o.adjustedFrom = adj;
+      if (last && last.r && last.r.loan && typeof last.r.loan.loans === 'number') o.loans = last.r.loan.loans;
       const t = C.tenureNote(o); if (el.textContent !== t) el.textContent = t;
     }
     box.addEventListener('focusout', (e) => { if (waitBlur && e.target.matches && e.target.matches('input[data-k]')) setTimeout(recalc, 0); });
@@ -790,6 +792,7 @@
       return s;
     }
     // ---- screen 2: the funding check, from the audited engine ----
+    let tenureFld = null;
     function recalc() {
       syncEntity(); applyWhen();
       const i = values();
@@ -853,6 +856,8 @@
         else if (issues.length) { out.result.innerHTML = top + fixHtml(issues); out.assume.innerHTML = entriesHtml(raw); }
         else out.result.innerHTML = top + '<p class="gw-fine">Enter ' + (r.missing || []).map((m) => ({ price: 'the price', age: 'the borrower’s age', buyers: 'the buyer details', otp: 'the option date' }[m] || m)).join(', ').replace(/, ([^,]*)$/, ' and $1') + ' to see the result.</p>';
       }
+      // the tenure field shows the tenure the calculation used (gw-money.js): a longer one typed is replaced by it once the field is not being typed in
+      if (tenureFld) { const applied = r.ok && r.loan ? r.loan.years : 0; if (tenureFld.settle(applied)) { recalc(); return; } tenureFld.hint(applied); }
       paintErrors(); paintTenureNote(raw); paintFund(); if (!fundOpen && (!last || fundBad())) setFund(true); { const el2 = q('[data-sale-est]'); if (el2) el2.innerHTML = i.saleEst && (i.order === 'buy' || i.order === 'sell') ? saleLine(i.saleEst) : ''; }
       wa();
     }
@@ -871,6 +876,7 @@
     if (MONEY) $$('input[data-t="money"]').forEach((x) => MONEY.wire(x, { parse: (t) => parseMoney(t), max: C.LIMITS.money.max }));
     $$('input').forEach((x) => { x.addEventListener('input', () => changed(x)); x.addEventListener('change', () => changed(x)); });
     if (MONEY) $$('input[data-t="num"]').forEach((x) => MONEY.selectOnFocus(x));
+    { const yEl = q('[data-k="years"]'); if (MONEY && MONEY.tenureField && yEl) tenureFld = MONEY.tenureField(yEl, { read: () => C.parseNum(yEl.value).value || null, max: () => C.LIMITS.years.max, recalc: () => { clearTimeout(tmr); recalc(); }, changed: () => save() }); }
     // ---- restore: shared details from the other calculators, then the planner's own ----
     const sv = shared.get();
     $$('[data-share]').forEach((x) => { const val = sv[x.dataset.share]; if (val === undefined || val === null || val === '') return; const m = /^buyers\.1\./.exec(x.dataset.share); if (m) showRow('buyers.1', true); if (x.dataset.t === 'chip') setChip(x, val); else x.value = x.dataset.t === 'money' && parseMoney(val) !== null ? fmtMoney(parseMoney(val)) : val; });
