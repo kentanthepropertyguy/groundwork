@@ -48,6 +48,17 @@
         list.innerHTML = rows.length ? rows.slice(0, limit).map(row).join('') : '<div class="kpe-state"><h3>No development found under that name</h3><p>Try fewer letters, or another spelling.</p></div>';
         count.textContent = rows.length.toLocaleString('en-US') + (rows.length === 1 ? ' development' : ' developments') + (q && rows.length > 1 ? ' · several match, so check the street and district' : '');
         more.hidden = rows.length <= limit; more.textContent = 'Show ' + Math.min(30, rows.length - limit) + ' more';
+        roadsInto(q, rows.length);
+      }
+      // Roads and streets: landed homes are found by road, so a road typed here leads to what sold around it (Property values & prices).
+      function roadsInto(q, devs) {
+        if (!q || !window.GWN || !GWN.findRoads) return;
+        GWN.findRoads(q, 3).then((rd) => {
+          if (!rd.length || inp.value.trim() !== q) return;
+          const html = rd.map((r) => '<a class="kpe-row" href="' + esc(GWN.roadLandedHref(ROOT, r)) + '"><span class="nm">' + esc(r.title) + '<span class="sb">' + esc((r.area ? r.area + ' · ' : '') + 'Road · what landed homes sold for nearby') + '</span></span><span class="fl"><span class="kpe-tag">Landed ›</span></span></a>').join('');
+          if (!devs) { list.innerHTML = html; count.textContent = rd.length + (rd.length === 1 ? ' road' : ' roads') + ' match'; more.hidden = true; }
+          else list.insertAdjacentHTML('beforeend', '<p class="sb" style="margin:16px 0 4px;font-weight:600">Roads and streets</p>' + html);
+        });
       }
       inp.addEventListener('input', () => { limit = 30; paint(); }); more.addEventListener('click', () => { if (!browse && !inp.value.trim()) { browse = true; limit = 30; } else limit += 30; paint(); });
       paint(); track('project_directory_viewed', {}); B.classList.add('kpe-ready');

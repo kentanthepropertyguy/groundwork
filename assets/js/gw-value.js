@@ -256,6 +256,7 @@
     const ST = { 1: 'new sale', 2: 'sub-sale' };
     h += table([['Date · tenure'], [(strata ? 'Strata' : 'Land') + ' sq ft', 1], ['Price · psf', 1]], d.rows.map((x) => ({ cells: [ym(x[0]) + (ST[x[6]] ? ' <i>' + ST[x[6]] + '</i>' : '') + '<small>' + tenure(x[5]) + '</small>', x[3].toLocaleString('en-US'), money(x[4]) + '<small>' + money(x[4] / x[3]) + ' psf</small>'] })));
     h += LIMITS;
+    h += mapNext(r, title(c.street) + ' (D' + Number(c.district) + ')', title(c.street));
     h += kenCta({ head: 'A personal assessment of your home', text: 'Ken looks at these sales against your land, your house and what sets it apart, and talks you through it.', msg: landedMsg(c), label: 'Ask Ken for an assessment', ctx: 'worth-landed' });
     h += moveNext(r);
     h += '<p class="gw-vx-src">URA private residential transaction records, ' + ym(I.firstMonth) + ' – ' + ym(I.latestMonth) + '. Single-house sales only' + (strata ? '; for cluster (strata) houses the area is the strata area URA records' : '; area is land area') + '. A sale URA lists more than once, identically, is counted once. Not endorsed by URA.</p>';
@@ -270,6 +271,8 @@
   const awayText = (m) => m < 100 ? 'under 100 m' : m < 1000 ? 'about ' + (Math.round(m / 50) * 50) + ' m' : 'about ' + (Math.round(m / 100) / 10) + ' km';
   const TGROUP = { fh: 'Freehold or 900+ yr', lh: 'Shorter lease' };
   const nearbyMsg = (loc, type, n) => 'Hi Ken, I’m looking at landed homes on ' + title(loc.name) + '. Groundwork found no recorded sale on the street itself' + (n ? ' and ' + n + ' ' + (type ? LTYPE[type].toLowerCase() + ' ' : '') + 'sale' + (n === 1 ? '' : 's') + ' on the streets around it' : ' and too few on the streets around it to compare') + '. Could you help me understand prices there?';
+  // The Map link: the road itself (its position, MRT, schools and nearby condo prices). The Map shows no landed sales, and the link says so.
+  const mapNext = (r, key, label) => '<a class="gw-vx-next" href="' + r + 'research/map/#pl=' + encodeURIComponent('road:' + key) + '" data-gw-go="map"><b>See ' + esc(label) + ' on the map</b><span>The road, MRT, schools, food and nearby condo prices. Landed sales are not on the map ›</span></a>';
   // res: GWLN.select(...). loc: { name, area, lat, lon }. o: { r, compact, geo }
   function nearbyHtml(res, loc, type, I, o) {
     o = o || {}; const T = type ? LTYPE[type] : 'Landed', t = T.toLowerCase(), r = o.r || '';
@@ -296,10 +299,11 @@
     if (res.n) {
       h += table([['Street · when'], [(res.strata ? 'Strata' : 'Land') + ' sq ft', 1], ['Price · psf', 1]], res.rows.map((x) => ({ cells: ['<b>' + esc(title(x.street)) + '</b><small>' + ym(x.ym) + ' · ' + awayText(x.m) + '</small>', x.land.toLocaleString('en-US') + '<small>' + tenure(x.tenure) + '</small>', money(x.price) + '<small>' + money(x.psf) + ' psf</small>'] })), 'sales');
       h += '<p class="gw-vx-why" data-vx-why>Same house type, newest first. We only look further out when there are too few sales close by. URA gives no house numbers, and each distance is to the middle of a street, so distances are approximate. ' + (res.strata ? 'Cluster (strata) houses are measured by strata area, not land. ' : '') + 'Sales on <b>' + res.streets + '</b> nearby street' + (res.streets === 1 ? '' : 's') + '.</p>';
+      (o.estates || []).slice(0, 1).forEach((e) => { h += '<p class="gw-vx-why" data-vx-estate>URA files some sales under the estate name <b>' + esc(title(e.estate)) + '</b>, on <b>' + esc(title(e.street)) + '</b>. URA doesn’t say which road in the estate each home is on, so we can’t tell which, if any, were on ' + esc(title(loc.name)) + '.' + (res.rows.some((x) => x.street === e.street) ? ' ' + esc(title(e.street)) + '’s sales are in the list above.' : '') + '</p>'; });
     }
     if (!o.compact) {
       if (res.state !== 'none') h += LIMITS;
-      if (loc.area) h += '<a class="gw-vx-next" href="' + r + 'research/map/#pl=' + encodeURIComponent('area:' + loc.area) + '" data-gw-go="map"><b>See the ' + esc(loc.area) + ' area on the map</b><span>MRT, schools, food and nearby condo prices. Landed sales are not on the map ›</span></a>';
+      if (loc.area) h += mapNext(r, title(loc.name) + ' (' + loc.area + ')', title(loc.name));
       h += kenCta({ head: 'Want Ken’s read on this street?', text: res.state === 'none' ? 'The records are thin here. Ken knows the streets and can tell you what he is seeing.' : 'Ken can place these sales against the land, the house and the street you have in mind.', msg: nearbyMsg(loc, type, res.n), label: 'Ask Ken about this street', ctx: 'worth-landed-street', fine: 'Optional · your message names the street, nothing about your finances.' });
       h += '<p class="gw-vx-src">URA private residential transaction records, ' + ym(I.firstMonth) + ' – ' + ym(I.latestMonth) + '. Single-house sales only; area is land area' + (res.strata ? ' (strata area for cluster houses)' : '') + '. ' + esc((o.geo && o.geo.source) || 'Street positions: OneMap, Singapore Land Authority.') + ' Not endorsed by URA.</p>';
     }
@@ -432,6 +436,8 @@
     const verQ = () => encodeURIComponent(LI && LI.sourceVersion || '');
     const geoP = () => GEO ? Promise.resolve(GEO) : getJson(base + 'landed/geo.json?v=' + verQ()).then((g) => (GEO = g));
     const moreP = () => MORE ? Promise.resolve(MORE) : getJson(base + 'landed/geo-more.json?v=' + verQ()).then((g) => (MORE = g));
+    let ESTATES = null;   // estate names are an extra: if the file cannot load, the answer is simply given without the note
+    const estatesP = () => ESTATES ? Promise.resolve(ESTATES) : getJson(base + 'landed/estates.json?v=' + verQ()).then((e) => (ESTATES = e.estates || [])).catch(() => []);
     const filesFor = (N, cands) => Promise.all(N.districtsOf(cands).map((d) => getJson(base + 'landed/d/' + d + '.json?v=' + verQ()).then((D) => [d, D]))).then((a) => { const f = {}; a.forEach((x) => { f[x[0]] = x[1]; }); return f; });
     // streets OneMap places that URA has no recent landed sale on: whole-name matches first, then names that start with what was typed
     function placeMatches(q) {
@@ -446,13 +452,13 @@
       const seq = lseq, N = NEARM();
       Lp.lt.hidden = true; $('.gw-chips', Lp.lt).innerHTML = '';
       Lp.out.innerHTML = '<p class="gw-vx-why" data-vx-looking>Looking at the streets around ' + esc(title(loc.name)) + '…</p>';
-      return geoP().then((G) => { const cands = N.candidates(G, loc, N.TIERS[N.TIERS.length - 1].m, loc.exclude); return filesFor(N, cands).then((files) => ({ G, cands, files })); }).then((c) => {
+      return geoP().then((G) => { const cands = N.candidates(G, loc, N.TIERS[N.TIERS.length - 1].m, loc.exclude); return Promise.all([filesFor(N, cands), estatesP()]).then((x) => ({ G, cands, files: x[0], estates: N.estatesFor(x[1], loc.name, cands) })); }).then((c) => {
         if (seq !== lseq) return; // the visitor has moved on
         const types = N.select(c.cands, c.files, { type: 'T', latest: LI.latestMonth }).types, keys = Object.keys(LTYPE).filter((k) => types[k]), first = N.defaultType(types), wrap = $('.gw-chips', Lp.lt);
         const show = (k, u) => {
           const res = N.select(c.cands, c.files, { type: k, latest: LI.latestMonth });
           if (keys.length) press($$('[data-vx-lt]', Lp.lt), $$('[data-vx-lt]', Lp.lt).filter((b) => b.dataset.vxLt === k)[0]);
-          Lp.out.innerHTML = nearbyHtml(res, loc, k, LI, { r, geo: c.G }); waSet(Lp.out, nearbyMsg(loc, k, res.n));
+          Lp.out.innerHTML = nearbyHtml(res, loc, k, LI, { r, geo: c.G, estates: c.estates }); waSet(Lp.out, nearbyMsg(loc, k, res.n));
           track('tool_completed', { tool_name: 'landed-sales', window: 'nearby', count: res.n, home_type: k ? LTYPE[k] : 'landed' });
           if (u) reveal(Lp.out);
         };
@@ -517,7 +523,7 @@
     let lt; Lp.street.addEventListener('input', () => { clearTimeout(lt); clearLandedBelow(true); lt = setTimeout(() => suggestStreets(false), 120); });
     Lp.street.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); clearTimeout(lt); suggestStreets(true); } });
     Lp.street.addEventListener('change', () => { if (pendingL) { note.apply(null, pendingL); pendingL = null; } });
-    function chooseStreet(m, user, presetType) {
+    function chooseStreet(m, user, presetType, auto) {
       clearLandedBelow(user); const seq = lseq;
       Lp.sugg.innerHTML = '<p class="gw-vx-picked">' + esc(title(m[0])) + ', District ' + esc(m[1]) + '</p>';
       return getJson(base + 'landed/d/' + m[1] + '.json?v=' + encodeURIComponent(LI.sourceVersion)).then((D) => {
@@ -526,7 +532,7 @@
         const c = landedTypes(D, s), keys = Object.keys(LTYPE).filter((k) => c[k]), wrap = $('.gw-chips', Lp.lt);
         wrap.innerHTML = keys.map((k) => chip('data-vx-lt', k, LTYPE[k] + ' <small>' + c[k] + '</small>')).join(''); Lp.lt.hidden = false; Lp.out.innerHTML = '';
         $$('[data-vx-lt]', wrap).forEach((b) => b.addEventListener('click', () => showLanded(b.dataset.vxLt, true)));
-        const want = presetType && c[presetType] ? presetType : keys.length === 1 ? keys[0] : null;
+        const want = presetType && c[presetType] ? presetType : keys.length === 1 ? keys[0] : auto ? keys.slice().sort((a, b) => c[b] - c[a])[0] : null;   // auto: a street chosen in a search opens its most-sold house type
         if (want) showLanded(want, user); else if (user) wrap.querySelector('button').focus();
       }).catch(() => { if (seq === lseq) fail(Lp.out, 'URA landed', () => chooseStreet(m, user, presetType)); });
     }
@@ -541,10 +547,26 @@
       if (user) reveal(Lp.out);
     }
 
-    // Start: the address (#hdb, #condo, #landed), else what this tab already told us.
-    const h = (location.hash || '').replace('#', ''), saved = ctx.get().type;
-    if (['hdb', 'condo', 'landed'].indexOf(h) >= 0) pickType(h, false); else if (saved) pickType(saved, false);
-    window.addEventListener('hashchange', () => { const x = (location.hash || '').replace('#', ''); if (['hdb', 'condo', 'landed'].indexOf(x) >= 0) pickType(x, false); });
+    // A road chosen in a search (#landed:Springwood%20Crescent) opens that street's answer. The street is dropped from the address once read.
+    function openStreet(name) {
+      return landedInit().then(() => {
+        if (!LI) return; Lp.street.value = name;
+        const exact = LI.streets.filter((x) => x[0] === normStreet(name));
+        if (exact.length === 1) { Lp.street.value = title(exact[0][0]); chooseStreet(exact[0], true, null, true); } else suggestStreets(true);   // one street of that name: straight to its answer; several: choose the district
+      });
+    }
+    const fromHash = (user) => {
+      const h = (location.hash || '').replace('#', ''), m = /^landed:(.{1,80})$/.exec(h); let street = '';
+      if (m) { try { street = decodeURIComponent(m[1]).replace(/[^\w .,'&()\/-]/g, '').trim(); } catch (e) { street = ''; } }
+      const t = m ? 'landed' : h;
+      if (['hdb', 'condo', 'landed'].indexOf(t) < 0) return false;
+      pickType(t, false);
+      if (street) { try { history.replaceState(null, '', '#landed'); } catch (e) { /* ignore */ } openStreet(street); }
+      return true;
+    };
+    // Start: the address (#hdb, #condo, #landed, #landed:<road>), else what this tab already told us.
+    if (!fromHash() && ctx.get().type) pickType(ctx.get().type, false);
+    window.addEventListener('hashchange', () => { fromHash(); });
   }
   if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount(); }
   return { streetQuery, nearStreets, edits, noSalesHtml, unsupportedHtml, unavailableHtml, streetMsg, UNSUP, splitNote, hdbComps, landedComps, hdbTypes, landedTypes, blockMatches, streetMatches, normBlock, hdbResult, landedResult, nearbyHtml, nearbyMsg, awayText, kmText, pageHtml, hdbMsg, landedMsg, condoMsg, flatLabel, title, tenure, ym, money, LTYPE, HDB_MIN_BLOCK, HDB_MIN_STREET, MID_MIN, LANDED_MIN };

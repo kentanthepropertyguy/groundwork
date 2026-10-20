@@ -53,6 +53,7 @@
   /* ---------------- icons (neighbourhood kinds) ---------------- */
   const ICON = {
     mrt: '<rect x="5" y="3" width="14" height="14" rx="3.5"/><path d="M5 11h14M8.5 21l2-4M15.5 21l-2-4"/>',
+    road: '<path d="M8 3 5 21M16 3l3 18"/><path d="M12 5v3M12 11v3M12 17v3"/>',
     school: '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11.5v4.5c0 1.5 3 3 6 3s6-1.5 6-3v-4.5"/>',
     shop: '<path d="M6 8h12l1 12H5z"/><path d="M9 8V6a3 3 0 016 0v2"/>',
     food: '<path d="M3 12h18a9 9 0 01-18 0z"/><path d="M8 8c0-1.6 1-1.6 1-3.2M13 8c0-1.6 1-1.6 1-3.2"/>',
@@ -72,6 +73,22 @@
     const m = { P, PM, BY, BYID, EV, AM, S, get ready() { return evReady; }, get AREAOF() { return AREAOF; }, latestMonth: placesDoc.latestMonth, asOf: placesDoc.asOf };
 
     m.setEvidence = (doc) => { Object.keys(doc.projects).forEach((id) => { const p = BYID[id]; if (p) EV[p.n] = doc.projects[id]; }); evReady = true; };
+    /* Roads (data/value/landed/geo.json + geo-more.json: one approximate point per road, from OneMap). A road is a place to look around, never a sale. */
+    const roadTitle = (n) => String(n || '').toLowerCase().replace(/(^|[\s\-/(])([a-z])/g, (x, a, b) => a + b.toUpperCase());
+    AM.roads = [];
+    m.setRoads = (geo, more) => {
+      const seen = {}, out = [], add = (name, lat, lon, area, landed, district) => { const k = roadTitle(name) + '|' + (area || ''); if (!name || lat == null || seen[k]) return; seen[k] = 1; out.push({ title: roadTitle(name), area: area || '', lat, lon, landed, district: String(district || ''), key: roadTitle(name) + (area ? ' (' + area + ')' : '') }); };
+      ((geo && geo.streets) || []).forEach((x) => add(x[0], x[2], x[3], x[4], true, x[1]));
+      ((more && more.streets) || []).forEach((x) => add(x[0], x[1], x[2], x[3], false, ''));
+      AM.roads = out;
+    };
+    m.hasRoads = () => AM.roads.length > 0;
+    /* a road by the name the address carries: "Springwood Crescent (Queenstown)", "Alnwick Road (D28)" (a street URA records sales on, by district) or just the name */
+    const roadBy = (n) => {
+      const x = /^(.*?)(?: \(([^)]*)\))?$/.exec(String(n || '')), nm = x[1], tag = x[2] || '', byName = AM.roads.filter((r) => r.title === nm);
+      if (/^D\d+$/.test(tag)) return byName.find((r) => r.district && Number(r.district) === Number(tag.slice(1))) || byName[0];
+      return (tag && byName.find((r) => r.area === tag)) || byName.sort((a, b) => (b.landed ? 1 : 0) - (a.landed ? 1 : 0))[0];
+    };
     m.setExtra = (ex) => { AM.schools = ex.schools || []; AM.shops = ex.shops || []; AM.sources = AM.sources.concat(ex.sources || []); };
     m.hasSchools = () => AM.schools.length > 0; m.hasShops = () => AM.shops.length > 0;
     /* the planning area of every positioned development, by point-in-polygon (bounding box first) */
@@ -151,6 +168,9 @@
     /* ---- place search: developments, MRT stations, schools, neighbourhoods ---- */
     const NORM = (s) => String(s).toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
     const rankIn = (n, t) => { const x = NORM(n), i = x.indexOf(t); return i < 0 ? null : i === 0 ? 0 : x.split(' ').some((w) => w.startsWith(t)) ? 1 : 2; };
+    // a road is only offered for a real name: a house number, "road" or "street" on its own does not list the island
+    const GENERIC = /^(road|street|avenue|drive|crescent|close|terrace|lorong|jalan|garden|gardens|place|lane|heights|park|view|walk|way|hill|rise|grove|north|south|east|west|upper|lower|bukit|the|and)$/;
+    const roadQuery = (t) => t.length >= 3 && t.split(' ').some((w) => w.length >= 3 && !GENERIC.test(w));
     m.places = (q) => {
       const t = NORM(q); if (!t) return [];
       const pick = (arr, name, mapper, cap, tie) => arr.map((x) => { const r = rankIn(name(x), t); return r === null ? null : { r, x }; }).filter(Boolean).sort((a, b) => a.r - b.r || (tie ? tie(b.x) - tie(a.x) : 0) || name(a.x).length - name(b.x).length).slice(0, cap).map((o) => mapper(o.x));
@@ -158,7 +178,8 @@
         ...pick(AM.areas, (a) => a.n, (a) => ({ t: 'area', n: a.n, sub: 'Neighbourhood' }), 2),
         ...pick(AM.stations, (s) => s.n, (s) => ({ t: 'mrt', n: s.n, sub: s.k + ' station' }), 3),
         ...pick(P, (p) => p.n, (p) => ({ t: 'dev', n: p.n, sub: `D${Number(p.district)} · ${p.t12} sale${p.t12 === 1 ? '' : 's'} in 12 months` }), 3, (p) => p.t12),
-        ...pick(AM.schools, (s) => s.n, (s) => ({ t: 'school', n: s.n, sub: s.lab }), 2)
+        ...pick(AM.schools, (s) => s.n, (s) => ({ t: 'school', n: s.n, sub: s.lab }), 2),
+        ...(roadQuery(t) ? pick(AM.roads, (r) => r.title, (r) => ({ t: 'road', n: r.key, label: r.title, sub: r.area ? 'Road · ' + r.area : 'Road' }), 3, (r) => (r.landed ? 1 : 0)) : [])
       ];
     };
 
@@ -173,6 +194,12 @@
         const pk = AM.parks.filter((k) => { const r = k.rings[0]; if (!r) return false; const la = r.reduce((s, q) => s + q[0], 0) / r.length, lo = r.reduce((s, q) => s + q[1], 0) / r.length; return inside(la, lo, a.rings); }).sort((x, y) => y.a - x.a);
         const devs = PM.filter((p) => AREAOF[p.n] === pl.n && EV[p.n]).sort((x, y) => y.t12 - x.t12 || x.n.localeCompare(y.n));
         return { t: 'area', title: a.n, meta: `Neighbourhood · ${a.region}`, a, stn, sch, pk, devs, bounds: [[a.b[0], a.b[1]], [a.b[2], a.b[3]]], centre: [(a.b[0] + a.b[2]) / 2, (a.b[1] + a.b[3]) / 2] };
+      }
+      if (pl.t === 'road') {
+        const rd = roadBy(pl.n); if (!rd) return null;
+        let r = 1000, list = devsNear(rd.lat, rd.lon, r); if (list.length < 3) { r = 2000; list = devsNear(rd.lat, rd.lon, r); }
+        const ar = rd.area || areaAt(rd.lat, rd.lon);
+        return { t: 'road', title: rd.title, meta: 'Road' + (ar ? ' · ' + ar : ''), s: { lat: rd.lat, lon: rd.lon, lab: 'Road' }, list, r, lat: rd.lat, lon: rd.lon, road: rd };
       }
       const s = pl.t === 'mrt' ? stationBy(pl.n) : schoolBy(pl.n); if (!s) return null;
       const ar = areaAt(s.lat, s.lon); let r = 1000, list = pl.t === 'mrt' ? nearStationDevs(s, r) : devsNear(s.lat, s.lon, r);

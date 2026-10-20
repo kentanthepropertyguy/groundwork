@@ -33,18 +33,19 @@
   addEventListener('popstate', onNav); addEventListener('hashchange', onNav);
 
   /* ---------------- search ---------------- */
-  const SECH = { area: 'Neighbourhoods', mrt: 'MRT stations', dev: 'Developments', school: 'Schools' };
-  const SCOL = { area: '#14203F', mrt: '#C9372C', dev: '#2E4FD1', school: '#6D4BC4' };
+  const SECH = { area: 'Neighbourhoods', mrt: 'MRT stations', dev: 'Developments', school: 'Schools', road: 'Roads' };
+  const SCOL = { area: '#14203F', mrt: '#C9372C', dev: '#2E4FD1', school: '#6D4BC4', road: '#1F7A6B' };
   const glyph = (k, sz = 13) => `<span class="gl" style="background:${SCOL[k] || '#6B7280'}">${icon(k, sz)}</span>`;
-  const noMatch = () => `No match. Try a development, MRT station${M.hasSchools() ? ', school' : ''} or neighbourhood.`;
+  const what = () => `development, ${M.hasRoads() ? 'road, ' : ''}MRT station${M.hasSchools() ? ', school' : ''} or neighbourhood`;
+  const noMatch = () => `No match. Try a ${what()}.`;
   function suggHtml(list, id) {
     if (!list.length) return `<div class="sugg" role="listbox" id="${id}"><div class="k">${noMatch()}</div></div>`;
     let last = '', i = 0;
-    return `<div class="sugg" role="listbox" id="${id}">${list.map((p) => { const head = p.t !== last ? `<div class="k">${SECH[p.t]}</div>` : ''; last = p.t; const k = i++; return head + `<button type="button" role="option" id="${id}-${k}" aria-selected="${k === S.qi}" data-pick="${p.t}|${esc(p.n)}">${glyph(p.t)}<b>${esc(p.n)}</b><span class="m">${esc(p.sub)}</span></button>`; }).join('')}</div>`;
+    return `<div class="sugg" role="listbox" id="${id}">${list.map((p) => { const head = p.t !== last ? `<div class="k">${SECH[p.t]}</div>` : ''; last = p.t; const k = i++; return head + `<button type="button" role="option" id="${id}-${k}" aria-selected="${k === S.qi}" data-pick="${p.t}|${esc(p.n)}">${glyph(p.t)}<b>${esc(p.label || p.n)}</b><span class="m">${esc(p.sub)}</span></button>`; }).join('')}</div>`;
   }
   function searchBox() {
     const list = S.suggOpen ? M.places(S.q) : [];
-    return `<div class="srch"><label class="vh" for="q">Search a development, MRT station${M.hasSchools() ? ', school' : ''} or neighbourhood</label><input id="q" type="search" autocomplete="off" role="combobox" aria-expanded="${S.suggOpen && list.length > 0}" aria-controls="q-list" aria-autocomplete="list" ${S.qi >= 0 && list[S.qi] ? `aria-activedescendant="q-list-${S.qi}"` : ''} placeholder="Search a place or development" value="${esc(S.q)}"><kbd>/</kbd>${S.suggOpen && S.q.trim() ? suggHtml(list, 'q-list') : ''}</div>`;
+    return `<div class="srch"><label class="vh" for="q">Search a ${what()}</label><input id="q" type="search" autocomplete="off" role="combobox" aria-expanded="${S.suggOpen && list.length > 0}" aria-controls="q-list" aria-autocomplete="list" ${S.qi >= 0 && list[S.qi] ? `aria-activedescendant="q-list-${S.qi}"` : ''} placeholder="${M.hasRoads() ? 'Search a place, road or development' : 'Search a place or development'}" value="${esc(S.q)}"><kbd>/</kbd>${S.suggOpen && S.q.trim() ? suggHtml(list, 'q-list') : ''}</div>`;
   }
 
   /* ---------------- development card ---------------- */
@@ -92,6 +93,8 @@
 
   /* ---------------- place cards: a neighbourhood, an MRT station or a school ---------------- */
   const devRow = (x, withDist = true) => `<button type="button" class="nb" data-pick="dev|${esc(x.p.n)}"><b>${esc(x.p.n)}</b><span class="m">${withDist ? distA(x.d) + ' · ' : ''}${esc(x.e.tenure)} · ${x.p.t12 ? x.p.t12 + ' sale' + (x.p.t12 === 1 ? '' : 's') + ' in 12 months' : 'no sales in 12 months'}</span><i aria-hidden="true">›</i></button>`;
+  // A road: where to read what landed homes sold for around it (the map itself shows condo prices, never landed sales)
+  const roadLanded = (d) => `<a class="nb" href="../../journey/worth/#landed:${encodeURIComponent(d.title)}" data-gw-go="landed" style="margin-top:12px"><b>What landed homes sold for near ${esc(d.title)}</b><span class="m">Sales by street from URA records. Landed sales are not shown on this map.</span><i aria-hidden="true">›</i></a>`;
   function placeCard(pl, mobile) {
     const d = M.placeData(pl); if (!d) return startCard(mobile);
     const head = `<div class="dp-top"><div style="min-width:0"><h2>${esc(d.title)}</h2><p class="meta">${esc(d.meta)}</p></div>${closeBtn}</div>`;
@@ -104,14 +107,14 @@
       const n = mobile && !S.more ? 0 : 6;
       body += `<div class="sec"><div class="sh"><b>Developments</b><span>${d.devs.length} with recorded sales</span></div>${n ? d.devs.slice(0, n).map((p) => devRow({ p, e: M.EV[p.n] }, false)).join('') + `<p class="basis" style="margin:6px 0 0">Most active in the last 12 months first. Select one to see prices by size.</p>` : ''}</div>`;
     } else {
-      body = `<div class="sec" style="margin-top:14px;padding-top:0;border:0"><div class="sh"><b>Developments within ${d.r / 1000} km</b><span>${d.list.length} with recorded sales</span></div>${d.list.length ? d.list.slice(0, mobile && !S.more ? 3 : 6).map((x) => devRow(x)).join('') : '<p class="basis" style="margin:0">None found.</p>'}<p class="basis" style="margin:8px 0 0">${d.t === 'mrt' ? 'Straight-line distance from the nearest exit, not walking time.' : 'Straight-line distance, not walking time. Living near a school does not decide admission; check the MOE registration rules.'}</p></div>`;
+      body = `<div class="sec" style="margin-top:14px;padding-top:0;border:0"><div class="sh"><b>Developments within ${d.r / 1000} km</b><span>${d.list.length} with recorded sales</span></div>${d.list.length ? d.list.slice(0, mobile && !S.more ? 3 : 6).map((x) => devRow(x)).join('') : '<p class="basis" style="margin:0">None found.</p>'}<p class="basis" style="margin:8px 0 0">${d.t === 'mrt' ? 'Straight-line distance from the nearest exit, not walking time.' : d.t === 'road' ? 'Straight-line distance from the middle of the road, not walking time. The road’s position is approximate, and no house is placed on it.' : 'Straight-line distance, not walking time. Living near a school does not decide admission; check the MOE registration rules.'}</p></div>${d.t === 'road' ? roadLanded(d) : ''}`;
     }
     if (!mobile) return `<aside class="dp" aria-label="${esc(d.title)}"><div class="dp-in">${head}${body}</div></aside>`;
     const more = (d.t === 'area' ? d.devs.length : d.list.length) > 3 ? `<div class="bs-act"><button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">${d.t === 'area' ? 'Developments' : 'More developments'} ${S.more ? '⌄' : '⌃'}</button></div>` : '';
     return `<aside class="bs${S.more ? ' open' : ''}" aria-label="${esc(d.title)}"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}${body}${more}</aside>`;
   }
   function startCard(mobile) {
-    const inner = `<h2>Explore homes and neighbourhoods</h2><p class="meta" style="margin-top:6px">Search a neighbourhood, MRT station${M.hasSchools() ? ', school' : ''} or development, or select a dot. Zoom in to see stations${M.hasSchools() ? ' and schools' : ''}.</p><p class="basis" style="margin:10px 0 0">${SRC}</p>`;
+    const inner = `<h2>Explore homes and neighbourhoods</h2><p class="meta" style="margin-top:6px">Search a neighbourhood, ${M.hasRoads() ? 'road, ' : ''}MRT station${M.hasSchools() ? ', school' : ''} or development, or select a dot. Zoom in to see stations${M.hasSchools() ? ' and schools' : ''}.</p><p class="basis" style="margin:10px 0 0">${SRC}</p>`;
     return mobile ? `<aside class="bs" aria-label="Start">${inner}</aside>` : `<aside class="dp dp-start" aria-label="Start"><div class="dp-in">${inner}</div></aside>`;
   }
 
@@ -144,7 +147,7 @@
     const md = mode(), m = narrow(), pad = DEVPAD(m);
     if (md === 'start' || (md === 'dev' && !M.BY[S.proj].pos)) return { keep: md === 'dev', key: 'start|' + (m ? 'm' : 'd'), projects: M.PM, selected: null, cmp: [], amen: [], world: true, fit, minZoom: 11, pad: m ? { tl: [20, 84], br: [20, (($('.bs') || {}).offsetHeight || 150) + 16] } : { tl: [20, 76], br: [360, 60] } };
     if (md === 'place') {
-      const d = M.placeData(S.place); if (!d) return Object.assign(mapProps0(fit), { world: true });
+      const d = M.placeData(S.place); if (!d) return { keep: false, key: 'start|' + (m ? 'm' : 'd'), projects: M.PM, selected: null, cmp: [], amen: [], world: true, fit, minZoom: 11, pad: m ? { tl: [20, 84], br: [20, (($('.bs') || {}).offsetHeight || 150) + 16] } : { tl: [20, 76], br: [360, 60] } };   // a place not found (an old link, or the road files still loading): the whole island, never an error
       if (d.t === 'area') return { key: 'a|' + S.place.n + '|' + (m ? 'm' + (S.more ? 'x' : '') : 'd'), projects: M.PM, selected: null, cmp: [], amen: [], bounds: d.bounds, areaRings: d.a.rings, place: { lat: null, chipAt: d.centre, label: d.title, sub: 'Neighbourhood' }, fit, minZoom: 11, pad };
       const list = d.list.slice(0, m && !S.more ? 3 : 6), cmp = list.map((x) => x.p.n);
       return { key: 'p|' + S.place.t + S.place.n + '|' + (m ? 'm' + (S.more ? 'x' : '') : 'd'), projects: M.PM, selected: null, cmp, amen: [], place: { lat: d.lat, lon: d.lon, label: d.title, sub: d.t === 'mrt' ? 'MRT station' : d.s.lab }, fitPts: [[d.lat, d.lon], ...cmp.map((n) => [M.BY[n].lat, M.BY[n].lon])], zoom: 15, minZoom: 14, fit, pad };
@@ -176,6 +179,7 @@
     const lic = '<a href="https://data.gov.sg/open-data-licence" target="_blank" rel="noopener noreferrer">Singapore Open Data Licence version 1.0</a>';
     el.innerHTML = `Project locations and prices: URA private residential transaction data (PMI_Resi_Transaction), to ${esc(ym(+String(M.latestMonth).replace('-', '')))}. Neighbourhood data: contains information from ${list}, from <a href="https://data.gov.sg" target="_blank" rel="noopener noreferrer">data.gov.sg</a>, made available under the terms of the ${lic}.` +
       (geo.length ? ` School and supermarket positions: contains information from ${line(geo[0])} from <a href="https://www.onemap.gov.sg" target="_blank" rel="noopener noreferrer">onemap.gov.sg</a>, made available under the terms of the ${lic}.` : '') +
+      (M.hasRoads() ? ' Road positions: OneMap, Singapore Land Authority, made available under the terms of the ' + lic + '; one approximate point for each road, never a house.' : '') +
       ` Basemap: OneMap, © contributors | Singapore Land Authority. Distances are straight-line. Not endorsed by any of these agencies.`;
   }
 
@@ -224,5 +228,8 @@
     // Prices load after the first paint; schools and supermarkets only if that file has been cleared for publication (no file, no layer).
     getJson('ev.json').then((ev) => { M.setEvidence(ev); render(); window.KPT_MAP_APP.evReady = true; }).catch(() => fail('Prices could not be loaded.'));
     if (am.extra) getJson(am.extra).then((ex) => { M.setExtra(ex); notices(); render(); }).catch(() => {});
+    // Roads (the street positions Property values & prices uses). Without them the search simply has no Roads group.
+    const landed = new URL('../../data/value/landed/', location.href).href, getRoad = (f) => fetch(landed + f + '?v=' + BUILD).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    Promise.all([getRoad('geo.json'), getRoad('geo-more.json')]).then(([g, mo]) => { if (!g && !mo) return; M.setRoads(g, mo); notices(); render(); window.KPT_MAP_APP.roadsReady = true; });
   }).catch(() => fail('The map data could not be loaded.'));
 })();

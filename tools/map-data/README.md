@@ -28,6 +28,16 @@ Non-chain supermarket licensee names are never published (the word "Supermarket"
 What it needs: Python 3.8+ (standard library only); internet access to onemap.gov.sg (public search, no key); the site's own `data/value/landed/index.json` and `data/map/amen.json`. The road-name file is optional: URA "Master Plan 2019 Road Name layer" (data.gov.sg, GeoJSON). It only adds streets with no sale, so a typed street can still be placed; without it `geo-more.json` is shorter. The published index used a 12,232-feature file with sha256 `5e9b7e70…2d512fcd`.
 Keep the cache OUTSIDE the site folder (raw OneMap output, never published; the crawler refuses a cache inside the site). The crawl is resumable (re-run after an interruption), takes 10 to 20 minutes, and exits non-zero if any lookup did not finish. Step 2 reports streets it could not place (they are left out of the answer, never guessed). Check the tests afterwards: the Springwood Crescent and busy-street cases must still pass.
 
+**Where else the street positions are used.** The same two files give the road search: the Map's search, the shared Groundwork search, the Research search and Browse all offer a road, and a road leads to what landed homes sold for around it (Property values & prices, address `#landed:<Road>`) and to its place on the Map (`#pl=road:<Road> (<Area>)`). Nothing extra to build: refreshing the street positions refreshes them all.
+
+## Estate names for landed sales (rebuild with the landed sales)
+URA files many landed sales under an estate name (for example SPRINGWOOD, on Jalan Mat Jambol), not under the road a house is on. `data/value/landed/estates.json` lists those names with the street URA files them under (no counts, no prices); the nearby-sales answer uses it for one plain sentence when a searched street starts with an estate name. Rebuild when the landed sales are rebuilt:
+
+    python3 tools/map-data/build-landed-estates.py --raw <folder of the URA PMI_Resi_Transaction batch-*.json files> --site .
+    node research/tests/landed-near-tests.js
+
+Needs Python 3.8+ (standard library only) and the same raw URA files the landed sales were built from (kept outside the site folder).
+
 ## Notices
 The sources notice under the map is generated from the datasets actually loaded (name, owner, access date, licence link). Update `--accessed` when a dataset is re-downloaded. The OneMap logo and attribution are part of the map and must stay.
 
