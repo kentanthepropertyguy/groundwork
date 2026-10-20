@@ -1,0 +1,154 @@
+"""Browser checks for the Interactive Map (desktop and phone). Run from the site folder:  python3 research/tests/map-render.py
+Starts the site's own local server, stubs the OneMap tiles (so the run needs no internet), and drives every flow.
+"""
+import json, os, pathlib, re, socket, subprocess, sys, time
+from playwright.sync_api import sync_playwright
+SITE = pathlib.Path(__file__).resolve().parents[2]
+PNG = bytes.fromhex('89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d49444154789c6360000002000001e221bc330000000049454e44ae426082')
+ok = fail = 0
+def check(name, cond, info=''):
+    global ok, fail
+    if cond: ok += 1; print('  ok   ' + name)
+    else: fail += 1; print('  FAIL ' + name + (' :: ' + str(info) if info else ''))
+def port():
+    s = socket.socket(); s.bind(('127.0.0.1', 0)); p = s.getsockname()[1]; s.close(); return p
+P = port(); srv = subprocess.Popen(['node', str(SITE / 'tools/serve-local.js')], env={**os.environ, 'PORT': str(P)}, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+for _ in range(100):
+    try: socket.create_connection(('127.0.0.1', P), 0.2).close(); break
+    except OSError: time.sleep(0.05)
+URL = f'http://127.0.0.1:{P}/research/map/'
+places = json.load(open(SITE / 'data/map/places.json')); ev = json.load(open(SITE / 'data/map/ev.json'))['projects']
+nopos = next(r[0] for r in places['rows'] if r[2] is None and r[0] == 'parktown-residence')
+thin = next(r[0] for r in places['rows'] if r[2] is not None and ev[r[0]]['rc']['new'])
+def fresh(ctx, off=False, tiles='stub'):
+    page = ctx.new_page(); errs = []
+    page.on('pageerror', lambda e: errs.append(str(e))); page.on('console', lambda m: errs.append(m.text) if m.type == 'error' else None)
+    page.route(re.compile(r'googletagmanager|facebook\.net'), lambda r: r.fulfill(status=200, content_type='application/javascript', body=''))
+    if tiles == 'stub': page.route(re.compile(r'onemap\.gov\.sg'), lambda r: r.fulfill(status=200, content_type='image/png', body=PNG))
+    else: page.route(re.compile(r'onemap\.gov\.sg/maps/tiles/'), lambda r: r.abort())
+    if off:   # layer switched off: the page must still work with no school or supermarket data
+        def patched(r): d = json.loads(r.fetch().text()); d['extra'] = None; r.fulfill(status=200, content_type='application/json', body=json.dumps(d))
+        page.route('**/data/map/amen.json*', patched)
+    return page, errs
+def open_(page, h=''):
+    page.goto(URL + h); page.wait_for_function('window.KPT_MAP_APP && window.KPT_MAP_APP.evReady', timeout=20000); page.wait_for_timeout(250)
+def pos(page, sel): return page.evaluate("s => { const e = document.querySelector(s); return e ? e.getBoundingClientRect().top : null }", sel)
+def txt(page, sel): return page.text_content(sel) if page.query_selector(sel) else ''   # raw text, not CSS-transformed
+try:
+  with sync_playwright() as p:
+    br = p.chromium.launch()
+    # ---------------------------------------------------------------- desktop
+    ctx = br.new_context(viewport={'width': 1440, 'height': 900}); page, errs = fresh(ctx); open_(page)
+    print('desktop: start')
+    check('start card and a dot for every positioned development', 'Explore homes and neighbourhoods' in txt(page, '.dp') and page.locator('path.leaflet-interactive').count() > 1500, page.locator('path.leaflet-interactive').count())
+    check('the basemap is OneMap Default, softened by filter, with the OneMap attribution visible', page.evaluate("document.querySelector('.leaflet-tile') && document.querySelector('.leaflet-tile').src.includes('/tiles/Default/')") and 'saturate' in page.evaluate("getComputedStyle(document.querySelector('.leaflet-tile-pane')).filter") and 'Singapore Land Authority' in txt(page, '.leaflet-control-attribution'))
+    print('desktop: search and a development')
+    page.fill('#q', 'jadescape'); check('search shows a Developments group', 'Developments' in txt(page, '.sugg'), txt(page, '.sugg')[:80])
+    page.keyboard.press('Enter'); page.wait_for_timeout(300)
+    check('address holds the development and radius', page.evaluate('location.hash').startswith('#p=jadescape&r='), page.evaluate('location.hash'))
+    check('card: neighbourhood first, then prices by size, then nearby', 0 < pos(page, '.around') < pos(page, '.sec.pr') < pos(page, '.sec.pr ~ .sec'), [pos(page, '.around'), pos(page, '.sec.pr')])
+    check('card names both markets and both size evidence blocks', 'Primary market' in txt(page, '.dp') and 'Secondary market' in txt(page, '.dp') and 'Sub Sale + Resale' in txt(page, '.dp'))
+    check('selected development is unmistakable on the map (chip and marker)', page.locator('.selchip').count() == 1 and page.locator('.selm').count() == 1 and 'Jadescape' in txt(page, '.selchip'))
+    check('no "Mainly sub-sales" note where sub-sales are a minority', 'mainly sub-sales' not in txt(page, '.dp').lower())
+    check('Open Research page links to the existing Research page', page.get_attribute('.dp-foot a.btn', 'href') == '../#/p/jadescape')
+    bands = page.locator('.mkt button.band'); default_i = page.evaluate("[...document.querySelectorAll('.mkt button.band')].findIndex(b => b.getAttribute('aria-pressed') === 'true')")
+    other = 0 if default_i != 0 else 1; heading0 = txt(page, '.sec.pr ~ .sec .sh')
+    check('before any choice the most-sold size of the secondary market is the comparison basis', default_i >= 0 and page.locator('button.band[aria-pressed=true]').count() == 1)
+    bands.nth(other).click(); page.wait_for_timeout(250)
+    check('selecting another size moves the selection to it', page.locator('button.band[aria-pressed=true]').count() == 1 and bands.nth(other).get_attribute('aria-pressed') == 'true')
+    sel_txt = txt(page, 'button.band[aria-pressed=true] b'); heading1 = txt(page, '.sec.pr ~ .sec .sh')
+    check('the nearby heading names the selected size and changed', sel_txt.split(' sq ft')[0] in heading1 and heading1 != heading0, (sel_txt, heading0, heading1))
+    cmp_href = page.get_attribute('a.nb', 'href') if page.query_selector('a.nb') else None
+    check('compare rows open the existing Compare page for the two projects', cmp_href is None or cmp_href.startswith('../#/compare/jadescape/'), cmp_href)
+    bands.nth(other).click(); page.wait_for_timeout(200); check('selecting the same size again returns to the default', bands.nth(default_i).get_attribute('aria-pressed') == 'true' and bands.nth(other).get_attribute('aria-pressed') == 'false')
+    print('desktop: history')
+    page.fill('#q', 'amo resid'); page.keyboard.press('ArrowDown'); page.keyboard.press('Enter'); page.wait_for_timeout(300)
+    check('second development selected', 'AMO Residence' in txt(page, '.dp h2'))
+    check('"Mainly sub-sales" shows where the secondary sales are all Sub Sales', 'mainly sub-sales' in txt(page, '.dp').lower())
+    page.go_back(); page.wait_for_timeout(300); check('the browser Back button returns to the previous development', 'Jadescape' in txt(page, '.dp h2'), txt(page, '.dp h2'))
+    page.go_forward(); page.wait_for_timeout(300); check('and Forward returns again', 'AMO Residence' in txt(page, '.dp h2'))
+    print('desktop: thin evidence, missing position, places')
+    open_(page, f'#p={thin}'); more = page.query_selector('button[data-rc]')
+    check('a development without enough sales for a typical price offers its most recent sales', more is not None)
+    if more:
+        more.click(); page.wait_for_timeout(200); check('recent sales are individual rows, labelled as not a typical price', page.locator('.rr').count() >= 1 and 'Not a typical price' in txt(page, '.rcl'))
+    open_(page, f'#p={nopos}')
+    check('a development with no URA position still shows its prices', 'Prices by size' in txt(page, '.dp') and page.locator('button.band').count() + page.locator('.mkt .basis').count() >= 1)
+    check('...says plainly it is not on the map, shows no neighbourhood or nearby list, and draws no selection', 'Not on the map yet' in txt(page, '.dp') and page.locator('.around').count() == 0 and page.locator('.selchip').count() == 0 and page.locator('a.nb, button.nb').count() == 0)
+    check('...and Open Research still works for it', page.get_attribute('.dp-foot a.btn', 'href') == f'../#/p/{nopos}')
+    open_(page, '#pl=area%3ABishan'); check('a neighbourhood card lists transport, parks and developments with recorded sales', all(w in txt(page, '.dp') for w in ('In this neighbourhood', 'Transport', 'Parks', 'Developments')))
+    page.locator('.dp button.nb').first.click(); page.wait_for_timeout(300); check('choosing a development from a place opens its card', page.evaluate('location.hash').startswith('#p='))
+    page.click('[data-dpclose]'); page.wait_for_timeout(300); check('closing returns to the start card', 'Explore homes' in txt(page, '.dp'))
+    page.fill('#q', 'toa payoh mrt'); page.keyboard.press('ArrowDown'); page.keyboard.press('Enter'); page.wait_for_timeout(300)
+    check('an MRT station card lists developments by distance with no prices', 'Developments within' in txt(page, '.dp') and '/ sq ft' not in txt(page, '.dp') and 'psf' not in txt(page, '.dp'))
+    print('desktop: furniture')
+    open_(page); page.keyboard.press('/'); check('"/" focuses the search box', page.evaluate("document.activeElement && document.activeElement.id") == 'q')
+    check('no horizontal scrolling', page.evaluate('document.documentElement.scrollWidth <= innerWidth'))
+    check('sources notice: Open Data Licence wording, access date, each dataset, OneMap, URA transactions', all(w in txt(page, '#mapSources') for w in ('Singapore Open Data Licence version 1.0', 'accessed 20 October 2026', 'LTA MRT Station Exit', 'Hawker Centres', 'NParks', 'Planning Area', 'OneMap', 'PMI_Resi_Transaction', 'Not endorsed')), txt(page, '#mapSources'))
+    check('notice also credits MOE, NEA supermarket licences and OneMap search for school and supermarket positions', all(w in txt(page, '#mapSources') for w in ('General information of schools', 'Ministry of Education', 'List of Supermarket Licences', 'OneMap Search', 'Singapore Land Authority')), txt(page, '#mapSources')[-420:])
+    page.click('[data-sources]'); page.wait_for_timeout(700); check('"Data & sources" scrolls to the notice', page.evaluate("document.getElementById('sources').getBoundingClientRect().top < innerHeight"))
+    real = [e for e in errs if 'onemap' not in e.lower()]; check('no console errors or exceptions', not real, real[:3]); ctx.close()
+    # ---------------------------------------------------------------- tiles fail
+    ctx = br.new_context(viewport={'width': 1440, 'height': 900}); page, errs = fresh(ctx, tiles='fail'); open_(page, '#p=jadescape'); page.wait_for_selector('.tilefail', timeout=20000)
+    check('if the basemap cannot load, the page says so, keeps the card and offers a retry', 'could not load' in txt(page, '.tilefail') and page.query_selector('[data-retry]') is not None and 'Jadescape' in txt(page, '.dp h2')); ctx.close()
+    # ---------------------------------------------------------------- phone
+    ctx = br.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=2, has_touch=True, is_mobile=True); page, errs = fresh(ctx); open_(page, '#p=jadescape')
+    print('phone')
+    check('bottom sheet peek: nearest item per group and two buttons', page.locator('.bs').count() == 1 and page.locator('.bs .ai').count() <= 4 and page.locator('.bs-act .btn').count() == 2, page.locator('.bs .ai').count())
+    check('peek hides prices until expanded', 'Prices by size' not in txt(page, '.bs'))
+    check('buttons are at least 44 px tall', page.evaluate("[...document.querySelectorAll('.bs-act .btn')].every(b => b.getBoundingClientRect().height >= 44)"))
+    page.click('.bs-act button[data-dpmore]'); page.wait_for_timeout(300)
+    check('expanding shows prices and nearby', 'Prices by size' in txt(page, '.bs') and 'Secondary market' in txt(page, '.bs'))
+    check('sheet stays inside the screen', page.evaluate("document.querySelector('.bs').getBoundingClientRect().height <= innerHeight * 0.75 && document.documentElement.scrollWidth <= innerWidth"))
+    open_(page, f'#p={nopos}'); check('phone: missing-position development shows prices and the plain note', 'Not on the map yet' in txt(page, '.bs'))
+    open_(page); page.fill('#q', 'bishan'); check('phone: search results open under the search box', page.locator('.sugg button').count() > 0 and page.evaluate("document.querySelector('.sugg').getBoundingClientRect().bottom <= innerHeight"))
+    real = [e for e in errs if 'onemap' not in e.lower()]; check('phone: no console errors', not real, real[:3]); ctx.close()
+    # ---------------------------------------------------------------- phones: the selected dot and its name stay above the sheet
+    print('phone: selected dot and name stay in the usable area')
+    VIS = """() => { const q = (s) => { const e = document.querySelector(s); if (!e) return null; const b = e.getBoundingClientRect(); return { l: b.left, t: b.top, r: b.right, b: b.bottom }; };
+      const d = q('.selm'), c = q('.selchip'), sh = q('.bs'), h = q('.gw-nav'); if (!d || !c || !sh || !h) return 'missing';
+      if (d.b > sh.t - 12) return 'dot behind the sheet: ' + d.b + ' vs ' + sh.t; if (c.t < h.b + 4) return 'name under the header'; if (c.l < 0 || c.r > innerWidth) return 'name off the side'; return 'ok'; }"""
+    for (w, h) in ((390, 844), (360, 640), (320, 568), (430, 932)):
+        ctx = br.new_context(viewport={'width': w, 'height': h}, device_scale_factor=2, has_touch=True, is_mobile=True); page, errs = fresh(ctx)
+        for dev in ('jadescape', thin):
+            open_(page, '#p=' + dev); check(f'{w}x{h} {dev}: dot and name clear of the sheet (peek)', page.evaluate(VIS) == 'ok', page.evaluate(VIS))
+            page.click('[data-dpmore]'); page.wait_for_timeout(300); check(f'{w}x{h} {dev}: dot and name clear of the sheet (expanded)', page.evaluate(VIS) == 'ok', page.evaluate(VIS))
+        open_(page, '#p=jadescape'); page.set_viewport_size({'width': w, 'height': max(480, h - 120)}); page.wait_for_timeout(500)
+        check(f'{w}x{h}: still clear after the screen height changes', page.evaluate(VIS) == 'ok', page.evaluate(VIS)); ctx.close()
+    # ---------------------------------------------------------------- connection to Research, and unpositioned developments
+    print('research connection')
+    ctx = br.new_context(viewport={'width': 1440, 'height': 900}); page, errs = fresh(ctx)
+    page.goto(URL.replace('map/', '') + '#/'); page.wait_for_selector('.kpr-onmap a[href="map/"]', timeout=20000)
+    check('Research home offers the map under the search box', 'map' in txt(page, '.kpr-onmap a').lower() and page.locator('.kpr-onmap').count() == 1)
+    page.goto(URL.replace('map/', '') + '#/p/jadescape'); page.wait_for_selector('.kpr-onmap a[href^="map/#p="]', timeout=20000)
+    check('a Research project page links to that project on the map', page.get_attribute('.kpr-onmap a', 'href') == 'map/#p=jadescape', page.get_attribute('.kpr-onmap a', 'href'))
+    check('the link appears once', page.locator('.kpr-onmap').count() == 1)
+    page.click('.kpr-onmap a'); page.wait_for_function('window.KPT_MAP_APP && window.KPT_MAP_APP.evReady', timeout=20000)
+    check('the link lands on the map with that development selected', 'Jadescape' in txt(page, '.dp h2') and page.evaluate('location.pathname').endswith('/research/map/'))
+    check('map uses the shared Groundwork header: brand, Research marked current, same menu', 'GROUNDWORK' in txt(page, '.gw-nav .gw-home b') and page.get_attribute('.gw-nav a[data-kpt-nav=research]', 'aria-current') == 'page' and page.get_attribute('.gw-nav .gw-home', 'href') == '../../' and page.locator('.gw-nav details.gw-menu').count() == 1)
+    check('map uses the shared Groundwork footer with the URA attribution', page.locator('footer.gw-foot').count() == 1 and 'Singapore Open Data Licence' in txt(page, 'footer.gw-foot') and 'Ken Property Tools' not in txt(page, 'body'))
+    check('the shared header sits above the map and the map fills the rest of the screen', page.evaluate("(() => { const h = document.querySelector('.gw-nav').getBoundingClientRect(), m = document.querySelector('.mapstage').getBoundingClientRect(); return Math.abs(h.bottom - m.top) < 1 && m.height >= innerHeight - h.height - 1; })()"))
+    page.click('.gw-nav details.gw-menu summary'); page.wait_for_timeout(300)
+    check('the shared menu opens above the map controls', page.evaluate("(() => { const m = document.querySelector('.gw-nav details.gw-menu[open] .gw-mx, .gw-nav details.gw-menu[open] [data-gw-menu-body]'); if (!m) return false; const r = m.getBoundingClientRect(), e = document.elementFromPoint(r.left + r.width / 2, r.top + Math.min(40, r.height / 2)); return !!e && !!e.closest('.gw-nav'); })()"))
+    page.keyboard.press('Escape'); page.wait_for_timeout(200)
+    check('Open Research page returns to the same project', page.get_attribute('.dp-foot a.btn', 'href') == '../#/p/jadescape')
+    # a development with no URA position keeps the map where the visitor had it
+    zoom0 = page.evaluate('KPT_MAP_APP.view.get().getZoom()'); c0 = page.evaluate('(() => { const c = KPT_MAP_APP.view.get().getCenter(); return [c.lat, c.lng]; })()')
+    page.fill('#q', 'parktown residence'); page.keyboard.press('Enter'); page.wait_for_timeout(400)
+    check('picking a development with no position shows its prices and the plain note', 'Not on the map yet' in txt(page, '.dp') and 'Prices by size' in txt(page, '.dp'))
+    c1 = page.evaluate('(() => { const c = KPT_MAP_APP.view.get().getCenter(); return [c.lat, c.lng]; })()'); z1 = page.evaluate('KPT_MAP_APP.view.get().getZoom()')
+    check('the map is not reset: same zoom and centre as before', z1 == zoom0 and abs(c1[0] - c0[0]) < 1e-6 and abs(c1[1] - c0[1]) < 1e-6, (zoom0, z1, c0, c1))
+    page.go_back(); page.wait_for_timeout(300); check('back returns to the previous development', 'Jadescape' in txt(page, '.dp h2'))
+    real = [e for e in errs if 'onemap' not in e.lower()]; check('no console errors across Research and the map', not real, real[:3]); ctx.close()
+    # ---------------------------------------------------------------- schools and supermarkets
+    print('schools and supermarkets')
+    ctx = br.new_context(viewport={'width': 1440, 'height': 900}); page, errs = fresh(ctx); open_(page, '#p=jadescape'); page.wait_for_function("document.querySelector('.dp').innerText.includes('Schools')", timeout=10000)
+    check('card shows Schools and Shops & food groups', 'Schools' in txt(page, '.dp') and 'Shops & food' in txt(page, '.dp'))
+    page.fill('#q', 'primary'); check('schools are searchable', 'Schools' in txt(page, '.sugg'), txt(page, '.sugg')[:80])
+    real = [e for e in errs if 'onemap' not in e.lower()]; check('no console errors with the layer on', not real, real[:3]); ctx.close()
+    ctx = br.new_context(viewport={'width': 1440, 'height': 900}); page, errs = fresh(ctx, off=True); open_(page, '#p=jadescape')
+    check('with the layer switched off the page still works: no schools, no error, shorter notice', 'Schools' not in txt(page, '.dp') and 'Food' in txt(page, '.dp') and 'Supermarket Licences' not in txt(page, '#mapSources') and not [e for e in errs if 'onemap' not in e.lower()]); ctx.close()
+    br.close()
+finally:
+    srv.terminate()
+print(f'\n{ok} passed, {fail} failed'); sys.exit(1 if fail else 0)

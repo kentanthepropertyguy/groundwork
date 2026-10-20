@@ -156,6 +156,7 @@
       <p class="kpr-note">Projects with no transactions yet, such as an unsold launch, won't appear.</p>
       <p class="kpr-note">Prefer to browse? <a href="../projects/">See every development</a>, including new launches with sites of their own.</p></section>`;
     if (window.KPTLG) { document.title = 'Research a development — Groundwork'; $app.innerHTML = KPTLG.landingHtml(CFG.total || 0); }
+    { const c = $app.querySelector('#lgCount'); if (c) c.insertAdjacentHTML('afterend', '<p class="lg-fine lg-center kpr-onmap"><a href="map/">Prefer a map? Explore homes and neighbourhoods ›</a></p>'); }
     $app.querySelector('#sb').appendChild(searchBox(null, (id) => { location.hash = '#/p/' + id; }));
     // Arriving from the homepage search: carry the typed name into this search box (it never leaves the browser).
     try { const q0 = new URLSearchParams(location.search).get('q'); const inp = $app.querySelector('#q'); if (q0 && inp && !S.qUsed) { S.qUsed = 1; inp.value = q0.slice(0, 80); inp.dispatchEvent(new Event('input')); } } catch (e) { /* no query */ }
@@ -265,6 +266,7 @@
           document.body.dataset.view = 'project'; document.title = M.name + ' — Research — Groundwork';
           if (window.KPTLG) { let IN = null; try { IN = window.KPTIntel ? KPTIntel.analyse(M, S.rawP, { sizeSqft: S.size || undefined, today: TODAY, monthStart: S.rawM && S.rawM.monthStart }) : null; } catch (e) { IN = null; } $app.innerHTML = KPTLG.projectHtml(M, { S, IN, root: '../' }); } else $app.innerHTML = projectHtml(M);
           wireCommon(M, 'project'); sizeEvent(M, 'project');
+          { const lead = $app.querySelector('[data-lg-lead]') || $app.querySelector('.kpr-meta'); if (lead) lead.insertAdjacentHTML('afterend', '<p class="lg-fine lg-center kpr-onmap"><a href="map/#p=' + encodeURIComponent(M.id) + '">See what is around it on the map ›</a></p>'); }
           if (window.KPTV2) KPTV2.afterProject(M, $app, d.p, d.m, { R, searchBox, track, onPick: (x) => { location.hash = '#/p/' + x; }, onCompare: (x) => { S.win = null; location.hash = '#/compare/' + id + '/' + x; } });
           const evd = document.getElementById('evidence'); if (evd) evd.addEventListener('toggle', () => { S.evOpen = evd.open; });
           $app.querySelectorAll('[data-sale]').forEach((b) => b.addEventListener('click', () => { location.hash = R.buildHash({ view: 'project', id, sale: b.dataset.sale }); }));
