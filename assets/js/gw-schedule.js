@@ -18,6 +18,10 @@
   const num = (x) => (typeof x === 'number' && isFinite(x) ? x : null);
   const pos = (x) => num(x) !== null && x > 0;
   const KINDS = { new: 1, ec: 1, completed: 1 };
+  // No option date (undated): the schedule is worked out from a fixed reference day that stands for "the option date". It is never shown as a date: every
+  // timing is read back as "N weeks / N months after the option" (after()). The first of a month, so no month-end clamp can move a payment.
+  const UNDATED_REF = '2000-01-01';
+  const ENTITY_KINDS = 'A company or other entity can buy a new launch or a completed private home here. An EC is sold only to eligible households, so it is not planned for a company.';
   const K = R.plannerConventions, NL = K.newLaunch, CP = K.completed, FS = K.finalStage;
   /* ---------------- dates (UTC, ISO yyyy-mm-dd): the same arithmetic the engine uses for its dates ---------------- */
   const D = (s) => (s instanceof Date ? new Date(s.getTime()) : C.parseDate(s));
@@ -27,6 +31,16 @@
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const day = (s) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? +m[3] + ' ' + MON[+m[2] - 1] + ' ' + m[1] : (s || ''); };
   const mon = (s) => { const m = /^(\d{4})-(\d{2})/.exec(s || ''); return m ? MON[+m[2] - 1] + ' ' + m[1] : (s || ''); };
+  // how long after the option a date falls, in whole weeks (up to 13 weeks) or months, for an undated schedule; null for a date on or before the option
+  const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+  function after(s) {
+    const d = D(s), r = D(UNDATED_REF); if (!d || !r) return '';
+    const days = Math.round((d.getTime() - r.getTime()) / 86400000);
+    if (days <= 0) return 'the option date';
+    if (days < 14) return plural(days, 'day') + ' after the option';
+    if (days <= 91) return plural(Math.round(days / 7), 'week') + ' after the option';
+    return plural(Math.round(days / 30.4375), 'month') + ' after the option';
+  }
 
   /* ---------------- the schedule ---------------- */
   // i: { kind: 'new'|'ec'|'completed', price, otp: 'YYYY-MM-DD', buyers?: [{ res, owned }] (default: one Singapore Citizen who owns no home, said in `assumedBuyer`),
@@ -36,17 +50,19 @@
     i = i || {};
     const bad = [];
     const kind = i.kind || 'new'; if (!KINDS[kind]) bad.push({ field: 'kind', text: 'kind must be new, ec or completed.' });
-    const otp = D(i.otp); if (!otp) bad.push({ field: 'otp', text: 'Option date must be a valid date (YYYY-MM-DD).' });
+    const entity = i.entity === true, undated = i.undated === true;
+    if (entity && kind === 'ec') bad.push({ field: 'kind', text: ENTITY_KINDS });
+    const otp = undated ? D(UNDATED_REF) : D(i.otp); if (!otp) bad.push({ field: 'otp', text: 'Option date must be a valid date (YYYY-MM-DD).' });
     if (num(i.price) !== null && (i.price < 0 || i.price > C.LIMITS.money.max)) bad.push({ field: 'price', text: i.price < 0 ? 'Amounts can’t be negative.' : C.LIMITS.money.text });
     if (bad.length) return { ok: false, missing: [], invalid: bad };
-    const assumedBuyer = i.buyers === undefined;
-    const given = (assumedBuyer ? [{ res: 'SC', owned: 0 }] : (i.buyers || [])).filter(Boolean);
-    const need = []; if (!pos(i.price)) need.push('price'); if (!given.length) need.push('buyers');
+    const assumedBuyer = !entity && i.buyers === undefined;
+    const given = entity ? [] : (assumedBuyer ? [{ res: 'SC', owned: 0 }] : (i.buyers || [])).filter(Boolean);
+    const need = []; if (!pos(i.price)) need.push('price'); if (!entity && !given.length) need.push('buyers');
     if (need.length) return { ok: false, missing: need, invalid: [] };
     const removes = !(i.removesOwnership === false);
     const buyers = given.map((b) => ({ res: b.res, owned: i.order === 'sell' && removes ? Math.max(0, Math.min(2, +b.owned) - 1) : +b.owned }));
     const P = i.price;
-    const duty = C.stampDuty({ price: P, kind: kind === 'ec' ? 'ec' : 'private', buyers });
+    const duty = C.stampDuty({ price: P, kind: kind === 'ec' ? 'ec' : 'private', buyers, entity });
     if (!duty.ok) return duty;
     const dates = i.dates || {}, mode = dates.mode === 'spread' ? 'spread' : 'grouped';
     const ev = [], assumptions = [];
@@ -83,7 +99,7 @@
     ev.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0) || (a.k - b.k));
     const events = ev.map((e) => { const o = Object.assign({}, e); delete o.k; o.basis = basisOf(o, kind); return o; });
     const total = events.reduce((s, e) => s + e.amount, 0);
-    return { ok: true, version: VERSION, kind, price: P, otp: iso(otp), assumedBuyer, events, duty: { bsd: duty.bsd, absd: duty.absd, absdRate: duty.absdRate, total: duty.total, notes: duty.notes, remissions: duty.remissions, date: iso(dutyDate) }, totals: { amount: Math.round(total * 100) / 100 }, assumptions, conventions: K, rulesChecked: R.checked };
+    return { ok: true, version: VERSION, kind, price: P, otp: iso(otp), entity, undated, assumedBuyer, events, duty: { bsd: duty.bsd, absd: duty.absd, absdRate: duty.absdRate, total: duty.total, notes: duty.notes, remissions: duty.remissions, date: iso(dutyDate) }, totals: { amount: Math.round(total * 100) / 100 }, assumptions, conventions: K, rulesChecked: R.checked };
   }
 
   /* ---------------- the basis of each date ---------------- */
@@ -105,22 +121,22 @@
   }
   const BASIS_TAG = { rule: 'By rule', developer: 'From developer', earliest: 'Earliest', estimate: 'Estimated', illustration: 'Illustration', assumption: 'Your date' };
   // One plain sentence for a payment's date. Only a rule date is "due"; an estimate, an earliest date or an illustration is never called a deadline.
-  function dateSentence(e, kind) {
-    const b = e.basis || basisOf(e, kind || 'new'), d = day(e.date);
+  function dateSentence(e, kind, undated) {
+    const b = e.basis || basisOf(e, kind || 'new'), un = undated === true, d = un ? after(e.date) : day(e.date), m = un ? after(e.date) : mon(e.date);
     let s;
     if (b === 'rule') {
-      if (e.id === 'otp') s = 'Paid on the option date you chose, under the Housing Developers Rules.';
-      else if (e.id === 'snp') s = 'Due by ' + d + ', the latest date under the Housing Developers Rules (within 8 weeks of the option).';
-      else if (e.id === 'bsd' || e.id === 'absd') s = 'Due by ' + d + ' under IRAS’s 14-day rule after ' + (kind === 'completed' ? 'you exercise the option' : 'signing the S&P') + '.';
+      if (e.id === 'otp') s = un ? 'Paid on the option date, under the Housing Developers Rules.' : 'Paid on the option date you chose, under the Housing Developers Rules.';
+      else if (e.id === 'snp') s = un ? 'Due within 8 weeks of the option, the latest under the Housing Developers Rules.' : 'Due by ' + d + ', the latest date under the Housing Developers Rules (within 8 weeks of the option).';
+      else if (e.id === 'bsd' || e.id === 'absd') s = (un ? 'Due within 14 days of ' : 'Due by ' + d + ' under IRAS’s 14-day rule after ') + (kind === 'completed' ? 'you exercise the option' : 'signing the S&P') + (un ? ' (IRAS), so by ' + d + ' at the latest.' : '.');
       else s = 'Due by ' + d + ' under the rules.';
     } else if (b === 'developer') s = 'On the date you entered from the developer’s schedule. Check it against your S&P.';
     else if (b === 'earliest') s = 'From ' + d + ', the earliest this stage can be called. The developer’s notice sets the real date, which may be later.';
     else if (b === 'illustration') s = 'An illustration, not a timetable.';
     else if (b === 'assumption') s = 'On the date you entered. It is not guaranteed.';
     else if (e.id === 'option') s = 'On your option date. The 1% amount is a planning convention; your option sets the actual figure.';
-    else if (e.id === 'exercise') s = 'Around ' + d + ', 14 days after the option: a planning convention. Your option sets the actual terms.';
-    else if (e.id === 'completion') s = 'Around ' + mon(e.date) + ', an illustrative date, not a deadline. Your S&P sets the actual date.';
-    else s = 'Around ' + mon(e.date) + ', an illustrative date, not a deadline.';
+    else if (e.id === 'exercise') s = un ? 'Within 14 days of the option: a planning convention. Your option sets the actual terms.' : 'Around ' + d + ', 14 days after the option: a planning convention. Your option sets the actual terms.';
+    else if (e.id === 'completion') s = 'Around ' + m + ', an illustrative date, not a deadline. Your S&P sets the actual date.';
+    else s = 'Around ' + m + ', an illustrative date, not a deadline.';
     if (e.provisional) s += ' Provisional: shown as one payment at the earliest trigger.';
     return s;
   }
@@ -137,13 +153,13 @@
     const pays = r.events.filter((e) => e.type === 'pay'), hit = pays.filter((e) => e.uncovered > 0)[0] || null;
     const h = r.headline, endOpen = h.uncoveredEnd, stageTotal = r.totals.uncovered;
     const out = { ok: true, any: h.peak > 0, first: null, monthly: false, onPayments: stageTotal, stillOpenAtEnd: endOpen, horizonEnd: r.series && r.series.length ? r.series[r.series.length - 1].date : null, coveredOn: h.coveredOn || null, coveredBy: h.coveredBy || null, firstGap: h.firstGap || null, peak: h.peak, peakAt: h.peakAt, peakCause: h.peakCause };
-    if (hit) { const b = hit.basis || basisOf(hit, r.kind); out.first = { id: hit.id, label: hit.label, date: hit.date, amount: hit.uncovered, basis: b, tag: BASIS_TAG[b], provisional: !!hit.provisional, sentence: dateSentence(Object.assign({}, hit, { basis: b }), r.kind) }; }
+    if (hit) { const b = hit.basis || basisOf(hit, r.kind); out.first = { id: hit.id, label: hit.label, date: hit.date, amount: hit.uncovered, basis: b, tag: BASIS_TAG[b], provisional: !!hit.provisional, sentence: dateSentence(Object.assign({}, hit, { basis: b }), r.kind, r.undated) }; }
     else if (h.firstGap) out.monthly = true;
     return out;
   }
   // the engine's events with each payment's date basis, tag and sentence attached (for the table)
   function annotate(r) {
-    return r.events.map((e) => { if (e.type !== 'pay') return Object.assign({}, e); const b = basisOf(e, r.kind); return Object.assign({}, e, { basis: b, tag: BASIS_TAG[b], sentence: dateSentence(Object.assign({}, e, { basis: b }), r.kind) }); });
+    return r.events.map((e) => { if (e.type !== 'pay') return Object.assign({}, e); const b = basisOf(e, r.kind); return Object.assign({}, e, { basis: b, tag: BASIS_TAG[b], sentence: dateSentence(Object.assign({}, e, { basis: b }), r.kind, r.undated) }); });
   }
   // ---- ONE cross-check, kept apart from everything above: the other documented way to count progressive instalments (added 18 Oct 2026) ----
   // The audited engine charges, after each release, the level instalment on everything released so far over the FULL tenure (the same figure a mortgage
@@ -166,5 +182,5 @@
     }
     return { steps, final: steps[steps.length - 1].instalment };
   }
-  return { schedule, basisOf, dateSentence, shortfall, annotate, tenureFromFirstRelease, BASIS_TAG, VERSION, day, mon };
+  return { schedule, basisOf, dateSentence, shortfall, annotate, tenureFromFirstRelease, BASIS_TAG, VERSION, day, mon, after, UNDATED_REF };
 });

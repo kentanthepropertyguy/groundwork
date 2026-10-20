@@ -17,7 +17,9 @@
 })(typeof self !== 'undefined' ? self : this, function (R, C) {
   'use strict';
   if (!R || !C || typeof C.progressive !== 'function' || typeof C.stampDuty !== 'function') throw new Error('GW_TIMELINE needs GW_RULES and GW_CALC');
-  const VERSION = 'R2.6-2026-10-15';
+  const VERSION = 'R2.7-2026-10-21';
+  // No option date: the timeline runs from a fixed reference day that stands for "the option date" (the same one the schedule adapter uses). It is never shown as a date.
+  const UNDATED_REF = '2000-01-01';
   const num = (x) => (typeof x === 'number' && isFinite(x) ? x : null);
   const pos = (x) => num(x) !== null && x > 0;
   const nn = (x) => (num(x) !== null && x >= 0 ? x : 0);
@@ -78,13 +80,15 @@
     i = i || {};
     const bad = [];
     const kind = i.kind || 'new'; if (!KINDS[kind]) bad.push({ field: 'kind', text: 'kind must be new, ec or completed.' });
-    if (i.entity) bad.push({ field: 'entity', text: 'The Planner is for individual buyers; company purchases use the New launch payments calculator.' });
-    const otp = D(i.otp); if (!otp) bad.push({ field: 'otp', text: 'Option date must be a valid date (YYYY-MM-DD).' });
+    const entity = i.entity === true, undated = i.undated === true;
+    if (entity && kind === 'ec') bad.push({ field: 'kind', text: 'A company or other entity can buy a new launch or a completed private home here. An EC is sold only to eligible households, so it is not planned for a company.' });
+    if (entity && (i.order || 'none') !== 'none') bad.push({ field: 'order', text: 'A company purchase is planned with no home to sell.' });
+    const otp = undated ? D(UNDATED_REF) : D(i.otp); if (!otp) bad.push({ field: 'otp', text: 'Option date must be a valid date (YYYY-MM-DD).' });
     ['price', 'cash', 'cpf', 'saveMo', 'cpfMo'].forEach((k) => { if (num(i[k]) !== null && (i[k] < 0 || i[k] > C.LIMITS.money.max)) bad.push({ field: k, text: i[k] < 0 ? 'Amounts can’t be negative.' : C.LIMITS.money.text }); });
     if (num(i.age) !== null && (i.age < C.LIMITS.age.min || i.age > C.LIMITS.age.max)) bad.push({ field: 'age', text: C.LIMITS.age.text });
     if (num(i.ratePct) !== null && (i.ratePct < C.LIMITS.ratePct.min || i.ratePct > C.LIMITS.ratePct.max)) bad.push({ field: 'ratePct', text: C.LIMITS.ratePct.text });
     if (num(i.years) !== null && (i.years < C.LIMITS.years.min || i.years > C.LIMITS.years.max)) bad.push({ field: 'years', text: C.LIMITS.years.text });
-    const order = i.order || 'buy'; if (['buy', 'sell', 'none'].indexOf(order) < 0) bad.push({ field: 'order', text: 'order must be buy (buy first), sell (sell first) or none (no sale).' });
+    const order = entity ? 'none' : (i.order || 'buy'); if (['buy', 'sell', 'none'].indexOf(order) < 0) bad.push({ field: 'order', text: 'order must be buy (buy first), sell (sell first) or none (no sale).' });
     if (order !== 'none' && i.flatLoan !== undefined && FLAT_LOAN_STATES.indexOf(i.flatLoan) < 0) bad.push({ field: 'flatLoan', text: 'flatLoan must be one of: ' + FLAT_LOAN_STATES.join(', ') + '.' });
     const sale = i.sale || {};
     if (order === 'buy') { if (!pos(sale.month) && !D(sale.date)) bad.push({ field: 'sale', text: 'Buy-first needs the month (after the option) or the date when the flat sale completes.' }); }
@@ -92,9 +96,9 @@
     if (i.rent && num(i.rent.monthly) !== null && i.rent.monthly < 0) bad.push({ field: 'rent', text: 'Rent can’t be negative.' });
     if (bad.length) return invalid(bad);
     const need = [];
-    if (!pos(i.price)) need.push('price'); if (!pos(i.age)) need.push('age'); if (!(i.buyers || []).filter(Boolean).length) need.push('buyers');
+    if (!pos(i.price)) need.push('price'); if (!entity && !pos(i.age)) need.push('age'); if (!entity && !(i.buyers || []).filter(Boolean).length) need.push('buyers');
     if (need.length) return missing(need);
-    return { ok: true, kind, otp, order };
+    return { ok: true, kind, otp, order, entity, undated };
   }
 
   /* ---------------- the engine ---------------- */
@@ -108,13 +112,15 @@
   //      horizonMonths }
   function timeline(i) {
     const v = validate(i); if (!v.ok) return v;
-    const { kind, otp, order } = v;
+    const { kind, otp, order, entity, undated } = v;
     const P = i.price, years0 = pos(i.years) ? i.years : undefined;   // no tenure given: GW_CALC.progressive picks the longest one that keeps the standard limit at this age
     const assumptions = [], warnings = [];
 
     // --- loan count and LTV: counted by GW_CALC.progressive from (loans, age, years) — MAS table via gw-rules ---
     const flatLoan = order === 'sell' ? 'sold' : (order === 'none' ? 'none' : (i.flatLoan || 'outstanding'));
     if (order === 'buy' && !i.flatLoan) assumptions.push({ id: 'flat-loan-default', text: 'Flat loan status not given: assumed still outstanding at the bank’s assessment (conservative).' });
+    if (entity) assumptions.push({ id: 'entity', text: 'A company or other entity can borrow up to 15% of the price (MAS). It has no CPF and no income test here, so the rest is cash. Its stamp duty and ABSD are worked out on the entity rates.' });
+    if (undated) assumptions.push({ id: 'undated', text: 'No option date entered: every timing is counted from the option date, whenever it falls. Nothing here is a calendar date.' });
     // Notice 632's exclusions for a contracted sale and for an HDB undertaking are not verified against the Notice itself, so they do not lift the headline: the loan is counted as
     // outstanding unless the caller states the bank has accepted the exclusion (flatLoanAccepted: true). The figures if the bank accepts it are returned beside the headline.
     const unverifiedExcl = order === 'buy' && (flatLoan === 'contracted' || flatLoan === 'undertaking');
@@ -127,11 +133,11 @@
 
     // --- buyers for duty: sell-first completes the flat sale before the purchase, so each buyer who owned it owns one fewer ---
     const removes = !(i.sale && i.sale.removesOwnership === false);
-    const buyers = (i.buyers || []).filter(Boolean).map((b) => ({ res: b.res, owned: order === 'sell' && removes ? Math.max(0, Math.min(2, +b.owned) - 1) : +b.owned }));
+    const buyers = entity ? [] : (i.buyers || []).filter(Boolean).map((b) => ({ res: b.res, owned: order === 'sell' && removes ? Math.max(0, Math.min(2, +b.owned) - 1) : +b.owned }));
     if (order === 'sell' && removes) assumptions.push({ id: 'sold-ownership', text: 'Sold first: the flat is no longer owned when the new home is bought, so it is not counted for ABSD.' });
 
     // --- the stage split and duty come from the live engine, unchanged ---
-    const prog = C.progressive({ price: P, age: i.age, years: years0, ratePct: num(i.ratePct) === null ? undefined : i.ratePct, loans, cpf: undefined, kind: kind === 'ec' ? 'ec' : 'private', buyers, loanCap: loanCapIn });
+    const prog = C.progressive({ price: P, age: entity ? undefined : i.age, years: years0, ratePct: num(i.ratePct) === null ? undefined : i.ratePct, loans, cpf: undefined, kind: kind === 'ec' ? 'ec' : 'private', buyers, loanCap: loanCapIn, entity });
     if (!prog.ok) return prog;
     const years = prog.years;
     const duty = prog.duty; if (!duty.ok) return duty;
@@ -217,7 +223,7 @@
     const ORDER = { pay: 0, in: 1, month: 2 };
     ev.forEach((e, k) => { e.k = k; });
     ev.sort((a, b) => (a.date - b.date) || (ORDER[a.type] - ORDER[b.type]) || (a.k - b.k));
-    let cash = nn(i.cash) + (order === 'sell' ? nn((i.sale || {}).cash) : 0), cpf = nn(i.cpf) + (order === 'sell' ? nn((i.sale || {}).cpf) : 0);
+    let cash = nn(i.cash) + (order === 'sell' ? nn((i.sale || {}).cash) : 0), cpf = entity ? 0 : nn(i.cpf) + (order === 'sell' ? nn((i.sale || {}).cpf) : 0);
     const cpfForInstal = i.payInstalmentFromCpf !== false;
     let owedCash = 0, owedFlex = 0, drawn = 0, peak = 0, peakAt = null, peakCause = null, firstGap = null, coveredOn = null, coveredBy = null, instalNow = 0;
     const series = [{ date: iso(otp), cash: round2(cash), cpf: round2(cpf), uncovered: 0, drawn: 0, instalment: 0 }];
@@ -236,7 +242,7 @@
       } else if (e.type === 'in') {
         cash += e.cashIn; cpf += e.cpfIn; if (owedCash + owedFlex > 0) settle(e.id === 'sale' ? 'the sale proceeds' : e.id === 'refund' ? 'the ABSD refund' : e.label.toLowerCase(), e.date);
       } else {
-        cash += nn(i.saveMo); cpf += nn(i.cpfMo);
+        cash += nn(i.saveMo); if (!entity) cpf += nn(i.cpfMo);
         const rent = rentMo && e.date < rentUntil ? rentMo : 0; // rent for the months before the keys
         const a = cpfForInstal ? Math.min(cpf, instalNow) : 0; cpf -= a; const b = Math.min(cash, instalNow - a); cash -= b;
         const rc = Math.min(cash, rent); cash -= rc;
@@ -253,7 +259,7 @@
     if (uncoveredEnd > 0) warnings.push({ id: 'uncovered-end', text: 'Payments totalling ' + Math.round(uncoveredEnd) + ' are not covered by any inflow within the horizon.' });
     const headline = { peak: round2(peak), peakAt: peakAt && iso(peakAt), peakCause, firstGap: firstGap && iso(firstGap), coveredOn: uncoveredEnd > 0 ? null : (coveredOn && iso(coveredOn)), coveredBy: uncoveredEnd > 0 ? null : coveredBy, uncoveredEnd };
     const out = {
-      ok: true, version: VERSION, kind, order, price: P, otp: iso(otp), saleDate: saleDate && iso(saleDate), keysDate: iso(keysDate), horizonMonths: horizon,
+      ok: true, version: VERSION, kind, order, entity, undated, price: P, otp: iso(otp), saleDate: saleDate && iso(saleDate), keysDate: iso(keysDate), horizonMonths: horizon,
       loan: Object.assign({}, ltvRow, { loanMax, cashMin, cpfOrCash: prog.cpfOrCash, years, ratePct: rate * 100, stressRatePct: R.stressRate * 100, tenureCapped: prog.tenureCapped, tenureCappedBy: prog.tenureCappedBy, tenureAsked: prog.tenureAsked, tenureAllowed: prog.tenureAllowed }),
       instalment: { final: round2(prog.finalMonthly), finalStress: round2(C.instal(loanMax, Math.max(R.stressRate, rate), years)), basis: 'Instalment at the quoted rate once the loan is fully drawn; the stress figure uses the higher of ' + (R.stressRate * 100) + '% and the quoted rate (MAS Notice 645), for TDSR only.' },
       duty: { bsd: duty.bsd, absd: duty.absd, absdRate: duty.absdRate, total: duty.total, notes: duty.notes, remissions: duty.remissions, date: iso(dutyDate) },
@@ -279,5 +285,5 @@
     ] };
   }
 
-  return { timeline, compare, validate, CONVENTIONS, MAS_LOAN_BASIS, FLAT_LOAN_STATES, VERSION, addMonths, addDays, iso };
+  return { timeline, compare, validate, UNDATED_REF, CONVENTIONS, MAS_LOAN_BASIS, FLAT_LOAN_STATES, VERSION, addMonths, addDays, iso };
 });
