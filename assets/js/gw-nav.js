@@ -13,7 +13,7 @@
 })(typeof self !== 'undefined' ? self : this, function (root) {
   'use strict';
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const MAIN = 'https://kentanthepropertyguy.com/', LAUNCHES = 'https://kentanthepropertyguy.com/#developments';
+  const MAIN = 'https://kentanthepropertyguy.com/', LAUNCHES = 'https://kentanthepropertyguy.com/developments/';
   const ASK_MSG = 'Hi Ken, I’m on Groundwork and would like to talk through my property plans. My situation is ____. (Ref KPT-HOME)';
   const ASK = 'https://wa.me/6590908898?text=' + encodeURIComponent(ASK_MSG);
 
@@ -59,12 +59,12 @@
       t: ['tdsr', 'total debt servicing ratio', 'how much can i borrow', 'borrow', 'borrowing', 'loan limit', 'loan eligibility', 'max loan', 'maximum loan', 'loan amount', 'affordability', 'afford', 'ltv', 'loan to value', 'income', 'debt', 'stress test', 'medium term rate'] },
     { id: 'msr', name: 'HDB and EC loan limit', tag: 'MSR', short: 'For HDB flats and new ECs', href: 'tools/msr/', icon: 'msr', menu: 1, sec: 'tools',
       t: ['msr', 'mortgage servicing ratio', 'hdb loan', 'hdb loan limit', 'ec', 'executive condo', 'executive condominium', 'hfe', 'hdb flat eligibility', 'bto', 'resale flat loan', 'hdb flat loan', 'hdb borrow'] },
-    { id: 'progressive', name: 'New launch payments', tag: 'Progressive payments', short: 'Cash, CPF and loan at each stage', href: 'tools/progressive-payments/', icon: 'progressive', menu: 1, sec: 'tools',
-      t: ['progressive payment', 'progressive payments', 'progressive', 'new launch', 'new launch payment', 'payment schedule', 'under construction', 'uncompleted', 'booking fee', 'option fee', 'developer', 'construction stages', 'stages', 'top', 'temporary occupation permit', 'downpayment', 'down payment', 'cash needed'] },
+    { id: 'progressive', name: 'New launch payments', tag: 'Progressive payments', short: 'A quick split by stage, with no dates', href: 'tools/progressive-payments/', icon: 'progressive', search: 1, sec: 'tools',
+      t: ['progressive payment', 'progressive payments', 'progressive', 'new launch payment', 'payment schedule', 'under construction', 'uncompleted', 'booking fee', 'option fee', 'developer', 'construction stages', 'stages', 'top', 'temporary occupation permit', 'downpayment', 'down payment', 'cash needed', 'company buyer', 'company purchase', 'buying through a company', 'entity'] },
     { id: 'planner', name: 'Planner: what can I afford?', tag: 'Comfortable budget', short: 'Your comfortable budget and the highest the numbers allow', href: 'tools/planner/', icon: 'planner', menu: 1, sec: 'tools',
       t: ['planner', 'what can i afford', 'afford', 'affordability', 'comfortable budget', 'budget', 'how much can i afford', 'highest price', 'cushion', 'new launch budget', 'upgrade budget', 'keep my flat', 'sell first'] },
     { id: 'payment-planner', name: 'Payment timeline', tag: 'Payment dates', short: 'See when and how much you need to pay.', href: 'tools/payment-planner/', icon: 'payment-planner', menu: 1, sec: 'tools',
-      t: ['payment timeline', 'cash flow', 'cashflow', 'timeline', 'planner', 'payment planner', 'shortfall', 'funding gap', 'buy first', 'sell first', 'buy first sell later', 'sell first buy later', 'bridging', 'absd refund', 'when to pay', 'payment dates', 'how much cash do i need', 'cash needed', 'cpf needed', 'upgrade timing'] },
+      t: ['payment timeline', 'new launch payments', 'new launch payment', 'progressive payments', 'progressive payment', 'progressive', 'payment schedule', 'booking fee', 'option fee', 'downpayment', 'down payment', 'under construction', 'construction stages', 'cash flow', 'cashflow', 'timeline', 'planner', 'payment planner', 'shortfall', 'funding gap', 'buy first', 'sell first', 'buy first sell later', 'sell first buy later', 'bridging', 'absd refund', 'when to pay', 'payment dates', 'how much cash do i need', 'cash needed', 'cpf needed', 'upgrade timing'] },
     { id: 'sale-proceeds', name: 'Sale proceeds', tag: 'Cash and CPF back', short: 'What you get back when you sell', href: 'tools/sale-proceeds/', icon: 'sale-proceeds', menu: 1, quick: 1, sec: 'tools',
       t: ['sale proceeds', 'proceeds', 'selling', 'sell', 'sell my flat', 'sell my hdb', 'sell my condo', 'cash proceeds', 'net proceeds', 'cpf refund', 'refund cpf', 'accrued interest', 'cpf accrued interest', 'how much will i get', 'cash from sale', 'agent commission', 'selling costs'] },
     { id: 'ssd', name: 'Selling within 4 years?', tag: 'SSD', short: 'Seller’s Stamp Duty', href: 'tools/ssd/', icon: 'ssd', menu: 1, sec: 'tools',
@@ -108,7 +108,7 @@
   // The three ways in, named the same everywhere (header, menu, homepage, footer, search results).
   const SECTIONS = {
     guide: { name: 'Guide me', href: 'journey/', nav: 'journey', q: 'Not sure where to start?', say: 'Pick your goal. We take you through the right tools, step by step.', ids: ['guide-buy', 'guide-up', 'guide-sell', 'guide-move'] },
-    tools: { name: 'Tools', href: 'tools/', nav: 'tools', q: 'Know what to work out?', say: 'Calculators for stamp duty, loans, sale proceeds and more.', ids: ['planner', 'stamp-duty', 'tdsr', 'msr', 'mortgage', 'progressive', 'payment-planner', 'sale-proceeds', 'ssd', 'hdb-upgrade'] },
+    tools: { name: 'Tools', href: 'tools/', nav: 'tools', q: 'Know what to work out?', say: 'Calculators for stamp duty, loans, sale proceeds and more.', ids: ['planner', 'stamp-duty', 'tdsr', 'msr', 'mortgage', 'payment-planner', 'sale-proceeds', 'ssd', 'hdb-upgrade'] },
     research: { name: 'Research', href: 'research/', nav: 'research', q: 'Looking at a property?', say: 'What homes really sold for, from URA and HDB records.', ids: ['research', 'map', 'worth', 'what-can-i-buy', 'directory', 'sample'] },
   };
   const SEC_ORDER = ['guide', 'tools', 'research'];
