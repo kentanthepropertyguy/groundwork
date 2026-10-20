@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#ffffff">
 <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
 <title>Sale proceeds calculator — Groundwork</title>
-<link rel="stylesheet" href="../../assets/css/gw.css?v=5b7a5df170">
+<link rel="stylesheet" href="../../assets/css/gw.css?v=ff63943bee">
 <link rel="canonical" href="https://tools.kentanthepropertyguy.com/tools/sale-proceeds/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Groundwork">
@@ -37,13 +37,13 @@
   document.querySelectorAll("[data-journey]").forEach(function (a) { a.addEventListener("click", function () { KPT.track("journey_started", { journey: a.dataset.journey }); }); });
   document.querySelectorAll("[data-tool]").forEach(function (a) { a.addEventListener("click", function () { KPT.track("tool_selected", { tool: a.dataset.tool, placement: "calc-sale-proceeds" }); }); });
 </script>
-<script src="../hdb-upgrade/rules.js?v=6f3bcd3b6f"></script>
+<script src="../hdb-upgrade/rules.js?v=2811c5b8ea"></script>
 <script src="../hdb-upgrade/assumptions.js?v=f44ac0d709"></script>
-<script src="../hdb-upgrade/engine.js?v=f8a25c9e95"></script>
-<script src="../../assets/js/gw-rules.js?v=b83e449c84"></script>
-<script src="../../assets/js/gw-calc.js?v=120edf69ab"></script>
+<script src="../hdb-upgrade/engine.js?v=c7b84311cc"></script>
+<script src="../../assets/js/gw-rules.js?v=76345cbc42"></script>
+<script src="../../assets/js/gw-calc.js?v=3ebd7ca341"></script>
 <script src="../../assets/js/gw-money.js?v=d0c6fd887b"></script>
-<script src="../../assets/js/gw-calc-ui.js?v=69f45b238b"></script>
+<script src="../../assets/js/gw-calc-ui.js?v=3e21d1d864"></script>
 <script>addEventListener("load", function () { if (window.KPT_RULES && window.KPT_ASSUMPTIONS && window.KPT_HDB && window.GW_RULES && window.GW_CALC && window.GWC_UI) return; var b = document.querySelector("[data-calc]"), o = b && b.querySelector("[data-out]"); if (!o) return; o.innerHTML = '<p class="gw-fine gw-noload" role="alert">The calculator didn’t load completely. Please refresh the page.</p>'; [].forEach.call(b.querySelectorAll("input,select,button"), function (x) { x.disabled = true; }); });</script>
 </body>
 </html>

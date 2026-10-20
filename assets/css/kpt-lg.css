@@ -221,7 +221,7 @@ body.lg #app > .kpr-sugg-h, body.lg #app > .kpr-results{ max-width:680px; }
 body.lg .kpe-hero{ text-align:center; padding:64px 22px 24px; }
 body.lg .kpe-hero .kpt-eyebrow{ color:var(--kpt-gold); font-weight:600; font-size:16px; letter-spacing:-.005em; text-transform:none; }
 body.lg .kpe-hero .kpt-h1{ font-family:var(--kpt-font); font-weight:700; font-size:60px; line-height:1.02; letter-spacing:-.04em; margin:12px 0 0; }
-body.lg .kpe-hero .kpt-lede{ font-size:18px; color:var(--kpt-muted); max-width:56ch; margin:16px auto 0; }
+body.lg .kpe-hero .kpt-lede{ font-size:18px; color:var(--kpt-muted); max-width:var(--gw-measure,56ch); margin:16px auto 0; }
 body.lg .kpe-sec{ max-width:760px; margin:0 auto; padding:16px 22px 48px; }
 body.lg .kpe-input{ width:100%; max-width:none !important; height:60px; border:1.5px solid var(--kpt-ink); border-radius:var(--kpt-pill); padding:0 24px; font-size:19px; font-family:var(--kpt-font); box-sizing:border-box; }
 body.lg .kpe-rows{ display:grid; gap:6px; background:var(--kpt-grey); border-radius:26px; padding:8px; margin-top:14px; }

@@ -164,13 +164,16 @@
       purchaseCosts: A.purchaseCosts, cashAvailable };
     const std = RULES.standardStructure, low = RULES.lowerLtvStructure;
     const stdTenureReg = Math.min(std.maxTenureYears, Math.floor(std.endAgeLimit - ageW));
+    // Bank policy cap (rules.js): a bank loan rarely runs past this age, so the 35-year lower-LTV structure is cut to what the age leaves.
+    const matAge = RULES.bankMaturityAge || Infinity;
+    const lowTenureReg = Math.max(0, Math.min(low.maxTenureYears, Math.floor(matAge - ageW + 1e-9)));
     const tenureCap = A.planningTenureCap;
     const longerYears = A.longerTenureYears || tenureCap;
 
     // ---------------------------------------------------- planning range
     const planScenario = (structure, incomeCap) => {
       const isStd = structure === 'standard';
-      const regTenure = isStd ? stdTenureReg : low.maxTenureYears;
+      const regTenure = isStd ? stdTenureReg : lowTenureReg;
       return runScenario(Object.assign({}, common, {
         incomeCap, reserve: A.reserve, rate: A.planningRate,
         ltv: isStd ? std.ltv : low.ltv,
@@ -238,7 +241,7 @@
         incomeCap: RULES.tdsrCeiling, reserve: 0, rate: RULES.stressRate,
         ltv: isStd ? std.ltv : low.ltv,
         minCashPct: isStd ? std.minCashPct : low.minCashPct,
-        tenureYears: Math.max(0, isStd ? stdTenureReg : low.maxTenureYears),
+        tenureYears: Math.max(0, isStd ? stdTenureReg : lowTenureReg),
         structure,
       }));
     };

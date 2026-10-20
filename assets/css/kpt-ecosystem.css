@@ -5,7 +5,7 @@
 .kpe{ --card:#FFFFFF; --track:#EFEDE6; --r-card:16px; --r-ctl:12px; --shadow:0 1px 2px rgba(22,33,62,.04),0 10px 30px rgba(22,33,62,.06); --warn:#8A5A12; --warn-wash:#FBF3E4; --ok:#2E6B45; --ok-wash:#EAF3EC; }
 .kpe .kpe-hero{ padding:40px 0 6px; }
 .kpe .kpe-hero .kpt-h1{ font-size:44px; line-height:1.1; letter-spacing:-.02em; max-width:20ch; margin-bottom:12px; }
-.kpe .kpe-hero .kpt-lede{ font-size:18px; max-width:52ch; line-height:1.5; }
+.kpe .kpe-hero .kpt-lede{ font-size:18px; max-width:var(--gw-measure,52ch); line-height:1.5; }
 @media (max-width:640px){ .kpe .kpe-hero{ padding:18px 0 0; } .kpe .kpe-hero .kpt-h1{ font-size:32px; } .kpe .kpe-hero .kpt-lede{ font-size:16.5px; } }
 .kpe .kpe-sec{ padding:34px 0 0; }
 .kpe .kpe-sec > h2{ font-family:var(--serif); font-weight:400; font-size:26px; line-height:1.2; margin:0 0 6px; }

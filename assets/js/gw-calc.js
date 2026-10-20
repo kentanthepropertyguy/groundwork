@@ -295,15 +295,45 @@
     const ageUnverified = bs.length > 1 && iwaa !== null && iwaaGross !== null && Math.abs(iwaa - iwaaGross) > 1e-9;
     return { list: bs, gross: G, assessable: AS, iwaa, iwaaGross, iwaaUse, ageUnverified, avgAge, youngest, haircut: G - AS, bad };
   }
+  // Three separate limits on a BANK loan to an individual, never mixed:
+  //   std     the longest tenure that keeps the STANDARD loan limit: within 30 years (25 for an HDB flat) and ending by age 65 (MAS Notice 632);
+  //   max     the longest loan MAS allows: 35 years (30 for an HDB flat);
+  //   ageCap  the latest age a bank usually ends a loan, 75 (bank policy, not MAS: see gw-rules.js), so 75 minus the age.
+  // The tenure used is the one asked for, cut to what is allowed (the shorter of max and ageCap); with none asked for, the standard tenure.
+  // Every figure that depends on tenure (the loan the income supports, the instalment, the loan limit) takes `years` from here.
   function bankTenure(kind, age, wanted) {
     const L = R.bankLtv, std = Math.max(0, Math.min(L.standardTenure[kind], Math.floor(L.endAge - age))), max = L.maxTenure[kind];
-    const years = pos(wanted) ? Math.min(wanted, max) : std;
-    return { std, max, years, lower: years > std, capped: pos(wanted) && wanted > max };
+    const ageCap = Math.max(0, Math.floor(L.maturityAge - age + 1e-9)), allowed = Math.min(max, ageCap);
+    // Left blank: the longest tenure that keeps the standard loan limit. From age 65 there is none (every loan then runs past 65 and takes the lower limit),
+    // so the default is the longest a bank usually lends, never zero: a blank tenure and a typed one must give the same kind of answer.
+    const years = pos(wanted) ? Math.min(wanted, allowed) : (std >= 1 ? std : allowed), capped = pos(wanted) && wanted > allowed;
+    return { std, max, ageCap, allowed, years, defaulted: !pos(wanted), noStd: std < 1, lower: years > std, capped, cappedBy: capped ? (ageCap < max ? 'age' : 'max') : null, maturityAge: L.maturityAge, asked: pos(wanted) ? wanted : null };
+  }
+
+  // The line under a tenure field, in words. It adds no rule: every number is read from bankTenure (std, allowed) and the rules file.
+  // o: { age, std, allowed, chosen (years typed, or 0), joint, entity, hdbLoan, years (HDB loan: the tenure used) }
+  const yrs = (n) => n + (n === 1 ? ' year' : ' years');
+  function tenureNote(o) {
+    const L = R.bankLtv, cap = L.standardTenure.private, max = L.maxTenure.private, ma = L.maturityAge;
+    if (o.hdbLoan) return (o.years ? 'Using ' + yrs(o.years) + ', the longest HDB allows here. ' : '') + 'An HDB loan runs up to ' + R.hdbLoan.maxTenureYears + ' years, ends by age ' + R.hdbLoan.endAge + ' and ends at least ' + R.hdbLoan.leaseBufferYears + ' years before the lease does. A shorter tenure is allowed.';
+    if (o.entity) return 'A company’s loan limit does not depend on the tenure. ' + yrs(cap) + ' is used if you leave this blank; up to ' + yrs(max) + ' is allowed.';
+    if (o.age === null || o.age === undefined || o.std === null || o.std === undefined) return 'Banks can lend for up to ' + yrs(max) + ' and usually end a loan by age ' + ma + ' (lender policy, not a MAS rule). Over ' + cap + ' years, or past age ' + L.endAge + ', the lower loan limit applies. Enter your age to see where that line falls.';
+    const at = (o.joint ? 'At an income-weighted age of ' : 'At age ') + o.age, allowed = o.allowed === undefined ? max : o.allowed;
+    if (allowed < 1) return at + ', banks usually end a loan by age ' + ma + ', so no bank loan tenure fits.';
+    if (o.chosen) {
+      if (o.chosen > allowed) return at + ', banks usually end a loan by age ' + ma + ' (lender policy, not a MAS rule), so ' + yrs(allowed) + ' is the most, and ' + yrs(allowed) + ' is used' + (allowed > o.std ? ' (the lower loan limit applies).' : '.');
+      return o.chosen > o.std ? at + ', ' + yrs(o.std) + ' is the longest that keeps the standard loan limit. ' + yrs(o.chosen) + ' takes the lower limit.' : at + ', ' + yrs(o.chosen) + ' keeps the standard loan limit.';
+    }
+    return o.std >= 1 ? at + ', ' + yrs(o.std) + ' is the longest that keeps the standard loan limit, and is used if you leave this blank. Longer, up to ' + yrs(allowed) + ', is allowed but takes the lower limit.' : at + ', no tenure keeps the standard loan limit, so ' + yrs(allowed) + ', the longest a bank usually lends, is used at the lower limit if you leave this blank. You can enter fewer years.';
   }
 
   // R1.2: MAS Notice 645 para 10(b), table row 5 (residential, OTP on or after 30 Sep 2022): the instalment is tested at the higher of 4% and the
   // thereafter interest rate. Optional i.quotedRatePct (the rate the borrower was quoted); absent, or not above 4%, the 4% floor applies as before.
   const testRate = (i) => (num(i.quotedRatePct) !== null && i.quotedRatePct / 100 > R.stressRate ? i.quotedRatePct / 100 : R.stressRate);
+
+  // When the tenure was left blank and a longer one is allowed, what that longer one would give (it takes the lower loan limit), so the result can say so
+  // in one line instead of the buyer having to find it. null when a tenure was typed or nothing longer is allowed.
+  const longerOf = (t, forNew, sr, loans) => (t.defaulted && t.allowed > t.years ? { years: t.allowed, maxLoan: forNew * AF(sr, t.allowed), ltv: R.bankLtv.lower[Math.min(nn(loans), 2)].ltv } : null);
 
   /* ---------------- 5. TDSR ---------------- */
   // i: { kind: 'private'|'hdb', borrowers: [...], debts, tenure, loans: 0|1|2 }
@@ -318,10 +348,10 @@
     const msrCap = kind === 'hdb' ? R.msr * B.assessable : null, forNewMsr = kind === 'hdb' ? Math.max(0, msrCap - prop) : null;
     const forNew = kind === 'hdb' ? Math.min(forNewTdsr, forNewMsr) : forNewTdsr, binding = kind === 'hdb' && forNewMsr < forNewTdsr ? 'msr' : 'tdsr';
     const t = bankTenure(kind, B.iwaaUse, i.tenure);
-    if (t.years < 1) return { ok: true, noTenure: true, cause: 'age', kind, B, cap, debts, forNew, tenure: t };
+    if (t.years < 1) return { ok: true, noTenure: true, cause: t.allowed < 1 ? 'maturity' : 'age', kind, B, cap, debts, forNew, tenure: t };
     const sr = testRate(i), loan = forNew * AF(sr, t.years), row = (t.lower ? R.bankLtv.lower : R.bankLtv.standard)[Math.min(nn(i.loans), 2)];
     if (loan > LIMITS.loan.max) return invalid([{ field: 'income', text: LIMITS.loan.text }]);
-    return { ok: true, kind, B, cap, debts, prop, forNew, forNewTdsr, forNewMsr, msrCap, binding, overLimit: debts > cap, tenure: t, rate: sr, maxLoan: loan, ltv: row.ltv, minCash: row.minCash, priceAtLtv: loan / row.ltv, msrApplies: kind === 'hdb' };
+    return { ok: true, kind, B, cap, debts, prop, forNew, forNewTdsr, forNewMsr, msrCap, binding, overLimit: debts > cap, tenure: t, rate: sr, maxLoan: loan, ltv: row.ltv, minCash: row.minCash, priceAtLtv: loan / row.ltv, msrApplies: kind === 'hdb', longer: longerOf(t, forNew, sr, i.loans) };
   }
 
   /* ---------------- 6. MSR ---------------- */
@@ -370,12 +400,12 @@
     const kind = sc === 'ec' ? 'private' : 'hdb', t = bankTenure(kind, B.iwaaUse, i.tenure);
     const msrCap = R.msr * B.assessable, tdsrCap = R.tdsr * B.assessable;
     const forNewMsr = Math.max(0, msrCap - prop), forNewTdsr = Math.max(0, tdsrCap - prop - other), forNew = Math.min(forNewMsr, forNewTdsr);
-    if (t.years < 1) return { ok: true, noTenure: true, cause: 'age', scenario: sc, B, rate: R.stressRate, tenure: t, msrCap, tdsrCap, prop, other, forNew, maxLoan: 0, notes };
+    if (t.years < 1) return { ok: true, noTenure: true, cause: t.allowed < 1 ? 'maturity' : 'age', scenario: sc, B, rate: R.stressRate, tenure: t, msrCap, tdsrCap, prop, other, forNew, maxLoan: 0, notes };
     const sr = testRate(i), loan = forNew * AF(sr, t.years), row = (t.lower ? R.bankLtv.lower : R.bankLtv.standard)[Math.min(nn(i.loans), 2)];
     if (loan > LIMITS.loan.max) return invalid([{ field: 'income', text: LIMITS.loan.text }]);
     if (sc === 'ec') notes.push({ id: 'ec-ceiling', text: 'New EC buyers have a household income ceiling: $16,000 a month, or $18,000 for EC sites whose land tender closed on or after 24 Aug 2026. MSR applies to ECs bought from the developer.' });
-    if (t.capped) notes.push({ id: 'capped', text: 'Tenure capped at ' + t.max + ' years, the MAS maximum here.' });
-    return { ok: true, scenario: sc, B, rate: sr, tenure: t, msrCap, tdsrCap, prop, other, forNewMsr, forNewTdsr, forNew, maxLoan: loan, ltv: row.ltv, minCash: row.minCash, priceAtLtv: loan / row.ltv, binding: forNewMsr <= forNewTdsr ? 'msr' : 'tdsr', notes };
+    if (t.capped) notes.push({ id: 'capped', text: t.cappedBy === 'age' ? 'Tenure capped at ' + t.allowed + ' years: banks usually end a loan by age ' + R.bankLtv.maturityAge + ' (lender policy, not a MAS rule).' : 'Tenure capped at ' + t.max + ' years, the MAS maximum here.' });
+    return { ok: true, scenario: sc, B, rate: sr, tenure: t, msrCap, tdsrCap, prop, other, forNewMsr, forNewTdsr, forNew, maxLoan: loan, ltv: row.ltv, minCash: row.minCash, priceAtLtv: loan / row.ltv, binding: forNewMsr <= forNewTdsr ? 'msr' : 'tdsr', notes, longer: longerOf(t, forNew, sr, i.loans) };
   }
 
   /* ---------------- 7. Progressive payments (uncompleted private home or EC) ---------------- */
@@ -388,7 +418,10 @@
     // no tenure given: the longest one that keeps the standard limit at this age (30 years or less AND ending by 65); where there is none (65 or over) the
     // 30-year convention applies and takes the lower limit, so a standard limit is never shown for a loan that runs past 65
     const stdNow = i.entity ? null : Math.max(0, Math.min(R.bankLtv.standardTenure.private, Math.floor(R.bankLtv.endAge - i.age + 1e-9)));
-    const P = i.price, wanted = pos(i.years) ? i.years : (stdNow >= 1 ? stdNow : R.bankLtv.standardTenure.private), years = Math.min(wanted, R.bankLtv.maxTenure.private);
+    // a bank usually ends a loan by age 75 (bank policy, not MAS): the tenure is cut to what that leaves, whether typed or not. A company has no age, so no such cut.
+    const ageCap = i.entity ? Infinity : Math.max(0, Math.floor(R.bankLtv.maturityAge - i.age + 1e-9)), allowed = Math.min(R.bankLtv.maxTenure.private, ageCap);
+    if (!i.entity && allowed < 1) return invalid([{ field: 'age', text: 'Banks usually end a loan by age ' + R.bankLtv.maturityAge + ', so no bank loan tenure fits at this age.' }]);
+    const P = i.price, wanted = pos(i.years) ? i.years : (stdNow >= 1 ? stdNow : (i.entity ? R.bankLtv.standardTenure.private : allowed)), years = Math.min(wanted, allowed);
     // MAS Notice 632: a tenure over 30 years, or a loan running past age 65, takes the lower limit (A2-02); a company borrower is
     // limited to 15% and has no CPF
     const pastAge = !i.entity && i.age + years > R.bankLtv.endAge, longTenure = years > R.bankLtv.standardTenure.private;
@@ -414,8 +447,10 @@
     });
     const sum = (k) => stages.reduce((s, x) => s + x[k], 0);
     const upfront = stages[0].amount + stages[1].amount + (duty.ok ? duty.total : 0);
+    // tenure left blank and a longer one allowed: what it would give, at the lower limit (one line on the result; not applied)
+    const longer = !i.entity && !pos(i.years) && !i._noLonger && allowed > years ? (() => { const x = progressive(Object.assign({}, i, { years: allowed, _noLonger: true })); return x.ok ? { years: x.years, ltv: x.ltv, loanMax: x.loanMax, finalMonthly: x.finalMonthly } : null; })() : null;
     return {
-      ok: true, price: P, ltv: row.ltv, minCash: row.minCash, loanMax, ruleLoanMax, loanCapped, cashMin, cpfOrCash, rate, years, stages, duty, lower, entity: !!i.entity, tenureCapped: wanted > years, autoLower: !i.lowerLtv && lower,
+      ok: true, price: P, ltv: row.ltv, minCash: row.minCash, loanMax, ruleLoanMax, loanCapped, cashMin, cpfOrCash, rate, years, stages, duty, lower, entity: !!i.entity, tenureCapped: wanted > years, tenureCappedBy: wanted > years ? (ageCap < R.bankLtv.maxTenure.private ? 'age' : 'max') : null, tenureAllowed: allowed, maturityAge: R.bankLtv.maturityAge, tenureAsked: pos(i.years) ? i.years : null, defaulted: !pos(i.years), longer, autoLower: !i.lowerLtv && lower,
       lowerWhy: longTenure ? 'tenure' : pastAge ? 'age' : (i.lowerLtv ? 'chosen' : null), age: i.entity ? null : i.age, stdYears,
       totals: { cash: sum('cash'), cpf: sum('cpf'), flex: sum('flex'), loan: sum('loan') }, upfront8wk: upfront,
       finalMonthly: instal(loanMax, rate, years), cpfGiven: cpfLeft !== null,
@@ -507,5 +542,5 @@
   };
   const ASK = (tool) => 'Hi Ken, I’m using the ' + tool + ' on Groundwork and have a question.';
 
-  return { mortgage, stampDuty, bsdLines, ssd, saleProceeds, saleEstimate, cpfInterestEstimate, tdsr, msr, progressive, borrowers, bankTenure, messages, ASK, instal, parseDate: D, parseMoney, parseNum, LIMITS, dutyAt };
+  return { mortgage, stampDuty, bsdLines, ssd, saleProceeds, saleEstimate, cpfInterestEstimate, tdsr, msr, progressive, borrowers, bankTenure, tenureNote, messages, ASK, instal, parseDate: D, parseMoney, parseNum, LIMITS, dutyAt };
 });

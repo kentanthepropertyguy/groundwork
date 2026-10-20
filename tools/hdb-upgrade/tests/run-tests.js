@@ -22,7 +22,8 @@ const PROFILES = [
     exp: { state: 'single', low: 1.39, high: 1.39, reg: 1.56, regLonger: false, longer: null, diag: 'cash' } },
   { name: '2 Strong cash / moderate income',
     input: sc({ salePrice: 1100000, outstandingLoan: 0, cashSavings: 150000, buyers: [{ age: 45, income: 6000 }, { age: 43, income: 4500 }] }),
-    exp: { state: 'standard', low: 1.72, high: 1.88, reg: 2.43, regLonger: true, longer: 1.99, diag: 'income' } },
+    // reg was 2.43 on a 35-year loan, which ends at age 79 for this couple; the bank maturity age (75) leaves 30 years, so 2.34. Recomputed with this engine at 30 years (the other profiles are unchanged).
+    exp: { state: 'standard', low: 1.72, high: 1.88, reg: 2.34, regLonger: true, longer: 1.99, diag: 'income' } },
   { name: '3 Older buyers (55+)',
     input: sc({ salePrice: 900000, outstandingLoan: 0, cashSavings: 100000, buyers: [{ age: 58, income: 9000 }, { age: 56, income: 6000 }] }),
     exp: { state: 'indicative', low: 1.27, high: 1.38, reg: 2.01, regLonger: true, longer: 1.91, diag: 'income' } },

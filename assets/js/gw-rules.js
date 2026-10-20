@@ -126,6 +126,11 @@
       standardTenure: { private: 30, hdb: 25 },
       maxTenure: { private: 35, hdb: 30 },
       endAge: 65,
+      // NOT a MAS rule. MAS sets no maturity age: age 65 above is only where the LOWER loan limit starts. Banks set their own latest age at which a loan
+      // may end, and the common figure is 75 for an individual borrower. UOB's private home loan page (checked 2026-10-21): "Up to 35 years or 75 years of
+      // age, whichever is earlier" (freehold), "or 75 years of age at end of loan tenor" (leasehold). Applies to bank loans only: an HDB loan has its own
+      // limit (to age 65, above), and a company has no age. Banks differ, so the tools say "usually" and tell the buyer to check with theirs.
+      maturityAge: BASE.bankMaturityAge || 75,
     },
     // Same MAS page: if the borrower is not an individual (e.g. a company), the LTV limit is 15%.
     entityLtv: 0.15,

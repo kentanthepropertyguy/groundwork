@@ -8,11 +8,11 @@
 <meta name="theme-color" content="#FAFAF8">
 <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
 <title>Can I afford to upgrade from my HDB? — Groundwork</title>
-<link rel="stylesheet" href="../../assets/css/kpt-system.css?v=a0e9e024fd">
+<link rel="stylesheet" href="../../assets/css/kpt-system.css?v=5ee6bbae9f">
 <link rel="stylesheet" href="../../assets/css/kpt-journey.css?v=6f9d09bbb8">
 <link rel="stylesheet" href="../../assets/css/kpt-shell.css?v=30b765165f">
 <script src="../../assets/js/gw-wa.js?v=7a6cf4f1be"></script>
-<link rel="stylesheet" href="../../assets/css/gw.css?v=5b7a5df170">
+<link rel="stylesheet" href="../../assets/css/gw.css?v=ff63943bee">
 <link rel="canonical" href="https://tools.kentanthepropertyguy.com/tools/hdb-upgrade/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Groundwork">
@@ -142,10 +142,10 @@
 <script src="../../assets/js/kpt-components.js?v=597f0bf0d3"></script>
 <script src="../../assets/js/kpt-market.js?v=f2c5f82332"></script>
 <!-- audit fix P: changed planner scripts carry a version so a cached older copy is never paired with this page -->
-<script src="rules.js?v=6f3bcd3b6f"></script>
+<script src="rules.js?v=2811c5b8ea"></script>
 <script src="assumptions.js?v=f44ac0d709"></script>
 <script src="ken-takes.js?v=9714519cfe"></script>
-<script src="engine.js?v=f8a25c9e95"></script>
+<script src="engine.js?v=c7b84311cc"></script>
 <script src="buyfirst.js?v=e7247310c2"></script>
 <script>
 (function () {
@@ -541,7 +541,7 @@
     let regMax = '';
     if (r.ui.showRegulatoryMax) {
       regMax = `<p class="kpt-group">${REG}Regulatory maximum</p>
-        <p class="kpt-note" style="margin-top:0;">The rules alone would allow up to about ${KPT.money(r.regulatory.max)}${r.regulatory.reliesOnLongerTenure ? ` using the lower-LTV, longer-tenure structure (a ${r.regulatory.tenureYears}-year loan, running to about age ${r.regulatory.endAge})` : ''}. This is a ceiling, not a planning figure.${r.regulatory.lenderCaveat ? ' ' + r.regulatory.lenderCaveat : ''}</p>`;
+        <p class="kpt-note" style="margin-top:0;">The rules, with banks usually ending a loan by age ${R.bankMaturityAge}, would allow up to about ${KPT.money(r.regulatory.max)}${r.regulatory.reliesOnLongerTenure ? ` using the lower-LTV, longer-tenure structure (a ${r.regulatory.tenureYears}-year loan, running to about age ${r.regulatory.endAge})` : ''}. This is a ceiling, not a planning figure.${r.regulatory.lenderCaveat ? ' ' + r.regulatory.lenderCaveat : ''}</p>`;
     }
 
     const fundsLines = [`Sale price less your loan and estimated selling costs: ${usd(b.netProceeds)}`];

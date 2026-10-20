@@ -7,7 +7,7 @@
      their markup, inputs, scripts and results are unchanged.
    Research (body.lg) keeps its own stylesheet; only the header and footer here apply to it.
    ========================================================================== */
-:root{--gw-ink:#16213E;--gw-body:#3B4256;--gw-muted:#6B7280;--gw-blue:#0B63CE;--gw-gold:#A9822F;--gw-green:#1F7A3D;--gw-grey:#F5F5F7;--gw-line:#E3E3E8;--gw-bar:#E7E7EA;--gw-a:#5a55d6;--gw-b:#2f7c97;
+:root{--gw-measure:100%;--gw-ink:#16213E;--gw-body:#3B4256;--gw-muted:#6B7280;--gw-blue:#0B63CE;--gw-gold:#A9822F;--gw-green:#1F7A3D;--gw-grey:#F5F5F7;--gw-line:#E3E3E8;--gw-bar:#E7E7EA;--gw-a:#5a55d6;--gw-b:#2f7c97;
   --gw-font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 
 /* ---------- shared header (R2.1: byline to the main site on desktop, New launches, Search, and a Menu that is always visible) ---------- */
@@ -113,8 +113,10 @@ body.gw-page a{color:var(--gw-blue);text-decoration:none}body.gw-page a:hover{te
 .gw-kicker{font-size:15px;font-weight:600;color:var(--gw-gold)}
 .gw-h1{font-size:74px;line-height:1;letter-spacing:-.045em !important}
 .gw-h2{font-size:42px;line-height:1.08}
-.gw-lead{font-size:20px;line-height:1.5;max-width:58ch}
-.gw-sub{font-size:17px;color:var(--gw-muted);line-height:1.5;max-width:58ch}
+/* Intro text (a page's lead, its one-line description, a result panel's opening line) fills the section it sits in, which is already capped at 1040px.
+   One measure, --gw-measure, instead of a different ch cap per class; text-wrap:pretty keeps a last line from standing alone. */
+.gw-lead{font-size:20px;line-height:1.5;max-width:var(--gw-measure);text-wrap:pretty}
+.gw-sub{font-size:17px;color:var(--gw-muted);line-height:1.5;max-width:var(--gw-measure);text-wrap:pretty}
 .gw-fine{font-size:13px;color:var(--gw-muted);line-height:1.5}
 .gw-center{text-align:center;margin-left:auto;margin-right:auto}
 .gw-band{padding:84px 0}.gw-band.grey{background:var(--gw-grey)}
@@ -199,7 +201,7 @@ body[data-view="directory"] .kpe-hero .kpt-lede a{color:var(--gw-blue)}
 body[data-view="directory"] .kpe-hero{text-align:left}
 body[data-view="directory"] .kpe-hero .kpt-h1,body[data-view="directory"] .kpe-hero .kpt-lede{margin-left:0;margin-right:0;text-align:left}
 body[data-view="directory"] .kpe-count{text-align:left}
-@media (min-width:900px){body[data-view="directory"] .kpe-hero .kpt-h1{max-width:none}body[data-view="directory"] .kpe-hero .kpt-lede{max-width:74ch}}
+@media (min-width:900px){body[data-view="directory"] .kpe-hero .kpt-h1{max-width:none}}
 .gw-panel,.gw-paths{scroll-margin-top:76px}
 .gw-guide>div:not(.gw-paths){display:grid;gap:22px;align-content:start}
 /* LIVE badge (as on the Lucerne Grand site): a fixed schedule label, always shown with the time beside it */
@@ -296,7 +298,6 @@ body[data-view="directory"] .kpe-count{text-align:left}
 .gw-calc-hero{padding:40px 0 14px}.gw-calc-hero .gw-wrap{justify-items:start;text-align:left;gap:10px}
 .gw-h1-c{font-size:44px;line-height:1.05}
 /* page headings and their one-line descriptions use the page width on desktop (the heading wraps only when it has to; text-wrap:balance above keeps it even) */
-@media (min-width:900px){.gw-calc-hero .gw-sub{max-width:80ch}}
 body.gw-legacy .kpt-hero-sub{max-width:none}
 .gw-csec{padding:6px 0 64px}
 .gw-calc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}

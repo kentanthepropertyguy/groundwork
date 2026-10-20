@@ -115,11 +115,11 @@
     if (tenP.error || (tenP.value !== undefined && (tenP.value < 1 || tenP.value > 35))) return h + '<p class="gr-fine">Check the loan tenure: between 1 and 35 years, or leave it blank.</p>';
     var base = { price: price, kind: 'private', age: ageP.value, buyers: buyers, loans: +$('grLoans').value, ratePct: rateP.value };
     var p, alt = null, why;
-    if (tenP.value) { p = C.progressive(Object.assign({}, base, { years: tenP.value })); why = 'the tenure you entered'; }
+    if (tenP.value) { p = C.progressive(Object.assign({}, base, { years: tenP.value })); why = p.ok && p.tenureCappedBy === 'age' ? 'cut from ' + tenP.value + ': banks usually end a loan by age ' + p.maturityAge : 'the tenure you entered'; }
     else {
-      var p30 = C.progressive(Object.assign({}, base, { years: 30 })); if (!p30.ok) return h;
+      var p30 = C.progressive(Object.assign({}, base, { years: 30 })); if (!p30.ok) return h + ((p30.invalid || []).some(function (e) { return /end a loan by age/.test(e.text || ''); }) ? '<p class="gr-fine">' + esc(p30.invalid[0].text) + '</p>' : '');
       if (p30.lowerWhy === 'age' && p30.stdYears >= 5) { p = C.progressive(Object.assign({}, base, { years: p30.stdYears })); alt = p30; why = 'ends by age 65, keeping the higher limit'; }
-      else { p = p30; why = p30.lower ? 'runs past age 65' : 'standard 30 years'; }
+      else { p = p30; why = p30.lower ? 'runs past age 65' + (p30.tenureCappedBy === 'age' ? '; banks usually end a loan by age ' + p30.maturityAge : '') : 'standard 30 years'; }
     }
     if (!p || !p.ok) return h;
     var m = C.mortgage({ loan: p.loanMax, ratePct: p.rate * 100, years: p.years, lender: 'bank' });
@@ -128,7 +128,7 @@
       '<div><span>Loan limit (' + Math.round(p.ltv * 100) + '%)</span><b>' + money(p.loanMax) + '</b><small>' + p.years + ' years (' + why + ') at ' + (Math.round(p.rate * 1000) / 10) + '%' + (p.lower ? '; the lower limit applies because ' + (p.lowerWhy === 'age' ? 'the loan runs past age 65' : 'the tenure is over 30 years') : '') + '</small></div>' +
       '<div><span>' + esc(G.a) + ': first instalment</span><b>' + (first ? money(first.monthly) + '/mo' : '—') + '</b><small>rising to ' + money(p.finalMonthly) + '/mo once fully drawn' + (G.vpYear ? ', by about ' + esc(G.vpYear) : '') + '</small></div>' +
       '<div><span>A resale at this price</span><b>' + (m.ok ? money(m.monthly) + '/mo' : '—') + '</b><small>the whole loan from the first month, after completion in about 8–12 weeks</small></div></div>';
-    if (alt) h += '<p class="gr-fine">Or a 30-year loan, which would run past age 65: allowed, with a limit of ' + Math.round(alt.ltv * 100) + '% (' + money(alt.loanMax) + ') and ' + money(alt.finalMonthly) + '/mo once fully drawn. For joint borrowers, banks use the income-weighted average age. Type a tenure above to see another choice.</p>';
+    if (alt) h += '<p class="gr-fine">Or a ' + alt.years + '-year loan, which would run past age 65: allowed, with a limit of ' + Math.round(alt.ltv * 100) + '% (' + money(alt.loanMax) + ') and ' + money(alt.finalMonthly) + '/mo once fully drawn. For joint borrowers, banks use the income-weighted average age. Type a tenure above to see another choice.</p>';
     h += '<div class="gr-tw"><table class="gr-t"><caption class="gr-sr">Progressive payments at this price</caption><thead><tr><th scope="col">Stage</th><th scope="col" class="r">Payment</th><th scope="col" class="r">Loan drawn</th><th scope="col" class="r">Instalment after</th></tr></thead><tbody>' +
       p.stages.map(function (s) { return '<tr><td>' + esc(s.name) + ' <small>' + Math.round(s.pct * 100) + '%</small></td><td class="r">' + money(s.amount) + '</td><td class="r">' + money(s.drawn) + '</td><td class="r">' + (s.monthly ? money(s.monthly) : '—') + '</td></tr>'; }).join('') + '</tbody></table></div>' +
       '<p class="gr-src">Standard progressive payment schedule, paid from cash first, then cash or CPF, then the loan; the sale and purchase agreement, your bank and CPF Board decide the actual funding. Interest ' + ($('grRate').value.trim() ? 'at the rate you entered' : 'at 4% a year, the rate banks must test affordability at, not a quote') + '. Loan limits under MAS Notice 632; your bank decides. Stamp duty from IRAS rates.</p>';

@@ -119,7 +119,7 @@
     const loanG = grp('buyers', 'You and your loan',
       money('income', 'Monthly fixed income, both borrowers', { ph: 'salary, gross, before CPF', hint: 'Fixed pay before CPF, for everyone buying. Type 0 if none: no bank loan is then assumed.', help: 'It sets the loan a bank could lend, and checks a new EC against the household income ceiling. Stays on this device.' }) +
       grid(numf('age', 'Borrower’s age', 'years', { share: 'borrowers.0.age', ph: 'e.g. 35', hint: 'Two borrowers: use their income-weighted average age (results for two borrowers are unverified).', help: 'How much can I borrow? works it out and shows both ways of weighting it. The age sets the loan limit together with the tenure. Which income MAS weights by is not confirmed.' })) +
-      grid(numf('ratePct', 'Interest rate you expect', '% a year', { value: '4', hint: 'Used to estimate your monthly mortgage. Borrowing eligibility is assessed at 4% or a higher applicable rate.' }) + numf('years', 'Loan tenure', 'years', { opt: true, ph: 'longest standard', hint: '<span data-tenure-note>Enter your age to see the longest tenure that keeps the standard loan limit. Longer, up to 35 years, takes the lower limit.</span>' })) +
+      grid(numf('ratePct', 'Interest rate you expect', '% a year', { value: '4', hint: 'Used to estimate your monthly mortgage. Borrowing eligibility is assessed at 4% or a higher applicable rate.' }) + numf('years', 'Loan tenure', 'years', { opt: true, ph: 'longest standard', hint: '<span data-tenure-note>Banks can lend for up to 35 years and usually end a loan by age 75 (lender policy, not a MAS rule). Over 30 years, or past age 65, the lower loan limit applies. Enter your age to see where that line falls.</span>' })) +
       money('prefLoan', 'How much would you like to borrow?', { opt: true, ph: 'blank = maximum estimated loan', hint: 'Leave blank to assume the maximum estimated loan. That is not a bank approval.', help: 'Type an amount to borrow less. A smaller loan means more cash and CPF now and a smaller instalment. An amount above the estimated limit is not used: the result shows the limit that applies.' }) +
       '<div data-when="kind:ec">' + chips('tender', 'When did the EC site’s land tender close?', [['unsure', 'Not sure'], ['before', 'Before 24 Aug 2026'], ['after', 'On or after 24 Aug 2026']], { value: 'unsure', hint: 'It sets the household income ceiling for a new EC. A balance unit in an older EC project keeps the lower ceiling, so choose “Before 24 Aug 2026” for it.', help: 'The ceiling is $16,000 a month if the tender closed before 24 Aug 2026, $18,000 if on or after. The developer or HDB can tell you.' }) +
         '<div class="gw-chips" data-k="ecIllus" data-t="chip" data-default="" hidden style="display:none" aria-hidden="true"><button type="button" class="gw-chip" data-v="yes" aria-pressed="false" tabindex="-1">yes</button></div></div>' +
@@ -399,7 +399,7 @@
     const from = v.payInstalmentFromCpf !== false ? 'Instalments are paid from CPF OA first, then cash.' : 'Instalments are paid from cash.';
     const items = [
       'Interest: <b>' + pc(L.ratePct / 100, 2) + '</b> a year, as you entered it (it starts at 4%). It stays the same for the whole period; a floating rate that changes is not modelled.',
-      'Tenure: <b>' + L.years + ' years</b>, from your age and the standard loan limit unless you entered one.',
+      'Tenure: <b>' + L.years + ' years</b>, ' + (L.tenureCapped && L.tenureCappedBy === 'age' ? 'the most a bank usually lends at your age (banks usually end a loan by age ' + root.GW_RULES.bankLtv.maturityAge + ', a lender policy and not a MAS rule), not the ' + L.tenureAsked + ' you entered.' : 'from your age (the longest that keeps the standard loan limit, or from age 65 the longest a bank usually lends) unless you entered one.'),
       'Illustrative, not confirmed bank instalments. How this is counted: after each release, the level monthly amount (principal and interest) on the total released so far, over the full tenure. This is the audited engine’s convention.' + (oc ? ' <b>It is not the only one.</b> If your bank counts the tenure from your first release and recalculates on the balance still owed, it would be about <b>' + $(oc.final) + '</b> a month once fully released here (' + oc.pct + '% more). We could not confirm either convention from a bank’s own document, so treat these as estimates and ask your bank for its schedule.' : ' Your bank’s own schedule may differ.'),
       'Not modelled: an interest-only period, fees and rate changes.',
       'The loan is an estimate of what a bank could lend. The bank decides what it actually lends.'];
@@ -525,8 +525,8 @@
   const RESN = { SC: 'Singapore Citizen', PR: 'Permanent Resident', FR: 'Foreigner' }, OWNN = ['owns no home', 'owns one home', 'owns two or more homes'];
   const OWN_CHOICE = [['buy', 'Buy first, then sell'], ['sell', 'Sell first, then buy'], ['none', 'Nothing to sell']];
   // need: [{ id, label, hint, done, shown }]; i: the form read as engine input; raw: only what the buyer actually entered
-  // the longest tenure that keeps the standard loan limit at this age: the engine's own figure (GW_CALC.progressive → stdYears)
-  const stdYearsOf = (age) => { try { const p = root.GW_CALC.progressive({ price: 1000000, age: age, kind: 'private', loans: 0 }); return p.ok ? p.stdYears : null; } catch (e) { return null; } };
+  // the longest tenure that keeps the standard loan limit at this age: the engine's own figure (GW_CALC.bankTenure)
+  const stdYearsOf = (age) => { try { return root.GW_CALC.bankTenure('private', age).std; } catch (e) { return null; } };
   // need: [{ id, label, hint, done, shown }]; i: the form read as engine input; raw: only what the buyer actually entered.
   // The questions are on the page above; this lists the ones still open and takes the buyer to each. It asks nothing a second time.
   function needHtml(need) {
@@ -717,10 +717,10 @@
     }
     function paintTenureNote(vals) {
       const el = q('[data-tenure-note]'); if (!el) return;
-      const cap = RL.standardTenure.private, max = RL.maxTenure.private, age = vals.age, L = C.LIMITS.age;
-      let t = 'Banks can lend for up to ' + max + ' years. Over ' + cap + ' years, or past age 65, the lower loan limit applies. Enter your age to see where that line falls.';
-      if (typeof age === 'number' && age >= L.min && age <= L.max) { const std = stdYearsFor(age); if (std !== null) t = std >= 1 ? 'At age ' + age + ', ' + std + ' years is the longest that keeps the standard loan limit, and is used if you leave this blank. Longer, up to ' + max + ' years, is allowed but takes the lower limit.' : 'At age ' + age + ', any loan runs past age 65, so the lower limit applies. Enter the years you want, up to ' + max + '.'; }
-      if (el.textContent !== t) el.textContent = t;
+      const age = vals.age, L = C.LIMITS.age, chosen = typeof vals.years === 'number' && vals.years > 0 ? vals.years : 0;
+      let o = {};
+      if (typeof age === 'number' && age >= L.min && age <= L.max) { const t = C.bankTenure('private', age); o = { age: age, std: t.std, allowed: t.allowed, chosen: chosen }; }
+      const t = C.tenureNote(o); if (el.textContent !== t) el.textContent = t;
     }
     box.addEventListener('focusout', (e) => { if (waitBlur && e.target.matches && e.target.matches('input[data-k]')) setTimeout(recalc, 0); });
     // ---- your property: the summary line, and whether the three details are in ----

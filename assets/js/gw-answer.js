@@ -38,7 +38,7 @@
   const ceilStep = (x, st) => Math.ceil(x / (st || STEP) - 1e-9) * (st || STEP);
   const MONTHS = [3, 6, 12];
   const MATERIAL = 0.05;                     // a longer tenure is suggested only when it adds this share (5%) to the budget; it never hides the other tenures
-  const SUGGEST_MAX_YEARS = 30, SUGGEST_END_AGE = 75;   // planning convention for the suggestion only: not a rule, and a tenure the buyer types is used as typed
+  const SUGGEST_MAX_YEARS = 30, SUGGEST_END_AGE = R.bankLtv.maturityAge;   // the 30 years is a planning convention for the suggestion only; the age is the bank maturity age (gw-rules.js), which also cuts a tenure the buyer types
   const LADDER = [15, 20, 25, 30, 35];       // tenures shown for comparison, with the standard, the suggested and the buyer's own
 
   /* ---------------- validation of the entries (ranges are GW_CALC.LIMITS) ---------------- */
@@ -77,7 +77,13 @@
     const probe = C.tdsr({ kind: 'private', borrowers: list, debts: 0, loans: 0, tenure: has(s.years) ? s.years : undefined, quotedRatePct: rate });
     out.probe = probe;
     out.std = probe.ok && probe.tenure ? probe.tenure.std : null;
-    out.years = has(s.years) ? s.years : (out.std >= 1 ? out.std : null);
+    // The tenure used is the engine's: the one typed, cut to what the rules and a bank's usual latest age leave (the shorter of 35 years and age 75 less the age), else the standard tenure.
+    // Everything below (the loan, the instalment, the tables) reads this one figure, so a tenure past what a bank lends can never reach a result.
+    const pt = probe.ok && probe.tenure ? probe.tenure : null;
+    out.allowed = pt ? pt.allowed : null;
+    out.typed = has(s.years) ? s.years : null;
+    out.years = pt && pt.years >= 1 ? pt.years : null;   // the engine's: typed (cut to what a bank lends), else the standard tenure, else (from age 65) the longest a bank usually lends
+    out.cappedFrom = out.typed !== null && pt && pt.capped && out.years !== null ? out.typed : null; out.cappedBy = out.cappedFrom !== null ? pt.cappedBy : null;
     out.cash = nn(s.cash); out.cpf = nn(s.cpf); out.setAside = Math.min(nn(s.setAside), out.cash);
     out.debts = nn(s.debts);
     out.contrib = out.kind === 'new' && (has(s.saveMo) || has(s.cpfMo));          // monthly amounts given: new launches are then checked
@@ -219,7 +225,7 @@
     // 1. income alone: what the income supports
     const probe = n.probe;
     if (!probe || !probe.ok) { res.state = 'invalid'; res.errors = (probe && probe.invalid ? probe.invalid.map((x) => ({ key: x.field === 'age' ? 'buyers.0.age' : x.field === 'income' ? 'buyers.0.fixed' : x.field, text: x.text })) : [{ key: 'buyers.0.age', text: 'These figures could not be worked out. Please check them.' }]); return res; }
-    if (!(n.years >= 1)) { res.state = 'invalid'; res.errors = [{ key: 'years', text: 'Any loan would run past age ' + R.bankLtv.endAge + ' for this age. Enter the loan years you want under Adjust assumptions.' }]; return res; }
+    if (!(n.years >= 1)) { res.state = 'invalid'; res.errors = [{ key: 'years', text: n.allowed < 1 ? 'Banks usually end a loan by age ' + R.bankLtv.maturityAge + ', so no loan tenure fits at this age.' : 'Any loan would run past age ' + R.bankLtv.endAge + ' for this age. Enter the loan years you want under Adjust assumptions.' }]; return res; }
     const tb = C.tdsr({ kind: 'private', borrowers: n.list, debts: n.debts + n.otherInstal + (s.home === 'keep' ? n.flatInstal : 0), loans: 0, tenure: n.years, quotedRatePct: n.ratePct });
     res.borrow = { max: tb.ok && !tb.noTenure ? tb.maxLoan : 0, years: n.years, std: n.std, rate: tb.rate, income: n.B.gross, counted: n.B.assessable, instalment: tb.forNew };
     res.kind = n.kind; res.years = n.years; res.ratePct = n.ratePct; res.B = n.B;
@@ -325,11 +331,11 @@
   function tenureInfo(n, ten, basis, head) {
     const at = head.comfortable !== null ? evaluate(n, basis, head.comfortable) : evaluate(n, basis, head.highest);
     const iw = n.B.iwaaUse;
-    return { years: n.years, manual: ten.manual, std: ten.std, cap: ten.cap, suggested: ten.suggested, longer: !!ten.longer, gain: ten.gain || 0, vsStdBudget: ten.fromBudget === undefined ? null : ten.fromBudget, nudge: ten.nudge, endAge: Math.round(iw + n.years), lower: n.years > ten.std, ltv: at.ok ? at.ltv : null, lowerWhy: at.ok ? at.lowerWhy : null };
+    return { years: n.years, allowed: n.allowed, cappedFrom: n.cappedFrom, cappedBy: n.cappedBy, manual: ten.manual, std: ten.std, cap: ten.cap, suggested: ten.suggested, longer: !!ten.longer, gain: ten.gain || 0, vsStdBudget: ten.fromBudget === undefined ? null : ten.fromBudget, nudge: ten.nudge, endAge: Math.round(iw + n.years), lower: n.years > ten.std, ltv: at.ok ? at.ltv : null, lowerWhy: at.ok ? at.lowerWhy : null };
   }
   // every valid tenure side by side, for the compare table: standard, the suggested, the buyer's own and a ladder up to the 35-year maximum.
   function tenureRows(s, n, ten, basis, solveC) {
-    const L = C.LIMITS.years, max = (R.bankLtv.maxTenure && R.bankLtv.maxTenure.private) || L.max;
+    const L = C.LIMITS.years, max = Math.min((R.bankLtv.maxTenure && R.bankLtv.maxTenure.private) || L.max, n.allowed >= 1 ? n.allowed : Infinity);   // only tenures a bank would lend: the shorter of 35 years and age 75 less the age
     const must = [ten.std, ten.suggested, n.years].filter((y) => y >= 1);
     let set = must.slice();
     LADDER.forEach((y) => { if (y <= max && y >= 1 && !must.some((m) => Math.abs(m - y) < 2) && set.indexOf(y) < 0) set.push(y); });
