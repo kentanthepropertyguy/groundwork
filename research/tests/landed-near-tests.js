@@ -102,9 +102,27 @@ t('middle group wording: ranked by price, says how many are left out, and the ps
   const h = V.nearbyHtml(r, SW, 'T', I, { r: '../../', geo: G }), m = /data-vx-mid>([^]*?)<\/p>/.exec(h)[1];
   assert.ok(m.indexOf('Ranked by sale price') === 0 && m.indexOf('leaving out the ' + k + ' lowest and ' + k + ' highest prices') > 0 && m.indexOf('Those same ' + r.mid.n + ' sales were') > 0, m);
 });
-t('map link describes what the Map shows (area, MRT, schools, condo prices) and says landed sales are not on it', () => {
+t('map link names the road and describes what the Map shows (the road, MRT, schools, condo prices); it says landed sales are not on it', () => {
   const h = V.nearbyHtml(near(SW, 'T'), SW, 'T', I, { r: '../../', geo: G }), a = /<a class="gw-vx-next"[^>]*data-gw-go="map">([^]*?)<\/a>/.exec(h)[1];
-  assert.ok(/area on the map/.test(a) && /Landed sales are not on the map/.test(a) && !/nearby condos sold/.test(a), a);
+  assert.ok(/See Springwood Crescent on the map/.test(a) && /Landed sales are not on the map/.test(a) && !/nearby condos sold/.test(a), a);
+  assert.ok(/href="\.\.\/\.\.\/research\/map\/#pl=road%3ASpringwood%20Crescent%20\(Queenstown\)"/.test(h), 'goes to the road, by name and area');
+});
+const E = rd(L + 'estates.json').estates;
+t('estate names: URA files the Springwood estate on Jalan Mat Jambol, and a street that starts with the estate name is told so', () => {
+  assert.ok(E.some((e) => e[0] === 'SPRINGWOOD' && e[1] === 'JALAN MAT JAMBOL' && e[2] === '05'));
+  const c = N.candidates(G, SW, 2500, SW.exclude), est = N.estatesFor(E, 'SPRINGWOOD CRESCENT', c);
+  assert.strictEqual(est.length, 1); assert.deepStrictEqual([est[0].estate, est[0].street], ['SPRINGWOOD', 'JALAN MAT JAMBOL']); assert.ok(est[0].m < 600);
+  const r = near(SW, 'T'), h = V.nearbyHtml(r, SW, 'T', I, { r: '../../', geo: G, estates: est }), m = /data-vx-estate>([^]*?)<\/p>/.exec(h)[1];
+  assert.ok(/estate name <b>Springwood<\/b>, on <b>Jalan Mat Jambol<\/b>/.test(m) && /can’t tell which, if any, were on Springwood Crescent/.test(m) && /Jalan Mat Jambol’s sales are in the list above/.test(m), m);
+  assert.ok(!/data-vx-estate/.test(V.nearbyHtml(r, SW, 'T', I, { r: '../../', geo: G })), 'no note without an estate');
+});
+t('estate names never match by accident: another street, a longer first word, the estate name alone', () => {
+  const c = N.candidates(G, SW, 2500, SW.exclude);
+  assert.strictEqual(N.estatesFor(E, 'SPRINGLEAF CRESCENT', c).length, 0); assert.strictEqual(N.estatesFor(E, 'SPRINGWOODS CRESCENT', c).length, 0); assert.strictEqual(N.estatesFor(E, 'SPRINGWOOD', c).length, 0);
+  assert.strictEqual(N.estatesFor(E, 'SPRINGWOOD CRESCENT', c.filter((x) => x.name !== 'JALAN MAT JAMBOL')).length, 0, 'only when URA files the estate on a street found nearby');
+});
+t('estates.json holds only names, streets and districts that exist in the landed sales (no counts, no prices)', () => {
+  const S = new Set(I.streets.map((x) => x[0] + '|' + x[1])); assert.ok(E.length > 300 && E.every((e) => e.length === 3 && S.has(e[1] + '|' + e[2])));
 });
 t('semi-detached widens only when the close ring is thin, and says so (first step held fewer than 5)', () => { const r = near(SW, 'S'); assert.ok(r.first.n >= 0); if (r.step > 0) assert.ok(r.first.n < N.MIN_N); });
 t('detached: widened to the widest step, never mixed with other types', () => { const r = near(SW, 'D'); assert.ok(r.rows.every((x) => x.type === 'D')); assert.ok(r.widened); });
@@ -127,7 +145,7 @@ t('says what was found, for which house type, within what distance and period', 
 t('keeps approximate facts apart from verified ones: distances are "about", street positions are one point', () => { assert.ok(/about \d+ m/.test(html)); assert.ok(/distances are approximate/.test(html)); assert.ok(/not a house/.test(html) && /OneMap/.test(html)); });
 t('lists price, land size, tenure and land psf for each sale', () => { assert.ok(/psf/.test(html) && /Freehold/.test(html) && /Land sq ft/i.test(html)); });
 t('never claims a value, an estimate or a forecast', () => { assert.ok(!/\b(valuation|valued at|worth about|estimated value|will be worth|forecast)\b/i.test(html.replace(/Why we don’t put one figure[\s\S]*?<\/ul>/, ''))); });
-t('links to the existing Map (planning area) and to Ken', () => { assert.ok(html.indexOf('href="../../research/map/#pl=area%3AQueenstown"') > 0); assert.ok(/data-gw-wa="worth-landed-street"/.test(html)); });
+t('links to the road on the existing Map and to Ken', () => { assert.ok(html.indexOf('href="../../research/map/#pl=road%3ASpringwood%20Crescent%20(Queenstown)"') > 0); assert.ok(/data-gw-wa="worth-landed-street"/.test(html)); });
 t('a widened answer says so, with what the first step held', () => { const h = V.nearbyHtml(near(SW, 'D'), SW, 'D', I, { r: '../../', geo: G }); assert.ok(/data-vx-widened/.test(h) && /so we looked wider/.test(h)); });
 t('too few sales: no ranges, no price, a plain limit and Ken first', () => {
   const none = N.select([], {}, { type: 'T', latest: I.latestMonth }), h = V.nearbyHtml(none, SW, 'T', I, { r: '../../', geo: G });

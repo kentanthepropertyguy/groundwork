@@ -112,10 +112,22 @@
       price: range(rows.map((x) => x.price)), psf: range(rows.map((x) => x.psf)), land: range(rows.map((x) => x.land))
     };
   }
+  // Estate names (data/value/landed/estates.json: [estate, street, district], from URA's own project names). When the street searched starts with an
+  // estate name ("SPRINGWOOD CRESCENT" starts with "SPRINGWOOD") and URA files that estate on a street among those found nearby, say so: it is what URA
+  // records, nothing more. The sale is never moved to the searched street.
+  const word = (n) => String(n || '').toUpperCase().replace(/[.,']/g, '').replace(/\s+/g, ' ').trim();
+  function estatesFor(estates, name, cands) {
+    const n = word(name) + ' ', out = [];
+    (estates || []).forEach((e) => {
+      const en = word(e[0]); if (!en || n.indexOf(en + ' ') !== 0 || n.length <= en.length + 1) return;
+      const c = cands.filter((x) => x.name === e[1] && x.district === e[2])[0]; if (c && !out.some((o) => o.estate === e[0] && o.street === e[1])) out.push({ estate: e[0], street: e[1], district: e[2], m: c.m });
+    });
+    return out.sort((a, b) => a.m - b.m);
+  }
   // The house type to show first: the one with most sales around, land-title houses before strata.
   function defaultType(types) {
     const ks = Object.keys(types).sort((a, b) => (STRATA[a] ? 1 : 0) - (STRATA[b] ? 1 : 0) || types[b] - types[a]);
     return ks[0] || null;
   }
-  return { TIERS, MIN_N, LIMITED_N, MID_MIN, LAND_BAND, dist, tenureClass, candidates, districtsOf, pool, select, defaultType, ymAdd };
+  return { TIERS, MIN_N, LIMITED_N, MID_MIN, LAND_BAND, dist, tenureClass, candidates, districtsOf, pool, select, defaultType, estatesFor, ymAdd };
 });

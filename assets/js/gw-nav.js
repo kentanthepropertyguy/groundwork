@@ -202,6 +202,55 @@
     return sites.sites.filter((s) => s.url && [s.name].concat(s.aliases || []).some((a) => (' ' + dnorm(a)).indexOf(' ' + q) >= 0)).map((s) => ({ id: s.id, name: s.name, url: s.url, tagline: s.tagline }));
   }
 
+  /* ---------------- matching roads (the street positions the nearby landed sales already use) ---------------- */
+  // data/value/landed/geo.json (streets with landed sales) and geo-more.json (other named streets): one approximate point per street. A road found here
+  // leads to what sold around it (Property values & prices) and to its place on the Map. Nothing here knows where any house is.
+  const ROAD_ABBR = { rd: 'road', av: 'avenue', jln: 'jalan', gdns: 'gardens', hts: 'heights', pk: 'park', bt: 'bukit' };   // only the ones that are not already the start of the word
+  const ROAD_GENERIC = { road: 1, street: 1, avenue: 1, drive: 1, crescent: 1, close: 1, terrace: 1, lorong: 1, jalan: 1, garden: 1, gardens: 1, place: 1, lane: 1, heights: 1, park: 1, view: 1, walk: 1, way: 1, hill: 1, rise: 1, grove: 1, north: 1, south: 1, east: 1, west: 1, upper: 1, lower: 1, bukit: 1, the: 1, and: 1 };
+  const roadTitle = (n) => String(n || '').toLowerCase().replace(/(^|[\s\-/(])([a-z])/g, (x, a, b) => a + b.toUpperCase());
+  const roadNorm = (n) => norm(n).replace(/\s+/g, ' ');
+  // One list from the two files. A name kept once per planning area; geo.json (a street with landed sales) wins over geo-more.json.
+  function roadList(geo, more) {
+    const out = [], seen = {};
+    const add = (name, lat, lon, area, landed, district) => {
+      const k = roadNorm(name) + '|' + (area || ''); if (!name || seen[k]) return; seen[k] = 1;
+      out.push({ name, title: roadTitle(name), n: roadNorm(name), area: area || '', lat, lon, landed: !!landed, district: district || '' });
+    };
+    ((geo && geo.streets) || []).forEach((s) => add(s[0], s[2], s[3], s[4], true, s[1]));
+    ((more && more.streets) || []).forEach((s) => add(s[0], s[1], s[2], s[3], false, ''));
+    return out;
+  }
+  // roads that match what was typed: whole name, then the start of the name, then every word typed starting a word of the name. House numbers and
+  // generic words ("road", "street") alone never match, so typing "road" does not list the island.
+  function matchRoads(list, query, max) {
+    if (!list || !list.length) return [];
+    let t = roadNorm(query).split(' ').filter(Boolean); while (t.length && /^\d+[a-z]?$/.test(t[0])) t.shift();
+    t = t.map((w) => ROAD_ABBR[w] || w); const q = t.join(' ');
+    if (q.length < 3 || !t.some((w) => w.length >= 3 && !ROAD_GENERIC[w])) return [];
+    const out = [];
+    list.forEach((r) => {
+      const w = r.n.split(' '); let s = 0;
+      if (r.n === q) s = 100; else if (r.n.indexOf(q) === 0) s = 80;
+      else if (t.every((x) => w.some((y) => y.indexOf(x) === 0))) s = 55;
+      if (s) out.push({ s, r });
+    });
+    return out.sort((a, b) => b.s - a.s || (b.r.landed ? 1 : 0) - (a.r.landed ? 1 : 0) || a.r.n.length - b.r.n.length || (a.r.n < b.r.n ? -1 : 1)).slice(0, max || 3).map((x) => x.r);
+  }
+  // How a road is named on the Map's address and in the landed page's address: "Springwood Crescent (Queenstown)". Chosen from the list, never typed text.
+  const roadKey = (r) => r.title + (r.area ? ' (' + r.area + ')' : '');
+  const roadLandedHref = (base, r) => base + 'journey/worth/#landed:' + encodeURIComponent(r.title);
+  const roadMapHref = (base, r) => base + 'research/map/#pl=' + encodeURIComponent('road:' + roadKey(r));
+  let roadsP = null, roadsBase = null, roadsCache = null;
+  function loadRoads() {
+    if (roadsP) return roadsP;
+    if (!roadsBase || typeof root.fetch !== 'function') return Promise.resolve([]);
+    const get = (f) => root.fetch(roadsBase + 'data/value/landed/' + f).then((x) => (x.ok ? x.json() : null)).catch(() => null);
+    roadsP = Promise.all([get('geo.json'), get('geo-more.json')]).then((a) => { if (!a[0] && !a[1]) { roadsP = null; return []; } return (roadsCache = roadList(a[0], a[1])); });
+    return roadsP;
+  }
+  const roadsNow = (query, max) => (roadsCache ? matchRoads(roadsCache, query, max) : []);   // the same answer, at once, once the files have loaded
+  const findRoads = (query, max) => (roadList.length && String(query || '').trim().length >= 3 ? loadRoads().then((l) => matchRoads(l, query, max)) : Promise.resolve([]));
+
   /* ---------------- markup ---------------- */
   const row = (e, r, cls) => '<a class="' + (cls || 'gw-mi') + '" href="' + esc(href(e, r)) + '"' + (e.ext ? ' target="_blank" rel="noopener"' : '') + ' data-gw-nav-to="' + e.id + '">' + svg(e.icon) + '<span><b>' + esc(e.name) + (e.ext ? ' <i aria-hidden="true">↗</i>' : '') + '</b><small>' + esc(e.tag) + '</small></span></a>';
   // The search box (hidden until the script runs, so there is never a box that does nothing).
@@ -290,6 +339,7 @@
     const KPT = () => root.KPT || { track: function () {} }, track = (n, p) => { try { KPT().track(n, p || {}); } catch (e) { /* analytics unavailable */ } };
     const me = document.querySelector('script[src*="assets/js/gw-nav.js"]');
     const base = me ? me.src.replace(/assets\/js\/gw-nav\.js.*$/, '') : (document.body.dataset.root || './');
+    roadsBase = base;
     const ctxKey = 'gw.ctx.v1', getCtx = () => { try { return JSON.parse(root.sessionStorage.getItem(ctxKey) || '{}') || {}; } catch (e) { return {}; } };
     const setCtx = (p) => { try { root.sessionStorage.setItem(ctxKey, JSON.stringify(Object.assign(getCtx(), p, { v: 1 }))); } catch (e) { /* storage blocked */ } };
 
@@ -333,7 +383,7 @@
       const items = () => [].slice.call(res.querySelectorAll('[role="option"]'));
       const setActive = (k) => { const it = items(); active = it.length ? (k + it.length) % it.length : -1; it.forEach((a, j) => a.setAttribute('aria-selected', String(j === active))); if (active >= 0) { inp.setAttribute('aria-activedescendant', it[active].id); it[active].scrollIntoView({ block: 'nearest' }); } else inp.removeAttribute('aria-activedescendant'); };
       const opt = (k, h, inner, extra) => '<a role="option" id="' + res.id + '-' + k + '" class="gw-sx-r" href="' + esc(h) + '"' + (extra || '') + '>' + inner + '</a>';
-      function render(q, devs, sites, loading, failed) {
+      function render(q, devs, sites, loading, failed, roads) {
         const st = devsOnly ? [] : scoredTools(q, devs && devs.length ? 4 : 6), tools = st.map((x) => x.e);
         const all = (sites || []).map((s) => ({ site: s })).concat(devs || []);
         // A development whose name starts with what was typed comes first, unless a tool matches the words exactly (ABSD, mortgage…).
@@ -346,11 +396,13 @@
         if (all.length) h += group('Developments · Research', all.map((d) => d.site
           ? opt(k++, d.site.url, svg('ext') + '<span><b>' + esc(d.site.name) + ' <i aria-hidden="true">↗</i></b><small>Ken’s site for this development</small></span>', ' data-gw-nav-to="site-' + esc(d.site.id) + '" target="_blank" rel="noopener"')
           : opt(k++, base + 'research/#/p/' + encodeURIComponent(d.id), svg('dev') + '<span><b>' + esc(d.name) + '</b><small>' + esc([d.street, 'District ' + d.district, d.n + ' sale' + (d.n === 1 ? '' : 's') + ' in 5 years'].join(' · ')) + '</small></span>', ' data-gw-nav-to="development"')).join(''));
+        // Roads and streets: one result per road, leading to what sold around it (landed homes are sold by street, not by development name).
+        if (roads && roads.length) h += group('Roads and streets', roads.map((d) => opt(k++, roadLandedHref(base, d), svg('map') + '<span><b>' + esc(d.title) + '</b><small>' + esc((d.area ? d.area + ' · ' : '') + 'What landed homes sold for nearby') + '</small></span>', ' data-gw-nav-to="road"')).join(''));
         if (devFirst) h += toolsHtml();
         // Audit A5-11: if the development list couldn't load, say so instead of quietly showing tools only.
         if (failed) after += '<p class="gw-sx-note" data-gw-sx-failed>Development search didn’t load. Check your connection and try again, or <a href="' + base + 'projects/" data-gw-nav-to="directory">browse every development</a>.</p>';
         if (loading) after += '<p class="gw-sx-note">Searching developments…</p>';
-        else if (!tools.length && !all.length && !failed) after += '<p class="gw-sx-note">Nothing matches “' + esc(q.slice(0, 40)) + '”. ' + (devsOnly ? 'Try part of the development’s name.' : 'Try a development name, or words like stamp duty, ABSD, mortgage, valuation or HDB upgrade.') + ' Executive condos and cluster houses aren’t covered in Research yet.</p>'; // V2-05
+        else if (!tools.length && !all.length && !(roads && roads.length) && !failed) after += '<p class="gw-sx-note">Nothing matches “' + esc(q.slice(0, 40)) + '”. ' + (devsOnly ? 'Try part of the development’s name.' : 'Try a development name, or words like stamp duty, ABSD, mortgage, valuation or HDB upgrade.') + ' Executive condos and cluster houses aren’t covered in Research yet.</p>'; // V2-05
         else if (all.length) after += '<a class="gw-sx-more" href="' + base + 'projects/" data-gw-nav-to="directory">Not listed? Browse every development ›</a>';
         res.innerHTML = (h ? '<div role="listbox" id="' + inp.getAttribute('aria-controls') + '" aria-label="Search results" style="display:grid;gap:1px">' + h + '</div>' : '') + after;
         res.hidden = false; inp.setAttribute('aria-expanded', 'true'); if (body) body.hidden = true;
@@ -363,11 +415,15 @@
         if (!q) { clear(); return; }
         const needDevs = dnorm(q).length >= 2;
         if (!needDevs) { render(q, [], [], false); return; }
-        if (ixP && ixP.__v) { render(q, matchDevs(ixP.__v, q, 6), matchSites(sitesP && sitesP.__v, q), false); return; }
+        if (ixP && ixP.__v) {
+          const again = () => render(q, matchDevs(ixP.__v, q, 6), matchSites(sitesP && sitesP.__v, q), false, false, roadsNow(q, 3));
+          again(); if (!roadsCache && q.length >= 3) findRoads(q, 3).then(() => { if (my === seq) again(); });
+          return;
+        }
         render(q, [], [], true);
-        Promise.all([loadIx(), loadSites()]).then(([ix, st]) => {
+        Promise.all([loadIx(), loadSites(), findRoads(q, 3)]).then(([ix, st, rd]) => {
           if (!ix) ixP = null; else if (ixP) ixP.__v = ix;   // a failed load is tried again on the next search
-          if (sitesP) sitesP.__v = st; if (my !== seq) return; render(q, matchDevs(ix, q, 6), matchSites(st, q), false, !ix);
+          if (sitesP) sitesP.__v = st; if (my !== seq) return; render(q, matchDevs(ix, q, 6), matchSites(st, q), false, !ix, rd);
         });
       }
       inp.addEventListener('input', () => { clearTimeout(tmr); tmr = setTimeout(run, 90); });
@@ -474,5 +530,5 @@
     }
   }
   if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount(); }
-  return { upDone, finStamp, clearJourney, oneEdit, deaccent, ENTRIES, SECTIONS, SEC_ORDER, doorHtml, researchRows, secSwitch, row, MENU_TOOLS, QUICK, UP, MAIN, LAUNCHES, ASK, ICON, svg, norm, matchTools, scoredTools, matchDevs, matchSites, displayName, menuHtml, searchHtml, quickHtml, stripHtml, href, esc };
+  return { upDone, finStamp, clearJourney, oneEdit, deaccent, ENTRIES, SECTIONS, SEC_ORDER, doorHtml, researchRows, secSwitch, row, MENU_TOOLS, QUICK, UP, MAIN, LAUNCHES, ASK, ICON, svg, norm, matchTools, scoredTools, matchDevs, matchSites, matchRoads, roadList, roadTitle, roadKey, roadLandedHref, roadMapHref, findRoads, roadsNow, displayName, menuHtml, searchHtml, quickHtml, stripHtml, href, esc };
 });
