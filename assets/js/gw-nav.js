@@ -89,7 +89,7 @@
       t: ['hdb upgrade', 'upgrade', 'upgrading', 'upgrade from hdb', 'sell hdb', 'moving', 'move', 'right size', 'rightsizing', 'downsizing', 'downgrade'] },
     { id: 'guide-buy', name: 'Buy a home', tag: 'A first home, or another without selling', href: 'journey/#buy', icon: 'home', search: 1, sec: 'guide',
       t: ['buy', 'buying', 'looking to buy', 'first home', 'first property', 'buy a condo', 'buy a home', 'purchase'] },
-    { id: 'guide-sell', name: 'Sell, or check my home’s value', tag: 'What homes like yours sold for, then your proceeds', href: 'journey/worth/', icon: 'worth', search: 1, sec: 'guide',
+    { id: 'guide-sell', name: 'Sell, or check my home’s value', tag: 'What homes like yours sold for, then your proceeds', href: 'journey/#sell', icon: 'worth', search: 1, sec: 'guide',
       t: ['sell', 'selling', 'sell my home', 'sell my flat', 'home value'] },
     { id: 'guide-move', name: 'Other moves', tag: 'Selling a condo or landed home, downsizing', href: 'journey/#move', icon: 'guide', search: 1, sec: 'guide',
       t: ['moving', 'move', 'downsize', 'downsizing', 'right size', 'rightsizing', 'sell condo', 'sell landed', 'sell then buy'] },

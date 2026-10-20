@@ -485,20 +485,8 @@
     let dirty = false; root.__paSettled = () => !dirty;
     const changed = () => { dirty = true; if (!firstEdit) { firstEdit = true; track('tool_started', {}); } clearTimeout(tmr); tmr = setTimeout(recalc, 100); };
 
-    // ---- inputs: live commas on money fields, the same display rule as the other tools ----
-    const tidy = (t) => String(t).replace(/[\s ]/g, '').replace(/^(sgd|s\$)/i, '').replace(/\$/g, '');
-    const group = (n) => n.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    function liveMoney(t) { if (!/^[\d,]*\.?\d*$/.test(t)) return null; const dot = t.indexOf('.'); let n = (dot < 0 ? t : t.slice(0, dot)).replace(/,/g, ''); n = n.replace(/^0+(?=\d)/, ''); if (dot >= 0 && n === '') n = '0'; return group(n) + (dot >= 0 ? '.' + t.slice(dot + 1) : ''); }
-    function wireMoney(x) {
-      x.addEventListener('input', () => {
-        const raw = x.value, caret = x.selectionStart == null ? raw.length : x.selectionStart, out2 = liveMoney(tidy(raw)); if (out2 === null || out2 === raw) return;
-        let sig = (tidy(raw.slice(0, caret)).match(/[\d.]/g) || []).length; x.value = out2;
-        if (document.activeElement === x && x.setSelectionRange) { let n = 0, pos = sig ? out2.length : 0; for (let k = 0; sig && k < out2.length; k++) { if (/[\d.]/.test(out2.charAt(k)) && ++n === sig) { pos = k + 1; break; } } try { x.setSelectionRange(pos, pos); } catch (er) { /* ignore */ } }
-      });
-      x.addEventListener('blur', () => { const p = parseMoney(x.value); if (!p.error && p.value !== undefined && p.value <= C.LIMITS.money.max) x.value = fmtMoney(p.value); });
-      x.addEventListener('focus', () => { if (x.matches(':focus-visible')) try { x.select(); } catch (e) { /* ignore */ } });
-    }
-    $$('input[data-t="money"]').forEach(wireMoney);
+    // ---- inputs: live commas on money fields (one behaviour for every calculator: gw-money.js) ----
+    if (root.GW_MONEY) $$('input[data-t="money"]').forEach((x) => root.GW_MONEY.wire(x, { parse: (t) => { const p = parseMoney(t); return !p.error && p.value !== undefined ? p.value : null; }, max: C.LIMITS.money.max }));
     box.addEventListener('input', (e) => { const t = e.target; if (!t.matches || !t.matches('input')) return; if (t.matches('[data-borrow-range]')) { borrowFromRange(); return; } if (t.matches('[data-range]')) return; if (t.dataset.k === 'price') { ptouched = t.value.trim() !== ''; if (!ptouched) { changed(); return; } changedPrice(); return; } changed(); });
     box.addEventListener('change', (e) => { if (e.target.matches && e.target.matches('input[data-k]') && !e.target.matches('[data-range]')) changed(); });
     // chips (static in the form; the cushion chips are redrawn with the head)
