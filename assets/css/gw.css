@@ -194,8 +194,12 @@ body.gw-legacy .kpf-acts2 .kpf-cta{background:transparent !important;color:var(-
 .gw-crumb{display:inline-block;font-size:14px;color:var(--gw-muted) !important;text-decoration:none !important;margin-bottom:6px}
 @media (max-width:719px){body.gw-legacy h1,body.gw-legacy .kpt-h1,body.gw-legacy h1.kpt-h2{font-size:38px}}
 
-/* Directory: the renamed heading stays centred */
-body[data-view="directory"] h1.kpt-h1{margin-left:auto;margin-right:auto;text-align:center}
+/* Directory: heading, search and results share one left edge */
+body[data-view="directory"] .kpe-hero .kpt-lede a{color:var(--gw-blue)}
+body[data-view="directory"] .kpe-hero{text-align:left}
+body[data-view="directory"] .kpe-hero .kpt-h1,body[data-view="directory"] .kpe-hero .kpt-lede{margin-left:0;margin-right:0;text-align:left}
+body[data-view="directory"] .kpe-count{text-align:left}
+@media (min-width:900px){body[data-view="directory"] .kpe-hero .kpt-h1{max-width:none}body[data-view="directory"] .kpe-hero .kpt-lede{max-width:74ch}}
 .gw-panel{scroll-margin-top:76px}
 .gw-guide>div:not(.gw-paths){display:grid;gap:22px;align-content:start}
 /* LIVE badge (as on the Lucerne Grand site): a fixed schedule label, always shown with the time beside it */
@@ -564,6 +568,7 @@ body.gw-legacy .gw-strip-host{max-width:760px;padding:0}
 /* Homepage: search, then three doors. */
 .gw-launch .gw-l-search{max-width:760px}
 .gw-doors{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;margin-top:6px}
+@media (max-width:719px){.gw-door-research{order:2}.gw-door-tools{order:3}}
 .gw-door{display:grid;gap:10px;align-content:start;min-width:0;border:1px solid var(--gw-line);border-radius:20px;background:#fff;padding:18px 16px 14px}
 .gw-door .gw-lane{margin:0 !important}
 .gw-door-t{margin:0 !important;font-size:24px !important;line-height:1.15;letter-spacing:-.02em}
@@ -574,6 +579,7 @@ body.gw-legacy .gw-strip-host{max-width:760px;padding:0}
 .gw-door .gw-qt a{padding:11px 12px 10px;gap:3px}.gw-door .gw-qt svg{width:22px;height:22px}.gw-door .gw-qt b{font-size:14.5px}.gw-door .gw-qt small{font-size:12px}
 .gw-rrows{gap:0}.gw-rrows .gw-mi{border-top:1px solid var(--gw-line);border-radius:0;min-height:54px;padding:8px 4px}
 .gw-rrows .gw-mi:first-child{border-top:0}
+.gw-rrows .gw-mi-map{display:block;padding:0 0 12px;border-radius:12px}.gw-rrows .gw-mi-map img{display:block;width:100%;height:auto;aspect-ratio:720/215;object-fit:cover;border:1px solid var(--gw-line);border-radius:12px;margin-bottom:10px;background:var(--gw-grey)}.gw-rrows .gw-mi-map span{display:block;padding:0 4px}.gw-rrows .gw-mi-map b::after{content:" ›";color:var(--gw-blue)}.gw-rrows .gw-mi-map+.gw-mi{border-top:1px solid var(--gw-line)}
 .gw-door-more{display:inline-flex;align-items:center;min-height:40px;font-weight:600;font-size:14.5px;color:var(--gw-blue) !important;text-decoration:none !important}
 @media (min-width:720px) and (max-width:1099px){.gw-doors{grid-template-columns:repeat(2,minmax(0,1fr))}.gw-door-research{grid-column:1/-1}.gw-door-research .gw-rrows{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px}.gw-door-research .gw-rrows .gw-mi:nth-child(2){border-top:0}}
 @media (min-width:1100px){.gw-doors{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.gw-door,.gw-guide-c.gw-l-guide{padding:20px 18px 14px}}

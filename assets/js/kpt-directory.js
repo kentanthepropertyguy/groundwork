@@ -41,7 +41,7 @@
         if (!q && !browse) {
           const ownRows = rows.filter(own);
           list.innerHTML = ownRows.map(row).join('');
-          count.textContent = ix.list.length.toLocaleString('en-US') + ' developments. Start typing a name above' + (ownRows.length ? ', or open a new launch with its own site below.' : '.');
+          count.textContent = ix.list.length.toLocaleString('en-US') + ' developments. Start typing a name above' + (ownRows.length ? ', or open one of Ken’s current projects with its own site.' : '.');
           more.hidden = false; more.textContent = 'Or browse all ' + ix.list.length.toLocaleString('en-US') + ' A–Z';
           return;
         }
