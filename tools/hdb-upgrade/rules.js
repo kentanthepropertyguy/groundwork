@@ -30,6 +30,11 @@
     // Same source as above. Lender assessment may be more restrictive.
     lowerLtvStructure: { ltv: 0.55, minCashPct: 0.10, maxTenureYears: 35 },
 
+    // Bank policy, NOT a MAS rule: the age by which a bank usually wants a private-home loan to end (UOB private home loan page,
+    // checked 2026-10-21: "Up to 35 years or 75 years of age, whichever is earlier"). Banks differ. Caps every bank-loan tenure here, so
+    // the 35-year lower-LTV structure never runs a loan past this age. Does not apply to HDB loans or company buyers.
+    bankMaturityAge: 75,
+
     // IRAS — Buyer's Stamp Duty, residential, on/after 15 Feb 2023. Computed on the higher
     // of price or market value; rounded down. Verified 2026-10-05.
     bsdBands: [

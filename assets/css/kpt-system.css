@@ -42,7 +42,7 @@ a{ color:inherit; text-decoration:none; }
 }
 .kpt-h1{ font-family:var(--serif); font-weight:400; font-size:40px; line-height:1.15; margin:0 0 14px; color:var(--ink); }
 .kpt-h2{ font-family:var(--serif); font-weight:400; font-size:26px; line-height:1.25; margin:0 0 10px; color:var(--ink); }
-.kpt-lede{ font-size:17px; color:var(--muted); margin:0 0 0; max-width:46ch; }
+.kpt-lede{ font-size:17px; color:var(--muted); margin:0 0 0; max-width:var(--gw-measure,46ch); text-wrap:pretty; }
 .kpt-body{ font-size:15px; color:var(--ink); }
 .kpt-muted{ color:var(--muted); }
 @media (max-width:640px){

@@ -17,7 +17,7 @@
 .pa-sale-r:empty{display:none}.pa-sale-r{color:var(--gw-body)}
 .pa-note a,.pa-fine a{color:var(--gw-blue)}
 .pa-gap{margin-top:6px}
-.pa-p{margin:0;font-size:16px;line-height:1.5;color:var(--gw-body);max-width:52ch}
+.pa-p{margin:0;font-size:16px;line-height:1.5;color:var(--gw-body);max-width:var(--gw-measure);text-wrap:pretty}
 /* fields */
 .pa-f{display:flex;flex-direction:column;gap:6px;min-width:0}
 .pa-f>span{font-size:14px;font-weight:600;color:var(--gw-ink)}.pa-f>span em{font-style:normal;font-weight:400;color:var(--gw-muted);font-size:12.5px;margin-left:4px}
@@ -54,7 +54,7 @@
 .pa-adj-b{display:flex;flex-direction:column;gap:14px;padding:6px 0 4px}
 /* the answer */
 .pa-intro{display:flex;flex-direction:column;gap:8px}
-.pa-lead{margin:0;font-size:28px;line-height:1.15;letter-spacing:-.02em;font-weight:700;color:var(--gw-ink);text-wrap:balance;max-width:24ch}
+.pa-lead{margin:0;font-size:28px;line-height:1.15;letter-spacing:-.02em;font-weight:700;color:var(--gw-ink);text-wrap:balance;max-width:var(--gw-measure)}
 .pa-lead b{font-weight:700;color:var(--gw-ink)}
 .pa-hd{display:flex;flex-direction:column;gap:14px}
 .pa-hdt{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between}
@@ -68,7 +68,7 @@
 .pa-fig .v.none{font-size:26px;color:var(--gw-body)}
 .pa-fig .s{font-size:13.5px;line-height:1.45;color:var(--gw-body);margin-top:8px}
 .pa-fig .s p{margin:0 0 6px}.pa-fig .s p:last-child{margin-bottom:0}.pa-fig .s b{color:var(--gw-ink)}
-.pa-beneath{margin:0;font-size:14.5px;line-height:1.5;color:var(--gw-body);max-width:56ch;padding-top:12px;border-top:1px solid var(--gw-line)}
+.pa-beneath{margin:0;font-size:14.5px;line-height:1.5;color:var(--gw-body);max-width:var(--gw-measure);padding-top:12px;border-top:1px solid var(--gw-line)}
 .pa-beneath b{color:var(--gw-ink)}
 .pa-badge{display:inline-block;font-size:12px;font-weight:600;line-height:1;padding:6px 10px;border-radius:980px;white-space:nowrap}
 .pa-badge.ok{background:var(--pa-ok-soft);color:var(--pa-ok)}.pa-badge.est{background:var(--pa-warn-soft);color:var(--pa-warn)}

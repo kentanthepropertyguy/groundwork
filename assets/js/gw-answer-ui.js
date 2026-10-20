@@ -107,6 +107,7 @@
   const tag = (kind, text) => '<span class="pa-badge ' + kind + '">' + text + '</span>';
   const plural = (n) => n + (n === 1 ? ' year' : ' years');
   const rateTxt = (res) => pc((res.ratePct === undefined ? 4 : res.ratePct) / 100, 2);
+  const R_MAT = root.GW_RULES && root.GW_RULES.bankLtv && root.GW_RULES.bankLtv.maturityAge || 75;
   const maxTenure = () => (root.GW_RULES && root.GW_RULES.bankLtv && root.GW_RULES.bankLtv.maxTenure && root.GW_RULES.bankLtv.maxTenure.private) || 35;
   // Three figures, each saying what it is: what the bank may lend (a loan, for the tenure shown), what the buyer can comfortably pay (loan plus cash, CPF,
   // reserves and payment dates), and what the loan costs each month. The bank's lending capacity is never presented as the buyer's budget.
@@ -227,8 +228,10 @@
     const cur = rows.filter((r) => r.isCurrent)[0] || {}, stdRow = rows.filter((r) => r.isStd)[0] || {}, sugRow = rows.filter((r) => r.isSuggested)[0] || {};
     const std = stdRow.ltv ? pc(stdRow.ltv) : '75%';
     let lead, why;
-    if (t.manual) { lead = 'Loan tenure: <b>' + plural(t.years) + '</b>, as you chose.'; why = ''; }
-    else { lead = 'Loan tenure: <b>' + plural(t.years) + '</b>.'; why = 'The longest loan that keeps the standard loan limit at your age.'; }
+    const mAge = root.GW_RULES && root.GW_RULES.bankLtv ? root.GW_RULES.bankLtv.maturityAge : 75, ageLine = 'Banks usually end a loan by age ' + mAge + ' (lender policy, not a MAS rule).';
+    if (t.cappedFrom) { lead = 'Loan tenure: <b>' + plural(t.years) + '</b>, not the ' + plural(t.cappedFrom) + ' you entered.'; why = t.cappedBy === 'age' ? ageLine : 'Thirty-five years is the longest a bank loan can run.'; }
+    else if (t.manual) { lead = 'Loan tenure: <b>' + plural(t.years) + '</b>, as you chose.'; why = ''; }
+    else { lead = 'Loan tenure: <b>' + plural(t.years) + '</b>.'; why = t.std < 1 ? 'No tenure keeps the standard loan limit at your age, so the longest a bank usually lends is used, at the lower limit. ' + ageLine : 'The longest loan that keeps the standard loan limit at your age.'; }
     const facts = 'Loan ends at about age ' + t.endAge + (t.ltv ? ' · loan limit ' + pc(t.ltv) + ' of the price' : '') + (t.lower && t.lowerWhy ? ', the lower limit because ' + (t.lowerWhy === 'age' ? 'the loan runs past age 65' : 'the tenure is over 30 years') : '') + '.';
     let nudge = '';
     if (t.nudge) {
@@ -238,7 +241,7 @@
         '<div class="pa-tn-b"><button type="button" class="pa-btn pri" data-use="' + (n.years === t.std ? 'auto' : n.years) + '">Use ' + plural(n.years) + '</button><button type="button" class="pa-link" data-cmp aria-expanded="' + !!cmpOpen + '">Compare tenures</button></div></div>';
     }
     const table = '<div class="pa-cmp-w" id="pa-cmp" data-cmp-box' + (cmpOpen ? '' : ' hidden') + '>' + '<p class="pa-fine pa-tf">' + facts + '</p>' + cmpTable(rows, t, true) +
-      '<p class="pa-fine">' + maxTenure() + ' years is the longest a loan can run. Banks set their own age limits, so check with yours. A longer loan can lower the loan limit.</p></div>';
+      '<p class="pa-fine">' + plural(Math.min(maxTenure(), t.allowed || maxTenure())) + ' is the longest a loan can run at your age. ' + ageLine + ' Banks set their own age limits, so check with yours. A longer loan can lower the loan limit.</p></div>';
     return '<div class="pa-tenure"><p class="pa-tl">' + lead + (why ? ' <span>' + why + '</span>' : '') + '</p>' + nudge +
       '<button type="button" class="pa-link pa-cmp-t" data-cmp aria-expanded="' + !!cmpOpen + '" aria-controls="pa-cmp">Compare tenures <span aria-hidden="true">' + (cmpOpen ? '▴' : '▾') + '</span></button>' + table + '</div>';
   }
@@ -279,7 +282,7 @@
     if (st.twoBuyers && B.ageUnverified) L.push(row('Two borrowers', '<span class="pa-badge bad">Unverified</span> Weighting your ages by income gives ' + (Math.round(B.iwaa * 10) / 10) + ' or ' + (Math.round(B.iwaaGross * 10) / 10) + ', depending on whether MAS means counted or gross income. We use the older, ' + (Math.round(B.iwaaUse * 10) / 10) + ', so the loan is never overstated. Ask the bank which age it uses.'));
     // tenure
     const tt = res.tenure;
-    if (tt) L.push(row('Your tenure', (tt.manual ? 'You chose ' + plural(tt.years) + ', so that is what is used. ' : plural(tt.years) + ' is used: the longest loan that keeps the standard loan limit at your age. ') + 'A longer one, up to ' + plural(tt.cap) + ' and ending by about age ' + 75 + ', is only offered when it adds 5% or more to your budget, and it takes the lower loan limit. ' + maxTenure() + ' years is the longest a loan can run. We do not assume your loan must end by that age, and banks set their own age limits.' + cmpTable(rows, tt, false)));
+    if (tt) L.push(row('Your tenure', (tt.manual ? 'You chose ' + plural(tt.years) + ', so that is what is used. ' : (tt.std < 1 ? plural(tt.years) + ' is used: no tenure keeps the standard loan limit at your age, so it is the longest a bank usually lends. ' : plural(tt.years) + ' is used: the longest loan that keeps the standard loan limit at your age. ')) + (tt.cappedFrom ? 'You entered ' + plural(tt.cappedFrom) + ', but ' + plural(tt.years) + ' is the longest a bank usually lends at your age, so that is what is used. ' : '') + 'A longer one, up to ' + plural(tt.cap) + ' and ending by about age ' + R_MAT + ', is only offered when it adds 5% or more to your budget, and it takes the lower loan limit. ' + plural(Math.min(maxTenure(), tt.allowed || maxTenure())) + ' is the longest a loan can run at your age. Banks usually end a loan by age ' + R_MAT + ' (lender policy, not a MAS rule) but set their own age limits, so check with yours.' + cmpTable(rows, tt, false)));
     // duty
     L.push(row('Stamp duty', 'Buyer’s stamp duty <b>' + $(a.bsd) + '</b>' + (a.absd > 0 ? ' and additional buyer’s stamp duty (' + pc(a.absdRate) + ') <b>' + $(a.absd) + '</b>' : ', with no additional buyer’s stamp duty') + '. Paid in cash within 14 days of signing.'));
     // cash and CPF

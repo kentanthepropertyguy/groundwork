@@ -254,7 +254,7 @@
     const headline = { peak: round2(peak), peakAt: peakAt && iso(peakAt), peakCause, firstGap: firstGap && iso(firstGap), coveredOn: uncoveredEnd > 0 ? null : (coveredOn && iso(coveredOn)), coveredBy: uncoveredEnd > 0 ? null : coveredBy, uncoveredEnd };
     const out = {
       ok: true, version: VERSION, kind, order, price: P, otp: iso(otp), saleDate: saleDate && iso(saleDate), keysDate: iso(keysDate), horizonMonths: horizon,
-      loan: Object.assign({}, ltvRow, { loanMax, cashMin, cpfOrCash: prog.cpfOrCash, years, ratePct: rate * 100, stressRatePct: R.stressRate * 100, tenureCapped: prog.tenureCapped }),
+      loan: Object.assign({}, ltvRow, { loanMax, cashMin, cpfOrCash: prog.cpfOrCash, years, ratePct: rate * 100, stressRatePct: R.stressRate * 100, tenureCapped: prog.tenureCapped, tenureCappedBy: prog.tenureCappedBy, tenureAsked: prog.tenureAsked, tenureAllowed: prog.tenureAllowed }),
       instalment: { final: round2(prog.finalMonthly), finalStress: round2(C.instal(loanMax, Math.max(R.stressRate, rate), years)), basis: 'Instalment at the quoted rate once the loan is fully drawn; the stress figure uses the higher of ' + (R.stressRate * 100) + '% and the quoted rate (MAS Notice 645), for TDSR only.' },
       duty: { bsd: duty.bsd, absd: duty.absd, absdRate: duty.absdRate, total: duty.total, notes: duty.notes, remissions: duty.remissions, date: iso(dutyDate) },
       events, series, headline, totals: { amount: sum('amount'), cash: sum('cashUsed'), cpf: sum('cpfUsed'), bank: sum('bank'), uncovered: sum('uncovered') },
