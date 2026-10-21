@@ -4,6 +4,7 @@ const root = path.join(__dirname, '../../..');
 const F = require(path.join(root, 'assets/js/kpt-find.js'));
 const T = F.T;
 let pass = 0, fail = 0;
+const ui = fs.readFileSync(path.join(root, 'assets/js/kpt-discover-ui.js'), 'utf8');
 const t = (name, fn) => { try { fn(); pass++; console.log('  ok   ' + name); } catch (e) { fail++; console.log('  FAIL ' + name + '\n       ' + e.message); } };
 
 // ---- synthetic index. latest month = 2026-09. rows: [bin,n,act,last,q1,med,q3]
@@ -128,9 +129,8 @@ t('0 matches: message and nearest working budget in $50k steps up to +50%', () =
 t('index failure: prepare() returns null for empty, corrupt or wrong-kind data', () => {
   [null, undefined, {}, { kind: 'x' }, { v: 1, kind: 'kpt-find-index', projects: 'x', latestMonth: '2026-09' }, { v: 2, kind: 'kpt-find-index', projects: [], latestMonth: '2026-09' }].forEach((d) => assert.strictEqual(F.prepare(d), null));
 });
-t('page: data failure leaves the section absent (renderFind clears findRoot)', () => {
-  const html = fs.readFileSync(path.join(root, 'tools/what-can-i-buy/index.html'), 'utf8');
-  assert.ok(/if \(!findIx\) \{ root\.innerHTML = ''; return; \}/.test(html)); assert.ok(/\.catch\(\(\) => \(findIx = null\)\)/.test(html));
+t('page: a data failure says so plainly and points to the directory instead of leaving the page blank', () => {
+  assert.ok(/We couldn’t load the sales data just now/.test(ui)); assert.ok(/browse every development/.test(ui)); assert.ok(/const get = [^\n]*\.catch\(\(\) => null\)/.test(ui));
 });
 
 console.log('Unsupported answers');
@@ -277,32 +277,29 @@ t('ELTA stays eligible when it qualifies under the rules (not hard-coded in or o
 
 console.log('V9.1 page wiring and privacy');
 const page = fs.readFileSync(path.join(root, 'tools/what-can-i-buy/index.html'), 'utf8');
-t('location panel gates the list: no cards and no analytics until the buyer chooses', () => {
-  const i = page.indexOf("if (FS.loc === 'pending')"), j = page.indexOf('FI.shortlist(findIx'), k = page.indexOf("KPT.track('find_shown'");
-  assert.ok(i > -1 && i < j && j < k); assert.ok(/FS\.loc === 'pending'\) \{ root\.innerHTML = [^;]*locPanel\(\)[^;]*; return; \}/.test(page));
+t('results and analytics only follow a budget: nothing is listed or counted at the entry screen', () => {
+  const i = ui.indexOf('D.search(ix, reqNow()'), k = ui.indexOf("track('find_shown'"); assert.ok(i > -1 && k > i);
+  assert.ok(/if \(!S\.req\.budget \|\| !ix\) \{ lastRes = null; return null; \}/.test(ui));
 });
-t('a district is applied only by an explicit click (locuse); never from the text alone', () => {
-  assert.ok(/f === 'locuse'\) \{ FS\.districts = \[t\.dataset\.d\]; FS\.loc = 'confirmed'/.test(page)); assert.ok(!/FS\.districts = .*resolveArea/.test(page)); assert.ok(!/districts: .*resolveArea/.test(page));
-  assert.ok(/f === 'locskip'\) \{ FS\.districts = \[\]; FS\.loc = 'skipped'/.test(page));
+t('a place is applied only by an explicit choice (a tapped suggestion or Enter on a single match); never guessed from the text alone', () => {
+  assert.ok(/f === 'pick'\) \{ pickPlace\(/.test(ui)); assert.ok(/if \(opts\.length === 1\) opts\[0\]\.click\(\)/.test(ui)); assert.ok(!/resolveArea/.test(ui));
 });
 t('location text is read only for display and matching, and never reaches analytics, WhatsApp or the URL', () => {
-  const uses = page.split('\n').filter((l) => /whereTextNow|whereText/.test(l));
-  uses.forEach((l) => assert.ok(!/track\(|waLink|waMessage|location\.href|location\.hash|history\./.test(l), l));
-  const after = page.slice(page.indexOf('function locPanel')); assert.ok(!/KPT\.track\([^)]*(txt|whereText|FS\.text)/.test(after));
-  assert.ok(/handoff\.from === 'buy' && handoff\.where !== 'flexible'/.test(page));
+  const uses = ui.split('\n').filter((l) => /pendingWhere|whereText|NR\.label/.test(l));
+  uses.forEach((l) => assert.ok(!/track\(|waLink|waMessage|location\.href|location\.hash|history\./.test(l), l.slice(0, 160)));
+  assert.ok(!/KPT\.track\([^)]*(pendingWhere|whereText|NR\.label)/.test(ui));
   const a = F.analytics(F.shortlist(ixr, { budget: 3000000, openTo: 'both', size: SZ, districts: ['20'], text: '', answers: { where: 'work' }, loc: { districts: ['20'] } }), '3.0-3.2m');
   assert.deepStrictEqual(Object.keys(a).sort(), F.ANALYTICS_KEYS.slice().sort());
 });
 t('Buyer analytics and WhatsApp still exclude the text; only the session handoff carries it', () => {
   const B = require(path.join(root, 'assets/js/kpt-buyer.js')); const A = { budget: 3000000, purpose: 'own-stay', size: 'not-sure', where: 'work', whereText: 'Ang Mo Kio', priorities: [], openTo: 'both' };
   assert.strictEqual(B.buildHandoff(A).whereText, 'Ang Mo Kio'); assert.ok(!/Ang Mo Kio/.test(B.waMessage(A)));
-  const buyPage = fs.readFileSync(path.join(root, 'buy/index.html'), 'utf8'); assert.ok(/writeHandoff\(window\.sessionStorage/.test(buyPage));
+  assert.ok(/M\.writeHandoff\(window\.sessionStorage/.test(ui));
 });
-t('HDB and budget-only handoffs have no location step', () => {
-  assert.ok(/locIntent = \(\) => \['areas', 'family', 'work', 'school'\]\.indexOf\(answersNow\(\)\.where\) > -1/.test(page));
-  assert.ok(/: \{ where: 'flexible', size: 'not-sure', priorities: \[\] \}/.test(page));
+t('HDB and budget-only handoffs carry a budget only: no place is asked for or guessed', () => {
+  assert.ok(/where: 'flexible', whereText: ''/.test(ui)); assert.ok(/near: null, from: h\.from/.test(ui));
 });
-t('freehold wording stays accurate: "Freehold or 900+ year lease" in the summary line and the Change search panel (never plain "Freehold")', () => { assert.ok(/'Freehold or 900\+ year lease'/.test(page)); assert.ok(/Freehold or 900\+ year lease only/.test(page)); assert.ok(!/\['Freehold'\]/.test(page)); assert.ok(!/999-year only/.test(page)); });
+t('freehold wording stays accurate: "Freehold or 900+ year lease" wherever the choice is shown (never plain "Freehold")', () => { assert.ok(/'Freehold or 900\+ year lease'/.test(ui)); assert.ok(/'Freehold or 900\+ yr'/.test(ui)); assert.ok(!/\['Freehold'\]|, 'Freehold'\]/.test(ui)); assert.ok(!/999-year only/.test(ui)); });
 
 console.log('Pinery Residences exclusion (V10.4.1: unresolved Huttons D18 vs URA D16 identity; targeted only)');
 const invRaw = JSON.parse(fs.readFileSync(path.join(root, 'data/projects/inventory.json'), 'utf8'));

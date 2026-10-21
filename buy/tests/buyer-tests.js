@@ -215,21 +215,14 @@ t('analytics: allow-listed categorical keys only, bucketed budget, no free text'
 });
 
 console.log('Page wiring');
+// Phase 4: /buy/ is a redirect into Budget Search (tools/what-can-i-buy), which has its own tests (tools/what-can-i-buy/tests/discover-tests.js).
+// This engine (kpt-buyer.js) is kept, unused by any page, so its rules and handoff shapes stay tested until it is retired on purpose.
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
-t('page loads the shared engine, result and buyer modules and the production config', () => {
-  ['kpt-engine.js', 'kpt-result.js', 'kpt-buyer.js', 'kpt-market.js', 'kpt-analytics.js', 'data/market/config.js'].forEach((s) => assert.ok(html.indexOf(s) > -1, s));
+t('/buy/ only redirects into Budget Search and carries no tool of its own', () => {
+  assert.ok(/what-can-i-buy/.test(html)); assert.ok(!/kpt-buyer\.js|kpt-engine\.js|id="budget"/.test(html));
 });
-t('page contains no reasoning of its own: no thresholds, rules or market maths', () => {
-  const js = html.split('<script>').pop();
-  assert.ok(!/\b(0\.15|1\.15|min_ratio|median|p25|p75)\b/.test(js)); assert.ok(/B\.analyse\(/.test(js));
+t('the old buyer handoff is still read by Budget Search', () => {
+  assert.ok(/h\.from === 'buy'/.test(fs.readFileSync(path.join(__dirname, '../../assets/js/kpt-discover-ui.js'), 'utf8')));
 });
-t('what-can-i-buy back chip knows about the buyer journey', () => {
-  assert.ok(/handoff\.from === 'buy'/.test(fs.readFileSync(path.join(__dirname, '../../tools/what-can-i-buy/index.html'), 'utf8')));
-});
-t('the page has the approved questionnaire and none of the removed questions or sections', () => {
-  ['What are you open to?', 'Where are you looking?', 'Anywhere in Singapore', 'Near somewhere specific', 'Area, street or project', 'What matters most?', 'Closer to the centre', 'Newer building', 'Freehold or 900+ year lease', "New launches are matched on bedrooms where we have inventory data. Resale uses size, because the transaction data has no bedroom count."].forEach((x) => assert.ok(html.indexOf(x) > -1, x));
-  ['Own stay', 'Investment', 'A bit of both', 'Near family', 'Near work', 'Near a particular school', 'Better location', 'Schools', 'Lower monthly', 'Facilities', 'Ways to get more from your budget', 'The main trade-off'].forEach((x) => assert.ok(html.indexOf(x) < 0, x));
-});
-t('the homepage still routes to /buy/', () => assert.ok(/href="buy\/"/.test(fs.readFileSync(path.join(__dirname, '../../index.html'), 'utf8'))));
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed'); process.exit(fail ? 1 : 0);
