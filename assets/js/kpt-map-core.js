@@ -116,7 +116,12 @@
     };
     /* what a card and a search row call it: "New launch", "New launch · under construction", "GLS site" */
     m.upTag = (p) => { const u = p && p.up; if (!u) return ''; return u.kind === 'launch' ? 'New launch' : u.unnamed ? 'GLS site' : 'Upcoming · GLS site'; };
-    m.upStage = (p) => { const u = p && p.up; if (!u) return ''; return u.kind === 'launch' ? (u.stage === 'under-construction' ? 'New launch · under construction' : 'New launch') : u.unnamed ? 'Awarded GLS site · no project name yet' : 'Awarded GLS site'; };
+    m.upStage = (p) => {
+      const u = p && p.up; if (!u) return '';
+      if (u.kind === 'launch') return u.stage === 'under-construction' ? 'New launch · under construction' : 'New launch';
+      const who = u.agency === 'HDB' ? 'HDB GLS site' : 'GLS site';
+      return u.unnamed ? 'Awarded ' + who + ' · no project name yet' : 'Awarded ' + who;
+    };
     const upNear = (lat, lon, max, skip) => m.UP.filter((p) => p.pos && p !== skip).map((p) => ({ p, d: hav({ lat, lon }, p) })).filter((x) => x.d <= max).sort((a, b) => a.d - b.d);
     m.upNear = upNear;
 
@@ -201,7 +206,7 @@
     const roadQuery = (t) => t.length >= 3 && t.split(' ').some((w) => w.length >= 3 && !GENERIC.test(w));
     // new launches and GLS sites: by name or by any other name the register lists (so "One Chuan Grove" and "Chuan Grove" both find it)
     const upPick = (t) => m.UP.map((p) => { const names = [p.n].concat(p.up.aliases || []); let r = null; names.forEach((x) => { const k = rankIn(x, t); if (k !== null && (r === null || k < r)) r = k; }); return r === null ? null : { r, p }; }).filter(Boolean).sort((a, b) => a.r - b.r || a.p.n.length - b.p.n.length).slice(0, 3)
-      .map((o) => ({ t: 'dev', g: 'up', n: o.p.n, sub: [m.upStage(o.p).split(' · ')[0] === 'New launch' ? 'New launch' : 'GLS site', o.p.pos ? '' : 'not on the map yet'].filter(Boolean).join(' · ') + (o.p.district ? ' · D' + Number(o.p.district) : '') }));
+      .map((o) => ({ t: 'dev', g: 'up', n: o.p.n, sub: [o.p.up.kind === 'launch' ? 'New launch' : 'GLS site', o.p.pos ? '' : 'not on the map yet'].filter(Boolean).join(' · ') + (o.p.district ? ' · D' + Number(o.p.district) : '') }));
     m.places = (q) => {
       const t = NORM(q); if (!t) return [];
       const pick = (arr, name, mapper, cap, tie) => arr.map((x) => { const r = rankIn(name(x), t); return r === null ? null : { r, x }; }).filter(Boolean).sort((a, b) => a.r - b.r || (tie ? tie(b.x) - tie(a.x) : 0) || name(a.x).length - name(b.x).length).slice(0, cap).map((o) => mapper(o.x));
@@ -242,6 +247,12 @@
         const list = devsNear(rd.lat, rd.lon, r);
         const ar = rd.area || areaAt(rd.lat, rd.lon);
         return { t: 'road', title: rd.title, meta: 'Road' + (ar ? ' · ' + ar : ''), s: { lat: rd.lat, lon: rd.lon, lab: 'Road' }, list, r, lat: rd.lat, lon: rd.lon, road: rd, ups: upNear(rd.lat, rd.lon, r) };
+      }
+      if (pl.t === 'dev') {
+        /* a selected development or launch: its own position is the centre, so the same optional radius works (nearby developments, launches and sites). Never a guess: no position, no radius. */
+        const p = BY[pl.n]; if (!p || !p.pos) return null;
+        const list = devsNear(p.lat, p.lon, r).filter((x) => x.p !== p), ar = AREAOF[p.n] || areaAt(p.lat, p.lon);
+        return { t: 'dev', title: p.n, meta: 'Development' + (ar ? ' · ' + ar : ''), s: { lat: p.lat, lon: p.lon, lab: 'Selected' }, list, r, lat: p.lat, lon: p.lon, ups: upNear(p.lat, p.lon, r, p), self: p };
       }
       const s = pl.t === 'mrt' ? stationBy(pl.n) : schoolBy(pl.n); if (!s) return null;
       const ar = areaAt(s.lat, s.lon), list = pl.t === 'mrt' ? nearStationDevs(s, r) : devsNear(s.lat, s.lon, r);

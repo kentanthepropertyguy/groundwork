@@ -76,7 +76,7 @@
       const dot = (p, o2) => { const k = L.circleMarker([p.lat, p.lon], Object.assign(p.up ? { radius: 5 * zs + 1, color: '#2E4FD1', weight: 1.8, fillColor: '#fff', fillOpacity: .95, bubblingMouseEvents: false } : { radius: (3 + Math.min(6, Math.sqrt(p.t12))) * zs, color: '#fff', weight: 1.2, fillColor: '#2E4FD1', fillOpacity: p.t12 ? .5 : .25, bubblingMouseEvents: false }, o2)); if (canHover) k.bindTooltip(tip(p), { className: 'gwtip', direction: 'top', offset: [0, -6] }); /* a touch screen has no hover: the tap selects the dot, and a tooltip would only cover the card and the map */ k.on('click', () => onSelect && onSelect(p.n)); return k; };
       for (const p of cur.projects) if (p.n !== cur.selected && !cmp.has(p.n)) dot(p).addTo(layer);
       for (const n of cmp) { const p = BY[n]; if (p && p.pos) dot(p, { fillColor: '#0E8C89', fillOpacity: .95, weight: 2 }).addTo(layer); }
-      if (cur.circle) L.circle([cur.circle.lat, cur.circle.lon], { radius: cur.circle.r, color: '#2E4FD1', weight: 2, opacity: .8, dashArray: '7 5', fillColor: '#2E4FD1', fillOpacity: .06, interactive: false }).addTo(selG);
+      if (cur.circle) L.circle([cur.circle.lat, cur.circle.lon], { radius: cur.circle.r, color: '#2E4FD1', weight: 2, opacity: cur.circle.soft ? .55 : .8, dashArray: '7 5', fillColor: '#2E4FD1', fillOpacity: cur.circle.soft ? .02 : .06, interactive: false }).addTo(selG);
       if (cur.areaRings) L.polygon(cur.areaRings, { color: '#14203F', weight: 2, opacity: .75, fillColor: '#2E4FD1', fillOpacity: .05, dashArray: '6 5', interactive: false }).addTo(selG);
       drawLabels();
     }

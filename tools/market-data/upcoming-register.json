@@ -1,11 +1,21 @@
 {
-  "_note": "The upcoming-project register: new launches and awarded GLS sites that have no URA sales yet, so they are not in the development register built from URA transactions. Edit THIS file, then run `node tools/market-data/build-upcoming.js` and commit data/map/upcoming.json with it. See tools/market-data/UPCOMING.md.",
+  "_note": "The supplemental project register: named new launches and awarded sites that the URA transaction data does not hold (it holds only developments that have sales). Edit THIS file, then run `node tools/market-data/build-upcoming.js` and commit data/map/upcoming.json with it. See tools/market-data/UPCOMING.md for the lifecycle, the sources and the refresh steps.",
   "v": 1,
   "auto": {
-    "_note": "Awarded residential GLS sites are added automatically from URA's 'URA Sale Sites' dataset (data.gov.sg) when they were awarded in the last `months` months and no development in the transaction register sits inside the site boundary. They carry no project name. A site listed under an entry's `ura` is never added twice. Put a site in `skip` to leave it out.",
-    "months": 12,
-    "landUse": ["Residential (Non-Landed)", "Residential with Commercial at 1st Sty", "Commercial and Residential"],
-    "skip": []
+    "_note": "URA residential and mixed-use sites are added automatically from URA's 'URA Sale Sites' dataset at ANY age, until they are resolved: a development with URA sales sits inside the site, its URA completion year has passed, it is listed under an entry's `ura`, or it is in `resolved` below. When OneMap holds one project name '(U/C)' inside the site boundary the site takes that name (it keeps its id, and its old 'GLS site' name stays searchable as an alias); otherwise it is a GLS site with no project name yet. Put a site in `skip` to leave it out, or in `resolved` (key 'DATE_AWARD|LOCATION': reason) when you know it has launched or been completed.",
+    "landUse": [
+      "Residential (Non-Landed)",
+      "Residential with Commercial at 1st Sty",
+      "Commercial and Residential"
+    ],
+    "skip": [],
+    "resolved": {
+      "20041126|Handy Road": "Awarded in 2004; completed long ago (no expected-completion year in the URA record)",
+      "20220126|Jalan Tembusu": "Launched as Tembusu Grand (URA sales since April 2023)",
+      "20220311|Dairy Farm Walk": "Launched as The Botany at Dairy Farm (URA sales since March 2023)",
+      "20220614|Dunman Road": "Launched as Grand Dunman (URA sales since July 2023)",
+      "20250703|Dunearn Road": "Launched as Dunearn House (380 homes; Frasers Property, CSC Land and Sekisui House); URA sales since July 2026"
+    }
   },
   "entries": [
     {
@@ -16,10 +26,17 @@
       "district": "20",
       "registry": "thomson-reserve",
       "microsite": "thomson-reserve",
-      "position": { "type": "onemap", "query": "THOMSON RESERVE", "building": "(U/C)" },
+      "position": {
+        "type": "onemap",
+        "query": "THOMSON RESERVE",
+        "building": "(U/C)"
+      },
       "facts": [],
       "sources": [
-        { "label": "OneMap address records for THOMSON RESERVE (U/C)", "url": "https://www.onemap.gov.sg/" }
+        {
+          "label": "OneMap address records for THOMSON RESERVE (U/C)",
+          "url": "https://www.onemap.gov.sg/"
+        }
       ]
     },
     {
@@ -31,12 +48,24 @@
       "tenure": "99 yrs from 2025",
       "registry": "lucerne-grand",
       "microsite": "lucerne-grand",
-      "position": { "type": "onemap", "query": "LUCERNE GRAND", "building": "(U/C)" },
-      "ura": ["20250609|Lakeside Drive"],
+      "position": {
+        "type": "onemap",
+        "query": "LUCERNE GRAND",
+        "building": "(U/C)"
+      },
+      "ura": [
+        "20250609|Lakeside Drive"
+      ],
       "facts": [],
       "sources": [
-        { "label": "OneMap address records for LUCERNE GRAND (U/C)", "url": "https://www.onemap.gov.sg/" },
-        { "label": "URA Sale Sites: Lakeside Drive, awarded June 2025", "url": "https://data.gov.sg/datasets/d_0e2b42f98535686282031a42c9c7b05a/view" }
+        {
+          "label": "OneMap address records for LUCERNE GRAND (U/C)",
+          "url": "https://www.onemap.gov.sg/"
+        },
+        {
+          "label": "URA Sale Sites: Lakeside Drive, awarded June 2025",
+          "url": "https://data.gov.sg/datasets/d_0e2b42f98535686282031a42c9c7b05a/view"
+        }
       ]
     },
     {
@@ -46,10 +75,17 @@
       "stage": "under-construction",
       "district": "09",
       "tenure": "103 yrs from 2024",
-      "position": { "type": "onemap", "query": "SOPHIA MEADOW", "building": "(U/C)" },
+      "position": {
+        "type": "onemap",
+        "query": "SOPHIA MEADOW",
+        "building": "(U/C)"
+      },
       "facts": [],
       "sources": [
-        { "label": "OneMap address records for SOPHIA MEADOW (U/C)", "url": "https://www.onemap.gov.sg/" }
+        {
+          "label": "OneMap address records for SOPHIA MEADOW (U/C)",
+          "url": "https://www.onemap.gov.sg/"
+        }
       ]
     },
     {
@@ -58,13 +94,127 @@
       "nameStatus": "reported",
       "kind": "gls",
       "stage": "awarded",
-      "ura": ["20250717|Chuan Grove", "20250910|Chuan Grove (1H2025)"],
-      "aliases": ["Chuan Grove", "Chuan Grove GLS", "Lorong Chuan GLS"],
-      "position": { "type": "ura" },
+      "ura": [
+        "20250717|Chuan Grove",
+        "20250910|Chuan Grove (1H2025)"
+      ],
+      "aliases": [
+        "Chuan Grove",
+        "Chuan Grove GLS",
+        "Lorong Chuan GLS"
+      ],
+      "position": {
+        "type": "ura"
+      },
       "facts": [],
       "sources": [
-        { "label": "URA Sale Sites: Chuan Grove (July 2025) and Chuan Grove (1H2025) (September 2025)", "url": "https://data.gov.sg/datasets/d_0e2b42f98535686282031a42c9c7b05a/view" },
-        { "label": "EdgeProp, 24 Feb 2026: Sing Holdings on its Chuan Grove project (no marketing name given)", "url": "https://www.edgeprop.sg/property-news/sing-holdings-prepares-massive-chuan-grove-project-after-record-2025-profit-north-gaia-ec" }
+        {
+          "label": "URA Sale Sites: Chuan Grove (July 2025) and Chuan Grove (1H2025) (September 2025)",
+          "url": "https://data.gov.sg/datasets/d_0e2b42f98535686282031a42c9c7b05a/view"
+        },
+        {
+          "label": "EdgeProp, 24 Feb 2026: Sing Holdings on its Chuan Grove project (no marketing name given)",
+          "url": "https://www.edgeprop.sg/property-news/sing-holdings-prepares-massive-chuan-grove-project-after-record-2025-profit-north-gaia-ec"
+        }
+      ]
+    },
+    {
+      "id": "chencharu-close",
+      "name": "Chencharu Close",
+      "kind": "gls",
+      "stage": "awarded",
+      "agency": "HDB",
+      "district": "27",
+      "aliases": [
+        "Chencharu Central",
+        "Chencharu Close GLS",
+        "Chencharu Close mixed-use site"
+      ],
+      "position": {
+        "type": "parcel"
+      },
+      "facts": [
+        [
+          "Site",
+          "About 2.95 ha (29,450 sqm), mixed commercial and residential, in the new Chencharu Town, Yishun"
+        ],
+        [
+          "Plan",
+          "About 875 homes, with a hawker centre, a bus interchange and retail"
+        ],
+        [
+          "Tenure",
+          "99 years"
+        ],
+        [
+          "Awarded",
+          "2025, by HDB, to a consortium of Evia Real Estate, Gamuda Land and Ho Lee Group"
+        ]
+      ],
+      "sources": [
+        {
+          "label": "HDB press release: HDB launches sale site at Chencharu Close (site, mixed use, about 875 homes)",
+          "url": "https://www.hdb.gov.sg/cs/infoweb/about-us/news-and-publications/press-releases/HDB-Launches-Sale-Site-at-Chencharu-Close"
+        },
+        {
+          "label": "Star Property, 2 Oct 2025: Gamuda Land and partners win Chencharu Close (site area, award)",
+          "url": "https://www.starproperty.my/news/gamuda-deepens-singapore-footprint-with-major-chencharu-close-win/133147"
+        },
+        {
+          "label": "Site boundary: URA Master Plan 2025 land-use parcel (Commercial & Residential, 29,452 sqm), matched to the 29,450 sqm reported",
+          "url": "https://data.gov.sg/datasets/d_a8c3546b26712e35021f3a681d0353ae/view"
+        }
+      ]
+    },
+    {
+      "id": "the-serra-residences",
+      "name": "The Serra Residences",
+      "kind": "launch",
+      "stage": "launched",
+      "district": "11",
+      "tenure": "Freehold",
+      "aliases": [
+        "Serra Residences",
+        "Serra",
+        "Serra Novena",
+        "7 Bassein Road"
+      ],
+      "position": {
+        "type": "onemap",
+        "query": "THE SERRA RESIDENCES",
+        "building": "(U/C)"
+      },
+      "facts": [
+        [
+          "Developer",
+          "Far East Organization"
+        ],
+        [
+          "Homes",
+          "133, in one 28-storey tower"
+        ],
+        [
+          "Site area",
+          "About 4,775 sqm (51,396 sq ft)"
+        ],
+        [
+          "Sales launch",
+          "16 October 2026 (preview from 2 October)"
+        ],
+        [
+          "Expected completion",
+          "4Q 2030"
+        ]
+      ],
+      "sources": [
+        {
+          "label": "Far East Organization media release, 2 October 2026: The Serra Residences",
+          "url": "https://www.malaymail.com/news/money/mediaoutreach/2026/10/02/far-east-organization-unveils-the-serra-residences/491458"
+        },
+        {
+          "label": "OneMap address records for THE SERRA RESIDENCES (U/C), 7 Bassein Road",
+          "url": "https://www.onemap.gov.sg/"
+        }
       ]
     },
     {
@@ -74,16 +224,38 @@
       "stage": "awarded",
       "registry": "hougang-central",
       "microsite": "hougang-central",
-      "position": null,
-      "positionNote": "Sold by HDB, which does not publish a site boundary in the datasets we use, and OneMap has no record for the project yet. It is searchable, and will be placed on the map once a verified location is added.",
+      "position": {
+        "type": "parcel"
+      },
       "facts": [
-        ["Plan", "About 830 homes, with a mall, a new bus interchange and a town plaza, joined to Hougang MRT"],
-        ["Tenure", "99 years"],
-        ["Awarded", "January 2026, to CapitaLand Integrated Commercial Trust, CapitaLand Development and UOL"]
+        [
+          "Site",
+          "About 4.69 ha (504,820 sq ft), plot ratio 2.5"
+        ],
+        [
+          "Plan",
+          "About 830 homes, with a mall, a new bus interchange and a town plaza, joined to Hougang MRT"
+        ],
+        [
+          "Tenure",
+          "99 years"
+        ],
+        [
+          "Awarded",
+          "January 2026, to CapitaLand Integrated Commercial Trust, CapitaLand Development and UOL"
+        ]
       ],
       "sources": [
-        { "label": "CapitaLand news release, 14 January 2026: CICT and consortium awarded Hougang Central site", "url": "https://www.capitaland.com/en/about-capitaland/newsroom/news-releases/international/2026/january/CICT-and-consortium-awarded-hougang-central-site.html" }
-      ]
+        {
+          "label": "CapitaLand news release, 14 January 2026: CICT and consortium awarded Hougang Central site",
+          "url": "https://www.capitaland.com/en/about-capitaland/newsroom/news-releases/international/2026/january/CICT-and-consortium-awarded-hougang-central-site.html"
+        },
+        {
+          "label": "Site boundary: URA Master Plan 2025 land-use parcel (Commercial & Residential, 46,908 sqm), matched to the 46,899 sqm in the release",
+          "url": "https://data.gov.sg/datasets/d_a8c3546b26712e35021f3a681d0353ae/view"
+        }
+      ],
+      "agency": "HDB"
     }
   ]
 }

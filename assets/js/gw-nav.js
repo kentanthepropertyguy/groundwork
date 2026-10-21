@@ -259,7 +259,7 @@
   function searchHtml(kind, placeholder, after) {
     const id = 'gwsx-' + kind + '-' + (++sxN);
     return '<div class="gw-sx gw-sx-' + kind + '" data-gw-search="' + kind + '"' + (kind === 'devs' ? ' data-gw-devs' : '') + ' hidden><label class="gw-sx-box" for="' + id + 'i">' + svg('search', 20) + '<span class="gw-vh">' + (kind === 'devs' ? 'Search developments' : 'Search tools and developments') + '</span>' +
-      '<input id="' + id + 'i" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="' + id + 'l" placeholder="' + esc(placeholder || 'Search a tool or a development') + '"></label>' +
+      '<input id="' + id + 'i" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="' + id + 'l" placeholder="' + esc(placeholder || 'Search a tool, development or postal code') + '"></label>' +
       '<div class="gw-sx-res" id="' + id + 'r" hidden></div>' + (after || '') + '</div>';
   }
   // The full menu: search, then the three ways in (Guide me, Tools, Research) with everything in each, then Ken's other sites.
@@ -372,6 +372,45 @@
     // Where a link from the menu or search goes (the tool or page only, never what was typed).
     document.addEventListener('click', (e) => { const a = e.target.closest && e.target.closest('[data-gw-nav-to]'); if (a) track('nav_select', { target: a.dataset.gwNavTo, placement: a.closest('[data-gw-search]') ? 'search' : a.closest('.gw-menu') ? 'menu' : 'page' }); });
 
+    // ---- postal codes and new launches in the same box ----
+    // A six-digit postal code is looked up with the shared module (gw-postal.js, the one the Map and Property values use) and sent where that address belongs:
+    // an HDB block or a landed home to Property values, a condo, EC or cluster development to its Research page, a launch or any other address to the Map. Only loaded when a code is typed.
+    const POSTAL_JS = 'assets/js/gw-postal.js?v=675423cd19';
+    const PC_RE = /^\s*(?:s(?:ingapore)?\s*\(?)?(\d{6})\)?\s*$/i;
+    let postalP = null, pdP = null, upP = null;
+    const loadPostal = () => postalP || (postalP = root.GW_POSTAL ? Promise.resolve(root.GW_POSTAL) : new Promise((ok) => { const s = document.createElement('script'); s.src = base + POSTAL_JS; s.onload = () => ok(root.GW_POSTAL || null); s.onerror = () => { postalP = null; ok(null); }; document.head.appendChild(s); }));
+    const getJ = (f) => fetch(base + f).then((x) => (x.ok ? x.json() : null)).catch(() => null);
+    const loadUp = () => upP || (upP = getJ('data/map/upcoming.json').then((d) => (d && Array.isArray(d.items) ? d : null)));
+    const loadPd = () => pdP || (pdP = Promise.all([getJ('data/registry/index.json'), loadUp(), getJ('data/value/hdb/index.json').then((i) => (i ? getJ('data/value/hdb/streets.json?v=' + encodeURIComponent(i.sourceVersion)) : null)), getJ('data/value/landed/index.json')]).then((a) => ({ reg: a[0] && a[0].rows, up: a[1] && a[1].items, hdb: a[2], landed: a[3] })));
+    // which kind of address: the same order Property values uses (development, HDB block, landed home), else just a place
+    function classifyAddr(GP, a, D) {
+      if (a.building) { const m = GP.devMatch(a, D.reg || [], D.up || []); if (m.kind !== 'none') { const x = m.list[0]; return Array.isArray(x) ? { k: 'dev', id: x[0], name: displayName(x[1]), cls: x[14] } : { k: 'up', id: x.id, name: x.name }; } }
+      if (D.hdb && GP.hdbTowns(a, D.hdb).length) return { k: 'hdb' };
+      if (D.landed && D.landed.streets) { const rk = GP.roadKey(a.road); if (rk && D.landed.streets.some((x) => GP.roadKey(x[0]) === rk)) return { k: 'landed' }; }
+      return { k: 'place' };
+    }
+    const mapPc = (a) => base + 'research/map/#pl=' + encodeURIComponent('postal:' + a.n);
+    // -> option rows for one resolved address: the destination that fits it first, "View on Map" second
+    function postalRows(a, c, opt, kn) {
+      const where = esc(a.title) + (a.building && a.sub ? ' · ' + esc(a.sub.split(' · ')[0]) : '') + ' · ' + a.code;
+      const ico = svg('map'), id = (t) => ' data-gw-nav-to="' + t + '"';
+      let first;
+      if (c.k === 'dev') first = opt(kn(), base + 'research/#/p/' + encodeURIComponent(c.id), svg('dev') + '<span><b>' + esc(c.name) + '</b><small>' + esc(({ ec: 'Executive Condominium', cluster: 'Cluster housing' }[c.cls] || 'Condominium') + ' · ' + a.title + ' · ' + a.code) + '</small></span>', id('postal-development'));
+      else if (c.k === 'up') first = opt(kn(), base + 'research/map/#p=' + encodeURIComponent(c.id), ico + '<span><b>' + esc(c.name) + '</b><small>' + esc('New launch or site · ' + a.code) + '</small></span>', id('postal-launch'));
+      else if (c.k === 'hdb') first = opt(kn(), base + 'journey/worth/#pc=' + a.code, svg('worth') + '<span><b>' + esc(a.title) + '</b><small>HDB flat · ' + a.code + ' · Property values</small></span>', id('postal-hdb'));
+      else if (c.k === 'landed') first = opt(kn(), base + 'journey/worth/#pc=' + a.code, svg('worth') + '<span><b>' + esc(a.title) + '</b><small>Landed home · ' + a.code + ' · Property values</small></span>', id('postal-landed'));
+      else first = opt(kn(), mapPc(a), ico + '<span><b>' + esc(a.title) + '</b><small>' + esc((a.building && a.sub ? a.sub.split(' · ')[0] + ' · ' : '') + a.code + ' · Open on Map') + '</small></span>', id('postal-map'));
+      const second = c.k === 'place' || c.k === 'up' ? '' : opt(kn(), mapPc(a), ico + '<span><b>View on Map</b><small>' + esc(a.title) + ' · what is nearby</small></span>', id('postal-map'));
+      return first + second;
+    }
+    // new launches and awarded sites (data/map/upcoming.json) by name or any name they are known by; the Map holds their panel
+    function matchUps(doc, query, skipNames, skipIds) {
+      const q = dnorm(query); if (q.length < 3 || !doc || !doc.items) return [];
+      return doc.items.map((it) => { let s = 0; [it.name].concat(it.aliases || []).forEach((a) => { const n = dnorm(a); const v = n === q ? 3 : n.indexOf(q) === 0 ? 2 : (' ' + n).indexOf(' ' + q) >= 0 ? 1 : 0; if (v > s) s = v; }); return { s, it }; })
+        .filter((x) => x.s && skipNames.indexOf(dnorm(x.it.name)) < 0 && skipIds.indexOf(x.it.id) < 0).sort((a, b) => b.s - a.s).slice(0, 3).map((x) => x.it);
+    }
+    const upSub = (u) => [u.kind === 'launch' ? 'New launch' : u.unnamed ? 'Awarded ' + (u.agency || 'URA') + ' site, no project name yet' : 'Awarded ' + (u.agency || 'URA') + ' site', u.district ? 'District ' + Number(u.district) : u.area || '', 'On the Map'].filter(Boolean).join(' · ');
+
     // ---- search ----
     let ixP = null, sitesP = null;
     const loadIx = () => ixP || (ixP = fetch(base + 'data/projects/index.json').then((x) => (x.ok ? x.json() : null)).catch(() => { ixP = null; return null; }));
@@ -383,7 +422,7 @@
       const items = () => [].slice.call(res.querySelectorAll('[role="option"]'));
       const setActive = (k) => { const it = items(); active = it.length ? (k + it.length) % it.length : -1; it.forEach((a, j) => a.setAttribute('aria-selected', String(j === active))); if (active >= 0) { inp.setAttribute('aria-activedescendant', it[active].id); it[active].scrollIntoView({ block: 'nearest' }); } else inp.removeAttribute('aria-activedescendant'); };
       const opt = (k, h, inner, extra) => '<a role="option" id="' + res.id + '-' + k + '" class="gw-sx-r" href="' + esc(h) + '"' + (extra || '') + '>' + inner + '</a>';
-      function render(q, devs, sites, loading, failed, roads) {
+      function render(q, devs, sites, loading, failed, roads, ups, pc) {
         const st = devsOnly ? [] : scoredTools(q, devs && devs.length ? 4 : 6), tools = st.map((x) => x.e);
         const all = (sites || []).map((s) => ({ site: s })).concat(devs || []);
         // A development whose name starts with what was typed comes first, unless a tool matches the words exactly (ABSD, mortgage…).
@@ -397,12 +436,15 @@
           ? opt(k++, d.site.url, svg('ext') + '<span><b>' + esc(d.site.name) + ' <i aria-hidden="true">↗</i></b><small>Ken’s site for this development</small></span>', ' data-gw-nav-to="site-' + esc(d.site.id) + '" target="_blank" rel="noopener"')
           : opt(k++, base + 'research/#/p/' + encodeURIComponent(d.id), svg('dev') + '<span><b>' + esc(d.name) + '</b><small>' + esc([d.cls === 'ec' ? 'Executive Condominium' : d.cls === 'cluster' ? 'Cluster housing' : '', d.street, 'District ' + d.district, d.n + ' sale' + (d.n === 1 ? '' : 's') + ' in 5 years'].filter(Boolean).join(' · ')) + '</small></span>', ' data-gw-nav-to="development"')).join(''));
         // Roads and streets: one result per road, leading to what sold around it (landed homes are sold by street, not by development name).
+        if (pc && pc.items && pc.items.length) h += group('Postal code', pc.items.map((x) => postalRows(x.a, x.c, opt, () => k++)).join(''));
+        if (pc && pc.note) after += '<p class="gw-sx-note" data-gw-sx-postal="' + pc.state + '" role="status">' + esc(pc.note) + '</p>';
+        if (ups && ups.length) h += group('New launches and sites · Map', ups.map((u) => opt(k++, base + 'research/map/#p=' + encodeURIComponent(u.id), svg('map') + '<span><b>' + esc(u.name) + '</b><small>' + esc(upSub(u)) + '</small></span>', ' data-gw-nav-to="launch"')).join(''));
         if (roads && roads.length) h += group('Roads and streets', roads.map((d) => opt(k++, roadLandedHref(base, d), svg('map') + '<span><b>' + esc(d.title) + '</b><small>' + esc((d.area ? d.area + ' · ' : '') + 'What landed homes sold for nearby') + '</small></span>', ' data-gw-nav-to="road"')).join(''));
         if (devFirst) h += toolsHtml();
         // Audit A5-11: if the development list couldn't load, say so instead of quietly showing tools only.
         if (failed) after += '<p class="gw-sx-note" data-gw-sx-failed>Development search didn’t load. Check your connection and try again, or <a href="' + base + 'projects/" data-gw-nav-to="directory">browse every development</a>.</p>';
         if (loading) after += '<p class="gw-sx-note">Searching developments…</p>';
-        else if (!tools.length && !all.length && !(roads && roads.length) && !failed) after += '<p class="gw-sx-note">Nothing matches “' + esc(q.slice(0, 40)) + '”. ' + (devsOnly ? 'Try part of the development’s name.' : 'Try a development name, or words like stamp duty, ABSD, mortgage, valuation or HDB upgrade.') + ' Executive condos and cluster houses aren’t covered in Research yet.</p>'; // V2-05
+        else if (!tools.length && !all.length && !(roads && roads.length) && !(ups && ups.length) && !pc && !failed) after += '<p class="gw-sx-note">Nothing matches “' + esc(q.slice(0, 40)) + '”. ' + (devsOnly ? 'Try part of the development’s name.' : 'Try a development name, or words like stamp duty, ABSD, mortgage, valuation or HDB upgrade.') + '</p>';
         else if (all.length) after += '<a class="gw-sx-more" href="' + base + 'projects/" data-gw-nav-to="directory">Not listed? Browse every development ›</a>';
         res.innerHTML = (h ? '<div role="listbox" id="' + inp.getAttribute('aria-controls') + '" aria-label="Search results" style="display:grid;gap:1px">' + h + '</div>' : '') + after;
         res.hidden = false; inp.setAttribute('aria-expanded', 'true'); if (body) body.hidden = true;
@@ -410,24 +452,42 @@
       }
       function clear() { res.hidden = true; res.innerHTML = ''; inp.setAttribute('aria-expanded', 'false'); active = -1; if (body) body.hidden = false; }
       let tmr;
+      // a six-digit postal code: look the address up, then say where it belongs
+      function runPostal(q, code) {
+        const my = ++seq;
+        render(q, [], [], false, false, [], [], { state: 'loading', note: 'Looking up ' + code + '…' });
+        Promise.all([loadPostal(), loadPd()]).then(([GP, D]) => {
+          if (my !== seq) return;
+          if (!GP) { render(q, [], [], false, false, [], [], { state: 'error', note: 'Postal codes could not be looked up just now. Check your connection and try again.' }); return; }
+          return GP.lookup(code).then((r) => {
+            if (my !== seq) return;
+            if (r.state !== 'ok') { render(q, [], [], false, false, [], [], { state: r.state, note: GP.msg(r.state, code) }); track('search_postal', { state: r.state }); return; }
+            const items = r.list.map((a) => ({ a, c: classifyAddr(GP, a, D) }));
+            render(q, [], [], false, false, [], [], { state: 'ok', items }); track('search_postal', { state: 'ok', kind: items[0] && items[0].c.k });
+          });
+        });
+      }
       function run() {
         const q = inp.value.trim(), my = ++seq;
         if (!q) { clear(); return; }
+        const pcm = devsOnly ? null : PC_RE.exec(q); if (pcm) { runPostal(q, pcm[1]); return; }
         const needDevs = dnorm(q).length >= 2;
         if (!needDevs) { render(q, [], [], false); return; }
         if (ixP && ixP.__v) {
-          const again = () => render(q, matchDevs(ixP.__v, q, 6), matchSites(sitesP && sitesP.__v, q), false, false, roadsNow(q, 3));
+          const again = () => { const dv = matchDevs(ixP.__v, q, 6), st = matchSites(sitesP && sitesP.__v, q); render(q, dv, st, false, false, roadsNow(q, 3), devsOnly ? [] : matchUps(upP && upP.__v, q, dv.map((d) => dnorm(d.name)).concat(st.map((x) => dnorm(x.name))), dv.map((d) => d.id).concat(st.map((x) => x.id)))); };
           again(); if (!roadsCache && q.length >= 3) findRoads(q, 3).then(() => { if (my === seq) again(); });
           return;
         }
         render(q, [], [], true);
-        Promise.all([loadIx(), loadSites(), findRoads(q, 3)]).then(([ix, st, rd]) => {
+        Promise.all([loadIx(), loadSites(), findRoads(q, 3), devsOnly ? null : loadUp()]).then(([ix, st, rd, up]) => {
           if (!ix) ixP = null; else if (ixP) ixP.__v = ix;   // a failed load is tried again on the next search
-          if (sitesP) sitesP.__v = st; if (my !== seq) return; render(q, matchDevs(ix, q, 6), matchSites(st, q), false, !ix, rd);
+          if (sitesP) sitesP.__v = st; if (up && upP) upP.__v = up; if (my !== seq) return;
+          const dv = matchDevs(ix, q, 6), ss = matchSites(st, q);
+          render(q, dv, ss, false, !ix, rd, devsOnly ? [] : matchUps(up, q, dv.map((d) => dnorm(d.name)).concat(ss.map((x) => dnorm(x.name))), dv.map((d) => d.id).concat(ss.map((x) => x.id))));
         });
       }
       inp.addEventListener('input', () => { clearTimeout(tmr); tmr = setTimeout(run, 90); });
-      inp.addEventListener('focus', () => { loadIx(); loadSites(); if (inp.value.trim()) run(); });
+      inp.addEventListener('focus', () => { loadIx(); loadSites(); if (!devsOnly) loadUp(); if (inp.value.trim()) run(); });
       inp.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowDown') { e.preventDefault(); setActive(active + 1); } else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(active - 1); }
         else if (e.key === 'Enter') { const it = items(); if (it.length) { e.preventDefault(); (it[active >= 0 ? active : 0]).click(); } else e.preventDefault(); }

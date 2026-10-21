@@ -10,7 +10,7 @@
   const BUILD = (document.currentScript && /[?&]v=([^&]+)/.exec(document.currentScript.src) || [])[1] || '1';
   const base = new URL('../../data/map/', location.href).href;
   const getJson = (f) => fetch(base + f + '?v=' + BUILD).then((r) => { if (!r.ok) throw new Error(f + ' ' + r.status); return r.json(); });
-  const S = { proj: null, start: true, place: null, band: null, rc: {}, hl: null, more: false, am: false, radius: 2000, pr: 1000, q: '', qi: -1, suggOpen: false };
+  const S = { proj: null, start: true, place: null, band: null, rc: {}, hl: null, more: false, am: false, radius: 2000, pr: 1000, nall: false, q: '', qi: -1, suggOpen: false };
   const PCR = {};   // postal code -> the last OneMap answer
   let M, view;
 
@@ -21,16 +21,17 @@
     if (pl && pl.includes(':')) { const i = pl.indexOf(':'); S.place = { t: pl.slice(0, i), n: pl.slice(i + 1) }; S.start = false; }
     else if (id && M.BYID[id]) { if (M.BYID[id].n !== S.proj) loadProject(M.BYID[id].n); S.start = false; }
     if (q.get('r') && S.proj) S.radius = +q.get('r');
-    S.pr = S.place && M.RADII.includes(+q.get('r')) ? +q.get('r') : 1000;
+    const nr = +(S.place ? q.get('r') : q.get('nr'));   // the nearby radius; on a development, r is the price-comparison radius
+    S.pr = M.RADII.includes(nr) ? nr : 1000; S.nall = false;
   }
   function addr() {
     const q = new URLSearchParams();
-    if (S.place) { q.set('pl', S.place.t + ':' + S.place.n); if (S.place.t !== 'area' && S.pr !== 1000) q.set('r', S.pr); } else if (!S.start && S.proj) { q.set('p', M.BY[S.proj].id); if (!M.BY[S.proj].up) q.set('r', S.radius); }
+    if (S.place) { q.set('pl', S.place.t + ':' + S.place.n); if (S.place.t !== 'area' && S.pr !== 1000) q.set('r', S.pr); } else if (!S.start && S.proj) { q.set('p', M.BY[S.proj].id); if (!M.BY[S.proj].up) q.set('r', S.radius); if (S.pr !== 1000 && M.BY[S.proj].pos) q.set('nr', S.pr); }
     return q.toString() ? '#' + q : location.pathname + location.search;
   }
   let lastHash = location.hash;
   function go(push) { const h = addr(); history[push ? 'pushState' : 'replaceState'](null, '', h); lastHash = location.hash; render(); }
-  function loadProject(name) { S.proj = name; S.more = false; S.band = null; S.rc = {}; S.hl = null; S.am = false; S.place = null; S.radius = M.BY[name].pos ? M.defaultRadius(name) : 2000; }
+  function loadProject(name) { S.proj = name; S.more = false; S.band = null; S.rc = {}; S.hl = null; S.am = false; S.place = null; S.pr = 1000; S.nall = false; S.radius = M.BY[name].pos ? M.defaultRadius(name) : 2000; }
   const onNav = () => { if (location.hash === lastHash) return; lastHash = location.hash; parseHash(); render(); };
   addEventListener('popstate', onNav); addEventListener('hashchange', onNav);
 
@@ -107,11 +108,21 @@
     const nopos = `<p class="basis nopos">Not on the map yet, so neighbourhood and nearby prices are not shown.${help('URA’s data has no verified location for this development, so it cannot be placed on the map or measured against anything nearby. Its own prices by size are still shown.', 'Why there is no map position')}</p>`;
     const open = `<a class="btn b" href="../#/p/${esc(p.id)}">Open Research page ›</a>`;
     const body = pos ? aroundHtml(name, amPer(mobile), mobile) : nopos;
-    if (!mobile) return `<aside class="dp" aria-label="Selected development"><div class="dp-in">${head}${body}${prices}${pos ? nearbyHtml(name, nb) : ''}</div><div class="dp-foot">${open}</div></aside>`;
+    if (!mobile) return `<aside class="dp" aria-label="Selected development"><div class="dp-in">${head}${body}${prices}${pos ? nearbyHtml(name, nb) + nearHtml(name) : ''}</div><div class="dp-foot">${open}</div></aside>`;
     const tog = `<button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">Prices &amp; nearby ${S.more ? '⌄' : '⌃'}</button>`;
-    return `<aside class="bs${S.more ? ' open' : ''}" aria-label="Selected development"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}${body}${S.more ? prices + (pos ? nearbyHtml(name, nb) : '') : ''}<div class="bs-act">${open}${tog}</div></aside>`;
+    return `<aside class="bs${S.more ? ' open' : ''}" aria-label="Selected development"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}${body}${S.more ? prices + (pos ? nearbyHtml(name, nb) + nearHtml(name) : '') : ''}<div class="bs-act">${open}${tog}</div></aside>`;
   }
 
+
+
+  /* ---------------- explore nearby: the same optional radius on every located selection ----------------
+     Secondary to the development's own details, and separate from the price comparison (which keeps its own radius and method). */
+  function nearHtml(name, mobile) {
+    const d = M.placeData({ t: 'dev', n: name }, S.pr); if (!d) return '';
+    const all = d.list.map((x) => ({ d: x.d, h: devRow(x) })).concat(d.ups.map((x) => ({ d: x.d, h: upRow(x) }))).sort((a, b) => a.d - b.d), n = all.length, show = S.nall ? all.slice(0, 15) : all.slice(0, 3);
+    const tip = help('Straight-line distance from this development, not walking time. This is for exploring what is around it. The price comparison above has its own radius and is not changed by this one.', 'About nearby developments');
+    return `<div class="sec nbr"><div class="sh"><b>Explore nearby${tip}</b><span>${n ? n + ' within ' + radText(d.r) : 'None within ' + radText(d.r)}</span></div>${radHtml()}${show.map((x) => x.h).join('')}${n > 3 ? `<button type="button" class="btn g" data-nall style="margin-top:8px">${S.nall ? 'Show fewer' : 'Show ' + (n > 15 ? 'the nearest 15 of ' : 'all ') + n}</button>` : ''}${S.nall && n > 15 ? '<p class="basis">Choose a smaller radius to narrow the list.</p>' : ''}</div>`;
+  }
 
   /* ---------------- a new launch or an awarded GLS site: confirmed information only, never a price ---------------- */
   const srcLink = (x) => /^https?:/.test(x.url) ? `<a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.label)}</a>` : esc(x.label);
@@ -122,14 +133,14 @@
     const facts = rows.length ? `<dl class="upf">${rows.map((r) => `<div><dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd></div>`).join('')}</dl>` : '';
     const notes = [
       u.nameStatus === 'reported' ? `<p class="basis">The name is reported, not yet confirmed by URA or the developer.${help('Chuan Grove is the name URA gives the sites. “One Chuan Grove” is how the project has been reported. It will be updated when the developer confirms the name.', 'About this name')}</p>` : '',
-      `<p class="basis">${u.kind === 'launch' ? 'No recorded sales yet, so no prices are shown.' : 'Not yet launched, so there are no sales or prices.'}${help('Prices on this map are past recorded sales from URA. This project has none, and Groundwork does not show or estimate prices for it. It is never counted as a match for a budget.', 'Why there is no price')}</p>`,
+      `<p class="basis">${u.kind === 'gls' ? 'Not yet launched, so there are no sales or prices.' : 'No recorded sales yet, so no prices are shown.'}${help('Prices on this map are past recorded sales from URA. This project has none, and Groundwork does not show or estimate prices for it. It is never counted as a match for a budget.', 'Why there is no price')}</p>`,
       p.pos ? '' : `<p class="basis nopos">Not on the map yet.${help(u.posNote || 'No verified location is available yet, so it is not placed on the map.', 'Why there is no map position')}</p>`
     ].join('');
     const srcs = `<details class="srcd"><summary>Sources</summary><ul>${(u.src || []).map((x) => `<li>${srcLink(x)}</li>`).join('')}${u.posSrc ? `<li>Location: ${esc(u.posSrc)}</li>` : ''}</ul></details>`;
     const links = (u.ms ? `<a class="btn b" href="${esc(u.ms)}" target="_blank" rel="noopener noreferrer">Open project microsite ↗</a>` : '') + (u.rs ? `<a class="btn ${u.ms ? 'g' : 'b'}" href="../#/p/${esc(u.rs)}">Research page ›</a>` : '');
-    const body = facts + notes + (p.pos ? aroundHtml(name, amPer(mobile), mobile, 'this site', true) : '') + srcs;
+    const body = facts + notes + (p.pos ? aroundHtml(name, amPer(mobile), mobile, 'this site', true) + nearHtml(name) : '') + srcs;
     if (!mobile) return `<aside class="dp" aria-label="Selected development"><div class="dp-in">${head}${body}</div>${links ? `<div class="dp-foot dp-foot2">${links}</div>` : ''}</aside>`;
-    return `<aside class="bs${S.more ? ' open' : ''}" aria-label="Selected development"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}${facts}${notes}${S.more ? (p.pos ? aroundHtml(name, 2, true, 'this site', true) : '') + srcs : ''}<div class="bs-act">${links}${p.pos || u.src && u.src.length ? `<button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">Nearby &amp; sources ${S.more ? '⌄' : '⌃'}</button>` : ''}</div></aside>`;
+    return `<aside class="bs${S.more ? ' open' : ''}" aria-label="Selected development"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}${facts}${notes}${S.more ? (p.pos ? aroundHtml(name, 2, true, 'this site', true) + nearHtml(name) : '') + srcs : ''}<div class="bs-act">${links}${p.pos || u.src && u.src.length ? `<button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">Nearby &amp; sources ${S.more ? '⌄' : '⌃'}</button>` : ''}</div></aside>`;
   }
   const cardFor = (name, m) => M.BY[name].up ? upCard(name, m) : devCard(name, m);
 
@@ -215,7 +226,9 @@
     const gr = M.around(shown, amPer(m)), amen = []; gr.forEach((g) => g.items.forEach((i) => amen.push({ id: i.id, k: i.k, n: i.n, lat: i.lat, lon: i.lon, d: i.d })));
     const near = amen.filter((a) => (a.k === 'mrt' || a.k === 'school') && a.d <= 1200).slice(0, 2).map((a) => [a.lat, a.lon]);
     const pts = [shown, ...cmp].map((n) => [M.BY[n].lat, M.BY[n].lon]).concat(near);
-    return { key: 'f|' + shown + '|' + S.radius + '|' + (m ? 'm' + (S.more ? 'x' : '') : 'd'), projects: M.PM, selected: shown, cmp, amen, circle: null, hl: S.hl, fitPts: pts, zoom: 15, minZoom: 14, fit: !!fit, pad };
+    const c = M.BY[shown];
+    if (S.pr !== 1000) { const dl = S.pr / 111320, dn = S.pr / (111320 * Math.cos(c.lat * Math.PI / 180)); pts.push([c.lat + dl, c.lon], [c.lat, c.lon + dn]); }   // a radius the visitor chose is shown whole
+    return { key: 'f|' + shown + '|' + S.radius + '|' + S.pr + '|' + (m ? 'm' + (S.more ? 'x' : '') : 'd'), projects: M.PM, selected: shown, cmp, amen, circle: { lat: c.lat, lon: c.lon, r: S.pr, soft: true }, hl: S.hl, fitPts: pts, zoom: 15, minZoom: 14, fit: !!fit, pad };
   }
   function mountMap(el) {
     const sh = $('.bs'); if (sh) $('.mapstage').style.setProperty('--shh', sh.offsetHeight + 'px');
@@ -223,7 +236,7 @@
     const pr = mapProps(true); pr.fit = true; view.update(pr);
   }
   function dotPick(n) { loadProject(n); S.start = false; go(true); }
-  function placePick(t, n) { S.start = false; S.more = false; S.hl = null; S.pr = 1000; S.place = { t, n }; go(true); }
+  function placePick(t, n) { S.start = false; S.more = false; S.hl = null; S.pr = 1000; S.nall = false; S.place = { t, n }; go(true); }
   function pickItem(v) { const i = v.indexOf('|'), t = v.slice(0, i), n = v.slice(i + 1); S.suggOpen = false; S.q = ''; S.qi = -1; if (t === 'dev') dotPick(n); else placePick(t, n); }
 
   /* ---------------- licence notices: generated from what is actually loaded ---------------- */
@@ -242,15 +255,17 @@
   /* ---------------- events ---------------- */
   document.addEventListener('click', (e) => {
     if (!M) return;
-    const t = e.target.closest('[data-dpclose],[data-dpmore],[data-dot],[data-radius],[data-pr],[data-am-more],[data-pick],[data-zoom],[data-band],[data-rc],[data-am],[data-sources]');
+    const t = e.target.closest('[data-dpclose],[data-dpmore],[data-nall],[data-dot],[data-radius],[data-pr],[data-am-more],[data-pick],[data-zoom],[data-band],[data-rc],[data-am],[data-sources]');
     if (!t) { if (!e.target.closest('.srch') && S.suggOpen) { S.suggOpen = false; render(); } return; }
     const d = t.dataset;
     if (t.hasAttribute('data-sources')) { const s = document.getElementById('sources'); if (s) s.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
     if (t.hasAttribute('data-dpclose')) { S.start = true; S.more = false; S.place = null; go(true); return; }
     if (t.hasAttribute('data-dpmore')) { S.more = !S.more; go(false); return; }
     if (d.dot) { dotPick(d.dot); return; }
-    if (d.radius) { S.radius = +d.radius; go(false); return; }
-    if (d.pr) { S.pr = +d.pr; go(false); return; }
+    const keep = (fn) => { const sc = $('.dp-in'), top = sc ? sc.scrollTop : 0; fn(); const n = $('.dp-in'); if (n) n.scrollTop = top; };   // a radius change keeps the panel where the visitor was reading
+    if (d.radius) { keep(() => { S.radius = +d.radius; go(false); }); return; }
+    if (d.pr) { keep(() => { S.pr = +d.pr; go(false); }); return; }
+    if (t.hasAttribute('data-nall')) { S.nall = !S.nall; refreshCard(); return; }
     if (t.hasAttribute('data-am-more')) { S.am = !S.am; refreshCard(); return; }
     if (d.band) { S.band = S.band === d.band ? null : d.band; refreshCard(); return; }
     if (d.rc) { S.rc[d.rc] = !S.rc[d.rc]; refreshCard(); return; }

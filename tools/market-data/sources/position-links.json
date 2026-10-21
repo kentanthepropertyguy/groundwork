@@ -1,0 +1,18 @@
+{
+  "_note": "A development whose marketing name is not the name OneMap holds for its building, linked BY HAND from a published source (the developer's release or the project's own address). fetch-onemap-names.js reads this file: it asks OneMap for `building` and keeps only the records at the listed postal codes. Add an entry only when a source states the link; never on a similar-looking name.",
+  "v": 1,
+  "links": {
+    "newport-residences": {
+      "building": "NEWPORT PLAZA",
+      "postals": ["079907", "079994"],
+      "why": "Newport Residences is the residential part of Newport Plaza, Anson Road (CDL's launch release, January 2026); OneMap holds the building as NEWPORT PLAZA (U/C), 80 and 82 Anson Road",
+      "source": { "label": "CDL: launch of Newport Residences, part of the 45-storey Newport Plaza", "url": "https://www.cdl.com.sg/newsroom/cdl-kicks-off-2026-with-the-launch-of-newport-residences-part-of-rare-freehold-mixed-use-development-at-the-gateway-to-the-cbd-and-the-future-greater-southern-waterfront" }
+    },
+    "skywaters-residences": {
+      "building": "THE SKYWATERS",
+      "postals": ["068811"],
+      "why": "Skywaters Residences is in the 63-storey tower at 8 Shenton Way, Singapore 068811; OneMap holds that address as THE SKYWATERS",
+      "source": { "label": "Skywaters Residences (8 Shenton Way, Singapore 068811)", "url": "https://en.wikipedia.org/wiki/Skywaters_Residences" }
+    }
+  }
+}

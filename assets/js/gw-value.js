@@ -557,6 +557,9 @@
     }
     const fromHash = (user) => {
       const h = (location.hash || '').replace('#', ''), m = /^landed:(.{1,80})$/.exec(h); let street = '';
+      // a postal code from the site search (#pc=368060): the same lookup as typing it in the postal box; the code is dropped from the address once read
+      const pcm = /^pc=(\d{6})$/.exec(h);
+      if (pcm && GP && PCB) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ignore */ } postalGo(pcm[1], true); return true; }
       if (m) { try { street = decodeURIComponent(m[1]).replace(/[^\w .,'&()\/-]/g, '').trim(); } catch (e) { street = ''; } }
       const t = m ? 'landed' : h;
       if (['hdb', 'condo', 'landed'].indexOf(t) < 0) return false;

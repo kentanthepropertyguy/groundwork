@@ -99,6 +99,8 @@ t('the location is never sent to analytics', () => {
 
 console.log('The real data and the shared Map code');
 const find = JSON.parse(fs.readFileSync(path.join(root, 'data/projects/find.json'), 'utf8')), places = JSON.parse(fs.readFileSync(path.join(root, 'data/map/places.json'), 'utf8'));
+// Every development with URA sales now has a position (URA's, or OneMap's: data/map/positions-onemap.json). To keep testing the "unplaced" list, the Map list is read as URA published it.
+const OM = new Set(JSON.parse(fs.readFileSync(path.join(root, 'data/map/positions-onemap.json'), 'utf8')).rows.map((x) => x[0])); places.rows.forEach((r) => { if (OM.has(r[0])) { r[2] = null; r[3] = null; } });
 const M = K.create(places, JSON.parse(fs.readFileSync(path.join(root, 'data/map/amen.json'), 'utf8')), { radius: 1000 });
 M.setRoads(JSON.parse(fs.readFileSync(path.join(root, 'data/value/landed/geo.json'), 'utf8')), JSON.parse(fs.readFileSync(path.join(root, 'data/value/landed/geo-more.json'), 'utf8')));
 const rix = F.prepare(find);
