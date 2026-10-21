@@ -46,7 +46,7 @@
 <script>window.GW_SAMPLE = {"a":"Jadescape","b":"Thomson Three","psf":[2323,2152],"band":"700–799 sqft","period":"Oct 2025 to Sep 2026"};</script>
 <script>window.GW_NOT_COVERED = {"ec":[],"cluster":["KEW LODGE"]};</script>
 <script src="../assets/js/gw-ask.js?v=bfe1e2e419"></script>
-<script src="../assets/js/kpt-lg.js?v=b432cb3c44"></script>
+<script src="../assets/js/kpt-lg.js?v=897b7f4398"></script>
 <script src="../assets/js/kpt-compare-v2.js?v=1d5fb19690"></script>
 <script src="../data/research/config.js?v=df6f3c6908"></script>
 <script>
@@ -132,41 +132,48 @@
     const input = wrap.querySelector('input'), res = wrap.querySelector('#res'); let timer = null, loaded = null;
     const ready = () => (loaded = loaded || loadSearch());
     // Roads and streets: landed homes are found by road, so a road typed here leads to what sold around it (Property values & prices).
-    function roadsInto(q, devs) {
-      if (!window.GWN || !GWN.findRoads) return;
-      GWN.findRoads(q, 3).then((rd) => {
-        if (!rd.length || input.value !== q) return;
-        const list = `<ul class="kpr-results" role="listbox" aria-label="Roads and streets">${rd.map((r) => `<li role="option"><button type="button" data-road="${esc(GWN.roadLandedHref('../', r))}"><span><b>${esc(r.title)}</b><span class="m">${esc((r.area ? r.area + ' · ' : '') + 'Road · landed homes are found by road')}</span></span><span class="r"><span>What sold nearby ›</span></span></button></li>`).join('')}</ul>`;
-        if (!devs) res.innerHTML = list; else res.insertAdjacentHTML('beforeend', `<p class="kpr-note" style="margin:14px 0 4px">Roads and streets</p>` + list);
-        input.setAttribute('aria-expanded', 'true');
-      });
+    function roadsHtml(q) {
+      if (!window.GWN || !GWN.findRoads) return Promise.resolve('');
+      return GWN.findRoads(q, 3).then((rd) => (rd.length ? `<ul class="kpr-results" role="listbox" aria-label="Roads and streets">${rd.map((r) => `<li role="option"><button type="button" data-road="${esc(GWN.roadLandedHref('../', r))}"><span><b>${esc(r.title)}</b><span class="m">${esc((r.area ? r.area + ' · ' : '') + 'Road · landed homes are found by road')}</span></span><span class="r"><span>What sold nearby ›</span></span></button></li>`).join('')}</ul>` : '')).catch(() => '');
+    }
+    // Registered launches and awarded sites with no sales yet (the shared register the Map and the site search read): listed apart from the transaction results, leading to the Map. Not offered when picking a second development to compare.
+    function launchesHtml(q, rows) {
+      if (cls || !window.KPTLG || !KPTLG.findLaunches) return Promise.resolve('');
+      const nm = (n) => KPTLG.lnorm(R.displayName(n)), skipIds = rows.map((r) => r.id), skipNames = rows.map((r) => nm(r.name)).concat(window.KPTV2 && KPTV2.siteMatches ? KPTV2.siteMatches(q).map((x) => nm(x.name)) : []);   // a launch with its own site already has its card (Has its own site)
+      return KPTLG.findLaunches(q, 3).then((ls) => KPTLG.launchRows(ls.filter((u) => skipIds.indexOf(u.id) < 0 && skipIds.indexOf(u.rs) < 0 && skipNames.indexOf(nm(u.name)) < 0), rows.length > 0)).catch(() => '');
     }
     function show(q) {
       ready().then(([ix, sd]) => {
         const found = q.trim() ? P.search(ix, sd, q, { limit: cls ? 40 : 8 }).filter((r) => r.id !== excludeId) : [], rows = cls ? found.filter((r) => P.classOf(r) === cls).slice(0, 8) : found, otherCls = cls ? found.filter((r) => P.classOf(r) !== cls).slice(0, 3) : [];
         input.setAttribute('aria-expanded', rows.length ? 'true' : 'false');
         if (!q.trim()) { res.innerHTML = ''; return; }
-        if (!rows.length) { res.innerHTML = window.KPTLG && KPTLG.emptySearch ? KPTLG.emptySearch(q, R) : `<div class="kpr-results"><div class="kpr-empty">No transactions found under that name in the last 5 years. It may be a launch with no sales yet, or spelled differently.</div></div>`; }
+        if (!rows.length) res.innerHTML = '';   // the empty message waits for the launch and road lookups, so a registered launch never meets a dead end
         else if (window.KPTLG) { const mx = Math.max.apply(null, rows.map((r) => r.n)); res.innerHTML = `<ul class="kpr-results" role="listbox">${rows.map((r, i) => KPTLG.resultRow(r, i, mx, R)).join('')}</ul>`; }
         else res.innerHTML = `<ul class="kpr-results" role="listbox">${rows.map((r, i) => `<li role="option"><button type="button" data-id="${esc(r.id)}" ${i === 0 ? 'aria-selected="true"' : ''}><b>${esc(R.displayName(r.name))}</b><span>${esc(r.street)} · D${Number(r.district)} · ${esc(r.seg)} · ${r.n} sales · latest ${esc(R.fmtMonth(r.last))}${r.new ? ' · new sales' : ''}${r.resale ? ' · resale' : ''}</span></button></li>`).join('')}</ul>`;
         if (otherCls.length) res.insertAdjacentHTML('beforeend', `<p class="lg-fine" data-lg-otherclass>Not offered: ${otherCls.map((r) => `${esc(R.displayName(r.name))} (${esc(P.classInfo(r).short === 'Condo' ? 'condominium' : P.classInfo(r).label.toLowerCase())})`).join(', ')}. Groundwork compares ${esc(P.CLASSES[cls].plural)} only with other ${esc(P.CLASSES[cls].plural)}, because ${cls === 'condo' ? 'ECs and cluster housing' : 'they'} sell under different rules and at different price levels.</p>`);
         if (rows.length && window.KPTLG && KPTLG.notCoveredNote) res.insertAdjacentHTML('beforeend', KPTLG.notCoveredNote(q, R));
         if (window.KPTV2) KPTV2.afterSearch(res, q, rows.length);
-        roadsInto(q, rows.length);
+        Promise.all([launchesHtml(q, rows), roadsHtml(q)]).then(([lh, rh]) => {
+          if (input.value !== q) return;
+          if (!rows.length && !lh && !rh && !res.querySelector('.v2-sites')) { res.innerHTML = window.KPTLG && KPTLG.emptySearch ? KPTLG.emptySearch(q, R) : `<div class="kpr-results"><div class="kpr-empty">No transactions found under that name in the last 5 years. It may be a launch with no sales yet, or spelled differently.</div></div>`; return; }
+          if (lh) res.insertAdjacentHTML('beforeend', lh);
+          if (rh) res.insertAdjacentHTML('beforeend', (rows.length || lh ? `<p class="kpr-note" style="margin:14px 0 4px">Roads and streets</p>` : '') + rh);
+          input.setAttribute('aria-expanded', 'true');
+        });
         clearTimeout(timer); timer = setTimeout(() => { if (q.trim().length >= 2) track('research_search', { results: rows.length }); }, 1200);
       }).catch(() => { res.innerHTML = `<div class="kpr-results"><div class="kpr-empty">Search is unavailable right now. Please refresh.</div></div>`; });
     }
     input.addEventListener('focus', ready);
     input.addEventListener('input', () => show(input.value));
-    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const b = res.querySelector('button'); if (b) { e.preventDefault(); if (b.dataset.road) location.href = b.dataset.road; else onPick(b.dataset.id); } } if (e.key === 'ArrowDown') { const b = res.querySelector('button'); if (b) { e.preventDefault(); b.focus(); } } });
-    res.addEventListener('click', (e) => { const r = e.target.closest('button[data-road]'); if (r) { location.href = r.dataset.road; return; } const b = e.target.closest('button[data-id]'); if (b) onPick(b.dataset.id); });
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const b = res.querySelector('button'); if (b) { e.preventDefault(); if (b.dataset.launch) location.href = b.dataset.launch; else if (b.dataset.road) location.href = b.dataset.road; else onPick(b.dataset.id); } } if (e.key === 'ArrowDown') { const b = res.querySelector('button'); if (b) { e.preventDefault(); b.focus(); } } });
+    res.addEventListener('click', (e) => { const l = e.target.closest('button[data-launch]'); if (l) { location.href = l.dataset.launch; return; } const r = e.target.closest('button[data-road]'); if (r) { location.href = r.dataset.road; return; } const b = e.target.closest('button[data-id]'); if (b) onPick(b.dataset.id); });
     return wrap;
   }
   function renderHome() {
     document.body.dataset.view = 'home'; document.title = "I'm researching a property — Groundwork";
     $app.innerHTML = `<section class="kpr-sec" style="padding-top:16px;border-top:none"><p class="kpt-eyebrow">I'm researching a property</p><h1 class="kpr-h" tabindex="-1">Which property are you looking at?</h1>
       <p class="kpr-lead">Search a private condo, executive condominium or cluster-housing development to see what its transactions say, then compare it with another of the same type. This uses URA transaction records from the last 5 years.</p><div id="sb"></div>
-      <p class="kpr-note">Projects with no transactions yet, such as an unsold launch, won't appear.</p>
+      <p class="kpr-note">A launch with no sales yet is listed without prices and opens on the Map.</p>
       <p class="kpr-note">Prefer to browse? <a href="../projects/">See every development</a>, including new launches with sites of their own.</p></section>`;
     if (window.KPTLG) { document.title = 'Research a development — Groundwork'; $app.innerHTML = KPTLG.landingHtml(CFG.total || 0); }
     { const c = $app.querySelector('#lgCount'); if (c) c.insertAdjacentHTML('afterend', '<p class="lg-fine lg-center kpr-onmap"><a href="map/">Prefer a map? Explore homes and neighbourhoods ›</a></p>'); }

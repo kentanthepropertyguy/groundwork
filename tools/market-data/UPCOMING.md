@@ -13,7 +13,7 @@ Run, in this order (the first three need the internet; the rest work from the sa
     node tools/market-data/refresh-all.js --raw <URA folder> --as-of YYYY-MM-DD    # monthly: includes build-positions.js
     node tools/market-data/build-upcoming.js --as-of YYYY-MM-DD   # -> data/map/upcoming.json (reads the saved OneMap files and sources/parcels.json)
 
-Then `node tools/market-data/tests/upcoming-tests.js`, `node research/tests/map-tests.js`, `python3 research/tests/followup-render.py`, and commit the data files. `build-upcoming.js` prints a **review list**: OneMap projects under construction that are in no listed site and not in the development register. If one is a home you can verify, add it to the register (section 1).
+Then `node tools/market-data/tests/upcoming-tests.js`, `node research/tests/map-tests.js`, `python3 research/tests/followup-render.py`, `node research/tests/launch-search-tests.js`, `python3 research/tests/mobile-sheet-render.py`, and commit the data files. `build-upcoming.js` prints a **review list**: OneMap projects under construction that are in no listed site and not in the development register. If one is a home you can verify, add it to the register (section 1).
 
 Offline (for example when a tool cannot reach OneMap): `fetch-onemap-uc.js --from <saved results>` and `fetch-onemap-names.js --from <saved { id: results }>` rebuild the cache from files; `build-upcoming.js --ura <geojson> --ura-updated YYYY-MM-DD --as-of YYYY-MM-DD` takes the URA file.
 
@@ -45,7 +45,7 @@ A launch or an awarded Government Land Sales (GLS) site has no URA sales yet, so
 |---|---|
 | `tools/market-data/upcoming-register.json` | **Edit this.** Hand-verified entries (any named project, HDB sites, launches OneMap does not list yet) plus the rules for the automatic sites. |
 | `tools/market-data/build-upcoming.js` | Builds the data file below. |
-| `data/map/upcoming.json` | **Generated. Commit it.** Loaded by the Map, Budget Search and the site search. |
+| `data/map/upcoming.json` | **Generated. Commit it.** Loaded by the Map, Budget Search, the site search and Research search (a launch with no sales is listed there without prices and opens on the Map). |
 
 What the register never holds: prices, transactions, unit counts or availability. A launch or site is therefore never a budget match, never in a price comparison and never in a "with recorded sales" list. It appears as "New launch or site" (a hollow marker) when it is near a place, in the nearby list of a selected place or development, or when searched for by name or alias.
 

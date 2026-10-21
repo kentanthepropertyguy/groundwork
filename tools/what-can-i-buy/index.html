@@ -222,7 +222,7 @@
   }
   // ---- Near a place (optional radius search). The Map's own logic layer (KPT_MAP), place search and Leaflet view do the work: nothing of the Map's search or drawing is rewritten here.
   // Its files load only when the buyer starts typing a place, so the islandwide search is exactly as light as before. Versions match the Map page (a test keeps them in step).
-  const MAP_V = '2026-10-21.11', RADII = [500, 1000, 2000, 3000], NEAR_TYPES = ['dev', 'mrt', 'area', 'road', 'school', 'postal'];
+  const MAP_V = '2026-10-21.12', RADII = [500, 1000, 2000, 3000], NEAR_TYPES = ['dev', 'mrt', 'area', 'road', 'school', 'postal'];
   const NEAR_BASIS = { dev: 'the development', mrt: 'the station', area: 'the centre of the neighbourhood', road: 'one point on the road', school: 'the school', postal: 'the address' };
   let NM = null, nmLoad = null, nmView = null, nmHost = null, nmLayer = null, nmSig = '', NR = null;   // NR: the resolved place { key, label, sub, lat, lon, dist, pos }
   const addCss = (href) => { if (!document.querySelector('link[href="' + href + '"]')) { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href; document.head.appendChild(l); } };
