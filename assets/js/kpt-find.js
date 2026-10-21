@@ -567,7 +567,7 @@
     if (types.indexOf('new') > -1 && Array.isArray(input.launches) && input.launches.length) {
       // Independent of the Huttons layer: a launch is left out only when URA sales or CURRENT Huttons prices already cover it. A missing or expired inventory covers nothing, and never changes budget matching.
       const known = {}; ix.projects.concat(ix.otherAll || []).forEach((p) => { known[p.id] = 1; }); if (inv) Object.keys(inv.bySlug || {}).forEach((k) => { const ip = inv.bySlug[k]; if (ip.status === 'ok' && freshness(inv, ip)) known[k] = 1; });
-      const all = input.launches.filter((l) => l && l.id && l.name && l.url && !known[l.id]).map((l) => { const placed = !!(nearIn && nearIn.sitePos && nearIn.sitePos[l.id]); return { id: l.id, name: l.name, tagline: l.tagline || '', url: l.url, placed, dist: placed ? nearIn.siteDist[l.id] : null }; });
+      const all = input.launches.filter((l) => l && l.id && l.name && l.url && !known[l.id] && !(l.onlyNear && !nearIn)).map((l) => { const placed = !!(nearIn && nearIn.sitePos && nearIn.sitePos[l.id]); return { id: l.id, name: l.name, tagline: l.tagline || '', url: l.url, placed, dist: placed ? nearIn.siteDist[l.id] : null }; });
       // With a place chosen, only a launch whose verified position is inside the radius is listed; the rest are not offered as local possibilities (out.upcoming.more says some exist, for a discreet link).
       const items = (nearIn ? all.filter((x) => x.placed && x.dist <= nearIn.radius) : all).sort((a, b) => (a.dist || 0) - (b.dist || 0) || (a.name < b.name ? -1 : 1));
       if (items.length || (nearIn && all.length)) out.upcoming = { near: !!nearIn, more: all.length - items.length, items };

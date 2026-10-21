@@ -157,6 +157,72 @@ t('a proximity list (area, MRT) holds developments of every class, each tagged, 
   const a = M.placeData({ t: 'mrt', n: 'Hougang MRT' }); assert.ok(a.list.some((r) => r.p.cls === 'ec') || a.list.some((r) => r.p.cls === 'condo')); for (let i = 1; i < a.list.length; i++) assert.ok(a.list[i - 1].d <= a.list[i].d);
 });
 
+console.log('Phase 3: new launches and GLS sites, postal codes, adjustable radius');
+const UPD = D('upcoming.json'), fixP = require('./fixtures/onemap-postal.json').answers, later = [], ta = (n, f) => later.push([n, f]);
+const stubF = (url) => { const m = /searchVal=(\d+)/.exec(url); return Promise.resolve({ ok: true, json: () => Promise.resolve(fixP[m[1]] || { found: 0, results: [] }) }); };
+const mk3 = () => { const o = mk(); o.M.setUpcoming(UPD); return o.M; };
+t('Thomson Reserve is found by Groundwork\'s own search, as a new launch, beside (not instead of) the developments with sales', () => {
+  const M3 = mk3(), r = M3.places('thomson reserve'); assert.strictEqual(r[0].n, 'Thomson Reserve'); assert.strictEqual(r[0].g, 'up'); assert.ok(/New launch/.test(r[0].sub), r[0].sub);
+  const all = M3.places('thomson'); assert.ok(all.some((x) => x.t === 'dev' && !x.g && x.n === 'Thomson Three'), 'a resale project still found'); assert.ok(all.some((x) => x.g === 'up' && x.n === 'Thomson Reserve'));
+  const p = M3.BY['Thomson Reserve']; assert.ok(p.pos && p.up && p.up.kind === 'launch' && /under construction/.test(M3.upStage(p)));
+});
+t('One Chuan Grove is found by its reported name and by the name URA uses; Hougang Central is searchable but has no map position', () => {
+  const M3 = mk3(); ['one chuan grove', 'chuan grove', 'lorong chuan gls'].forEach((q2) => assert.ok(M3.places(q2).some((x) => x.n === 'One Chuan Grove'), q2));
+  const h = M3.places('hougang central').find((x) => x.n === 'Hougang Central'); assert.ok(h && /not on the map yet/.test(h.sub), JSON.stringify(h));
+  const hc = M3.BY['Hougang Central']; assert.ok(!hc.pos && hc.lat === null && hc.lon === null && !M3.PM.includes(hc), 'never placed with a guessed position'); assert.ok(UPD.items.find((i) => i.id === 'hougang-central').posNote);
+});
+t('a GLS site with no project name yet is found by its location and called a GLS site', () => {
+  const M3 = mk3(), r = M3.places('peck hay'); assert.ok(r[0].g === 'up' && r[0].n === 'Peck Hay Road GLS site' && /GLS site/.test(r[0].sub)); const p = M3.BY[r[0].n]; assert.ok(p.up.unnamed && p.pos && /no project name yet/.test(M3.upStage(p)));
+});
+t('records are linked, never duplicated: no launch or site repeats a development that has URA sales, nor each other', () => {
+  const M3 = mk3(), ids = new Set(places.rows.map((r) => r[0])), names = new Set(places.rows.map((r) => M3.BY[r[1]] ? r[1] : r[1])); const seenId = new Set(), seenN = new Set();
+  UPD.items.forEach((i) => { assert.ok(!ids.has(i.id), i.id + ' is already a transaction development'); assert.ok(!places.rows.some((r) => r[1].toLowerCase() === i.name.toLowerCase()), i.name); assert.ok(!seenId.has(i.id) && !seenN.has(i.name), 'repeat ' + i.id); seenId.add(i.id); seenN.add(i.name); });
+  assert.strictEqual(M3.P.length, places.rows.length + UPD.items.length);
+  const again = mk().M; again.setUpcoming(UPD); again.setUpcoming(UPD); assert.strictEqual(again.P.length, places.rows.length + UPD.items.length, 'loading the register twice adds nothing');
+  const dup = mk().M; dup.setUpcoming({ items: [{ id: places.rows[0][0], name: 'Same id as a real development', kind: 'launch', stage: 'x', lat: 1.3, lon: 103.8 }, { id: 'zz', name: places.rows[1][1], kind: 'launch', stage: 'x', lat: 1.3, lon: 103.8 }] }); assert.strictEqual(dup.P.length, places.rows.length, 'a transaction record wins by id and by name');
+});
+t('a launch or site is never a development with sales: no evidence, no price, never in a nearby comparison or a "with recorded sales" list', () => {
+  const M3 = mk3(); M3.UP.forEach((p) => { assert.ok(!M3.EV[p.n], p.n); assert.strictEqual(p.t12, 0); });
+  const u = M3.BY['Thomson Reserve'], mrt = M3.placeData({ t: 'mrt', n: 'Upper Thomson MRT' }, 3000); assert.ok(mrt.list.length && mrt.list.every((x) => !x.p.up), 'sales lists hold developments with sales only'); assert.ok(mrt.ups.some((x) => x.p === u), 'but it is offered separately');
+  M3.P.filter((p) => !p.up && p.pos && M3.EV[p.n]).slice(0, 40).forEach((p) => { const nb = M3.nearbyFor(p.n); nb.list.forEach((x) => assert.ok(!x.p.up)); assert.ok(M3.nearby(p.n, 3000).every((x) => !x.up)); });
+  assert.ok(JSON.stringify(UPD).search(/"(price|psf|p12|s12|t12|sales|units|available|asking|launchPrice)"/i) < 0, 'no price, sale or availability field in the register data');
+});
+t('the card for a launch has its own surroundings: nearest MRT, school, shops and park, by straight-line distance', () => {
+  const M3 = mk3(), a = M3.around('Thomson Reserve', 1); assert.deepStrictEqual(a.map((g) => g.id), ['tr', 'sc', 'sh', 'pk']); assert.ok(a[0].items[0].n.includes('Upper Thomson') && a[0].items[0].d < 400);
+  assert.deepStrictEqual(M3.around('Hougang Central', 2), [], 'nothing is measured from a site with no position');
+});
+t('radius: 500 m, 1 km, 2 km, 3 km; 1 km is the default; every listed development is inside the radius, nearest first, and a wider radius only adds', () => {
+  const M3 = mk3(); assert.deepStrictEqual(M3.RADII, [500, 1000, 2000, 3000]);
+  [['mrt', 'Toa Payoh MRT'], ['school', M3.AM.schools[5] && M3.AM.schools[5].n], ['area', 'Bishan']].forEach(([ty, nm]) => {
+    if (ty === 'area') return; const base = M3.placeData({ t: ty, n: nm }); assert.strictEqual(base.r, 1000, 'default'); let prev = -1;
+    M3.RADII.forEach((r) => { const d = M3.placeData({ t: ty, n: nm }, r); assert.strictEqual(d.r, r); assert.ok(d.list.length >= prev); prev = d.list.length; d.list.forEach((x, i) => { assert.ok(x.d <= r, nm + ' ' + x.p.n + ' ' + x.d + ' > ' + r); if (i) assert.ok(x.d >= d.list[i - 1].d); }); d.ups.forEach((x) => assert.ok(x.d <= r)); });
+  });
+  assert.strictEqual(M3.placeData({ t: 'mrt', n: 'Toa Payoh MRT' }, 1234).r, 1000, 'an unknown radius falls back to 1 km');
+});
+t('radius: a station with few developments nearby stays at the radius chosen (no silent widening to 2 km)', () => {
+  const M3 = mk3(), few = M3.AM.stations.filter((s) => M3.placeData({ t: 'mrt', n: s.n }, 1000).list.length < 3)[0]; assert.ok(few, 'a station with under 3 developments in 1 km exists');
+  const d = M3.placeData({ t: 'mrt', n: few.n }); assert.strictEqual(d.r, 1000); d.list.forEach((x) => assert.ok(x.d <= 1000));
+});
+t('radius: a road works too, with the same four choices', () => {
+  const M3 = mk3(); M3.setRoads(D2('geo.json'), D2('geo-more.json')); const rd = M3.AM.roads.find((x) => /^aida street$/i.test(x.title)) || M3.AM.roads[0];
+  M3.RADII.forEach((r) => { const d = M3.placeData({ t: 'road', n: rd.key }, r); assert.strictEqual(d.r, r); d.list.forEach((x) => assert.ok(x.d <= r)); });
+});
+function D2(f) { try { return JSON.parse(fs.readFileSync(path.join(root, 'data/value/landed', f), 'utf8')); } catch (e) { return null; } }
+ta('postal code: a typed code resolves to a verified address and centres the Map there, with the same radius choices', async () => {
+  const M3 = mk3(), r = await M3.lookupPostal('570155', stubF); assert.strictEqual(r.state, 'ok'); assert.strictEqual(M3.postalState('570155'), 'ok');
+  const d = M3.placeData({ t: 'postal', n: '570155' }); assert.strictEqual(d.title, '155 Bishan Street 13'); assert.strictEqual(d.r, 1000); assert.ok(/Postal code 570155/.test(d.meta) && /Bishan/.test(d.meta)); assert.strictEqual(d.lat, r.list[0].lat); assert.strictEqual(d.lon, r.list[0].lon);
+  assert.ok(d.list.length > 3 && d.list.every((x, i) => x.d <= 1000 && (!i || x.d >= d.list[i - 1].d))); assert.ok(d.list.some((x) => x.p.n === 'Bishan Loft' && x.p.cls === 'ec'), 'an EC nearby is listed with its class');
+  assert.ok(d.ups.some((x) => x.p.n === 'One Chuan Grove' && x.d > 500 && x.d < 1000), 'a GLS site within 1 km is offered separately'); assert.ok(!M3.placeData({ t: 'postal', n: '570155' }, 500).ups.some((x) => x.p.n === 'One Chuan Grove'));
+  assert.strictEqual(M3.placeData({ t: 'postal', n: '570155' }, 3000).r, 3000);
+});
+ta('postal code: invalid, unknown and failed lookups are said simply, and nothing is placed', async () => {
+  const M3 = mk3(); assert.strictEqual((await M3.lookupPostal('999999', stubF)).state, 'invalid'); assert.strictEqual((await M3.lookupPostal('123456', stubF)).state, 'none');
+  assert.strictEqual((await M3.lookupPostal('560123', () => Promise.reject(new Error('x')))).state, 'error'); assert.strictEqual(M3.placeData({ t: 'postal', n: '123456' }), null, 'no address, no place');
+});
+ta('postal code: a code shared by several buildings offers each address (up to three)', async () => {
+  const M3 = mk3(), r = await M3.lookupPostal('459007', stubF); assert.ok(r.list.length >= 2); r.list.forEach((x) => assert.ok(M3.placeData({ t: 'postal', n: x.n })));
+});
+
 if (process.env.KPT_RAW) {
   console.log('build validation against the live Research cells');
   t('42k cells recomputed from the raw URA files match the live cells exactly (0 mismatches)', () => {
@@ -167,4 +233,4 @@ if (process.env.KPT_RAW) {
     const id = Object.keys(out.ev)[7]; out.ev[id].mk.sec[0][5] += 1; assert.ok(B.validate(out, path.join(root, 'data/projects')).bad.length > 0, 'a corrupted cell must be caught');
   });
 }
-console.log('\n' + pass + ' passed, ' + fail + ' failed'); process.exit(fail ? 1 : 0);
+(async () => { for (const [n, f] of later) { try { await f(); pass++; console.log('  ok   ' + n); } catch (e) { fail++; console.log('  FAIL ' + n + '\n       ' + String(e.message || e).split('\n').slice(0, 4).join('\n       ')); } } console.log('\n' + pass + ' passed, ' + fail + ' failed'); process.exit(fail ? 1 : 0); })();

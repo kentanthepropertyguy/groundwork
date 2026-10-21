@@ -12,6 +12,7 @@
 
   root.KPT_MAP_VIEW = function (K, M) {      // K = KPT_MAP (helpers), M = the model made by KPT_MAP.create
     const { esc, icon } = K;
+    const canHover = typeof matchMedia === 'function' && matchMedia('(hover: hover) and (pointer: fine)').matches;
     let map, tiles, layer, labelsG, selG, el, onSelect, onPlace, cur = {}, failed = false, saved = null, stats = null, loadingEl = null, failEl = null, tileTimer = null;
 
     function create(container, opts) {
@@ -71,10 +72,11 @@
         }
       }
       keepSelectedInView();
-      const BY = M.BY, cmp = new Set(cur.cmp || []), tip = (p) => `${esc(p.n)}${p.cls && p.cls !== 'condo' ? ' (' + esc(M.CLS[p.cls].short) + ')' : ''} · ${p.t12} sale${p.t12 === 1 ? '' : 's'} in 12 months`, z = map.getZoom(), zs = z <= 12 ? .5 : z <= 13 ? .75 : 1;
-      const dot = (p, o2) => { const k = L.circleMarker([p.lat, p.lon], Object.assign({ radius: (3 + Math.min(6, Math.sqrt(p.t12))) * zs, color: '#fff', weight: 1.2, fillColor: '#2E4FD1', fillOpacity: p.t12 ? .5 : .25, bubblingMouseEvents: false }, o2)); k.bindTooltip(tip(p), { className: 'gwtip', direction: 'top', offset: [0, -6] }); k.on('click', () => onSelect && onSelect(p.n)); return k; };
+      const BY = M.BY, cmp = new Set(cur.cmp || []), tip = (p) => p.up ? `${esc(p.n)} · ${esc(M.upTag(p))}` : `${esc(p.n)}${p.cls && p.cls !== 'condo' ? ' (' + esc(M.CLS[p.cls].short) + ')' : ''} · ${p.t12} sale${p.t12 === 1 ? '' : 's'} in 12 months`, z = map.getZoom(), zs = z <= 12 ? .5 : z <= 13 ? .75 : 1;
+      const dot = (p, o2) => { const k = L.circleMarker([p.lat, p.lon], Object.assign(p.up ? { radius: 5 * zs + 1, color: '#2E4FD1', weight: 1.8, fillColor: '#fff', fillOpacity: .95, bubblingMouseEvents: false } : { radius: (3 + Math.min(6, Math.sqrt(p.t12))) * zs, color: '#fff', weight: 1.2, fillColor: '#2E4FD1', fillOpacity: p.t12 ? .5 : .25, bubblingMouseEvents: false }, o2)); if (canHover) k.bindTooltip(tip(p), { className: 'gwtip', direction: 'top', offset: [0, -6] }); /* a touch screen has no hover: the tap selects the dot, and a tooltip would only cover the card and the map */ k.on('click', () => onSelect && onSelect(p.n)); return k; };
       for (const p of cur.projects) if (p.n !== cur.selected && !cmp.has(p.n)) dot(p).addTo(layer);
       for (const n of cmp) { const p = BY[n]; if (p && p.pos) dot(p, { fillColor: '#0E8C89', fillOpacity: .95, weight: 2 }).addTo(layer); }
+      if (cur.circle) L.circle([cur.circle.lat, cur.circle.lon], { radius: cur.circle.r, color: '#2E4FD1', weight: 2, opacity: .8, dashArray: '7 5', fillColor: '#2E4FD1', fillOpacity: .06, interactive: false }).addTo(selG);
       if (cur.areaRings) L.polygon(cur.areaRings, { color: '#14203F', weight: 2, opacity: .75, fillColor: '#2E4FD1', fillOpacity: .05, dashArray: '6 5', interactive: false }).addTo(selG);
       drawLabels();
     }
@@ -88,7 +90,7 @@
       };
       // 1. the selected development or place: a dark chip above the marker
       const sel = cur.selected && BY[cur.selected] && BY[cur.selected].pos ? BY[cur.selected] : null;
-      const head = sel ? (() => { const e = EV[cur.selected], ten = e ? (/^99/.test(e.tenure) ? '99-yr' : /^freehold/i.test(e.tenure) ? 'Freehold' : e.tenure) : ''; return { lat: sel.lat, lon: sel.lon, t: sel.n, sub: `D${Number(sel.district)}${sel.cls && sel.cls !== 'condo' ? ' · ' + M.CLS[sel.cls].short : ''}${ten ? ' · ' + ten : ''}` }; })() : (cur.place && cur.place.lat != null ? { lat: cur.place.lat, lon: cur.place.lon, t: cur.place.label, sub: cur.place.sub } : null);
+      const head = sel ? (() => { const e = EV[cur.selected], ten = e ? (/^99/.test(e.tenure) ? '99-yr' : /^freehold/i.test(e.tenure) ? 'Freehold' : e.tenure) : ''; return { lat: sel.lat, lon: sel.lon, t: sel.n, sub: sel.up ? M.upTag(sel) : `D${Number(sel.district)}${sel.cls && sel.cls !== 'condo' ? ' · ' + M.CLS[sel.cls].short : ''}${ten ? ' · ' + ten : ''}` }; })() : (cur.place && cur.place.lat != null ? { lat: cur.place.lat, lon: cur.place.lon, t: cur.place.label, sub: cur.place.sub } : null);
       if (head) { const pt = map.latLngToContainerPoint([head.lat, head.lon]); L.marker([head.lat, head.lon], { icon: L.divIcon({ className: 'selwrap', html: '<div class="selm"><i class="h"></i><i class="r"></i><i class="d"></i></div>', iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, keyboard: false, zIndexOffset: 3000 }).addTo(labelsG); L.marker([head.lat, head.lon], { icon: L.divIcon({ className: 'selwrap', html: chipHtml(head.t, head.sub), iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, keyboard: false, zIndexOffset: 3500 }).addTo(labelsG); placed.push({ x: pt.x - 90, y: pt.y - 74, w: 180, h: 56 }, { x: pt.x - 16, y: pt.y - 16, w: 32, h: 32 }); }
       else if (cur.place && cur.place.chipAt) { const pt = map.latLngToContainerPoint(cur.place.chipAt); L.marker(cur.place.chipAt, { icon: L.divIcon({ className: 'selwrap', html: chipHtml(cur.place.label, cur.place.sub), iconSize: [0, 0], iconAnchor: [0, 0] }), interactive: false, keyboard: false, zIndexOffset: 1000 }).addTo(labelsG); placed.push({ x: pt.x - 90, y: pt.y - 60, w: 180, h: 56 }); }
       // 2. amenities listed on the card (nearest MRT, schools, shops, parks)

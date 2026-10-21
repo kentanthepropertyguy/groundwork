@@ -263,13 +263,30 @@ t('the radius options are 500 m, 1 km, 2 km and 3 km, and the location is saved 
 });
 t('the launch list is optional, never an error, and only used when the new-launch layer is on', () => {
   assert.ok(/const loadSites = \(\) => .*fetch\(SITES_URL\)\.then\(\(r\) => \(r\.ok \? r\.json\(\) : null\)\)\.catch\(\(\) => null\)/.test(page));
-  assert.ok(/launches: sitesDoc \|\| null/.test(page)); assert.ok(/\/\^https:\\\/\\\//.test(page), 'only https launch links');
+  assert.ok(/launches: launchesFor\(\)/.test(page) && /return sitesDoc \|\| null/.test(page)); assert.ok(/\/\^https:\\\/\\\//.test(page), 'only https launch links');
   assert.ok(!/KPT\.track\([^)]*(launch|site)/i.test(page), 'launch names are never sent to analytics');
 });
 t('the unplaced list and the upcoming block are separate from the matches, and say what they are not', () => {
   assert.ok(/no verified map position/.test(page)); assert.ok(/Not confirmed to be within/.test(page)); assert.ok(/not budget matches/.test(page)); assert.ok(/Browse other upcoming launches/.test(page));
   assert.ok(/id="kpfUnplaced"/.test(page) && /data-f="unplaced"/.test(page));
   assert.ok(!/<i>\$\{esc\(NR\.sub\)\}<\/i>/.test(page), 'the place type is no longer printed after a name that already carries it');
+});
+
+console.log('Phase 3: postal codes and the launch register');
+t('a launch or site from the register (onlyNear) is never listed without a place, and never counted as a match', () => {
+  const o = { openTo: 'both', size: { lo: 700, hi: 1300, source: 'explicit' }, sizes: { resale: { lo: 700, hi: 1300, source: 'explicit' }, new: { lo: 700, hi: 1300, source: 'explicit' } }, inv };
+  const none = run(rix, Object.assign({ budget: 1800000, launches: [L('thomson-reserve'), L('peck-hay-road-gls-site', { onlyNear: true })] }, o));
+  assert.deepStrictEqual(upIds(none), ['thomson-reserve'], 'the register-only site is not offered without a place');
+  const base0 = run(rix, Object.assign({ budget: 1800000 }, o)); assert.strictEqual(none.total, base0.total); assert.strictEqual(none.shown, base0.shown);
+});
+t('the page loads the shared postal module before the Map core, and accepts a postal code as a place', () => {
+  assert.ok(/gw-postal\.js/.test(page)); assert.ok(page.indexOf('gw-postal.js') < page.indexOf('kpt-map-core.js'), 'postal module first');
+  assert.ok(/NEAR_TYPES[^;]*'postal'/.test(page)); assert.ok(/upcoming\.json/.test(page) && /setUpcoming/.test(page));
+  assert.ok(!/elastic\/search/.test(page), 'the page has no OneMap lookup of its own; it uses the shared module');
+});
+t('the shared module, not a copy, is what the Map and Budget Search both call', () => {
+  const core = fs.readFileSync(path.join(root, 'assets/js/kpt-map-core.js'), 'utf8'); assert.ok(/gw-postal\.js/.test(core) && !/elastic\/search/.test(core));
+  assert.ok(/gw-postal\.js/.test(mapPage) && mapPage.indexOf('gw-postal.js') < mapPage.indexOf('kpt-map-core.js'));
 });
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed'); process.exit(fail ? 1 : 0);
