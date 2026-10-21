@@ -160,7 +160,7 @@
     if (res.state === 'no-income') return '<div class="pa-intro">' + kick + '<h2 class="pa-lead">No bank loan to work out</h2><p class="pa-p">Your income is entered as $0, so there is no income to lend against. Add income, including a co-borrower’s, to see what a bank could lend. Leave it blank if you have not decided yet.</p></div>';
     if (res.state === 'income' || res.state === 'ask-home' || res.state === 'ask-flat') {
       const prompt = res.state === 'income' ? 'Add your cash and CPF to see what that buys.' : res.state === 'ask-home' ? 'Answer the property questions on the left to see your budget.' : (PROMPTASK[(res.ask || [])[0]] || 'Answer the property questions on the left.');
-      return '<div class="pa-intro">' + kick + '<h2 class="pa-lead">The bank may lend about <b>' + $s(Math.floor(res.borrow.max / 1e4) * 1e4) + '</b></h2><p class="pa-p">An estimate from your income alone, over ' + plural(res.borrow.years) + '. ' + prompt + '</p></div>';
+      return '<div class="pa-intro">' + kick + '<h2 class="pa-lead">The bank may lend about <b>' + $s(Math.floor(res.borrow.max / 1e4) * 1e4) + '</b></h2><p class="pa-p">' + (res.borrow.monthly > 0 ? 'About <b>' + $(round100(res.borrow.monthly)) + '</b> a month, over ' + plural(res.borrow.years) + ' at your expected ' + rateTxt(res) + '. An estimate from your income alone. ' : 'An estimate from your income alone, over ' + plural(res.borrow.years) + '. ') + prompt + '</p></div>';
     }
     if (res.state === 'out-of-reach') return '<div class="pa-intro">' + kick + '<h2 class="pa-lead">Nothing fits these figures yet</h2><p class="pa-p">' + (res.lever ? 'The biggest lever is cash: about <b>' + $(res.lever.amount) + '</b> more would bring a ' + $s(res.lever.forPrice) + ' home within reach.' : 'Adding cash is the biggest lever.') + '</p></div>';
     if (res.state === 'invalid') return '<div class="pa-intro">' + kick + '<h2 class="pa-lead">Check the entries marked on the left</h2></div>';
@@ -407,6 +407,16 @@
     function fitSticky() { if (outEl) outEl.classList.toggle('pa-tall', outEl.scrollHeight > (root.innerHeight || 800) - 100); }
     root.addEventListener('resize', fitSticky); box.addEventListener('toggle', fitSticky, true);
     let heldHtml = null;
+    // the most the age allows, from the buyers' ages alone (no income, cash or price needed): the same limit the calculation applies (C.tenureLimit)
+    const ageLimit = () => { try { return C.tenureLimit({ kind: 'private', borrowers: readEntries().buyers.map((b) => ({ age: b.age, fixed: b.fixed || 0, variable: b.variable || 0 })) }); } catch (e) { return null; } };
+    // the line under the loan-years field: its usual hint, or, after an over-long entry was corrected, what it was changed from and why
+    function paintYearsHint() {
+      const y = field('years'), h = y && y.closest('label') && y.closest('label').querySelector('.pa-hint'); if (!h) return;
+      if (h.dataset.d === undefined) h.dataset.d = h.textContent;
+      let t = h.dataset.d; const adj = yAdj(), L = adj ? ageLimit() : null, chosen = C.parseNum(y.value).value || 0;
+      if (L && L.allowed >= 1 && chosen >= L.allowed) t = C.tenureNote({ age: L.age, std: L.std, allowed: L.allowed, chosen: chosen, adjustedFrom: adj, joint: L.joint });
+      if (h.textContent !== t) h.textContent = t;
+    }
     let tenureFld = null; const yAdj = () => { const y = field('years'); return y && +y.dataset.adjustedFrom > 0 ? +y.dataset.adjustedFrom : 0; };
     function recalc() {
       dirty = false; applyWhen();
@@ -438,7 +448,7 @@
         out.foot.hidden = true; out.ask.hidden = true;
       }
       if (r.state === 'ok' || (lastOk && !bad)) out.foot.hidden = false;
-      barUpdate(); wa(); save(); fitSticky();
+      paintYearsHint(); barUpdate(); wa(); save(); fitSticky();
     }
     function restoreCushionUi(s) { /* the chips are redrawn with the head; keep the amount field in step */ const f = field('cushionAmount'); if (f && cush.amount !== undefined && document.activeElement !== f) f.value = cush.amount ? fmtMoney(cush.amount) : f.value; }
 
@@ -498,7 +508,7 @@
 
     // ---- inputs: live commas on money fields (one behaviour for every calculator: gw-money.js) ----
     if (root.GW_MONEY) $$('input[data-t="money"]').forEach((x) => root.GW_MONEY.wire(x, { parse: (t) => { const p = parseMoney(t); return !p.error && p.value !== undefined ? p.value : null; }, max: C.LIMITS.money.max }));
-    { const yEl = field('years'); if (root.GW_MONEY && root.GW_MONEY.tenureField && yEl) tenureFld = root.GW_MONEY.tenureField(yEl, { read: () => { const p = C.parseNum(yEl.value); return p.error ? null : (p.value || null); }, max: () => C.LIMITS.years.max, recalc: () => { clearTimeout(tmr); recalc(); } }); }
+    { const yEl = field('years'); if (root.GW_MONEY && root.GW_MONEY.tenureField && yEl) tenureFld = root.GW_MONEY.tenureField(yEl, { read: () => { const p = C.parseNum(yEl.value); return p.error ? null : (p.value || null); }, max: () => C.LIMITS.years.max, limit: () => { const L = ageLimit(); return L ? L.allowed : 0; }, recalc: () => { clearTimeout(tmr); recalc(); } }); }
     box.addEventListener('input', (e) => { const t = e.target; if (!t.matches || !t.matches('input')) return; if (t.matches('[data-borrow-range]')) { borrowFromRange(); return; } if (t.matches('[data-range]')) return; if (t.dataset.k === 'price') { ptouched = t.value.trim() !== ''; if (!ptouched) { changed(); return; } changedPrice(); return; } changed(); });
     box.addEventListener('change', (e) => { if (e.target.matches && e.target.matches('input[data-k]') && !e.target.matches('[data-range]')) changed(); });
     // chips (static in the form; the cushion chips are redrawn with the head)

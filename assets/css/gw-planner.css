@@ -340,7 +340,8 @@ table.pl-evs{display:table;width:100%;border-collapse:collapse;font-size:14px;fo
 .pl-prop-edit:focus-visible,.pl-tab:focus-visible,.pl-buyer>summary:focus-visible,.pl-how2>summary:focus-visible,.pl-adv>summary:focus-visible{outline:2px solid var(--pl-sig);outline-offset:2px}
 .pl-buyer{margin-top:2px}.pl-buyer>summary{cursor:pointer;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;min-height:44px;font-size:14px;color:var(--gw-body);list-style:none}
 .pl-buyer>summary::-webkit-details-marker{display:none}.pl-buyer>summary em{font-style:normal;font-weight:700;color:var(--gw-blue)}
-.pl-buyer-b{display:flex;flex-direction:column;gap:12px;padding:6px 0 4px}
+.pl-buyer-line{margin:0;font-size:14px;line-height:1.45;color:var(--gw-body)}
+.pl-buyer-b{display:flex;flex-direction:column;gap:12px;padding:10px 0 4px}
 .pl-prop .pl-route{margin-top:0}
 /* the two screens */
 .pl-screens{display:flex;flex-direction:column;gap:18px}
