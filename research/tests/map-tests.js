@@ -8,6 +8,9 @@ let pass = 0, fail = 0; const t = (n, f) => { try { f(); pass++; console.log('  
 const places = D('places.json'), amen = D('amen.json'), extra = amen.extra ? D(amen.extra) : null, ev = D('ev.json'), ix = JSON.parse(fs.readFileSync(path.join(root, 'data/projects/index.json'), 'utf8'));
 const mk = (S, withExtra = true) => { const S0 = S || { band: null, radius: 2000 }, M = K.create(places, JSON.parse(JSON.stringify(amen)), S0); M.setEvidence(ev); if (withExtra && extra) M.setExtra(extra); return { M, S: S0 }; };
 const { M, S } = mk();
+// every development with URA sales now has a position (URA's own, or OneMap's); to test the rule for one that has none, take one position away in a copy
+const placesNP = JSON.parse(JSON.stringify(places)); placesNP.rows.find((r) => r[0] === 'newport-residences').splice(2, 2, null, null);
+const mkNP = () => { const S0 = { band: null, radius: 2000 }, M2 = K.create(placesNP, JSON.parse(JSON.stringify(amen)), S0); M2.setEvidence(ev); if (extra) M2.setExtra(extra); return M2; };
 const hav = (a, b) => { const R_ = 6371000, p = Math.PI / 180, dl = (b.lat - a.lat) * p, dn = (b.lon - a.lon) * p, x = Math.sin(dl / 2) ** 2 + Math.cos(a.lat * p) * Math.cos(b.lat * p) * Math.sin(dn / 2) ** 2; return Math.round(2 * R_ * Math.asin(Math.sqrt(x))); };
 
 console.log('data');
@@ -17,8 +20,9 @@ t('every Research project is on the map list, once, with the Research display na
   rows.forEach((r) => { const p = M.BYID[r.id]; assert.ok(p, r.id); assert.strictEqual(p.n, R.displayName(r.name)); assert.ok(M.EV[p.n], 'evidence for ' + r.id); });
 });
 t('positions are inside Singapore; a project with no URA position stays unpositioned (never invented)', () => {
-  const no = M.P.filter((p) => !p.pos); assert.ok(no.length > 0 && no.length < 200);
-  no.forEach((p) => { assert.strictEqual(p.lat, null); assert.strictEqual(p.lon, null); assert.ok(!M.PM.includes(p)); });
+  const no = mkNP().P.filter((p) => !p.pos); assert.strictEqual(no.length, 1);
+  no.forEach((p) => { assert.strictEqual(p.lat, null); assert.strictEqual(p.lon, null); assert.ok(!mkNP().PM.includes(p)); });
+  assert.strictEqual(M.P.filter((p) => !p.pos).length, 0, 'every development with URA sales is on the map');
   M.PM.forEach((p) => { assert.ok(p.lat > 1.15 && p.lat < 1.50 && p.lon > 103.60 && p.lon < 104.10, p.n); });
 });
 t('SVY21: the grid origin converts to its own latitude and longitude, and a known landmark lands within 50 m', () => {
@@ -96,9 +100,9 @@ t('"Mainly sub-sales" shows only where more than half of the secondary sales in 
   M.P.forEach((p) => { const b = M.market(p.n, 'sec'); if (!b) return assert.strictEqual(M.mainlySub(p.n), false); const cs = M.cellsOf(p.n, 'sec', b.win === null ? 2 : b.win), n = cs.reduce((s, c) => s + c.n, 0), sub = cs.reduce((s, c) => s + c.sub, 0); assert.strictEqual(M.mainlySub(p.n), n > 0 && sub * 2 > n, p.n); });
 });
 t('a development with no URA position has prices but no neighbourhood or nearby list, and can still be found by search', () => {
-  const p = M.BYID['parktown-residence']; assert.ok(p && !p.pos && M.EV[p.n]);
+  const M = mkNP(), p = M.BYID['newport-residences']; assert.ok(p && !p.pos && M.EV[p.n]);   // a development with no verified position
   assert.deepStrictEqual(M.around(p.n), []); assert.strictEqual(M.nearbyFor(p.n).mode, 'none'); assert.deepStrictEqual(M.nearby(p.n, 5000), []);
-  assert.ok(M.places('parktown').some((x) => x.t === 'dev' && x.n === p.n));
+  assert.ok(M.places('newport resid').some((x) => x.t === 'dev' && x.n === p.n));
   assert.ok(!M.PM.some((x) => x.n === p.n)); M.PM.forEach((q) => assert.ok(!M.nearby(q.n, 1000).some((x) => x.n === p.n)));
 });
 
@@ -137,7 +141,8 @@ t('place cards: an MRT station lists developments by distance and never shows a 
 console.log('Phase 1: development coverage (condo, EC, cluster)');
 t('the Map lists every register development once, with its class; unplaced ones stay searchable', () => {
   const by = { condo: 0, ec: 0, cluster: 0 }; M.P.forEach((p) => { by[p.cls]++; }); assert.ok(by.condo > 2000 && by.ec >= 70 && by.cluster >= 140, JSON.stringify(by));
-  assert.ok(M.P.some((p) => p.cls !== 'condo' && !p.pos), 'at least one EC/cluster without a position is still listed');
+  assert.ok(mkNP().P.some((p) => !p.pos), 'a development without a position is still listed');
+  assert.ok(M.P.filter((p) => p.cls !== 'condo' && p.pos).length >= 200, 'ECs and cluster housing are on the map');
 });
 t('Rosyth School lists Hundred Palms Residences (an EC) within 1 km, with its class', () => {
   const d = M.placeData({ t: 'school', n: 'Rosyth School' }); assert.ok(d && d.list.length, 'school card'); const x = d.list.find((r) => /Hundred Palms/.test(r.p.n)); assert.ok(x, d.list.map((r) => r.p.n).join(','));
@@ -166,10 +171,10 @@ t('Thomson Reserve is found by Groundwork\'s own search, as a new launch, beside
   const all = M3.places('thomson'); assert.ok(all.some((x) => x.t === 'dev' && !x.g && x.n === 'Thomson Three'), 'a resale project still found'); assert.ok(all.some((x) => x.g === 'up' && x.n === 'Thomson Reserve'));
   const p = M3.BY['Thomson Reserve']; assert.ok(p.pos && p.up && p.up.kind === 'launch' && /under construction/.test(M3.upStage(p)));
 });
-t('One Chuan Grove is found by its reported name and by the name URA uses; Hougang Central is searchable but has no map position', () => {
+t('One Chuan Grove is found by its reported name and by the name URA uses; Hougang Central is searchable and now placed on its verified parcel', () => {
   const M3 = mk3(); ['one chuan grove', 'chuan grove', 'lorong chuan gls'].forEach((q2) => assert.ok(M3.places(q2).some((x) => x.n === 'One Chuan Grove'), q2));
-  const h = M3.places('hougang central').find((x) => x.n === 'Hougang Central'); assert.ok(h && /not on the map yet/.test(h.sub), JSON.stringify(h));
-  const hc = M3.BY['Hougang Central']; assert.ok(!hc.pos && hc.lat === null && hc.lon === null && !M3.PM.includes(hc), 'never placed with a guessed position'); assert.ok(UPD.items.find((i) => i.id === 'hougang-central').posNote);
+  const h = M3.places('hougang central').find((x) => x.n === 'Hougang Central'); assert.ok(h && /GLS site/.test(h.sub) && !/not on the map/.test(h.sub), JSON.stringify(h));
+  const hc = M3.BY['Hougang Central']; assert.ok(hc.pos && M3.PM.includes(hc) && /Master Plan 2025/.test(UPD.items.find((i) => i.id === 'hougang-central').posSrc), 'placed on a parcel verified against URA\'s Master Plan');
 });
 t('a GLS site with no project name yet is found by its location and called a GLS site', () => {
   const M3 = mk3(), r = M3.places('peck hay'); assert.ok(r[0].g === 'up' && r[0].n === 'Peck Hay Road GLS site' && /GLS site/.test(r[0].sub)); const p = M3.BY[r[0].n]; assert.ok(p.up.unnamed && p.pos && /no project name yet/.test(M3.upStage(p)));
@@ -189,7 +194,7 @@ t('a launch or site is never a development with sales: no evidence, no price, ne
 });
 t('the card for a launch has its own surroundings: nearest MRT, school, shops and park, by straight-line distance', () => {
   const M3 = mk3(), a = M3.around('Thomson Reserve', 1); assert.deepStrictEqual(a.map((g) => g.id), ['tr', 'sc', 'sh', 'pk']); assert.ok(a[0].items[0].n.includes('Upper Thomson') && a[0].items[0].d < 400);
-  assert.deepStrictEqual(M3.around('Hougang Central', 2), [], 'nothing is measured from a site with no position');
+  const M4 = mk().M; M4.setUpcoming({ items: [{ id: 'zz-no-pos', name: 'Site Without Position', kind: 'gls', stage: 'awarded', posNote: 'x' }] }); assert.deepStrictEqual(M4.around('Site Without Position', 2), [], 'nothing is measured from a site with no position'); assert.strictEqual(M4.placeData({ t: 'dev', n: 'Site Without Position' }), null);
 });
 t('radius: 500 m, 1 km, 2 km, 3 km; 1 km is the default; every listed development is inside the radius, nearest first, and a wider radius only adds', () => {
   const M3 = mk3(); assert.deepStrictEqual(M3.RADII, [500, 1000, 2000, 3000]);
@@ -233,4 +238,28 @@ if (process.env.KPT_RAW) {
     const id = Object.keys(out.ev)[7]; out.ev[id].mk.sec[0][5] += 1; assert.ok(B.validate(out, path.join(root, 'data/projects')).bad.length > 0, 'a corrupted cell must be caught');
   });
 }
+console.log('Follow-up: the same optional radius on a selected development, launch or site');
+t('a selected development has the same radius choices, a default of 1 km, and never lists itself', () => {
+  const M3 = mk3(); ['Bartley Ridge', 'Thomson Three', 'Hundred Palms Residences', 'Horizon Green', 'Thomson Reserve', 'The Serra Residences', 'Chencharu Close', 'Hougang Central'].forEach((n) => {
+    assert.ok(M3.BY[n] && M3.BY[n].pos, n + ' has a position'); const b = M3.placeData({ t: 'dev', n }); assert.strictEqual(b.r, 1000, n); assert.strictEqual(b.t, 'dev'); let prev = -1;
+    M3.RADII.forEach((r) => { const d = M3.placeData({ t: 'dev', n }, r); assert.strictEqual(d.r, r); assert.ok(d.list.length + d.ups.length >= prev, n + ' never shrinks as the radius grows'); prev = d.list.length + d.ups.length;
+      d.list.forEach((x) => { assert.ok(x.d <= r && x.p.n !== n, n); }); d.ups.forEach((x) => { assert.ok(x.d <= r && x.p.n !== n, n); }); assert.strictEqual(d.lat, M3.BY[n].lat); assert.strictEqual(d.lon, M3.BY[n].lon); });
+  });
+});
+t('a development with no position has no radius (never invented)', () => { const M3 = mkNP(); M3.setUpcoming(UPD); const none = M3.P.find((p) => !p.pos); assert.ok(none); assert.strictEqual(M3.placeData({ t: 'dev', n: none.n }), null); assert.strictEqual(M3.placeData({ t: 'dev', n: 'No Such Place' }), null); });
+t('the nearby radius does not touch the price comparison: nearbyFor depends only on the comparison radius', () => {
+  const o = mk3(), n = 'Bartley Ridge'; const a = JSON.stringify(o.nearbyFor(n)); o.placeData({ t: 'dev', n }, 3000); o.placeData({ t: 'dev', n }, 500); assert.strictEqual(JSON.stringify(o.nearbyFor(n)), a);
+});
+t('Chencharu Close is listed within 1 km of Khatib MRT, as a site and not as a sale', () => {
+  const M3 = mk3(), d = M3.placeData({ t: 'mrt', n: 'Khatib MRT' }); const x = d.ups.find((u) => u.p.n === 'Chencharu Close'); assert.ok(x && x.d < 1000, JSON.stringify(d.ups.map((u) => [u.p.n, u.d]))); assert.ok(!d.list.some((u) => u.p.n === 'Chencharu Close'));
+  assert.strictEqual(M3.upStage(M3.BY['Chencharu Close']), 'Awarded HDB GLS site'); assert.strictEqual(M3.upStage(M3.BY['The Serra Residences']), 'New launch');
+});
+t('search: Serra Residences, the official name and Chencharu Central each find one project', () => {
+  const M3 = mk3(); const one = (q, n) => { const r = M3.places(q).filter((x) => x.t === 'dev' && x.n === n); assert.strictEqual(r.length, 1, q); };
+  one('serra residences', 'The Serra Residences'); one('the serra residences', 'The Serra Residences'); one('chencharu central', 'Chencharu Close'); one('reserve residences', 'The Reserve Residences'); one('the reserve residences', 'The Reserve Residences');
+});
+t('The Reserve Residences is on the map at Jalan Anak Bukit and every development with URA sales but no URA position is placed from OneMap or says it is not', () => {
+  const M3 = mk3(), r = M3.BY['The Reserve Residences']; assert.ok(r.pos && r.lat > 1.335 && r.lat < 1.345 && r.lon > 103.772 && r.lon < 103.782); assert.ok(M3.PM.includes(r));
+  const pos = D('positions-onemap.json'); assert.ok(pos.rows.length >= 80); pos.rows.forEach((x) => { const p = M3.BYID[x[0]]; assert.ok(p && p.pos && Math.abs(p.lat - x[1]) < 1e-5 && Math.abs(p.lon - x[2]) < 1e-5, x[0]); });
+});
 (async () => { for (const [n, f] of later) { try { await f(); pass++; console.log('  ok   ' + n); } catch (e) { fail++; console.log('  FAIL ' + n + '\n       ' + String(e.message || e).split('\n').slice(0, 4).join('\n       ')); } } console.log('\n' + pass + ' passed, ' + fail + ' failed'); process.exit(fail ? 1 : 0); })();

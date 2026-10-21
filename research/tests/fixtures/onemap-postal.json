@@ -1,445 +1,483 @@
 {
-"_note": "Real answers from OneMap's address search for these postal codes, retrieved 2026-10-21 (Singapore Land Authority, Singapore Open Data Licence v1.0). Used only by the tests, which never call OneMap. A code not listed here is answered with no result.",
-"answers": {
-"159016": {
-"found": 1,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "ALEXANDRA PRIMARY SCHOOL",
-"BLK_NO": "2A",
-"ROAD_NAME": "PRINCE CHARLES CRESCENT",
-"BUILDING": "ALEXANDRA PRIMARY SCHOOL",
-"ADDRESS": "2A PRINCE CHARLES CRESCENT ALEXANDRA PRIMARY SCHOOL SINGAPORE 159016",
-"POSTAL": "159016",
-"LATITUDE": "1.291334391613348",
-"LONGITUDE": "103.8244246805311"
-}
-]
-},
-"188065": {
-"found": 1,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "SINGAPORE MANAGEMENT UNIVERSITY (ADMIN BLDG)",
-"BLK_NO": "81",
-"ROAD_NAME": "VICTORIA STREET",
-"BUILDING": "SINGAPORE MANAGEMENT UNIVERSITY (ADMIN BLDG)",
-"ADDRESS": "81 VICTORIA STREET SINGAPORE MANAGEMENT UNIVERSITY (ADMIN BLDG) SINGAPORE 188065",
-"POSTAL": "188065",
-"LATITUDE": "1.296846713984232",
-"LONGITUDE": "103.8522079431716"
-}
-]
-},
-"238801": {
-"found": 1,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "ION ORCHARD",
-"BLK_NO": "2",
-"ROAD_NAME": "ORCHARD TURN",
-"BUILDING": "ION ORCHARD",
-"ADDRESS": "2 ORCHARD TURN ION ORCHARD SINGAPORE 238801",
-"POSTAL": "238801",
-"LATITUDE": "1.303979741445055",
-"LONGITUDE": "103.832032328465"
-}
-]
-},
-"310031": {
-"found": 0,
-"totalNumPages": 0,
-"pageNum": 1,
-"results": []
-},
-"310080": {
-"found": 1,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "80 LORONG 4 TOA PAYOH SINGAPORE 310080",
-"BLK_NO": "80",
-"ROAD_NAME": "LORONG 4 TOA PAYOH",
-"BUILDING": "NIL",
-"ADDRESS": "80 LORONG 4 TOA PAYOH SINGAPORE 310080",
-"POSTAL": "310080",
-"LATITUDE": "1.335263461120134",
-"LONGITUDE": "103.8485168035469"
-}
-]
-},
-"359419": {
-"found": 1,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "DUNSFOLD 18",
-"BLK_NO": "45D",
-"ROAD_NAME": "DUNSFOLD DRIVE",
-"BUILDING": "DUNSFOLD 18",
-"ADDRESS": "45D DUNSFOLD DRIVE DUNSFOLD 18 SINGAPORE 359419",
-"POSTAL": "359419",
-"LATITUDE": "1.348503480221498",
-"LONGITUDE": "103.8606190292034"
-}
-]
-},
-"400001": {
-"found": 1,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "1 EUNOS CRESCENT SINGAPORE 400001",
-"BLK_NO": "1",
-"ROAD_NAME": "EUNOS CRESCENT",
-"BUILDING": "NIL",
-"ADDRESS": "1 EUNOS CRESCENT SINGAPORE 400001",
-"POSTAL": "400001",
-"LATITUDE": "1.320657645248208",
-"LONGITUDE": "103.9024634451098"
-}
-]
-},
-"456789": {
-"found": 0,
-"totalNumPages": 0,
-"pageNum": 1,
-"results": []
-},
-"459007": {
-"found": 4,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "UNITED MANSIONS",
-"BLK_NO": "614C",
-"ROAD_NAME": "EAST COAST ROAD",
-"BUILDING": "UNITED MANSIONS",
-"ADDRESS": "614C EAST COAST ROAD UNITED MANSIONS SINGAPORE 459007",
-"POSTAL": "459007",
-"LATITUDE": "1.311254207910809",
-"LONGITUDE": "103.9217415100433"
-},
-{
-"SEARCHVAL": "UNITED MANSIONS",
-"BLK_NO": "614",
-"ROAD_NAME": "EAST COAST ROAD",
-"BUILDING": "UNITED MANSIONS",
-"ADDRESS": "614 EAST COAST ROAD UNITED MANSIONS SINGAPORE 459007",
-"POSTAL": "459007",
-"LATITUDE": "1.311252069928519",
-"LONGITUDE": "103.9217374758025"
-},
-{
-"SEARCHVAL": "UNITED MANSIONS",
-"BLK_NO": "614A",
-"ROAD_NAME": "EAST COAST ROAD",
-"BUILDING": "UNITED MANSIONS",
-"ADDRESS": "614A EAST COAST ROAD UNITED MANSIONS SINGAPORE 459007",
-"POSTAL": "459007",
-"LATITUDE": "1.311254207910809",
-"LONGITUDE": "103.9217415100433"
-},
-{
-"SEARCHVAL": "UNITED MANSIONS",
-"BLK_NO": "614B",
-"ROAD_NAME": "EAST COAST ROAD",
-"BUILDING": "UNITED MANSIONS",
-"ADDRESS": "614B EAST COAST ROAD UNITED MANSIONS SINGAPORE 459007",
-"POSTAL": "459007",
-"LATITUDE": "1.311254207910809",
-"LONGITUDE": "103.9217415100433"
-}
-]
-},
-"459919": {
-"found": 1,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "OPERA ESTATE",
-"BLK_NO": "1",
-"ROAD_NAME": "AIDA STREET",
-"BUILDING": "OPERA ESTATE",
-"ADDRESS": "1 AIDA STREET OPERA ESTATE SINGAPORE 459919",
-"POSTAL": "459919",
-"LATITUDE": "1.316832521711999",
-"LONGITUDE": "103.9286229384194"
-}
-]
-},
-"460001": {
-"found": 1,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "1 BEDOK SOUTH AVENUE 1 SINGAPORE 460001",
-"BLK_NO": "1",
-"ROAD_NAME": "BEDOK SOUTH AVENUE 1",
-"BUILDING": "NIL",
-"ADDRESS": "1 BEDOK SOUTH AVENUE 1 SINGAPORE 460001",
-"POSTAL": "460001",
-"LATITUDE": "1.320852086897327",
-"LONGITUDE": "103.9337210914409"
-}
-]
-},
-"520123": {
-"found": 1,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "123 SIMEI STREET 1 SINGAPORE 520123",
-"BLK_NO": "123",
-"ROAD_NAME": "SIMEI STREET 1",
-"BUILDING": "NIL",
-"ADDRESS": "123 SIMEI STREET 1 SINGAPORE 520123",
-"POSTAL": "520123",
-"LATITUDE": "1.345306618358452",
-"LONGITUDE": "103.9531879561585"
-}
-]
-},
-"530108": {
-"found": 1,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "108 HOUGANG AVENUE 1 SINGAPORE 530108",
-"BLK_NO": "108",
-"ROAD_NAME": "HOUGANG AVENUE 1",
-"BUILDING": "NIL",
-"ADDRESS": "108 HOUGANG AVENUE 1 SINGAPORE 530108",
-"POSTAL": "530108",
-"LATITUDE": "1.35277393315535",
-"LONGITUDE": "103.8900931770253"
-}
-]
-},
-"556103": {
-"found": 0,
-"totalNumPages": 0,
-"pageNum": 1,
-"results": []
-},
-"556820": {
-"found": 1,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "THE CHUAN",
-"BLK_NO": "31",
-"ROAD_NAME": "LORONG CHUAN",
-"BUILDING": "THE CHUAN",
-"ADDRESS": "31 LORONG CHUAN THE CHUAN SINGAPORE 556820",
-"POSTAL": "556820",
-"LATITUDE": "1.34988776144934",
-"LONGITUDE": "103.8604517832037"
-}
-]
-},
-"560123": {
-"found": 1,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "123 ANG MO KIO AVENUE 6 SINGAPORE 560123",
-"BLK_NO": "123",
-"ROAD_NAME": "ANG MO KIO AVENUE 6",
-"BUILDING": "NIL",
-"ADDRESS": "123 ANG MO KIO AVENUE 6 SINGAPORE 560123",
-"POSTAL": "560123",
-"LATITUDE": "1.370481187931938",
-"LONGITUDE": "103.8448058007904"
-}
-]
-},
-"569933": {
-"found": 1,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "AMK HUB",
-"BLK_NO": "53",
-"ROAD_NAME": "ANG MO KIO AVENUE 3",
-"BUILDING": "AMK HUB",
-"ADDRESS": "53 ANG MO KIO AVENUE 3 AMK HUB SINGAPORE 569933",
-"POSTAL": "569933",
-"LATITUDE": "1.369389226903445",
-"LONGITUDE": "103.8484779659393"
-}
-]
-},
-"570101": {
-"found": 1,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "BISHAN VIEW",
-"BLK_NO": "101",
-"ROAD_NAME": "BISHAN STREET 12",
-"BUILDING": "BISHAN VIEW",
-"ADDRESS": "101 BISHAN STREET 12 BISHAN VIEW SINGAPORE 570101",
-"POSTAL": "570101",
-"LATITUDE": "1.344859158281522",
-"LONGITUDE": "103.8484007651851"
-}
-]
-},
-"570155": {
-"found": 1,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "155 BISHAN STREET 13 SINGAPORE 570155",
-"BLK_NO": "155",
-"ROAD_NAME": "BISHAN STREET 13",
-"BUILDING": "NIL",
-"ADDRESS": "155 BISHAN STREET 13 SINGAPORE 570155",
-"POSTAL": "570155",
-"LATITUDE": "1.346227092383125",
-"LONGITUDE": "103.8559055652196"
-}
-]
-},
-"575749": {
-"found": 1,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "JADESCAPE",
-"BLK_NO": "16",
-"ROAD_NAME": "SHUNFU ROAD",
-"BUILDING": "JADESCAPE",
-"ADDRESS": "16 SHUNFU ROAD JADESCAPE SINGAPORE 575749",
-"POSTAL": "575749",
-"LATITUDE": "1.351814853838989",
-"LONGITUDE": "103.8382982223318"
-}
-]
-},
-"579600": {
-"found": 1,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "THOMSON RESERVE (U/C)",
-"BLK_NO": "9",
-"ROAD_NAME": "BRIGHT HILL DRIVE",
-"BUILDING": "THOMSON RESERVE (U/C)",
-"ADDRESS": "9 BRIGHT HILL DRIVE THOMSON RESERVE (U/C) SINGAPORE 579600",
-"POSTAL": "579600",
-"LATITUDE": "1.356683271086537",
-"LONGITUDE": "103.8309842297955"
-}
-]
-},
-"579819": {
-"found": 1,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "BISHAN LOFT",
-"BLK_NO": "31",
-"ROAD_NAME": "BISHAN STREET 11",
-"BUILDING": "BISHAN LOFT",
-"ADDRESS": "31 BISHAN STREET 11 BISHAN LOFT SINGAPORE 579819",
-"POSTAL": "579819",
-"LATITUDE": "1.347521836844581",
-"LONGITUDE": "103.8520478175324"
-}
-]
-},
-"649646": {
-"found": 1,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "LUCERNE GRAND (U/C)",
-"BLK_NO": "30",
-"ROAD_NAME": "LAKESIDE DRIVE",
-"BUILDING": "LUCERNE GRAND (U/C)",
-"ADDRESS": "30 LAKESIDE DRIVE LUCERNE GRAND (U/C) SINGAPORE 649646",
-"POSTAL": "649646",
-"LATITUDE": "1.343073798362386",
-"LONGITUDE": "103.7202501547773"
-}
-]
-},
-"650420": {
-"found": 1,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "420 BUKIT BATOK WEST AVENUE 2 SINGAPORE 650420",
-"BLK_NO": "420",
-"ROAD_NAME": "BUKIT BATOK WEST AVENUE 2",
-"BUILDING": "NIL",
-"ADDRESS": "420 BUKIT BATOK WEST AVENUE 2 SINGAPORE 650420",
-"POSTAL": "650420",
-"LATITUDE": "1.362550430358479",
-"LONGITUDE": "103.7457707953515"
-}
-]
-},
-"677741": {
-"found": 0,
-"totalNumPages": 0,
-"pageNum": 1,
-"results": []
-},
-"680123": {
-"found": 1,
-"totalNumPages": 1,
-"pageNum": 1,
-"results": [
-{
-"SEARCHVAL": "123 TECK WHYE LANE SINGAPORE 680123",
-"BLK_NO": "123",
-"ROAD_NAME": "TECK WHYE LANE",
-"BUILDING": "NIL",
-"ADDRESS": "123 TECK WHYE LANE SINGAPORE 680123",
-"POSTAL": "680123",
-"LATITUDE": "1.379196360897764",
-"LONGITUDE": "103.7494576863001"
-}
-]
-},
-"820123": {
-"found": 0,
-"totalNumPages": 0,
-"pageNum": 1,
-"results": []
-},
-"999999": {
-"found": 0,
-"totalNumPages": 0,
-"pageNum": 1,
-"results": []
-}
-}
+ "_note": "Real answers from OneMap's address search for these postal codes, retrieved 2026-10-21 (Singapore Land Authority, Singapore Open Data Licence v1.0). Used only by the tests, which never call OneMap. A code not listed here is answered with no result.",
+ "answers": {
+  "159016": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "ALEXANDRA PRIMARY SCHOOL",
+     "BLK_NO": "2A",
+     "ROAD_NAME": "PRINCE CHARLES CRESCENT",
+     "BUILDING": "ALEXANDRA PRIMARY SCHOOL",
+     "ADDRESS": "2A PRINCE CHARLES CRESCENT ALEXANDRA PRIMARY SCHOOL SINGAPORE 159016",
+     "POSTAL": "159016",
+     "LATITUDE": "1.291334391613348",
+     "LONGITUDE": "103.8244246805311"
+    }
+   ]
+  },
+  "188065": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "SINGAPORE MANAGEMENT UNIVERSITY (ADMIN BLDG)",
+     "BLK_NO": "81",
+     "ROAD_NAME": "VICTORIA STREET",
+     "BUILDING": "SINGAPORE MANAGEMENT UNIVERSITY (ADMIN BLDG)",
+     "ADDRESS": "81 VICTORIA STREET SINGAPORE MANAGEMENT UNIVERSITY (ADMIN BLDG) SINGAPORE 188065",
+     "POSTAL": "188065",
+     "LATITUDE": "1.296846713984232",
+     "LONGITUDE": "103.8522079431716"
+    }
+   ]
+  },
+  "238801": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "ION ORCHARD",
+     "BLK_NO": "2",
+     "ROAD_NAME": "ORCHARD TURN",
+     "BUILDING": "ION ORCHARD",
+     "ADDRESS": "2 ORCHARD TURN ION ORCHARD SINGAPORE 238801",
+     "POSTAL": "238801",
+     "LATITUDE": "1.303979741445055",
+     "LONGITUDE": "103.832032328465"
+    }
+   ]
+  },
+  "310031": {
+   "found": 0,
+   "totalNumPages": 0,
+   "pageNum": 1,
+   "results": []
+  },
+  "310080": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "80 LORONG 4 TOA PAYOH SINGAPORE 310080",
+     "BLK_NO": "80",
+     "ROAD_NAME": "LORONG 4 TOA PAYOH",
+     "BUILDING": "NIL",
+     "ADDRESS": "80 LORONG 4 TOA PAYOH SINGAPORE 310080",
+     "POSTAL": "310080",
+     "LATITUDE": "1.335263461120134",
+     "LONGITUDE": "103.8485168035469"
+    }
+   ]
+  },
+  "359419": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "DUNSFOLD 18",
+     "BLK_NO": "45D",
+     "ROAD_NAME": "DUNSFOLD DRIVE",
+     "BUILDING": "DUNSFOLD 18",
+     "ADDRESS": "45D DUNSFOLD DRIVE DUNSFOLD 18 SINGAPORE 359419",
+     "POSTAL": "359419",
+     "LATITUDE": "1.348503480221498",
+     "LONGITUDE": "103.8606190292034"
+    }
+   ]
+  },
+  "368060": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "BARTLEY RIDGE",
+     "BLK_NO": "40",
+     "ROAD_NAME": "MOUNT VERNON ROAD",
+     "BUILDING": "BARTLEY RIDGE",
+     "ADDRESS": "40 MOUNT VERNON ROAD BARTLEY RIDGE SINGAPORE 368060",
+     "POSTAL": "368060",
+     "X": "33316.61889560334",
+     "Y": "35885.5108300522",
+     "LATITUDE": "1.340809866280527",
+     "LONGITUDE": "103.8810915664521"
+    }
+   ]
+  },
+  "400001": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "1 EUNOS CRESCENT SINGAPORE 400001",
+     "BLK_NO": "1",
+     "ROAD_NAME": "EUNOS CRESCENT",
+     "BUILDING": "NIL",
+     "ADDRESS": "1 EUNOS CRESCENT SINGAPORE 400001",
+     "POSTAL": "400001",
+     "LATITUDE": "1.320657645248208",
+     "LONGITUDE": "103.9024634451098"
+    }
+   ]
+  },
+  "456789": {
+   "found": 0,
+   "totalNumPages": 0,
+   "pageNum": 1,
+   "results": []
+  },
+  "459007": {
+   "found": 4,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "UNITED MANSIONS",
+     "BLK_NO": "614C",
+     "ROAD_NAME": "EAST COAST ROAD",
+     "BUILDING": "UNITED MANSIONS",
+     "ADDRESS": "614C EAST COAST ROAD UNITED MANSIONS SINGAPORE 459007",
+     "POSTAL": "459007",
+     "LATITUDE": "1.311254207910809",
+     "LONGITUDE": "103.9217415100433"
+    },
+    {
+     "SEARCHVAL": "UNITED MANSIONS",
+     "BLK_NO": "614",
+     "ROAD_NAME": "EAST COAST ROAD",
+     "BUILDING": "UNITED MANSIONS",
+     "ADDRESS": "614 EAST COAST ROAD UNITED MANSIONS SINGAPORE 459007",
+     "POSTAL": "459007",
+     "LATITUDE": "1.311252069928519",
+     "LONGITUDE": "103.9217374758025"
+    },
+    {
+     "SEARCHVAL": "UNITED MANSIONS",
+     "BLK_NO": "614A",
+     "ROAD_NAME": "EAST COAST ROAD",
+     "BUILDING": "UNITED MANSIONS",
+     "ADDRESS": "614A EAST COAST ROAD UNITED MANSIONS SINGAPORE 459007",
+     "POSTAL": "459007",
+     "LATITUDE": "1.311254207910809",
+     "LONGITUDE": "103.9217415100433"
+    },
+    {
+     "SEARCHVAL": "UNITED MANSIONS",
+     "BLK_NO": "614B",
+     "ROAD_NAME": "EAST COAST ROAD",
+     "BUILDING": "UNITED MANSIONS",
+     "ADDRESS": "614B EAST COAST ROAD UNITED MANSIONS SINGAPORE 459007",
+     "POSTAL": "459007",
+     "LATITUDE": "1.311254207910809",
+     "LONGITUDE": "103.9217415100433"
+    }
+   ]
+  },
+  "459919": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "OPERA ESTATE",
+     "BLK_NO": "1",
+     "ROAD_NAME": "AIDA STREET",
+     "BUILDING": "OPERA ESTATE",
+     "ADDRESS": "1 AIDA STREET OPERA ESTATE SINGAPORE 459919",
+     "POSTAL": "459919",
+     "LATITUDE": "1.316832521711999",
+     "LONGITUDE": "103.9286229384194"
+    }
+   ]
+  },
+  "460001": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "1 BEDOK SOUTH AVENUE 1 SINGAPORE 460001",
+     "BLK_NO": "1",
+     "ROAD_NAME": "BEDOK SOUTH AVENUE 1",
+     "BUILDING": "NIL",
+     "ADDRESS": "1 BEDOK SOUTH AVENUE 1 SINGAPORE 460001",
+     "POSTAL": "460001",
+     "LATITUDE": "1.320852086897327",
+     "LONGITUDE": "103.9337210914409"
+    }
+   ]
+  },
+  "520123": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "123 SIMEI STREET 1 SINGAPORE 520123",
+     "BLK_NO": "123",
+     "ROAD_NAME": "SIMEI STREET 1",
+     "BUILDING": "NIL",
+     "ADDRESS": "123 SIMEI STREET 1 SINGAPORE 520123",
+     "POSTAL": "520123",
+     "LATITUDE": "1.345306618358452",
+     "LONGITUDE": "103.9531879561585"
+    }
+   ]
+  },
+  "530108": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "108 HOUGANG AVENUE 1 SINGAPORE 530108",
+     "BLK_NO": "108",
+     "ROAD_NAME": "HOUGANG AVENUE 1",
+     "BUILDING": "NIL",
+     "ADDRESS": "108 HOUGANG AVENUE 1 SINGAPORE 530108",
+     "POSTAL": "530108",
+     "LATITUDE": "1.35277393315535",
+     "LONGITUDE": "103.8900931770253"
+    }
+   ]
+  },
+  "545688": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "HUNDRED PALMS RESIDENCES",
+     "BLK_NO": "274",
+     "ROAD_NAME": "YIO CHU KANG ROAD",
+     "BUILDING": "HUNDRED PALMS RESIDENCES",
+     "ADDRESS": "274 YIO CHU KANG ROAD HUNDRED PALMS RESIDENCES SINGAPORE 545688",
+     "POSTAL": "545688",
+     "X": "32928.36944050621",
+     "Y": "39428.27456551231",
+     "LATITUDE": "1.372849416103161",
+     "LONGITUDE": "103.8776034969999"
+    }
+   ]
+  },
+  "556103": {
+   "found": 0,
+   "totalNumPages": 0,
+   "pageNum": 1,
+   "results": []
+  },
+  "556820": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "THE CHUAN",
+     "BLK_NO": "31",
+     "ROAD_NAME": "LORONG CHUAN",
+     "BUILDING": "THE CHUAN",
+     "ADDRESS": "31 LORONG CHUAN THE CHUAN SINGAPORE 556820",
+     "POSTAL": "556820",
+     "LATITUDE": "1.34988776144934",
+     "LONGITUDE": "103.8604517832037"
+    }
+   ]
+  },
+  "560123": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "123 ANG MO KIO AVENUE 6 SINGAPORE 560123",
+     "BLK_NO": "123",
+     "ROAD_NAME": "ANG MO KIO AVENUE 6",
+     "BUILDING": "NIL",
+     "ADDRESS": "123 ANG MO KIO AVENUE 6 SINGAPORE 560123",
+     "POSTAL": "560123",
+     "LATITUDE": "1.370481187931938",
+     "LONGITUDE": "103.8448058007904"
+    }
+   ]
+  },
+  "569933": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "AMK HUB",
+     "BLK_NO": "53",
+     "ROAD_NAME": "ANG MO KIO AVENUE 3",
+     "BUILDING": "AMK HUB",
+     "ADDRESS": "53 ANG MO KIO AVENUE 3 AMK HUB SINGAPORE 569933",
+     "POSTAL": "569933",
+     "LATITUDE": "1.369389226903445",
+     "LONGITUDE": "103.8484779659393"
+    }
+   ]
+  },
+  "570101": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "BISHAN VIEW",
+     "BLK_NO": "101",
+     "ROAD_NAME": "BISHAN STREET 12",
+     "BUILDING": "BISHAN VIEW",
+     "ADDRESS": "101 BISHAN STREET 12 BISHAN VIEW SINGAPORE 570101",
+     "POSTAL": "570101",
+     "LATITUDE": "1.344859158281522",
+     "LONGITUDE": "103.8484007651851"
+    }
+   ]
+  },
+  "570155": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "155 BISHAN STREET 13 SINGAPORE 570155",
+     "BLK_NO": "155",
+     "ROAD_NAME": "BISHAN STREET 13",
+     "BUILDING": "NIL",
+     "ADDRESS": "155 BISHAN STREET 13 SINGAPORE 570155",
+     "POSTAL": "570155",
+     "LATITUDE": "1.346227092383125",
+     "LONGITUDE": "103.8559055652196"
+    }
+   ]
+  },
+  "575749": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "JADESCAPE",
+     "BLK_NO": "16",
+     "ROAD_NAME": "SHUNFU ROAD",
+     "BUILDING": "JADESCAPE",
+     "ADDRESS": "16 SHUNFU ROAD JADESCAPE SINGAPORE 575749",
+     "POSTAL": "575749",
+     "LATITUDE": "1.351814853838989",
+     "LONGITUDE": "103.8382982223318"
+    }
+   ]
+  },
+  "579600": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "THOMSON RESERVE (U/C)",
+     "BLK_NO": "9",
+     "ROAD_NAME": "BRIGHT HILL DRIVE",
+     "BUILDING": "THOMSON RESERVE (U/C)",
+     "ADDRESS": "9 BRIGHT HILL DRIVE THOMSON RESERVE (U/C) SINGAPORE 579600",
+     "POSTAL": "579600",
+     "LATITUDE": "1.356683271086537",
+     "LONGITUDE": "103.8309842297955"
+    }
+   ]
+  },
+  "579819": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "BISHAN LOFT",
+     "BLK_NO": "31",
+     "ROAD_NAME": "BISHAN STREET 11",
+     "BUILDING": "BISHAN LOFT",
+     "ADDRESS": "31 BISHAN STREET 11 BISHAN LOFT SINGAPORE 579819",
+     "POSTAL": "579819",
+     "LATITUDE": "1.347521836844581",
+     "LONGITUDE": "103.8520478175324"
+    }
+   ]
+  },
+  "649646": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "LUCERNE GRAND (U/C)",
+     "BLK_NO": "30",
+     "ROAD_NAME": "LAKESIDE DRIVE",
+     "BUILDING": "LUCERNE GRAND (U/C)",
+     "ADDRESS": "30 LAKESIDE DRIVE LUCERNE GRAND (U/C) SINGAPORE 649646",
+     "POSTAL": "649646",
+     "LATITUDE": "1.343073798362386",
+     "LONGITUDE": "103.7202501547773"
+    }
+   ]
+  },
+  "650420": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "420 BUKIT BATOK WEST AVENUE 2 SINGAPORE 650420",
+     "BLK_NO": "420",
+     "ROAD_NAME": "BUKIT BATOK WEST AVENUE 2",
+     "BUILDING": "NIL",
+     "ADDRESS": "420 BUKIT BATOK WEST AVENUE 2 SINGAPORE 650420",
+     "POSTAL": "650420",
+     "LATITUDE": "1.362550430358479",
+     "LONGITUDE": "103.7457707953515"
+    }
+   ]
+  },
+  "677741": {
+   "found": 0,
+   "totalNumPages": 0,
+   "pageNum": 1,
+   "results": []
+  },
+  "680123": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "123 TECK WHYE LANE SINGAPORE 680123",
+     "BLK_NO": "123",
+     "ROAD_NAME": "TECK WHYE LANE",
+     "BUILDING": "NIL",
+     "ADDRESS": "123 TECK WHYE LANE SINGAPORE 680123",
+     "POSTAL": "680123",
+     "LATITUDE": "1.379196360897764",
+     "LONGITUDE": "103.7494576863001"
+    }
+   ]
+  },
+  "820123": {
+   "found": 0,
+   "totalNumPages": 0,
+   "pageNum": 1,
+   "results": []
+  },
+  "999999": {
+   "found": 0,
+   "totalNumPages": 0,
+   "pageNum": 1,
+   "results": []
+  }
+ }
 }

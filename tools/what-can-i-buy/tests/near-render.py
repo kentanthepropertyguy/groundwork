@@ -1,6 +1,6 @@
 """Browser checks for What can this budget buy? near a place (desktop and phone). Run from the site folder:  python3 tools/what-can-i-buy/tests/near-render.py
 Starts the site's own local server, stubs the OneMap tiles (no internet needed) and drives the whole flow."""
-import os, pathlib, re, socket, subprocess, sys, time
+import json, os, pathlib, re, socket, subprocess, sys, time
 from playwright.sync_api import sync_playwright
 SITE = pathlib.Path(__file__).resolve().parents[3]
 PNG = bytes.fromhex('89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d49444154789c6360000002000001e221bc330000000049454e44ae426082')
@@ -16,12 +16,20 @@ for _ in range(100):
     try: socket.create_connection(('127.0.0.1', P), 0.2).close(); break
     except OSError: time.sleep(0.05)
 URL = f'http://127.0.0.1:{P}/tools/what-can-i-buy/'
+# Every development with URA sales now has a position (URA's, or OneMap's: data/map/positions-onemap.json). To keep testing the "unplaced" list, the page is served the Map list as URA published it.
+OM = {x[0] for x in json.load(open(SITE / 'data/map/positions-onemap.json'))['rows']}
+def ura_only(r):
+    d = json.loads(r.fetch().text())
+    for row in d['rows']:
+        if row[0] in OM: row[2] = row[3] = None
+    r.fulfill(status=200, content_type='application/json', body=json.dumps(d))
 def fresh(ctx):
     page = ctx.new_page(); errs = []; reqs = []
     page.on('pageerror', lambda e: errs.append(str(e))); page.on('console', lambda m: errs.append(m.text) if m.type == 'error' else None)
     page.on('request', lambda r: reqs.append(r.url))
     page.route(re.compile(r'googletagmanager|facebook\.net'), lambda r: r.fulfill(status=200, content_type='application/javascript', body=''))
     page.route(re.compile(r'onemap\.gov\.sg'), lambda r: r.fulfill(status=200, content_type='image/png', body=PNG))
+    page.route('**/data/map/places.json*', ura_only)
     return page, errs, reqs
 def start(page, budget='1,800,000'):
     page.goto(URL); page.fill('#budgetInput', budget); page.click('#budgetGo'); page.wait_for_selector('#kpfNearQ', timeout=20000)
@@ -110,7 +118,7 @@ try:
         check(vn + ': every one is listed (' + str(len(un)) + ') and none is also a result card', len(un) == total_unp and not (set(un) & set(cn)), (un[:3], cn[:3]))
         check(vn + ': each says what it is and why it was matched, and none says it is inside the radius', all(re.search(r'(New launch|Resale)', x) for x in pg.eval_on_selector_all('#kpfUnplaced .kpf-unl li', 'e => e.map(x => x.innerText)')) and 'within' not in pg.inner_text('#kpfUnplaced .kpf-unl'))
         upt = pg.inner_text('.kpf-up') if pg.query_selector('.kpf-up') else ''
-        check(vn + ': with a place chosen, launches with no verified position are not listed as local possibilities (a register site with a verified position inside the radius is, with its distance, and is not a match)', 'Thomson Reserve' not in pg.inner_text('#findRoot') and 'Hougang Central' not in pg.inner_text('#findRoot') and (not upt or (re.search(r'\d(\.\d)? km|\d+ m', upt) and 'not budget matches' in upt and not re.search(r'\$\s?\d', upt))), upt[:200])
+        check(vn + ': with a place chosen, launches and sites are never result cards (a register site with a verified position inside the radius is, with its distance, and is not a match)', not ({'Thomson Reserve', 'Hougang Central', 'Chencharu Close', 'The Serra Residences'} & set(cn)) and (not upt or (re.search(r'\d(\.\d)? km|\d+ m', upt) and 'not budget matches' in upt and not re.search(r'\$\s?\d', upt))), upt[:200])
         ext = pg.eval_on_selector_all('.kpf-upmore a', 'e => e.map(x => [x.target, x.rel, x.href, x.innerText])')
         check(vn + ': a discreet link browses other upcoming launches separately, in a new tab', len(ext) == 1 and ext[0][0] == '_blank' and 'noopener' in ext[0][1] and ext[0][2].startswith('https://') and 'upcoming launches' in ext[0][3], ext)
         # hide / show the map

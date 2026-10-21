@@ -84,6 +84,17 @@ t('lookup: a code that resolved is answered from memory (one request per code)',
 t('lookup: only the six digits typed are sent, never anything else', async () => {
   const log = []; await GP.lookup(GP.code('Singapore 570101'), stub(log)); assert.ok(log.every((u) => /searchVal=570101$/.test(u)));
 });
+t('368060 (a condo) and 545688 (an EC) resolve to their developments; the site search sends them to Research', async () => {
+  const GP2 = require('../../assets/js/gw-postal.js'); const a = (await GP2.lookup('368060', stub())).list[0], b = (await GP2.lookup('545688', stub())).list[0];
+  assert.strictEqual(GP2.devMatch(a, reg, []).list[0][0], 'bartley-ridge'); assert.strictEqual(GP2.devMatch(b, reg, []).list[0][0], 'hundred-palms-residences');
+  const row = reg.find((r) => r[0] === 'hundred-palms-residences'); assert.strictEqual(row[14], 'ec');
+});
+t('the site search (gw-nav.js) reads a postal code exactly as the shared module does, and loads the module version that is on disk', () => {
+  const nav = fs.readFileSync(path.join(root, 'assets/js/gw-nav.js'), 'utf8'), m = /const PC_RE = (\/.*\/i);/.exec(nav); assert.ok(m, 'PC_RE');
+  const re = eval(m[1]); ['570155', ' 570155 ', 'Singapore 570155', 'S570155', 'S(570155)', 'S 570155', '57015', '5701555', '570 155', 'Jadescape 570155', 'stamp duty'].forEach((x) => assert.strictEqual(re.exec(x) ? re.exec(x)[1] : null, GP.code(x), x));
+  const v = /gw-postal\.js\?v=([0-9a-f]{10})'/.exec(nav); assert.ok(v, 'the nav names the postal module with a version');
+  assert.strictEqual(v[1], require('crypto').createHash('sha256').update(fs.readFileSync(path.join(root, 'assets/js/gw-postal.js'))).digest('hex').slice(0, 10), 'gw-nav.js carries an old gw-postal.js version: set it to the first 10 characters of the file\'s sha256, then re-hash gw-nav.js');
+});
 (async () => {
   for (const [n, f] of q) { try { await f(); pass++; console.log('  ok   ' + n); } catch (e) { fail++; console.log('  FAIL ' + n + '\n       ' + String(e.message || e).split('\n').slice(0, 4).join('\n       ')); } }
   console.log('\n' + pass + ' passed, ' + fail + ' failed'); process.exit(fail ? 1 : 0);

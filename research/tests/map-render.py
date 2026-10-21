@@ -18,7 +18,15 @@ for _ in range(100):
     except OSError: time.sleep(0.05)
 URL = f'http://127.0.0.1:{P}/research/map/'
 places = json.load(open(SITE / 'data/map/places.json')); ev = json.load(open(SITE / 'data/map/ev.json'))['projects']
-nopos = next(r[0] for r in places['rows'] if r[2] is None and r[0] == 'parktown-residence')
+# Every development with URA sales now has a position (URA's, or OneMap's: data/map/positions-onemap.json). To keep testing what the page does for one that has none, the page is served the Map list as URA published it:
+# the OneMap-placed developments with no position.
+OM = {x[0] for x in json.load(open(SITE / 'data/map/positions-onemap.json'))['rows']}
+def ura_only(r):
+    d = json.loads(r.fetch().text())
+    for row in d['rows']:
+        if row[0] in OM: row[2] = row[3] = None
+    r.fulfill(status=200, content_type='application/json', body=json.dumps(d))
+nopos = 'parktown-residence'; assert nopos in OM
 thin = next(r[0] for r in places['rows'] if r[2] is not None and ev[r[0]]['rc']['new'])
 def fresh(ctx, off=False, tiles='stub'):
     page = ctx.new_page(); errs = []
@@ -29,6 +37,7 @@ def fresh(ctx, off=False, tiles='stub'):
     if off:   # layer switched off: the page must still work with no school or supermarket data
         def patched(r): d = json.loads(r.fetch().text()); d['extra'] = None; r.fulfill(status=200, content_type='application/json', body=json.dumps(d))
         page.route('**/data/map/amen.json*', patched)
+    page.route('**/data/map/places.json*', ura_only)
     return page, errs
 def open_(page, h=''):
     page.goto(URL + h); page.wait_for_function('window.KPT_MAP_APP && window.KPT_MAP_APP.evReady', timeout=20000); page.wait_for_timeout(250)

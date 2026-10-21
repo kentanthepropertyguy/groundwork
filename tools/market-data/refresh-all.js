@@ -7,6 +7,8 @@
    Steps (each is also runnable on its own; see the file header of each):
      1. build-project-stats.js   Research project data (index, detail, peers, search, manifest) -> data/projects
      2. build-map-data.js        Map positions and cells                                          -> data/map/places.json, ev.json
+     2b. build-positions.js     Positions for launched developments URA gives no coordinates for (OneMap's own project records) -> data/map/places.json, positions-onemap.json
+                                 (reads sources/onemap-uc.json and sources/onemap-names.json; refresh those first, with network: fetch-onemap-uc.js, then fetch-onemap-names.js, then build-upcoming.js after this)
      3. build-find-index.js      FIND index                                                       -> data/projects/find.json
      4. build-registry-classes.js  Registry rows and their class                                  -> data/registry/index.json
      5. build-suggest.js         Research "Compare with" suggestions                              -> data/research/suggest.json
@@ -35,6 +37,7 @@ fs.rmSync(path.join(dp, 'detail'), { recursive: true, force: true }); fs.rmSync(
 ['detail', 'peers'].forEach((d) => copy(path.join(tmp, 'projects', d), path.join(dp, d)));
 run('Map data', 'build-map-data.js', ['--raw', raw, '--out', path.join(tmp, 'map'), '--projects', 'data/projects', '--as-of', asOf, '--report', path.join(tmp, 'map-nopos.txt')]);
 ['places.json', 'ev.json'].forEach((f) => fs.copyFileSync(path.join(tmp, 'map', f), path.join(site, 'data/map', f)));
+run('Map positions from OneMap', 'build-positions.js', []);
 run('FIND index', 'build-find-index.js', ['--raw', raw, '--project-data', 'data/projects', '--out', path.join(dp, 'find.json'), '--as-of', asOf]);
 run('Registry classes', 'build-registry-classes.js', []);
 run('Compare suggestions', 'build-suggest.js', []);

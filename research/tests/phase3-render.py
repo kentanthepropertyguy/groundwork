@@ -83,7 +83,7 @@ try:
         opn(pg); pick(pg, 'peck hay'); t = card(pg); shot(pg, f'map-gls-no-name-{vn}')
         check(vn + ': a GLS site with no marketing name says so', 'GLS site' in t and re.search(r'no project name|not yet named|No name', t, re.I), t)
         opn(pg); pick(pg, 'hougang central'); t = card(pg); shot(pg, f'map-hougang-central-{vn}')
-        check(vn + ': a project with no verified position is searchable but says it is not on the map', re.search(r'not (yet )?(on|placed on) the map', t, re.I) is not None, t)
+        check(vn + ': Hougang Central is searchable and, with its parcel verified, placed on the map', 'Hougang Central' in t and re.search(r'not (yet )?(on|placed on) the map', t, re.I) is None, t)
         opn(pg); pg.fill('#q', 'chuan grove'); pg.wait_for_selector('.sugg button', timeout=4000); check(vn + ': One Chuan Grove is found by its reported name', 'One Chuan Grove' in pg.inner_text('.sugg'))
         # ordinary condo, EC, cluster: no regression
         for nm, want in [('Jadescape', 'Jadescape'), ('Bishan Loft', 'Executive Condominium'), ('Dunsfold 18', 'Dunsfold')]:
