@@ -169,7 +169,7 @@
       '<div class="gw-rmore"><p class="gw-lane">More ways to research</p><div class="gw-rlinks">' +
       [['../journey/worth/', 'Property values &amp; prices', 'HDB, condo and landed sales · asking price', 'worth'], ['../tools/what-can-i-buy/', 'What can this budget buy?', 'Homes that sold around your budget', 'what-can-i-buy'], ['../projects/', 'Browse every development', 'A–Z list', 'directory']]
         .map((x) => '<a href="' + x[0] + '" data-gw-nav-to="' + x[3] + '"><b>' + x[1] + '</b><small>' + x[2] + '</small></a>').join('') + '</div></div>' + sampleExample() +
-      '<p class="lg-fine lg-center" data-lg-scope>Can’t see it? Research covers private condos and apartments, executive condominiums (ECs) and strata cluster houses with sales in the last five years, each kept to its own type. An unsold launch won’t appear, and landed homes on their own land are found by road. <a href="../projects/">Browse all ' + (total ? num(total) + ' ' : '') + 'developments</a>, including new launches with sites of their own.</p></div></section></div>';
+      '<p class="lg-fine lg-center" data-lg-scope>Can’t see it? Research covers private condos and apartments, executive condominiums (ECs) and strata cluster houses with sales in the last five years, each kept to its own type. A launch with no sales yet is listed without prices and opens on the Map, and landed homes on their own land are found by road. <a href="../projects/">Browse all ' + (total ? num(total) + ' ' : '') + 'developments</a>, including new launches with sites of their own.</p></div></section></div>';
   }
   // One search result row (the page's searchBox keeps its own events and keyboard handling).
   function resultRow(r, i, max, R) {
@@ -177,6 +177,33 @@
     const meta = [clsOf(r) === 'condo' ? '' : CLS[clsOf(r)].label, titleCase(r.street), 'District ' + Number(r.district), r.last ? 'latest sale ' + R.fmtMonth(r.last) : ''].filter(Boolean).join(' · ');
     return '<li role="option"><button type="button" data-id="' + esc(r.id) + '"' + (i === 0 ? ' aria-selected="true"' : '') + '><span><b>' + esc(R.displayName(r.name)) + '</b><span class="m">' + esc(meta) + '</span></span>' +
       '<span class="r"><span>' + plural(r.n, 'sale') + ' in 5 years</span><i style="width:' + w + 'px"></i></span></button></li>';
+  }
+
+  // The register of launches and awarded sites (data/map/upcoming.json, the file the Map and the site search read), matched by name or any name it is known by.
+  const lnorm = (v) => String(v == null ? '' : v).normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[’'`]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+  function matchLaunches(items, query, max) {
+    const q = lnorm(query); if (q.length < 3 || !Array.isArray(items)) return [];
+    return items.map((it) => { let sc = 0; [it.name].concat(it.aliases || []).forEach((a) => { const n = lnorm(a), v = n === q ? 3 : n.indexOf(q) === 0 ? 2 : (' ' + n).indexOf(' ' + q) >= 0 ? 1 : 0; if (v > sc) sc = v; }); return { sc, it }; })
+      .filter((x) => x.sc).sort((a, b) => b.sc - a.sc).slice(0, max || 3).map((x) => x.it);
+  }
+  let launchP = null;
+  function findLaunches(query, max, url) {
+    if (lnorm(query).length < 3 || typeof fetch !== 'function') return Promise.resolve([]);
+    launchP = launchP || fetch(url || '../data/map/upcoming.json').then((x) => (x.ok ? x.json() : null)).then((d) => (d && Array.isArray(d.items) ? d.items : [])).catch(() => { launchP = null; return []; });
+    return launchP.then((l) => matchLaunches(l, query, max));
+  }
+  // Registered launches and awarded sites (the same register the Map and the site search read). They have no recorded sales, so they are listed apart from the transaction results and lead to the Map, never to a price.
+  function launchMeta(u) {
+    const dev = ((u.facts || []).filter((f) => f[0] === 'Developer')[0] || [])[1];
+    const kind = u.kind === 'launch' ? (u.stage === 'launched' ? 'New launch' : 'New launch, not yet completed') : u.unnamed ? 'Awarded ' + (u.agency || 'URA') + ' site, no project name yet' : 'Awarded ' + (u.agency || 'URA') + ' site';
+    return [kind, u.district ? 'District ' + Number(u.district) : u.area || '', u.tenure || '', dev].filter(Boolean).join(' · ');
+  }
+  function launchRows(list, hasSales) {
+    if (!list || !list.length) return '';
+    const rows = list.map((u) => '<li role="option"><button type="button" data-launch="map/#p=' + encodeURIComponent(u.id) + '"><span><b>' + esc(u.name) + '</b><span class="m">' + esc(launchMeta(u)) + '</span><span class="m">No sales recorded yet</span><span class="m" style="color:var(--kpt-blue);font-weight:600">View on Map ›</span></span></button></li>').join('');
+    return '<div data-lg-launches>' + (hasSales ? '<p class="lg-fine" style="margin:14px 0 4px;text-align:left">New launches and sites, with no sales recorded yet</p>' : '') +
+      '<ul class="kpr-results" role="listbox" aria-label="New launches and sites">' + rows + '</ul>' +
+      '<p class="lg-fine" data-lg-launch-note style="margin-top:8px">Research shows prices once sales are recorded. The Map shows where ' + (list.length === 1 ? 'it is' : 'they are') + ', what is nearby and the confirmed project facts.</p></div>';
   }
 
   /* ---------- A4-03: names Research leaves out (window.GW_NOT_COVERED, written into the page at build time) ---------- */
@@ -416,5 +443,5 @@
     }
   });
 
-  return { strong, STRONG, freshness, freshLine, dataSpan, mixedLine, emptySearch, notCoveredNote, notCoveredMatches, runWhat, district, askData, typicalPrice, landingHtml, resultRow, projectHtml, afterProject, fillFacts, lineChart, projectLead, projectPill, activitySentence, priceSentence, tenurePhrase, titleCase, sqft, esc, money, num, plural };
+  return { launchRows, launchMeta, matchLaunches, findLaunches, lnorm, strong, STRONG, freshness, freshLine, dataSpan, mixedLine, emptySearch, notCoveredNote, notCoveredMatches, runWhat, district, askData, typicalPrice, landingHtml, resultRow, projectHtml, afterProject, fillFacts, lineChart, projectLead, projectPill, activitySentence, priceSentence, tenurePhrase, titleCase, sqft, esc, money, num, plural };
 });

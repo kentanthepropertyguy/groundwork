@@ -10,7 +10,7 @@
   const BUILD = (document.currentScript && /[?&]v=([^&]+)/.exec(document.currentScript.src) || [])[1] || '1';
   const base = new URL('../../data/map/', location.href).href;
   const getJson = (f) => fetch(base + f + '?v=' + BUILD).then((r) => { if (!r.ok) throw new Error(f + ' ' + r.status); return r.json(); });
-  const S = { proj: null, start: true, place: null, band: null, rc: {}, hl: null, more: false, am: false, radius: 2000, pr: 1000, nall: false, q: '', qi: -1, suggOpen: false };
+  const S = { proj: null, start: true, place: null, band: null, rc: {}, hl: null, more: false, min: false, am: false, radius: 2000, pr: 1000, nall: false, q: '', qi: -1, suggOpen: false };
   const PCR = {};   // postal code -> the last OneMap answer
   let M, view;
 
@@ -22,7 +22,7 @@
     else if (id && M.BYID[id]) { if (M.BYID[id].n !== S.proj) loadProject(M.BYID[id].n); S.start = false; }
     if (q.get('r') && S.proj) S.radius = +q.get('r');
     const nr = +(S.place ? q.get('r') : q.get('nr'));   // the nearby radius; on a development, r is the price-comparison radius
-    S.pr = M.RADII.includes(nr) ? nr : 1000; S.nall = false;
+    S.pr = M.RADII.includes(nr) ? nr : 1000; S.nall = false; S.min = false;
   }
   function addr() {
     const q = new URLSearchParams();
@@ -31,7 +31,7 @@
   }
   let lastHash = location.hash;
   function go(push) { const h = addr(); history[push ? 'pushState' : 'replaceState'](null, '', h); lastHash = location.hash; render(); }
-  function loadProject(name) { S.proj = name; S.more = false; S.band = null; S.rc = {}; S.hl = null; S.am = false; S.place = null; S.pr = 1000; S.nall = false; S.radius = M.BY[name].pos ? M.defaultRadius(name) : 2000; }
+  function loadProject(name) { S.proj = name; S.more = false; S.min = false; S.band = null; S.rc = {}; S.hl = null; S.am = false; S.place = null; S.pr = 1000; S.nall = false; S.radius = M.BY[name].pos ? M.defaultRadius(name) : 2000; }
   const onNav = () => { if (location.hash === lastHash) return; lastHash = location.hash; parseHash(); render(); };
   addEventListener('popstate', onNav); addEventListener('hashchange', onNav);
 
@@ -98,11 +98,16 @@
     return bits.length ? `<p class="basis" style="margin:8px 0 0">${esc(bits.join(' '))}</p>` : '';
   }
   const areaLine = (name) => { const a = M.AREAOF[name]; return a ? ` · ${esc(a)}` : ''; };
-  const closeBtn = '<button type="button" class="close" data-dpclose aria-label="Close">×</button>';
+  const closeBtn = '<button type="button" class="close" data-dpclose aria-label="Close" title="Close and clear the selection">×</button>';
+  // Phone sheet: Minimise keeps the selection, marker and radius and leaves a slim bar to reopen; × closes and clears the selection.
+  const minBtn = '<button type="button" class="hide" data-dpmin aria-label="Minimise to see the map" title="Minimise to see the map"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>';
+  const topBtns = (mobile) => (mobile ? `<span class="acts">${minBtn}${closeBtn}</span>` : closeBtn);
+  const minBar = (title, sub, rad) => `<aside class="bs min" aria-label="${esc(title)}, minimised"><div class="mn"><button type="button" class="mn-open" data-dpshow aria-label="Show details for ${esc(title)}"><span class="mt"><b>${esc(title)}</b>${sub ? `<span class="m">${esc(sub)}</span>` : ''}</span><span class="mo">Show details <i aria-hidden="true">⌃</i></span></button>${closeBtn}</div>${rad || ''}</aside>`;
   function devCard(name, mobile) {
     const p = M.BY[name], e = M.EV[name], pos = p.pos;
-    const head = `<div class="dp-top"><div style="min-width:0"><h2>${esc(name)}</h2><p class="meta">${M.CLS[p.cls].short ? esc(M.CLS[p.cls].label) + ' · ' : ''}${e ? esc(e.street) + areaLine(name) + ' · ' : ''}District ${Number(p.district)}${e ? ' · ' + esc(e.tenure) : ''}</p></div>${closeBtn}</div>`;
-    if (!e) { const body = `<p class="basis">Loading prices…</p>`; return mobile ? `<aside class="bs" aria-label="Selected development"><button type="button" class="grab" data-dpmore aria-label="Expand"></button>${head}${body}</aside>` : `<aside class="dp" aria-label="Selected development"><div class="dp-in">${head}${body}</div></aside>`; }
+    const head = `<div class="dp-top"><div style="min-width:0"><h2>${esc(name)}</h2><p class="meta">${M.CLS[p.cls].short ? esc(M.CLS[p.cls].label) + ' · ' : ''}${e ? esc(e.street) + areaLine(name) + ' · ' : ''}District ${Number(p.district)}${e ? ' · ' + esc(e.tenure) : ''}</p></div>${topBtns(mobile)}</div>`;
+    if (mobile && S.min) return minBar(name, [M.CLS[p.cls].short ? M.CLS[p.cls].label : '', 'District ' + Number(p.district)].filter(Boolean).join(' · '), pos ? radStrip(name) : '');
+    if (!e) { const body = `<p class="basis">Loading prices…</p>`; return mobile ? `<aside class="bs" aria-label="Selected development"><div class="bs-hd"><button type="button" class="grab" data-dpmore aria-label="Expand"></button>${head}</div>${body}</aside>` : `<aside class="dp" aria-label="Selected development"><div class="dp-in">${head}${body}</div></aside>`; }
     const nb = M.nearbyFor(name);
     const prices = `<div class="sec pr"><div class="sh"><b>Prices by size${help('Median price per sq ft by size. Sizes with fewer than 5 sales are not shown. Prices are past recorded sales from URA, not asking prices or a valuation.', 'How these prices are worked out')}</b><span>Past sales, not a valuation</span></div><div class="mkts">${marketHtml(name, 'sec', nb.ref)}${marketHtml(name, 'new', nb.ref)}${pos ? '<p class="basis" style="margin:2px 0 0">Select a size to compare nearby.</p>' : ''}${classNote(name)}</div></div>`;
     const nopos = `<p class="basis nopos">Not on the map yet, so neighbourhood and nearby prices are not shown.${help('URA’s data has no verified location for this development, so it cannot be placed on the map or measured against anything nearby. Its own prices by size are still shown.', 'Why there is no map position')}</p>`;
@@ -110,7 +115,7 @@
     const body = pos ? aroundHtml(name, amPer(mobile), mobile) : nopos;
     if (!mobile) return `<aside class="dp" aria-label="Selected development"><div class="dp-in">${head}${body}${prices}${pos ? nearbyHtml(name, nb) + nearHtml(name) : ''}</div><div class="dp-foot">${open}</div></aside>`;
     const tog = `<button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">Prices &amp; nearby ${S.more ? '⌄' : '⌃'}</button>`;
-    return `<aside class="bs${S.more ? ' open' : ''}" aria-label="Selected development"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}${body}${S.more ? prices + (pos ? nearbyHtml(name, nb) + nearHtml(name) : '') : ''}<div class="bs-act">${open}${tog}</div></aside>`;
+    return `<aside class="bs${S.more ? ' open' : ''}" aria-label="Selected development"><div class="bs-hd"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}${pos ? radStrip(name) : ''}</div>${body}${S.more ? prices + (pos ? nearbyHtml(name, nb) + nearHtml(name, true) : '') : ''}<div class="bs-act">${open}${tog}</div></aside>`;
   }
 
 
@@ -121,14 +126,15 @@
     const d = M.placeData({ t: 'dev', n: name }, S.pr); if (!d) return '';
     const all = d.list.map((x) => ({ d: x.d, h: devRow(x) })).concat(d.ups.map((x) => ({ d: x.d, h: upRow(x) }))).sort((a, b) => a.d - b.d), n = all.length, show = S.nall ? all.slice(0, 15) : all.slice(0, 3);
     const tip = help('Straight-line distance from this development, not walking time. This is for exploring what is around it. The price comparison above has its own radius and is not changed by this one.', 'About nearby developments');
-    return `<div class="sec nbr"><div class="sh"><b>Explore nearby${tip}</b><span>${n ? n + ' within ' + radText(d.r) : 'None within ' + radText(d.r)}</span></div>${radHtml()}${show.map((x) => x.h).join('')}${n > 3 ? `<button type="button" class="btn g" data-nall style="margin-top:8px">${S.nall ? 'Show fewer' : 'Show ' + (n > 15 ? 'the nearest 15 of ' : 'all ') + n}</button>` : ''}${S.nall && n > 15 ? '<p class="basis">Choose a smaller radius to narrow the list.</p>' : ''}</div>`;
+    return `<div class="sec nbr"><div class="sh"><b>Explore nearby${tip}</b><span>${n ? n + ' within ' + radText(d.r) : 'None within ' + radText(d.r)}</span></div>${mobile ? '' : radHtml()}${show.map((x) => x.h).join('')}${n > 3 ? `<button type="button" class="btn g" data-nall style="margin-top:8px">${S.nall ? 'Show fewer' : 'Show ' + (n > 15 ? 'the nearest 15 of ' : 'all ') + n}</button>` : ''}${S.nall && n > 15 ? '<p class="basis">Choose a smaller radius to narrow the list.</p>' : ''}</div>`;
   }
 
   /* ---------------- a new launch or an awarded GLS site: confirmed information only, never a price ---------------- */
   const srcLink = (x) => /^https?:/.test(x.url) ? `<a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.label)}</a>` : esc(x.label);
   function upCard(name, mobile) {
     const p = M.BY[name], u = p.up, ar = M.AREAOF[name] || u.area || '';
-    const head = `<div class="dp-top"><div style="min-width:0"><h2>${esc(name)}</h2><p class="meta">${esc(M.upStage(p))}${p.district ? ' · District ' + Number(p.district) : ''}${ar ? ' · ' + esc(ar) : ''}</p></div>${closeBtn}</div>`;
+    const head = `<div class="dp-top"><div style="min-width:0"><h2>${esc(name)}</h2><p class="meta">${esc(M.upStage(p))}${p.district ? ' · District ' + Number(p.district) : ''}${ar ? ' · ' + esc(ar) : ''}</p></div>${topBtns(mobile)}</div>`;
+    if (mobile && S.min) return minBar(name, M.upStage(p), p.pos ? radStrip(name) : '');
     const rows = (u.facts || []).slice(); if (u.tenure && !rows.some((r) => /tenure/i.test(r[0]))) rows.push(['Tenure', u.tenure]);
     const facts = rows.length ? `<dl class="upf">${rows.map((r) => `<div><dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd></div>`).join('')}</dl>` : '';
     const notes = [
@@ -140,7 +146,7 @@
     const links = (u.ms ? `<a class="btn b" href="${esc(u.ms)}" target="_blank" rel="noopener noreferrer">Open project microsite ↗</a>` : '') + (u.rs ? `<a class="btn ${u.ms ? 'g' : 'b'}" href="../#/p/${esc(u.rs)}">Research page ›</a>` : '');
     const body = facts + notes + (p.pos ? aroundHtml(name, amPer(mobile), mobile, 'this site', true) + nearHtml(name) : '') + srcs;
     if (!mobile) return `<aside class="dp" aria-label="Selected development"><div class="dp-in">${head}${body}</div>${links ? `<div class="dp-foot dp-foot2">${links}</div>` : ''}</aside>`;
-    return `<aside class="bs${S.more ? ' open' : ''}" aria-label="Selected development"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}${facts}${notes}${S.more ? (p.pos ? aroundHtml(name, 2, true, 'this site', true) + nearHtml(name) : '') + srcs : ''}<div class="bs-act">${links}${p.pos || u.src && u.src.length ? `<button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">Nearby &amp; sources ${S.more ? '⌄' : '⌃'}</button>` : ''}</div></aside>`;
+    return `<aside class="bs${S.more ? ' open' : ''}" aria-label="Selected development"><div class="bs-hd"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}${p.pos ? radStrip(name) : ''}</div>${facts}${notes}${S.more ? (p.pos ? aroundHtml(name, 2, true, 'this site', true) + nearHtml(name, true) : '') + srcs : ''}<div class="bs-act">${links}${p.pos || u.src && u.src.length ? `<button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">Nearby &amp; sources ${S.more ? '⌄' : '⌃'}</button>` : ''}</div></aside>`;
   }
   const cardFor = (name, m) => M.BY[name].up ? upCard(name, m) : devCard(name, m);
 
@@ -150,6 +156,12 @@
   const roadLanded = (d) => `<a class="nb" href="../../journey/worth/#landed:${encodeURIComponent(d.title)}" data-gw-go="landed" style="margin-top:12px"><b>What landed homes sold for near ${esc(d.title)}</b><span class="m">Sales by street from URA records. Landed sales are not shown on this map.</span><i aria-hidden="true">›</i></a>`;
   const radText = (x) => (x < 1000 ? x + ' m' : x / 1000 + ' km');
   const radHtml = () => `<div class="rad" role="radiogroup" aria-label="Search radius">${M.RADII.map((x) => `<button type="button" role="radio" aria-checked="${x === S.pr}" data-pr="${x}">${radText(x)}</button>`).join('')}</div>`;
+  // The same four radius choices, kept at the top of the phone sheet (pinned while the details scroll) and in the minimised bar.
+  function radStrip(name) {
+    const d = M.placeData({ t: 'dev', n: name }, S.pr); if (!d) return '';
+    const n = d.list.length + d.ups.length;
+    return `<div class="bs-rad"><div class="rl"><b>Nearby</b><span>${n ? n + ' within ' + radText(d.r) : 'None within ' + radText(d.r)}</span></div>${radHtml()}</div>`;
+  }
   const upRow = (x) => `<button type="button" class="nb" data-pick="dev|${esc(x.p.n)}"><b>${esc(x.p.n)}</b><span class="m">${esc(M.upTag(x.p))} · ${distA(x.d)}</span><i aria-hidden="true">›</i></button>`;
   // a postal code that has not been resolved (an old link, or OneMap not answering): said simply, with the way out
   function postalMiss(pl, mobile) {
@@ -159,7 +171,8 @@
   }
   function placeCard(pl, mobile) {
     const d = M.placeData(pl, S.pr); if (!d) return pl.t === 'postal' ? postalMiss(pl, mobile) : startCard(mobile);
-    const head = `<div class="dp-top"><div style="min-width:0"><h2>${esc(d.title)}</h2><p class="meta">${esc(d.meta)}</p></div>${closeBtn}</div>`;
+    const head = `<div class="dp-top"><div style="min-width:0"><h2>${esc(d.title)}</h2><p class="meta">${esc(d.meta)}</p></div>${topBtns(mobile)}</div>`;
+    if (mobile && S.min) return minBar(d.title, d.meta, d.t === 'area' ? '' : `<div class="bs-rad">${radHtml()}</div>`);
     let body = '';
     if (d.t === 'area') {
       const row = (k, label, txt) => `<div class="ag"><span class="agi k-${k}">${icon(k, 13)}</span><div class="agb"><b>${label}</b><p class="ai2">${txt}</p></div></div>`;
@@ -174,7 +187,7 @@
     }
     if (!mobile) return `<aside class="dp" aria-label="${esc(d.title)}"><div class="dp-in">${head}${body}</div></aside>`;
     const more = (d.t === 'area' ? d.devs.length : d.list.length + (d.ups ? d.ups.length : 0)) > 3 ? `<div class="bs-act"><button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">${d.t === 'area' ? 'Developments' : 'More developments'} ${S.more ? '⌄' : '⌃'}</button></div>` : '';
-    return `<aside class="bs${S.more ? ' open' : ''}" aria-label="${esc(d.title)}"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}${body}${more}</aside>`;
+    return `<aside class="bs${S.more ? ' open' : ''}" aria-label="${esc(d.title)}"><div class="bs-hd"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}</div>${body}${more}</aside>`;
   }
   function startCard(mobile) {
     const inner = `<h2>Explore homes and neighbourhoods</h2><p class="meta" style="margin-top:6px">Search a neighbourhood, ${M.hasRoads() ? 'road, ' : ''}MRT station${M.hasSchools() ? ', school' : ''} or development, or select a dot. Zoom in to see stations${M.hasSchools() ? ' and schools' : ''}.</p><p class="basis" style="margin:10px 0 0">${SRC}</p>`;
@@ -188,7 +201,7 @@
     const legend = `<div class="mapkey" aria-label="Map key"><span><i class="a"></i>Development</span>${sp || md === 'place' ? '<span><i class="s"></i>Selected</span>' : ''}<span><i class="m"></i>MRT</span>${M.hasSchools() ? '<span><i class="sc"></i>School</span>' : ''}${sp && M.EV[sp] ? '<span><i class="t"></i>Nearby comparison</span>' : ''}${M.UP.some((p) => p.pos) ? '<span><i class="u"></i>New launch or site</span>' : ''}</div>`;
     const zoom = `<div class="zoomc zc"><button type="button" data-zoom="1" aria-label="Zoom in">+</button><button type="button" data-zoom="-1" aria-label="Zoom out">−</button></div>`;
     const card = md === 'start' ? startCard(m) : md === 'place' ? placeCard(S.place, m) : cardFor(shown, m);
-    return `<div class="mapstage${m && S.more ? ' more' : ''}"><div id="map" class="map" aria-label="Map of Singapore"></div><div class="mapsearch">${searchBox()}</div>${m ? '' : zoom + legend}${card}</div>`;
+    return `<div class="mapstage${m && S.more && !S.min ? ' more' : ''}"><div id="map" class="map" aria-label="Map of Singapore"></div><div class="mapsearch">${searchBox()}</div>${m ? '' : zoom + legend}${card}</div>`;
   }
   const postalAsked = {};
   function render() {
@@ -208,15 +221,15 @@
     view.update(mapProps(false));
   }
   const sheetH = () => (($('.bs') || {}).offsetHeight || 300) + 16;
-  const DEVPAD = (m) => m ? { tl: [28, S.more ? 16 : 84], br: [28, sheetH()] } : { tl: [48, 84], br: [420, 70] };
+  const DEVPAD = (m) => m ? { tl: [28, S.more && !S.min ? 16 : 84], br: [28, sheetH()] } : { tl: [48, 84], br: [420, 70] };
   function mapProps(fit) {
     const md = mode(), m = narrow(), pad = DEVPAD(m);
     if (md === 'start' || (md === 'dev' && !M.BY[S.proj].pos)) return { keep: md === 'dev', key: 'start|' + (m ? 'm' : 'd'), projects: M.PM, selected: null, cmp: [], amen: [], world: true, fit, minZoom: 11, pad: m ? { tl: [20, 84], br: [20, (($('.bs') || {}).offsetHeight || 150) + 16] } : { tl: [20, 76], br: [360, 60] } };
     if (md === 'place') {
       const d = M.placeData(S.place, S.pr); if (!d) return { keep: false, key: 'start|' + (m ? 'm' : 'd'), projects: M.PM, selected: null, cmp: [], amen: [], world: true, fit, minZoom: 11, pad: m ? { tl: [20, 84], br: [20, (($('.bs') || {}).offsetHeight || 150) + 16] } : { tl: [20, 76], br: [360, 60] } };   // a place not found (an old link, or the road files still loading): the whole island, never an error
-      if (d.t === 'area') return { key: 'a|' + S.place.n + '|' + (m ? 'm' + (S.more ? 'x' : '') : 'd'), projects: M.PM, selected: null, cmp: [], amen: [], bounds: d.bounds, areaRings: d.a.rings, place: { lat: null, chipAt: d.centre, label: d.title, sub: 'Neighbourhood' }, fit, minZoom: 11, pad };
+      if (d.t === 'area') return { key: 'a|' + S.place.n + '|' + (m ? 'm' + (S.more ? 'x' : '') + (S.min ? 'n' : '') : 'd'), projects: M.PM, selected: null, cmp: [], amen: [], bounds: d.bounds, areaRings: d.a.rings, place: { lat: null, chipAt: d.centre, label: d.title, sub: 'Neighbourhood' }, fit, minZoom: 11, pad };
       const list = d.list.slice(0, m && !S.more ? 3 : 6), cmp = list.map((x) => x.p.n), dl = d.r / 111320, dn = d.r / (111320 * Math.cos(d.lat * Math.PI / 180));
-      return { key: 'p|' + S.place.t + S.place.n + '|' + d.r + '|' + (m ? 'm' + (S.more ? 'x' : '') : 'd'), projects: M.PM, selected: null, cmp, amen: [], circle: { lat: d.lat, lon: d.lon, r: d.r }, place: { lat: d.lat, lon: d.lon, label: d.title, sub: d.t === 'mrt' ? 'MRT station' : d.s.lab }, fitPts: [[d.lat, d.lon], [d.lat + dl, d.lon], [d.lat - dl, d.lon], [d.lat, d.lon + dn], [d.lat, d.lon - dn]], zoom: 15, minZoom: 11, fit, pad };
+      return { key: 'p|' + S.place.t + S.place.n + '|' + d.r + '|' + (m ? 'm' + (S.more ? 'x' : '') + (S.min ? 'n' : '') : 'd'), projects: M.PM, selected: null, cmp, amen: [], circle: { lat: d.lat, lon: d.lon, r: d.r }, place: { lat: d.lat, lon: d.lon, label: d.title, sub: d.t === 'mrt' ? 'MRT station' : d.s.lab }, fitPts: [[d.lat, d.lon], [d.lat + dl, d.lon], [d.lat - dl, d.lon], [d.lat, d.lon + dn], [d.lat, d.lon - dn]], zoom: 15, minZoom: 11, fit, pad };
     }
     return mapProps0(fit);
   }
@@ -228,7 +241,7 @@
     const pts = [shown, ...cmp].map((n) => [M.BY[n].lat, M.BY[n].lon]).concat(near);
     const c = M.BY[shown];
     if (S.pr !== 1000) { const dl = S.pr / 111320, dn = S.pr / (111320 * Math.cos(c.lat * Math.PI / 180)); pts.push([c.lat + dl, c.lon], [c.lat, c.lon + dn]); }   // a radius the visitor chose is shown whole
-    return { key: 'f|' + shown + '|' + S.radius + '|' + S.pr + '|' + (m ? 'm' + (S.more ? 'x' : '') : 'd'), projects: M.PM, selected: shown, cmp, amen, circle: { lat: c.lat, lon: c.lon, r: S.pr, soft: true }, hl: S.hl, fitPts: pts, zoom: 15, minZoom: 14, fit: !!fit, pad };
+    return { key: 'f|' + shown + '|' + S.radius + '|' + S.pr + '|' + (m ? 'm' + (S.more ? 'x' : '') + (S.min ? 'n' : '') : 'd'), projects: M.PM, selected: shown, cmp, amen, circle: { lat: c.lat, lon: c.lon, r: S.pr, soft: true }, hl: S.hl, fitPts: pts, zoom: 15, minZoom: 14, fit: !!fit, pad };
   }
   function mountMap(el) {
     const sh = $('.bs'); if (sh) $('.mapstage').style.setProperty('--shh', sh.offsetHeight + 'px');
@@ -236,7 +249,7 @@
     const pr = mapProps(true); pr.fit = true; view.update(pr);
   }
   function dotPick(n) { loadProject(n); S.start = false; go(true); }
-  function placePick(t, n) { S.start = false; S.more = false; S.hl = null; S.pr = 1000; S.nall = false; S.place = { t, n }; go(true); }
+  function placePick(t, n) { S.start = false; S.more = false; S.min = false; S.hl = null; S.pr = 1000; S.nall = false; S.place = { t, n }; go(true); }
   function pickItem(v) { const i = v.indexOf('|'), t = v.slice(0, i), n = v.slice(i + 1); S.suggOpen = false; S.q = ''; S.qi = -1; if (t === 'dev') dotPick(n); else placePick(t, n); }
 
   /* ---------------- licence notices: generated from what is actually loaded ---------------- */
@@ -255,14 +268,16 @@
   /* ---------------- events ---------------- */
   document.addEventListener('click', (e) => {
     if (!M) return;
-    const t = e.target.closest('[data-dpclose],[data-dpmore],[data-nall],[data-dot],[data-radius],[data-pr],[data-am-more],[data-pick],[data-zoom],[data-band],[data-rc],[data-am],[data-sources]');
+    const t = e.target.closest('[data-dpclose],[data-dpmin],[data-dpshow],[data-dpmore],[data-nall],[data-dot],[data-radius],[data-pr],[data-am-more],[data-pick],[data-zoom],[data-band],[data-rc],[data-am],[data-sources]');
     if (!t) { if (!e.target.closest('.srch') && S.suggOpen) { S.suggOpen = false; render(); } return; }
     const d = t.dataset;
     if (t.hasAttribute('data-sources')) { const s = document.getElementById('sources'); if (s) s.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
-    if (t.hasAttribute('data-dpclose')) { S.start = true; S.more = false; S.place = null; go(true); return; }
+    if (t.hasAttribute('data-dpclose')) { S.start = true; S.more = false; S.min = false; S.place = null; go(true); return; }
+    if (t.hasAttribute('data-dpmin')) { S.min = true; go(false); return; }
+    if (t.hasAttribute('data-dpshow')) { S.min = false; go(false); return; }
     if (t.hasAttribute('data-dpmore')) { S.more = !S.more; go(false); return; }
     if (d.dot) { dotPick(d.dot); return; }
-    const keep = (fn) => { const sc = $('.dp-in'), top = sc ? sc.scrollTop : 0; fn(); const n = $('.dp-in'); if (n) n.scrollTop = top; };   // a radius change keeps the panel where the visitor was reading
+    const keep = (fn) => { const sc = $('.dp-in') || $('.bs'), top = sc ? sc.scrollTop : 0; fn(); const n = $('.dp-in') || $('.bs'); if (n) n.scrollTop = top; };   // a radius change keeps the panel where the visitor was reading
     if (d.radius) { keep(() => { S.radius = +d.radius; go(false); }); return; }
     if (d.pr) { keep(() => { S.pr = +d.pr; go(false); }); return; }
     if (t.hasAttribute('data-nall')) { S.nall = !S.nall; refreshCard(); return; }
