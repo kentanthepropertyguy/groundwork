@@ -404,7 +404,7 @@ t('tick boxes allow at most two projects; the third is disabled', () => { assert
 t('the page-level Get Ken\'s view button and its message are unchanged', () => { assert.ok(/kv\.href = KPT\.waLink\(\{ message: R\.waMessage\(budget\) \}\)/.test(page)); assert.ok(/id="kenView"[^>]*>Get Ken's view →/.test(page)); });
 t('V9.1 location gate, confirmed-district-only rule and typed-text privacy are intact', () => { assert.ok(/FS\.loc === 'pending'\) \{ root\.innerHTML = [^;]*locPanel\(\)[^;]*; return; \}/.test(page)); assert.ok(/f === 'locuse'\) \{ FS\.districts = \[t\.dataset\.d\]; FS\.loc = 'confirmed'/.test(page)); });
 t('"Show N more" exists for both groups and is the only control that expands them', () => { assert.ok(/data-f="more" data-sale="\$\{esc\(g\.sale\)\}">Show \$\{extra\.length\} more/.test(page)); });
-t('the page makes no network request other than find.json, inventory.json and the existing budget data', () => { const f = page.match(/fetch\([^)]*\)/g) || []; f.forEach((x) => assert.ok(/FIND_URL|INV_URL|\bu\)|f\(u\)/.test(x), x)); });
+t('the page makes no network request other than find.json, inventory.json, the launch microsites list, the existing budget data and (only once a place is typed) the Map\'s own data files', () => { const f = page.match(/fetch\([^)]*\)/g) || []; f.forEach((x) => assert.ok(/FIND_URL|INV_URL|SITES_URL|\bu\)|f\(u\)|u \+ '\?v=' \+ MAP_V/.test(x), x)); });
 
 console.log('Data file');
 const schemaErrors = (doc) => {
