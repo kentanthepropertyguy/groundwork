@@ -228,10 +228,8 @@
     return '<div class="gw-vx-empty" data-vx-state="no-sales"><p><b>No landed sales recorded on “' + esc(title(name)) + '”</b></p><p class="gw-vx-why">' + why + ' Check the spelling as it is on your address.</p></div>';
   }
   const UNSUP = {
-    postal: 'Postal codes aren’t supported here. Type your street name instead, for example Aida Street.',
     block: 'That looks like an HDB block number. For an HDB flat, choose HDB flat above. For a landed home, type the street name.',
     unit: 'Unit numbers aren’t used here. Type the street name only, for example Aida Street.',
-    hdbPostal: 'Postal codes aren’t supported here. Choose your town, then type the block number, for example 612B.',
     hdbText: 'Type the block number only, for example 612B. The street is shown once you pick the block.'
   };
   const unsupportedHtml = (k) => '<p class="gw-vx-why" data-vx-state="unsupported">' + esc(UNSUP[k]) + '</p>';
@@ -313,6 +311,7 @@
   // The page body (written at build time; gw-value.js brings it to life). r: path to the site root.
   function pageHtml(r) {
     return '<section class="gw-panel gw-vx" data-gw-value aria-label="Your home">' +
+      '<div class="gw-q gw-vx-pc"><label class="gw-fld"><span>Postal code <em>Optional</em></span><input data-vx-pc type="text" inputmode="numeric" autocomplete="postal-code" maxlength="20" spellcheck="false" placeholder="e.g. 570155"></label><div class="gw-vx-pcout" data-vx-pcout aria-live="polite"></div></div>' +
       '<div class="gw-q"><span class="l">What kind of home?</span><div class="gw-chips" role="group" aria-label="What kind of home?">' + chip('data-vx-type', 'hdb', 'HDB flat') + chip('data-vx-type', 'condo', 'Condo or apartment') + chip('data-vx-type', 'landed', 'Landed home') + '</div></div>' +
       // HDB
       '<div class="gw-vx-pane" data-vx-pane="hdb" hidden><div class="gw-vx-f"><label class="gw-fld"><span>Town</span><select data-vx-town><option value="">Loading towns…</option></select></label>' +
@@ -395,7 +394,7 @@
       // R2.2: a postal code or a street name in the block box is an unsupported search, not "no resales"
       const nb = normBlock(q);
       pendingH = null;
-      if (/^\d{6}$/.test(nb)) { H.sugg.innerHTML = unsupportedHtml('hdbPostal'); later('h', 'hdb-value', 'unsupported', 'postal', user); return; }
+      if (/^\d{6}$/.test(nb)) { postalGo(nb, user); return; }
       if (!/^\d+[A-Z]{0,2}$/.test(nb)) { H.sugg.innerHTML = unsupportedHtml('hdbText'); later('h', 'hdb-value', 'unsupported', 'text', user); return; }
       const m = blockMatches(T, q, 8);
       if (!m.length) { H.sugg.innerHTML = '<p class="gw-vx-why" data-vx-state="no-sales">No Blk ' + esc(nb) + ' in ' + esc(title(T.town)) + ' has been resold since 2017. Check the block number and town.</p>'; later('h', 'hdb-value', 'no-sales', T.id + nb, user); return; }
@@ -497,6 +496,7 @@
       clearLandedBelow(true); if (!LI) return;
       const Q = streetQuery(Lp.street.value); lastQ = Q; pendingL = null;
       if (Q.kind === 'empty') { Lp.sugg.innerHTML = ''; return; }
+      if (Q.kind === 'postal' && GP && GP.code(Lp.street.value)) { postalGo(GP.code(Lp.street.value), user); return; }
       if (Q.kind !== 'street') { Lp.sugg.innerHTML = unsupportedHtml(Q.kind); later('l', 'landed-sales', 'unsupported', Q.kind, user); return; }
       const m = streetMatches(LI, Q.q, 6), lead = Q.note ? '<p class="gw-vx-why" data-vx-qnote>' + (Q.note === 'postal' ? 'Postal codes aren’t used here, so we searched for the street name.' : 'House numbers aren’t needed, so we searched for the street name.') + '</p>' : '';
       let list = m;
@@ -564,6 +564,78 @@
       if (street) { try { history.replaceState(null, '', '#landed'); } catch (e) { /* ignore */ } openStreet(street); }
       return true;
     };
+
+    // -- Postal code: ONE shared lookup (gw-postal.js, the same one the Map and Budget Search use) finds the address. The existing paths then show the evidence:
+    //    an HDB block opens the town's resale evidence, a condo, EC or cluster development opens its Research page, a landed home opens its street's sales.
+    //    This only finds which property it is. Past sales are evidence, never an official HDB valuation or a formal property valuation. --
+    const GP = root.GW_POSTAL, PCB = $('[data-vx-pc]'), PCO = $('[data-vx-pcout]');   // if the shared module did not load, the box does nothing and the page works as before
+    if (!GP && PCB) PCB.closest('.gw-vx-pc').hidden = true;
+    let pseq = 0, regP = null;
+    const regRows = () => regP || (regP = getJson(r + 'data/registry/index.json').then((d) => d.rows).catch((e) => { regP = null; throw e; }));
+    const CLSL = { condo: 'Condominium', ec: 'Executive condominium (EC)', cluster: 'Strata landed (cluster housing)' };
+    const pcMapLink = (a) => '<a href="' + r + 'research/map/#pl=' + encodeURIComponent('postal:' + a.n) + '" data-gw-go="map">See what is nearby on the Map ›</a>';
+    const pcHead = (a, found) => '<p class="' + (found === false ? 'gw-vx-addr' : 'gw-vx-picked') + '" data-vx-pc-addr>' + esc(a.title) + ' · Singapore ' + esc(a.code) + '</p>';
+    const pcNote = (txt) => '<p class="gw-fine gw-vx-pcnote">' + txt + '</p>';
+    function classify(a) {
+      const tryDev = () => (a.building ? regRows().then((rows) => { const m = GP.devMatch(a, rows); return m.kind === 'none' ? null : { kind: 'dev', m }; }).catch(() => null) : Promise.resolve(null));
+      const tryHdb = () => hdbInit().then(() => (I ? getJson(base + 'hdb/streets.json?v=' + encodeURIComponent(I.sourceVersion)).then((S) => { const towns = GP.hdbTowns(a, S); return towns.length ? { kind: 'hdb', towns } : null; }) : null)).catch(() => null);
+      return tryDev().then((x) => x || tryHdb()).then((x) => x || landedOf(a)).then((x) => x || { kind: 'none' });
+    }
+    const landedOf = (a) => landedInit().then(() => { if (!LI) return null; const k = GP.roadKey(a.road), ms = LI.streets.filter((x) => GP.roadKey(x[0]) === k); return ms.length ? { kind: 'landed', streets: ms } : null; }).catch(() => null);
+    function routeDev(a, cl) {
+      pickType('condo', true);
+      const rows = cl.m.list.slice(0, 3).map((x) => '<div class="gw-vx-pcdev" data-vx-dev="' + esc(x[0]) + '"><div><b>' + esc(/[a-z]/.test(x[1]) ? x[1] : title(x[1])) + '</b><span>' + esc([cl.m.kind === 'near' ? 'Closest match' : '', CLSL[x[14]] || 'Condominium', x[3] ? 'District ' + Number(x[3]) : '', x[5], cl.m.list.length > 1 && x[2] ? title(x[2]) : ''].filter(Boolean).join(' · ')) + '</span></div><a class="gw-btn pri" href="' + r + 'research/#/p/' + encodeURIComponent(x[0]) + '" data-gw-go="research">Open Research page ›</a></div>').join('');
+      PCO.innerHTML = pcHead(a) + (cl.m.list.length > 1 ? '<p class="gw-vx-why">More than one development has this name. Choose yours.</p>' : '') + rows + pcNote('Recorded sales and prices from URA, not a valuation. ' + pcMapLink(a));
+      track('tool_completed', { tool_name: 'worth-postal', kind: 'development' });
+    }
+    function routeHdb(a, cl) {
+      pickType('hdb', true);
+      const blk = normBlock(a.blk), k = GP.roadKey(a.road);
+      const tryTown = (i) => (i >= cl.towns.length ? Promise.resolve(null) : setTown(cl.towns[i], false).then(() => (T ? T.blocks.filter((x) => x[0] === blk && GP.roadKey(T.streets[x[1]]) === k)[0] || tryTown(i + 1) : null)));
+      return tryTown(0).then((m) => {
+        if (m) { H.block.value = m[0]; chooseBlock(m, true); PCO.innerHTML = pcHead(a) + pcNote('HDB flat, ' + esc(title(T.town)) + '. Past resales are below. They are indicative, not an official HDB valuation.'); track('tool_completed', { tool_name: 'worth-postal', kind: 'hdb' }); return; }
+        // not an HDB block with a resale in these records: a landed house on a road that shares its name, or a block with no resale in the last 2 years
+        return landedOf(a).then((lc) => {
+          if (lc) return routeLanded(a, lc);
+          PCO.innerHTML = pcHead(a, false) + '<p class="gw-vx-why" data-vx-state="postal-no-resale">No resale of this block is recorded from ' + esc(ym(I.windowFrom)) + ' in HDB’s records. Choose another block in ' + esc(title(T ? T.town : cl.towns[0])) + ' below, or ' + pcMapLink(a).replace('See what is nearby', 'see what is nearby') + '</p>';
+          note('hdb-value', 'no-sales', 'postal' + a.code);
+        });
+      });
+    }
+    function routeLanded(a, cl) {
+      pickType('landed', true);
+      return landedInit().then(() => {
+        PCO.innerHTML = pcHead(a) + pcNote('Landed home. These are the recorded sales on ' + esc(title(cl.streets[0][0])) + ', not a valuation of this house.');
+        track('tool_completed', { tool_name: 'worth-postal', kind: 'landed' });
+        if (cl.streets.length === 1) { Lp.street.value = title(cl.streets[0][0]); return chooseStreet(cl.streets[0], true, null, true); }
+        Lp.street.value = title(cl.streets[0][0]); suggestStreets(true);   // the same street name in more than one district: choose
+      });
+    }
+    function routeNone(a) {
+      PCO.innerHTML = pcHead(a, false) + '<p class="gw-vx-why" data-vx-state="postal-no-match">We have no recorded sales to show for this address. Choose a kind of home below and search by name, or ' + pcMapLink(a).replace('See what is nearby', 'see what is nearby') + '</p>';
+      note('postal', 'no-match', a.code);
+    }
+    const route = (a, cl) => (cl.kind === 'dev' ? routeDev(a, cl) : cl.kind === 'hdb' ? routeHdb(a, cl) : cl.kind === 'landed' ? routeLanded(a, cl) : routeNone(a));
+    function postalGo(c, user) {
+      if (!GP || !PCB) return Promise.resolve();
+      const seq = ++pseq; PCB.value = c; resetHdb(true); resetLanded(true);   // a new postal code replaces what an earlier search left on screen
+      PCO.innerHTML = '<p class="gw-vx-why">' + esc(GP.msg('loading', c)) + '</p>';
+      return GP.lookup(c).then((res) => {
+        if (seq !== pseq) return;
+        if (res.state !== 'ok') { PCO.innerHTML = '<p class="gw-vx-why" data-vx-state="postal-' + res.state + '">' + esc(GP.msg(res.state, c)) + '</p>'; if (res.state !== 'error') note('postal', res.state, c); return; }
+        return Promise.all(res.list.map((a) => classify(a).then((cl) => ({ a, cl })))).then((all) => {
+          if (seq !== pseq) return;
+          // several addresses share this code: a development with several buildings is still one development; otherwise the visitor chooses
+          const first = all[0], same = all.every((x) => x.cl.kind === first.cl.kind && (x.cl.kind !== 'dev' || x.cl.m.list[0][0] === first.cl.m.list[0][0]) && (x.cl.kind !== 'hdb' || x.a.blk === first.a.blk));
+          if (all.length === 1 || same) return route(first.a, first.cl);
+          PCO.innerHTML = '<p class="gw-vx-why">More than one address has this postal code. Which one?</p><div class="gw-vx-sugg">' + all.map((x, i) => '<button type="button" data-i="' + i + '"><b>' + esc(x.a.title) + '</b>' + (x.a.building ? ' ' + esc(title(x.a.building)) : '') + '</button>').join('') + '</div>';
+          $$('button[data-i]', PCO).forEach((b) => b.addEventListener('click', () => { const x = all[+b.dataset.i]; route(x.a, x.cl); }));
+        });
+      }).catch(() => { if (seq === pseq) PCO.innerHTML = '<p class="gw-vx-why" data-vx-state="postal-error">' + esc(GP.msg('error', c)) + '</p>'; });
+    }
+    let pt; if (GP && PCB) PCB.addEventListener('input', () => { clearTimeout(pt); pseq++; const c = GP.code(PCB.value); if (!c) { PCO.innerHTML = /\d{6,}/.test(PCB.value) ? '<p class="gw-vx-why">A postal code has six digits.</p>' : ''; return; } pt = setTimeout(() => postalGo(c, false), 150); });
+    if (GP && PCB) PCB.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); clearTimeout(pt); const c = GP.code(PCB.value); if (c) postalGo(c, true); } });
+
     // Start: the address (#hdb, #condo, #landed, #landed:<road>), else what this tab already told us.
     if (!fromHash() && ctx.get().type) pickType(ctx.get().type, false);
     window.addEventListener('hashchange', () => { fromHash(); });

@@ -109,7 +109,8 @@ try:
         cn = pg.eval_on_selector_all('#findRoot .kpf-card .kpf-name', 'e => e.map(x => x.innerText)')
         check(vn + ': every one is listed (' + str(len(un)) + ') and none is also a result card', len(un) == total_unp and not (set(un) & set(cn)), (un[:3], cn[:3]))
         check(vn + ': each says what it is and why it was matched, and none says it is inside the radius', all(re.search(r'(New launch|Resale)', x) for x in pg.eval_on_selector_all('#kpfUnplaced .kpf-unl li', 'e => e.map(x => x.innerText)')) and 'within' not in pg.inner_text('#kpfUnplaced .kpf-unl'))
-        check(vn + ': with a place chosen, launches with no verified position are not listed as local possibilities', not pg.query_selector('.kpf-up') and 'Thomson Reserve' not in pg.inner_text('#findRoot') and 'Hougang Central' not in pg.inner_text('#findRoot'))
+        upt = pg.inner_text('.kpf-up') if pg.query_selector('.kpf-up') else ''
+        check(vn + ': with a place chosen, launches with no verified position are not listed as local possibilities (a register site with a verified position inside the radius is, with its distance, and is not a match)', 'Thomson Reserve' not in pg.inner_text('#findRoot') and 'Hougang Central' not in pg.inner_text('#findRoot') and (not upt or (re.search(r'\d(\.\d)? km|\d+ m', upt) and 'not budget matches' in upt and not re.search(r'\$\s?\d', upt))), upt[:200])
         ext = pg.eval_on_selector_all('.kpf-upmore a', 'e => e.map(x => [x.target, x.rel, x.href, x.innerText])')
         check(vn + ': a discreet link browses other upcoming launches separately, in a new tab', len(ext) == 1 and ext[0][0] == '_blank' and 'noopener' in ext[0][1] and ext[0][2].startswith('https://') and 'upcoming launches' in ext[0][3], ext)
         # hide / show the map
@@ -162,7 +163,7 @@ try:
             if label != 'fresh': check(vn + ': ' + label + ' Huttons inventory: no Huttons price is used for matching', 'From around' not in body, '')
             pick(pg3, 'yio chu kang road', 'Serangoon'); rad(pg3, '2000')
             pg3.wait_for_selector('.kpf-upmore a', timeout=10000)
-            check(vn + ': ' + label + ' Huttons inventory: with a place chosen, no launch without a verified position is listed, and the discreet link remains', not pg3.query_selector('.kpf-up') and pg3.query_selector('.kpf-upmore a') is not None, pg3.inner_text('#findRoot')[:120])
+            check(vn + ': ' + label + ' Huttons inventory: with a place chosen, no launch without a verified position is listed (a placed one may be), and the discreet link remains', 'Hougang Central' not in pg3.inner_text('#findRoot') and 'Thomson Reserve' not in pg3.inner_text('#findRoot') and pg3.query_selector('.kpf-upmore a') is not None, pg3.inner_text('#findRoot')[:120])
             check(vn + ': ' + label + ' Huttons inventory: no script errors', not [e for e in errs3 if 'favicon' not in e and '404' not in e], errs3[:3])
             pg3.close()
         check(vn + ': no script errors with a placed launch', not [e for e in errs2 if 'favicon' not in e], errs2[:3])

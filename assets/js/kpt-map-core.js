@@ -102,6 +102,29 @@
     PM.forEach((p) => { const a = areaAt(p.lat, p.lon); if (a) AREAOF[p.n] = a; });
     m.areaAt = areaAt;
 
+    /* ---- new launches and awarded GLS sites (data/map/upcoming.json) ----
+       They have no URA sales, so they are not in places.json. Each becomes a development in this model (flag `up`): it is searchable, has a card, and a dot when it has a verified position.
+       A project already in places.json (same id or same name) wins, so the day a launch gets its first URA sale the record is linked, never shown twice. No lat/lon means no marker, never a guess. */
+    m.UP = [];
+    m.setUpcoming = (doc) => {
+      ((doc && doc.items) || []).forEach((it) => {
+        if (!it || !it.id || !it.name || (BYID[it.id] && !BYID[it.id].up) || (BY[it.name] && !BY[it.name].up) || BYID[it.id]) return;
+        const o = { id: it.id, n: it.name, lat: typeof it.lat === 'number' ? it.lat : null, lon: typeof it.lon === 'number' ? it.lon : null, district: it.district || '', seg: '', p12: 0, s12: 0, sub12: 0, t12: 0, cls: CLS[it.cls] ? it.cls : 'condo', up: it };
+        o.pos = o.lat != null && o.lon != null; P.push(o); BY[o.n] = o; BYID[o.id] = o; m.UP.push(o);
+        if (o.pos) { PM.push(o); const a = areaAt(o.lat, o.lon); if (a) AREAOF[o.n] = a; }
+      });
+    };
+    /* what a card and a search row call it: "New launch", "New launch · under construction", "GLS site" */
+    m.upTag = (p) => { const u = p && p.up; if (!u) return ''; return u.kind === 'launch' ? 'New launch' : u.unnamed ? 'GLS site' : 'Upcoming · GLS site'; };
+    m.upStage = (p) => { const u = p && p.up; if (!u) return ''; return u.kind === 'launch' ? (u.stage === 'under-construction' ? 'New launch · under construction' : 'New launch') : u.unnamed ? 'Awarded GLS site · no project name yet' : 'Awarded GLS site'; };
+    const upNear = (lat, lon, max, skip) => m.UP.filter((p) => p.pos && p !== skip).map((p) => ({ p, d: hav({ lat, lon }, p) })).filter((x) => x.d <= max).sort((a, b) => a.d - b.d);
+    m.upNear = upNear;
+
+    /* ---- postal codes: one shared module (assets/js/gw-postal.js), the same lookup the Budget Search and Property values pages use ---- */
+    const PO = (typeof module === 'object' && module.exports) ? require('./gw-postal.js') : (typeof self !== 'undefined' ? self : {}).GW_POSTAL;
+    if (!PO) throw new Error('kpt-map-core: gw-postal.js must be loaded first');
+    m.PC = PO.PC; m.postalCode = PO.code; m.postalValid = PO.valid; m.postalMsg = PO.msg; m.postalState = PO.state; m.lookupPostal = PO.lookup;
+
     /* ---- price evidence ---- */
     const cellsOf = (name, mk, win = 0) => EV[name] ? EV[name].mk[mk].filter((c) => c[1] === win).map((c) => ({ bin: c[0], n: c[2], act: c[3], last: c[4], q1: c[5], med: c[6], q3: c[7], pmed: c[8], sub: c[9] })).sort((a, b) => a.bin - b.bin) : [];
     m.cellsOf = cellsOf;
@@ -125,7 +148,7 @@
     m.chosen = chosen; m.focus = focus; m.mostSold = mostSold;
 
     /* ---- nearby developments (positioned only) ---- */
-    const nearby = (name, radius) => { const c = BY[name]; if (!c || !c.pos) return []; return PM.filter((p) => p !== c).map((p) => Object.assign({ d: hav(c, p) }, p)).filter((p) => p.d <= radius).sort((a, b) => a.d - b.d); };
+    const nearby = (name, radius) => { const c = BY[name]; if (!c || !c.pos) return []; return PM.filter((p) => p !== c && !p.up).map((p) => Object.assign({ d: hav(c, p) }, p)).filter((p) => p.d <= radius).sort((a, b) => a.d - b.d); };
     m.nearby = nearby;
     function rank(me, p) { const e = EV[p.n], sameTen = e.tenGroup === me.tenGroup, age = (e.lease && me.lease) ? Math.abs(e.lease - me.lease) : null; return (sameTen ? 0 : 1) * 1000 + (age == null ? 500 : Math.min(age, 50) * 10) + p.d / 100; }
     function suggest(name, mk, bin, radius) {
@@ -176,13 +199,17 @@
     // a road is only offered for a real name: a house number, "road" or "street" on its own does not list the island
     const GENERIC = /^(road|street|avenue|drive|crescent|close|terrace|lorong|jalan|garden|gardens|place|lane|heights|park|view|walk|way|hill|rise|grove|north|south|east|west|upper|lower|bukit|the|and)$/;
     const roadQuery = (t) => t.length >= 3 && t.split(' ').some((w) => w.length >= 3 && !GENERIC.test(w));
+    // new launches and GLS sites: by name or by any other name the register lists (so "One Chuan Grove" and "Chuan Grove" both find it)
+    const upPick = (t) => m.UP.map((p) => { const names = [p.n].concat(p.up.aliases || []); let r = null; names.forEach((x) => { const k = rankIn(x, t); if (k !== null && (r === null || k < r)) r = k; }); return r === null ? null : { r, p }; }).filter(Boolean).sort((a, b) => a.r - b.r || a.p.n.length - b.p.n.length).slice(0, 3)
+      .map((o) => ({ t: 'dev', g: 'up', n: o.p.n, sub: [m.upStage(o.p).split(' · ')[0] === 'New launch' ? 'New launch' : 'GLS site', o.p.pos ? '' : 'not on the map yet'].filter(Boolean).join(' · ') + (o.p.district ? ' · D' + Number(o.p.district) : '') }));
     m.places = (q) => {
       const t = NORM(q); if (!t) return [];
       const pick = (arr, name, mapper, cap, tie) => arr.map((x) => { const r = rankIn(name(x), t); return r === null ? null : { r, x }; }).filter(Boolean).sort((a, b) => a.r - b.r || (tie ? tie(b.x) - tie(a.x) : 0) || name(a.x).length - name(b.x).length).slice(0, cap).map((o) => mapper(o.x));
       return [
         ...pick(AM.areas, (a) => a.n, (a) => ({ t: 'area', n: a.n, sub: 'Neighbourhood' }), 2),
         ...pick(AM.stations, (s) => s.n, (s) => ({ t: 'mrt', n: s.n, sub: s.k + ' station' }), 3),
-        ...pick(P, (p) => p.n, (p) => ({ t: 'dev', n: p.n, sub: `D${Number(p.district)}${CLS[p.cls].short ? ' · ' + CLS[p.cls].short : ''} · ${p.t12} sale${p.t12 === 1 ? '' : 's'} in 12 months` }), 3, (p) => p.t12),
+        ...pick(P.filter((p) => !p.up), (p) => p.n, (p) => ({ t: 'dev', n: p.n, sub: `D${Number(p.district)}${CLS[p.cls].short ? ' · ' + CLS[p.cls].short : ''} · ${p.t12} sale${p.t12 === 1 ? '' : 's'} in 12 months` }), 3, (p) => p.t12),
+        ...upPick(t),
         ...pick(AM.schools, (s) => s.n, (s) => ({ t: 'school', n: s.n, sub: s.lab }), 2),
         ...(roadQuery(t) ? pick(AM.roads, (r) => r.title, (r) => ({ t: 'road', n: r.key, label: r.title, sub: r.area ? 'Road · ' + r.area : 'Road' }), 3, (r) => (r.landed ? 1 : 0)) : [])
       ];
@@ -192,24 +219,33 @@
     const stationBy = (n) => AM.stations.find((s) => s.n === n), schoolBy = (n) => AM.schools.find((s) => s.n === n), areaBy = (n) => AM.areas.find((a) => a.n === n);
     const devsNear = (lat, lon, max) => PM.filter((p) => EV[p.n]).map((p) => ({ p, e: EV[p.n], d: hav({ lat, lon }, p) })).filter((x) => x.d <= max).sort((a, b) => a.d - b.d);
     const nearStationDevs = (s, max) => PM.filter((p) => EV[p.n]).map((p) => { let d = Infinity; for (const x of s.ex) d = Math.min(d, hav({ lat: x[0], lon: x[1] }, p)); return { p, e: EV[p.n], d }; }).filter((x) => x.d <= max).sort((a, b) => a.d - b.d);
-    m.placeData = (pl) => {
+    /* r = the search radius in metres (500, 1000, 2000 or 3000; 1 km unless the visitor changes it) */
+    m.RADII = [500, 1000, 2000, 3000];
+    m.placeData = (pl, rad) => {
+      const r = m.RADII.includes(rad) ? rad : 1000;
       if (pl.t === 'area') {
         const a = areaBy(pl.n); if (!a) return null;
         const stn = AM.stations.filter((s) => inside(s.lat, s.lon, a.rings)), sch = AM.schools.filter((s) => inside(s.lat, s.lon, a.rings));
         const pk = AM.parks.filter((k) => { const r = k.rings[0]; if (!r) return false; const la = r.reduce((s, q) => s + q[0], 0) / r.length, lo = r.reduce((s, q) => s + q[1], 0) / r.length; return inside(la, lo, a.rings); }).sort((x, y) => y.a - x.a);
         const devs = PM.filter((p) => AREAOF[p.n] === pl.n && EV[p.n]).sort((x, y) => y.t12 - x.t12 || x.n.localeCompare(y.n));
-        return { t: 'area', title: a.n, meta: `Neighbourhood · ${a.region}`, a, stn, sch, pk, devs, bounds: [[a.b[0], a.b[1]], [a.b[2], a.b[3]]], centre: [(a.b[0] + a.b[2]) / 2, (a.b[1] + a.b[3]) / 2] };
+        const ups = m.UP.filter((p) => p.pos && AREAOF[p.n] === pl.n);
+        return { t: 'area', title: a.n, meta: `Neighbourhood · ${a.region}`, a, stn, sch, pk, devs, ups, bounds: [[a.b[0], a.b[1]], [a.b[2], a.b[3]]], centre: [(a.b[0] + a.b[2]) / 2, (a.b[1] + a.b[3]) / 2] };
+      }
+      if (pl.t === 'postal') {
+        const pc = m.PC[pl.n]; if (!pc) return null;
+        const list = devsNear(pc.lat, pc.lon, r);
+        const ar = areaAt(pc.lat, pc.lon);
+        return { t: 'postal', title: pc.title, meta: 'Postal code ' + pc.code + (ar ? ' · ' + ar : ''), s: { lat: pc.lat, lon: pc.lon, lab: 'Address' }, list, r, lat: pc.lat, lon: pc.lon, ups: upNear(pc.lat, pc.lon, r) };
       }
       if (pl.t === 'road') {
         const rd = roadBy(pl.n); if (!rd) return null;
-        let r = 1000, list = devsNear(rd.lat, rd.lon, r); if (list.length < 3) { r = 2000; list = devsNear(rd.lat, rd.lon, r); }
+        const list = devsNear(rd.lat, rd.lon, r);
         const ar = rd.area || areaAt(rd.lat, rd.lon);
-        return { t: 'road', title: rd.title, meta: 'Road' + (ar ? ' · ' + ar : ''), s: { lat: rd.lat, lon: rd.lon, lab: 'Road' }, list, r, lat: rd.lat, lon: rd.lon, road: rd };
+        return { t: 'road', title: rd.title, meta: 'Road' + (ar ? ' · ' + ar : ''), s: { lat: rd.lat, lon: rd.lon, lab: 'Road' }, list, r, lat: rd.lat, lon: rd.lon, road: rd, ups: upNear(rd.lat, rd.lon, r) };
       }
       const s = pl.t === 'mrt' ? stationBy(pl.n) : schoolBy(pl.n); if (!s) return null;
-      const ar = areaAt(s.lat, s.lon); let r = 1000, list = pl.t === 'mrt' ? nearStationDevs(s, r) : devsNear(s.lat, s.lon, r);
-      if (list.length < 3) { r = 2000; list = pl.t === 'mrt' ? nearStationDevs(s, r) : devsNear(s.lat, s.lon, r); }
-      return { t: pl.t, title: s.n, meta: pl.t === 'mrt' ? `${s.k === 'LRT' ? 'LRT' : 'MRT'} station${ar ? ' · ' + ar : ''}` : `${s.lab}${ar ? ' · ' + ar : ''}`, s, list, r, lat: s.lat, lon: s.lon };
+      const ar = areaAt(s.lat, s.lon), list = pl.t === 'mrt' ? nearStationDevs(s, r) : devsNear(s.lat, s.lon, r);
+      return { t: pl.t, title: s.n, meta: pl.t === 'mrt' ? `${s.k === 'LRT' ? 'LRT' : 'MRT'} station${ar ? ' · ' + ar : ''}` : `${s.lab}${ar ? ' · ' + ar : ''}`, s, list, r, lat: s.lat, lon: s.lon, ups: upNear(s.lat, s.lon, r) };
     };
     return m;
   }
@@ -221,8 +257,8 @@
   const help = (text, label) => { const id = 'gwi-' + (++helpN); return `<span class="gwi-w"><button type="button" class="gwi" aria-label="${esc(label || 'More information')}" aria-expanded="false" aria-describedby="${id}">i</button><span class="gwi-t" id="${id}" hidden>${esc(text)}</span></span>`; };
   if (typeof document !== 'undefined' && !window.__gwiInit) {
     window.__gwiInit = true;
-    let tip = null, cur = null, pinned = false;
-    const hide = () => { if (tip) { tip.remove(); tip = null; } if (cur) { cur.setAttribute('aria-expanded', 'false'); cur = null; } pinned = false; };
+    let tip = null, cur = null, pinned = false, auto = null;
+    const hide = () => { clearTimeout(auto); if (tip) { tip.remove(); tip = null; } if (cur) { cur.setAttribute('aria-expanded', 'false'); cur = null; } pinned = false; };
     const show = (b) => {
       if (cur === b) return; hide();
       const t = b.parentNode.querySelector('.gwi-t'); if (!t) return;
@@ -231,6 +267,7 @@
       const left = Math.max(12, Math.min(r.left + r.width / 2 - w / 2, window.innerWidth - w - 12)); tip.style.left = left + 'px';
       const h = tip.offsetHeight, below = r.bottom + 8 + h <= window.innerHeight - 8; tip.style.top = (below ? r.bottom + 8 : Math.max(8, r.top - 8 - h)) + 'px';
       b.setAttribute('aria-expanded', 'true'); cur = b;
+      clearTimeout(auto); if (!hoverable()) auto = setTimeout(hide, 9000);   // on a phone the tip closes by itself, so it never stays over what is being read
     };
     const hoverable = () => window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches;
     document.addEventListener('mouseover', (e) => { const b = hoverable() && e.target.closest && e.target.closest('.gwi'); if (b && !pinned) show(b); });

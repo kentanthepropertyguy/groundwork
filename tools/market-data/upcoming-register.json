@@ -1,0 +1,89 @@
+{
+  "_note": "The upcoming-project register: new launches and awarded GLS sites that have no URA sales yet, so they are not in the development register built from URA transactions. Edit THIS file, then run `node tools/market-data/build-upcoming.js` and commit data/map/upcoming.json with it. See tools/market-data/UPCOMING.md.",
+  "v": 1,
+  "auto": {
+    "_note": "Awarded residential GLS sites are added automatically from URA's 'URA Sale Sites' dataset (data.gov.sg) when they were awarded in the last `months` months and no development in the transaction register sits inside the site boundary. They carry no project name. A site listed under an entry's `ura` is never added twice. Put a site in `skip` to leave it out.",
+    "months": 12,
+    "landUse": ["Residential (Non-Landed)", "Residential with Commercial at 1st Sty", "Commercial and Residential"],
+    "skip": []
+  },
+  "entries": [
+    {
+      "id": "thomson-reserve",
+      "name": "Thomson Reserve",
+      "kind": "launch",
+      "stage": "under-construction",
+      "district": "20",
+      "registry": "thomson-reserve",
+      "microsite": "thomson-reserve",
+      "position": { "type": "onemap", "query": "THOMSON RESERVE", "building": "(U/C)" },
+      "facts": [],
+      "sources": [
+        { "label": "OneMap address records for THOMSON RESERVE (U/C)", "url": "https://www.onemap.gov.sg/" }
+      ]
+    },
+    {
+      "id": "lucerne-grand",
+      "name": "Lucerne Grand",
+      "kind": "launch",
+      "stage": "under-construction",
+      "district": "22",
+      "tenure": "99 yrs from 2025",
+      "registry": "lucerne-grand",
+      "microsite": "lucerne-grand",
+      "position": { "type": "onemap", "query": "LUCERNE GRAND", "building": "(U/C)" },
+      "ura": ["20250609|Lakeside Drive"],
+      "facts": [],
+      "sources": [
+        { "label": "OneMap address records for LUCERNE GRAND (U/C)", "url": "https://www.onemap.gov.sg/" },
+        { "label": "URA Sale Sites: Lakeside Drive, awarded June 2025", "url": "https://data.gov.sg/datasets/d_0e2b42f98535686282031a42c9c7b05a/view" }
+      ]
+    },
+    {
+      "id": "sophia-meadow",
+      "name": "Sophia Meadow",
+      "kind": "launch",
+      "stage": "under-construction",
+      "district": "09",
+      "tenure": "103 yrs from 2024",
+      "position": { "type": "onemap", "query": "SOPHIA MEADOW", "building": "(U/C)" },
+      "facts": [],
+      "sources": [
+        { "label": "OneMap address records for SOPHIA MEADOW (U/C)", "url": "https://www.onemap.gov.sg/" }
+      ]
+    },
+    {
+      "id": "one-chuan-grove",
+      "name": "One Chuan Grove",
+      "nameStatus": "reported",
+      "kind": "gls",
+      "stage": "awarded",
+      "ura": ["20250717|Chuan Grove", "20250910|Chuan Grove (1H2025)"],
+      "aliases": ["Chuan Grove", "Chuan Grove GLS", "Lorong Chuan GLS"],
+      "position": { "type": "ura" },
+      "facts": [],
+      "sources": [
+        { "label": "URA Sale Sites: Chuan Grove (July 2025) and Chuan Grove (1H2025) (September 2025)", "url": "https://data.gov.sg/datasets/d_0e2b42f98535686282031a42c9c7b05a/view" },
+        { "label": "EdgeProp, 24 Feb 2026: Sing Holdings on its Chuan Grove project (no marketing name given)", "url": "https://www.edgeprop.sg/property-news/sing-holdings-prepares-massive-chuan-grove-project-after-record-2025-profit-north-gaia-ec" }
+      ]
+    },
+    {
+      "id": "hougang-central",
+      "name": "Hougang Central",
+      "kind": "gls",
+      "stage": "awarded",
+      "registry": "hougang-central",
+      "microsite": "hougang-central",
+      "position": null,
+      "positionNote": "Sold by HDB, which does not publish a site boundary in the datasets we use, and OneMap has no record for the project yet. It is searchable, and will be placed on the map once a verified location is added.",
+      "facts": [
+        ["Plan", "About 830 homes, with a mall, a new bus interchange and a town plaza, joined to Hougang MRT"],
+        ["Tenure", "99 years"],
+        ["Awarded", "January 2026, to CapitaLand Integrated Commercial Trust, CapitaLand Development and UOL"]
+      ],
+      "sources": [
+        { "label": "CapitaLand news release, 14 January 2026: CICT and consortium awarded Hougang Central site", "url": "https://www.capitaland.com/en/about-capitaland/newsroom/news-releases/international/2026/january/CICT-and-consortium-awarded-hougang-central-site.html" }
+      ]
+    }
+  ]
+}

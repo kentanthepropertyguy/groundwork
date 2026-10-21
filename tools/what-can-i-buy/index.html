@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="../../assets/css/kpt-journey.css?v=4b50abcf2e">
 <link rel="stylesheet" href="../../assets/css/kpt-shell.css?v=30b765165f">
 <script src="../../assets/js/gw-wa.js?v=7a6cf4f1be"></script>
-<link rel="stylesheet" href="../../assets/css/gw.css?v=ff63943bee">
+<link rel="stylesheet" href="../../assets/css/gw.css?v=7464e4804e">
 <link rel="canonical" href="https://tools.kentanthepropertyguy.com/tools/what-can-i-buy/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Groundwork">
@@ -39,7 +39,7 @@
 <script src="../../assets/js/kpt-market.js?v=f2c5f82332"></script>
 <script src="../../assets/js/kpt-engine.js?v=6ffe7ee923"></script>
 <script src="../../assets/js/kpt-result.js?v=4a36410c7a"></script>
-<script src="../../assets/js/kpt-find.js?v=a998e8f6ae"></script>
+<script src="../../assets/js/kpt-find.js?v=999cee5f80"></script>
 <script src="../../data/market/config.js?v=de1831ebfc"></script>
 <script>
 (function () {
@@ -222,8 +222,8 @@
   }
   // ---- Near a place (optional radius search). The Map's own logic layer (KPT_MAP), place search and Leaflet view do the work: nothing of the Map's search or drawing is rewritten here.
   // Its files load only when the buyer starts typing a place, so the islandwide search is exactly as light as before. Versions match the Map page (a test keeps them in step).
-  const MAP_V = '2026-10-21.5', RADII = [500, 1000, 2000, 3000], NEAR_TYPES = ['dev', 'mrt', 'area', 'road', 'school'];
-  const NEAR_BASIS = { dev: 'the development', mrt: 'the station', area: 'the centre of the neighbourhood', road: 'one point on the road', school: 'the school' };
+  const MAP_V = '2026-10-21.7', RADII = [500, 1000, 2000, 3000], NEAR_TYPES = ['dev', 'mrt', 'area', 'road', 'school', 'postal'];
+  const NEAR_BASIS = { dev: 'the development', mrt: 'the station', area: 'the centre of the neighbourhood', road: 'one point on the road', school: 'the school', postal: 'the address' };
   let NM = null, nmLoad = null, nmView = null, nmHost = null, nmLayer = null, nmSig = '', NR = null;   // NR: the resolved place { key, label, sub, lat, lon, dist, pos }
   const addCss = (href) => { if (!document.querySelector('link[href="' + href + '"]')) { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href; document.head.appendChild(l); } };
   const addJs = (src) => new Promise((ok, no) => { const x = document.createElement('script'); x.src = src; x.onload = ok; x.onerror = () => no(new Error(src)); document.head.appendChild(x); });
@@ -231,9 +231,9 @@
     if (nmLoad) return nmLoad;
     const get = (u, must) => fetch(u + '?v=' + MAP_V).then((r) => { if (!r.ok) throw new Error(u); return r.json(); }).catch((e) => { if (must) throw e; return null; });
     addCss('../../assets/vendor/leaflet/leaflet.css'); addCss('../../assets/css/kpt-map.css?v=' + MAP_V);
-    nmLoad = Promise.all([addJs('../../assets/vendor/leaflet/leaflet.js').then(() => addJs('../../assets/js/kpt-map-core.js?v=' + MAP_V)).then(() => addJs('../../assets/js/kpt-map-view.js?v=' + MAP_V)), get('../../data/map/places.json', true), get('../../data/map/amen.json', true)])
+    nmLoad = Promise.all([addJs('../../assets/vendor/leaflet/leaflet.js').then(() => addJs('../../assets/js/gw-postal.js?v=' + MAP_V)).then(() => addJs('../../assets/js/kpt-map-core.js?v=' + MAP_V)).then(() => addJs('../../assets/js/kpt-map-view.js?v=' + MAP_V)), get('../../data/map/places.json', true), get('../../data/map/amen.json', true), get('../../data/map/upcoming.json')])
       .then((a) => {
-        NM = window.KPT_MAP.create(a[1], a[2], { band: null, radius: 1000 });
+        NM = window.KPT_MAP.create(a[1], a[2], { band: null, radius: 1000 }); NM.setUpcoming(a[3]);   // new launches and awarded GLS sites join the same place index as the Map's, so the two never disagree
         return Promise.all([get('../../data/value/landed/geo.json'), get('../../data/value/landed/geo-more.json'), a[2].extra ? get('../../data/map/' + a[2].extra) : null])
           .then((b) => { if (b[0] || b[1]) NM.setRoads(b[0], b[1]); if (b[2]) NM.setExtra(b[2]); return NM; });
       }).catch((e) => { nmLoad = null; throw e; });
@@ -252,9 +252,17 @@
   }
   /** A launch microsite with a verified position (numeric lat and lon in sites.json) is placed like any development; without one it can never be inside a radius. */
   function siteNear() {
-    if (!NR || NR.siteDist || !sitesDoc || !window.KPT_MAP) return;
+    if (!NR || NR.siteDist || !window.KPT_MAP) return;
     NR.siteDist = {}; NR.sitePos = {};
-    sitesDoc.forEach((x) => { if (typeof x.lat === 'number' && typeof x.lon === 'number') { NR.sitePos[x.id] = 1; NR.siteDist[x.id] = window.KPT_MAP.hav({ lat: NR.lat, lon: NR.lon }, x); } });
+    if (NM) NM.UP.forEach((p) => { if (p.pos) { NR.sitePos[p.id] = 1; NR.siteDist[p.id] = window.KPT_MAP.hav({ lat: NR.lat, lon: NR.lon }, p); } });   // the Map's launch and GLS register: only a verified position is ever placed
+    (sitesDoc || []).forEach((x) => { if (typeof x.lat === 'number' && typeof x.lon === 'number') { NR.sitePos[x.id] = 1; NR.siteDist[x.id] = window.KPT_MAP.hav({ lat: NR.lat, lon: NR.lon }, x); } });
+  }
+  /* The launch microsites, plus (only with a place chosen) the Map's verified new launches and GLS sites that have a position. They have no price here, so they are possibilities listed apart, never budget matches. */
+  function launchesFor() {
+    if (!(NM && FS && FS.near && NR)) return sitesDoc || null;
+    const self = FS.near.t === 'dev' && NM.BY[FS.near.n] ? NM.BY[FS.near.n].id : '';   // the place chosen is not also offered as a possibility "near" itself
+    const base = (sitesDoc || []).filter((x) => x.id !== self), ids = {}; base.forEach((x) => { ids[x.id] = 1; });
+    return base.concat(NM.UP.filter((p) => p.pos && !ids[p.id] && p.id !== self).map((p) => ({ id: p.id, name: p.n, tagline: NM.upStage(p), url: p.up.ms || '../../research/map/#p=' + p.id, onlyNear: true })));
   }
   const nearInput = () => { if (!(FS && FS.near && NR && NR.key === FS.near.t + '|' + FS.near.n)) return null; siteNear(); return { dist: NR.dist, pos: NR.pos, radius: FS.near.r, label: NR.label, sitePos: NR.sitePos || {}, siteDist: NR.siteDist || {} }; };
   /** The place's type ("Road", "MRT station") is dropped when its name already says it, and its area when the name already carries it, so nothing reads "Yio Chu Kang Road Road". */
@@ -269,8 +277,15 @@
     if (!t) { box.hidden = true; box.innerHTML = ''; inp.setAttribute('aria-expanded', 'false'); return; }
     box.hidden = false; inp.setAttribute('aria-expanded', 'true');
     if (!NM) { box.innerHTML = nmLoad ? '<p class="kpf-sg-note">Loading places…</p>' : '<p class="kpf-sg-note">Place search isn’t available just now. The list below still covers all of Singapore.</p>'; return; }
+    const code = NM.postalCode(t);   // a six-digit number is a postal code: OneMap resolves it (the same lookup the Map uses)
+    if (code) {
+      box.innerHTML = '<p class="kpf-sg-note" role="status">' + esc(NM.postalMsg('loading', code)) + '</p>';
+      NM.lookupPostal(code).then((r) => { const i = $('kpfNearQ'), b = $('kpfSugg'); if (!i || !b || i.value.trim() !== t) return;
+        b.innerHTML = r.state === 'ok' ? r.list.map((x, k) => `<button type="button" role="option" class="kpf-sg" id="kpfSg${k}" data-f="nearpick" data-t="postal" data-n="${esc(x.n)}"><b>${esc(x.title)}</b><span>${esc(x.sub)}</span></button>`).join('') : '<p class="kpf-sg-note" role="status">' + esc(NM.postalMsg(r.state, code)) + '</p>'; });
+      return;
+    }
     const list = NM.places(t).filter((x) => NEAR_TYPES.indexOf(x.t) > -1 && (x.t !== 'dev' || (NM.BY[x.n] && NM.BY[x.n].pos)));
-    box.innerHTML = list.length ? list.map((x, i) => `<button type="button" role="option" class="kpf-sg" id="kpfSg${i}" data-f="nearpick" data-t="${esc(x.t)}" data-n="${esc(x.n)}"><b>${esc(x.label || x.n)}</b><span>${esc(sugSub(x))}</span></button>`).join('') : '<p class="kpf-sg-note">No match. Try a road, MRT station, neighbourhood or development.</p>';
+    box.innerHTML = list.length ? list.map((x, i) => `<button type="button" role="option" class="kpf-sg" id="kpfSg${i}" data-f="nearpick" data-t="${esc(x.t)}" data-n="${esc(x.n)}"><b>${esc(x.label || x.n)}</b><span>${esc(sugSub(x))}</span></button>`).join('') : '<p class="kpf-sg-note">No match. Try a postal code, road, MRT station, neighbourhood or development.</p>';
   }
   function nearTyped(v) {
     if (FS) FS.nearErr = '';
@@ -285,7 +300,7 @@
     }).catch(() => { FS.nearErr = 'Place search isn’t available just now. The list still covers all of Singapore.'; renderFindView(); });
   }
   function nearHtml(res) {
-    const input = `<div class="kpf-nin"><label class="kpf-vh" for="kpfNearQ">Near a road, MRT station, neighbourhood or development</label><input id="kpfNearQ" type="search" autocomplete="off" maxlength="60" role="combobox" aria-expanded="false" aria-controls="kpfSugg" aria-autocomplete="list" placeholder="Road, MRT, area or development"><div class="kpf-sugg" id="kpfSugg" role="listbox" hidden></div></div>`;
+    const input = `<div class="kpf-nin"><label class="kpf-vh" for="kpfNearQ">Near a postal code, road, MRT station, neighbourhood or development</label><input id="kpfNearQ" type="search" autocomplete="off" maxlength="60" role="combobox" aria-expanded="false" aria-controls="kpfSugg" aria-autocomplete="list" placeholder="Postal code, road, MRT or area"><div class="kpf-sugg" id="kpfSugg" role="listbox" hidden></div></div>`;
     const err = FS.nearErr ? `<p class="kpf-nerr" role="status">${esc(FS.nearErr)}</p>` : '';
     const ni = nearInput();
     if (!FS.near || !ni) return `<div class="kpf-near" id="kpfNear"><p class="kpf-nt">Near somewhere? <span>Optional</span></p>${input}${err}</div>`;
@@ -350,7 +365,7 @@
     };
     root.addEventListener('focusin', (e) => { if (e.target && e.target.id === 'kpfNearQ' && !NM) loadNear().catch(() => { nmLoad = null; }); });
     if (location.hash === '#developments') { pendingScroll = true; try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} }   // arriving from the Buy result button: land on the list, not the summary above it
-    const restoreNear = () => (FS.near ? loadNear().then(() => { NR = resolveNear(FS.near); if (!NR) FS.near = null; }).catch(() => { nmLoad = null; FS.near = null; FS.nearErr = 'Place search isn’t available just now, so the list covers all of Singapore.'; }) : null);
+    const restoreNear = () => (FS.near ? loadNear().then(() => (FS.near.t === 'postal' ? NM.lookupPostal(String(FS.near.n).split('~')[0]) : null)).then(() => { NR = resolveNear(FS.near); if (!NR) FS.near = null; }).catch(() => { nmLoad = null; FS.near = null; FS.nearErr = 'Place search isn’t available just now, so the list covers all of Singapore.'; }) : null);
     Promise.all([loadFind(), loadInv(), loadSites()]).then(restoreNear).then(() => { renderFind(); if (pendingScroll) { pendingScroll = false; const h = $('kpfH'); if (h && h.scrollIntoView) h.scrollIntoView({ block: 'start' }); } });
   }
   const WHERE_SAY = { areas: 'You chose a specific area', work: 'You said you want to be near work', family: 'You said you want to be near family', school: 'You said you want to be near a particular school' };
@@ -411,7 +426,7 @@
       root.innerHTML = `<section class="kpf" aria-labelledby="kpfH">${head}${summary}<p class="kpf-quiet">Tell us the size you have in mind, in square feet, to see developments.</p></section>`; return;
     }
     const typical = openTo === 'both' ? null : FI.inferSize(findStep, openTo);   // V10.3.6: one typical size only when one sale type is shown
-    const res = FI.shortlist(findIx, { budget, range: plannerRange(), openTo, size: sz, sizes: SW.sizes, districts: FS.districts, text: FS.text, freehold: FS.freehold, regionSoft: !!FS.regionSoft, loc: { districts: FS.districts, skipped: FS.loc !== 'none' && !FS.districts.length && !niEarly }, near: niEarly, pct: FS.widen ? FI.T.widenBudgetPct : FI.T.budgetPct, answers: answersFind(), typical, inv: invOn ? inv : null, launches: sitesDoc || null });
+    const res = FI.shortlist(findIx, { budget, range: plannerRange(), openTo, size: sz, sizes: SW.sizes, districts: FS.districts, text: FS.text, freehold: FS.freehold, regionSoft: !!FS.regionSoft, loc: { districts: FS.districts, skipped: FS.loc !== 'none' && !FS.districts.length && !niEarly }, near: niEarly, pct: FS.widen ? FI.T.widenBudgetPct : FI.T.budgetPct, answers: answersFind(), typical, inv: invOn ? inv : null, launches: launchesFor() });
     const V10 = !!res.inventory;
     const allCards = res.groups.reduce((a, g) => a.concat(g.cards, g.more || []), []);
     FS.ticked = FS.ticked.map((t) => { const c = allCards.find((x) => x.slug === t.slug); return c ? { slug: t.slug, name: c.name, tag: tagOf(c), research: !!c.link } : null; }).filter(Boolean);   // only comparison picks that still qualify stay

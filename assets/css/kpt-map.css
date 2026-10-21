@@ -164,6 +164,30 @@ body.kpm{margin:0;background:#fff;color:var(--gw-ink);font-family:var(--gw-font)
   .kpm .tilefail{font-size:11.5px;padding:8px 10px;top:72px}
 }
 
+/* radius: the same four choices as Budget Search; a dashed circle on the map shows the reach */
+.kpm .rad{display:flex;gap:6px;margin:8px 0 6px}
+.kpm .rad button{flex:1 1 0;min-height:34px;padding:0 6px;border:1px solid var(--m-line2);border-radius:999px;background:#fff;color:var(--m-ink);font-size:12.5px;font-weight:700}
+.kpm .rad button[aria-checked=true]{background:var(--m-ink);border-color:var(--m-ink);color:#fff}
+/* recorded sales: a small count beside the size, never a unit count */
+.kpm .band b .cnt{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:999px;background:#fff;border:1px solid var(--m-line);color:var(--m-mut);font:600 10.5px/1.5 var(--sans);font-style:normal;vertical-align:1px}
+.kpm .band.cmp b .cnt{border-color:#C9D3F4}
+/* a new launch or awarded GLS site: hollow marker, a few confirmed facts, no price */
+.kpm .mapkey i.u{width:9px;height:9px;background:#fff;box-shadow:inset 0 0 0 2px var(--m-sig)}
+.kpm .upf{margin:12px 0 0;display:grid;gap:7px}
+.kpm .upf div{display:grid;grid-template-columns:104px 1fr;gap:10px;font-size:13px;line-height:1.4}
+.kpm .upf dt{color:var(--m-mut);font-weight:600}
+.kpm .upf dd{margin:0;color:var(--m-ink)}
+.kpm .srcd{margin-top:12px;font-size:12px;color:var(--m-mut)}
+.kpm .srcd summary{cursor:pointer;font-weight:700;color:var(--m-sig);min-height:28px;display:flex;align-items:center}
+.kpm .srcd ul{margin:4px 0 0;padding-left:16px;display:grid;gap:4px;line-height:1.4}
+.kpm .srcd a{color:var(--m-sig)}
+.kpm .am-acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.kpm .am-acts .lnk2{min-height:28px}
+.kpm .dp-foot2{display:grid;gap:8px}
+.kpm .dp-foot2 .btn{width:100%}
+.kpm .sugg .k.pcm{text-transform:none;letter-spacing:0;font-size:13px;font-weight:500;color:var(--m-text);padding:10px}
+@media (max-width:760px){ .kpm .upf div{grid-template-columns:92px 1fr;font-size:12.5px} .kpm .upf{margin-top:8px} }
+
 /* (i) help: a small round button; its text opens in one floating tip (hover or focus on a desktop, tap on a phone) */
 .gwi-w{display:inline-flex!important;vertical-align:middle;margin:0 0 0 6px!important;font-size:inherit!important;color:inherit!important}
 .gwi-t{display:none!important}

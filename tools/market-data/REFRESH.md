@@ -18,3 +18,9 @@ After it:
     node tools/market-data/build-registry-classes.js --check
 
 then bump the asset version hashes for any changed script. Adding or removing a property type from a class is done in `tools/market-data/config.json` (`classes`) only; `propertyTypes` must stay equal to the condo class (the build stops with a clear message if they differ).
+
+## Also keep current (not part of `refresh-all.js`)
+
+- `node tools/market-data/build-upcoming.js --as-of YYYY-MM-DD` after editing `upcoming-register.json` or when URA publishes new Sale Sites; commit `data/map/upcoming.json`. See `UPCOMING.md`.
+- `node tools/market-data/build-hdb-streets.js` after any HDB resale data refresh (HDB road to town, used by postal-code search on Property values).
+- `node tools/market-data/tests/upcoming-tests.js` and `node research/tests/postal-tests.js`.

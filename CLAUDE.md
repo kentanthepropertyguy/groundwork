@@ -23,6 +23,8 @@ This is the product principle. It applies to every page, current and future. Kee
 - Past transaction prices are not active listings and not valuations. Say so briefly where prices are shown.
 - Distances are straight-line and say so. A place with no map position is counted and named, never silently dropped.
 - Analytics are bucketed and anonymous. Typed text, locations, budgets and development names are never sent to analytics or WhatsApp.
+- Postal codes have ONE implementation, `assets/js/gw-postal.js` (OneMap lookup, messages, road and development matching); the Map, Budget Search and Property values all call it. Do not write a second lookup. It identifies a property; it never values one, and results from it are labelled past sales, not a valuation.
+- The Map's radius is `RADII` in `kpt-map-core.js` (500 m, 1 km, 2 km, 3 km; 1 km default, never widened silently). New launches and GLS sites live in `data/map/upcoming.json` (see `tools/market-data/UPCOMING.md`): no prices or transactions, never a budget match, and an item without a verified position is searchable but not placed on the Map.
 - Reuse before writing: the Map (`assets/js/kpt-map-core.js`, `kpt-map-view.js`) owns place search and map drawing, the Research engines own price evidence, `kpt-find.js` owns the budget shortlist. Other pages call them; they do not copy them.
 
 ## Working rules
