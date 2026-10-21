@@ -514,6 +514,8 @@ table.pl-evs{display:table;width:100%;border-collapse:collapse;font-size:14px;fo
 .pl-sumtop-1{grid-template-columns:minmax(0,1fr)}
 .pl-sumbox>.pl-sf-then{margin:0;padding:9px 18px 11px;border-top:1px solid var(--gw-line);font-size:13px;line-height:1.45;color:var(--gw-muted)}
 @media (max-width:899px){.pl-sumbox>.pl-sf-then{padding:8px 16px 10px}}
+.pl-sumbox>.pl-sf-duty{color:var(--gw-ink)}
+.pl-sumbox>.pl-sf-then+.pl-sf-duty{padding-top:0;border-top:0}
 .pl-sf-rows{display:flex;flex-direction:column;margin-top:8px}
 .pl-sf-row{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n a" "w w";gap:2px 14px;align-items:baseline;padding:7px 0;border-top:1px solid #F0DCA8;font-size:15px;color:#5C3A00}
 .pl-sf-row .n{grid-area:n;font-weight:600}.pl-sf-row .w{grid-area:w;font-size:13.5px;color:#5C3A00}.pl-sf-row .a{grid-area:a;font-variant-numeric:tabular-nums;white-space:nowrap}

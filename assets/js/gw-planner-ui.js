@@ -296,15 +296,21 @@
       (r.entity ? '<p class="pl-note">A company or other entity can borrow up to 15% of the price (MAS), with no income test here and no CPF, so the rest of each payment is cash.</p>' : '');
   }
   // screen 1: what to pay up front and when, and the total (the rows below are the answer to "when")
+  // Stamp duty, in the main result: BSD and, where it applies, ABSD with its rate, each amount once, with the date it is due. The payment list below keeps its own rows.
+  function dutyLine(s) {
+    const d = s.duty; if (!d || !(d.bsd > 0 || d.absd > 0)) return '';
+    const parts = [d.bsd > 0 ? 'BSD <b>' + $(d.bsd) + '</b>' : '', d.absd > 0 ? 'ABSD <b>' + $(d.absd) + '</b>' + (d.absdRate > 0 ? ' (' + Math.round(d.absdRate * 100) + '%)' : '') : ''].filter(Boolean);
+    return '<p class="pl-sf-then pl-sf-duty">Stamp duty ' + esc(onDay(s.duty.date)) + ': ' + parts.join(' and ') + (parts.length > 1 ? ', ' + $(d.total) + ' in all' : '') + '.</p>';
+  }
   function schedSumHtml(s) {
     const lastE = s.events[s.events.length - 1], f0 = s.events[0];
     // the first scheduled payment, then the others that fall due by the stamp duty date, each with its own date (the calculator does not know what has already been paid)
     const NM = { snp: 'S&P', bsd: 'stamp duty', absd: 'stamp duty', exercise: 'option exercise' }, then = [];
-    s.events.filter((e, k) => k > 0 && e.date <= s.duty.date).forEach((e) => { const nm = esc(NM[e.id] || lcFirst(SHORT_NAME[e.id] || e.label)), key = nm + '|' + e.date, g = then.filter((x) => x.key === key)[0]; if (g) g.amount += e.amount; else then.push({ key: key, nm: nm, date: e.date, amount: e.amount }); });
+    s.events.filter((e, k) => k > 0 && e.date <= s.duty.date && e.id !== 'bsd' && e.id !== 'absd').forEach((e) => { const nm = esc(NM[e.id] || lcFirst(SHORT_NAME[e.id] || e.label)), key = nm + '|' + e.date, g = then.filter((x) => x.key === key)[0]; if (g) g.amount += e.amount; else then.push({ key: key, nm: nm, date: e.date, amount: e.amount }); });
     const thenItems = then.map((x) => $(x.amount) + ' ' + esc(onDay(x.date)) + ' (' + x.nm + ')'), thenTxt = thenItems.length > 1 ? thenItems.slice(0, -1).join(', ') + ' and ' + thenItems[thenItems.length - 1] : (thenItems[0] || '');
     const firstSub = esc(SHORT_NAME[f0.id] || f0.label) + ', due ' + esc(UND ? 'on the option date' : day(f0.date)) + '';
     const t = (k, val, sub) => '<div class="pl-sf"><span class="k">' + k + '</span><span class="v">' + val + '</span><span class="s">' + sub + '</span></div>';
-    return '<div class="pl-sumbox"><div class="pl-sumtop pl-sumtop-2">' + t('First scheduled payment', $(f0.amount), firstSub) + t('Total to pay', $(s.totals.amount), 'Last payment ' + esc(dateLabel(lastE.date, lastE.basis, lastE.id)) + (lastE.basis === 'estimate' ? ', estimated' : '')) + '</div>' + (thenTxt ? '<p class="pl-sf-then">Then ' + thenTxt + '.</p>' : '') + '</div>';
+    return '<div class="pl-sumbox"><div class="pl-sumtop pl-sumtop-2">' + t('First scheduled payment', $(f0.amount), firstSub) + t('Total to pay', $(s.totals.amount), 'Last payment ' + esc(dateLabel(lastE.date, lastE.basis, lastE.id)) + (lastE.basis === 'estimate' ? ', estimated' : '')) + '</div>' + (thenTxt ? '<p class="pl-sf-then">Then ' + thenTxt + '.</p>' : '') + dutyLine(s) + '</div>';
   }
   // One plain sentence about the loan (replaces the loan-comparison panel). Skipped when a note above already says the loan is only an illustration.
   let lastPref = null;
