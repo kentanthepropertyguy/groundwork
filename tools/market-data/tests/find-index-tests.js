@@ -79,7 +79,7 @@ if (!fs.existsSync(findPath)) { console.log('  skip no data/projects/find.json')
   });
   t('no individual-deal fields: only aggregate keys exist, and every row is exactly 7 numbers', () => {
     const keys = new Set(); (function walk(o) { if (Array.isArray(o)) o.forEach(walk); else if (o && typeof o === 'object') Object.keys(o).forEach((k) => { keys.add(k); walk(o[k]); }); })(find);
-    const allowed = ['v', 'kind', 'asOf', 'latestMonth', 'window', 'from', 'to', 'label', 'bin', 'minCell', 'sales', 'fields', 'source', 'scope', 'note', 'projects', 'id', 'name', 'street', 'd', 'seg', 'tg', 'tl', 'm', 'new', 'resale'];
+    const allowed = ['v', 'kind', 'asOf', 'latestMonth', 'window', 'from', 'to', 'label', 'bin', 'minCell', 'sales', 'fields', 'source', 'scope', 'note', 'projects', 'id', 'name', 'street', 'd', 'seg', 'tg', 'tl', 'm', 'new', 'resale', 'c', 'classes'];
     keys.forEach((k) => assert.ok(allowed.indexOf(k) > -1, 'unexpected key ' + k)); all.forEach((x) => { assert.strictEqual(x.r.length, 7); x.r.forEach((v) => assert.ok(Number.isFinite(v))); });
   });
   t('size budget: under 250 KB raw', () => assert.ok(fs.statSync(findPath).size < 250000));

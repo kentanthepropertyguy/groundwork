@@ -19,6 +19,19 @@
   const sqft = (label) => String(label || '').replace(/\s*sqft$/, ' sq ft');
   const titleCase = (s) => String(s || '').toLowerCase().replace(/\b([a-z])/g, (c) => c.toUpperCase());
   const SALE_WORDS = { resale: ['resale', 'resales', 'resold'], 'new sale': ['new sale', 'new sales', 'sold'], 'sub-sale': ['sub-sale', 'sub-sales', 'sold'] };
+  // Development class (shared register): condo | ec | cluster. Rows and models from older data carry none and are condos.
+  const CLS = {
+    condo: { label: 'Condominium', what: 'a private residential development', like: '' },
+    ec: { label: 'Executive Condominium', what: 'an executive condominium (EC)', like: 'Executive condominiums are sold under different rules from private condominiums, so their prices are not comparable with condominium prices. Comparisons here are with other ECs only.' },
+    cluster: { label: 'Cluster housing', what: 'a strata landed (cluster housing) development', like: 'Strata landed homes in a gated development sell at different price levels from condominiums. Comparisons here are with other cluster-housing developments only.' },
+  };
+  const clsOf = (x) => (x && CLS[x.cls] ? x.cls : 'condo');
+  const ALSO = { condo: ['condominium sale', 'condominium sales'], ec: ['EC sale', 'EC sales'], cluster: ['cluster-housing sale', 'cluster-housing sales'] };
+  function alsoLine(M) {
+    const a = M && M.also; if (!a) return '';
+    const parts = Object.keys(a).filter((k) => ALSO[k]).map((k) => a[k] + ' ' + ALSO[k][a[k] === 1 ? 0 : 1]);
+    return parts.length ? 'The same name also appears in URA records with ' + parts.join(' and ') + ' of another property type. They are counted separately and are not part of the prices on this page.' : '';
+  }
   const REGION = { CCR: 'Core Central Region', RCR: 'Rest of Central Region', OCR: 'Outside Central Region' };
   const words = (M) => SALE_WORDS[M.sale && M.sale.label] || ['sale', 'sales', 'sold'];
   // A4-04: a "typical price" needs the comparison page's stronger rule: at least 5 sales over at least 3 months (kpt-evidence.js CONFIG).
@@ -87,7 +100,7 @@
   }
   function projectLead(M) {
     const where = [M.street ? 'on ' + titleCase(M.street) : '', district(M) ? 'in ' + district(M) : ''].filter(Boolean).join(' '), ten = M.tenure && M.tenure.mixed ? 'with mixed tenure in these records' : tenurePhrase(M.tenure);
-    const s1 = esc(M.name) + ' is <span data-lg-what>a private residential development</span>' + (where ? ' ' + esc(where) : '') + (ten ? ', ' + esc(ten) : '') + '.';
+    const s1 = esc(M.name) + ' is <span data-lg-what>' + CLS[clsOf(M)].what + '</span>' + (where ? ' ' + esc(where) : '') + (ten ? ', ' + esc(ten) : '') + '.';
     return [s1, esc(activitySentence(M)), priceSentence(M)].filter(Boolean).join(' ');
   }
 
@@ -138,12 +151,12 @@
       '<div class="gw-rmore"><p class="gw-lane">More ways to research</p><div class="gw-rlinks">' +
       [['../journey/worth/', 'Property values &amp; prices', 'HDB, condo and landed sales · asking price', 'worth'], ['../tools/what-can-i-buy/', 'What can this budget buy?', 'Homes that sold around your budget', 'what-can-i-buy'], ['../projects/', 'Browse every development', 'A–Z list', 'directory']]
         .map((x) => '<a href="' + x[0] + '" data-gw-nav-to="' + x[3] + '"><b>' + x[1] + '</b><small>' + x[2] + '</small></a>').join('') + '</div></div>' + sampleExample() +
-      '<p class="lg-fine lg-center" data-lg-scope>Can’t see it? Research covers private condos and apartments with sales in the last five years. Executive condominiums (ECs) and cluster houses aren’t covered in Research yet, and an unsold launch won’t appear. <a href="../projects/">Browse all ' + (total ? num(total) + ' ' : '') + 'developments</a>, including new launches with sites of their own.</p></div></section></div>';
+      '<p class="lg-fine lg-center" data-lg-scope>Can’t see it? Research covers private condos and apartments, executive condominiums (ECs) and strata cluster houses with sales in the last five years, each kept to its own type. An unsold launch won’t appear, and landed homes on their own land are found by road. <a href="../projects/">Browse all ' + (total ? num(total) + ' ' : '') + 'developments</a>, including new launches with sites of their own.</p></div></section></div>';
   }
   // One search result row (the page's searchBox keeps its own events and keyboard handling).
   function resultRow(r, i, max, R) {
     const w = max ? Math.max(6, Math.round(110 * r.n / max)) : 0;
-    const meta = [titleCase(r.street), 'District ' + Number(r.district), r.last ? 'latest sale ' + R.fmtMonth(r.last) : ''].filter(Boolean).join(' · ');
+    const meta = [clsOf(r) === 'condo' ? '' : CLS[clsOf(r)].label, titleCase(r.street), 'District ' + Number(r.district), r.last ? 'latest sale ' + R.fmtMonth(r.last) : ''].filter(Boolean).join(' · ');
     return '<li role="option"><button type="button" data-id="' + esc(r.id) + '"' + (i === 0 ? ' aria-selected="true"' : '') + '><span><b>' + esc(R.displayName(r.name)) + '</b><span class="m">' + esc(meta) + '</span></span>' +
       '<span class="r"><span>' + plural(r.n, 'sale') + ' in 5 years</span><i style="width:' + w + 'px"></i></span></button></li>';
   }
@@ -163,13 +176,13 @@
   const ncName = (x, R) => esc(R && R.displayName ? R.displayName(x.name) : titleCase(x.name));
   function emptySearch(q, R, list) {
     const m = notCoveredMatches(q, list);
-    if (!m.length) return '<div class="kpr-results"><div class="kpr-empty">No transactions found under that name in the last 5 years. It may be a launch with no sales yet, or spelled differently. Executive condominiums (ECs) and cluster houses aren’t covered in Research yet.</div></div>';
+    if (!m.length) return '<div class="kpr-results"><div class="kpr-empty">No transactions found under that name in the last 5 years. It may be a launch with no sales yet, or spelled differently.</div></div>';
     return '<div class="kpr-results"><div class="kpr-empty" data-lg-nc>' + (m.length === 1 ? '<b>' + ncName(m[0], R) + '</b> is ' + (m[0].kind === 'ec' ? 'an ' : 'a ') + ncKind[m[0].kind] + '.' : 'Matching names: ' + m.map((x) => '<b>' + ncName(x, R) + '</b> (' + (x.kind === 'ec' ? 'EC' : 'cluster houses') + ')').join(', ') + '.') +
-      ' ECs and cluster houses aren’t covered in Research yet: it looks at private condos and apartments only.</div></div>';
+      ' Research can’t show it: URA records no single-home sale with a price and size under ' + (m.length === 1 ? 'that name' : 'those names') + ' (for example, one sale of several homes together).</div></div>';
   }
   function notCoveredNote(q, R, list) {
     const m = notCoveredMatches(q, list); if (!m.length) return '';
-    return '<p class="lg-fine" data-lg-nc>Also matching, but not covered in Research yet: ' + m.map((x) => ncName(x, R) + ' (' + (x.kind === 'ec' ? 'EC' : 'cluster houses') + ')').join(', ') + '. ECs and cluster houses aren’t covered in Research yet.</p>';
+    return '<p class="lg-fine" data-lg-nc>Also matching, but Research has no prices for ' + (m.length === 1 ? 'it' : 'them') + ': ' + m.map((x) => ncName(x, R) + ' (' + (x.kind === 'ec' ? 'EC' : 'cluster houses') + ')').join(', ') + '. URA records no single-home sale with a price and size under ' + (m.length === 1 ? 'that name' : 'those names') + '.</p>';
   }
 
   /* ---------- a development's page ---------- */
@@ -209,7 +222,7 @@
     const read = (M.read || []).map((r) => '<p>' + esc(r.text) + '</p>').join('');
     const all = M.history && M.history.all && M.history.all.points.length ? '<p>' + esc(M.history.all.text) + ' Overall PSF mixes every size sold, and that mix changes over time.' + (M.history.mixShift ? ' ' + esc(M.history.mixShift.text) : '') + '</p>' : '';
     const floors = M.floors && M.floors.rows && M.floors.rows.length ? '<h3 style="font-size:16px">By floor band, ' + esc(sqft(M.floors.band)) + ', ' + esc(M.floors.window) + '</h3><ul class="lg-list">' + M.floors.rows.map((r) => '<li>Floors ' + esc(r.band) + ': median ' + money(r.psf.med) + ' · ' + esc(r.evidence.line) + '</li>').join('') + '</ul><p class="lg-fine">' + esc(M.floors.note) + '</p>' : '';
-    const ctx = M.context ? '<h3 style="font-size:16px">Market context, not direct comparables</h3><p>' + esc(M.context.note) + '</p>' + M.context.rows.map((r) => '<p><b>' + esc(String(r.label).replace(/^District D(\d+)$/, 'District $1')) + ':</b> ' + r.windows.map((w) => esc(w.label) + ', ' + plural(w.n, 'sale') + ' from ' + plural(w.projects, 'project') + ', median ' + money(w.psf.med)).join(' · ') + '</p>').join('') : '';
+    const ctx = M.context ? '<h3 style="font-size:16px">Market context, not direct comparables</h3><p>' + esc(M.context.note) + '</p>' + M.context.rows.map((r) => '<p><b>' + esc(String(r.label).replace(/^District D(\d+)/, 'District $1')) + ':</b> ' + r.windows.map((w) => esc(w.label) + ', ' + plural(w.n, 'sale') + ' from ' + plural(w.projects, 'project') + ', median ' + money(w.psf.med)).join(' · ') + '</p>').join('') : '';
     return '<details class="lg-fold" id="evidence"><summary>How we worked this out<small>Sales checked, size, recency, floors</small></summary><div class="in">' + found + read + all + checks + floors + ctx +
       '<h3 style="font-size:16px">What the sales can’t tell you</h3><ul class="lg-list">' + (M.notMeasured || []).map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul>' +
       '<p class="lg-fine">' + esc(M.notes && M.notes.psf) + ' ' + esc(M.history && M.history.note) + '</p></div></details>';
@@ -259,7 +272,7 @@
   function projectHtml(M, ctx) {
     const S = (ctx && ctx.S) || {}, IN = ctx && ctx.IN, root = (ctx && ctx.root) || '../', f = M.focus || {}, A = M.answer || {}, mf = S.rawM || null;
     if (S.rawP && S.rawP.id === M.id && Array.isArray(S.rawP.districts)) M.districtsAll = S.rawP.districts;
-    const kick = [M.street ? titleCase(M.street) : '', district(M)].filter(Boolean).join(' · ');
+    const kick = [clsOf(M) === 'condo' ? '' : CLS[clsOf(M)].label, M.street ? titleCase(M.street) : '', district(M)].filter(Boolean).join(' · ');
     const chartPts = M.history && M.history.band && M.history.band.points ? M.history.band.points : [];
     const chart = lineChart(chartPts, '#5a55d6', 'Median ' + (words(M)[0]) + ' PSF of ' + (f.label || '') + ' homes at ' + M.name + ' in each 12-month period, oldest to newest');
     const ken = M.ken ? '<div class="lg-tile" style="grid-column:1/-1"><b>Ken’s Take</b><p>“' + esc(M.ken.note) + '”</p><p class="lg-fine">Ken’s judgement, not URA data.</p></div>' : '';
@@ -269,6 +282,7 @@
         (kick ? '<p class="lg-kicker">' + esc(kick) + '</p>' : '') +
         '<h1 class="lg-name" tabindex="-1">' + esc(M.name) + '</h1>' +
         '<p class="lg-lead lg-center" data-lg-lead>' + projectLead(M) + '</p>' + projectPill(M) +
+        (clsOf(M) !== 'condo' ? '<p class="lg-fine lg-center" data-lg-class="' + clsOf(M) + '">' + esc(CLS[clsOf(M)].like) + '</p>' : '') + (alsoLine(M) ? '<p class="lg-fine lg-center" data-lg-also>' + esc(alsoLine(M)) + '</p>' : '') +
         (M.tenure && M.tenure.mixed ? '<p class="lg-fine lg-center" data-lg-mixed>' + esc(mixedLine(M.tenure)) + '</p>' : '') + freshLine(mf) +
         (A.lines && A.state !== 'recent' ? '<p class="lg-fine lg-center">' + A.lines.map((l) => esc(l.text)).join(' ') + '</p>' : '') +
         ((M.bands || []).length ? '<div class="lg-sizes"><span class="lbl">' + sizeLine(M) + '</span><div class="lg-chips" role="group" aria-label="Size">' + sizeChips(M) + '</div>' + sizeForm(S) + '</div>' : '') +

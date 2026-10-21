@@ -1,6 +1,7 @@
 {
   "_note": "Project-level data layer settings. Exclusions are an EXPLICIT, REVIEWED list matched on the exact URA project name. No pattern matching. A name in 'hold' is kept OUT of the generated data until Ken rules on it (move it to 'exclude' to drop it for good, or delete it from 'hold' to include it).",
   "schema": 1,
+  "nameFixes": { "_note": "Source-encoding repairs. URA names that arrive with a replacement character are shown with the correct letter. The development id is always made from the name as URA sent it, so published links never change.", "ENCHANT\uFFFD": "ENCHANT\u00c9", "VERD\uFFFD JOO CHIAT": "VERD\u00c9 JOO CHIAT" },
   "bin": 100,
   "windows": [12, 24, 36, "all"],
   "periodMonths": 12,

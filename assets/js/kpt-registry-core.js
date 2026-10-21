@@ -67,6 +67,7 @@
     const A = ix.byId.get(aId), B = ix.byId.get(bId); if (!A || !B) return reason('ambiguous');
     const key = pairKey(aId, bId), hit = (comps.comparisons || []).find((c) => pairKey(c.a, c.b) === key);
     if (hit) return { state: 'supported', comparison: hit };
+    if ((A.cls || 'condo') !== (B.cls || 'condo')) return reason('different-class', { eligible: false });      // a condominium, an EC and cluster housing are never compared on price
     const min = (policy.support || {}).minResaleTransactions || 30, side = [];
     [A, B].forEach((p) => {
       if (p.stage === 'new-launch') side.push(['new-launch', p]);

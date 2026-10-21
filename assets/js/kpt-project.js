@@ -171,7 +171,24 @@
       .map((c) => ({ scope: pdoc.scope, kind: 'context', includesProject: true, sale: SALE[c.sale], tenureGroup: m.tenureGroups[c.tenureGroup], bin: c.bin, allSizes: c.bin === -1, window: WINDOW_LABEL(m, c.win),
         n: c.n, projects: c.projects, topProjectShare: c.top, activeMonths: c.act, lastMonth: c.last, psf: dist5([c.min, c.q1, c.med, c.q3, c.max]) }));
   }
-  const peerScopeFile = (scope) => 'peers/' + (/^\d+$/.test(scope) ? 'd' + String(scope).padStart(2, '0') : String(scope).toLowerCase()) + '.json';
+  // Condo peers keep their original file names. EC and cluster peers live beside them as peers/ec-d19.json, peers/cluster-ocr.json (never pooled with condos).
+  const peerScopeFile = (scope, cls) => 'peers/' + (cls && cls !== 'condo' ? cls + '-' : '') + (/^\d+$/.test(scope) ? 'd' + String(scope).padStart(2, '0') : String(scope).toLowerCase()) + '.json';
+
+  /* ---------- development classes (shared register) ---------- */
+  // Every development has one class. Rows from an older index without a class are condos. Wording is for buyers; nothing here changes a number.
+  const CLASSES = {
+    condo: { id: 'condo', label: 'Condominium', short: 'Condo', plural: 'condominiums', article: 'a private condominium' },
+    ec: { id: 'ec', label: 'Executive Condominium', short: 'EC', plural: 'executive condominiums', article: 'an executive condominium (EC)' },
+    cluster: { id: 'cluster', label: 'Strata landed (cluster housing)', short: 'Cluster', plural: 'cluster-housing developments', article: 'a strata landed (cluster housing) development' },
+  };
+  const classOf = (row) => (row && CLASSES[row.cls] ? row.cls : 'condo');
+  const classInfo = (row) => CLASSES[classOf(row)];
+  // Short sentence for a development that also has transactions of another class under the same name (kept out of its prices).
+  function alsoNote(row) {
+    const a = row && row.also; if (!a) return '';
+    const parts = Object.keys(a).filter((k) => CLASSES[k]).map((k) => a[k] + ' ' + CLASSES[k].short + (a[k] === 1 ? ' sale' : ' sales'));
+    return parts.length ? 'The same development name also has ' + parts.join(' and ') + ' of a different property type. They are counted separately and are not included in the prices shown.' : '';
+  }
 
   /* ---------- loader (injected fetch, so Node tests need no network) ---------- */
   function createStore(base, fetchJson) {
@@ -180,9 +197,9 @@
       manifest: () => get('manifest.json'), index: () => get('index.json'), searchDoc: () => get('search.json'),
       shard: (id, m) => get('detail/' + shardName(shardOf(id, m.shards)) + '.json'),
       project: (id, m) => get('detail/' + shardName(shardOf(id, m.shards)) + '.json').then((d) => d.projects[id] || null),
-      peers: (scope) => get(peerScopeFile(scope)),
+      peers: (scope, cls) => get(peerScopeFile(scope, cls)),
     };
   }
 
-  return { normaliseName, compactName, slugify, hash32, shardOf, shardName, SHARDS, search, findById, rowObject, fieldMap, decode, decodeAll, dist5, cells, compare, history, monthly, peerCells, peerScopeFile, createStore, addMonths, WINDOW_LABEL, SALE };
+  return { normaliseName, compactName, slugify, hash32, shardOf, shardName, SHARDS, search, findById, rowObject, fieldMap, decode, decodeAll, dist5, cells, compare, history, monthly, peerCells, peerScopeFile, CLASSES, classOf, classInfo, alsoNote, createStore, addMonths, WINDOW_LABEL, SALE };
 });

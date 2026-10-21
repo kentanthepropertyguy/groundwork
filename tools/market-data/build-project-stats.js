@@ -5,8 +5,10 @@
 
    Usage: node tools/market-data/build-project-stats.js --raw tools/market-data/raw --out data/projects [--as-of 2026-10-05] [--report tools/market-data/out/projects-report.txt]
 
-   Scope (approved): Condominium + Apartment, strata, single-unit transactions; New Sale, Sub-sale and Resale kept as separate sale types.
-   Executive Condominiums, landed, multi-unit caveats and the reviewed catch-all names are excluded. No bedroom, exact floor, or forecast fields exist.
+   Scope: the shared development register (register.js). Classes: condo (Condominium, Apartment), ec (Executive Condominium), cluster (Strata Terrace /
+   Semi-detached / Detached). Strata, single-unit transactions; New Sale, Sub-sale and Resale kept as separate sale types. Non-strata landed, multi-unit
+   caveats and the reviewed catch-all names are excluded. Every transaction is in exactly one class; a development's headline class is the one with the
+   most transactions, and any other class under the same name is counted in `also`, not pooled. No bedroom, exact floor, or forecast fields exist.
 
    Output (folder):
      manifest.json   schema, field orders, windows, periods, floor bands, counts, policy statements
@@ -21,6 +23,7 @@
 const fs = require('fs'), path = require('path');
 const { quantile } = require('./build-bands.js');
 const P = require('../../assets/js/kpt-project.js');
+const G = require('./register.js');
 const SQM_TO_SQFT = 10.7639;
 
 const CELL_FIELDS = ['sale', 'bin', 'win', 'n', 'act', 'top', 'last', 'min', 'q1', 'med', 'q3', 'max'];
@@ -74,30 +77,24 @@ const cellRow = (key, s) => key.concat([s.n, s.act, s.top, s.last]).concat(s.psf
 
 /* ---------- build ---------- */
 function build(records, cfg, pc, asOf) {
-  const warnings = [], report = { read: records.length, excluded: {}, used: 0, excludedNames: {}, heldNames: {} };
+  const warnings = [], report = { read: records.length, excluded: {}, used: 0, excludedNames: {}, heldNames: {}, byClass: {} };
   const ex = (k) => { report.excluded[k] = (report.excluded[k] || 0) + 1; };
-  const exclude = new Map(pc.exclude.map((e) => [e.name, e])), hold = new Map(pc.hold.map((e) => [e.name, e]));
+  const tmap = G.checkConfig(cfg), screen = G.nameScreen(pc);
   const seenNames = new Set(); records.forEach((r) => seenNames.add(r.project));
 
   // 1. parse + filter
   const parsed = [];
   records.forEach((t) => {
-    const m = /^(\d{2})(\d{2})$/.exec(String(t.contractDate || ''));
-    if (!m) return ex('bad contract date');
-    if (!cfg.propertyTypes.includes(t.propertyType)) return ex('property type not in scope (' + (t.propertyType || '?') + ')');
-    if (t.typeOfArea !== 'Strata') return ex('not strata area');
-    if (String(t.noOfUnits) !== '1') return ex('multi-unit caveat');
-    const sale = +t.typeOfSale; if (![1, 2, 3].includes(sale)) return ex('unknown sale type');
-    if (!['OCR', 'RCR', 'CCR'].includes(t.marketSegment)) return ex('unknown market segment');
-    const price = Number(t.price), sqm = Number(t.area);
-    if (!(price > 0) || !(sqm > 0)) return ex('missing price or area');
+    const a = G.admit(t, t.marketSegment, tmap); if (!a.ok) return ex(a.reason);
     if (!t.project || !String(t.project).trim()) return ex('missing project name');
-    if (exclude.has(t.project)) { report.excludedNames[t.project] = (report.excludedNames[t.project] || 0) + 1; return ex('reviewed catch-all name'); }
-    if (hold.has(t.project)) { report.heldNames[t.project] = (report.heldNames[t.project] || 0) + 1; return ex('held for review'); }
-    const sqft = sqm * SQM_TO_SQFT;
-    parsed.push({ project: t.project, street: t.street || '', district: String(t.district || ''), seg: t.marketSegment, sale, price, sqm, sqft, psf: price / sqft, bin: Math.floor(sqft / pc.bin) * pc.bin,
-      floor: t.floorRange && t.floorRange !== '-' ? String(t.floorRange) : null, tenure: parseTenure(t.tenure), tenureRaw: String(t.tenure || ''), ym: (2000 + +m[2]) * 12 + (+m[1] - 1) });
+    const sc = screen(t.project);
+    if (sc === 'exclude') { report.excludedNames[t.project] = (report.excludedNames[t.project] || 0) + 1; return ex('reviewed catch-all name'); }
+    if (sc === 'hold') { report.heldNames[t.project] = (report.heldNames[t.project] || 0) + 1; return ex('held for review'); }
+    const sqft = a.sqm * SQM_TO_SQFT;
+    parsed.push({ project: t.project, cls: a.cls, street: t.street || '', district: String(t.district || ''), seg: t.marketSegment, sale: a.sale, price: a.price, sqm: a.sqm, sqft, psf: a.price / sqft, bin: Math.floor(sqft / pc.bin) * pc.bin,
+      floor: t.floorRange && t.floorRange !== '-' ? String(t.floorRange) : null, tenure: parseTenure(t.tenure), tenureRaw: String(t.tenure || ''), ym: a.ym });
     report.used++;
+    report.byClass[a.cls] = (report.byClass[a.cls] || 0) + 1;
   });
   if (!parsed.length) throw new Error('No usable transactions.');
   pc.exclude.concat(pc.hold).forEach((e) => { if (!seenNames.has(e.name)) warnings.push({ code: 'stale-list-entry', msg: e.name + ' not found in the raw data' }); });
@@ -123,20 +120,24 @@ function build(records, cfg, pc, asOf) {
     ids.set(id, name);
   });
 
+  // Register: one development per project name; its headline class and the counts of any other class under the same name.
+  const dev = new Map();
+  byProject.forEach((rows, name) => { dev.set(name, G.split(rows)); });
   const mode = (arr) => { const c = new Map(); arr.forEach((x) => c.set(x, (c.get(x) || 0) + 1)); return Array.from(c.entries()).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0][0]; };
   const details = {}, indexRows = [], searchKeys = [], tokenMap = new Map();
   for (let s = 0; s < pc.shards; s++) details[P.shardName(s)] = { v: pc.schema, shard: P.shardName(s), projects: {} };
   const sortedNames = Array.from(ids.entries()).sort((a, b) => (a[0] < b[0] ? -1 : 1)).map((e) => e[1]);
+  const classCount = {};
   const peerBuckets = new Map();                               // scope|sale|tg|bin|win -> rows
 
   sortedNames.forEach((name) => {
-    const id = P.slugify(name), rows = byProject.get(name);
+    const id = P.slugify(name), shown = G.shownName(name, pc), D = dev.get(name), rows = D.rows, cls = D.cls, also = D.also;
     const street = mode(rows.map((t) => t.street)), districts = Array.from(new Set(rows.map((t) => t.district))).sort(), seg = mode(rows.map((t) => t.seg));
     const segs = Array.from(new Set(rows.map((t) => t.seg)));
     if (districts.length > 1) warnings.push({ code: 'multi-district', msg: name + ' spans districts ' + districts.join(', ') + '; the most common is used' });
     if (segs.length > 1) warnings.push({ code: 'multi-segment', msg: name + ' spans segments ' + segs.join(', ') });
     if (new Set(rows.map((t) => t.street)).size > 1) warnings.push({ code: 'multi-street', msg: name + ' spans more than one street; the most common is used' });
-    if (/�/.test(name)) warnings.push({ code: 'name-encoding', msg: 'Name contains a replacement character (source encoding): ' + name });
+    if (/�/.test(shown)) warnings.push({ code: 'name-encoding', msg: 'Name contains a replacement character (source encoding): ' + name });
     // tenure
     const tc = new Map(); rows.forEach((t) => { const k = t.tenure.label; const e = tc.get(k) || { n: 0, t: t.tenure }; e.n++; tc.set(k, e); });
     const variants = Array.from(tc.entries()).sort((a, b) => b[1].n - a[1].n || (a[0] < b[0] ? -1 : 1));
@@ -174,20 +175,21 @@ function build(records, cfg, pc, asOf) {
     });
     const allMonths = Array.from(new Set(rows.map((t) => t.ym))).sort((a, b) => a - b);
     const rec = {
-      id, name, street, district: mode(rows.map((t) => t.district)), districts: districts.length > 1 ? districts : undefined, seg, tenure,
+      id, name: shown, cls, also, street, district: mode(rows.map((t) => t.district)), districts: districts.length > 1 ? districts : undefined, seg, tenure,
       n: rows.length, sale: sales, first: ymToS(allMonths[0]), last: ymToS(allMonths[allMonths.length - 1]), active: allMonths.length,
       floorUnknown: rows.filter((t) => !t.floor).length, dist, monthly, periods, cells: cellsOut, periodCells, floorCells, floors,
     };
     details[P.shardName(P.shardOf(id, pc.shards))].projects[id] = rec;
-    indexRows.push([id, name, street, rec.district, seg, tenure.group, tenure.label, mixed ? 1 : 0, rows.length, rec.first, rec.last, rec.active, sales.new, sales.sub, sales.resale, P.shardOf(id, pc.shards)]);
-    searchKeys.push(P.normaliseName(name));
-    P.normaliseName(name).split(' ').forEach((tok) => { const a = tokenMap.get(tok) || tokenMap.set(tok, []).get(tok); a.push(indexRows.length - 1); });
+    indexRows.push([id, shown, street, rec.district, seg, tenure.group, tenure.label, mixed ? 1 : 0, rows.length, rec.first, rec.last, rec.active, sales.new, sales.sub, sales.resale, P.shardOf(id, pc.shards), cls, also || null]);
+    classCount[cls] = (classCount[cls] || 0) + 1;
+    searchKeys.push(P.normaliseName(shown));
+    P.normaliseName(shown).split(' ').forEach((tok) => { const a = tokenMap.get(tok) || tokenMap.set(tok, []).get(tok); a.push(indexRows.length - 1); });
     // peers
     rows.forEach((t) => {
       const tg = tenureGroupIndex(t.tenure, t.sale, refYear, cfg, groups);
       [t.district, t.seg].forEach((scope) => W.forEach((w, wi) => {
         if (latest - t.ym >= w) return;
-        [t.bin, -1].forEach((b) => { const k = [scope, t.sale, tg, b, wi].join('|'); (peerBuckets.get(k) || peerBuckets.set(k, []).get(k)).push(t); });
+        [t.bin, -1].forEach((b) => { const k = [cls, scope, t.sale, tg, b, wi].join('|'); (peerBuckets.get(k) || peerBuckets.set(k, []).get(k)).push(t); });
       }));
     });
   });
@@ -196,17 +198,18 @@ function build(records, cfg, pc, asOf) {
   // 3. peers
   const peerDocs = {};
   Array.from(peerBuckets.keys()).forEach((k) => {
-    const [scope, s, tg, b, wi] = k.split('|'), g = peerBuckets.get(k), sm = summary(g), c = {};
+    const [pcls, scope, s, tg, b, wi] = k.split('|'), g = peerBuckets.get(k), sm = summary(g), c = {};
     g.forEach((t) => { c[t.project] = (c[t.project] || 0) + 1; });
-    const file = P.peerScopeFile(scope);
-    const d = peerDocs[file] || (peerDocs[file] = { v: pc.schema, scope, fields: PEER_FIELDS, cells: [] });
+    const file = P.peerScopeFile(scope, pcls);
+    const d = peerDocs[file] || (peerDocs[file] = Object.assign({ v: pc.schema, scope }, pcls === 'condo' ? {} : { cls: pcls }, { fields: PEER_FIELDS, cells: [] }));
     d.cells.push([+s, +tg, +b, +wi, sm.n, Object.keys(c).length, Math.round(1000 * Math.max.apply(null, Object.values(c)) / g.length) / 1000, sm.act, sm.last].concat(sm.psf));
   });
   Object.keys(peerDocs).forEach((f) => peerDocs[f].cells.sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2] || a[3] - b[3]));
 
   const nProjects = indexRows.length;
   const index = {
-    v: pc.schema, fields: ['id', 'name', 'street', 'district', 'seg', 'tenGroup', 'tenLabel', 'mixed', 'n', 'first', 'last', 'active', 'new', 'sub', 'resale', 'shard'],
+    v: pc.schema, fields: ['id', 'name', 'street', 'district', 'seg', 'tenGroup', 'tenLabel', 'mixed', 'n', 'first', 'last', 'active', 'new', 'sub', 'resale', 'shard', 'cls', 'also'],
+    classes: Object.keys(P.CLASSES).reduce((o, k) => { o[k] = { label: P.CLASSES[k].label, short: P.CLASSES[k].short }; return o; }, {}),
     tenureGroups: groups, rows: indexRows,
   };
   const search = { v: pc.schema, keys: searchKeys, compact: searchKeys.map((k) => k.replace(/ /g, '')), tokens: Array.from(tokenMap.entries()).sort((a, b) => (a[0] < b[0] ? -1 : 1)) };
@@ -214,15 +217,16 @@ function build(records, cfg, pc, asOf) {
     v: pc.schema, kind: 'kpt-project-data', asOf, latestMonth: ymToS(latest), monthStart: ymToS(earliest), months: latest - earliest + 1, boundaryMonth: ymToS(earliest),
     boundaryNote: 'The first month in the URA rolling window may be incomplete.',
     source: 'URA transactions (PMI_Resi_Transaction)', attribution: 'PENDING: exact acknowledgement wording and licence link to be confirmed before publishing project-named statistics.',
-    scope: 'Private Condominium and Apartment, strata, single-unit transactions. New sale, sub-sale and resale kept separate. No Executive Condominiums, no landed.',
+    scope: 'Private Condominium and Apartment developments, Executive Condominiums (ECs) and strata landed (cluster housing) developments: strata, single-unit transactions. Each development has one class; prices are never pooled across classes. New sale, sub-sale and resale kept separate. Landed homes on their own land are not included (see Property values & prices).',
+    classes: { note: 'condo = Condominium and Apartment; ec = Executive Condominium; cluster = Strata Terrace, Semi-detached and Detached. A development is one URA project name; its class is the one with the most transactions, and transactions of another class under the same name are counted in "also" and kept out of its prices.', counts: classCount },
     shards: pc.shards, bin: pc.bin, binUnit: 'sqft (area converted from URA square metres)', windows: pc.windows, windowSemantics: 'trailing and cumulative, ending on latestMonth; "all" = full history',
     periods: periodDefs, periodNote: 'Disjoint 12-month periods, most recent first; the last entry is the earlier remainder.', tenureGroups: groups, floorBands,
-    floorNote: 'URA floor bands only. Exact floors are not available and are not inferred.', counts: { projects: nProjects, transactions: report.used, read: report.read },
+    floorNote: 'URA floor bands only. Exact floors are not available and are not inferred.', counts: { projects: nProjects, transactions: report.used, read: report.read, byClass: report.byClass },
     quantiles: 'min, Q1, median, Q3, max; linear interpolation between closest ranks', psfNote: 'PSF is approximate: price / (URA area in whole square metres x 10.7639). Whole-sqm area rounding gives up to about +/-1% PSF error on small units.',
     monthFormat: 'Index and detail summaries use "YYYY-MM"; cell arrays use YYYYMM integers.',
     fields: { cell: CELL_FIELDS, peer: PEER_FIELDS, cellNote: 'cells: win = window index; periodCells: win = period index; floorCells: win = floor band index; sale 1 new, 2 sub-sale, 3 resale',
       dist5: ['min', 'q1', 'med', 'q3', 'max'], period: ['n', 'min', 'q1', 'med', 'q3', 'max'], floorSummary: ['floorBand', 'n', 'act', 'last', 'min', 'q1', 'med', 'q3', 'max'], monthly: 'flat [monthIndexFromMonthStart, count, ...] per sale type' },
-    policy: ['No bedrooms or bedroom inference', 'No exact floors; URA floor bands only', 'Historical transaction evidence only: no appreciation, yield or forecast', 'Cells report n, active months and most recent month; evidence sufficiency is decided downstream', 'Peer cells are context, not project comparables; they include the project itself'],
+    policy: ['No bedrooms or bedroom inference', 'No exact floors; URA floor bands only', 'Historical transaction evidence only: no appreciation, yield or forecast', 'Cells report n, active months and most recent month; evidence sufficiency is decided downstream', 'Peer cells are context, not project comparables; they include the project itself', 'Condominiums, ECs and cluster housing are separate classes: peer cells, comparisons and suggestions never mix them'],
     excludedNames: pc.exclude.map((e) => e.name), heldNames: pc.hold.map((e) => e.name),
   };
   return { manifest, index, search, details, peers: peerDocs, report, warnings, groups };
@@ -241,7 +245,7 @@ function reportText(res, sizes) {
   const r = res.report, ex = Object.keys(r.excluded).sort((a, b) => r.excluded[b] - r.excluded[a]).map((k) => '  ' + String(r.excluded[k]).padStart(7) + '  ' + k).join('\n');
   const w = {}; res.warnings.forEach((x) => { (w[x.code] = w[x.code] || []).push(x.msg); });
   const tot = Object.values(sizes).reduce((a, b) => a + b, 0);
-  return ['Project data build report', '', 'Records read: ' + r.read, 'Transactions included: ' + r.used, 'Projects included: ' + res.manifest.counts.projects, 'Latest month: ' + res.manifest.latestMonth + '   earliest: ' + res.manifest.monthStart, '',
+  return ['Project data build report', '', 'Records read: ' + r.read, 'Transactions included: ' + r.used, 'Projects included: ' + res.manifest.counts.projects + '  (' + Object.keys(res.manifest.classes.counts).map((k) => k + ' ' + res.manifest.classes.counts[k]).join(', ') + ')', 'Transactions by class: ' + Object.keys(r.byClass).map((k) => k + ' ' + r.byClass[k]).join(', '), 'Latest month: ' + res.manifest.latestMonth + '   earliest: ' + res.manifest.monthStart, '',
     'Excluded, by reason:', ex, '', 'Reviewed catch-all names removed (rows):', Object.keys(r.excludedNames).map((k) => '  ' + k + ': ' + r.excludedNames[k]).join('\n') || '  none', '',
     'Held for Ken\'s review, kept OUT of the data (rows):', Object.keys(r.heldNames).map((k) => '  ' + k + ': ' + r.heldNames[k]).join('\n') || '  none', '',
     'Warnings:', Object.keys(w).map((k) => '  [' + k + '] ' + w[k].length + '\n' + w[k].slice(0, 25).map((m) => '      ' + m).join('\n')).join('\n') || '  none', '',

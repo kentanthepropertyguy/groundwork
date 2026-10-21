@@ -10,7 +10,8 @@
     "thin-data": "has too few resale transactions in the current dataset for a reliable comparison.",
     "new-launch": "is a new launch. Comparisons that include a new launch are not available yet.",
     "no-report": "No comparison has been generated for this pair yet.",
-    "ambiguous": "More than one development matches. Choose the one you mean."
+    "ambiguous": "More than one development matches. Choose the one you mean.",
+    "different-class": "A condominium, an executive condominium (EC) and a cluster-housing development sell under different rules and at different price levels, so Groundwork does not compare their prices."
    }
   },
   "enquiry": {

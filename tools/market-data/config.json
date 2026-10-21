@@ -6,6 +6,12 @@
     "Condominium",
     "Apartment"
   ],
+  "classes": {
+    "_note": "Development classes in the shared register (tools/market-data/register.js). Each transaction belongs to exactly one class by its URA property type. 'propertyTypes' above stays the CONDO list used by the pooled condo bands; a test keeps the two in step.",
+    "condo": { "label": "Condominium", "short": "Condo", "propertyTypes": ["Condominium", "Apartment"] },
+    "ec": { "label": "Executive Condominium", "short": "EC", "propertyTypes": ["Executive Condominium"] },
+    "cluster": { "label": "Strata landed (cluster housing)", "short": "Cluster", "propertyTypes": ["Strata Terrace", "Strata Semi-detached", "Strata Detached"] }
+  },
   "ageBands": [
     {
       "label": "0–10",

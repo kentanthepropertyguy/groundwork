@@ -9,7 +9,7 @@ const H = 3600000, D = 24 * H, NOW = Date.parse('2026-10-06T10:00:00Z');   // 6 
 const iso = (ms) => new Date(ms).toISOString();
 const real = F.prepare(JSON.parse(fs.readFileSync(path.join(root, 'data/projects/find.json'), 'utf8')));
 // V10.4.1: prepare() now leaves Pinery out on purpose. The V9.1 golden hashes were taken WITH Pinery in the input, so the parity test feeds it the full, unfiltered list. That proves nothing else changed; the exclusion itself is tested in find-tests.js.
-const realAll = (() => { const d = JSON.parse(fs.readFileSync(path.join(root, 'data/projects/find.json'), 'utf8')); return Object.assign({}, real, { projects: d.projects, districts: Array.from(new Set(d.projects.map((p) => p.d))).sort() }); })();
+const realAll = (() => { const d = JSON.parse(fs.readFileSync(path.join(root, 'data/projects/find.json'), 'utf8')); const condo = d.projects.filter((p) => !p.c); return Object.assign({}, real, { projects: condo, others: { ec: [], cluster: [] }, otherAll: [], districts: Array.from(new Set(condo.map((p) => p.d))).sort() }); })();   // Phase 1: the V9.1 parity is for the condominium list; ECs and cluster housing are additive and tested in find-tests.js
 const SZ = { lo: 870, hi: 1000, source: 'explicit', line: 'x' };
 const base = (o) => Object.assign({ budget: 2600000, openTo: 'new', size: SZ, districts: [], text: '', freehold: false, answers: { where: 'flexible', size: 'not-sure', priorities: [] }, typical: null }, o);
 const IP = (slug, name, types, extra) => Object.assign({ slug, name, checkedAt: iso(NOW - 2 * H), status: 'ok', byBedrooms: types }, extra || {});
@@ -473,6 +473,14 @@ t('the real data gives no exact price: every "From around" and budget sentence u
 t('handoff with real project names: no Huttons, counts, prices, ranges, check times or source text', () => { const names = cards(rrun(KS)).slice(0, 2).map((c) => c.name), m = HM({ names, budget: 2200000, size: { from: 1000, to: 1100 }, district: null }); assert.ok(!/huttons|inventory|checked|from around|\bunits?\b|\bavailable\b|\d{2}:\d{2}/i.test(m), m); assert.ok(/^Hi Ken, I’m comparing /.test(m)); assert.ok(/\$2\.2m/.test(m)); assert.strictEqual((m.match(/\$/g) || []).length, 1); });
 t('CTA on real cards: every card, candidate or not, asks "Does this suit me? →" and offers "Compare this with another"', () => { const cs = allCards(rrun({ budget: 2200000, size: KS.size, openTo: 'new' })); assert.ok(cs.length); cs.forEach((c) => { assert.strictEqual(c.ask, 'Does this suit me? →'); assert.strictEqual(c.tick, 'Compare this with another'); assert.strictEqual(c.hasCheck, c.tier === 'a' || c.tier === 'b'); }); });
 t('the real file does not touch resale: a resale-only journey is identical with and without it', () => { const a = JSON.stringify(rrun({ openTo: 'resale', budget: 2200000, size: KS.size })), b = JSON.stringify(F.shortlist(real, base({ openTo: 'resale', budget: 2200000, size: KS.size }))); const strip = (x) => JSON.stringify(JSON.parse(x, (k, v) => (['checkedAt', 'inventory'].indexOf(k) > -1 ? undefined : v))); assert.strictEqual(strip(a), strip(b)); });
+t('Phase 1: an EC the Huttons inventory lists keeps its inventory card, gains its URA record and Research link, and is not repeated in the EC section', () => {
+  const ec = Object.assign(URAP('ec-x', 'EC X', 'ST', '22', [row(900, 6, 3, 202609, 2400000, 2800000)]), { c: 'ec', seg: 'OCR' });
+  const ix = mkIx([ec]), inv = prep([IP('ec-x', 'EC X', [TY(3, 2900000, [[900, 2600000]])], { district: '22', tenureGroup: 1, tenure: '99 yrs from 2025', street: 'ST' })]);
+  const r = run(ix, inv, { budget: 2600000 });
+  assert.deepStrictEqual(ids(r), ['ec-x']);
+  assert.ok(cards(r)[0].link && cards(r)[0].link.indexOf('#/p/ec-x/new') > -1, 'Research link');
+  assert.ok(!r.otherTypes || r.otherTypes.every((o) => o.groups.every((g) => g.cards.every((c) => c.id !== 'ec-x'))), 'not repeated');
+});
 t('find.json is byte-identical to V9.1', () => assert.strictEqual(crypto.createHash('sha256').update(fs.readFileSync(path.join(root, 'data/projects/find.json'))).digest('hex'), FIND_SHA));
 
 

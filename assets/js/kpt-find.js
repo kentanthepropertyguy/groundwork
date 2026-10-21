@@ -61,8 +61,11 @@
   function prepare(doc) {
     if (!doc || doc.kind !== 'kpt-find-index' || doc.v !== 1 || !Array.isArray(doc.projects) || !/^\d{4}-\d{2}$/.test(doc.latestMonth || '')) return null;
     const latest = Number(doc.latestMonth.replace('-', ''));
-    const projects = doc.projects.filter((p) => !(p && FIND_EXCLUDED.indexOf(p.id) > -1));
-    return { latest, latestMonth: doc.latestMonth, window: doc.window, minCell: doc.minCell, bin: doc.bin || 100, projects, districts: Array.from(new Set(projects.map((p) => p.d))).sort() };
+    const kept = doc.projects.filter((p) => !(p && FIND_EXCLUDED.indexOf(p.id) > -1));
+    // Shared development register: a project carries "c" (ec | cluster) unless it is a condominium. The condo list drives everything exactly as before; ECs and cluster housing are
+    // matched with the same rules but listed in their own sections, so their prices are never mixed with condominium prices.
+    const isOther = (p) => p && (p.c === 'ec' || p.c === 'cluster'), projects = kept.filter((p) => !isOther(p)), others = { ec: kept.filter((p) => p.c === 'ec'), cluster: kept.filter((p) => p.c === 'cluster') };
+    return { latest, latestMonth: doc.latestMonth, window: doc.window, minCell: doc.minCell, bin: doc.bin || 100, projects, others, otherAll: others.ec.concat(others.cluster), districts: Array.from(new Set(kept.map((p) => p.d))).sort() };
   }
 
   /* ---------------------------------------------------------------- size */
@@ -190,8 +193,8 @@
     if (!fit.some((r) => r[2] >= T.minActiveMonths)) return null;
     const q1 = Math.min.apply(null, fit.map((r) => r[4])), q3 = Math.max.apply(null, fit.map((r) => r[6]));
     const bins = fit.map((r) => r[0]);
-    return { id: p.id, sale, name: p.name, street: p.street, district: p.d, seg: p.seg, tenure: p.tl, mixed: !!p.m, tenGroup: p.tg, n, strength: n >= T.goodSales ? 'good' : 'limited', last, q1, q3,
-      fit: o.cap && q3 > o.cap && B <= q3 ? 'below' : B >= q1 && B <= q3 ? 'inside' : B > q3 ? 'above' : 'below', bandLo: Math.min.apply(null, bins), bandHi: Math.max.apply(null, bins) + ix.bin, multi: fit.length > 1 };
+    return Object.assign(p.c ? { cls: p.c } : {}, { id: p.id, sale, name: p.name, street: p.street, district: p.d, seg: p.seg, tenure: p.tl, mixed: !!p.m, tenGroup: p.tg, n, strength: n >= T.goodSales ? 'good' : 'limited', last, q1, q3,
+      fit: o.cap && q3 > o.cap && B <= q3 ? 'below' : B >= q1 && B <= q3 ? 'inside' : B > q3 ? 'above' : 'below', bandLo: Math.min.apply(null, bins), bandHi: Math.max.apply(null, bins) + ix.bin, multi: fit.length > 1 });
   }
   // Audit A3-14: a planner range is never stretched past its top. With a cap (the top of the planner's range) the budget window
   // stops there, and a development whose typical prices run above it says "A little above your … budget".
@@ -278,6 +281,10 @@
   const BED_TBC = 'Bedroom layout to be confirmed', QUIET_BED = 'Bedroom availability not confirmed.', QUIET_UNCONFIRMED = 'Current availability not confirmed.', ASK_LABEL = 'Does this suit me? →', TICK_LABEL = 'Compare this with another';
   const budgetLine = (o, fit) => { const b = budWord(o) + ' budget'; return fit === 'below' ? { tone: 'over', text: 'A little above your ' + b } : { tone: 'ok', text: 'Within your ' + b }; };   // fit 'below' = the prices sit above the budget
   const bedLabel = (types) => { const n = types.map((t) => t.bedrooms); return n.length === 1 && n[0] === 0 ? 'Studio' : joinAnd(n.map((b) => (b === 0 ? 'Studio' : b >= 5 ? '5+' : String(b)))) + ' Bedroom'; };
+  const CLS_LABEL = { ec: 'Executive Condominium', cluster: 'Cluster housing' };
+  const CLS_SECTION = { ec: 'Executive Condominiums', cluster: 'Cluster housing (strata landed)' };
+  const CLS_NOTE = { ec: 'A different property type from private condominiums, with its own buyer rules (EC eligibility applies) and its own price levels. Shown for the same budget and size, never mixed with the condominium prices above.',
+    cluster: 'Strata landed homes in a gated development. A different property type from condominiums, with its own price levels. Shown for the same budget and size, never mixed with the condominium prices above.' };
   const salesLine = (n, isNew) => n + (isNew ? ' recent developer sales' : ' recent sales') + ' around this size';
   function card(c, o, un, ix) {
     return {
@@ -286,7 +293,7 @@
         // V10.3.6 resale: the size is that of the homes that sold; a chosen bedroom is never claimed, only said to be still to confirm
         : { size: 'Recent homes sold: about ' + sizeText(c.bandLo, c.bandHi), priceLead: 'Recent sales', figure: p2(c.q1) + '–' + p2(c.q3), priceNote: null, budget: budgetLine(o, c.fit), sales: c.n + ' sales in the last 12 months', latest: 'Latest: ' + ymLabel(c.last), quiet: null, bedNote: o.bedChosen ? BED_TBC : null },
       id: c.id, name: displayName(c.name), sale: c.sale, saleLabel: c.sale === 'new' ? 'Developer sales' : 'Resale',
-      meta: [displayName(c.street), 'District ' + Number(c.district), c.seg, c.tenure + (c.mixed ? ' (mixed tenure in the data)' : '')].join(' · '),
+      meta: [c.cls ? CLS_LABEL[c.cls] : null, displayName(c.street), 'District ' + Number(c.district), c.seg, c.tenure + (c.mixed ? ' (mixed tenure in the data)' : '')].filter(Boolean).join(' · '),
       why: why(c, o),
       evidence: c.n + (c.sale === 'new' ? ' developer sales' : ' sales') + ' in the last 12 months · latest ' + ymLabel(c.last) + ' · ' + (c.strength === 'good' ? 'Good' : 'Limited') + ' recent evidence',
       strength: c.strength,
@@ -359,7 +366,7 @@
   const SUP_RANK = { good: 0, limited: 1, early: 2, few: 3, none: 3 };
   /** A usable record for any inventory project: URA's own facts win (including URA's region); otherwise the reviewed metadata the export joined in. V10.3.5: a reviewed inventory `region` is a fallback only, used when URA does not list the project; with no reviewed region seg stays null, so Closer to the centre cannot qualify it (never guessed). Null = cannot be placed, so it is not shown. */
   function recordFor(ix, ip) {
-    const u = ix.projects.find((p) => p.id === ip.slug); if (u) return { rec: u, ura: u };
+    const u = ix.projects.find((p) => p.id === ip.slug) || (ix.otherAll || []).find((p) => p.id === ip.slug); if (u) return { rec: u, ura: u };
     if (ip.status !== 'ok' || !/^(0[1-9]|1\d|2[0-8])$/.test(String(ip.district)) || typeof ip.tenureGroup !== 'number' || typeof ip.tenure !== 'string' || !ip.tenure) return null;
     return { rec: { id: ip.slug, name: ip.name, street: ip.street || '', d: String(ip.district), seg: (ip.region === 'CCR' || ip.region === 'RCR' || ip.region === 'OCR') ? ip.region : null, tg: ip.tenureGroup, tl: ip.tenure, m: 0, new: [], resale: [] }, ura: null };
   }
@@ -475,7 +482,7 @@
     if (bedSel) base.bedChosen = true;      // V10.3.6: a bedroom was chosen; resale cards say its layout is still to be confirmed
     if (input.sizes) { base.sizes = {}; types0.forEach((s) => { const w = input.sizes[s]; if (w && w.lo > 0 && w.hi > w.lo) base.sizes[s] = { lo: w.lo, hi: w.hi, source: w.source }; }); }      // V10.3.6: one window per sale type
     if (eff.on.indexOf('location') > -1) { base.regions = ['CCR', 'RCR']; base.regionRank = true; base.prefs = base.prefs.filter((p) => p !== 'location'); }   // V10.3.4: Closer is a filter; with regionSoft it never reaches here (removed in effectivePrefs)
-    if (inv) { base.inv = inv; base.sizeSource = input.size.source; base._uraIds = {}; ix.projects.forEach((p) => { base._uraIds[p.id] = 1; }); }
+    if (inv) { base.inv = inv; base.sizeSource = input.size.source; base._uraIds = {}; ix.projects.concat(ix.otherAll || []).forEach((p) => { base._uraIds[p.id] = 1; }); }
     const types = saleTypes(input.openTo), lists = {};
     types.forEach((s) => { const ob = forType(base, s); lists[s] = !ob ? [] : inv && s === 'new' ? newCandidates(ix, ob) : eligible(ix, s, ob); });
     const eligibleN = {}; types.forEach((s) => { eligibleN[s] = lists[s].length; });
@@ -500,10 +507,25 @@
       return g;
     }).filter((g) => g.cards.length);
     const shown = groups.reduce((a, g) => a + g.cards.length, 0);
+    // Executive Condominiums and cluster housing: the same budget, size and area rules, listed apart from the condominiums (never pooled). A development already listed above
+    // (an EC the Huttons inventory covers) is not repeated.
+    const listed = {}; groups.forEach((g) => g.cards.concat(g.more || []).forEach((c) => { listed[c.id] = 1; }));
+    const otherTypes = ['ec', 'cluster'].map((cls) => {
+      const pool = ix.others && ix.others[cls]; if (!pool || !pool.length) return null;
+      const sub = Object.assign({}, ix, { projects: pool }), gs = [];
+      types.forEach((s) => {
+        const ob = forType(base, s); if (!ob || ob.noWin) return;
+        const all = eligible(sub, s, Object.assign({}, ob, { inv: null })).filter((c) => !listed[c.id]);
+        const cards = takeCapped(all, T.bothResale).map((c) => resaleDecor(card(c, ob, un, sub)));
+        if (cards.length) gs.push({ sale: s, label: s === 'new' ? 'Developer sales' : 'Resale', eligible: all.length, cards });
+      });
+      return gs.length ? { cls, label: CLS_SECTION[cls], note: CLS_NOTE[cls], groups: gs } : null;
+    }).filter(Boolean);
     const state = total === 0 ? 'none' : total < T.minSales ? 'few' : 'list';
     const out = { version: VERSION, state, total, shown, groups, eligible: eligibleN, size: input.size, unsupported: un, filters: { districts: base.districts, freehold: base.freehold, text: base.text, pct: base.pct }, dataTo: ix.latestMonth, window: ix.window,
       dataLine: 'Based on actual sales in the last 12 months (to ' + ymLabel(ix.latest) + ') around your budget and size.',
       orderLine: 'Listed by how much recent evidence there is, not by quality or value.', changes: [], reference: null, noneText: null };
+    if (otherTypes.length) out.otherTypes = otherTypes;
     if (inv && types.indexOf('new') > -1) {
       out.inventory = { active: true, checkedAt: new Date(inv.fileAt).toISOString() };
       out.dataLine = 'Based on actual URA sales in the last 12 months (to ' + ymLabel(ix.latest) + ') around your budget and size, plus a check of current Huttons inventory where we could make one. This is a starting list, not a recommendation.';
@@ -573,7 +595,7 @@
   /* ---------------------------------------------------------------- methodology (plain words; the only place the technical meaning lives) */
   const METHOD = [
     'New launch projects: choosing “New launch” lists projects with developer sales (URA “New Sale”) in the last 12 months. Recent developer sales are not proof that the developer still has units to sell. URA’s data has no unit counts or inventory, so a project can appear here after most of its units have sold.',
-    'Where the sales come from: private condominium and apartment sales recorded by URA, for new launches and resale. Sub-sales, Executive Condominiums and landed homes are not included.',
+    'Where the sales come from: private condominium and apartment sales recorded by URA, for new launches and resale. Executive Condominiums and strata landed (cluster housing) developments are matched the same way but listed in their own sections below, and their prices are never mixed with condominium prices. Sub-sales and landed homes on their own land are not included.',
     'The window: the last 12 months of recorded sales. Older sales are never used to put a development on the list.',
     '“Typical prices” means the middle half of the sales: the range between the price a quarter of the sales were below and the price a quarter were above. Half of those sales fell inside it. It is not a price anyone should expect to pay for a particular unit.',
     'A development is listed only if homes of the size you chose sold there in the last 12 months at typical prices that overlap your budget (within about 10% either side), there were at least 3 such sales in the last 12 months, at least one of those sizes sold in two or more different months, and the latest of them was within the last 6 months of the data.',

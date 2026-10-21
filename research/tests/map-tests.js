@@ -30,7 +30,7 @@ t('the published files hold aggregates and positions only: no unit, floor, buyer
   const keys = (o, a = new Set()) => { if (Array.isArray(o)) o.forEach((x) => keys(x, a)); else if (o && typeof o === 'object') Object.keys(o).forEach((k) => { a.add(k); keys(o[k], a); }); return a; };
   [places, amen].forEach((d) => keys(d).forEach((k) => assert.ok(!bad.test(k), 'field ' + k)));
   keys(ev.projects[Object.keys(ev.projects)[0]]).forEach((k) => assert.ok(!bad.test(k), 'ev field ' + k));
-  assert.deepStrictEqual(places.fields, ['id', 'name', 'lat', 'lon', 'district', 'seg', 'p12', 's12', 'sub12']);
+  assert.deepStrictEqual(places.fields, ['id', 'name', 'lat', 'lon', 'district', 'seg', 'p12', 's12', 'sub12', 'cls']);
 });
 t('schools and supermarkets are published as names, levels and positions only, and the layer is switched on', () => {
   assert.strictEqual(amen.extra, 'amen-extra.json'); assert.ok(extra && extra.schools.length > 300 && extra.shops.length > 400);
@@ -132,6 +132,29 @@ t('place search: neighbourhoods, then stations, then developments; unknown text 
 t('place cards: an MRT station lists developments by distance and never shows a price', () => {
   const d = M.placeData({ t: 'mrt', n: 'Toa Payoh MRT' }); assert.ok(d.list.length > 0); for (let i = 1; i < d.list.length; i++) assert.ok(d.list[i - 1].d <= d.list[i].d);
   const a = M.placeData({ t: 'area', n: 'Bishan' }); assert.ok(a.devs.length > 5); assert.ok(a.stn.length >= 1); assert.strictEqual(M.placeData({ t: 'area', n: 'Nowhere' }), null);
+});
+
+console.log('Phase 1: development coverage (condo, EC, cluster)');
+t('the Map lists every register development once, with its class; unplaced ones stay searchable', () => {
+  const by = { condo: 0, ec: 0, cluster: 0 }; M.P.forEach((p) => { by[p.cls]++; }); assert.ok(by.condo > 2000 && by.ec >= 70 && by.cluster >= 140, JSON.stringify(by));
+  assert.ok(M.P.some((p) => p.cls !== 'condo' && !p.pos), 'at least one EC/cluster without a position is still listed');
+});
+t('Rosyth School lists Hundred Palms Residences (an EC) within 1 km, with its class', () => {
+  const d = M.placeData({ t: 'school', n: 'Rosyth School' }); assert.ok(d && d.list.length, 'school card'); const x = d.list.find((r) => /Hundred Palms/.test(r.p.n)); assert.ok(x, d.list.map((r) => r.p.n).join(','));
+  assert.ok(x.d < 400 && M.clsShort(x.p.n) === 'EC');
+});
+t('CHIJ St. Nicholas Girls\' School lists Horizon Green (cluster housing) within 1 km', () => {
+  const d = M.placeData({ t: 'school', n: "CHIJ ST. Nicholas Girls' School" }); assert.ok(d && d.list.length, 'school card'); const x = d.list.find((r) => /Horizon Green/.test(r.p.n)); assert.ok(x, d.list.map((r) => r.p.n).join(','));
+  assert.ok(x.d < 500 && x.p.cls === 'cluster');
+});
+t('nearby comparison and context never mix classes (an EC is only compared with ECs, a condo only with condos)', () => {
+  let checked = 0;
+  M.P.filter((p) => p.pos && p.cls !== 'condo').slice(0, 60).concat(M.P.filter((p) => p.pos && p.cls === 'condo').slice(0, 60)).forEach((p) => {
+    const r = M.nearbyFor(p.n); r.list.forEach((x) => { assert.strictEqual(x.p.cls, p.cls, p.n + ' vs ' + x.p.n); checked++; });
+  }); assert.ok(checked > 20);
+});
+t('a proximity list (area, MRT) holds developments of every class, each tagged, nearest first', () => {
+  const a = M.placeData({ t: 'mrt', n: 'Hougang MRT' }); assert.ok(a.list.some((r) => r.p.cls === 'ec') || a.list.some((r) => r.p.cls === 'condo')); for (let i = 1; i < a.list.length; i++) assert.ok(a.list[i - 1].d <= a.list[i].d);
 });
 
 if (process.env.KPT_RAW) {

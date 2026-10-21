@@ -53,7 +53,7 @@
   /* ---------- shared rendering ---------- */
   const LEVEL = { BASIC: ['bs', 'Basic'], FEATURED: ['ft', 'Featured'], MICROSITE: ['ms', 'Microsite'] };
   const badge = (lv) => '<span class="kpe-badge ' + LEVEL[lv][0] + '" title="' + esc({ BASIC: 'Verified basic information and available transaction analysis.', FEATURED: 'More detailed curated information. A content-depth label, not a ranking or endorsement.', MICROSITE: 'Has a dedicated, independently maintained website.' }[lv]) + '">' + LEVEL[lv][1] + '</span>';
-  const subline = (o) => [o.street && o.street.replace(/\b\w/g, (c) => c), o.district ? 'District ' + o.district : null, o.seg, o.tenure && o.tenure !== '–' ? o.tenure : null].filter(Boolean).join(' · ');
+  const subline = (o) => [o.cls === 'ec' ? 'Executive Condominium' : o.cls === 'cluster' ? 'Cluster housing' : null, o.street && o.street.replace(/\b\w/g, (c) => c), o.district ? 'District ' + o.district : null, o.seg, o.tenure && o.tenure !== '–' ? o.tenure : null].filter(Boolean).join(' · ');
   const stageText = { 'new-launch': 'New launch', completed: 'Completed', unknown: null };
   const flags = (o) => (o.level !== 'BASIC' ? badge(o.level) : '') + (o.cmp ? '<span class="kpe-tag ok">' + o.cmp + (o.cmp > 1 ? ' comparisons' : ' comparison') + '</span>' : '') + (o.ms === 'configured' ? '<span class="kpe-tag">Own site</span>' : '');
   const draftBadge = '<span class="kpe-badge dr" title="Not approved for publication">Private draft</span>';
@@ -112,6 +112,7 @@
       }
       const a = A.name, b = B2.name, items = []; let head = 'This comparison isn’t available yet.', body = '';
       if (res.reason === 'same-project') { head = 'Choose two different developments.'; }
+      else if (res.reason === 'different-class') { head = 'These are different property types.'; body = '<p>' + esc(why['different-class'] || 'A condominium, an executive condominium and a cluster-housing development sell under different rules and at different price levels, so Groundwork does not compare their prices.') + '</p>'; }
       else if (res.reason === 'no-report') {
         body = '<p>' + esc(why['no-report']) + ' Both developments have enough resale transactions in the current dataset for one to be prepared. Reports are generated only after each project’s facts are sourced and reviewed, so a pair isn’t created automatically.</p>';
         items.push('<a class="kpe-link" href="' + ROOT + 'research/#/compare/' + A.id + '/' + B2.id + '" data-kpt-nav="research-statistical">See the statistical side-by-side in Research</a> (transaction medians only, no interpretation)');
