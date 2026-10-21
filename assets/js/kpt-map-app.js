@@ -10,7 +10,8 @@
   const BUILD = (document.currentScript && /[?&]v=([^&]+)/.exec(document.currentScript.src) || [])[1] || '1';
   const base = new URL('../../data/map/', location.href).href;
   const getJson = (f) => fetch(base + f + '?v=' + BUILD).then((r) => { if (!r.ok) throw new Error(f + ' ' + r.status); return r.json(); });
-  const S = { proj: null, start: true, place: null, band: null, rc: {}, hl: null, more: false, min: false, am: false, radius: 2000, pr: 1000, nall: false, q: '', qi: -1, suggOpen: false };
+  const LY = window.KPT_MAP_VIEW.layers;
+  const S = { proj: null, start: true, place: null, band: null, rc: {}, hl: null, more: false, min: false, am: false, sec: {}, layers: LY.load(), lyrOpen: false, radius: 2000, pr: 1000, nall: false, q: '', qi: -1, suggOpen: false };
   const PCR = {};   // postal code -> the last OneMap answer
   let M, view;
 
@@ -31,7 +32,7 @@
   }
   let lastHash = location.hash;
   function go(push) { const h = addr(); history[push ? 'pushState' : 'replaceState'](null, '', h); lastHash = location.hash; render(); }
-  function loadProject(name) { S.proj = name; S.more = false; S.min = false; S.band = null; S.rc = {}; S.hl = null; S.am = false; S.place = null; S.pr = 1000; S.nall = false; S.radius = M.BY[name].pos ? M.defaultRadius(name) : 2000; }
+  function loadProject(name) { S.proj = name; S.sec = {}; S.more = false; S.min = false; S.band = null; S.rc = {}; S.hl = null; S.am = false; S.place = null; S.pr = 1000; S.nall = false; S.radius = M.BY[name].pos ? M.defaultRadius(name) : 2000; }
   const onNav = () => { if (location.hash === lastHash) return; lastHash = location.hash; parseHash(); render(); };
   addEventListener('popstate', onNav); addEventListener('hashchange', onNav);
 
@@ -63,11 +64,36 @@
 
   /* ---------------- development card ---------------- */
   const SRC = '<button type="button" class="lnk2" data-sources>Data &amp; sources</button>';
-  const amPer = (mobile) => (mobile ? S.more : S.am) ? 2 : 1;   // the nearest of each kind first; the next ones on demand
-  function aroundHtml(name, per, mobile, what, noSrc) {
-    const g = M.around(name, per);
-    return `<div class="around"><div class="h2">Around ${what || 'this home'}${help('Straight-line distances from the ' + (what ? 'site' : 'development') + ', not walking time.' + (M.hasSchools() ? ' Living near a school does not decide admission.' : ''), 'How distances are measured')}</div>${g.map((x) => `<div class="ag"><span class="agi k-${x.k}">${icon(x.k, 13)}</span><div class="agb"><b${per === 1 ? ' class="vh"' : ''}>${x.label}</b>${x.items.length ? x.items.map((i) => `<button type="button" class="ai" data-am="${esc(i.id)}"><span class="an">${esc(i.n)}${i.k === 'school' || i.k === 'shop' || (i.k === 'food' && !/food cent|hawker cent|market/i.test(i.n)) ? `<em>${esc(i.k === 'food' ? 'Food centre' : i.sub)}</em>` : ''}</span><span class="ad num">${distA(i.d)}</span></button>`).join('') : `<p class="none">${x.none}</p>`}</div></div>`).join('')}<p class="basis am-acts">${mobile ? '' : `<button type="button" class="lnk2" data-am-more aria-expanded="${S.am}">${S.am ? 'Show less' : 'Show more nearby'}</button>`}${noSrc ? '' : `${mobile ? '' : '<span aria-hidden="true"> · </span>'}${SRC}`}</p></div>`;
+  /* The summary shows the two amenities that matter most for this home: the nearest MRT or LRT station, then the nearest primary school (within 2 km), else the nearest shop or park (within 1 km). Everything else is in the amenities section. */
+  function keyAmen(name) {
+    const by = {}; M.around(name, 1).forEach((g) => { by[g.id] = g.items[0] || null; });
+    const out = []; if (by.tr) out.push(by.tr); if (by.sc && by.sc.d <= 2000) out.push(by.sc);
+    if (out.length < 2 && by.sh && by.sh.d <= 1000) out.push(by.sh); if (out.length < 2 && by.pk && by.pk.d <= 1000) out.push(by.pk);
+    return out.slice(0, 2);
   }
+  const amSub = (i) => (i.k === 'school' || i.k === 'shop' || (i.k === 'food' && !/food cent|hawker cent|market/i.test(i.n)) ? `<em>${esc(i.k === 'food' ? 'Food centre' : i.sub)}</em>` : '');
+  const amRow = (i) => `<button type="button" class="ai" data-am="${esc(i.id)}"><span class="an">${esc(i.n)}${amSub(i)}</span><span class="ad num">${distA(i.d)}</span></button>`;
+  const keyHtml = (name) => { const k = keyAmen(name); return k.length ? `<div class="around key">${k.map((i) => `<div class="ag"><span class="agi k-${i.k}">${icon(i.k, 13)}</span><div class="agb">${amRow(i)}</div></div>`).join('')}</div>` : ''; };
+  function amenBody(name, what) {
+    const g = M.around(name, 2);
+    return g.map((x) => `<div class="ag"><span class="agi k-${x.k}">${icon(x.k, 13)}</span><div class="agb"><b>${x.label}</b>${x.items.length ? x.items.map(amRow).join('') : `<p class="none">${x.none}</p>`}</div></div>`).join('') + `<p class="basis">Straight-line distances from the ${what || 'development'}, not walking time.${M.hasSchools() ? ' Living near a school does not decide admission.' : ''}</p>`;
+  }
+  /* A section that opens on demand. Which are open is remembered while the same development stays selected. */
+  const amTitle = () => (M.hasSchools() ? 'Transport, schools and amenities' : 'Transport and amenities');
+  const sx = (id, title, body) => `<details class="sx" data-sx="${id}"${S.sec[id] ? ' open' : ''}><summary><span>${title}</span></summary><div class="sxb">${body}</div></details>`;
+  const PRICE_TIP = 'Median price per sq ft for the size with the most recent sales. Sizes with fewer than 5 sales are not shown. These are past recorded sales from URA, not asking prices or a valuation. Primary (new sale) and secondary (resale and sub-sale) prices are never combined.';
+  /* The first fact: the most meaningful recent price, with its market, size, sample and period. Too few sales in any size means no price, only what exists. */
+  function leadHtml(name) {
+    const l = M.lead(name), tip = help(PRICE_TIP, 'About this price');
+    if (l) {
+      const c = l.row, sub = l.mk === 'sec' && M.mainlySub(name) ? ' · mainly sub-sales' : '';
+      return `<div class="lead"><div class="ld-k">Recent prices${tip}</div><div class="ld-p"><b class="num">${fmt(c.med)}</b><small>psf</small></div><p class="ld-s">${MKT[l.mk][0]}${sub} · ${band(c.bin)} · ${c.n} sale${c.n === 1 ? '' : 's'}, ${WINL[l.mm.win]} · typical ${fmtM(c.pmed)}</p><p class="basis">Past sales, not a valuation.</p></div>`;
+    }
+    const m = ['sec', 'new'].map((mk) => M.market(name, mk)).filter(Boolean).sort((a, b) => b.hist - a.hist)[0];
+    if (!m) return `<div class="lead"><div class="ld-k">Recent prices</div><p class="ld-s">No recorded sales to show.</p></div>`;
+    return `<div class="lead"><div class="ld-k">Recent prices${tip}</div><p class="ld-s">Not enough recent sales in any one size to show a typical price. ${m.hist} recorded since ${monthStart()}, latest ${ym(m.last)}.</p></div>`;
+  }
+  const methBody = () => `<ul class="meth"><li>Prices are past recorded sales from URA, not asking prices or a valuation. A median price per sq ft is shown only for sizes with enough sales; sizes with fewer than 5 sales are not shown.</li><li>Primary (new sale) and secondary (resale and sub-sale) sales are kept apart.</li><li>Nearby homes are chosen in the same market and size, then by tenure, lease age and distance. Each side has 2+ sales in 2 months. ECs and cluster housing are compared only with their own type.</li><li>Distances are in a straight line, not walking time.</li></ul><p class="basis">${SRC}</p>`;
   const recentHtml = (name, mk) => {
     const rows = M.EV[name].rc && M.EV[name].rc[mk] || []; if (!rows.length) return '';
     const open = !!S.rc[mk];
@@ -82,12 +108,12 @@
   }
   const monthStart = () => { const s = String(M.latestMonth || '').split('-'); return s.length === 2 ? K.ym(((+s[0]) - 5) * 100 + (+s[1])) : 'the start of the data'; };
   const idOf = (name) => M.BY[name].id;
-  function nearbyHtml(name, nb) {
+  function nearbyHtml(name, nb) {   // the body of the "Compare nearby homes" / "Nearby prices" section
     const [lab] = nb.ref ? MKT[nb.ref.mk] : [''], refTxt = nb.ref ? `${lab} · ${band(nb.ref.bin)}${nb.ref.win ? ' · ' + WINL[nb.ref.win] : ''}` : '';
-    if (nb.mode === 'none') { if (!M.EV[name]) return ''; const nx = S.radius < 2000 ? 2000 : S.radius < 3000 ? 3000 : 5000; return `<div class="sec"><div class="sh"><b>Nearby prices</b>${refTxt ? `<span>${refTxt}</span>` : ''}</div><p class="basis" style="margin:0">No nearby ${M.BY[name].cls === 'condo' ? 'development' : M.CLS[M.BY[name].cls].short + ' development'} has enough recorded sales ${nb.ref ? 'in this size ' : ''}to show prices.</p>${S.radius < 5000 ? `<button type="button" class="lnk" data-radius="${nx}">Look within ${nx / 1000} km ›</button>` : ''}</div>`; }
+    if (nb.mode === 'none') { const nx = S.radius < 2000 ? 2000 : S.radius < 3000 ? 3000 : 5000; return `<p class="basis" style="margin:0">No nearby ${M.BY[name].cls === 'condo' ? 'development' : M.CLS[M.BY[name].cls].short + ' development'} has enough recorded sales ${nb.ref ? 'in this size ' : ''}to show prices.</p>${S.radius < 5000 ? `<button type="button" class="lnk" data-radius="${nx}">Look within ${nx / 1000} km ›</button>` : ''}`; }
     const cmp = nb.mode === 'compare';
     const row = (r) => { const inner = `<b>${esc(r.p.n)}</b><span class="m">${dist(r.p.d)} · ${esc(r.e.tenure)} · ${r.theirs.n} sale${r.theirs.n === 1 ? '' : 's'}</span><span class="px num">${fmt(r.theirs.med)}<small>psf</small></span><i aria-hidden="true">›</i>`; return cmp ? `<a class="nb" href="../#/compare/${esc(idOf(name))}/${esc(r.p.id)}">${inner}</a>` : `<button type="button" class="nb" data-dot="${esc(r.p.n)}">${inner}</button>`; };
-    return `<div class="sec"><div class="sh"><b>${cmp ? 'Compare with nearby' : 'Nearby prices'}${help((cmp ? 'Same market and size, then tenure, lease age and distance. Each side has 2+ sales in 2 months.' : `Surrounding market for context, not a price for ${name}.`) + (M.BY[name].cls === 'condo' ? '' : ` ${M.CLS[M.BY[name].cls].plural.replace(/^./, (c) => c.toUpperCase())} are only compared with other ${M.CLS[M.BY[name].cls].plural}.`), 'How nearby developments are chosen')}</b><span>${refTxt}</span></div>${nb.list.map(row).join('')}</div>`;
+    return `<p class="basis" style="margin:0 0 4px">${esc(refTxt)}${refTxt ? ' · ' : ''}${cmp ? 'Same market and size, then tenure, lease age and distance.' : `Surrounding market for context, not a price for ${esc(name)}.`}</p>${nb.list.map(row).join('')}`;
   }
   // A development that is not a condominium, or whose name also carries another property type: said once, in the prices section.
   function classNote(name) {
@@ -108,25 +134,24 @@
     const head = `<div class="dp-top"><div style="min-width:0"><h2>${esc(name)}</h2><p class="meta">${M.CLS[p.cls].short ? esc(M.CLS[p.cls].label) + ' · ' : ''}${e ? esc(e.street) + areaLine(name) + ' · ' : ''}District ${Number(p.district)}${e ? ' · ' + esc(e.tenure) : ''}</p></div>${topBtns(mobile)}</div>`;
     if (mobile && S.min) return minBar(name, [M.CLS[p.cls].short ? M.CLS[p.cls].label : '', 'District ' + Number(p.district)].filter(Boolean).join(' · '), pos ? radStrip(name) : '');
     if (!e) { const body = `<p class="basis">Loading prices…</p>`; return mobile ? `<aside class="bs" aria-label="Selected development"><div class="bs-hd"><button type="button" class="grab" data-dpmore aria-label="Expand"></button>${head}</div>${body}</aside>` : `<aside class="dp" aria-label="Selected development"><div class="dp-in">${head}${body}</div></aside>`; }
+    if (S.sec.pr === undefined && !M.lead(name)) S.sec.pr = true;   // no typical price to lead with: the sales that do exist are shown straight away
     const nb = M.nearbyFor(name);
-    const prices = `<div class="sec pr"><div class="sh"><b>Prices by size${help('Median price per sq ft by size. Sizes with fewer than 5 sales are not shown. Prices are past recorded sales from URA, not asking prices or a valuation.', 'How these prices are worked out')}</b><span>Past sales, not a valuation</span></div><div class="mkts">${marketHtml(name, 'sec', nb.ref)}${marketHtml(name, 'new', nb.ref)}${pos ? '<p class="basis" style="margin:2px 0 0">Select a size to compare nearby.</p>' : ''}${classNote(name)}</div></div>`;
+    const pricesBody = `<div class="mkts">${marketHtml(name, 'sec', nb.ref)}${marketHtml(name, 'new', nb.ref)}${pos ? '<p class="basis" style="margin:2px 0 0">Select a size to compare nearby.</p>' : ''}${classNote(name)}</div>`;
     const nopos = `<p class="basis nopos">Not on the map yet, so neighbourhood and nearby prices are not shown.${help('URA’s data has no verified location for this development, so it cannot be placed on the map or measured against anything nearby. Its own prices by size are still shown.', 'Why there is no map position')}</p>`;
+    const secs = sx('pr', 'Prices by size', pricesBody) + (pos ? sx('cmp', nb.mode === 'compare' ? 'Compare nearby homes' : 'Nearby prices', nearbyHtml(name, nb)) + sx('am', amTitle(), amenBody(name)) + sx('nbr', 'Explore nearby developments', nearHtml(name, mobile)) : '') + sx('meth', 'Data and methodology', methBody());
     const open = `<a class="btn b" href="../#/p/${esc(p.id)}">Open Research page ›</a>`;
-    const body = pos ? aroundHtml(name, amPer(mobile), mobile) : nopos;
-    if (!mobile) return `<aside class="dp" aria-label="Selected development"><div class="dp-in">${head}${body}${prices}${pos ? nearbyHtml(name, nb) + nearHtml(name) : ''}</div><div class="dp-foot">${open}</div></aside>`;
-    const tog = `<button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">Prices &amp; nearby ${S.more ? '⌄' : '⌃'}</button>`;
-    return `<aside class="bs${S.more ? ' open' : ''}" aria-label="Selected development"><div class="bs-hd"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}${pos ? radStrip(name) : ''}</div>${body}${S.more ? prices + (pos ? nearbyHtml(name, nb) + nearHtml(name, true) : '') : ''}<div class="bs-act">${open}${tog}</div></aside>`;
+    const top = leadHtml(name) + (pos ? keyHtml(name) : nopos);
+    if (!mobile) return `<aside class="dp" aria-label="Selected development"><div class="dp-in">${head}${top}<div class="sxs">${secs}</div></div><div class="dp-foot">${open}</div></aside>`;
+    const tog = `<button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">More about this home ${S.more ? '⌄' : '⌃'}</button>`;
+    return `<aside class="bs${S.more ? ' open' : ''}" aria-label="Selected development"><div class="bs-hd"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}${pos ? radStrip(name) : ''}</div>${top}${S.more ? `<div class="sxs">${secs}</div>` : ''}<div class="bs-act">${open}${tog}</div></aside>`;
   }
-
-
 
   /* ---------------- explore nearby: the same optional radius on every located selection ----------------
      Secondary to the development's own details, and separate from the price comparison (which keeps its own radius and method). */
-  function nearHtml(name, mobile) {
+  function nearHtml(name, mobile) {   // the body of the "Explore nearby developments" section
     const d = M.placeData({ t: 'dev', n: name }, S.pr); if (!d) return '';
     const all = d.list.map((x) => ({ d: x.d, h: devRow(x) })).concat(d.ups.map((x) => ({ d: x.d, h: upRow(x) }))).sort((a, b) => a.d - b.d), n = all.length, show = S.nall ? all.slice(0, 15) : all.slice(0, 3);
-    const tip = help('Straight-line distance from this development, not walking time. This is for exploring what is around it. The price comparison above has its own radius and is not changed by this one.', 'About nearby developments');
-    return `<div class="sec nbr"><div class="sh"><b>Explore nearby${tip}</b><span>${n ? n + ' within ' + radText(d.r) : 'None within ' + radText(d.r)}</span></div>${mobile ? '' : radHtml()}${show.map((x) => x.h).join('')}${n > 3 ? `<button type="button" class="btn g" data-nall style="margin-top:8px">${S.nall ? 'Show fewer' : 'Show ' + (n > 15 ? 'the nearest 15 of ' : 'all ') + n}</button>` : ''}${S.nall && n > 15 ? '<p class="basis">Choose a smaller radius to narrow the list.</p>' : ''}</div>`;
+    return `<p class="basis" style="margin:0 0 4px">${n ? n + ' within ' + radText(d.r) : 'None within ' + radText(d.r)} · straight-line distance from this development. The price comparison has its own radius and is not changed by this one.</p>${mobile ? '' : radHtml()}${show.map((x) => x.h).join('')}${n > 3 ? `<button type="button" class="btn g" data-nall style="margin-top:8px">${S.nall ? 'Show fewer' : 'Show ' + (n > 15 ? 'the nearest 15 of ' : 'all ') + n}</button>` : ''}${S.nall && n > 15 ? '<p class="basis">Choose a smaller radius to narrow the list.</p>' : ''}`;
   }
 
   /* ---------------- a new launch or an awarded GLS site: confirmed information only, never a price ---------------- */
@@ -136,17 +161,19 @@
     const head = `<div class="dp-top"><div style="min-width:0"><h2>${esc(name)}</h2><p class="meta">${esc(M.upStage(p))}${p.district ? ' · District ' + Number(p.district) : ''}${ar ? ' · ' + esc(ar) : ''}</p></div>${topBtns(mobile)}</div>`;
     if (mobile && S.min) return minBar(name, M.upStage(p), p.pos ? radStrip(name) : '');
     const rows = (u.facts || []).slice(); if (u.tenure && !rows.some((r) => /tenure/i.test(r[0]))) rows.push(['Tenure', u.tenure]);
-    const facts = rows.length ? `<dl class="upf">${rows.map((r) => `<div><dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd></div>`).join('')}</dl>` : '';
+    const dl = (a) => `<dl class="upf">${a.map((r) => `<div><dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd></div>`).join('')}</dl>`;
+    const facts = rows.length ? dl(rows.slice(0, 3)) : '';   // the first facts are the ones that matter; the rest are one tap away
     const notes = [
       u.nameStatus === 'reported' ? `<p class="basis">The name is reported, not yet confirmed by URA or the developer.${help('Chuan Grove is the name URA gives the sites. “One Chuan Grove” is how the project has been reported. It will be updated when the developer confirms the name.', 'About this name')}</p>` : '',
       `<p class="basis">${u.kind === 'gls' ? 'Not yet launched, so there are no sales or prices.' : 'No recorded sales yet, so no prices are shown.'}${help('Prices on this map are past recorded sales from URA. This project has none, and Groundwork does not show or estimate prices for it. It is never counted as a match for a budget.', 'Why there is no price')}</p>`,
       p.pos ? '' : `<p class="basis nopos">Not on the map yet.${help(u.posNote || 'No verified location is available yet, so it is not placed on the map.', 'Why there is no map position')}</p>`
     ].join('');
-    const srcs = `<details class="srcd"><summary>Sources</summary><ul>${(u.src || []).map((x) => `<li>${srcLink(x)}</li>`).join('')}${u.posSrc ? `<li>Location: ${esc(u.posSrc)}</li>` : ''}</ul></details>`;
+    const srcs = `<ul class="meth">${(u.src || []).map((x) => `<li>${srcLink(x)}</li>`).join('')}${u.posSrc ? `<li>Location: ${esc(u.posSrc)}</li>` : ''}</ul>`;
+    const secs = (rows.length > 3 ? sx('more', 'More project details', dl(rows.slice(3))) : '') + (p.pos ? sx('am', amTitle(), amenBody(name, 'site')) + sx('nbr', 'Explore nearby developments', nearHtml(name, mobile)) : '') + ((u.src && u.src.length) || u.posSrc ? sx('meth', 'Data and sources', srcs) : '');
     const links = (u.ms ? `<a class="btn b" href="${esc(u.ms)}" target="_blank" rel="noopener noreferrer">Open project microsite ↗</a>` : '') + (u.rs ? `<a class="btn ${u.ms ? 'g' : 'b'}" href="../#/p/${esc(u.rs)}">Research page ›</a>` : '');
-    const body = facts + notes + (p.pos ? aroundHtml(name, amPer(mobile), mobile, 'this site', true) + nearHtml(name) : '') + srcs;
-    if (!mobile) return `<aside class="dp" aria-label="Selected development"><div class="dp-in">${head}${body}</div>${links ? `<div class="dp-foot dp-foot2">${links}</div>` : ''}</aside>`;
-    return `<aside class="bs${S.more ? ' open' : ''}" aria-label="Selected development"><div class="bs-hd"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}${p.pos ? radStrip(name) : ''}</div>${facts}${notes}${S.more ? (p.pos ? aroundHtml(name, 2, true, 'this site', true) + nearHtml(name, true) : '') + srcs : ''}<div class="bs-act">${links}${p.pos || u.src && u.src.length ? `<button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">Nearby &amp; sources ${S.more ? '⌄' : '⌃'}</button>` : ''}</div></aside>`;
+    const top = facts + notes + (p.pos ? keyHtml(name) : '');
+    if (!mobile) return `<aside class="dp" aria-label="Selected development"><div class="dp-in">${head}${top}<div class="sxs">${secs}</div></div>${links ? `<div class="dp-foot dp-foot2">${links}</div>` : ''}</aside>`;
+    return `<aside class="bs${S.more ? ' open' : ''}" aria-label="Selected development"><div class="bs-hd"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}${p.pos ? radStrip(name) : ''}</div>${top}${S.more && secs ? `<div class="sxs">${secs}</div>` : ''}<div class="bs-act">${links}${secs ? `<button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">More about this site ${S.more ? '⌄' : '⌃'}</button>` : ''}</div></aside>`;
   }
   const cardFor = (name, m) => M.BY[name].up ? upCard(name, m) : devCard(name, m);
 
@@ -196,12 +223,16 @@
 
   /* ---------------- page ---------------- */
   const mode = () => S.place ? 'place' : (S.start || !S.proj) ? 'start' : 'dev';
+  function legendHtml() {
+    const md = mode(), shown = md === 'dev' ? S.proj : null, sp = shown && M.BY[shown].pos ? shown : null, L = S.layers;
+    return `<div class="mapkey" aria-label="Map key">${L.homes ? '<span><i class="a"></i>Development</span>' : ''}${sp || md === 'place' ? '<span><i class="s"></i>Selected</span>' : ''}${L.mrt ? '<span><i class="m"></i>MRT</span>' : ''}${L.school && M.hasSchools() ? '<span><i class="sc"></i>School</span>' : ''}${L.shops ? '<span><i class="sh"></i>Shops and parks</span>' : ''}${sp && M.EV[sp] ? '<span><i class="t"></i>Nearby comparison</span>' : ''}${L.launch && M.UP.some((p) => p.pos) ? '<span><i class="u"></i>New launch or site</span>' : ''}</div>`;
+  }
   function stage() {
     const m = narrow(), md = mode(), shown = md === 'dev' ? S.proj : null, sp = shown && M.BY[shown].pos ? shown : null;
-    const legend = `<div class="mapkey" aria-label="Map key"><span><i class="a"></i>Development</span>${sp || md === 'place' ? '<span><i class="s"></i>Selected</span>' : ''}<span><i class="m"></i>MRT</span>${M.hasSchools() ? '<span><i class="sc"></i>School</span>' : ''}${sp && M.EV[sp] ? '<span><i class="t"></i>Nearby comparison</span>' : ''}${M.UP.some((p) => p.pos) ? '<span><i class="u"></i>New launch or site</span>' : ''}</div>`;
+    const legend = legendHtml();
     const zoom = `<div class="zoomc zc"><button type="button" data-zoom="1" aria-label="Zoom in">+</button><button type="button" data-zoom="-1" aria-label="Zoom out">−</button></div>`;
     const card = md === 'start' ? startCard(m) : md === 'place' ? placeCard(S.place, m) : cardFor(shown, m);
-    return `<div class="mapstage${m && S.more && !S.min ? ' more' : ''}"><div id="map" class="map" aria-label="Map of Singapore"></div><div class="mapsearch">${searchBox()}</div>${m ? '' : zoom + legend}${card}</div>`;
+    return `<div class="mapstage${m && S.more && !S.min ? ' more' : ''}"><div id="map" class="map" aria-label="Map of Singapore"></div><div class="mapsearch">${searchBox()}</div>${LY.html(S.layers, S.lyrOpen, M)}${m ? '' : zoom + legend}${card}</div>`;
   }
   const postalAsked = {};
   function render() {
@@ -222,7 +253,8 @@
   }
   const sheetH = () => (($('.bs') || {}).offsetHeight || 300) + 16;
   const DEVPAD = (m) => m ? { tl: [28, S.more && !S.min ? 16 : 84], br: [28, sheetH()] } : { tl: [48, 84], br: [420, 70] };
-  function mapProps(fit) {
+  const mapProps = (fit) => Object.assign(mapProps1(fit), { layers: S.layers });
+  function mapProps1(fit) {
     const md = mode(), m = narrow(), pad = DEVPAD(m);
     if (md === 'start' || (md === 'dev' && !M.BY[S.proj].pos)) return { keep: md === 'dev', key: 'start|' + (m ? 'm' : 'd'), projects: M.PM, selected: null, cmp: [], amen: [], world: true, fit, minZoom: 11, pad: m ? { tl: [20, 84], br: [20, (($('.bs') || {}).offsetHeight || 150) + 16] } : { tl: [20, 76], br: [360, 60] } };
     if (md === 'place') {
@@ -236,7 +268,7 @@
   function mapProps0(fit) {
     const m = narrow(), shown = S.proj, pad = DEVPAD(m);
     const nb = M.EV[shown] ? M.nearbyFor(shown) : { list: [] }, cmp = nb.list.map((r) => r.p.n);
-    const gr = M.around(shown, amPer(m)), amen = []; gr.forEach((g) => g.items.forEach((i) => amen.push({ id: i.id, k: i.k, n: i.n, lat: i.lat, lon: i.lon, d: i.d })));
+    const amen = (S.sec.am && (!m || S.more) ? M.around(shown, 2).reduce((a, g) => a.concat(g.items), []) : keyAmen(shown)).map((i) => ({ id: i.id, k: i.k, n: i.n, lat: i.lat, lon: i.lon, d: i.d }));   // the two that matter, or all of them while the amenities section is open
     const near = amen.filter((a) => (a.k === 'mrt' || a.k === 'school') && a.d <= 1200).slice(0, 2).map((a) => [a.lat, a.lon]);
     const pts = [shown, ...cmp].map((n) => [M.BY[n].lat, M.BY[n].lon]).concat(near);
     const c = M.BY[shown];
@@ -265,12 +297,17 @@
       ` Basemap: OneMap, © contributors | Singapore Land Authority. Distances are straight-line. Not endorsed by any of these agencies.`;
   }
 
+  /* the Layers control alone is redrawn, so the map does not move */
+  function drawLayers() { const el = $('.lyr'); if (el) el.outerHTML = LY.html(S.layers, S.lyrOpen, M); }
+
   /* ---------------- events ---------------- */
   document.addEventListener('click', (e) => {
     if (!M) return;
-    const t = e.target.closest('[data-dpclose],[data-dpmin],[data-dpshow],[data-dpmore],[data-nall],[data-dot],[data-radius],[data-pr],[data-am-more],[data-pick],[data-zoom],[data-band],[data-rc],[data-am],[data-sources]');
-    if (!t) { if (!e.target.closest('.srch') && S.suggOpen) { S.suggOpen = false; render(); } return; }
+    const t = e.target.closest('[data-lyr],[data-dpclose],[data-dpmin],[data-dpshow],[data-dpmore],[data-nall],[data-dot],[data-radius],[data-pr],[data-am-more],[data-pick],[data-zoom],[data-band],[data-rc],[data-am],[data-sources]');
+    if (!t) { if (S.lyrOpen && !e.target.closest('.lyr')) { S.lyrOpen = false; drawLayers(); } if (!e.target.closest('.srch') && S.suggOpen) { S.suggOpen = false; render(); } return; }
+    if (S.lyrOpen && !t.hasAttribute('data-lyr') && !e.target.closest('.lyr')) { S.lyrOpen = false; drawLayers(); }
     const d = t.dataset;
+    if (t.hasAttribute('data-lyr')) { S.lyrOpen = !S.lyrOpen; drawLayers(); const b = $('.lyr-b'); if (b) b.focus(); return; }
     if (t.hasAttribute('data-sources')) { const s = document.getElementById('sources'); if (s) s.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
     if (t.hasAttribute('data-dpclose')) { S.start = true; S.more = false; S.min = false; S.place = null; go(true); return; }
     if (t.hasAttribute('data-dpmin')) { S.min = true; go(false); return; }
@@ -292,7 +329,7 @@
   document.addEventListener('mouseout', (e) => { const t = e.target.closest && e.target.closest('[data-am]'); if (t && !narrow() && view) view.hl(S.hl, false); });
   document.addEventListener('keydown', (e) => {
     if (!M) return;
-    if (e.key === 'Escape') { if (S.suggOpen) { S.suggOpen = false; render(); } return; }
+    if (e.key === 'Escape') { if (S.lyrOpen) { S.lyrOpen = false; drawLayers(); const b = $('.lyr-b'); if (b) b.focus(); return; } if (S.suggOpen) { S.suggOpen = false; render(); } return; }
     if (e.key === '/' && !e.target.matches('input,textarea')) { const i = $('#q'); if (i) { e.preventDefault(); i.focus(); } return; }
     if (e.target.matches('#q')) {
       const list = suggestions().list;
@@ -301,6 +338,15 @@
       else if (e.key === 'Enter') { e.preventDefault(); const it = list[S.qi >= 0 ? S.qi : 0]; if (it) pickItem(it.t + '|' + it.n); else { const c = M.postalCode(S.q); if (c) M.lookupPostal(c).then((x) => { PCR[c] = x; if (x.list[0] && M.postalCode(S.q) === c) pickItem('postal|' + x.list[0].n); else refreshSugg(); }); } }
     }
   });
+  document.addEventListener('change', (e) => {
+    const c = M && e.target.matches && e.target.matches('[data-layer]') ? e.target : null; if (!c) return;
+    S.layers[c.dataset.layer] = c.checked; LY.save(S.layers); view.update({ layers: S.layers }); const k = $('.mapkey'); if (k) k.outerHTML = legendHtml();
+  });
+  /* a section opened or closed: remembered while the same development stays selected; the amenities section also decides how many amenities are marked on the map */
+  document.addEventListener('toggle', (e) => {
+    const d = e.target; if (!M || !d.matches || !d.matches('details.sx')) return; const id = d.dataset.sx; if (!!S.sec[id] === d.open) return;
+    S.sec[id] = d.open; if (id === 'am' && view) view.update(mapProps(false));
+  }, true);
   document.addEventListener('input', (e) => {
     if (M && e.target.matches('#q')) { S.q = e.target.value; S.qi = -1; S.suggOpen = true; const c = M.postalCode(S.q); if (c && PCR[c] && PCR[c].state === 'error') delete PCR[c]; refreshSugg(); }
   });

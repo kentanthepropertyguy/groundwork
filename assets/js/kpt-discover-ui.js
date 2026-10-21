@@ -17,8 +17,8 @@
 
   /* ------------------------------------------------------------------ state */
   const BLANK = { budget: null, over: false, type: 'any', sale: 'either', minSize: null, tenure: 'any', beds: null };
-  const S = { req: Object.assign({}, BLANK), near: null, mode: 'entry', edit: false, view: 'list', shown: {}, helps: {}, sel: null, errBudget: '', pendingWhere: '', draftBudget: '', moreOpen: false };
-  let ix, invDoc, sitesDoc, dataReady = null, handoff = null, NM = null, nmLoad = null, nmView = null, nmHost = null, nmLayer = null, nmSig = '', NR = null, lastRes = null, seenKey = {};
+  const S = { req: Object.assign({}, BLANK), near: null, mode: 'entry', edit: false, view: 'list', shown: {}, helps: {}, sel: null, errBudget: '', pendingWhere: '', draftBudget: '', moreOpen: false, sheetMin: false, layers: null, lyrOpen: false };
+  let srcLine = '', ix, invDoc, sitesDoc, dataReady = null, handoff = null, NM = null, nmLoad = null, nmView = null, nmHost = null, nmLayer = null, nmSig = '', nmBase = '', wasStage = false, NR = null, lastRes = null, seenKey = {};
 
   /* ------------------------------------------------------------------ data */
   const get = (u, opts) => fetch(u, opts).then((r) => (r.ok ? r.json() : null)).catch(() => null);
@@ -98,7 +98,8 @@
     if (!S.req.budget) return;
     const base = handoff || { v: 1, from: 'search', state: 'ok', budget: { low: S.req.budget, high: S.req.budget, single: true }, purpose: null, openTo: 'both', size: 'not-sure', where: 'flexible', whereText: '', priorities: [] };
     const next = Object.assign({}, base, { find2: snapshot() });
-    if (!handoff || !handoff.budget || handoff.budget.high !== S.req.budget || !handoff.budget.single) { next.budget = { low: S.req.budget, high: S.req.budget, single: true }; next.edited = true; }
+    // a planner's range stays as it was while its top is still the maximum
+    if (!handoff || !handoff.budget || handoff.budget.high !== S.req.budget) { next.budget = { low: S.req.budget, high: S.req.budget, single: true }; next.edited = true; }
     handoff = next; M.writeHandoff(window.sessionStorage, next);
   }
   const SIZE_BEDS = { '1br': 1, '2br': 2, '3br': 3, '3br-study': 3, '4br-plus': 4 };
@@ -113,7 +114,7 @@
         beds: SIZE_BEDS[buy.size] || null, tenure: pr.indexOf('freehold') > -1 ? 'free' : 'any' });
       return { req: r, near: null, where: buy.where && buy.where !== 'flexible' ? String(buy.whereText || '').trim().slice(0, 60) : '', from: 'buy' };
     }
-    if (h && h.budget && h.budget.high > 0) return { req: Object.assign({}, BLANK, { budget: Math.round(h.budget.high) }), near: null, from: h.from, range: h.budget.high > h.budget.low ? { low: h.budget.low, high: h.budget.high } : null };
+    if (h && h.budget && h.budget.high > 0) return { req: Object.assign({}, BLANK, { budget: Math.round(h.budget.high) }), near: null, from: h.from, planner: true, range: h.budget.high > h.budget.low ? { low: h.budget.low, high: h.budget.high } : null, single: !(h.budget.high > h.budget.low) };
     return null;
   }
 
@@ -147,7 +148,8 @@
     }
     const research = u ? `<a data-f="go" data-id="${id}" href="../../research/#/p/${id}/${it.sale}">Research page ›</a>` : '';
     const map = `<a data-f="go" data-id="${id}" href="../../research/map/#p=${id}">View on Map ›</a>`;
-    return `<article class="kd-card${S.sel === it.id ? ' is-sel' : ''}" data-pid="${id}"><h3>${esc(nm)}</h3><p class="kd-meta">${esc(meta(it))}</p>${ev}${n}${inv}<p><span class="kd-tag kd-tg-${tag[0]}">${tag[1]}</span></p><div class="kd-acts">${research}${map}</div></article>`;
+    const loc = stageOn() && NM && NM.BYID[it.id] && NM.BYID[it.id].pos ? `<button type="button" class="kd-link kd-loc" data-f="locate" data-id="${id}" aria-pressed="${S.sel === it.id}">Show here on map</button>` : '';
+    return `<article class="kd-card${S.sel === it.id ? ' is-sel' : ''}" data-pid="${id}"><h3>${esc(nm)}</h3><p class="kd-meta">${esc(meta(it))}</p>${ev}${n}${inv}<p><span class="kd-tag kd-tg-${tag[0]}">${tag[1]}</span></p><div class="kd-acts">${loc}${research}${map}</div></article>`;
   }
 
   /* ------------------------------------------------------------------ the requirements form (one component: the entry screen, the desktop panel and the phone sheet) */
@@ -261,14 +263,22 @@
   function resultsHtml(res) {
     const r = res.req, body = res.state === 'ok' ? listHtml(res) : emptyHtml(res);
     return `<div class="kd-lead"><p class="kd-eye">I’m looking to buy</p><h1 class="kd-h1" id="kdH">${esc(headline(res))}</h1>${res.state === 'ok' ? subLine(res) : ''}</div>
-      ${chips()}<div class="kd-bar"><div class="kd-barrow"><button type="button" class="kd-btn kd-ghost" data-f="edit" aria-expanded="${S.edit}">Edit search</button>${S.near ? `<div class="kd-radin">${radChips()}</div>` : ''}<div class="kd-vt" role="radiogroup" aria-label="View"><button type="button" role="radio" aria-checked="${S.view === 'list'}" data-f="view" data-v="list">List</button><button type="button" role="radio" aria-checked="${S.view === 'map'}" data-f="view" data-v="map"${S.near ? '' : ' disabled'}>Map</button></div></div></div>
+      ${chips()}<div class="kd-bar"><div class="kd-barrow"><button type="button" class="kd-btn kd-ghost" data-f="edit" aria-expanded="${S.edit}">Edit search</button>${S.near ? `<div class="kd-radin">${radChips()}</div>` : ''}</div></div>
       ${S.near ? `<div class="kd-quick">${radChips()}</div>` : ''}<div class="kd-quick2">${overToggle(res.counts)}</div>
-      ${S.view === 'map' && S.near ? '<p class="kd-mhint" id="kdMhint"></p>' : ''}${body}${res.state === 'ok' ? unplacedHtml(res) + upcomingHtml(res) : ''}
+      ${body}${res.state === 'ok' ? unplacedHtml(res) + upcomingHtml(res) : ''}
       <details class="kd-meth"><summary>How these are matched</summary><div class="inner">${METHOD.map((t) => `<p>${esc(t)}</p>`).join('')}</div></details>`;
   }
 
   /* ------------------------------------------------------------------ map (the Map's own view; one Leaflet map kept alive across re-renders) */
-  function destroyMap() { if (nmView) { try { nmView.destroy(); } catch (e) { /* already gone */ } } nmView = null; nmHost = null; nmLayer = null; nmSig = ''; }
+  const stageOn = () => !!(S.near && NR && nearInput());
+  const isPhone = () => !!(window.matchMedia && matchMedia('(max-width: 899px)').matches);
+  const LYR = () => (window.KPT_MAP_VIEW && window.KPT_MAP_VIEW.layers) || null;
+  function destroyMap() { if (nmView) { try { nmView.destroy(); } catch (e) { /* already gone */ } } if (nmHost && nmHost.parentNode) nmHost.parentNode.removeChild(nmHost); nmView = null; nmHost = null; nmLayer = null; nmSig = ''; nmBase = ''; }
+  /* the part of the map not covered by the results panel (left, on a desktop) or the bottom sheet (on a phone) */
+  function stagePad() {
+    if (isPhone()) { const m = document.querySelector('.kd-main'); return { tl: [18, 64], br: [18, (m ? m.offsetHeight : 0) + 16] }; }
+    return { tl: [440, 64], br: [18, 40] };
+  }
   function syncMap(res) {
     const slot = $('kdMapSlot'), ni = nearInput();
     if (!ni || !res) { destroyMap(); return; }
@@ -277,24 +287,44 @@
     slot.appendChild(nmHost);
     if (!nmView) {
       nmView = window.KPT_MAP_VIEW(window.KPT_MAP, NM); nmView.create(nmHost, { onSelect: mapPick, onPlace: () => {} });
-      if (window.matchMedia && matchMedia('(pointer: coarse)').matches) nmView.get().dragging.disable();
+      if (!S.layers && LYR()) S.layers = LYR().load();
     }
     const names = []; res.items.forEach((i) => { const p = NM.BYID[i.id]; if (p && p.pos && names.indexOf(p.n) < 0) names.push(p.n); });
-    const selName = S.sel && NM.BYID[S.sel] ? NM.BYID[S.sel].n : null, sig = NR.key + '|' + ni.radius + '|' + names.join(',') + '|' + (selName || '');
+    const selName = S.sel && NM.BYID[S.sel] ? NM.BYID[S.sel].n : null;
+    const base = NR.key + '|' + ni.radius + '|' + names.join(',') + '|' + (isPhone() ? 'p' + (S.sheetMin ? 'n' : 'o') : 'd'), sig = base + '|' + (selName || '');
     nmView.invalidate && nmView.invalidate();
     if (sig === nmSig) return;
-    nmSig = sig;
+    const refit = base !== nmBase; nmSig = sig; nmBase = base;
     const mp = nmView.get(), c = [NR.lat, NR.lon], bnd = L.latLng(c[0], c[1]).toBounds(ni.radius * 2);
     if (!nmLayer) nmLayer = L.layerGroup().addTo(mp);
     nmLayer.clearLayers();
     L.circle(c, { radius: ni.radius, color: '#2E4FD1', weight: 2, opacity: .8, dashArray: '7 5', fillColor: '#2E4FD1', fillOpacity: .07, interactive: false }).addTo(nmLayer);
     L.circleMarker(c, { radius: 7, color: '#fff', weight: 2.5, fillColor: '#14203F', fillOpacity: 1, bubblingMouseEvents: false }).bindTooltip(NR.label, { className: 'gwtip', direction: 'top', offset: [0, -6] }).addTo(nmLayer);
-    nmView.update({ key: sig, projects: [], selected: selName, cmp: names.filter((n) => n !== selName), amen: [], areaRings: NR.rings || null, bounds: bnd, fit: true, minZoom: 11, ambient: false, pad: { tl: [18, 18], br: [18, 18] } });
+    // matches are the teal dots; every other private home and launch is quiet context (not clickable), shown or hidden by the Layers control
+    nmView.update({ key: sig, projects: NM.PM, quiet: true, layers: S.layers || undefined, selected: selName, cmp: names.filter((n) => n !== selName), amen: [], areaRings: NR.rings || null, bounds: bnd, fit: refit, minZoom: 11, pad: stagePad() });
   }
-  function mapPick(name) {   // a dot on the map -> its card (phone: shown under the map; desktop: scrolled to in the list)
-    const p = NM && NM.BY[name]; if (!p) return;
-    S.sel = p.id; renderResults();
-    if (window.matchMedia && matchMedia('(min-width: 900px)').matches) { const el = document.querySelector('#kdRes [data-pid="' + p.id + '"]'); if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.classList.remove('is-hl'); void el.offsetWidth; el.classList.add('is-hl'); } }
+  /* the Layers control and the key beside it share the Map's choices for this visit */
+  function drawLayers() {
+    const host = $('kdLyr'); if (!host) return; const LY = LYR();
+    if (!(stageOn() && NM && LY)) { host.innerHTML = ''; return; }
+    if (!S.layers) S.layers = LY.load();
+    host.innerHTML = LY.html(S.layers, S.lyrOpen, NM);
+  }
+  function drawKey() {
+    const host = $('kdKey'); if (!host) return; if (!(stageOn() && NM && S.layers)) { host.innerHTML = ''; return; }
+    const L2 = S.layers;
+    host.innerHTML = `<div class="mapkey" aria-label="Map key"><span><i class="t"></i>Matches your search</span>${S.sel ? '<span><i class="s"></i>Selected</span>' : ''}${L2.homes ? '<span><i class="a"></i>Other private homes</span>' : ''}${L2.mrt ? '<span><i class="m"></i>MRT</span>' : ''}${L2.school && NM.hasSchools() ? '<span><i class="sc"></i>School</span>' : ''}${L2.shops ? '<span><i class="sh"></i>Shops and parks</span>' : ''}${L2.launch && NM.UP.some((p) => p.pos) ? '<span><i class="u"></i>New launch or site</span>' : ''}</div>`;
+  }
+  /* a card or a dot is chosen: the card is marked, the map shows the development; on a phone the sheet opens so the card is in view */
+  function selectDev(id, scroll) {
+    S.sel = S.sel === id && !scroll ? null : id; if (S.sel && S.sheetMin) { S.sheetMin = false; applySheet(); }
+    renderResults();
+    if (S.sel && scroll) { const el = document.querySelector('#kdRes [data-pid="' + S.sel + '"]'); if (el) { el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); el.classList.remove('is-hl'); void el.offsetWidth; el.classList.add('is-hl'); } }
+  }
+  function mapPick(name) { const p = NM && NM.BY[name]; if (p) selectDev(p.id, true); }
+  function applySheet() {
+    const cols = document.querySelector('.kd-cols'), b = document.querySelector('[data-f=sheet]'); if (cols) cols.classList.toggle('is-min', !!S.sheetMin);
+    if (b) { b.setAttribute('aria-expanded', String(!S.sheetMin)); const t = b.querySelector('.kd-shc'); if (t) t.textContent = S.sheetMin ? 'Show results' : 'Minimise'; }
   }
 
   /* ------------------------------------------------------------------ rendering */
@@ -314,9 +344,12 @@
     const mapOn = !!(S.near && nearInput());
     $('kdMapCol').hidden = !mapOn;
     document.body.classList.toggle('kd-hasmap', mapOn);
-    document.body.dataset.kdView = mapOn ? S.view : 'list';
-    if (S.view === 'map' && S.near) { const sel = S.sel && res.items.concat(res.over).find((i) => i.id === S.sel), box = $('kdMsel'); if (box) box.innerHTML = sel ? cardHtml(sel) : '<p class="kd-mhint">Tap a dot to see the development.</p>'; }
-    syncMap(res);
+    document.body.dataset.kdView = mapOn ? 'stage' : 'list';
+    const sh = $('kdShT'); if (sh) sh.textContent = res.counts.projects + (res.counts.projects === 1 ? ' development' : ' developments'); const ss = $('kdShS'); if (ss) ss.textContent = placeLine() + ' · nearest first';
+    applySheet();
+    if (mapOn && !wasStage) window.scrollTo({ top: 0 });   // the map is a full-screen stage: start at its top
+    wasStage = mapOn;
+    syncMap(res); drawLayers(); drawKey();
     const key = JSON.stringify([S.req.type, S.req.sale, !!S.near, FI.bucket(res.counts.projects)]);
     if (!seenKey[key]) { seenKey[key] = 1; KPT.track('find_shown', { budget_band: bandOf(S.req.budget), result_bucket: FI.bucket(res.counts.projects), area_filter: !!S.near, sale_groups: S.req.sale === 'either' ? 'resale+new' : S.req.sale, property_type: S.req.type }); }
   }
@@ -330,11 +363,11 @@
     const root = $('root'), bey = $('beyond'); if (bey) bey.hidden = S.mode === 'entry';
     if (S.mode === 'entry') {
       root.className = 'kd is-entry';
-      root.innerHTML = `<div class="kd-entry"><p class="kd-eye">I’m looking to buy</p><h1 class="kd-h1">What are you looking for?</h1><p class="kd-lede">Tell us your maximum and where. Add requirements if you have them, and change any of it later without starting again.</p><div id="kdForm" class="kd-form"></div><p class="kd-fine">Not sure of your budget? <a href="../hdb-upgrade/">Work out your planning position first ›</a></p></div>`;
+      root.innerHTML = `<div class="kd-entry"><p class="kd-eye">I’m looking to buy</p><h1 class="kd-h1">What are you looking for?</h1><p class="kd-lede">Tell us your maximum and where. Add requirements if you have them, and change any of it later without starting again.</p>${srcLine ? `<p class="kd-src">${esc(srcLine)}</p>` : ''}<div id="kdForm" class="kd-form"></div>${srcLine ? '' : '<p class="kd-fine">Not sure of your budget? <a href="../hdb-upgrade/">Work out your planning position first ›</a></p>'}</div>`;
       $('kdForm').innerHTML = formHtml(true); bindInputs(); return;
     }
     root.className = 'kd is-results' + (S.edit ? ' is-edit' : '');
-    root.innerHTML = `<div class="kd-cols"><div class="kd-main"><div id="kdEdit" class="kd-edit${S.edit ? ' open' : ''}" role="region" aria-label="Edit your search"><div class="kd-edit-h"><b>Edit your search</b><span>Results update as you change things</span><button type="button" class="kd-sheetx" data-f="done" aria-label="Close">✕</button></div><div id="kdForm" class="kd-form"></div><div class="kd-sheetbar"><button type="button" class="kd-btn" data-f="done" id="kdSheetCount"></button></div></div><div id="kdRes"></div></div><aside class="kd-mapcol" id="kdMapCol" hidden><div class="kd-mapbox"><div id="kdMapSlot" class="kd-mapslot"></div><div class="kd-msel" id="kdMsel"></div></div></aside></div>`;
+    root.innerHTML = `<div class="kd-cols${S.sheetMin ? ' is-min' : ''}"><div class="kd-main"><div class="kd-shd"><button type="button" class="kd-shb" data-f="sheet" aria-expanded="${!S.sheetMin}" aria-controls="kdRes"><span class="kd-grab" aria-hidden="true"></span><span class="kd-shl"><b id="kdShT"></b><span id="kdShS"></span></span><span class="kd-shc">${S.sheetMin ? 'Show results' : 'Minimise'}</span></button></div><div id="kdEdit" class="kd-edit${S.edit ? ' open' : ''}" role="region" aria-label="Edit your search"><div class="kd-edit-h"><b>Edit your search</b><span>Results update as you change things</span><button type="button" class="kd-sheetx" data-f="done" aria-label="Close">✕</button></div><div id="kdForm" class="kd-form"></div><div class="kd-sheetbar"><button type="button" class="kd-btn" data-f="done" id="kdSheetCount"></button></div></div><div id="kdRes"></div></div><aside class="kd-mapcol" id="kdMapCol" hidden><div class="kd-mapbox kpm"><div id="kdMapSlot" class="kd-mapslot"></div><div id="kdLyr"></div><div id="kdKey"></div><div class="zoomc zc"><button type="button" data-f="zoom" data-d="1" aria-label="Zoom in">+</button><button type="button" data-f="zoom" data-d="-1" aria-label="Zoom out">−</button></div></div></aside></div>`;
     compute();
     $('kdForm').innerHTML = formHtml(false); bindInputs(); renderResults();
   }
@@ -410,7 +443,12 @@
     loadData().then(() => { S.mode = 'results'; S.edit = false; S.shown = {}; renderAll(); persist(); const h = $('kdH'); if (h && h.scrollIntoView) window.scrollTo({ top: 0 }); });
   }
   function onClick(e) {
+    const card = e.target.closest ? e.target.closest('.kd-card[data-pid]') : null;   // a card (not one of its links or buttons) chooses that development on the map
+    if (card && stageOn() && !e.target.closest('a,button,summary,input,label')) { selectDev(card.dataset.pid, false); return; }
     const t = e.target.closest ? e.target.closest('[data-f]') : null; if (!t || !t.dataset) return; const f = t.dataset.f;
+    if (f === 'locate') { selectDev(t.dataset.id, true); const b = document.querySelector('#kdRes [data-f=locate][data-id="' + t.dataset.id + '"]'); if (b) b.focus(); return; }
+    if (f === 'zoom') { if (nmView) { if (Number(t.dataset.d) > 0) nmView.zoom(1); else nmView.zoomOut(1); } return; }
+    if (f === 'sheet') { S.sheetMin = !S.sheetMin; applySheet(); nmSig = ''; nmBase = ''; syncMap(lastRes); return; }
     if (f === 'go') { KPT.track('find_research_click', { project_id: t.dataset.id }); return; }
     if (f === 'show') { show(); return; }
     if (f === 'seg') {
@@ -463,11 +501,26 @@
     handoff = M.readHandoff(window.sessionStorage);
     const init = initial();
     if (init) { S.req = Object.assign({}, BLANK, init.req); if (init.req.budget) S.draftBudget = money(init.req.budget); S.view = 'list'; }
+    if (init && init.planner && S.req.budget && D.clean(S.req).budget) {   // a budget from a planner: the buyer chooses area and type first, then Show developments (never straight to islandwide results)
+      srcLine = 'From your plan: ' + (init.range ? m2(init.range.low) + '–' + m2(init.range.high) + '. The top of the range is filled in as your maximum.' : 'about ' + m2(S.req.budget) + '.');
+      S.mode = 'entry'; renderAll(); loadData(); return;
+    }
     if (init && S.req.budget && D.clean(S.req).budget) {
       $('root').innerHTML = '<p class="kd-load">Loading…</p>';
       loadData().then(() => restorePlace(init.near, init.where)).then(() => { S.mode = 'results'; renderAll(); if (!init.near && !init.where) persist(); });
     } else { S.mode = 'entry'; renderAll(); loadData(); }
   }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('[data-lyr]');
+    if (b) { S.lyrOpen = !S.lyrOpen; drawLayers(); const nb = document.querySelector('.lyr-b'); if (nb) nb.focus(); return; }
+    if (S.lyrOpen && !(e.target.closest && e.target.closest('.lyr'))) { S.lyrOpen = false; drawLayers(); }
+  });
+  document.addEventListener('change', (e) => {
+    const c = e.target.matches && e.target.matches('[data-layer]') ? e.target : null; if (!c || !S.layers) return;
+    S.layers[c.dataset.layer] = c.checked; LYR().save(S.layers); if (nmView) nmView.update({ layers: S.layers }); drawKey();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && S.lyrOpen) { S.lyrOpen = false; drawLayers(); const nb = document.querySelector('.lyr-b'); if (nb) nb.focus(); } });
+  let rzT; addEventListener('resize', () => { clearTimeout(rzT); rzT = setTimeout(() => { if (nmView && lastRes) { nmSig = ''; nmBase = ''; syncMap(lastRes); } }, 200); });
   // Ken: a quiet, generic WhatsApp link (no budget, place or search in it)
   const BEYOND_WA = 'Hi Ken, I was using Groundwork and have a question.';
   const kb = $('kenBeyond'); if (kb) kb.href = KPT.waLink({ message: BEYOND_WA });

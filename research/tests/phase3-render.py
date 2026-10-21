@@ -93,7 +93,7 @@ try:
         if mob and pg.query_selector('[data-dpmore]'): pg.click('[data-dpmore]'); pg.wait_for_timeout(500)
         t = card(pg)
         check(vn + ': "Prices by size" rows carry a small "N sales" badge, not "units"', re.search(r'\d+ sales?', t) is not None and not re.search(r'available units|units available', t, re.I), t)
-        check(vn + ': "Around this home" offers more on demand', pg.query_selector('[data-am-more]') is not None or mob)
+        check(vn + ': the summary marks the two amenities that matter and the full list opens on demand', pg.query_selector('.around.key') is not None and pg.query_selector('details[data-sx=am]') is not None)
         # MRT and school radius
         opn(pg); pick(pg, 'toa payoh mrt'); check(vn + ': a station has the same radius choices', pg.query_selector('.rad') is not None); shot(pg, f'map-mrt-{vn}')
         radius(pg, 2000); check(vn + ': a station at 2 km', '2 km' in card(pg))

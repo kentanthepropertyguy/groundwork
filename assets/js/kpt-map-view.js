@@ -10,6 +10,23 @@
   const TILES = 'https://www.onemap.gov.sg/maps/tiles/Default/{z}/{x}/{y}.png';
   const ATTR = '<img src="https://www.onemap.gov.sg/web-assets/images/logo/om_logo.png" alt="" onerror="this.style.display=\'none\'"> <a href="https://www.onemap.gov.sg/" target="_blank" rel="noopener">OneMap</a> &copy; contributors | Singapore Land Authority';
 
+  /* ---- Layers: what the map shows besides the selection. One small control; the choice is remembered for the visit (this tab) and shared by the Map and Budget Search. ---- */
+  const LKEY = 'kpt.map.layers', LDEF = { homes: true, launch: true, mrt: true, school: false, shops: false };
+  const LLAB = { homes: 'Private homes', launch: 'New launches and GLS sites', mrt: 'MRT stations', school: 'Schools', shops: 'Shops and parks' };
+  const layers = {
+    DEF: LDEF,
+    load() { const o = Object.assign({}, LDEF); try { const j = JSON.parse(sessionStorage.getItem(LKEY) || 'null'); if (j && typeof j === 'object') Object.keys(LDEF).forEach((k) => { if (typeof j[k] === 'boolean') o[k] = j[k]; }); } catch (e) { /* storage unavailable: the defaults */ } return o; },
+    save(st) { try { sessionStorage.setItem(LKEY, JSON.stringify(st)); } catch (e) { /* the choice just is not remembered */ } },
+    /* only the layers that have something behind them on this page */
+    avail(M) { return Object.keys(LDEF).filter((k) => k === 'homes' || k === 'mrt' || (k === 'launch' && M.UP.some((p) => p.pos)) || (k === 'school' && M.hasSchools()) || (k === 'shops' && (M.AM.parks.length || M.AM.food.length || M.hasShops()))); },
+    label: (k) => LLAB[k],
+    /* the control: a quiet button and, when open, a small list of switches */
+    html(st, open, M) {
+      const av = layers.avail(M);
+      return `<div class="lyr"><button type="button" class="lyr-b" data-lyr aria-expanded="${!!open}" aria-controls="lyr-p"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/></svg>Layers</button>${open ? `<div class="lyr-p" id="lyr-p" role="group" aria-label="Map layers">${av.map((k) => `<label class="lyr-r"><input type="checkbox" data-layer="${k}"${st[k] ? ' checked' : ''}><span>${LLAB[k]}</span></label>`).join('')}</div>` : ''}</div>`;
+    }
+  };
+
   root.KPT_MAP_VIEW = function (K, M) {      // K = KPT_MAP (helpers), M = the model made by KPT_MAP.create
     const { esc, icon } = K;
     const canHover = typeof matchMedia === 'function' && matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -55,7 +72,6 @@
     function update(o) {
       if (o.keep && saved) o = Object.assign({}, o, { key: saved.key });   // a development with no position: leave the map where the visitor had it
       cur = Object.assign(cur, o);
-      layer.clearLayers(); selG.clearLayers();
       if (!map._loaded || o.fit) {
         if (saved && saved.key === o.key) map.setView(saved.center, saved.zoom, { animate: false });
         else if (cur.world) { const pd = cur.pad, sz = map.getSize(), c0 = [1.362, 103.81]; map.setView(c0, sz.x < 600 ? 11 : 12, { animate: false }); const rx = (pd.tl[0] + sz.x - pd.br[0]) / 2, ry = (pd.tl[1] + sz.y - pd.br[1]) / 2, p0 = map.latLngToContainerPoint(c0); map.panBy([Math.round(p0.x - rx), Math.round(p0.y - ry)], { animate: false }); }
@@ -72,14 +88,18 @@
         }
       }
       keepSelectedInView();
+      layer.clearLayers(); selG.clearLayers();   // cleared after the view is placed: placing it can fire a zoom that draws once already
       const BY = M.BY, cmp = new Set(cur.cmp || []), tip = (p) => p.up ? `${esc(p.n)} · ${esc(M.upTag(p))}` : `${esc(p.n)}${p.cls && p.cls !== 'condo' ? ' (' + esc(M.CLS[p.cls].short) + ')' : ''} · ${p.t12} sale${p.t12 === 1 ? '' : 's'} in 12 months`, z = map.getZoom(), zs = z <= 12 ? .5 : z <= 13 ? .75 : 1;
-      const dot = (p, o2) => { const k = L.circleMarker([p.lat, p.lon], Object.assign(p.up ? { radius: 5 * zs + 1, color: '#2E4FD1', weight: 1.8, fillColor: '#fff', fillOpacity: .95, bubblingMouseEvents: false } : { radius: (3 + Math.min(6, Math.sqrt(p.t12))) * zs, color: '#fff', weight: 1.2, fillColor: '#2E4FD1', fillOpacity: p.t12 ? .5 : .25, bubblingMouseEvents: false }, o2)); if (canHover) k.bindTooltip(tip(p), { className: 'gwtip', direction: 'top', offset: [0, -6] }); /* a touch screen has no hover: the tap selects the dot, and a tooltip would only cover the card and the map */ k.on('click', () => onSelect && onSelect(p.n)); return k; };
-      for (const p of cur.projects) if (p.n !== cur.selected && !cmp.has(p.n)) dot(p).addTo(layer);
-      for (const n of cmp) { const p = BY[n]; if (p && p.pos) dot(p, { fillColor: '#0E8C89', fillOpacity: .95, weight: 2 }).addTo(layer); }
+      const dot = (p, o2) => { if (cur.quiet && !(o2 && o2.match)) o2 = Object.assign({ interactive: false }, p.up ? {} : { fillColor: '#8B93A7', fillOpacity: .32 }, o2); const k = L.circleMarker([p.lat, p.lon], Object.assign(p.up ? { radius: 4 * zs + 1, color: '#2E4FD1', weight: 1.5, fillColor: '#fff', fillOpacity: .9, bubblingMouseEvents: false } : { radius: (2.6 + Math.min(5, Math.sqrt(p.t12))) * zs, color: '#fff', weight: 1, fillColor: '#2E4FD1', fillOpacity: p.t12 ? .42 : .2, bubblingMouseEvents: false }, o2)); if (canHover && !(cur.quiet && !(o2 && o2.match))) k.bindTooltip(tip(p), { className: 'gwtip', direction: 'top', offset: [0, -6] }); /* a touch screen has no hover: the tap selects the dot, and a tooltip would only cover the card and the map */ k.on('click', () => onSelect && onSelect(p.n)); return k; };
+      const LY = Object.assign({}, LDEF, cur.layers);
+      for (const p of cur.projects) if (p.n !== cur.selected && !cmp.has(p.n) && (p.up ? LY.launch : LY.homes)) dot(p).addTo(layer);
+      for (const n of cmp) { const p = BY[n]; if (p && p.pos) dot(p, { fillColor: '#0E8C89', fillOpacity: .95, weight: 2, match: true }).addTo(layer); }
       if (cur.circle) L.circle([cur.circle.lat, cur.circle.lon], { radius: cur.circle.r, color: '#2E4FD1', weight: 2, opacity: cur.circle.soft ? .55 : .8, dashArray: '7 5', fillColor: '#2E4FD1', fillOpacity: cur.circle.soft ? .02 : .06, interactive: false }).addTo(selG);
       if (cur.areaRings) L.polygon(cur.areaRings, { color: '#14203F', weight: 2, opacity: .75, fillColor: '#2E4FD1', fillOpacity: .05, dashArray: '6 5', interactive: false }).addTo(selG);
       drawLabels();
     }
+    const pts = new WeakMap();   // a park is a boundary; it is marked at the middle of its first ring
+    const parkPt = (k) => { let c = pts.get(k); if (!c) { const r = k.rings[0] || [[0, 0]]; c = { n: k.n, lat: r.reduce((a, q) => a + q[0], 0) / r.length, lon: r.reduce((a, q) => a + q[1], 0) / r.length }; pts.set(k, c); } return c; };
     const amIcon = (k, hl, small) => L.divIcon({ className: 'amwrap', html: `<div class="am k-${k}${hl ? ' hl' : ''}${small ? ' sm' : ''}">${icon(k, small ? 11 : 14)}</div>`, iconSize: small ? [18, 18] : [24, 24], iconAnchor: small ? [9, 9] : [12, 12] });
     function drawLabels() {
       labelsG.clearLayers(); if (!cur.projects || !map) return;
@@ -101,13 +121,21 @@
       (cur.cmp || []).forEach((n) => { const p = BY[n]; if (!p || !p.pos) return; const pt = map.latLngToContainerPoint([p.lat, p.lon]); if (vis(pt)) label(pt, p.n, 't', 12); });
       // 4. ambient: MRT stations from zoom 14, schools from zoom 16 (names only when there is room); never the same ones twice
       if (cur.ambient !== false) {
+        const LY = Object.assign({}, LDEF, cur.layers);
         const amb = (arr, kind, minZ, nameZ, cls) => { if (z < minZ) return; arr.forEach((s) => { const id = kind + ':' + s.n; if (amIds.has(id)) return; const pt = map.latLngToContainerPoint([s.lat, s.lon]); if (!vis(pt)) return;
           const mk = L.marker([s.lat, s.lon], { icon: amIcon(kind, false, true), keyboard: false, title: s.n, riseOnHover: true }).addTo(labelsG); mk.on('click', (ev) => { L.DomEvent.stopPropagation(ev); onPlace && onPlace(kind, s.n); }); placed.push({ x: pt.x - 9, y: pt.y - 9, w: 18, h: 18 });
           if (z >= nameZ) label(pt, s.n, 'a k-' + kind, 12); }); };
-        amb(AM.stations, 'mrt', 14, 16); amb(AM.schools, 'school', 16, 17);
+        if (LY.mrt) amb(AM.stations, 'mrt', 14, 16);
+        if (LY.school) amb(AM.schools, 'school', 16, 17);
+        if (LY.shops) {   // supermarkets and food centres from zoom 16, parks (marked at their middle) from zoom 15; not clickable, there is no page behind them
+          const quiet = (arr, kind, minZ, nameZ) => { if (z < minZ) return; arr.forEach((s) => { const id = kind + ':' + s.n; if (amIds.has(id)) return; const pt = map.latLngToContainerPoint([s.lat, s.lon]); if (!vis(pt)) return; if (placed.some((q) => hit({ x: pt.x - 9, y: pt.y - 9, w: 18, h: 18 }, q))) return;
+            const mk = L.marker([s.lat, s.lon], { icon: amIcon(kind, false, true), keyboard: false, interactive: canHover, title: s.n }).addTo(labelsG); placed.push({ x: pt.x - 9, y: pt.y - 9, w: 18, h: 18 }); if (z >= nameZ) label(pt, s.n, 'a k-' + kind, 12); }); };
+          quiet(AM.parks.filter((k) => k.a >= 15000).map(parkPt), 'park', 15, 17); quiet(AM.food, 'food', 16, 17); quiet(AM.shops || [], 'shop', 16, 17);
+        }
       }
     }
     function hl(id, pan, pad) { if (!map) return; cur.hl = id; drawLabels(); if (pan && id) { const a = (cur.amen || []).find((x) => x.id === id); if (a) map.panInside([a.lat, a.lon], { paddingTopLeft: pad ? pad.tl : [40, 90], paddingBottomRight: pad ? pad.br : [40, 40], animate: true }); } }
     return { create, update, hl, zoom: (d) => map.zoomIn(d), zoomOut: (d) => map.zoomOut(d), get: () => map, destroy: () => { clearTimeout(tileTimer); if (map) { saved = { key: cur.key, center: map.getCenter(), zoom: map.getZoom() }; map.remove(); map = null; } }, failed: () => failed, invalidate: () => map && map.invalidateSize() };
   };
+  root.KPT_MAP_VIEW.layers = layers;
 })(typeof self !== 'undefined' ? self : this);

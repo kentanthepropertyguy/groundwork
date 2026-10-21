@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="../../assets/css/kpt-journey.css?v=4b50abcf2e">
 <link rel="stylesheet" href="../../assets/css/kpt-shell.css?v=30b765165f">
 <script src="../../assets/js/gw-wa.js?v=7a6cf4f1be"></script>
-<link rel="stylesheet" href="../../assets/css/gw.css?v=676e08cc0b">
+<link rel="stylesheet" href="../../assets/css/gw.css?v=59acb7f685">
 <link rel="canonical" href="https://tools.kentanthepropertyguy.com/tools/hdb-upgrade/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Groundwork">
@@ -650,6 +650,7 @@
       };
       if (r.cash && r.cash.refundAssumedMax !== undefined) h.cpf = { confirmed: false, refundMax: r.cash.refundAssumedMax };
       if (old && old.from === 'hdb-upgrade' && old.find && !old.edited && old.budget.low === h.budget.low && old.budget.high === h.budget.high) h.find = old.find;   // keep the search made on "What it buys" for the same budget
+      if (old && old.from === 'hdb-upgrade' && old.find2 && !old.edited && old.budget.low === h.budget.low && old.budget.high === h.budget.high) h.find2 = old.find2;   // ...with its requirements, so coming back lands on the same results
       M.writeHandoff(st, h);
     } catch (e) { /* storage unavailable */ }
   }
