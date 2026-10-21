@@ -54,7 +54,8 @@
   }
   function formHtml() {
     return '<section class="pa-sec" aria-labelledby="pa-h-you"><h2 class="pa-h" id="pa-h-you">You</h2>' +
-      chips('who', 'Buying', [['alone', 'Buying alone'], ['two', 'With someone']], { value: 'alone', cls: 'pa-who' }) + buyerRow(0) + buyerRow(1) + '</section>' +
+      chips('who', 'Buying', [['alone', 'Buying alone'], ['two', 'With someone']], { value: 'alone', cls: 'pa-who' }) + buyerRow(0) + buyerRow(1) +
+      chips('buyers.0.res', 'Residency, you', RES, { value: 'SC', share: 'buyers.0.res' }) + chips('buyers.1.res', 'Residency, second buyer', RES, { value: 'SC', share: 'buyers.1.res', when: 'who:two' }) + '</section>' +
       '<section class="pa-sec" aria-labelledby="pa-h-own"><h2 class="pa-h" id="pa-h-own">Your property now</h2>' +
       chips('owns', 'Do you own a property now?', [['none', 'No'], ['one', 'Yes, one'], ['two', 'Yes, two or more']], { value: '' }) +
       '<div class="pa-own" data-when="owns:one,two" hidden>' +
@@ -78,9 +79,8 @@
       '<section class="pa-sec" aria-labelledby="pa-h-home"><h2 class="pa-h" id="pa-h-home">The home</h2>' + chips('kind', 'What are you buying?', [['new', 'New launch'], ['completed', 'Completed private home'], ['hdb', 'HDB flat']], { value: 'new' }) +
       '<div class="pa-route" data-when="kind:hdb" hidden>' + hdbRoute(true) + '</div>' +
       '<p class="pa-note">Buying an EC, or buying before you sell? Use the <a href="../payment-planner/">payment timeline</a>.</p></section>' +
-      '<details class="pa-adj" data-adj><summary><span>Adjust assumptions</span><em data-adj-sum></em></summary><div class="pa-adj-b">' +
-      '<div class="pa-pair">' + numf('ratePct', 'Interest rate you expect', '% a year', { ph: '4', hint: 'Your instalment uses this. Banks test what you can borrow at the higher of 4% and this rate.' }) + numf('years', 'Loan years', 'years', { ph: 'suggested for you', hint: 'Leave it empty and we suggest one. A number here is used as typed, up to the most a bank allows at your age; a longer one is changed to that maximum.' }) + '</div>' +
-      chips('buyers.0.res', 'Residency, you', RES, { value: 'SC', share: 'buyers.0.res' }) + chips('buyers.1.res', 'Residency, second buyer', RES, { value: 'SC', share: 'buyers.1.res', when: 'who:two' }) +
+      '<section class="pa-sec" aria-labelledby="pa-h-loan"><h2 class="pa-h" id="pa-h-loan">The loan</h2><div class="pa-pair">' + numf('ratePct', 'Interest rate you expect', '% a year', { ph: '4', hint: 'Your instalment uses this. Banks test the loan at the higher of 4% and this rate.' }) + numf('years', 'Loan years', 'years', { ph: 'suggested for you', hint: 'Leave it empty and we suggest one. More than a bank allows is cut back to the maximum.' }) + '</div></section>' +
+      '<details class="pa-adj" data-adj><summary><span>More options</span><em data-adj-sum></em></summary><div class="pa-adj-b">' +
       datef('otp', 'Option date') + money('setAside', 'Set aside for fees and renovation', { opt: true, ph: '0', hint: 'Kept out of the money used for the purchase.' }) + '</div></details>';
   }
 
@@ -388,7 +388,7 @@
       const typed = f.value.trim() !== '' ? parseMoney(f.value) : null;
       q('[data-borrow-note]').textContent = choice ? 'You would borrow ' + $(r.at.loan) + ' of the ' + $(mx) + ' the bank may lend at this price. Borrowing less means more cash and CPF now and a smaller instalment.' : typed && !typed.error && typed.value > mx ? 'That is more than the ' + $(mx) + ' the numbers allow at this price, so ' + $(mx) + ' is used.' : 'Up to ' + $(mx) + ', the most the numbers allow at this price. Borrowing less means more cash and CPF now and a smaller instalment.';
     }
-    function adjSummary(s) { const e = q('[data-adj-sum]'); if (!e) return; const rate = s.ratePct !== undefined ? s.ratePct : 4, yrs = res && res.years ? res.years : (s.years || ''); const r0 = (s.buyers[0] && s.buyers[0].res) || 'SC'; e.textContent = pc(rate / 100, 2).replace(/\.0+%$/, '%') + (yrs ? ' · ' + yrs + ' years' : '') + ' · ' + RESW[r0] + (s.otp ? ' · option ' + day(s.otp) : ''); }
+    function adjSummary(s) { const e = q('[data-adj-sum]'); if (!e) return; e.textContent = [s.otp ? 'option ' + day(s.otp) : '', s.setAside > 0 ? '$' + fmtMoney(s.setAside) + ' set aside' : ''].filter(Boolean).join(' · '); }
     function setPriceUi(r) {
       const rg = q('[data-range]'), pf = field('price'), box2 = out.pricebox;
       if (!r || r.state !== 'ok') { box2.hidden = true; return; }
