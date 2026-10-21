@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /* ==========================================================================
-   Interactive Map data. Same raw URA files, same scope and the same cell rules as build-project-stats.js (Research); this
+   Interactive Map data. Same raw URA files, same scope (the shared development register, register.js: condos, ECs and cluster housing, each
+   development in one class) and the same cell rules as build-project-stats.js (Research); this
    build only adds what the map needs: a project position and size-band cells for TWO markets.
      Primary market   = New Sale (type 1)
      Secondary market = Sub Sale + Resale (types 2 and 3), with the Sub Sale count kept inside every secondary cell
@@ -22,6 +23,7 @@ const fs = require('fs'), path = require('path');
 const { quantile } = require('./build-bands.js');
 const P = require('../../assets/js/kpt-project.js');
 const R = require('../../assets/js/kpt-research.js');
+const G = require('./register.js');
 const SQM_TO_SQFT = 10.7639, WINS = [12, 24, 36], MAX_RECENT = 6;
 
 /* ---------- SVY21 (EPSG:3414) to WGS84: inverse transverse Mercator, Krueger series ---------- */
@@ -52,19 +54,16 @@ function load(rawDir) {
 }
 
 function build(docs, cfg, pc, ix, asOf) {
-  const exclude = new Set(pc.exclude.map((e) => e.name)), hold = new Set(pc.hold.map((e) => e.name));
+  const tmap = G.checkConfig(cfg), screen = G.nameScreen(pc);
   const xy = new Map(), tx = new Map();
   let latest = 0;
   docs.forEach((doc) => (doc.Result || []).forEach((p) => {
-    const name = p.project; if (!name || exclude.has(name) || hold.has(name)) return;
+    const name = p.project; if (!name || screen(name)) return;
     if (p.x && p.y && !xy.has(name)) xy.set(name, [Number(p.x), Number(p.y)]);
     (p.transaction || []).forEach((t) => {
-      const m = /^(\d{2})(\d{2})$/.exec(String(t.contractDate || '')); if (!m) return;
-      if (!cfg.propertyTypes.includes(t.propertyType) || t.typeOfArea !== 'Strata' || String(t.noOfUnits) !== '1') return;
-      const s = +t.typeOfSale; if (![1, 2, 3].includes(s) || !['OCR', 'RCR', 'CCR'].includes(p.marketSegment)) return;
-      const price = Number(t.price), sqm = Number(t.area); if (!(price > 0) || !(sqm > 0)) return;
-      const sqft = sqm * SQM_TO_SQFT, ym = (2000 + +m[2]) * 12 + (+m[1] - 1); latest = Math.max(latest, ym);
-      (tx.get(name) || tx.set(name, []).get(name)).push({ s, price, sqft, psf: price / sqft, bin: Math.floor(sqft / 100) * 100, ym });
+      const a = G.admit(t, p.marketSegment, tmap); if (!a.ok) return;
+      const sqft = a.sqm * SQM_TO_SQFT; latest = Math.max(latest, a.ym);
+      (tx.get(name) || tx.set(name, []).get(name)).push({ s: a.sale, cls: a.cls, price: a.price, sqft, psf: a.price / sqft, bin: Math.floor(sqft / 100) * 100, ym: a.ym });
     });
   }));
   const cell = (rs) => {
@@ -85,16 +84,18 @@ function build(docs, cfg, pc, ix, asOf) {
   const places = [], ev = {}, check = [], noXY = [];
   Array.from(tx.keys()).sort().forEach((name) => {
     const id = P.slugify(name), row = byId.get(id); if (!row) return;      // not in the Research index: out of scope
-    const rows = tx.get(name), isNew = (x) => x.s === 1, isSec = (x) => x.s !== 1;
+    const D = G.split(tx.get(name)), rows = D.rows, cls = D.cls;      // headline class only; other classes under the same name are counted in `also`
+    if (row.cls !== cls) throw new Error('Class differs from the Research index for ' + name + ': ' + row.cls + ' vs ' + cls);
+    const isNew = (x) => x.s === 1, isSec = (x) => x.s !== 1;
     const mkNew = cellsFor(rows, [1]), mkSec = cellsFor(rows, [2, 3]);
     const sec = rows.filter(isSec), nw = rows.filter(isNew), s12 = sec.filter((x) => latest - x.ym < 12);
     const lease = (/from (\d{4})/.exec(row.tenLabel) || [])[1];
-    ev[id] = { street: R.displayName(row.street), tenure: row.tenLabel, tenGroup: row.tenGroup, lease: lease ? +lease : null,
+    ev[id] = { street: R.displayName(row.street), also: D.also, tenure: row.tenLabel, tenGroup: row.tenGroup, lease: lease ? +lease : null,
       tot: { new: nw.length, sub: sec.filter((x) => x.s === 2).length, res: sec.filter((x) => x.s === 3).length },
       lastNew: nw.length ? ymInt(Math.max(...nw.map((x) => x.ym))) : null, lastSec: sec.length ? ymInt(Math.max(...sec.map((x) => x.ym))) : null,
       mk: { new: mkNew, sec: mkSec }, rc: { new: recent(rows, [1], mkNew), sec: recent(rows, [2, 3], mkSec) } };
     const pos = xy.get(name), ll = pos ? svy21(pos[0], pos[1]) : null; if (!ll) noXY.push({ id, name, n: rows.length, last: row.last });
-    places.push([id, R.displayName(name), ll ? r5(ll.lat) : null, ll ? r5(ll.lon) : null, String(row.district), row.seg, nw.filter((x) => latest - x.ym < 12).length, s12.length, s12.filter((x) => x.s === 2).length]);
+    places.push([id, R.displayName(G.shownName(name, pc)), ll ? r5(ll.lat) : null, ll ? r5(ll.lon) : null, String(row.district), row.seg, nw.filter((x) => latest - x.ym < 12).length, s12.length, s12.filter((x) => x.s === 2).length, cls]);
     check.push({ id, rows });
   });
   return { places, ev, latest, noXY, check, cellsFor, byId };
@@ -133,6 +134,7 @@ function main() {
   const out = build(load(raw), cfg, pc, ix, asOf);
   const ids = new Set(out.places.map((r) => r[0])), missing = ix.rows.filter((r) => !ids.has(r[ix.fields.indexOf('id')]));
   if (missing.length) { console.error('Research projects missing from the map build: ' + missing.length); process.exit(1); }
+  const seenNames = new Map(); out.places.forEach((r) => { if (seenNames.has(r[1])) { console.error('Two developments share the map name "' + r[1] + '": ' + seenNames.get(r[1]) + ' and ' + r[0]); process.exit(1); } seenNames.set(r[1], r[0]); });
   if (ymInt(out.latest).toString().replace(/^(\d{4})(\d{2})$/, '$1-$2') !== man.latestMonth) { console.error('Latest month differs from Research (' + ymInt(out.latest) + ' vs ' + man.latestMonth + '); build from the same raw files.'); process.exit(1); }
   if (!process.argv.includes('--no-validate')) {
     const v = validate(out, projDir);
@@ -141,7 +143,7 @@ function main() {
   }
   fs.mkdirSync(outDir, { recursive: true });
   const meta = { v: 1, asOf, latestMonth: man.latestMonth, source: 'URA transactions (PMI_Resi_Transaction)' };
-  fs.writeFileSync(path.join(outDir, 'places.json'), JSON.stringify(Object.assign({}, meta, { fields: ['id', 'name', 'lat', 'lon', 'district', 'seg', 'p12', 's12', 'sub12'], rows: out.places })));
+  fs.writeFileSync(path.join(outDir, 'places.json'), JSON.stringify(Object.assign({}, meta, { fields: ['id', 'name', 'lat', 'lon', 'district', 'seg', 'p12', 's12', 'sub12', 'cls'], rows: out.places })));
   fs.writeFileSync(path.join(outDir, 'ev.json'), JSON.stringify(Object.assign({}, meta, { cellFields: ['bin', 'win', 'n', 'act', 'last', 'q1', 'med', 'q3', 'pmed', 'sub'], projects: out.ev })));
   const kb = (f) => Math.round(fs.statSync(path.join(outDir, f)).size / 1024) + ' KB';
   console.log(out.places.length + ' projects (' + (out.places.length - out.noXY.length) + ' with a position, ' + out.noXY.length + ' without); places.json ' + kb('places.json') + ', ev.json ' + kb('ev.json'));

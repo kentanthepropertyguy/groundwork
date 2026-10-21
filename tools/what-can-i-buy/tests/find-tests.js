@@ -317,8 +317,10 @@ t('synthetic: a project with the Pinery id is dropped by prepare(); every other 
 });
 t('shipped data: Pinery is removed from the FIND index and every other project stays (647 of 648)', () => {
   assert.ok(realDoc.projects.some((p) => p.id === 'pinery-residences'), 'source file still holds it (data is unchanged)');
-  assert.strictEqual(ixr.projects.length, realDoc.projects.length - 1); assert.ok(!ixr.projects.some((p) => p.id === 'pinery-residences'));
+  const condoN = realDoc.projects.filter((p) => !p.c).length;      // Phase 1: ECs and cluster housing (c: 'ec' | 'cluster') are kept apart from the condominium list
+  assert.strictEqual(ixr.projects.length, condoN - 1); assert.ok(!ixr.projects.some((p) => p.id === 'pinery-residences'));
   assert.strictEqual(ixr.projects.length, 647);
+  assert.strictEqual(ixr.projects.length + ixr.others.ec.length + ixr.others.cluster.length, realDoc.projects.length - 1);
 });
 t('Pinery is never shown across budgets, sale types, sizes and with inventory on', () => {
   let shown = 0;
@@ -387,6 +389,43 @@ t('analytics: tool_selected and nav_click carry only a tool/target and a placeme
 });
 t('Home and the Tools hub load no new script (only analytics and components)', () => {
   ['index.html', 'tools/index.html'].forEach((f) => (rd(f).match(/<script src="([^"]+)"/g) || []).forEach((m) => assert.ok(/kpt-analytics\.js|kpt-components\.js/.test(m), m)));
+});
+
+console.log('\nDevelopment classes (shared register): ECs and cluster housing are matched with the same rules but never pooled with condominiums');
+const PC = (id, cls, n) => Object.assign(R1(id, n), { c: cls });
+t('prepare() keeps condominiums in projects and ECs / cluster housing in their own lists', () => {
+  const ix = mk([R1('a', 6), PC('e1', 'ec', 6), PC('k1', 'cluster', 6)]);
+  assert.deepStrictEqual(ix.projects.map((p) => p.id), ['a']); assert.deepStrictEqual(ix.others.ec.map((p) => p.id), ['e1']); assert.deepStrictEqual(ix.others.cluster.map((p) => p.id), ['k1']);
+  assert.deepStrictEqual(ix.otherAll.map((p) => p.id).sort(), ['e1', 'k1']);
+});
+t('the condominium groups are byte-identical with or without ECs and cluster housing in the index (nothing is pooled)', () => {
+  const a = run(mk([R1('a', 6), R1('b', 5)])), b = run(mk([R1('a', 6), R1('b', 5), PC('e1', 'ec', 9), PC('k1', 'cluster', 9)]));
+  assert.strictEqual(JSON.stringify(a.groups), JSON.stringify(b.groups)); assert.strictEqual(a.total, b.total); assert.strictEqual(a.state, b.state);
+  assert.strictEqual(a.otherTypes, undefined);
+});
+t('an EC that matches is listed in its own Executive Condominiums section, labelled, and never inside the condominium groups', () => {
+  const r = run(mk([R1('a', 6), PC('e1', 'ec', 9), PC('k1', 'cluster', 7)]));
+  assert.deepStrictEqual(ids(r), ['a']);
+  assert.deepStrictEqual(r.otherTypes.map((o) => o.cls), ['ec', 'cluster']);
+  const ec = r.otherTypes[0]; assert.strictEqual(ec.label, 'Executive Condominiums'); assert.ok(/never mixed/.test(ec.note));
+  assert.strictEqual(ec.groups[0].cards[0].id, 'e1'); assert.ok(/^Executive Condominium · /.test(ec.groups[0].cards[0].meta));
+  assert.ok(/^Cluster housing · /.test(r.otherTypes[1].groups[0].cards[0].meta));
+  assert.ok(ec.groups[0].cards[0].link.indexOf('#/p/e1/resale') > -1);
+});
+t('ECs follow the same evidence rules: fewer than 3 sales is not listed, and an area filter applies', () => {
+  assert.strictEqual(run(mk([R1('a', 6), PC('e1', 'ec', 2)])).otherTypes, undefined);
+  assert.strictEqual(run(mk([R1('a', 6), PC('e1', 'ec', 9)]), { districts: ['16'] }).otherTypes, undefined);
+  assert.strictEqual(run(mk([R1('a', 6), PC('e1', 'ec', 9)]), { districts: ['15'] }).otherTypes.length, 1);
+});
+t('a search with no condominium match still shows the EC that matches (state stays "none" for the condominiums)', () => {
+  const r = run(mk([R1('a', 2), PC('e1', 'ec', 9)]));
+  assert.strictEqual(r.state, 'none'); assert.strictEqual(r.total, 0); assert.strictEqual(r.otherTypes[0].groups[0].cards[0].id, 'e1');
+});
+t('shipped data: Hundred Palms Residences (EC, District 19) is an EC in FIND and appears only in the EC section', () => {
+  const hp = realDoc.projects.find((p) => p.id === 'hundred-palms-residences'); assert.ok(hp && hp.c === 'ec');
+  const r = F.shortlist(ixr, { budget: 1850000, openTo: 'resale', size: { lo: 900, hi: 1100, source: 'explicit', line: '' }, districts: [], text: 'Hundred Palms', freehold: false, answers: { where: 'flexible', size: 'not-sure', priorities: [] } });
+  assert.ok(allIds(r).indexOf('hundred-palms-residences') < 0);
+  assert.ok(r.otherTypes && r.otherTypes.some((o) => o.cls === 'ec' && o.groups.some((g) => g.cards.some((c) => c.id === 'hundred-palms-residences'))));
 });
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed'); process.exit(fail ? 1 : 0);

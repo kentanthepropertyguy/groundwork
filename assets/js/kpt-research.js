@@ -156,7 +156,7 @@
     const monthly = (P.monthly(p, m)[sale] || []), from12 = P.addMonths(m.latestMonth, -11), rec = monthly.filter((x) => x.month >= from12);
     const recent = { n: sum(rec, (x) => x.n), months: rec.length, latest: monthly.length ? monthly[monthly.length - 1].month : null };
     const first = monthly.length ? monthly[0].month : null;
-    const model = { id: p.id, name, rawName: p.name, kind: 'project', street: p.street, district: p.district, districtLabel: distLabel(p.district), region: p.seg, tenure: { label: p.tenure.label, mixed: !!p.tenure.mixed, group: m.tenureGroups[p.tenure.group], variants: p.tenure.variants || null },
+    const model = { id: p.id, name, rawName: p.name, kind: 'project', cls: P.classOf(p), also: p.also || null, street: p.street, district: p.district, districtLabel: distLabel(p.district), region: p.seg, tenure: { label: p.tenure.label, mixed: !!p.tenure.mixed, group: m.tenureGroups[p.tenure.group], variants: p.tenure.variants || null },
       sale: { selected: sale, label: saleLabel, note: SALE_NOTE[sale], options: saleOptions(p) }, notes: { psf: PSF_NOTE, history: HISTORY_NOTE, floor: FLOOR_NOTE, context: CONTEXT_NOTE }, notMeasured: NOT_MEASURED.slice() };
     model.evidenceBase = { first, latest: recent.latest, total: p.sale[sale] };
 
@@ -248,7 +248,8 @@
     const tg = sale === 'resale' ? (p.tenure.group === 0 ? last : p.tenure.group) : 0, useBin = bin == null ? -1 : bin;
     const own = (win) => { const c = C.window.find((x) => x.sale === code && x.bin === bin && x.win === win); return bin == null ? (C.window.filter((x) => x.sale === code && x.win === win).reduce((t, x) => t + x.n, 0)) : c ? c.n : 0; };
     const rows = [];
-    [['district', 'District ' + distLabel(p.district), peers.district], ['region', p.seg, peers.region]].forEach((s) => {
+    const cn = P.classOf(p) === 'condo' ? '' : ' · ' + P.CLASSES[P.classOf(p)].plural + ' only';       // an EC is only ever set beside other ECs, a cluster development beside other cluster developments
+    [['district', 'District ' + distLabel(p.district) + cn, peers.district], ['region', p.seg + cn, peers.region]].forEach((s) => {
       if (!s[2]) return;
       const wins = [0, ALL].map((win) => {
         const c = P.peerCells(s[2], { sale: code, tenureGroup: tg, bin: useBin, win }, m)[0]; if (!c) return null;
@@ -521,12 +522,13 @@
 
   /* ---------- suggestions, WhatsApp, analytics, routes ---------- */
   // D10: same district only, labelled as such. Same district does not establish comparability.
+  // Same property class only (condo with condo, EC with EC, cluster housing with cluster housing): prices of different classes are never set side by side.
   function sameDistrict(index, id, limit) {
-    const F = P.fieldMap(index.fields), me = index.rows.find((r) => r[F.id] === id);
+    const F = P.fieldMap(index.fields), me = index.rows.find((r) => r[F.id] === id), cls = (r) => (F.cls === undefined ? 'condo' : P.classOf({ cls: r[F.cls] }));
     if (!me) return { label: null, rows: [] };
-    const rows = index.rows.filter((r) => r[F.district] === me[F.district] && r[F.id] !== id).sort((a, b) => b[F.n] - a[F.n] || (a[F.name] < b[F.name] ? -1 : 1)).slice(0, limit || 6)
+    const rows = index.rows.filter((r) => r[F.district] === me[F.district] && r[F.id] !== id && cls(r) === cls(me)).sort((a, b) => b[F.n] - a[F.n] || (a[F.name] < b[F.name] ? -1 : 1)).slice(0, limit || 6)
       .map((r) => ({ id: r[F.id], name: displayName(r[F.name]), n: r[F.n], last: r[F.last] }));
-    return { label: 'Other projects in ' + distLabel(me[F.district]), rows };
+    return { label: 'Other ' + (cls(me) === 'condo' ? 'projects' : P.CLASSES[cls(me)].plural) + ' in ' + distLabel(me[F.district]), rows };
   }
   // The only things that ever reach WhatsApp: project names selected from our own index. Never typed text, size or budget.
   function waMessage(names) {

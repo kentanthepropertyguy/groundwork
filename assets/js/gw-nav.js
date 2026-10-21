@@ -193,7 +193,7 @@
     }
     return out.sort((a, b) => b.s - a.s || b.r[F.n] - a.r[F.n]).slice(0, max || 6).map((x) => {
       const r = x.r;
-      return { id: r[F.id], name: displayName(r[F.name]), street: title(r[F.street]), district: Number(r[F.district]), n: r[F.n], last: r[F.last], byStreet: x.s === 15, score: x.s };
+      return { id: r[F.id], name: displayName(r[F.name]), street: title(r[F.street]), district: Number(r[F.district]), n: r[F.n], last: r[F.last], byStreet: x.s === 15, score: x.s, cls: F.cls === undefined ? 'condo' : (r[F.cls] || 'condo') };
     });
   }
   // Developments with their own site (data/research/sites.json): the configured ones, by name or alias.
@@ -395,7 +395,7 @@
         if (!devFirst) h += toolsHtml();
         if (all.length) h += group('Developments · Research', all.map((d) => d.site
           ? opt(k++, d.site.url, svg('ext') + '<span><b>' + esc(d.site.name) + ' <i aria-hidden="true">↗</i></b><small>Ken’s site for this development</small></span>', ' data-gw-nav-to="site-' + esc(d.site.id) + '" target="_blank" rel="noopener"')
-          : opt(k++, base + 'research/#/p/' + encodeURIComponent(d.id), svg('dev') + '<span><b>' + esc(d.name) + '</b><small>' + esc([d.street, 'District ' + d.district, d.n + ' sale' + (d.n === 1 ? '' : 's') + ' in 5 years'].join(' · ')) + '</small></span>', ' data-gw-nav-to="development"')).join(''));
+          : opt(k++, base + 'research/#/p/' + encodeURIComponent(d.id), svg('dev') + '<span><b>' + esc(d.name) + '</b><small>' + esc([d.cls === 'ec' ? 'Executive Condominium' : d.cls === 'cluster' ? 'Cluster housing' : '', d.street, 'District ' + d.district, d.n + ' sale' + (d.n === 1 ? '' : 's') + ' in 5 years'].filter(Boolean).join(' · ')) + '</small></span>', ' data-gw-nav-to="development"')).join(''));
         // Roads and streets: one result per road, leading to what sold around it (landed homes are sold by street, not by development name).
         if (roads && roads.length) h += group('Roads and streets', roads.map((d) => opt(k++, roadLandedHref(base, d), svg('map') + '<span><b>' + esc(d.title) + '</b><small>' + esc((d.area ? d.area + ' · ' : '') + 'What landed homes sold for nearby') + '</small></span>', ' data-gw-nav-to="road"')).join(''));
         if (devFirst) h += toolsHtml();

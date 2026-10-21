@@ -63,10 +63,14 @@
   };
   const icon = (k, sz) => `<svg width="${sz || 14}" height="${sz || 14}" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
 
+  /* ---------------- development classes (shared register): condo | ec | cluster ---------------- */
+  // A development is one class. Prices are only ever set beside developments of the same class, so a condo is never compared with an EC.
+  const CLS = { condo: { short: '', label: 'Condominium', plural: 'condominiums' }, ec: { short: 'EC', label: 'Executive Condominium', plural: 'ECs' }, cluster: { short: 'Cluster housing', label: 'Strata landed (cluster housing)', plural: 'cluster-housing developments' } };
+
   /* ---------------- the model ---------------- */
   /* places: places.json; amen: amen.json; S: the app's state object (read for the selected size band and the nearby radius). */
   function create(placesDoc, amen, S) {
-    const F = placesDoc.fields, P = placesDoc.rows.map((r) => { const o = {}; F.forEach((k, i) => { o[k === 'name' ? 'n' : k] = r[i]; }); o.pos = o.lat != null && o.lon != null; o.t12 = o.p12 + o.s12; return o; });
+    const F = placesDoc.fields, P = placesDoc.rows.map((r) => { const o = {}; F.forEach((k, i) => { o[k === 'name' ? 'n' : k] = r[i]; }); o.pos = o.lat != null && o.lon != null; o.t12 = o.p12 + o.s12; o.cls = CLS[o.cls] ? o.cls : 'condo'; return o; });
     const PM = P.filter((p) => p.pos), BY = {}, BYID = {}; P.forEach((p) => { BY[p.n] = p; BYID[p.id] = p; });
     const AM = { stations: amen.stations, food: amen.food, parks: amen.parks, areas: amen.areas, schools: [], shops: [], sources: amen.sources.slice() };
     const EV = {}; let evReady = false, AREAOF = {};
@@ -83,6 +87,7 @@
       AM.roads = out;
     };
     m.hasRoads = () => AM.roads.length > 0;
+    m.CLS = CLS; m.clsShort = (name) => (BY[name] ? CLS[BY[name].cls].short : '');
     /* a road by the name the address carries: "Springwood Crescent (Queenstown)", "Alnwick Road (D28)" (a street URA records sales on, by district) or just the name */
     const roadBy = (n) => {
       const x = /^(.*?)(?: \(([^)]*)\))?$/.exec(String(n || '')), nm = x[1], tag = x[2] || '', byName = AM.roads.filter((r) => r.title === nm);
@@ -125,7 +130,7 @@
     function rank(me, p) { const e = EV[p.n], sameTen = e.tenGroup === me.tenGroup, age = (e.lease && me.lease) ? Math.abs(e.lease - me.lease) : null; return (sameTen ? 0 : 1) * 1000 + (age == null ? 500 : Math.min(age, 50) * 10) + p.d / 100; }
     function suggest(name, mk, bin, radius) {
       const me = EV[name], mine = cellsOf(name, mk).find((c) => c.bin === bin), out = [];
-      for (const p of nearby(name, radius)) { if (!EV[p.n]) continue; const theirs = cellsOf(p.n, mk).find((c) => c.bin === bin); if (likeOK(mine, theirs)) out.push({ p, e: EV[p.n], theirs, score: rank(me, p) }); }
+      for (const p of nearby(name, radius)) { if (!EV[p.n] || p.cls !== BY[name].cls) continue; const theirs = cellsOf(p.n, mk).find((c) => c.bin === bin); if (likeOK(mine, theirs)) out.push({ p, e: EV[p.n], theirs, score: rank(me, p) }); }
       return out.sort((a, b) => a.score - b.score);
     }
     /* Surrounding market context (never the selected project's own price): nearby developments with a supported price in a size the project has actually transacted. */
@@ -134,7 +139,7 @@
       if (!ref) for (const mk of ['sec', 'new']) { const mm = market(name, mk); if (mm && mm.win !== null) { ref = { mk, bin: mostSold(mm.rows).bin, win: mm.win }; break; } }
       if (!ref) for (const mk of ['sec', 'new']) { for (let w = 0; w < 3 && !ref; w++) { const cs = cellsOf(name, mk, w); if (cs.length) { const b = cs.reduce((a, c) => c.n > a.n || (c.n === a.n && c.last > a.last) ? c : a); ref = { mk, bin: b.bin, win: w }; } } if (ref) break; }
       if (!ref) return null;
-      const list = nearby(name, radius).filter((p) => EV[p.n]).map((p) => { const c = cellsOf(p.n, ref.mk, ref.win).find((x) => x.bin === ref.bin); return c && supported(c) ? { p, e: EV[p.n], theirs: c, score: rank(me, p) } : null; }).filter(Boolean).sort((a, b) => a.score - b.score);
+      const list = nearby(name, radius).filter((p) => EV[p.n] && p.cls === BY[name].cls).map((p) => { const c = cellsOf(p.n, ref.mk, ref.win).find((x) => x.bin === ref.bin); return c && supported(c) ? { p, e: EV[p.n], theirs: c, score: rank(me, p) } : null; }).filter(Boolean).sort((a, b) => a.score - b.score);
       return { ref, list };
     }
     function nearbyFor(name) {
@@ -145,7 +150,7 @@
       return { mode: 'none', ref: cx ? cx.ref : null, list: [] };
     }
     m.suggest = suggest; m.context = context; m.nearbyFor = nearbyFor; m.rank = rank;
-    m.defaultRadius = (name) => { const n2 = nearby(name, 2000).length; return n2 > 150 ? 1000 : n2 < 10 ? 3000 : 2000; };
+    m.defaultRadius = (name) => { const n2 = nearby(name, 2000).filter((p) => p.cls === BY[name].cls).length; return n2 > 150 ? 1000 : n2 < 10 ? 3000 : 2000; };
 
     /* ---- the neighbourhood around a home ---- */
     const nearPts = (arr, p, n, max, k, f) => arr.filter(f || (() => true)).map((x) => ({ k, n: x.n, sub: x.sub || x.lv || x.w || '', d: hav(p, x), lat: x.lat, lon: x.lon })).filter((x) => x.d <= max).sort((a, b) => a.d - b.d).slice(0, n);
@@ -177,7 +182,7 @@
       return [
         ...pick(AM.areas, (a) => a.n, (a) => ({ t: 'area', n: a.n, sub: 'Neighbourhood' }), 2),
         ...pick(AM.stations, (s) => s.n, (s) => ({ t: 'mrt', n: s.n, sub: s.k + ' station' }), 3),
-        ...pick(P, (p) => p.n, (p) => ({ t: 'dev', n: p.n, sub: `D${Number(p.district)} · ${p.t12} sale${p.t12 === 1 ? '' : 's'} in 12 months` }), 3, (p) => p.t12),
+        ...pick(P, (p) => p.n, (p) => ({ t: 'dev', n: p.n, sub: `D${Number(p.district)}${CLS[p.cls].short ? ' · ' + CLS[p.cls].short : ''} · ${p.t12} sale${p.t12 === 1 ? '' : 's'} in 12 months` }), 3, (p) => p.t12),
         ...pick(AM.schools, (s) => s.n, (s) => ({ t: 'school', n: s.n, sub: s.lab }), 2),
         ...(roadQuery(t) ? pick(AM.roads, (r) => r.title, (r) => ({ t: 'road', n: r.key, label: r.title, sub: r.area ? 'Road · ' + r.area : 'Road' }), 3, (r) => (r.landed ? 1 : 0)) : [])
       ];

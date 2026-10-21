@@ -11,7 +11,8 @@
   (function () { try { const k = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid', 'fbclid'], q = new URLSearchParams(location.search), now = {}; k.forEach((n) => { if (q.get(n)) now[n] = q.get(n).slice(0, 100); }); if (Object.keys(now).length) sessionStorage.setItem('kpt_attr', JSON.stringify(now)); } catch (e) { /* storage unavailable */ } })();
   // Same display names as Research search (URA records names in capitals).
   const nameOf = (o) => (window.KPT_RESEARCH && !/[a-z]/.test(o.name) ? window.KPT_RESEARCH.displayName(o.name) : o.name);
-  const subline = (o) => [o.street, o.district ? 'District ' + o.district : null, o.seg, o.tenure && o.tenure !== '–' ? o.tenure : null].filter(Boolean).join(' · ');
+  const CLSL = { ec: 'Executive Condominium', cluster: 'Cluster housing' };
+  const subline = (o) => [CLSL[o.cls] || null, o.street, o.district ? 'District ' + o.district : null, o.seg, o.tenure && o.tenure !== '–' ? o.tenure : null].filter(Boolean).join(' · ');
   function href(url, id) {
     let saved = {}; try { saved = JSON.parse(sessionStorage.getItem('kpt_attr') || '{}'); } catch (e) { saved = {}; }
     const u = new URL(url);

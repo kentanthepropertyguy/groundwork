@@ -70,19 +70,27 @@
   const idOf = (name) => M.BY[name].id;
   function nearbyHtml(name, nb) {
     const [lab] = nb.ref ? MKT[nb.ref.mk] : [''], refTxt = nb.ref ? `${lab} · ${band(nb.ref.bin)}${nb.ref.win ? ' · ' + WINL[nb.ref.win] : ''}` : '';
-    if (nb.mode === 'none') { if (!M.EV[name]) return ''; const nx = S.radius < 2000 ? 2000 : S.radius < 3000 ? 3000 : 5000; return `<div class="sec"><div class="sh"><b>Nearby prices</b>${refTxt ? `<span>${refTxt}</span>` : ''}</div><p class="basis" style="margin:0">No nearby development has enough recorded sales ${nb.ref ? 'in this size ' : ''}to show prices.</p>${S.radius < 5000 ? `<button type="button" class="lnk" data-radius="${nx}">Look within ${nx / 1000} km ›</button>` : ''}</div>`; }
+    if (nb.mode === 'none') { if (!M.EV[name]) return ''; const nx = S.radius < 2000 ? 2000 : S.radius < 3000 ? 3000 : 5000; return `<div class="sec"><div class="sh"><b>Nearby prices</b>${refTxt ? `<span>${refTxt}</span>` : ''}</div><p class="basis" style="margin:0">No nearby ${M.BY[name].cls === 'condo' ? 'development' : M.CLS[M.BY[name].cls].short + ' development'} has enough recorded sales ${nb.ref ? 'in this size ' : ''}to show prices.</p>${S.radius < 5000 ? `<button type="button" class="lnk" data-radius="${nx}">Look within ${nx / 1000} km ›</button>` : ''}</div>`; }
     const cmp = nb.mode === 'compare';
     const row = (r) => { const inner = `<b>${esc(r.p.n)}</b><span class="m">${dist(r.p.d)} · ${esc(r.e.tenure)} · ${r.theirs.n} sale${r.theirs.n === 1 ? '' : 's'}</span><span class="px num">${fmt(r.theirs.med)}<small>psf</small></span><i aria-hidden="true">›</i>`; return cmp ? `<a class="nb" href="../#/compare/${esc(idOf(name))}/${esc(r.p.id)}">${inner}</a>` : `<button type="button" class="nb" data-dot="${esc(r.p.n)}">${inner}</button>`; };
-    return `<div class="sec"><div class="sh"><b>${cmp ? 'Compare with nearby' : 'Nearby prices'}</b><span>${refTxt}</span></div>${nb.list.map(row).join('')}<p class="basis" style="margin:6px 0 0">${cmp ? 'Same market and size, then tenure, lease age and distance. Each side has 2+ sales in 2 months.' : `Surrounding market for context, not a price for ${esc(name)}.`}</p></div>`;
+    return `<div class="sec"><div class="sh"><b>${cmp ? 'Compare with nearby' : 'Nearby prices'}</b><span>${refTxt}</span></div>${nb.list.map(row).join('')}<p class="basis" style="margin:6px 0 0">${cmp ? 'Same market and size, then tenure, lease age and distance. Each side has 2+ sales in 2 months.' : `Surrounding market for context, not a price for ${esc(name)}.`}${M.BY[name].cls === 'condo' ? '' : ` ${esc(M.CLS[M.BY[name].cls].plural.replace(/^./, (c) => c.toUpperCase()))} are only compared with other ${esc(M.CLS[M.BY[name].cls].plural)}.`}</p></div>`;
+  }
+  // A development that is not a condominium, or whose name also carries another property type: said once, in the prices section.
+  function classNote(name) {
+    const p = M.BY[name], e = M.EV[name], bits = [];
+    if (p.cls === 'ec') bits.push('This is an executive condominium (EC). EC prices are not comparable with private condominium prices, so only other ECs are used for nearby comparisons.');
+    else if (p.cls === 'cluster') bits.push('This is a strata landed (cluster housing) development. Its prices are not comparable with condominium prices, so only other cluster-housing developments are used for nearby comparisons.');
+    if (e && e.also) { const t = Object.keys(e.also).filter((k) => M.CLS[k]).map((k) => e.also[k] + ' ' + (k === 'condo' ? 'condominium' : M.CLS[k].short) + ' sale' + (e.also[k] === 1 ? '' : 's')); if (t.length) bits.push('The same name also appears in URA records with ' + t.join(' and ') + ' of another property type. They are counted separately and are not in these prices.'); }
+    return bits.length ? `<p class="basis" style="margin:8px 0 0">${esc(bits.join(' '))}</p>` : '';
   }
   const areaLine = (name) => { const a = M.AREAOF[name]; return a ? ` · ${esc(a)}` : ''; };
   const closeBtn = '<button type="button" class="close" data-dpclose aria-label="Close">×</button>';
   function devCard(name, mobile) {
     const p = M.BY[name], e = M.EV[name], pos = p.pos;
-    const head = `<div class="dp-top"><div style="min-width:0"><h2>${esc(name)}</h2><p class="meta">${e ? esc(e.street) + areaLine(name) + ' · ' : ''}District ${Number(p.district)}${e ? ' · ' + esc(e.tenure) : ''}</p></div>${closeBtn}</div>`;
+    const head = `<div class="dp-top"><div style="min-width:0"><h2>${esc(name)}</h2><p class="meta">${M.CLS[p.cls].short ? esc(M.CLS[p.cls].label) + ' · ' : ''}${e ? esc(e.street) + areaLine(name) + ' · ' : ''}District ${Number(p.district)}${e ? ' · ' + esc(e.tenure) : ''}</p></div>${closeBtn}</div>`;
     if (!e) { const body = `<p class="basis">Loading prices…</p>`; return mobile ? `<aside class="bs" aria-label="Selected development"><button type="button" class="grab" data-dpmore aria-label="Expand"></button>${head}${body}</aside>` : `<aside class="dp" aria-label="Selected development"><div class="dp-in">${head}${body}</div></aside>`; }
     const nb = M.nearbyFor(name);
-    const prices = `<div class="sec pr"><div class="sh"><b>Prices by size</b><span>Past sales, not a valuation</span></div><div class="mkts">${marketHtml(name, 'sec', nb.ref)}${marketHtml(name, 'new', nb.ref)}<p class="basis" style="margin:2px 0 0">Median price per sq ft by size. Sizes with fewer than 5 sales are not shown.${pos ? ' Select a size to compare nearby.' : ''}</p></div></div>`;
+    const prices = `<div class="sec pr"><div class="sh"><b>Prices by size</b><span>Past sales, not a valuation</span></div><div class="mkts">${marketHtml(name, 'sec', nb.ref)}${marketHtml(name, 'new', nb.ref)}<p class="basis" style="margin:2px 0 0">Median price per sq ft by size. Sizes with fewer than 5 sales are not shown.${pos ? ' Select a size to compare nearby.' : ''}</p>${classNote(name)}</div></div>`;
     const nopos = `<p class="basis nopos">Not on the map yet: URA's data has no location for this development, so neighbourhood and nearby prices are not shown.</p>`;
     const open = `<a class="btn b" href="../#/p/${esc(p.id)}">Open Research page ›</a>`;
     const body = pos ? aroundHtml(name, mobile ? (S.more ? 2 : 1) : 2) : nopos;
@@ -92,7 +100,7 @@
   }
 
   /* ---------------- place cards: a neighbourhood, an MRT station or a school ---------------- */
-  const devRow = (x, withDist = true) => `<button type="button" class="nb" data-pick="dev|${esc(x.p.n)}"><b>${esc(x.p.n)}</b><span class="m">${withDist ? distA(x.d) + ' · ' : ''}${esc(x.e.tenure)} · ${x.p.t12 ? x.p.t12 + ' sale' + (x.p.t12 === 1 ? '' : 's') + ' in 12 months' : 'no sales in 12 months'}</span><i aria-hidden="true">›</i></button>`;
+  const devRow = (x, withDist = true) => `<button type="button" class="nb" data-pick="dev|${esc(x.p.n)}"><b>${esc(x.p.n)}</b><span class="m">${x.p.cls !== 'condo' ? esc(M.CLS[x.p.cls].short) + ' · ' : ''}${withDist ? distA(x.d) + ' · ' : ''}${esc(x.e.tenure)} · ${x.p.t12 ? x.p.t12 + ' sale' + (x.p.t12 === 1 ? '' : 's') + ' in 12 months' : 'no sales in 12 months'}</span><i aria-hidden="true">›</i></button>`;
   // A road: where to read what landed homes sold for around it (the map itself shows condo prices, never landed sales)
   const roadLanded = (d) => `<a class="nb" href="../../journey/worth/#landed:${encodeURIComponent(d.title)}" data-gw-go="landed" style="margin-top:12px"><b>What landed homes sold for near ${esc(d.title)}</b><span class="m">Sales by street from URA records. Landed sales are not shown on this map.</span><i aria-hidden="true">›</i></a>`;
   function placeCard(pl, mobile) {
@@ -177,7 +185,7 @@
     const line = (s) => `${esc(s.name)} (${esc(s.by)}, accessed ${esc(s.accessed)})`;
     const geo = M.AM.sources.filter((s) => s.k === 'geocode'), list = M.AM.sources.filter((s) => s.k !== 'geocode').map(line).join('; ');
     const lic = '<a href="https://data.gov.sg/open-data-licence" target="_blank" rel="noopener noreferrer">Singapore Open Data Licence version 1.0</a>';
-    el.innerHTML = `Project locations and prices: URA private residential transaction data (PMI_Resi_Transaction), to ${esc(ym(+String(M.latestMonth).replace('-', '')))}. Neighbourhood data: contains information from ${list}, from <a href="https://data.gov.sg" target="_blank" rel="noopener noreferrer">data.gov.sg</a>, made available under the terms of the ${lic}.` +
+    el.innerHTML = `Project locations and prices: URA private residential transaction data (PMI_Resi_Transaction), to ${esc(ym(+String(M.latestMonth).replace('-', '')))}. Developments are private condominiums, executive condominiums (ECs) and strata cluster housing, each compared only with its own type. Neighbourhood data: contains information from ${list}, from <a href="https://data.gov.sg" target="_blank" rel="noopener noreferrer">data.gov.sg</a>, made available under the terms of the ${lic}.` +
       (geo.length ? ` School and supermarket positions: contains information from ${line(geo[0])} from <a href="https://www.onemap.gov.sg" target="_blank" rel="noopener noreferrer">onemap.gov.sg</a>, made available under the terms of the ${lic}.` : '') +
       (M.hasRoads() ? ' Road positions: OneMap, Singapore Land Authority, made available under the terms of the ' + lic + '; one approximate point for each road, never a house.' : '') +
       ` Basemap: OneMap, © contributors | Singapore Land Authority. Distances are straight-line. Not endorsed by any of these agencies.`;

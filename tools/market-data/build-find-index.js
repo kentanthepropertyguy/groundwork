@@ -5,8 +5,9 @@
 
    Usage: node tools/market-data/build-find-index.js --raw tools/market-data/raw --project-data data/projects --out data/projects/find.json [--as-of 2026-10-05]
 
-   Scope (same as build-project-stats.js, which this does NOT modify): Condominium + Apartment, strata, single-unit transactions; the same reviewed
-   exclusion and hold lists. FIND V1 keeps New Sale (1) and Resale (3) only. Sub-sale is out of V1. Window = the trailing 12 months ending on the
+   Scope (same shared development register as build-project-stats.js, register.js): Condominium + Apartment, Executive Condominium and strata landed
+   (cluster housing), strata, single-unit transactions; the same reviewed exclusion and hold lists. Each development is in one class and only its
+   headline-class sales are used, so a price band never mixes classes. Non-condo projects carry "c" (ec | cluster); condo projects carry no "c". FIND V1 keeps New Sale (1) and Resale (3) only. Sub-sale is out of V1. Window = the trailing 12 months ending on the
    latest contract month in the data (identical to the existing "period 0").
 
    Privacy / aggregate-only rule: a band with fewer than MIN_CELL sales is NEVER written, because a one- or two-sale band would publish an individual
@@ -22,6 +23,7 @@ const fs = require('fs'), path = require('path');
 const { quantile } = require('./build-bands.js');
 const PS = require('./build-project-stats.js');
 const P = require('../../assets/js/kpt-project.js');
+const G = require('./register.js');
 
 const SQM_TO_SQFT = 10.7639, MIN_CELL = 3, WINDOW_MONTHS = 12, SALES = { 1: 'new', 3: 'resale' };
 const ymInt = (ym) => Math.floor(ym / 12) * 100 + (ym % 12) + 1;
@@ -30,23 +32,21 @@ const ymStr = (ym) => Math.floor(ym / 12) + '-' + String((ym % 12) + 1).padStart
 /** records: flat raw rows (see build-project-stats.flatten). indexRows: data/projects/index.json rows with its field list. */
 function buildFindIndex(records, cfg, pc, indexDoc, asOf, opts) {
   opts = opts || {};
-  const exclude = new Set(pc.exclude.map((e) => e.name)), hold = new Set(pc.hold.map((e) => e.name));
+  const tmap = G.checkConfig(cfg), screen = G.nameScreen(pc);
   const parsed = [];
   records.forEach((t) => {
-    const m = /^(\d{2})(\d{2})$/.exec(String(t.contractDate || '')); if (!m) return;
-    if (!cfg.propertyTypes.includes(t.propertyType)) return;
-    if (t.typeOfArea !== 'Strata') return;
-    if (String(t.noOfUnits) !== '1') return;
-    const sale = +t.typeOfSale; if (![1, 2, 3].includes(sale)) return;
-    if (!['OCR', 'RCR', 'CCR'].includes(t.marketSegment)) return;
-    const price = Number(t.price), sqm = Number(t.area); if (!(price > 0) || !(sqm > 0)) return;
+    const a = G.admit(t, t.marketSegment, tmap); if (!a.ok) return;
     if (!t.project || !String(t.project).trim()) return;
-    if (exclude.has(t.project) || hold.has(t.project)) return;
-    parsed.push({ project: t.project, sale, price, bin: Math.floor((sqm * SQM_TO_SQFT) / pc.bin) * pc.bin, ym: (2000 + +m[2]) * 12 + (+m[1] - 1) });
+    if (screen(t.project)) return;
+    parsed.push({ project: t.project, cls: a.cls, sale: a.sale, price: a.price, bin: Math.floor((a.sqm * SQM_TO_SQFT) / pc.bin) * pc.bin, ym: a.ym });
   });
   if (!parsed.length) throw new Error('No usable transactions.');
   const latest = parsed.reduce((a, t) => Math.max(a, t.ym), 0);
-  const recent = parsed.filter((t) => t.sale !== 2 && latest - t.ym < WINDOW_MONTHS);
+  // One development per name: only the sales of its headline class are used (any other class under the same name is counted in the register, not here).
+  const devs = new Map(); parsed.forEach((t) => { (devs.get(t.project) || devs.set(t.project, []).get(t.project)).push(t); });
+  const clsOf = new Map(), headRows = [];
+  devs.forEach((rows, name) => { const D = G.split(rows); clsOf.set(name, D.cls); D.rows.forEach((t) => headRows.push(t)); });
+  const recent = headRows.filter((t) => t.sale !== 2 && latest - t.ym < WINDOW_MONTHS);
 
   const F = indexDoc.fields, col = (n) => F.indexOf(n), rowsByName = new Map(indexDoc.rows.map((r) => [r[col('name')], r]));
   const groups = new Map();
@@ -65,17 +65,18 @@ function buildFindIndex(records, cfg, pc, indexDoc, asOf, opts) {
 
   const projects = [];
   Array.from(byProject.keys()).sort().forEach((name) => {
-    const ir = rowsByName.get(name); if (!ir) throw new Error('Project in the price index is missing from index.json: ' + name);
+    const ir = rowsByName.get(G.shownName(name, pc)); if (!ir) throw new Error('Project in the price index is missing from index.json: ' + name);
     const id = P.slugify(name); if (ir[col('id')] !== id) throw new Error('Project id mismatch for ' + name);
     const e = byProject.get(name);
-    projects.push({ id, name: ir[col('name')], street: ir[col('street')], d: ir[col('district')], seg: ir[col('seg')], tg: ir[col('tenGroup')], tl: ir[col('tenLabel')], m: ir[col('mixed')] ? 1 : 0, new: e[1], resale: e[3] });
+    const cls = clsOf.get(name); if (col('cls') > -1 && ir[col('cls')] !== cls) throw new Error('Class differs from index.json for ' + name + ': ' + ir[col('cls')] + ' vs ' + cls);
+    projects.push(Object.assign({ id, name: ir[col('name')], street: ir[col('street')], d: ir[col('district')], seg: ir[col('seg')], tg: ir[col('tenGroup')], tl: ir[col('tenLabel')], m: ir[col('mixed')] ? 1 : 0 }, cls !== 'condo' ? { c: cls } : {}, { new: e[1], resale: e[3] }));
   });
   const win = { from: ymStr(latest - WINDOW_MONTHS + 1), to: ymStr(latest) };
   const doc = {
     v: 1, kind: 'kpt-find-index', asOf, latestMonth: win.to, window: { from: win.from, to: win.to, label: win.from + ' to ' + win.to }, bin: pc.bin, minCell: MIN_CELL,
-    sales: ['new', 'resale'], fields: ['bin', 'n', 'act', 'last', 'q1', 'med', 'q3'],
+    sales: ['new', 'resale'], classes: ['condo', 'ec', 'cluster'], fields: ['bin', 'n', 'act', 'last', 'q1', 'med', 'q3'],
     source: 'URA transactions (PMI_Resi_Transaction)',
-    scope: 'Private Condominium and Apartment, strata, single-unit transactions. New sale and resale only (sub-sale excluded from FIND V1). No Executive Condominiums, no landed.',
+    scope: 'Private Condominium and Apartment developments, Executive Condominiums (c: "ec") and strata landed / cluster housing (c: "cluster"): strata, single-unit transactions. New sale and resale only (sub-sale excluded from FIND V1). Classes are listed separately and never pooled. Landed homes on their own land are not included.',
     note: 'Aggregates only. Price quartiles per project, sale type and 100 sqft band for the last 12 months. Bands with fewer than ' + MIN_CELL + ' sales are never written.',
     projects,
   };

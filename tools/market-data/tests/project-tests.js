@@ -72,8 +72,11 @@ t('reviewed catch-all name is excluded', () => { assert.strictEqual(row('RESIDEN
 t('held name is kept OUT and reported', () => { assert.strictEqual(row('LAKEVIEW ESTATE'), undefined); assert.strictEqual(R.report.heldNames['LAKEVIEW ESTATE'], 1); });
 t('exclusion is exact-name only (no pattern matching)', () => { const r = B.build([S.tx('SOMETHING ESTATE', {}), S.tx('RESIDENTIAL APARTMENTS PLUS', {})], cfg, pc, 'x'); assert.strictEqual(r.manifest.counts.projects, 2); });
 t('real config exclusion list has no wildcard characters', () => pcReal.exclude.concat(pcReal.hold).forEach((e) => assert.ok(!/[*?\[\]\\^$|]/.test(e.name), e.name)));
-t('EC, landed, strata-landed, multi-unit, bad date and missing price rows are out', () => {
-  ['ECPROJECT', 'LANDEDX', 'STRATALANDED', 'BULK', 'BADDATE', 'NOPRICE'].forEach((n) => assert.strictEqual(row(n), undefined, n));
+t('landed, multi-unit, bad date and missing price rows are out', () => {
+  ['LANDEDX', 'BULK', 'BADDATE', 'NOPRICE'].forEach((n) => assert.strictEqual(row(n), undefined, n));
+});
+t('Phase 1: an EC project and a strata cluster project are in the register with their own class', () => {
+  assert.strictEqual(row('ECPROJECT').cls, 'ec'); assert.strictEqual(row('STRATALANDED').cls, 'cluster'); assert.strictEqual(row('ALPHA').cls, 'condo');
 });
 t('stale exclusion entries produce a warning, not a failure', () => { const r = B.build([S.tx('X', {})], cfg, Object.assign({}, pc, { exclude: [{ name: 'NOT IN DATA', reason: 't' }] }), 'x'); assert.ok(r.warnings.some((w) => w.code === 'stale-list-entry')); assert.strictEqual(r.manifest.counts.projects, 1); });
 
@@ -117,7 +120,7 @@ t('peer files exist per district and region and are marked as context', () => {
 });
 t('peer cell n equals the sum of project transactions in the cell (all sizes, resale, all history, any tenure group)', () => {
   const d20 = R.peers['peers/d20.json'], c = P.peerCells(d20, { sale: 3, win: WIN('all'), bin: -1 }, M), sum = c.reduce((a, x) => a + x.n, 0);
-  const expected = Object.values(R.details).reduce((a, d) => a + Object.values(d.projects).filter((p) => p.district === '20').reduce((s, p) => s + (p.sale.resale || 0), 0), 0);
+  const expected = Object.values(R.details).reduce((a, d) => a + Object.values(d.projects).filter((p) => p.district === '20' && (p.cls || 'condo') === 'condo').reduce((s, p) => s + (p.sale.resale || 0), 0), 0);
   assert.strictEqual(sum, expected);
 });
 t('peer cells are keyed by tenure group and carry concentration and evidence fields', () => { const c = P.peerCells(R.peers['peers/rcr.json'], { sale: 3, win: WIN('all'), bin: -1 }, M); assert.ok(new Set(c.map((x) => x.tenureGroup)).size >= 2); c.forEach((x) => { assert.ok(x.projects >= 1 && x.topProjectShare > 0 && x.activeMonths >= 1 && x.lastMonth); }); });
@@ -129,6 +132,40 @@ t('no generated field name mentions bedrooms, appreciation, yield, forecast, pre
   assert.ok(all.length > 50); all.forEach((k) => assert.ok(!/bed|apprec|yield|forecast|predict|school/i.test(k), 'field: ' + k));
 });
 t('policy statements are shipped in the manifest', () => assert.ok(M.policy.some((p) => /No bedrooms/.test(p)) && M.policy.some((p) => /appreciation/.test(p))));
+
+console.log('Phase 1: shared development register (condo / EC / cluster)');
+{
+  const mx = [];
+  for (let i = 0; i < 4; i++) mx.push(S.tx('MIXDEV', { price: String(1500000 + i * 10000) }));
+  mx.push(S.tx('MIXDEV', { propertyType: 'Strata Terrace', price: '3000000', area: '200' }));
+  for (let i = 0; i < 3; i++) mx.push(S.tx('ECONLY', { propertyType: 'Executive Condominium', price: String(1300000 + i * 10000), district: '19' }));
+  for (let i = 0; i < 2; i++) mx.push(S.tx('CLUSTONLY', { propertyType: 'Strata Detached', price: String(3500000 + i * 10000), area: '220', district: '20' }));
+  const base = S.fixture(), all = base.concat(mx), RR = B.build(all, cfg, pc, 'x');
+  const F = P.fieldMap(RR.index.fields), rowOf = (n) => { const r = RR.index.rows.find((x) => x[F.name] === n); return r && P.rowObject(RR.index, RR.index.rows.indexOf(r)); };
+  const total = (cls) => RR.index.rows.reduce((a, r) => a + ((r[F.cls] || 'condo') === cls ? r[F.n] : 0) + ((r[F.also] || {})[cls] || 0), 0);
+  t('every admitted transaction lands in exactly one class (class totals add to the admitted total)', () => {
+    const admitted = RR.manifest.counts.transactions; assert.ok(admitted > 0); assert.strictEqual(total('condo') + total('ec') + total('cluster'), admitted);
+  });
+  t('a mixed development is ONE row, headed by its larger class, with the minority counted once under also', () => {
+    assert.strictEqual(RR.index.rows.filter((r) => r[F.name] === 'MIXDEV').length, 1);
+    const m = rowOf('MIXDEV'); assert.strictEqual(m.cls || 'condo', 'condo'); assert.strictEqual(m.n, 4);
+    const d = RR.details[P.shardName(P.shardOf(P.slugify('MIXDEV'), pc.shards))].projects[P.slugify('MIXDEV')];
+    assert.strictEqual(d.n, 4); assert.ok(JSON.stringify(m.also || d.also || '').indexOf('1') > -1, 'minority count recorded');
+  });
+  t('the minority transaction is not pooled into any condo peer file', () => {
+    const d20 = RR.peers['peers/d20.json'], c = P.peerCells(d20, { sale: 3, win: RR.manifest.windows.indexOf('all'), bin: -1 }, RR.manifest), sum = c.reduce((a, x) => a + x.n, 0);
+    const expected = Object.values(RR.details).reduce((a, dd) => a + Object.values(dd.projects).filter((p) => p.district === '20' && (p.cls || 'condo') === 'condo').reduce((s, p) => s + (p.sale.resale || 0), 0), 0);
+    assert.strictEqual(sum, expected);
+  });
+  t('EC and cluster developments get class-separate peer files and none of their rows enter the condo files', () => {
+    assert.ok(Object.keys(RR.peers).some((k) => /^peers\/ec/.test(k)) && Object.keys(RR.peers).some((k) => /^peers\/cluster/.test(k)));
+    assert.strictEqual(rowOf('ECONLY').cls, 'ec'); assert.strictEqual(rowOf('CLUSTONLY').cls, 'cluster');
+  });
+  t('development ids are unique across classes', () => { const ids = RR.index.rows.map((r) => r[F.id]); assert.strictEqual(new Set(ids).size, ids.length); });
+  t('config: the condo class is exactly the legacy propertyTypes list (pooled bands stay condo-only)', () => {
+    assert.deepStrictEqual((cfg.classes.condo.propertyTypes || []).slice().sort(), (cfg.propertyTypes || []).slice().sort());
+  });
+}
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);
