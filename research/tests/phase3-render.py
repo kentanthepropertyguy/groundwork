@@ -103,25 +103,27 @@ try:
         check(vn + ': no page errors on the Map', not errs, errs); ctx.close()
 
     for vn, kw in VIEWS:
-        ctx, pg, errs = fresh(br, kw); print('\n== Budget Search,', vn)
-        pg.goto(f'http://127.0.0.1:{P}/tools/what-can-i-buy/'); pg.fill('#budgetInput', '2,200,000'); pg.click('#budgetGo'); pg.wait_for_selector('#kpfNearQ', timeout=20000); pg.wait_for_selector('.kpf-card', timeout=15000)
-        up0 = pg.inner_text('.kpf-up') if pg.query_selector('.kpf-up') else ''; check(vn + ': without a place, no GLS site or unnamed launch is listed, and none is a budget match', 'GLS' not in up0 and 'Peck Hay' not in up0 and 'Thomson Reserve' not in pg.inner_text('.kpf-card'), up0[:200])
-        pg.type('#kpfNearQ', '570155', delay=10); pg.wait_for_selector('.kpf-sg', timeout=15000); check(vn + ': Budget Search takes the same postal code', '155 Bishan Street 13' in pg.inner_text('#kpfSugg'))
-        pg.keyboard.press('Enter'); pg.wait_for_selector('.kpf-nwhere', timeout=15000); pg.wait_for_timeout(800)
-        check(vn + ': the place line names the address', '155 Bishan Street 13' in pg.inner_text('.kpf-nwhere'), pg.inner_text('.kpf-nwhere'))
-        sh = pg.evaluate("document.getElementById('kpfH').scrollIntoView(); window.scrollBy(0, -78)"); shot(pg, f'budget-postal-1km-{vn}')
-        rs = pg.evaluate("[...document.querySelectorAll('[data-f=nearr]')].map(b=>b.dataset.r).join(',')"); check(vn + ': the same four radius choices', rs == '500,1000,2000,3000', rs)
+        ctx, pg, errs = fresh(br, kw); print('\n== Budget Search,', vn); phone = vn != 'desktop' and kw['viewport']['width'] < 700
+        pg.goto(f'http://127.0.0.1:{P}/tools/what-can-i-buy/'); pg.wait_for_selector('#kdBudget'); pg.fill('#kdBudget', '2,200,000'); pg.click('[data-f=show]'); pg.wait_for_selector('.kd-card', timeout=20000)
+        up0 = pg.inner_text('.kd-up') if pg.query_selector('.kd-up') else ''; check(vn + ': without a place, no GLS site or unnamed launch is listed, and none is a budget match', 'GLS' not in up0 and 'Peck Hay' not in up0 and 'Thomson Reserve' not in pg.inner_text('.kd-card'), up0[:200])
+        pg.click('.kd-bar [data-f=edit]'); pg.wait_for_selector('#kdEdit.open')
+        pg.type('#kdEdit #kdPlace', '570155', delay=10); pg.wait_for_selector('.kd-sg', timeout=15000); check(vn + ': Budget Search takes the same postal code', '155 Bishan Street 13' in pg.inner_text('#kdSugg'))
+        pg.click('.kd-sg'); pg.wait_for_selector('.kd-chips :text("155 Bishan Street 13")', timeout=15000); pg.wait_for_timeout(800)
+        check(vn + ': the place line names the address', '155 Bishan Street 13' in pg.inner_text('.kd-chips') and '155 Bishan Street 13' in pg.inner_text('.kd-main'), pg.inner_text('.kd-chips'))
+        [pg.click(x) for x in ('#kdSheetCount', '#kdDone') if pg.query_selector(x).is_visible()][:1]; pg.wait_for_timeout(500); shot(pg, f'budget-postal-1km-{vn}')
+        sel = '.kd-quick [data-f=rad]' if phone else '.kd-radin [data-f=rad]'
+        rs = pg.evaluate("(s)=>[...document.querySelectorAll(s)].map(b=>b.dataset.r).join(',')", sel); check(vn + ': the same four radius choices', rs == '500,1000,2000,3000', rs)
         counts = {}
         for r in ('500', '1000', '2000', '3000'):
-            pg.click(f'[data-f=nearr][data-r="{r}"]'); pg.wait_for_function(f"document.querySelector('[data-f=nearr][aria-checked=true]').dataset.r === '{r}'"); pg.wait_for_timeout(500)
-            counts[r] = len(pg.query_selector_all('.kpf-card')); up = pg.inner_text('.kpf-up') if pg.query_selector('.kpf-up') else ''
+            pg.click(f'{sel}[data-r="{r}"]'); pg.wait_for_function(f"[...document.querySelectorAll('{sel}')].some(b=>b.dataset.r==='{r}'&&b.getAttribute('aria-checked')==='true')"); pg.wait_for_timeout(500)
+            counts[r] = len(pg.query_selector_all('.kd-card'))
             if r == '3000': shot(pg, f'budget-postal-3km-{vn}')
             if r == '2000': shot(pg, f'budget-postal-2km-{vn}')
         check(vn + ': a wider radius never shows fewer matches', counts['500'] <= counts['1000'] <= counts['2000'] <= counts['3000'], counts)
-        up = pg.inner_text('.kpf-up') if pg.query_selector('.kpf-up') else ''
+        up = pg.inner_text('.kd-up') if pg.query_selector('.kd-up') else ''
         check(vn + ': launches and sites nearby are listed apart, with no price', (not up) or (not re.search(r'\$\s?\d', up) and re.search(r'price|not (a )?match|no (launch )?price|unpriced', up, re.I) is not None), up)
-        pg.click('[data-f=nearchange]') if not pg.query_selector('#kpfNearQ') else None; pg.fill('#kpfNearQ', '999999'); pg.wait_for_timeout(700)
-        check(vn + ': an invalid code is explained', 'not a Singapore postal code' in pg.inner_text('#kpfSugg'))
+        pg.click('.kd-bar [data-f=edit]'); pg.wait_for_selector('#kdEdit.open'); pg.fill('#kdEdit #kdPlace', ''); pg.type('#kdEdit #kdPlace', '999999', delay=10); pg.wait_for_timeout(1200)
+        check(vn + ': an invalid code is explained', 'postal code' in pg.inner_text('#kdSugg').lower(), pg.inner_text('#kdSugg')[:120])
         check(vn + ': no page errors on Budget Search', not errs, errs); ctx.close()
 
     CASES = [('570155', 'hdb', '(hdb|Bishan)'), ('400001', 'hdb', 'no resale|not .*resale|No resale|resale'), ('570101', 'hdb', '(hdb|Bishan)'), ('575749', 'condo', 'research/#/p/'), ('579819', 'ec', 'research/#/p/'), ('359419', 'cluster', 'research/#/p/'), ('579600', 'launch', 'research/#/p/thomson-reserve'), ('459919', 'landed', '(landed|street|Opera|Aida)'), ('999999', None, 'not a Singapore postal code'), ('123456', None, 'No address found')]

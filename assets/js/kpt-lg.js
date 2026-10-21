@@ -167,7 +167,7 @@
       '<section class="lg-band tight" style="padding-top:0"><div class="lg-wrap" style="max-width:760px">' +
       // Everything else in Research, one tap away (the same pages the menu lists under Research).
       '<div class="gw-rmore"><p class="gw-lane">More ways to research</p><div class="gw-rlinks">' +
-      [['../journey/worth/', 'Property values &amp; prices', 'HDB, condo and landed sales · asking price', 'worth'], ['../tools/what-can-i-buy/', 'What can this budget buy?', 'Homes that sold around your budget', 'what-can-i-buy'], ['../projects/', 'Browse every development', 'A–Z list', 'directory']]
+      [['../journey/worth/', 'Property prices &amp; past sales', 'HDB, condo and landed sales · asking price', 'worth'], ['../tools/what-can-i-buy/', 'What can this budget buy?', 'Search by budget, area and must-haves', 'what-can-i-buy'], ['../projects/', 'Browse every development', 'A–Z list', 'directory']]
         .map((x) => '<a href="' + x[0] + '" data-gw-nav-to="' + x[3] + '"><b>' + x[1] + '</b><small>' + x[2] + '</small></a>').join('') + '</div></div>' + sampleExample() +
       '<p class="lg-fine lg-center" data-lg-scope>Can’t see it? Research covers private condos and apartments, executive condominiums (ECs) and strata cluster houses with sales in the last five years, each kept to its own type. A launch with no sales yet is listed without prices and opens on the Map, and landed homes on their own land are found by road. <a href="../projects/">Browse all ' + (total ? num(total) + ' ' : '') + 'developments</a>, including new launches with sites of their own.</p></div></section></div>';
   }

@@ -682,6 +682,6 @@
   }
 
   return { VERSION, T, radiusText, DISTRICT_AREAS, AREA_ALIASES, AREA_CHOICES, NEW_LABEL, NEW_NOTE, NEW_NOTE_INV, resolveArea, districtLabel, districtShort, BASE_NOT_EVAL, METHOD, METHOD_INV, ANALYTICS_KEYS, HUT,
-    prepareInventory, freshness, invMatch, bedsFor, effectivePrefs, prefOrder, support, newCandidates, whenText, handoffMessage, askEvent, typeNoun,
+    prepareInventory, freshness, recordFor, invMatch, bedsFor, effectivePrefs, prefOrder, support, newCandidates, whenText, handoffMessage, askEvent, typeNoun,
     displayName, prepare, inferSize, sizeWindow, sizeWindows, BED_WORDS, GROUP_SUB, matchDistricts, unsupported, notEvaluated, matchProject, eligible, shortlist, count, compare, why, card, analytics, bucket, m2, p2, num, sizeText, ymLabel, monthsBetween };
 });

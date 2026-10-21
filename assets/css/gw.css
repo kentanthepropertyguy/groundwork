@@ -570,7 +570,7 @@ body.gw-legacy .gw-strip-host{max-width:760px;padding:0}
 .gw-mhome{display:flex;align-items:center;gap:10px;min-height:42px;padding:6px 10px;border-radius:12px;font-weight:600;font-size:14.5px;color:var(--gw-ink) !important;text-decoration:none !important}
 .gw-mhome:hover{background:var(--gw-grey)}.gw-mhome svg{color:var(--gw-blue)}
 @media (max-width:639px){.gw-ms-tools .gw-ml{grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 6px}.gw-ms-tools .gw-mi small{display:none}.gw-ms-tools .gw-mi{min-height:44px}}
-@media (min-width:640px){.gw-mcols{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.gw-mfoot{grid-template-columns:auto 1fr 1fr auto;align-items:center;gap:8px}.gw-mfoot .gw-mask{margin:0;padding:0 18px}}
+@media (min-width:640px){.gw-mcols{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.gw-mfoot{display:flex;flex-wrap:wrap;align-items:center;gap:6px 20px}.gw-mfoot .gw-mi{flex:0 1 auto}.gw-mfoot .gw-mi b,.gw-mfoot .gw-mi small{white-space:nowrap}.gw-mfoot .gw-mask{margin:0 0 0 auto;padding:0 18px}.gw-mfoot .gw-mclear{flex:1 1 100%;margin:4px 0 0}}
 /* Search results say which section each page belongs to. */
 .gw-sec{font-style:normal;font-weight:700;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;padding:1px 6px;border-radius:6px;margin-right:4px;background:#EEF4FC;color:var(--gw-blue)}
 .gw-sec-guide{background:#FBF3DF;color:#7A5B0E}.gw-sec-research{background:#EEF0F6;color:var(--gw-ink)}
@@ -645,3 +645,9 @@ body.gw-legacy .gw-strip-host{max-width:760px;padding:0}
 .gw-vx-near-c{border-top:0;padding-top:4px}.gw-vx-near .gw-vx-t b{color:var(--gw-ink);font-weight:600}
 @media (max-width:640px){.gw-vx-near .gw-vx-t td:first-child{white-space:normal}.gw-vx-near .gw-vx-t td{padding:8px 6px}}
 @media (max-width:340px){.gw-vx-near .gw-vx-t{font-size:12.5px}.gw-vx-near .gw-vx-t td{padding:8px 4px}}
+/* Phase 4: the homepage leads with three intentions (buy, sell, research); calculators stay one tap away. */
+.gw-allt{margin:0 !important;font-size:14.5px;color:var(--gw-muted)}.gw-allt a{font-weight:600}
+.gw-door-sell .gw-rrows .gw-mi small{white-space:normal}
+
+@media (min-width:720px){.gw-tg-q .gw-tls{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.gw-paths + .gw-jres{margin-top:18px !important}

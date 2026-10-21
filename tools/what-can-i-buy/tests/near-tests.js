@@ -245,13 +245,13 @@ t('the launch microsites file has no coordinates today, so every upcoming launch
 });
 
 console.log('The page');
-const page = fs.readFileSync(path.join(root, 'tools/what-can-i-buy/index.html'), 'utf8'), mapPage = fs.readFileSync(path.join(root, 'research/map/index.html'), 'utf8');
+const html = fs.readFileSync(path.join(root, 'tools/what-can-i-buy/index.html'), 'utf8'), ui = fs.readFileSync(path.join(root, 'assets/js/kpt-discover-ui.js'), 'utf8'), D = require(path.join(root, 'assets/js/kpt-discover.js')), page = html + '\n' + ui, mapPage = fs.readFileSync(path.join(root, 'research/map/index.html'), 'utf8');
 t('the Map files load only when a place is typed (no static script or stylesheet for the Map or Leaflet)', () => {
-  assert.ok(!/<script[^>]+(leaflet|kpt-map-)/.test(page)); assert.ok(!/<link[^>]+(leaflet|kpt-map)/.test(page));
-  assert.ok(/function loadNear\(\)/.test(page));
+  assert.ok(!/<script[^>]+(leaflet|kpt-map-)/.test(html)); assert.ok(!/<link[^>]+(leaflet|kpt-map)/.test(html));
+  assert.ok(/nmLoad = Promise\.all\(\[addJs\('\.\.\/\.\.\/assets\/vendor\/leaflet\/leaflet\.js'\)/.test(ui)); assert.ok(/root\.addEventListener\('focusin'[^\n]*loadNear\(\)/.test(ui));
 });
 t('the page asks for the same Map file versions as the Map page (so the browser reuses them and a bump cannot split them)', () => {
-  const mv = (/MAP_V = '([^']+)'/.exec(page) || [])[1], want = (/kpt-map-core\.js\?v=([^"']+)/.exec(mapPage) || [])[1];
+  const mv = (/MAP_V: '([^']+)'/.exec(html) || [])[1], want = (/kpt-map-core\.js\?v=([^"']+)/.exec(mapPage) || [])[1];
   assert.ok(mv && want && mv === want, mv + ' vs ' + want);
   assert.strictEqual((/kpt-map-view\.js\?v=([^"']+)/.exec(mapPage) || [])[1], mv); assert.strictEqual((/kpt-map-app\.js\?v=([^"']+)/.exec(mapPage) || [])[1], mv); assert.strictEqual((/kpt-map\.css\?v=([^"']+)/.exec(mapPage) || [])[1], mv);
 });
@@ -260,18 +260,17 @@ t('the page reuses the Map\'s search and view instead of its own (no second copy
   assert.ok(!/L\.map\(|L\.tileLayer\(/.test(page), 'the page must not build its own Leaflet map');
 });
 t('the radius options are 500 m, 1 km, 2 km and 3 km, and the location is saved only in this tab', () => {
-  assert.ok(/RADII = \[500, 1000, 2000, 3000\]/.test(page)); assert.ok(/near: FS\.near \? \{ t: FS\.near\.t, n: FS\.near\.n, r: FS\.near\.r \}/.test(page));
-  assert.ok(!/KPT\.track\([^)]*near/i.test(page));
+  assert.deepStrictEqual(D.T.radii, [500, 1000, 2000, 3000]); assert.ok(/RADII = D\.T\.radii/.test(ui));
+  assert.ok(/find2: snapshot\(\)/.test(ui) && /M\.writeHandoff\(window\.sessionStorage/.test(ui)); assert.ok(!/localStorage/.test(ui));
+  assert.ok(!/KPT\.track\([^)]*near/i.test(ui));
 });
 t('the launch list is optional, never an error, and only used when the new-launch layer is on', () => {
-  assert.ok(/const loadSites = \(\) => .*fetch\(SITES_URL\)\.then\(\(r\) => \(r\.ok \? r\.json\(\) : null\)\)\.catch\(\(\) => null\)/.test(page));
-  assert.ok(/launches: launchesFor\(\)/.test(page) && /return sitesDoc \|\| null/.test(page)); assert.ok(/\/\^https:\\\/\\\//.test(page), 'only https launch links');
-  assert.ok(!/KPT\.track\([^)]*(launch|site)/i.test(page), 'launch names are never sent to analytics');
+  assert.ok(/get\(CFG\.SITES_URL\)/.test(ui)); assert.ok(/const get = [^\n]*\.catch\(\(\) => null\)/.test(ui) || /catch\(\(\) => null\)/.test(ui));
+  assert.ok(/stage === 'new-launch' && x\.status === 'configured' && \/\^https:\\\/\\\//.test(ui), 'only https launch links');
+  assert.ok(!/track\([^)]*(launch|site)/i.test(ui), 'launch names are never sent to analytics');
 });
 t('the unplaced list and the upcoming block are separate from the matches, and say what they are not', () => {
-  assert.ok(/no verified map position/.test(page)); assert.ok(/Not confirmed to be within/.test(page)); assert.ok(/not budget matches/.test(page)); assert.ok(/Browse other upcoming launches/.test(page));
-  assert.ok(/id="kpfUnplaced"/.test(page) && /data-f="unplaced"/.test(page));
-  assert.ok(!/<i>\$\{esc\(NR\.sub\)\}<\/i>/.test(page), 'the place type is no longer printed after a name that already carries it');
+  assert.ok(/no verified map position/.test(ui)); assert.ok(/Not confirmed to be within/.test(ui)); assert.ok(/not budget matches/.test(ui)); assert.ok(/class="kd-sec kd-up"/.test(ui));
 });
 
 console.log('Phase 3: postal codes and the launch register');
@@ -282,8 +281,8 @@ t('a launch or site from the register (onlyNear) is never listed without a place
   const base0 = run(rix, Object.assign({ budget: 1800000 }, o)); assert.strictEqual(none.total, base0.total); assert.strictEqual(none.shown, base0.shown);
 });
 t('the page loads the shared postal module before the Map core, and accepts a postal code as a place', () => {
-  assert.ok(/gw-postal\.js/.test(page)); assert.ok(page.indexOf('gw-postal.js') < page.indexOf('kpt-map-core.js'), 'postal module first');
-  assert.ok(/NEAR_TYPES[^;]*'postal'/.test(page)); assert.ok(/upcoming\.json/.test(page) && /setUpcoming/.test(page));
+  assert.ok(ui.indexOf("gw-postal.js?v=") > -1 && ui.indexOf("gw-postal.js?v=") < ui.indexOf("kpt-map-core.js?v="), 'postal module first');
+  assert.ok(/NEAR_TYPES = \[[^\]]*'postal'/.test(ui)); assert.ok(/NM\.setUpcoming/.test(ui));
   assert.ok(!/elastic\/search/.test(page), 'the page has no OneMap lookup of its own; it uses the shared module');
 });
 t('the shared module, not a copy, is what the Map and Budget Search both call', () => {

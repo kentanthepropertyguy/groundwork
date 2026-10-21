@@ -120,7 +120,7 @@
       '<ol class="gw-upsteps">' + UP_STEPS.map((x, i) => '<li data-up-step="' + x[0] + '"' + (i === 0 ? ' class="now"' : '') + '><a href="' + r + x[3] + '" data-gw-go="up-' + x[0] + '"><i aria-hidden="true">' + (i + 1) + '</i><span><b>' + esc(x[1]) + '</b><small>' + esc(x[2]) + '</small></span></a></li>').join('') + '</ol>' +
       '<a class="gw-btn pri gw-upgo" href="' + r + UP_STEPS[0][3] + '" data-gw-up-go data-gw-go="up-worth">' + esc(UP_STEPS[0][4]) + ' ›</a>' +
       '<div class="gw-upmore"><a href="' + esc(wa('Hi Ken, I own an HDB flat and I’m thinking of upgrading. Could we talk it through?')) + '" target="_blank" rel="noopener" data-gw-wa="up-ken">Talk it through with Ken on WhatsApp ›</a>' +
-      '<span>Not upgrading from HDB? <a href="#buy" data-gw-go="buy-path">Buying</a> · <a href="#move" data-gw-go="move-path">Other moves</a> · <a href="' + r + 'journey/worth/" data-gw-go="worth">Property values &amp; prices</a></span></div></section>';
+      '<span>Not upgrading from HDB? <a href="#buy" data-gw-go="buy-path">Buying</a> · <a href="#sell" data-gw-go="sell-path">Selling</a> · <a href="#move" data-gw-go="move-path">Sell and buy again</a></span></div></section>';
   }
   function guideHtml(g) {
     if (!g.head) return '<p class="gw-fine">Choose one to see your next steps.</p>';

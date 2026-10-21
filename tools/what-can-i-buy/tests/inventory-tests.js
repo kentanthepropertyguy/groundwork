@@ -3,6 +3,7 @@ const fs = require('fs'), path = require('path'), assert = require('assert'), cr
 const root = path.join(__dirname, '../../..');
 const F = require(path.join(root, 'assets/js/kpt-find.js')), T = F.T;
 let pass = 0, fail = 0;
+const ui = fs.readFileSync(path.join(root, 'assets/js/kpt-discover-ui.js'), 'utf8');
 const t = (name, fn) => { try { fn(); pass++; console.log('  ok   ' + name); } catch (e) { fail++; console.log('  FAIL ' + name + '\n       ' + e.message); } };
 const FIND_SHA = 'e4516fd8d6e8f8a0b6494619024e4370dcfa6d7e9305015f760e9fa235c6db00';
 const H = 3600000, D = 24 * H, NOW = Date.parse('2026-10-06T10:00:00Z');   // 6 Oct 2026, 18:00 Singapore
@@ -374,36 +375,27 @@ t('the single new analytics event carries slugs only: letters, digits, hyphens; 
 
 console.log('Page wiring');
 const page = fs.readFileSync(path.join(root, 'tools/what-can-i-buy/index.html'), 'utf8');
-t('the inventory file is optional: a failed fetch resolves to null and the page shows no error for it', () => { assert.ok(/fetch\(INV_URL, \{ cache: 'no-cache' \}\)\.then\(\(r\) => \(r\.ok \? r\.json\(\) : null\)\)\.catch\(\(\) => null\)/.test(page)); });
-t('review hooks (?inventory= and ?now=) work only on localhost or in test mode', () => { assert.ok(/const REVIEW = test \|\| \/\^\(localhost\|127\\\.0\\\.0\\\.1\)\$\/\.test\(location\.hostname\)/.test(page)); assert.ok(/REVIEW && \/\^\[\\w\.\/-\]\+\\\.json\$\//.test(page)); assert.ok(/REVIEW && isFinite\(Date\.parse\(params\.get\('now'\)/.test(page)); });
+t('the inventory file is optional: a failed fetch resolves to null and the page shows no error for it', () => { assert.ok(/get\(CFG\.INV_URL, \{ cache: 'no-cache' \}\)/.test(ui)); assert.ok(/const get = [^\n]*\.catch\(\(\) => null\)/.test(ui)); });
+t('review hooks (?now=) work only on localhost or in test mode', () => { assert.ok(/const REVIEW = CFG\.review \|\| \/\^\(localhost\|127\\\.0\\\.0\\\.1\)\$\/\.test\(location\.hostname\)/.test(ui)); assert.ok(/REVIEW && isFinite\(Date\.parse\(params\.get\('now'\)/.test(ui)); });
 t('the page tracks exactly: find_shown, find_research_click, find_ask_click (twice, slugs only)', () => { const tr = page.match(/KPT\.track\('find_[a-z_]+'[^)]*\)/g).sort(); assert.deepStrictEqual(tr, ["KPT.track('find_ask_click', ev)", "KPT.track('find_ask_click', ev)", "KPT.track('find_research_click', { project_id: t.dataset.id })", "KPT.track('find_shown', pl)"]); });
-t('WhatsApp links are built only through the pure handoff builder (names, budget, typed size, confirmed district)', () => {
-  const wa = page.split('\n').filter((l) => /waLink\(/.test(l)); wa.forEach((l) => assert.ok(/waFor\(|R\.waMessage\(budget\)|message: BEYOND_WA/.test(l), l));
-  assert.ok(/const waFor = \(names\) => FI\.handoffMessage\(\{ names, budget, size: FS\.explicit && FS\.explicit\.typed \? \{ from: FS\.explicit\.from, to: FS\.explicit\.to \} : null, district: FS\.loc === 'confirmed' && FS\.districts\.length === 1 \? FS\.districts\[0\] : null \}\)/.test(page));
-  assert.ok(!/waFor\([^)]*(FS\.text|whereText)/.test(page));
+t('the only WhatsApp link is a generic message: no budget, place or search in it', () => {
+  const wa = ui.split('\n').filter((l) => /waLink\(/.test(l)); assert.ok(wa.length >= 1); wa.forEach((l) => assert.ok(/message: BEYOND_WA/.test(l), l));
+  assert.ok(/const BEYOND_WA = 'Hi Ken, I was using Groundwork and have a question\.'/.test(ui));
 });
 t('V10.2: the Beyond the numbers WhatsApp opener is one fixed sentence with no search, budget, project or Huttons detail', () => { const m = /const BEYOND_WA = '([^']*)';/.exec(page); assert.ok(m && m[1] === 'Hi Ken, I was using Ken Property Tools and have a question.', m && m[1]); });
 t('V10.2: Beyond the numbers has the approved text, the TikTok link is plain, and no TikTok mention sits inside the cards or the list code', () => {
-  const sec = /<section class="kpb-beyond"[\s\S]*?<\/section>/.exec(page)[0];
-  ['Beyond the numbers', "I'm Ken.", "I've been in Singapore property since 2007.", 'I discuss property questions and market decisions live on TikTok most nights.', 'Watch Ken on TikTok @kennx8898 →', 'Prefer to talk it through?', 'Message Ken on WhatsApp →'].forEach((x) => assert.ok(sec.indexOf(x) > -1, x));
-  assert.ok(/href="https:\/\/www\.tiktok\.com\/@kennx8898" target="_blank" rel="noopener"/.test(sec));
-  assert.ok(!/<svg|follower|embed|iframe/i.test(sec));
-  const findJs = fs.readFileSync(path.join(root, 'assets/js/kpt-find.js'), 'utf8'); assert.ok(!/tiktok/i.test(findJs));
+  const sec = /<section class="kd-ken"[\s\S]*?<\/section>/.exec(page)[0];
+  ['Beyond the numbers', "I'm Ken.", 'Property agent since 2007.', 'I discuss property questions and market decisions live on TikTok most nights.', 'Watch Ken on TikTok @kennx8898 →', 'Message Ken on WhatsApp →'].forEach((x) => assert.ok(sec.indexOf(x) > -1, x));
+  assert.ok(/href="https:\/\/www\.tiktok\.com\/@kennx8898" target="_blank" rel="noopener"/.test(sec)); assert.ok(!/<svg|follower|embed|iframe/i.test(sec));
+  const findJs = fs.readFileSync(path.join(root, 'assets/js/kpt-find.js'), 'utf8'); assert.ok(!/tiktok/i.test(findJs)); assert.ok(!/tiktok/i.test(ui), 'no TikTok mention in the list code');
   assert.ok(!/tiktok/i.test(page.replace(sec, '').replace(/<footer[\s\S]*?<\/footer>/, '')), 'TikTok appears only in Beyond the numbers and the footer');
-  // V10.4: the footer identity block carries a photo too, but the shared shell hides it whenever Beyond the numbers is showing, so only one is ever visible.
-  const inBeyond = (sec.match(/ken-portrait\.jpg/g) || []).length, inFooter = ((page.match(/<footer[\s\S]*?<\/footer>/) || [''])[0].match(/ken-portrait\.jpg/g) || []).length;
-  assert.strictEqual(inBeyond, 1, 'Beyond the numbers carries Ken\'s photo once');
-  assert.strictEqual(inFooter, 1, 'the footer identity block carries one photo');
-  assert.strictEqual((page.match(/ken-portrait\.jpg/g) || []).length, 2, 'no other Ken photo on the page');
-  const shell = fs.readFileSync(path.join(root, 'assets/css/kpt-shell.css'), 'utf8');
-  assert.ok(/body:has\(#beyond:not\(\[hidden\]\)\) \.kpt-ken-img/.test(shell), 'the footer photo is hidden while Beyond the numbers is showing');
 });
-t('V10.2: the FIND page has no Ken\'s Take block, and the Buy result button lands on the list', () => { assert.ok(!/res-ken|Ken's Take/.test(page)); assert.ok(/location\.hash === '#developments'/.test(page)); assert.ok(/what-can-i-buy\/#developments/.test(fs.readFileSync(path.join(root, 'buy/index.html'), 'utf8'))); });
-t('the typed size flag is set only when the buyer typed a range (never for the inferred size)', () => { assert.ok(/FS\.explicit = \{ from: a, to: b, typed: true \}/.test(page)); assert.ok(/typed: sz\.source === 'explicit' && !!\(FS\.explicit && FS\.explicit\.typed\)/.test(page)); });
-t('tick boxes allow at most two projects; the third is disabled', () => { assert.ok(/FS\.ticked\.length >= 2 && !on/.test(page)); assert.ok(/FS\.ticked\.length < 2\) FS\.ticked\.push/.test(page)); });
+t('V10.2: the page has no Ken\'s Take block, and old Buy links land in Budget Search', () => { assert.ok(!/res-ken|Ken's Take/.test(page + ui)); assert.ok(/what-can-i-buy\//.test(fs.readFileSync(path.join(root, 'buy/index.html'), 'utf8'))); });
+t('a size is applied only when the buyer typed a minimum: never worked out from bedrooms or anything else', () => { assert.ok(/function applyMin\(inp\)/.test(ui)); assert.ok(!/minSize = [^;\n]*(beds|SIZE_BEDS)/.test(ui)); const d = fs.readFileSync(path.join(root, 'assets/js/kpt-discover.js'), 'utf8'); assert.ok(!/inferSize|sizeFor|SIZE_BEDS/.test(d)); });
+// (the V10 "tick two to compare" boxes were part of the old results page; Research opens each development and compares from there)
 t('the page-level Get Ken\'s view button and its message are unchanged', () => { assert.ok(/kv\.href = KPT\.waLink\(\{ message: R\.waMessage\(budget\) \}\)/.test(page)); assert.ok(/id="kenView"[^>]*>Get Ken's view →/.test(page)); });
-t('V9.1 location gate, confirmed-district-only rule and typed-text privacy are intact', () => { assert.ok(/FS\.loc === 'pending'\) \{ root\.innerHTML = [^;]*locPanel\(\)[^;]*; return; \}/.test(page)); assert.ok(/f === 'locuse'\) \{ FS\.districts = \[t\.dataset\.d\]; FS\.loc = 'confirmed'/.test(page)); });
-t('"Show N more" exists for both groups and is the only control that expands them', () => { assert.ok(/data-f="more" data-sale="\$\{esc\(g\.sale\)\}">Show \$\{extra\.length\} more/.test(page)); });
+t('a place is applied only by an explicit choice, never from typed text alone', () => { assert.ok(/f === 'pick'\) \{ pickPlace\(/.test(ui)); assert.ok(/if \(opts\.length === 1\) opts\[0\]\.click\(\)/.test(ui)); });
+t('"Show N more" exists for the groups and is the only control that expands them', () => { assert.ok(/data-f="more" data-key="\$\{esc\(key\)\}">Show \$\{Math\.min\(left, 20\)\} more/.test(ui)); assert.ok(/f === 'more'\) \{ S\.shown\[t\.dataset\.key\]/.test(ui)); });
 t('the page makes no network request other than find.json, inventory.json, the launch microsites list, the existing budget data and (only once a place is typed) the Map\'s own data files', () => { const f = page.match(/fetch\([^)]*\)/g) || []; f.forEach((x) => assert.ok(/FIND_URL|INV_URL|SITES_URL|\bu\)|f\(u\)|u \+ '\?v=' \+ MAP_V/.test(x), x)); });
 
 console.log('Data file');
