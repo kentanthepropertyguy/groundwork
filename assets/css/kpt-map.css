@@ -103,7 +103,7 @@ body.kpm{margin:0;background:#fff;color:var(--gw-ink);font-family:var(--gw-font)
 .kpm .mapkey{position:absolute;z-index:500;left:16px;bottom:16px;display:flex;gap:14px;background:rgba(255,255,255,.94);border:1px solid var(--m-line);border-radius:999px;padding:7px 14px;font-size:11.5px;color:var(--m-text);box-shadow:var(--m-sh)}
 .kpm .mapkey i{display:inline-block;border-radius:50%;margin-right:6px;vertical-align:-1px;background:var(--m-sig)}
 .kpm .mapkey i.a{width:9px;height:9px;opacity:.7} .kpm .mapkey i.s{width:11px;height:11px;background:var(--m-ink)} .kpm .mapkey i.t{width:10px;height:10px;background:var(--m-teal)}
-.kpm .mapkey i.m{width:10px;height:10px;border-radius:3px;background:#C9372C} .kpm .mapkey i.sc{width:10px;height:10px;border-radius:3px;background:#6D4BC4}
+.kpm .mapkey i.sh{width:10px;height:10px;border-radius:3px;background:#C97A1E} .kpm .mapkey i.m{width:10px;height:10px;border-radius:3px;background:#C9372C} .kpm .mapkey i.sc{width:10px;height:10px;border-radius:3px;background:#6D4BC4}
 .kpm .zoomc{position:absolute;z-index:500;left:16px;bottom:62px;display:flex;flex-direction:column;gap:4px}
 .kpm .zoomc button{width:36px;height:36px;border-radius:9px;background:#fff;border:1px solid var(--m-line);box-shadow:var(--m-sh);font-size:18px;font-weight:700;color:var(--m-ink);display:grid;place-items:center;text-align:center}
 .kpm .leaflet-container{font:inherit;background:var(--m-paper2)}
@@ -118,7 +118,7 @@ body.kpm{margin:0;background:#fff;color:var(--gw-ink);font-family:var(--gw-font)
 .kpm .lbl.a{font-weight:700;font-size:11px} .kpm .lbl.a.k-mrt{color:#A92A21} .kpm .lbl.a.k-school{color:#523A9E} .kpm .lbl.a.k-park{color:#1F6E42} .kpm .lbl.a.k-shop,.kpm .lbl.a.k-food{color:#9A5B12} .kpm .lbl.a.hl{font-size:12px}
 .kpm .amwrap,.kpm .selwrap{background:none;border:0;overflow:visible}
 .kpm .am{width:24px;height:24px;border-radius:8px;display:grid;place-items:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(20,32,63,.3)}
-.kpm .am.sm{width:18px;height:18px;border-radius:6px;border-width:1.5px;box-shadow:0 1px 3px rgba(20,32,63,.25)}
+.kpm .am.sm{width:18px;height:18px;border-radius:6px;border-width:1.5px;box-shadow:0 1px 2px rgba(20,32,63,.18);opacity:.88}
 .kpm .am.k-mrt{background:#C9372C} .kpm .am.k-school{background:#6D4BC4} .kpm .am.k-shop,.kpm .am.k-food{background:#C97A1E} .kpm .am.k-park{background:#2E8B57}
 .kpm .am.hl{transform:scale(1.25);box-shadow:0 0 0 3px rgba(46,79,209,.35),0 4px 10px rgba(20,32,63,.35)}
 .kpm .selchip{position:absolute;left:0;top:0;transform:translate(-50%,calc(-100% - 24px));background:var(--m-ink);color:#fff;border-radius:10px;padding:6px 11px 7px;white-space:nowrap;text-align:center;box-shadow:0 6px 18px rgba(20,32,63,.28);pointer-events:none;font-family:var(--sans)}
@@ -217,3 +217,45 @@ body.kpm{margin:0;background:#fff;color:var(--gw-ink);font-family:var(--gw-font)
 .gwi-w .gwi:focus-visible{box-shadow:0 0 0 3px rgba(46,79,209,.35)}
 .gwi-tip{position:fixed;z-index:5000;box-sizing:border-box;padding:10px 12px;background:#14203F;color:#fff;border-radius:10px;box-shadow:0 10px 28px rgba(20,32,63,.28);font:400 13px/1.45 system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;pointer-events:none}
 
+
+/* ---- answer-first panel: the most useful fact first, the rest on demand ---- */
+.kpm .lead{margin-top:14px;padding:12px 14px;background:var(--m-paper);border-radius:12px}
+.kpm .ld-k{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--m-mut);display:flex;align-items:center}
+.kpm .ld-p{display:flex;align-items:baseline;gap:5px;margin-top:4px}
+.kpm .ld-p b{font-size:30px;line-height:1.1;font-weight:800;color:var(--m-ink);letter-spacing:-.02em}
+.kpm .ld-p small{font-size:13px;font-weight:700;color:var(--m-mut)}
+.kpm .ld-s{margin:4px 0 0;font-size:13px;line-height:1.4;color:var(--m-text)}
+.kpm .lead .basis{margin-top:4px}
+.kpm .around.key{margin-top:10px;padding-top:6px;border-top:0}
+.kpm .sxs{margin-top:12px;border-top:1px solid var(--m-line)}
+.kpm details.sx{border-bottom:1px solid var(--m-line)}
+.kpm details.sx>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:46px;font-size:14px;font-weight:700;color:var(--m-ink)}
+.kpm details.sx>summary::-webkit-details-marker{display:none}
+.kpm details.sx>summary::after{content:'';flex:none;width:8px;height:8px;border-right:2px solid var(--m-mut);border-bottom:2px solid var(--m-mut);transform:rotate(45deg) translate(-2px,-2px);transition:transform .15s}
+.kpm details.sx[open]>summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
+.kpm details.sx>summary:focus-visible{outline:2px solid var(--m-sig);outline-offset:-2px;border-radius:6px}
+.kpm .sxb{padding:0 0 14px}
+.kpm .sxb .mkts{margin-top:0}
+.kpm .meth{margin:0;padding-left:18px;display:grid;gap:6px;font-size:12.5px;line-height:1.45;color:var(--m-text)}
+.kpm .meth a{color:var(--m-sig)}
+@media (prefers-reduced-motion:reduce){.kpm details.sx>summary::after{transition:none}}
+
+/* ---- Layers: one quiet control ---- */
+.kpm .lyr{position:absolute;z-index:565;left:406px;top:16px}
+.kpm .lyr-b{display:inline-flex;align-items:center;gap:7px;height:46px;padding:0 14px;background:#fff;border:1px solid var(--m-line2);border-radius:13px;box-shadow:var(--m-sh);font-size:13.5px;font-weight:700;color:var(--m-ink)}
+.kpm .lyr-b:hover,.kpm .lyr-b[aria-expanded=true]{background:var(--m-paper)}
+.kpm .lyr-p{position:absolute;left:0;top:52px;min-width:230px;background:#fff;border:1px solid var(--m-line);border-radius:12px;box-shadow:var(--m-sh);padding:6px}
+.kpm .lyr-r{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 10px;border-radius:8px;font-size:14px;color:var(--m-ink);font-weight:600;cursor:pointer}
+.kpm .lyr-r:hover{background:var(--m-sig-soft)}
+.kpm .lyr-r input{width:18px;height:18px;accent-color:var(--m-sig);flex:none;margin:0}
+.kpm .lyr-r:focus-within{outline:2px solid var(--m-sig);outline-offset:-2px}
+@media (max-width:760px){
+  .kpm .lyr{left:auto;right:12px;top:68px}
+  .kpm .lyr-b{height:40px;padding:0 12px}
+  .kpm .lyr-p{left:auto;right:0;top:46px}
+  .kpm .mapstage.more .lyr{display:none}
+  .kpm .bs .lead{margin-top:6px;padding:10px 12px}
+  .kpm .ld-p b{font-size:26px}
+  .kpm .bs .around.key{margin-top:6px}
+  .kpm .bs .sxs{margin-top:8px}
+}

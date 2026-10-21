@@ -149,8 +149,14 @@
       return { mk, bin: +bin, win: +win };
     }
     const mostSold = (rows) => rows.reduce((a, c) => c.n > a.n ? c : a);
-    function focus(name) { for (const mk of ['sec', 'new']) { const mm = market(name, mk); if (mm && mm.win === 0) return { mk, bin: mostSold(mm.rows).bin, win: 0 }; } return null; }
-    m.chosen = chosen; m.focus = focus; m.mostSold = mostSold;
+    /* The market and size a development is best described by: the market that has recent sales (shortest window first); when both do, the one with more sales in the last 12 months (a new launch is led by its Primary sales, a resale home by its Secondary). One rule for the card's headline and for the nearby comparison. */
+    function lead(name) {
+      const b = BY[name], order = b && b.p12 > b.s12 ? ['new', 'sec'] : ['sec', 'new']; let best = null;
+      for (const mk of order) { const mm = market(name, mk); if (mm && mm.win !== null && (best === null || mm.win < best.mm.win)) best = { mk, mm, row: mostSold(mm.rows) }; }
+      return best;
+    }
+    function focus(name) { const l = lead(name); return l && l.mm.win === 0 ? { mk: l.mk, bin: l.row.bin, win: 0 } : null; }
+    m.chosen = chosen; m.focus = focus; m.lead = lead; m.mostSold = mostSold;
 
     /* ---- nearby developments (positioned only) ---- */
     const nearby = (name, radius) => { const c = BY[name]; if (!c || !c.pos) return []; return PM.filter((p) => p !== c && !p.up).map((p) => Object.assign({ d: hav(c, p) }, p)).filter((p) => p.d <= radius).sort((a, b) => a.d - b.d); };

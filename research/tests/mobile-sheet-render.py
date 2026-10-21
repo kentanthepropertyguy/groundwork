@@ -86,6 +86,7 @@ try:
         if kind != 'mrt': check(f'{nm}: the nearby radius is kept in the link', 'nr=2000' in hash_(pg) or 'r=2000' in hash_(pg), hash_(pg))
         # open the details and scroll: the name and the radius stay pinned
         if pg.query_selector('.bs-act [data-dpmore][aria-expanded=false]'): pg.click('.bs-act [data-dpmore]'); pg.wait_for_timeout(450)
+        pg.evaluate("document.querySelectorAll('.bs details.sx').forEach(d => d.open = true)"); pg.wait_for_timeout(300)   # the sections open on demand; open them so there is something to scroll
         pg.evaluate("document.querySelector('.bs').scrollTop = 600"); pg.wait_for_timeout(250)
         sb = sheet(pg); rb = box(pg, '.bs .rad')
         check(f'{nm}: scrolled to the details, the radius choices are still at the top of the sheet', rb and sb and rb['y'] - sb['y'] < 170, (rb, sb))
@@ -111,7 +112,7 @@ try:
         # everything is still reachable
         if kind == 'dev':
             if pg.query_selector('.bs-act [data-dpmore][aria-expanded=false]'): pg.click('.bs-act [data-dpmore]'); pg.wait_for_timeout(450)
-            t = card(pg); check(f'{nm}: prices by size, the neighbourhood and the Research link are still there', 'Prices by size' in t and 'AROUND THIS HOME' in t.upper() and 'Explore nearby' in t and pg.query_selector('.bs a[href*="#/p/"]') is not None, t[:200])
+            t = card(pg); check(f'{nm}: prices by size, the neighbourhood and the Research link are still there', 'Prices by size' in t and 'amenities' in t.lower() and 'Explore nearby developments' in t and 'RECENT PRICES' in t.upper() and pg.query_selector('.bs a[href*="#/p/"]') is not None, t[:200])
         elif kind == 'launch':
             check(f'{nm}: no price and no marketing link, sources on demand', re.search(r'\$\s?\d', t) is None and pg.query_selector('.bs a[href*="kentanthepropertyguy"]') is None and 'Far East' in t)
         # close is different from minimise

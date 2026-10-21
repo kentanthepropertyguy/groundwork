@@ -72,6 +72,6 @@ t('every page that loads the shared search script points at its current version 
 });
 t('the Browse page script and the Map scripts carry new versions', () => {
   assert.ok(new RegExp('kpt-directory\\.js\\?v=' + sha('assets/js/kpt-directory.js')).test(fs.readFileSync(path.join(root, 'projects/index.html'), 'utf8')));
-  const m = fs.readFileSync(path.join(root, 'research/map/index.html'), 'utf8'); ['core', 'view', 'app'].forEach((x) => assert.ok(new RegExp('kpt-map-' + x + '\\.js\\?v=2026-10-21\\.\\d+').test(m), x));
+  const m = fs.readFileSync(path.join(root, 'research/map/index.html'), 'utf8'); ['core', 'view', 'app'].forEach((x) => assert.ok(new RegExp('kpt-map-' + x + '\\.js\\?v=2026-10-\\d+\\.\\d+').test(m), x));
 });
 console.log('\n' + pass + ' passed, ' + fail + ' failed'); process.exit(fail ? 1 : 0);

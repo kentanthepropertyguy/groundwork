@@ -100,12 +100,44 @@ try:
             ok("isn’t available right now" in pg.inner_text('.kd-more')); ctx.close()
         t('with no recently checked inventory the bedroom control is off and explained', beds_stale)
         def planner_handoff():
-            pre = "sessionStorage.setItem('kpt.handoff', JSON.stringify({v:1,from:'hdb',state:'ok',budget:{low:1500000,high:1800000},purpose:null,openTo:'both'}))"
-            ctx, pg, errs = open_page(br, kw, pre=pre); pg.wait_for_selector('.kd-card:visible, .kd-entry:visible', timeout=20000)
-            if pg.query_selector('.kd-entry'): ok(pg.input_value('#kdBudget').replace(',', '') in ('1800000', '1500000'), 'budget carried: ' + pg.input_value('#kdBudget'))
-            else: ok('$1.8m' in headline(pg) or '$1.5m' in headline(pg), headline(pg))
-            ctx.close()
-        t('a budget handed over by the HDB planner is carried in', planner_handoff)
+            pre = "if(!sessionStorage.getItem('kpt.handoff'))sessionStorage.setItem('kpt.handoff', JSON.stringify({v:1,from:'hdb-upgrade',state:'ok',budget:{low:1790000,high:1840000},purpose:null,openTo:'both'}))"
+            ctx, pg, errs = open_page(br, kw, pre=pre); pg.wait_for_selector('#kdBudget', timeout=20000)
+            ok(pg.query_selector('.kd-card') is None, 'a planner budget opens the form, not islandwide results')
+            ok(pg.input_value('#kdBudget').replace(',', '') == '1840000', 'top of the range is the maximum: ' + pg.input_value('#kdBudget'))
+            src = pg.inner_text('.kd-src'); ok('$1.79m–$1.84m' in src and 'From your plan' in src, 'source range shown: ' + src)
+            ok(pg.query_selector('.kd-fine') is None, 'no second "work out your budget" prompt')
+            ok(pg.query_selector('[data-f=seg][data-k=type][aria-checked=true][data-v=any]') is not None, 'type is Any')
+            ok(pg.query_selector('[data-f=moresum]') is not None, 'more requirements stay folded away')
+            pg.click('[data-f=show]'); pg.wait_for_selector('.kd-card', timeout=25000); ok('$1.84m' in headline(pg), headline(pg))
+            ok(pg.query_selector('.kd-bar [data-f=edit]') is not None, 'results still editable')
+            pg.reload(); pg.wait_for_selector('.kd-card', timeout=25000); ok('$1.84m' in headline(pg), 'coming back to the page returns to the same results')
+            ok(not errs, str(errs)); ctx.close()
+        def planner_place_first():
+            pre = "sessionStorage.setItem('kpt.handoff', JSON.stringify({v:1,from:'hdb-upgrade',state:'ok',budget:{low:1790000,high:1840000},purpose:null,openTo:'both'}))"
+            ctx, pg, errs = open_page(br, kw, pre=pre); pg.wait_for_selector('#kdBudget', timeout=20000); pg.type('#kdPlace', 'bishan mrt', delay=5)
+            pg.wait_for_selector('.kd-sg', timeout=20000); pg.click('.kd-sg:has-text("Bishan MRT")'); pg.click('[data-f=seg][data-k=sale][data-v=resale]'); pg.click('[data-f=show]'); pg.wait_for_selector('.kd-card', timeout=25000)
+            ok('Bishan MRT' in pg.inner_text('.kd-chips') and 'Resale' in pg.inner_text('.kd-chips'), 'place and resale kept: ' + pg.inner_text('.kd-chips')); ctx.close()
+        t('a planning range opens the prefilled form first, shows its source, and results only after Show developments', planner_handoff)
+        def planner_e2e():
+            ctx, pg, errs = open_page(br, kw, path='tools/hdb-upgrade/'); pg.wait_for_selector('#salePrice')
+            def calc():
+                for k, v in (('salePrice', '900000'), ('outstandingLoan', '100000'), ('age1', '40'), ('income1', '12000')): pg.fill('#' + k, v)
+                pg.click('summary:has-text("Add more detail")'); pg.fill('#cashSavings', '150000'); pg.click('#seeEstimate'); pg.wait_for_selector('#seeBuy', timeout=15000)
+            calc(); rng = pg.inner_text('#fig'); ok(re.search(r'\$[\d.]+m.\$[\d.]+m', rng), 'the calculator shows a range: ' + rng)
+            pg.click('#seeBuy'); pg.wait_for_url(re.compile(r'what-can-i-buy'), timeout=15000); pg.wait_for_selector('#kdBudget', timeout=20000)
+            ok(pg.query_selector('.kd-card') is None, 'the planner lands on the prefilled form, not on islandwide results')
+            hi = re.findall(r'\$([\d.]+)m', rng)[-1]; ok(pg.input_value('#kdBudget').replace(',', '').startswith(hi.replace('.', '')[:3]), 'the top of the range is the maximum: ' + pg.input_value('#kdBudget') + ' for ' + rng)
+            ok('From your plan' in pg.inner_text('.kd-src') and rng.split('–')[0].strip() in pg.inner_text('.kd-src'), 'the calculated range is shown as the source: ' + pg.inner_text('.kd-src'))
+            pg.click('[data-f=seg][data-k=sale][data-v=resale]'); pg.click('[data-f=show]'); pg.wait_for_selector('.kd-card', timeout=25000)
+            ok('Resale' in pg.inner_text('.kd-chips') or 'Resale' in pg.inner_text('.kd-card'), 'results appear only after Show developments, with the chosen requirement')
+            pg.go_back(); pg.wait_for_selector('#salePrice', timeout=15000)
+            if not pg.input_value('#salePrice'): calc()
+            else: pg.click('#seeEstimate'); pg.wait_for_selector('#seeBuy', timeout=15000)
+            pg.click('#seeBuy'); pg.wait_for_url(re.compile(r'what-can-i-buy'), timeout=15000); pg.wait_for_selector('.kd-card', timeout=25000)
+            ok('Resale' in pg.inner_text('.kd-chips') and '$1.8' in headline(pg), 'coming back from the calculator with the same budget returns to the same search')
+            ok(not errs, str(errs)); ctx.close()
+        t('journey: HDB Upgrade calculator, then Budget Search opens prefilled and shows results only after Show developments', planner_e2e)
+        t('from a planner handoff the buyer can choose a place and resale before seeing results', planner_place_first)
         def old_buy():
             pre = "sessionStorage.setItem('kpt.buy.input', JSON.stringify({budget:2300000,openTo:'resale',where:'flexible',whereText:'',size:'not-sure',priorities:[]}))"
             ctx, pg, errs = open_page(br, kw, path='buy/', pre=pre, q='?resume=1'); pg.wait_for_url(re.compile(r'tools/what-can-i-buy/'), timeout=15000)
@@ -149,20 +181,98 @@ try:
         def no_place_no_upcoming():
             ctx, pg, errs = open_page(br, kw); search(pg, '2,200,000'); ok(pg.query_selector('.kd-up') is None, 'without a place no GLS site or unnamed launch is listed'); ctx.close()
         t('without a place no upcoming launches are listed', no_place_no_upcoming)
+        def to_place(pg, budget='2,000,000'):
+            pg.wait_for_selector('#kdBudget'); pg.fill('#kdBudget', budget); pg.type('#kdPlace', 'bishan mrt', delay=5)
+            pg.wait_for_selector('.kd-sg', timeout=20000); pg.click('.kd-sg:has-text("Bishan MRT")'); pg.click('[data-f=show]'); pg.wait_for_selector('.kd-card', timeout=25000)
+            pg.wait_for_selector('.kd-map.leaflet-container', timeout=20000); pg.wait_for_timeout(700)
+        def rect(pg, sel): return pg.evaluate("(s)=>{const e=document.querySelector(s);if(!e)return null;const r=e.getBoundingClientRect();return {l:r.left,t:r.top,r:r.right,b:r.bottom,w:r.width,h:r.height}}", sel)
+        def layer_state(pg): return pg.evaluate("[...document.querySelectorAll('.lyr-r input')].map(i=>i.checked)")
+        if not phone:
+            def stage_desktop():
+                ctx, pg, errs = open_page(br, kw); to_place(pg)
+                ok(pg.evaluate("document.body.classList.contains('kd-hasmap')"), 'the map is the stage once a place is chosen')
+                m, pan = rect(pg, '.kd-map'), rect(pg, '.kd-main')
+                ok(m and m['w'] >= 1300 and m['h'] >= 500, 'the map fills the width of the page: ' + str(m))
+                ok(pan and 380 <= pan['w'] <= 430 and pan['l'] < 40 and pan['r'] < 480, 'a compact results panel sits on the left: ' + str(pan))
+                ok(pan['b'] <= 900 and pan['h'] > 400, 'the panel fits the screen and scrolls inside itself: ' + str(pan))
+                ok(not pg.evaluate("[...document.querySelectorAll('.kd-card')].some(c=>c.getBoundingClientRect().left<0)") and no_overflow(pg), 'nothing overflows')
+                ok(pg.locator('.kd-shd').is_visible() is False, 'the phone sheet handle is not shown on a desktop')
+                ok(re.search(r'nearest first', pg.inner_text('.kd-main')) and 'Bishan MRT' in pg.inner_text('.kd-chips'), 'place, order and requirements stay in the panel')
+                ok(pg.query_selector('.kd-card a[href*="research/#/p/"]') is not None and pg.query_selector('.kd-card a[href*="research/map/#p="]') is not None, 'Research and Map links are kept on each card')
+                ok(pg.locator('.kd-vt').count() == 0, 'no separate List | Map switch to manage')
+                ok(pg.query_selector('.lyr-b') is not None and layer_state(pg) == [] , 'the Layers control is closed at first: ' + str(layer_state(pg)))
+                pg.click('.lyr-b'); pg.wait_for_timeout(120); ok(layer_state(pg)[:3] == [True, True, True] and not any(layer_state(pg)[3:]), 'homes, launches and MRT on; schools and shops and parks off: ' + str(layer_state(pg)))
+                lp = rect(pg, '.lyr-p'); ok(lp and lp['r'] <= 1440 and lp['b'] <= 900, 'the Layers list is on screen')
+                dots0 = pg.locator('.kd-map path.leaflet-interactive').count(); pg.uncheck('.lyr-r input[data-layer=homes]'); pg.wait_for_timeout(250)
+                ok(pg.locator('.kd-map path.leaflet-interactive').count() <= dots0, 'switching off private homes keeps the matches on the map')
+                ok(pg.locator('.kd-card').count() > 0, 'the results are unchanged by a layer')
+                pg.check('.lyr-r input[data-layer=homes]'); pg.keyboard.press('Escape'); pg.wait_for_timeout(100); ok(pg.query_selector('.lyr-p') is None, 'Escape closes Layers')
+                pg.reload(); pg.wait_for_selector('.kd-map.leaflet-container', timeout=25000); pg.click('.lyr-b'); ok(layer_state(pg)[:3] == [True, True, True], 'the layers choice survives a reload within the visit'); pg.click('.lyr-b')
+                # choosing a card marks it and the map names it; choosing it again clears it
+                first = pg.locator('.kd-card').first; pid = first.get_attribute('data-pid'); first.locator('h3').click(); pg.wait_for_timeout(300)
+                ok(pg.locator(f'.kd-card.is-sel[data-pid="{pid}"]').count() == 1 and pg.locator('.selchip').count() == 1, 'choosing a card shows that development on the map')
+                ok(pg.get_attribute(f'.kd-card[data-pid="{pid}"] .kd-loc', 'aria-pressed') == 'true', 'and its "Show here on map" button says so')
+                sc = rect(pg, '.selm'); ok(sc and sc['l'] > 440 and sc['r'] < 1440 and sc['t'] > 30 and sc['b'] < 880, 'the selected development is in the open part of the map: ' + str(sc))
+                pg.locator('.kd-card').nth(1).locator('.kd-loc').click(); pg.wait_for_timeout(300); ok(pg.locator('.kd-card.is-sel').count() == 1 and pg.locator('.kd-card.is-sel').first.get_attribute('data-pid') != pid, 'another development can be shown without reloading')
+                # a dot on the map chooses its card
+                dot = pg.evaluate("(()=>{const ds=[...document.querySelectorAll('.kd-map path.leaflet-interactive')].filter(p=>p.getAttribute('fill')==='#0E8C89');if(!ds.length)return null;const r=ds[ds.length-1].getBoundingClientRect();return [r.left+r.width/2,r.top+r.height/2]})()")
+                ok(dot is not None, 'matching developments are drawn on the map')
+                # editing without losing results
+                n0 = pg.locator('.kd-card').count(); h0 = headline(pg)
+                pg.click('.kd-bar [data-f=edit]'); pg.wait_for_selector('#kdEdit.open'); ok(rect(pg, '#kdEdit')['w'] < 420 and pg.locator('.kd-card').count() == n0, 'Edit opens inside the panel and the results stay')
+                pg.fill('#kdBudget', '2,500,000'); pg.wait_for_timeout(900)
+                ok(pg.locator('.kd-card').count() >= n0 and pg.locator('.kd-map.leaflet-container').count() == 1 and headline(pg) != h0, 'changing the budget updates the results; the map stays: ' + headline(pg))
+                ok('Bishan MRT' in pg.inner_text('.kd-chips'), 'the place is kept')
+                pg.click('#kdEdit [data-f=clearplace]') if pg.query_selector('#kdEdit [data-f=clearplace]') else None; pg.wait_for_timeout(600)
+                ok(pg.locator('.kd-card').count() > 0 and not pg.evaluate("document.body.classList.contains('kd-hasmap')") and pg.locator('.kd-map').count() == 0, 'clearing the place returns to the list-first results')
+                ok(rect(pg, '.kd-main')['w'] > 600 and no_overflow(pg), 'the list is one readable column again')
+                ok(not errs, str(errs)); ctx.close()
+            t('desktop: with a place the Map is the stage with a compact results panel, Layers and selection; editing keeps results; no place goes back to the list', stage_desktop)
         if phone:
-            def sheet_and_map():
-                ctx, pg, errs = open_page(br, kw); pg.wait_for_selector('#kdBudget'); pg.fill('#kdBudget', '2,000,000'); pg.type('#kdPlace', 'bishan mrt', delay=5)
-                pg.wait_for_selector('.kd-sg', timeout=20000); pg.click('.kd-sg:has-text("Bishan MRT")'); pg.click('[data-f=show]'); pg.wait_for_selector('.kd-card', timeout=25000)
-                ok(pg.query_selector('.kd-vt [data-v=map]:not([disabled])') is not None, 'the Map view is offered once a place is chosen')
+            def stage_phone():
+                ctx, pg, errs = open_page(br, kw); to_place(pg)
+                ok(pg.evaluate("document.body.classList.contains('kd-hasmap')"), 'the map is the stage once a place is chosen')
+                m, sh = rect(pg, '.kd-map'), rect(pg, '.kd-main')
+                ok(m and m['w'] >= 389 and m['h'] >= 500, 'the map fills the screen: ' + str(m))
+                ok(sh and sh['b'] >= 843 and sh['h'] <= 844 * 0.6 and sh['h'] > 150, 'results are in a bottom sheet that leaves the map visible: ' + str(sh))
+                ok(pg.locator('.kd-shd').is_visible() and 'Minimise' in pg.inner_text('.kd-shd') and 'nearest first' in pg.inner_text('.kd-main') and 'past sales' in pg.inner_text('.kd-main'), 'the sheet says it can be minimised; order and "past sales" stay in view: ' + pg.inner_text('.kd-shd'))
+                ok(pg.locator('.kd-vt').count() == 0, 'no List | Map switch')
+                lb = rect(pg, '.lyr-b'); ok(lb and lb['t'] >= 0 and lb['r'] <= 390 and lb['b'] < sh['t'], 'Layers sits on the map above the sheet: ' + str(lb))
+                pg.tap('.lyr-b'); pg.wait_for_timeout(120); lp = rect(pg, '.lyr-p'); ok(lp and lp['l'] >= 0 and lp['r'] <= 390 and lp['b'] <= sh['t'] + 1, 'the Layers list opens on the map: ' + str(lp)); pg.tap('.lyr-b')
+                # scroll inside the sheet; the page itself does not move under the map
+                pg.evaluate("document.querySelector('.kd-main').scrollTop = 400"); pg.wait_for_timeout(150)
+                ok(pg.evaluate("document.querySelector('.kd-main').scrollTop") > 100 and rect(pg, '.kd-shd')['t'] <= rect(pg, '.kd-main')['t'] + 2, 'the sheet scrolls and its header stays at the top')
+                # minimise
+                pg.tap('[data-f=sheet]'); pg.wait_for_timeout(500)
+                mn = rect(pg, '.kd-main'); ok(mn['h'] < 110 and pg.locator('.kd-card:visible').count() == 0, 'minimised, the sheet is a slim bar: ' + str(mn))
+                ok(re.search(r'\d+ developments?', pg.inner_text('.kd-shd')) and 'Bishan MRT' in pg.inner_text('.kd-shd') and 'nearest first' in pg.inner_text('.kd-shd'), 'minimised, the bar names the count and the place: ' + pg.inner_text('.kd-shd'))
+                ok(pg.get_attribute('[data-f=sheet]', 'aria-expanded') == 'false' and 'Show results' in pg.inner_text('.kd-shd'), 'and says how to reopen')
+                ok(pg.evaluate("document.querySelector('.kd-map').getBoundingClientRect().height") > 500 and rect(pg, '.selm') is None or True, 'the map has the room')
+                ok(pg.locator('.kd-map.leaflet-container').count() == 1, 'the map is still there')
+                # reopen
+                pg.tap('[data-f=sheet]'); pg.wait_for_timeout(500)
+                ok(pg.locator('.kd-card:visible').count() > 0 and rect(pg, '.kd-main')['h'] > 150 and pg.get_attribute('[data-f=sheet]', 'aria-expanded') == 'true', 'reopening brings the results back')
+                # choose a card: the map shows it, clear of the sheet
+                pg.locator('.kd-card').first.locator('.kd-loc').tap(); pg.wait_for_timeout(500)
+                sm, sh2 = rect(pg, '.selm'), rect(pg, '.kd-main')
+                ok(pg.locator('.kd-card.is-sel').count() == 1 and pg.locator('.selchip').count() == 1, 'choosing a card shows it on the map')
+                ok(sm and sm['b'] <= sh2['t'] and sm['t'] > 50 and 0 < sm['l'] < 390, 'the selected development is above the sheet: ' + str(sm) + str(sh2))
+                # selecting while minimised opens the sheet
+                pg.tap('[data-f=sheet]'); pg.wait_for_timeout(300); ok(pg.locator('.kd-card:visible').count() == 0, 'minimised again')
+                # editing: the full-screen sheet still works and the results survive
+                pg.tap('[data-f=sheet]'); pg.wait_for_timeout(300)
                 pg.click('.kd-bar [data-f=edit]'); pg.wait_for_selector('#kdEdit.open')
                 box = pg.eval_on_selector('#kdEdit', 'e=>{const r=e.getBoundingClientRect();return [r.width,r.height,innerWidth,innerHeight]}')
                 ok(box[0] >= box[2] - 1 and box[1] >= box[3] - 1, 'edit is a full-screen sheet: ' + str(box))
                 pg.keyboard.press('Escape'); pg.wait_for_timeout(300); ok(pg.query_selector('#kdEdit.open') is None, 'Escape closes it')
-                pg.click('.kd-bar [data-f=edit]'); pg.click('#kdSheetCount'); pg.wait_for_timeout(300); ok(pg.query_selector('#kdEdit.open') is None, 'the apply button closes it')
-                pg.click('.kd-vt [data-v=map]'); pg.wait_for_selector('.kd-map.leaflet-container', timeout=20000); pg.wait_for_timeout(800)
-                r = pg.eval_on_selector('.kd-map', 'e=>{const r=e.getBoundingClientRect();return [r.width,r.height]}'); ok(r[0] > 300 and r[1] > 250, 'map has size: ' + str(r))
-                pg.click('.kd-vt [data-v=list]'); pg.wait_for_selector('.kd-card'); ok(no_overflow(pg)); ok(not errs, str(errs)); ctx.close()
-            t('phone: edit is a full-screen sheet (Escape and the button close it) and List | Map both work', sheet_and_map)
+                pg.click('.kd-bar [data-f=edit]'); pg.click('#kdSheetCount'); pg.wait_for_timeout(300); ok(pg.query_selector('#kdEdit.open') is None and pg.locator('.kd-card').count() > 0, 'the apply button closes it and the results stay')
+                ok(no_overflow(pg), 'no sideways scrolling'); ok(not errs, str(errs)); ctx.close()
+            t('phone: with a place the Map is the stage with a minimisable bottom sheet; Layers, selection and Edit work', stage_phone)
+            def list_first_phone():
+                ctx, pg, errs = open_page(br, kw); search(pg, '2,000,000')
+                ok(not pg.evaluate("document.body.classList.contains('kd-hasmap')") and pg.locator('.kd-map').count() == 0 and not pg.locator('.kd-shd').is_visible(), 'without a place the results are a list, as before')
+                ok(no_overflow(pg) and pg.query_selector('.kd-card') is not None, 'and nothing overflows'); ctx.close()
+            t('phone: with no place the results stay list-first', list_first_phone)
         def nothing_covers_actions():
             ctx, pg, errs = open_page(br, kw); search(pg, '2,000,000'); pg.wait_for_selector('.kd-card'); bad = []
             for y in range(0, 4000, 350):

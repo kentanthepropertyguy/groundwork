@@ -49,6 +49,7 @@ def pick(pg, q, label=None):   # type in the one search box and choose the first
     else: pg.keyboard.press('ArrowDown'); pg.keyboard.press('Enter')
     pg.wait_for_function("document.querySelector('.dp, .bs') && document.querySelector('.dp, .bs').innerText.length > 20", timeout=6000); pg.wait_for_timeout(700)
 def radius(pg, r):
+    pg.evaluate("(()=>{const d=document.querySelector('details.sx[data-sx=nbr]'); if(d&&!d.open) d.querySelector('summary').click()})()"); pg.wait_for_selector('.rad button:visible', timeout=4000)   # the nearby-developments section is folded until asked for
     pg.click(f'.rad button[data-pr="{r}"]'); pg.wait_for_function(f"document.querySelector('.rad [aria-checked=true]').dataset.pr === '{r}'", timeout=4000); pg.wait_for_timeout(600)
 def circles(pg): return pg.evaluate("document.querySelectorAll('.leaflet-overlay-pane path[stroke-dasharray]').length")
 VIEWS = [('desktop', dict(viewport={'width': 1440, 'height': 900})), ('390', dict(viewport={'width': 390, 'height': 844}, device_scale_factor=2, has_touch=True, is_mobile=True))]
@@ -59,7 +60,7 @@ def radios(pg): return pg.evaluate("[...document.querySelectorAll('.rad button')
 def circ(pg): return pg.evaluate("(()=>{const a=document.querySelector('.leaflet-overlay-pane path[stroke-dasharray]');if(!a)return null;const r=a.getBoundingClientRect();return [Math.round(r.x+r.width/2),Math.round(r.width)]})()")
 def sel_x(pg): return pg.evaluate("(()=>{const a=document.querySelector('.selchip');if(!a)return null;const r=a.getBoundingClientRect();return Math.round(r.x+r.width/2)})()")
 def prices(pg): return pg.evaluate("[...document.querySelectorAll('.sec.pr')].map(x=>x.innerText).join('|')")
-def nearby_count(pg): return pg.evaluate("(()=>{const s=document.querySelector('.sec.nbr .sh > span:last-child')||document.querySelector('.dp .sh > span:last-child, .bs .sh > span:last-child');return s?s.innerText:''})()")
+def nearby_count(pg): return pg.evaluate("(()=>{const s=document.querySelector('details.sx[data-sx=nbr] .basis')||document.querySelector('.sec.nbr .sh > span:last-child')||document.querySelector('.dp .sh > span:last-child, .bs .sh > span:last-child');return s?s.innerText:''})()")
 try:
   with sync_playwright() as p:
     br = p.chromium.launch()

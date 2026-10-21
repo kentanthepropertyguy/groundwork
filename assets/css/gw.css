@@ -177,9 +177,9 @@ body.gw-page *,body.gw-page *::before,body.gw-page *::after,.gw-nav *,.gw-foot *
 body.gw-legacy{--bg:#FFFFFF;--line:#E3E3E8;--serif:var(--gw-font);--radius:14px;--navy-soft:#39456B;background:#fff;font-family:var(--gw-font);-webkit-font-smoothing:antialiased;letter-spacing:-.01em}
 body.gw-legacy .kpt-section{max-width:760px}
 body.gw-legacy .kpt-eyebrow{color:var(--gw-gold);font-size:15px;font-weight:600;letter-spacing:0;text-transform:none}
-body.gw-legacy h1,body.gw-legacy .kpt-h1,body.gw-legacy h1.kpt-h2{font-family:var(--gw-font);font-weight:700;letter-spacing:-.04em;line-height:1.02;font-size:52px}
+body.gw-legacy h1,body.gw-legacy .kpt-h1,body.gw-legacy h1.kpt-h2{font-family:var(--gw-font);font-weight:700;letter-spacing:-.04em;line-height:1.05;font-size:44px}
 body.gw-legacy h2,body.gw-legacy .kpt-h2,body.gw-legacy h3{font-family:var(--gw-font);font-weight:700;letter-spacing:-.025em}
-body.gw-legacy input[type=text],body.gw-legacy input[type=search],body.gw-legacy input:not([type]){border:1.5px solid #CFD2DA !important;border-radius:14px !important;padding:12px 16px !important;background:#fff !important;font-family:var(--gw-font) !important;font-size:18px !important}
+body.gw-legacy input[type=text],body.gw-legacy input[type=search],body.gw-legacy input:not([type]){border:1.5px solid #CFD2DA !important;border-radius:12px !important;padding:12px 16px !important;background:#fff !important;font-family:var(--gw-font) !important;font-size:18px !important}
 body.gw-legacy input:focus{outline:none;border-color:var(--gw-ink) !important;box-shadow:0 0 0 3px rgba(22,33,62,.08)}
 body.gw-legacy .kpt-choices{background:var(--gw-grey);border-radius:14px;padding:4px;gap:4px;border:0}
 body.gw-legacy .kpt-choice{border:0 !important;border-radius:10px !important;font-family:var(--gw-font)}
@@ -194,7 +194,7 @@ body.gw-legacy .kpf-cta{border-radius:980px !important}
 .kpf-research{display:inline-flex;align-items:center;min-height:42px;padding:9px 18px;border-radius:980px;background:var(--gw-blue);color:#fff !important;font-weight:600;font-size:15px;text-decoration:none !important}
 body.gw-legacy .kpf-acts2 .kpf-cta{background:transparent !important;color:var(--gw-green) !important;border:0 !important;padding:0 !important;min-height:0;font-weight:600;text-decoration:none}
 .gw-crumb{display:inline-block;font-size:14px;color:var(--gw-muted) !important;text-decoration:none !important;margin-bottom:6px}
-@media (max-width:719px){body.gw-legacy h1,body.gw-legacy .kpt-h1,body.gw-legacy h1.kpt-h2{font-size:38px}}
+@media (max-width:719px){body.gw-legacy h1,body.gw-legacy .kpt-h1,body.gw-legacy h1.kpt-h2{font-size:32px}}
 
 /* Directory: heading, search and results share one left edge */
 body[data-view="directory"] .kpe-hero .kpt-lede a{color:var(--gw-blue)}
