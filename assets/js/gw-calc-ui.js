@@ -404,6 +404,16 @@
     // New launch payments, TDSR and MSR: the loan-tenure field (the ones with a line under them) shows the tenure used (gw-money.js)
     const tenureEl = box.querySelector('[data-tenure-note]') && box.querySelector('[data-k="tenure"],[data-k="years"]');
     let tenureFld = null;
+    // the most the age allows, from the age alone (no income or price needed): the same limit the calculation applies (C.tenureLimit)
+    function tenureLimitNow() {
+      try {
+        const v = values(); let L = null;
+        if (id === 'progressive') L = v.entity ? null : C.tenureLimit({ kind: 'private', age: typeof v.age === 'number' ? v.age : undefined });
+        else if (id === 'msr') L = C.tenureLimit({ kind: v.scenario === 'hdb-bank' ? 'hdb' : v.scenario === 'hdb-loan' ? 'hdb-loan' : 'private', borrowers: v.borrowers, lease: v.lease });
+        else L = C.tenureLimit({ kind: v.kind === 'hdb' ? 'hdb' : 'private', borrowers: v.borrowers });
+        return L ? L.allowed : 0;
+      } catch (e) { return 0; }
+    }
     const FN = { mortgage: 'mortgage', 'stamp-duty': 'stampDuty', ssd: 'ssd', 'sale-proceeds': 'saleProceeds', tdsr: 'tdsr', msr: 'msr', progressive: 'progressive' };
     let last = null, lastSig = '', startedT = false, doneT = false;
     function recalc() {
@@ -438,7 +448,7 @@
     // money fields: commas appear as you type, the same behaviour as the Payment Timeline (gw-money.js)
     if (root.GW_MONEY) { $$('input[data-t="money"]').forEach((x) => root.GW_MONEY.wire(x, { parse: parseMoney, max: C.LIMITS.money.max })); $$('input[data-t="num"]').forEach((x) => root.GW_MONEY.selectOnFocus(x)); }
     $$('input').forEach((x) => { x.addEventListener('input', () => changed(x)); x.addEventListener('change', () => changed(x)); });
-    if (tenureEl && root.GW_MONEY && root.GW_MONEY.tenureField) tenureFld = root.GW_MONEY.tenureField(tenureEl, { read: () => C.parseNum(tenureEl.value).value || null, max: () => (id === 'progressive' ? C.LIMITS.years.max : C.LIMITS.tenure.max), recalc: () => { clearTimeout(tmr); recalc(); } });
+    if (tenureEl && root.GW_MONEY && root.GW_MONEY.tenureField) tenureFld = root.GW_MONEY.tenureField(tenureEl, { read: () => C.parseNum(tenureEl.value).value || null, max: () => (id === 'progressive' ? C.LIMITS.years.max : C.LIMITS.tenure.max), limit: tenureLimitNow, recalc: () => { clearTimeout(tmr); recalc(); } });
     // CPF accrued interest: a rough estimate only when the visitor asks for one, and only until they type their own figure
     let estimated = false;
     const est = box.querySelector('[data-estimate]');

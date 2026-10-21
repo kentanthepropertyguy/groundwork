@@ -67,5 +67,34 @@ ok('age 60 shows both tiers', /Over 5 years takes the lower loan limit of 55% \(
 ok('adjusted entry says so', C.tenureNote({ age: 60, std: 5, allowed: 15, chosen: 15, adjustedFrom: 30 }).indexOf('Changed from 30 years. Maximum 15 years') === 0);
 ok('a valid longer entry keeps its own wording', /Over 5 years takes the lower loan limit/.test(C.tenureNote({ age: 60, std: 5, allowed: 15, chosen: 10, loans: 0 })));
 ok('35-year maximum has no age sentence', C.tenureNote({ age: 35, std: 30, allowed: 35, chosen: 40 }).indexOf('Maximum 35 years for a bank loan.') === 0);
+
+// ---- tenureLimit: the age-only limit used to correct a typed tenure before the result is complete equals what the engines apply
+for (const age of AGES) {
+  const L = C.tenureLimit({ kind: 'private', age });
+  ok('tenureLimit private age ' + age, L && L.allowed === allowedOf(age, 35), L);
+  const tdA = C.tdsr({ kind: 'private', borrowers: [{ age, fixed: 20000 }], debts: 0, loans: 0, tenure: 99 });
+  ok('tenureLimit private age ' + age + ' = tdsr tenure at an excessive entry', tdA.tenure.years === L.allowed, [tdA.tenure.years, L.allowed]);
+  const H2 = C.tenureLimit({ kind: 'hdb', age });
+  ok('tenureLimit hdb age ' + age, H2 && H2.allowed === allowedOf(age, 30), H2);
+  const mH = C.msr({ scenario: 'hdb-bank', borrowers: [{ age, fixed: 15000 }], tenure: 99, loans: 0 });
+  ok('tenureLimit hdb age ' + age + ' = msr hdb-bank tenure at an excessive entry', mH.tenure.years === H2.allowed, [mH.tenure.years, H2.allowed]);
+}
+for (const age of [35, 50, 60]) for (const lease of [99, 70, 40]) {
+  const L = C.tenureLimit({ kind: 'hdb-loan', age, lease }), m = C.msr({ scenario: 'hdb-loan', borrowers: [{ age, fixed: 15000 }], tenure: 99, loans: 0, lease });
+  ok('tenureLimit hdb-loan age ' + age + ' lease ' + lease + ' = msr', L && m.tenure && L.allowed === m.tenure.years, [L && L.allowed, m.tenure && m.tenure.years]);
+}
+ok('tenureLimit joint without incomes is not guessed', C.tenureLimit({ kind: 'private', borrowers: [{ age: 60 }, { age: 30 }] }) === null);
+for (const pair of [[{ age: 60, fixed: 9000 }, { age: 30, fixed: 1000 }], [{ age: 55, fixed: 5000 }, { age: 45, fixed: 5000 }], [{ age: 62, fixed: 4000 }, { age: 38, fixed: 8000 }]]) {
+  const L = C.tenureLimit({ kind: 'private', borrowers: pair }), r = C.tdsr({ kind: 'private', borrowers: pair, debts: 0, loans: 0, tenure: 99 });
+  ok('tenureLimit joint with incomes = tdsr tenure ' + JSON.stringify(pair.map(b => b.age)), L && r.tenure && L.allowed === r.tenure.years, [L && L.allowed, r.tenure && r.tenure.years]);
+}
+// ---- What can I afford?: the monthly mortgage beside the loan is the instalment on that loan at the entered rate and the applied tenure
+for (const age of AGES) for (const rate of [3, 4, 5]) for (const typed of [undefined, 35]) {
+  const q = A.assess({ kind: 'new', buyers: [{ res: 'SC', age, fixed: 12000 }], home: 'none', ratePct: rate, years: typed });
+  if (!q.borrow || !q.borrow.years) continue;
+  const exp = C.instal(q.borrow.max, rate / 100, q.borrow.years);
+  ok('afford monthly age ' + age + ' rate ' + rate + ' typed ' + typed, Math.abs(q.borrow.monthly - exp) < 0.005, [q.borrow.monthly, exp, q.borrow.years]);
+  ok('afford monthly years = applied tenure age ' + age + ' typed ' + typed, typed === undefined || q.borrow.years <= Math.min(typed, allowedOf(age, 35)), q.borrow.years);
+}
 console.log('tenure-consistency: ' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

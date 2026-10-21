@@ -227,7 +227,7 @@
     if (!probe || !probe.ok) { res.state = 'invalid'; res.errors = (probe && probe.invalid ? probe.invalid.map((x) => ({ key: x.field === 'age' ? 'buyers.0.age' : x.field === 'income' ? 'buyers.0.fixed' : x.field, text: x.text })) : [{ key: 'buyers.0.age', text: 'These figures could not be worked out. Please check them.' }]); return res; }
     if (!(n.years >= 1)) { res.state = 'invalid'; res.errors = [{ key: 'years', text: n.allowed < 1 ? 'Banks usually end a loan by age ' + R.bankLtv.maturityAge + ', so no loan tenure fits at this age.' : 'Any loan would run past age ' + R.bankLtv.endAge + ' for this age. Enter the loan years you want under Adjust assumptions.' }]; return res; }
     const tb = C.tdsr({ kind: 'private', borrowers: n.list, debts: n.debts + n.otherInstal + (s.home === 'keep' ? n.flatInstal : 0), loans: 0, tenure: n.years, quotedRatePct: n.ratePct });
-    res.borrow = { max: tb.ok && !tb.noTenure ? tb.maxLoan : 0, years: n.years, std: n.std, rate: tb.rate, income: n.B.gross, counted: n.B.assessable, instalment: tb.forNew };
+    res.borrow = { max: tb.ok && !tb.noTenure ? tb.maxLoan : 0, years: n.years, std: n.std, rate: tb.rate, income: n.B.gross, counted: n.B.assessable, instalment: tb.forNew, monthly: tb.ok && !tb.noTenure ? C.instal(tb.maxLoan, n.ratePct / 100, n.years) : null };
     res.kind = n.kind; res.years = n.years; res.ratePct = n.ratePct; res.B = n.B;
     const moneyGiven = has(s.cash) || has(s.cpf);
     if (!moneyGiven) { res.state = 'income'; return res; }
@@ -250,7 +250,7 @@
     const ten = chooseTenure(s, n, basisOf(n), solveC);
     n = ten.n;
     const tb2 = C.tdsr({ kind: 'private', borrowers: n.list, debts: n.debts + n.otherInstal + (s.home === 'keep' ? n.flatInstal : 0), loans: 0, tenure: n.years, quotedRatePct: n.ratePct });
-    res.borrow = { max: tb2.ok && !tb2.noTenure ? tb2.maxLoan : 0, years: n.years, std: n.std, rate: tb2.rate, income: n.B.gross, counted: n.B.assessable, instalment: tb2.forNew };
+    res.borrow = { max: tb2.ok && !tb2.noTenure ? tb2.maxLoan : 0, years: n.years, std: n.std, rate: tb2.rate, income: n.B.gross, counted: n.B.assessable, instalment: tb2.forNew, monthly: tb2.ok && !tb2.noTenure ? C.instal(tb2.maxLoan, n.ratePct / 100, n.years) : null };
     res.years = n.years;
     const base = solveC(n, mode0);
     let head = base, basis = mode0, saleCounted = false, beneath = null, saleNote = null;

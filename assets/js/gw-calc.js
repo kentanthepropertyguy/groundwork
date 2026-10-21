@@ -321,6 +321,20 @@
     if (o.allowed < max) return 'Maximum ' + yrs(o.allowed) + ' based on ' + (o.joint ? 'income-weighted age ' : 'age ') + o.age + ' and assumed bank maturity age ' + L.maturityAge + ' (lender policy, not a MAS rule).';
     return 'Maximum ' + yrs(max) + (o.hdb ? ' for an HDB flat bank loan.' : ' for a bank loan.');
   }
+  // The most a loan tenure can be, worked out from the age alone: the same limits bankTenure and the HDB loan rule apply, so a screen can correct an
+  // over-long entry before income, price or any other figure is in. o: { kind: 'private'|'hdb'|'hdb-loan', age (a number) | borrowers: [{ age, fixed, variable }], lease }.
+  // Returns { allowed, std, max, age, joint } or null when the age is not known yet (joint borrowers need their incomes to be weighted).
+  function tenureLimit(o) {
+    const kind = o.kind === 'hdb' || o.kind === 'hdb-loan' ? o.kind : 'private'; let age = null, joint = false;
+    if (typeof o.age === 'number') age = o.age;
+    else if (o.borrowers && o.borrowers.length) {
+      const named = o.borrowers.filter((b) => b && (pos(b.age) || pos(b.fixed) || pos(b.variable)));
+      if (named.length === 1 && pos(named[0].age)) age = named[0].age; // one borrower: their own age, with or without an income yet
+      else { const B = borrowers(o.borrowers); if (!B.bad.length && B.iwaa !== null) { age = kind === 'hdb-loan' ? B.avgAge : B.iwaaUse; joint = B.list.length > 1; } } }
+    if (typeof age !== 'number' || !(age >= LIMITS.age.min && age <= LIMITS.age.max)) return null;
+    if (kind === 'hdb-loan') { const H = R.hdbLoan, leaseCap = pos(o.lease) ? Math.floor(o.lease - H.leaseBufferYears) : Infinity, m = Math.max(0, Math.min(H.maxTenureYears, Math.floor(H.endAge - age), leaseCap)); return { allowed: m, std: m, max: H.maxTenureYears, age, joint, hdbLoan: true }; }
+    const t = bankTenure(kind, age); return { allowed: t.allowed, std: t.std, max: t.max, age, joint };
+  }
   // Which loan limit the longest tenure takes. The tenure is never moved to keep the standard limit: it is only cut to the most allowed, and this says what that costs.
   // o: { std, allowed, loans (housing loans the buyer has: 0, 1, 2+; gives the two limits in figures), ltvStd, ltvLow (or the figures directly) }
   function tenureTierText(o) {
@@ -564,5 +578,5 @@
   };
   const ASK = (tool) => 'Hi Ken, I’m using the ' + tool + ' on Groundwork and have a question.';
 
-  return { mortgage, stampDuty, bsdLines, ssd, saleProceeds, saleEstimate, cpfInterestEstimate, tdsr, msr, progressive, borrowers, bankTenure, tenureNote, tenureMaxText, tenureTierText, messages, ASK, instal, parseDate: D, parseMoney, parseNum, LIMITS, dutyAt };
+  return { mortgage, stampDuty, bsdLines, ssd, saleProceeds, saleEstimate, cpfInterestEstimate, tdsr, msr, progressive, borrowers, bankTenure, tenureNote, tenureMaxText, tenureTierText, tenureLimit, messages, ASK, instal, parseDate: D, parseMoney, parseNum, LIMITS, dutyAt };
 });

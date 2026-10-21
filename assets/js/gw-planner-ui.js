@@ -108,7 +108,7 @@
   // A group of related inputs, drawn in the page itself (Concept B: no side rail and no bottom sheet). `data-sheet` names the group so an "Edit" link can reach it.
   const grp = (id, title, inner, o) => { o = o || {}; const h = o.h || 3; return '<section class="pl-grp" data-sheet="' + id + '" aria-labelledby="pls-' + id + '"' + (o.when ? ' data-when="' + o.when + '"' : '') + '><h' + h + ' class="pl-grp-h' + (o.sr ? ' sr' : '') + '" id="pls-' + id + '">' + title + '</h' + h + '><div class="pl-grp-b">' + inner + '<p class="pl-grp-n" data-sheet-note aria-live="polite"></p></div></section>'; };
   const KIND_SHORT = { new: 'New launch', ec: 'New EC', resaleec: 'Resale EC', completed: 'Completed home', hdb: 'HDB flat' };
-  const BUYER_DEFAULT = 'Stamp duty is worked out for a Singapore Citizen buying a first home, until you change it.';
+  const BUYER_DEFAULT = 'Stamp duty (BSD and ABSD) is worked out from who is buying and the homes they already own.';
   // Every question once, in the part of the page where it is asked. The first three (type, price, option date) are all the Schedule screen needs.
   function parts() {
     const purchase = grp('purchase', 'Your property',
@@ -117,9 +117,9 @@
       '<div class="pl-route" data-when="kind:hdb" hidden>' + hdbRoute() + '</div>' +
       grid(money('price', 'Purchase price', { share: 'buyPrice', ph: 'e.g. 1,800,000' }) + '<div data-when="noOtp:0">' + datef('otp', 'Option date', { today: true, hint: 'The day you pay the booking or option fee. Every other date counts from here.' }) + '</div>') +
       check('noOtp', 'I don’t have an option date yet') +
-      '<details class="pl-buyer" data-buyer><summary><span data-buyer-line>' + BUYER_DEFAULT + '</span> <em>Change</em></summary><div class="pl-buyer-b">' +
+      '<div class="pl-buyer" data-buyer><p class="pl-buyer-line" data-buyer-line>' + BUYER_DEFAULT + '</p><div class="pl-buyer-b">' +
       chips('entity', 'Who is buying?', [['0', 'Individuals'], ['1', 'A company or other entity']], { value: '0', hint: 'A company or other entity can borrow up to 15% of the price and has no CPF. It can buy a new launch or a completed private home.' }) +
-      '<p class="gw-fine" data-entity-note aria-live="polite" hidden></p><div data-when="entity:0">' + buyersBlock() + '</div></div></details>', { h: 2 });
+      '<p class="gw-fine" data-entity-note aria-live="polite" hidden></p><div data-when="entity:0">' + buyersBlock() + '</div></div></div>', { h: 2 });
     const dates = '<details class="pl-adv pl-dates" data-dates data-when="noOtp:0"><summary><span data-when="kind:new,ec">Add the developer’s dates</span><span data-when="kind:completed,resaleec">Add the completion date</span> <em>optional</em></summary>' +
       grp('dates', '<span data-when="kind:new,ec">The developer’s dates</span><span data-when="kind:completed,resaleec">Completion date</span>',
         '<div data-when="kind:new,ec">' + grid(datef('top', 'Developer’s expected TOP', { opt: true }) + datef('csc', 'Expected final payment (CSC)', { opt: true, hint: 'From the developer. Without them, the earliest possible dates are used and marked as earliest dates.' })) + '</div>' +
@@ -767,11 +767,11 @@
     const buyerWords = (b) => (b.length > 1 ? 'Two buyers' : (RESN[b[0].res] || b[0].res) + ', ' + (b[0].owned === 0 ? 'first home' : b[0].owned === 1 ? 'owns one home' : 'owns two or more homes'));
     function setProp(open) { propOpen = open; prop.classList.toggle('is-collapsed', !open); propEdit.setAttribute('aria-expanded', String(open)); }
     function paintProp(i) {
-      const b = i.buyers.length ? i.buyers : [{ res: 'SC', owned: 0 }], touched = buyerTouched || i.entity || b.length > 1 || b[0].res !== 'SC' || b[0].owned !== 0;
+      const b = i.buyers.length ? i.buyers : [{ res: 'SC', owned: 0 }];
       propOk = i.uiKind !== 'hdb' && has('price') && !errMap.price && (i.undated || (!!raw.otp && !errMap.otp));
       const bits = [KIND_SHORT[i.uiKind] || '', has('price') ? $(raw.price) : '', i.undated ? 'No option date yet' : raw.otp ? 'Option ' + day(raw.otp) : '', i.entity ? 'Company or other entity' : buyerWords(b)].filter(Boolean);
       propSum.innerHTML = bits.map((x, k) => (k === 0 ? '<b>' + esc(x) + '</b>' : '<span>' + esc(x) + '</span>')).join('');
-      if (buyerLine) buyerLine.textContent = i.entity ? 'Buyer: a company or other entity. Stamp duty and ABSD are worked out at the entity rates.' : touched ? 'Buyer: ' + buyerWords(b) + '.' : BUYER_DEFAULT;
+      if (buyerLine) buyerLine.textContent = i.entity ? 'Buyer: a company or other entity. Stamp duty and ABSD are worked out at the entity rates.' : BUYER_DEFAULT;
     }
     // a stage table with nothing in it takes no room; the sections open on a wide screen, closed on a phone (the reader's choice is kept after that)
     const wide = () => !!(root.matchMedia && root.matchMedia('(min-width:900px)').matches);
@@ -882,7 +882,11 @@
     if (MONEY) $$('input[data-t="money"]').forEach((x) => MONEY.wire(x, { parse: (t) => parseMoney(t), max: C.LIMITS.money.max }));
     $$('input').forEach((x) => { x.addEventListener('input', () => changed(x)); x.addEventListener('change', () => changed(x)); });
     if (MONEY) $$('input[data-t="num"]').forEach((x) => MONEY.selectOnFocus(x));
-    { const yEl = q('[data-k="years"]'); if (MONEY && MONEY.tenureField && yEl) tenureFld = MONEY.tenureField(yEl, { read: () => C.parseNum(yEl.value).value || null, max: () => C.LIMITS.years.max, recalc: () => { clearTimeout(tmr); recalc(); }, changed: () => save() }); }
+    { const yEl = q('[data-k="years"]'); if (MONEY && MONEY.tenureField && yEl) tenureFld = MONEY.tenureField(yEl, { read: () => C.parseNum(yEl.value).value || null, max: () => C.LIMITS.years.max, limit: () => {
+        // the most the age allows, from the age alone (no income or cash needed): the same limit the calculation applies (C.tenureLimit)
+        const eEl = q('[data-k="entity"]'), aEl = q('[data-k="age"]'); if (eEl && chipVal(eEl) === '1') return 0;
+        const a = aEl ? C.parseNum(aEl.value).value : undefined; const L = C.tenureLimit({ kind: 'private', age: typeof a === 'number' ? a : undefined }); return L ? L.allowed : 0;
+      }, recalc: () => { clearTimeout(tmr); recalc(); }, changed: () => save() }); }
     // ---- restore: shared details from the other calculators, then the planner's own ----
     const sv = shared.get();
     $$('[data-share]').forEach((x) => { const val = sv[x.dataset.share]; if (val === undefined || val === null || val === '') return; const m = /^buyers\.1\./.exec(x.dataset.share); if (m) showRow('buyers.1', true); if (x.dataset.t === 'chip') setChip(x, val); else x.value = x.dataset.t === 'money' && parseMoney(val) !== null ? fmtMoney(parseMoney(val)) : val; });

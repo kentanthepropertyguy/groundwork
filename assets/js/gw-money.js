@@ -7,7 +7,7 @@
    GW_MONEY.selectOnFocus(input)         keyboard focus selects the value so typing replaces it.
    GW_MONEY.tenureField(input, o)        a loan-tenure field shows the tenure that is used. While you type nothing moves. When you leave the field, or a
                                          calculation finishes with the field not in use, a tenure above what is allowed is replaced by the tenure applied.
-                                         o.read(): the typed number or null; o.max(): the most the field takes; o.recalc(): run the screen's calculation;
+                                         o.read(): the typed number or null; o.max(): the most the field takes; o.limit(): the most the age allows, or 0; o.recalc(): run the screen's calculation;
                                          o.changed(): the screen's own save after the value was changed here. Returns { settle(applied), hint(applied) }.
    No calculation here: the tenure applied and the most allowed are always passed in from the calculators (gw-calc.js bankTenure).
    ========================================================================== */
@@ -60,9 +60,11 @@
     const read = () => { if (o.read) return o.read(); const t = String(x.value).replace(/[,\s]/g, ''); return /^\d+(\.\d+)?$/.test(t) && +t > 0 ? +t : null; };
     const put = (v, from) => { x.value = String(v); x.dataset.adjustedFrom = x.dataset.adjustedFrom || String(from); if (o.changed) o.changed(); }; // keeps what was first typed through a second adjustment
     const idle = () => root.document.activeElement !== x;
+    // o.limit(): the most this tenure can be from the age alone (calculators' tenureLimit), 0 when the age is not known yet; it needs no income, price or result
+    const lim = () => { const l = o.limit ? o.limit() : 0; return l >= 1 ? l : 0; };
     x.addEventListener('input', () => { delete x.dataset.adjustedFrom; }); // typing again starts afresh: the "Changed from" line goes
     x.addEventListener('blur', () => {
-      const asked = read(), most = o.max ? o.max() : null;
+      const asked = read(), most = lim() || (o.max ? o.max() : null);
       // more than any tenure can be: the most, at once. The screen then recalculates after the short delay its own changes use, so a click
       // that caused the blur is not moved from under the pointer; a changed entry reaches the same recalculation through its change event.
       if (asked !== null && most && asked > most) put(most, asked);
@@ -70,9 +72,10 @@
     });
     // Called after every calculation with the tenure the calculation applied (a number of years, or 0/null when there is none).
     function settle(applied) {
-      if (!idle() || !(applied >= 1)) return false;
+      const to = applied >= 1 ? applied : lim(); // the calculation's own tenure when there is a result, else the age limit
+      if (!idle() || !(to >= 1)) return false;
       const asked = read();
-      if (asked !== null && asked > applied) { put(applied, asked); return true; }
+      if (asked !== null && asked > to) { put(to, asked); return true; }
       return false;
     }
     // A blank field shows the tenure that will be used, in the placeholder, so what is seen is what is calculated.
