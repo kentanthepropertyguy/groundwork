@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#FAFAF8">
 <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/css/kpt-system.css?v=5ee6bbae9f">
-<link rel="stylesheet" href="../../assets/css/kpt-journey.css?v=6f9d09bbb8">
+<link rel="stylesheet" href="../../assets/css/kpt-journey.css?v=4b50abcf2e">
 <link rel="stylesheet" href="../../assets/css/kpt-shell.css?v=30b765165f">
 <script src="../../assets/js/gw-wa.js?v=7a6cf4f1be"></script>
 <link rel="stylesheet" href="../../assets/css/gw.css?v=ff63943bee">
@@ -39,7 +39,7 @@
 <script src="../../assets/js/kpt-market.js?v=f2c5f82332"></script>
 <script src="../../assets/js/kpt-engine.js?v=6ffe7ee923"></script>
 <script src="../../assets/js/kpt-result.js?v=4a36410c7a"></script>
-<script src="../../assets/js/kpt-find.js?v=428f84b99e"></script>
+<script src="../../assets/js/kpt-find.js?v=a998e8f6ae"></script>
 <script src="../../data/market/config.js?v=de1831ebfc"></script>
 <script>
 (function () {
@@ -174,7 +174,7 @@
 
   // ---------------------------------------------------------------- FIND V1: Developments worth investigating
   // All rules, ranking and wording are in assets/js/kpt-find.js. This is presentation and wiring only. Nothing typed here is sent to analytics or WhatsApp.
-  const FIND_URL = '../../data/projects/find.json?v=cb22ad4ae6', FI = window.KPT_FIND;
+  const FIND_URL = '../../data/projects/find.json?v=df416f6c2b', FI = window.KPT_FIND;
   let findIx, findStep = null, FS = null;
   const loadFind = () => (findIx !== undefined ? Promise.resolve(findIx) : fetch(FIND_URL).then((r) => (r.ok ? r.json() : null)).then((d) => (findIx = FI.prepare(d))).catch(() => (findIx = null)));
   // V10: optional Huttons inventory (data/projects/inventory.json, schema v2). Missing, unreadable or invalid = FIND behaves exactly as V9.1. The page never shows an error for it.
@@ -183,6 +183,10 @@
   const INV_URL = (REVIEW && /^[\w./-]+\.json$/.test(params.get('inventory') || '') ? params.get('inventory') : '../../data/projects/inventory.json') + '?v=e998ef3bd0';
   const nowMs = () => (REVIEW && isFinite(Date.parse(params.get('now') || '')) ? Date.parse(params.get('now')) : Date.now());
   let invDoc;
+  // Upcoming launches (the launch microsites in data/research/sites.json): optional. Missing or unreadable = no "Upcoming launches" block; the page shows no error for it.
+  const SITES_URL = '../../data/research/sites.json?v=5acb944844';
+  let sitesDoc;
+  const loadSites = () => (sitesDoc !== undefined ? Promise.resolve(sitesDoc) : fetch(SITES_URL).then((r) => (r.ok ? r.json() : null)).catch(() => null).then((d) => (sitesDoc = ((d && Array.isArray(d.sites) ? d.sites : []).filter((x) => x && x.stage === 'new-launch' && x.status === 'configured' && /^https:\/\//.test(x.url || '') && x.id && x.name)))));
   const loadInv = () => (invDoc !== undefined ? Promise.resolve(invDoc) : fetch(INV_URL, { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null).then((d) => (invDoc = d)));
   const answersNow = () => (handoff && handoff.from === 'buy' ? { where: handoff.where, size: handoff.size, priorities: handoff.priorities || [] } : { where: 'flexible', size: 'not-sure', priorities: [] });
   // V10.3.4: the buyer's one-click "include" choices live in this search only; the Buy answers are never rewritten. Include Outside Central removes Closer for this search (regionSoft): all regions, no region ranking; Show any bedroom turns the bedroom off.
@@ -196,7 +200,7 @@
   const openToNow = () => (handoff && handoff.from === 'buy' && ['new', 'resale', 'both'].indexOf(handoff.openTo) > -1 ? handoff.openTo : 'both');
   // ---- the buyer's search, remembered in this tab with the handoff (sessionStorage only; never sent to analytics or WhatsApp)
   const DIST_RE = /^(0[1-9]|1\d|2[0-8])$/, LOCS = ['none', 'pending', 'confirmed', 'skipped'], moneyIn = (n) => Number(n).toLocaleString('en-SG');
-  const snapFind = () => ({ explicit: FS.explicit ? { from: FS.explicit.from, to: FS.explicit.to, typed: !!FS.explicit.typed, widened: !!FS.explicit.widened } : null, widen: !!FS.widen, widenSize: !!FS.widenSize, freehold: !!FS.freehold, regionSoft: !!FS.regionSoft, bedOff: !!FS.bedOff, districts: FS.districts.slice(), text: FS.text, loc: FS.loc, ticked: FS.ticked.map((t) => t.slug) });
+  const snapFind = () => ({ explicit: FS.explicit ? { from: FS.explicit.from, to: FS.explicit.to, typed: !!FS.explicit.typed, widened: !!FS.explicit.widened } : null, widen: !!FS.widen, widenSize: !!FS.widenSize, freehold: !!FS.freehold, regionSoft: !!FS.regionSoft, bedOff: !!FS.bedOff, districts: FS.districts.slice(), text: FS.text, loc: FS.loc, near: FS.near ? { t: FS.near.t, n: FS.near.n, r: FS.near.r } : null, ticked: FS.ticked.map((t) => t.slug) });
   function restoreFind(sv) {
     const o = {}, ex = sv && sv.explicit;
     o.explicit = ex && ex.from >= 100 && ex.to > ex.from && ex.to <= 20000 ? { from: Math.round(ex.from), to: Math.round(ex.to), typed: !!ex.typed, widened: !!ex.widened } : null;
@@ -204,6 +208,7 @@
     o.districts = sv && Array.isArray(sv.districts) ? sv.districts.filter((d) => typeof d === 'string' && DIST_RE.test(d)).slice(0, 8) : [];
     o.text = sv && typeof sv.text === 'string' ? sv.text.replace(/\s+/g, ' ').trim().slice(0, 40) : '';
     o.loc = sv && LOCS.indexOf(sv.loc) > -1 ? sv.loc : null;
+    o.near = sv && sv.near && NEAR_TYPES.indexOf(sv.near.t) > -1 && typeof sv.near.n === 'string' && sv.near.n.length > 0 && sv.near.n.length <= 160 && RADII.indexOf(Number(sv.near.r)) > -1 ? { t: sv.near.t, n: sv.near.n, r: Number(sv.near.r) } : null;
     o.ticked = sv && Array.isArray(sv.ticked) ? sv.ticked.filter((s) => typeof s === 'string' && /^[a-z0-9-]+$/.test(s)).slice(0, 2).map((slug) => ({ slug, name: '', tag: '' })) : [];
     return o;
   }
@@ -215,15 +220,138 @@
     if (budgetEdited) { next.budget = { low: budget, high: budget, single: true }; next.edited = true; }
     handoff = next; M.writeHandoff(window.sessionStorage, next);
   }
+  // ---- Near a place (optional radius search). The Map's own logic layer (KPT_MAP), place search and Leaflet view do the work: nothing of the Map's search or drawing is rewritten here.
+  // Its files load only when the buyer starts typing a place, so the islandwide search is exactly as light as before. Versions match the Map page (a test keeps them in step).
+  const MAP_V = '2026-10-21.5', RADII = [500, 1000, 2000, 3000], NEAR_TYPES = ['dev', 'mrt', 'area', 'road', 'school'];
+  const NEAR_BASIS = { dev: 'the development', mrt: 'the station', area: 'the centre of the neighbourhood', road: 'one point on the road', school: 'the school' };
+  let NM = null, nmLoad = null, nmView = null, nmHost = null, nmLayer = null, nmSig = '', NR = null;   // NR: the resolved place { key, label, sub, lat, lon, dist, pos }
+  const addCss = (href) => { if (!document.querySelector('link[href="' + href + '"]')) { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href; document.head.appendChild(l); } };
+  const addJs = (src) => new Promise((ok, no) => { const x = document.createElement('script'); x.src = src; x.onload = ok; x.onerror = () => no(new Error(src)); document.head.appendChild(x); });
+  function loadNear() {
+    if (nmLoad) return nmLoad;
+    const get = (u, must) => fetch(u + '?v=' + MAP_V).then((r) => { if (!r.ok) throw new Error(u); return r.json(); }).catch((e) => { if (must) throw e; return null; });
+    addCss('../../assets/vendor/leaflet/leaflet.css'); addCss('../../assets/css/kpt-map.css?v=' + MAP_V);
+    nmLoad = Promise.all([addJs('../../assets/vendor/leaflet/leaflet.js').then(() => addJs('../../assets/js/kpt-map-core.js?v=' + MAP_V)).then(() => addJs('../../assets/js/kpt-map-view.js?v=' + MAP_V)), get('../../data/map/places.json', true), get('../../data/map/amen.json', true)])
+      .then((a) => {
+        NM = window.KPT_MAP.create(a[1], a[2], { band: null, radius: 1000 });
+        return Promise.all([get('../../data/value/landed/geo.json'), get('../../data/value/landed/geo-more.json'), a[2].extra ? get('../../data/map/' + a[2].extra) : null])
+          .then((b) => { if (b[0] || b[1]) NM.setRoads(b[0], b[1]); if (b[2]) NM.setExtra(b[2]); return NM; });
+      }).catch((e) => { nmLoad = null; throw e; });
+    return nmLoad;
+  }
+  /** One chosen place -> its point and the straight-line distance to every mapped development within the widest radius (the Map's haversine). A development with no position is simply absent. */
+  function resolveNear(n) {
+    if (!NM) return null;
+    let o = null;
+    if (n.t === 'dev') { const p = NM.BY[n.n]; if (p && p.pos) o = { label: p.n, sub: 'Development', lat: p.lat, lon: p.lon }; }
+    else { const pd = NM.placeData({ t: n.t, n: n.n }); if (pd) o = n.t === 'area' ? { label: pd.title, sub: 'Neighbourhood', lat: pd.centre[0], lon: pd.centre[1], rings: pd.a.rings, bounds: pd.bounds } : { label: pd.title, sub: pd.meta, lat: pd.lat, lon: pd.lon }; }
+    if (!o) return null;
+    const dist = {}, pos = {}, c = { lat: o.lat, lon: o.lon }, far = RADII[RADII.length - 1];
+    NM.PM.forEach((p) => { pos[p.id] = 1; const d = window.KPT_MAP.hav(c, p); if (d <= far) dist[p.id] = d; });
+    return Object.assign(o, { key: n.t + '|' + n.n, basis: NEAR_BASIS[n.t] || 'the place', dist, pos });
+  }
+  /** A launch microsite with a verified position (numeric lat and lon in sites.json) is placed like any development; without one it can never be inside a radius. */
+  function siteNear() {
+    if (!NR || NR.siteDist || !sitesDoc || !window.KPT_MAP) return;
+    NR.siteDist = {}; NR.sitePos = {};
+    sitesDoc.forEach((x) => { if (typeof x.lat === 'number' && typeof x.lon === 'number') { NR.sitePos[x.id] = 1; NR.siteDist[x.id] = window.KPT_MAP.hav({ lat: NR.lat, lon: NR.lon }, x); } });
+  }
+  const nearInput = () => { if (!(FS && FS.near && NR && NR.key === FS.near.t + '|' + FS.near.n)) return null; siteNear(); return { dist: NR.dist, pos: NR.pos, radius: FS.near.r, label: NR.label, sitePos: NR.sitePos || {}, siteDist: NR.siteDist || {} }; };
+  /** The place's type ("Road", "MRT station") is dropped when its name already says it, and its area when the name already carries it, so nothing reads "Yio Chu Kang Road Road". */
+  const subParts = (label, sub) => { const p = String(sub || '').split(' · '); let type = p[0] || '', area = p[1] || ''; if (area && String(label).indexOf(area) > -1) area = ''; if (type && (String(label).trim().split(/\s+/).pop().toLowerCase() === type.split(/\s+/)[0].toLowerCase() || String(label).toLowerCase().indexOf(type.toLowerCase()) > -1)) type = ''; return { type, area }; };
+  const sugSub = (x) => { const q = subParts(x.label || x.n, x.sub); return [q.type, q.area].filter(Boolean).join(' · '); };
+  const whereSub = (o) => { const a = String(o.sub || '').split(' · ')[1] || ''; return a && String(o.label).indexOf(a) < 0 ? a : ''; };
+  const H = (t, l) => (window.KPT_MAP && window.KPT_MAP.help ? window.KPT_MAP.help(t, l) : '');   // the Map's (i) help: secondary explanations, one tap or hover away
+  const distText = (m) => (m < 50 ? 'On the spot' : m < 1000 ? 'About ' + (Math.round(m / 10) * 10) + ' m' : (m / 1000).toFixed(1) + ' km') + ' · straight line';
+  function nearSugg(q) {
+    const box = $('kpfSugg'), inp = $('kpfNearQ'); if (!box || !inp) return;
+    const t = String(q || '').trim();
+    if (!t) { box.hidden = true; box.innerHTML = ''; inp.setAttribute('aria-expanded', 'false'); return; }
+    box.hidden = false; inp.setAttribute('aria-expanded', 'true');
+    if (!NM) { box.innerHTML = nmLoad ? '<p class="kpf-sg-note">Loading places…</p>' : '<p class="kpf-sg-note">Place search isn’t available just now. The list below still covers all of Singapore.</p>'; return; }
+    const list = NM.places(t).filter((x) => NEAR_TYPES.indexOf(x.t) > -1 && (x.t !== 'dev' || (NM.BY[x.n] && NM.BY[x.n].pos)));
+    box.innerHTML = list.length ? list.map((x, i) => `<button type="button" role="option" class="kpf-sg" id="kpfSg${i}" data-f="nearpick" data-t="${esc(x.t)}" data-n="${esc(x.n)}"><b>${esc(x.label || x.n)}</b><span>${esc(sugSub(x))}</span></button>`).join('') : '<p class="kpf-sg-note">No match. Try a road, MRT station, neighbourhood or development.</p>';
+  }
+  function nearTyped(v) {
+    if (FS) FS.nearErr = '';
+    if (String(v).trim() && !NM) loadNear().then(() => { const i = $('kpfNearQ'); if (i) nearSugg(i.value); }).catch(() => { nmLoad = null; const i = $('kpfNearQ'); if (i) nearSugg(i.value); });
+    nearSugg(v);
+  }
+  function pickNear(t, n) {
+    loadNear().then(() => {
+      const next = { t, n, r: FS.near ? FS.near.r : 1000 }, nr = resolveNear(next);
+      if (!nr) { FS.nearErr = 'We couldn’t place that on the map. Please try another.'; renderFindView(); return; }
+      NR = nr; FS.near = next; FS.nearEdit = false; FS.nearErr = ''; FS.unpOpen = false; FS.unpAll = false; FS.districts = []; FS.text = ''; FS.more = {}; FS.mapOpen = true; renderFind();
+    }).catch(() => { FS.nearErr = 'Place search isn’t available just now. The list still covers all of Singapore.'; renderFindView(); });
+  }
+  function nearHtml(res) {
+    const input = `<div class="kpf-nin"><label class="kpf-vh" for="kpfNearQ">Near a road, MRT station, neighbourhood or development</label><input id="kpfNearQ" type="search" autocomplete="off" maxlength="60" role="combobox" aria-expanded="false" aria-controls="kpfSugg" aria-autocomplete="list" placeholder="Road, MRT, area or development"><div class="kpf-sugg" id="kpfSugg" role="listbox" hidden></div></div>`;
+    const err = FS.nearErr ? `<p class="kpf-nerr" role="status">${esc(FS.nearErr)}</p>` : '';
+    const ni = nearInput();
+    if (!FS.near || !ni) return `<div class="kpf-near" id="kpfNear"><p class="kpf-nt">Near somewhere? <span>Optional</span></p>${input}${err}</div>`;
+    const r = FS.near.r, nr = res && res.near, rl = FI.radiusText;
+    const rad = `<div class="kpf-rad" role="radiogroup" aria-label="Search radius">${RADII.map((x) => `<button type="button" class="kpf-rbtn" role="radio" aria-checked="${x === r}" data-f="nearr" data-r="${x}">${esc(rl(x))}</button>`).join('')}</div>`;
+    const count = nr && nr.devs > 0 ? `<p class="kpf-ncount" role="status"><b>${nr.devs}</b> ${nr.devs === 1 ? 'development fits' : 'developments fit'} your budget within ${esc(rl(r))}${H('Straight-line distance from ' + NR.basis + ', not walking or driving time. A development is counted when it has enough recent sales, or current Huttons prices for new launches, near your budget and size.', 'How distances are measured')}</p>` : '';
+    const fine = nr && nr.devs > 0 ? `<p class="kpf-nfine">${res.inventory ? 'Based on recent sales and, where available, Huttons prices. Not a list of every home for sale.' : 'Based on recent sales, not a list of homes for sale.'}</p>` : '';
+    const unp = nr && nr.unplaced ? nr.unplaced.length : 0, onMap = nr && nr.devs > 0 ? (nr.devs === 1 ? 'It is on the map. ' : (nr.devs === 2 ? 'Both are' : 'All ' + nr.devs + ' are') + ' on the map. ') : '';
+    const missing = unp ? `<p class="kpf-nfine kpf-nmiss">${esc(onMap)}${unp}${nr.devs > 0 ? ' more' : ''} ${unp === 1 ? 'development fits' : 'developments fit'} your budget but ${unp === 1 ? 'has' : 'have'} no verified map position. <a href="#kpfUnplaced" data-f="unplaced">See ${unp === 1 ? 'it' : 'them'}</a>${H('URA publishes no location for many recent launches, so they cannot be placed on the map or measured against the radius. They are listed below and are not sorted by distance.', 'Why some developments have no map position')}</p>` : '';
+    const open = FS.mapOpen !== false && !!nr && nr.devs > 0;
+    const mapBar = nr && nr.devs > 0 ? `<div class="kpf-mapbar"><button type="button" class="kpf-link" data-f="maptog" aria-expanded="${open}">${open ? 'Hide map' : 'Show map'}</button></div>` : '';
+    const slot = `<div class="kpm kpf-mapwrap" id="kpfMapSlot"${open ? '' : ' hidden'}><div class="kpf-zm"><button type="button" data-f="zin" aria-label="Zoom in">+</button><button type="button" data-f="zout" aria-label="Zoom out">−</button></div></div>`;
+    return `<div class="kpf-near is-on" id="kpfNear"><div class="kpf-nhead"><p class="kpf-nwhere">Within <b>${esc(rl(r))}</b> of <b>${esc(NR.label)}</b>${whereSub(NR) ? ` <i>(${esc(whereSub(NR))})</i>` : ''}</p><span class="kpf-nact"><button type="button" class="kpf-link" data-f="nearchange">${FS.nearEdit ? 'Cancel' : 'Change place'}</button><button type="button" class="kpf-link" data-f="nearclear">Clear</button></span></div>${FS.nearEdit ? input : ''}${rad}${count}${mapBar}${open ? slot : ''}${fine}${missing}${err}</div>`;
+  }
+  function destroyNearMap() { if (nmView) { try { nmView.destroy(); } catch (e) { /* already gone */ } } nmView = null; nmHost = null; nmLayer = null; nmSig = ''; }
+  /** Keeps the one Leaflet map alive across list re-renders: the map node is moved into the new slot, and only a changed place, radius or result set redraws it. */
+  function syncNearMap(res, ni) {
+    const slot = $('kpfMapSlot');
+    if (!ni) { destroyNearMap(); return; }
+    if (!slot || !NM || !window.KPT_MAP_VIEW || !window.L || !res.near) return;
+    if (!nmHost) { nmHost = document.createElement('div'); nmHost.className = 'kpf-map'; }
+    slot.appendChild(nmHost);
+    if (!nmView) {
+      nmView = window.KPT_MAP_VIEW(window.KPT_MAP, NM); nmView.create(nmHost, { onSelect: mapPick, onPlace: () => {} });
+      if (window.matchMedia && matchMedia('(pointer: coarse)').matches) nmView.get().dragging.disable();   // a finger on the map scrolls the page; pinch and the +/− buttons zoom
+    }
+    const sig = NR.key + '|' + ni.radius + '|' + res.near.ids.join(',');
+    nmView.invalidate();
+    if (sig === nmSig) return;
+    nmSig = sig;
+    const mp = nmView.get(), c = [NR.lat, NR.lon], bnd = L.latLng(c[0], c[1]).toBounds(ni.radius * 2);
+    if (NR.bounds) bnd.extend([[NR.bounds[0][0], NR.bounds[0][1]], [NR.bounds[1][0], NR.bounds[1][1]]]);
+    if (!nmLayer) nmLayer = L.layerGroup().addTo(mp);
+    nmLayer.clearLayers();
+    L.circle(c, { radius: ni.radius, color: '#2E4FD1', weight: 2, opacity: .8, dashArray: '7 5', fillColor: '#2E4FD1', fillOpacity: .07, interactive: false }).addTo(nmLayer);
+    L.circleMarker(c, { radius: 7, color: '#fff', weight: 2.5, fillColor: '#14203F', fillOpacity: 1, bubblingMouseEvents: false }).bindTooltip(NR.label + (whereSub(NR) ? ' · ' + whereSub(NR) : ''), { className: 'gwtip', direction: 'top', offset: [0, -6] }).addTo(nmLayer);   // the place itself: a plain dot, so no label ever sits on top of a development
+    const names = res.near.ids.map((id) => NM.BYID[id]).filter((p) => p && p.pos).map((p) => p.n);
+    nmView.update({ key: sig, projects: [], selected: null, cmp: names, amen: [], areaRings: NR.rings || null, bounds: bnd, fit: true, minZoom: 11, ambient: false, pad: { tl: [18, 18], br: [18, 18] } });
+  }
+  function mapPick(name) {   // a dot on the map -> its card in the list
+    const p = NM && NM.BY[name]; if (!p) return;
+    const go = () => { const el = document.querySelector('#findRoot [data-pid="' + p.id + '"]'); if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.classList.remove('is-hl'); void el.offsetWidth; el.classList.add('is-hl'); } return !!el; };
+    if (!go()) { FS.more.resale = true; FS.more.new = true; renderFind(); go(); }
+  }
   let pendingScroll = false;
   function initFind(step) {
     const root = $('findRoot'); if (!root || !FI || !budget) return;
     const sv = handoff && handoff.find ? restoreFind(handoff.find) : null;
-    findStep = step; FS = { explicit: sv ? sv.explicit : null, widen: sv ? sv.widen : false, widenSize: sv ? sv.widenSize : false, loc: (sv && sv.loc) || (locIntent() ? 'pending' : 'none'), locPick: false, districts: sv ? sv.districts : [], text: sv ? sv.text : '', freehold: sv ? sv.freehold : answersNow().priorities.indexOf('freehold') > -1, regionSoft: sv ? sv.regionSoft : false, bedOff: sv ? sv.bedOff : false, panel: false, draft: null, ddOpen: false, seen: {}, ticked: sv ? sv.ticked : [], more: {}, info: false };
+    findStep = step; FS = { explicit: sv ? sv.explicit : null, widen: sv ? sv.widen : false, widenSize: sv ? sv.widenSize : false, loc: (sv && sv.loc) || (locIntent() ? 'pending' : 'none'), locPick: false, districts: sv ? sv.districts : [], text: sv ? sv.text : '', freehold: sv ? sv.freehold : answersNow().priorities.indexOf('freehold') > -1, regionSoft: sv ? sv.regionSoft : false, bedOff: sv ? sv.bedOff : false, panel: false, draft: null, ddOpen: false, seen: {}, ticked: sv ? sv.ticked : [], more: {}, info: false, near: sv ? sv.near : null, nearEdit: false, nearErr: '', mapOpen: true };
     root.onclick = findClick; root.onchange = findChange; root.oninput = findInput;
-    root.onkeydown = (e) => { if (e.key === 'Enter' && e.target && e.target.matches && e.target.matches('#kpfPanel input[type=text]')) { e.preventDefault(); findClick({ target: root.querySelector('[data-f=update]'), preventDefault() {} }); } };
+    root.onkeydown = (e) => {
+      const t = e.target; if (!t || !t.matches) return;
+      if (e.key === 'Enter' && t.matches('#kpfPanel input[type=text]')) { e.preventDefault(); findClick({ target: root.querySelector('[data-f=update]'), preventDefault() {} }); return; }
+      // the place search: Enter picks only when one place is suggested (never a guess between several); the arrow keys move through the suggestions
+      if (t.id === 'kpfNearQ') {
+        const opts = root.querySelectorAll('#kpfSugg .kpf-sg');
+        if (e.key === 'Enter') { e.preventDefault(); if (opts.length === 1) opts[0].click(); } else if (e.key === 'ArrowDown' && opts.length) { e.preventDefault(); opts[0].focus(); } else if (e.key === 'Escape') { nearSugg(''); }
+      } else if (t.matches('.kpf-sg')) {
+        const opts = Array.prototype.slice.call(root.querySelectorAll('#kpfSugg .kpf-sg')), i = opts.indexOf(t);
+        if (e.key === 'ArrowDown' && i < opts.length - 1) { e.preventDefault(); opts[i + 1].focus(); } else if (e.key === 'ArrowUp') { e.preventDefault(); (i > 0 ? opts[i - 1] : $('kpfNearQ')).focus(); } else if (e.key === 'Escape') { $('kpfNearQ').focus(); nearSugg(''); }
+      }
+    };
+    root.addEventListener('focusin', (e) => { if (e.target && e.target.id === 'kpfNearQ' && !NM) loadNear().catch(() => { nmLoad = null; }); });
     if (location.hash === '#developments') { pendingScroll = true; try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} }   // arriving from the Buy result button: land on the list, not the summary above it
-    Promise.all([loadFind(), loadInv()]).then(() => { renderFind(); if (pendingScroll) { pendingScroll = false; const h = $('kpfH'); if (h && h.scrollIntoView) h.scrollIntoView({ block: 'start' }); } });
+    const restoreNear = () => (FS.near ? loadNear().then(() => { NR = resolveNear(FS.near); if (!NR) FS.near = null; }).catch(() => { nmLoad = null; FS.near = null; FS.nearErr = 'Place search isn’t available just now, so the list covers all of Singapore.'; }) : null);
+    Promise.all([loadFind(), loadInv(), loadSites()]).then(restoreNear).then(() => { renderFind(); if (pendingScroll) { pendingScroll = false; const h = $('kpfH'); if (h && h.scrollIntoView) h.scrollIntoView({ block: 'start' }); } });
   }
   const WHERE_SAY = { areas: 'You chose a specific area', work: 'You said you want to be near work', family: 'You said you want to be near family', school: 'You said you want to be near a particular school' };
   const WHERE_WHAT = { work: 'your workplace', family: 'where your family lives', school: 'schools' };
@@ -266,7 +394,7 @@
     const areaPart = FS.districts.length ? (FS.districts.length === 1 ? 'District ' : 'Districts ') + listJoin(FS.districts.map(Number)) + (FS.text ? ' · “' + FS.text + '”' : '') : FS.text ? '“' + FS.text + '”' : 'Anywhere in Singapore';
     const bedAns = answersFind().size, bedTxt = FI.bedsFor(bedAns) ? FI.BED_WORDS[bedAns] : null;
     const sizePart = !sz ? 'Size not set' : sz.mixed ? (bedTxt ? bedTxt.charAt(0).toUpperCase() + bedTxt.slice(1) : 'Typical sizes for your budget') : (sz.source === 'inferred' ? 'About ' : '') + sizeFmt(sz.lo, sz.hi);
-    const line2 = [sizePart, areaPart].concat(FS.freehold ? ['Freehold or 900+ year lease'] : []).concat(regionOnNow() ? ['Core Central and Rest of Central'] : []).concat(FS.widen ? ['Budget ±15%'] : []).join(' · ');
+    const niEarly = nearInput(), line2 = [sizePart].concat(niEarly ? [] : [areaPart]).concat(FS.freehold ? ['Freehold or 900+ year lease'] : []).concat(regionOnNow() ? ['Core Central and Rest of Central'] : []).concat(FS.widen ? ['Budget ±15%'] : []).join(' · ');
     const open = FS.panel && FS.draft, d = FS.draft || {};
     const panel = open ? `<div class="kpf-panel" id="kpfPanel" role="group" aria-label="Change search">
       <label class="kpf-fld"><span>Budget</span><input id="kpfBudget" type="text" inputmode="numeric" autocomplete="off" value="${esc(d.budget)}" aria-label="Budget in dollars"></label>
@@ -283,7 +411,7 @@
       root.innerHTML = `<section class="kpf" aria-labelledby="kpfH">${head}${summary}<p class="kpf-quiet">Tell us the size you have in mind, in square feet, to see developments.</p></section>`; return;
     }
     const typical = openTo === 'both' ? null : FI.inferSize(findStep, openTo);   // V10.3.6: one typical size only when one sale type is shown
-    const res = FI.shortlist(findIx, { budget, range: plannerRange(), openTo, size: sz, sizes: SW.sizes, districts: FS.districts, text: FS.text, freehold: FS.freehold, regionSoft: !!FS.regionSoft, loc: { districts: FS.districts, skipped: FS.loc !== 'none' && !FS.districts.length }, pct: FS.widen ? FI.T.widenBudgetPct : FI.T.budgetPct, answers: answersFind(), typical, inv: invOn ? inv : null });
+    const res = FI.shortlist(findIx, { budget, range: plannerRange(), openTo, size: sz, sizes: SW.sizes, districts: FS.districts, text: FS.text, freehold: FS.freehold, regionSoft: !!FS.regionSoft, loc: { districts: FS.districts, skipped: FS.loc !== 'none' && !FS.districts.length && !niEarly }, near: niEarly, pct: FS.widen ? FI.T.widenBudgetPct : FI.T.budgetPct, answers: answersFind(), typical, inv: invOn ? inv : null, launches: sitesDoc || null });
     const V10 = !!res.inventory;
     const allCards = res.groups.reduce((a, g) => a.concat(g.cards, g.more || []), []);
     FS.ticked = FS.ticked.map((t) => { const c = allCards.find((x) => x.slug === t.slug); return c ? { slug: t.slug, name: c.name, tag: tagOf(c), research: !!c.link } : null; }).filter(Boolean);   // only comparison picks that still qualify stay
@@ -292,7 +420,7 @@
     const otherCards = (res.otherTypes || []).reduce((a, o) => a.concat(o.groups.reduce((b, g) => b.concat(g.cards), [])), []);
     if (window.GW_WA) { GW_WA.on('a.kpf-cta[data-slug]', (a) => { const c = allCards.concat(otherCards).find((x) => x.slug === a.dataset.slug); return c ? KPT.waLink({ message: waFor([c.name]) }) : null; }); GW_WA.on('a.kpf-wa', () => KPT.waLink({ message: waFor(FS.ticked.map((t) => t.name)) })); }
     const cardHtml = (c, noTick) => { const s = c.simple;
-      return `<article class="kpf-card">${s.badge ? `<p class="kpf-badge">${esc(s.badge)}</p>` : ''}<h3 class="kpf-name">${esc(c.name)}</h3><p class="kpf-meta">${esc(c.meta.replace(/ from \d{4}/, "").replace(FS.districts.length ? / · (?:CCR|RCR|OCR)(?= · |$)/ : /$^/, ""))}</p>
+      return `<article class="kpf-card" data-pid="${esc(c.id)}">${s.badge ? `<p class="kpf-badge">${esc(s.badge)}</p>` : ''}<h3 class="kpf-name">${esc(c.name)}</h3><p class="kpf-meta">${esc(c.meta.replace(/ from \d{4}/, "").replace(FS.districts.length ? / · (?:CCR|RCR|OCR)(?= · |$)/ : /$^/, ""))}</p>${c.dist != null ? `<p class="kpf-dist">${esc(distText(c.dist))}</p>` : ''}
       <p class="kpf-sz">${esc(s.size)}</p>${s.bedNote ? `<p class="kpf-bn">${esc(s.bedNote)}</p>` : ''}<p class="kpf-pr"><span class="kpf-pl">${esc(s.priceLead)}</span> <b>${esc(s.figure)}</b>${s.priceNote ? ` <span class="kpf-pn">${esc(s.priceNote)}</span>` : ''}</p>
       <p class="kpf-bud kpf-bud--${s.budget.tone}">${esc(s.budget.text)}</p>
       ${s.sales ? `<p class="kpf-sales">${esc(s.sales)}</p>` : ''}${s.latest ? `<p class="kpf-latest">${esc(s.latest)}</p>` : ''}${s.quiet ? `<p class="kpf-q">${esc(s.quiet)}</p>` : ''}
@@ -306,17 +434,33 @@
     };
     const list = res.groups.map(groupHtml).join('');
     // Executive Condominiums and cluster housing: the same rules, listed apart from the condominiums, never pooled. No "compare" tick (a pair must be the same type).
-    const otherHtml = (res.otherTypes || []).map((o) => `<section class="kpf-other" data-kpf-class="${esc(o.cls)}"><h3 class="kpf-gh">${esc(o.label)}</h3><p class="kpf-gsub">${esc(o.note)}</p>` + o.groups.map((g) => `<p class="kpf-gsub"><b>${esc(g.label)}</b></p>` + g.cards.map((c) => cardHtml(c, true)).join('')).join('') + '</section>').join('');
+    const otherHtml = (res.otherTypes || []).map((o) => `<section class="kpf-other" data-kpf-class="${esc(o.cls)}"><h3 class="kpf-gh">${esc(o.label)}</h3><p class="kpf-gsub">${esc(o.note)}</p>` + o.groups.map((g) => `<p class="kpf-gsub"><b>${esc(g.label)}</b></p>` + g.cards.map((c) => cardHtml(c, true)).join('') + (res.near && g.eligible > g.cards.length ? `<p class="kpf-gsub">Showing the nearest ${g.cards.length} of ${g.eligible}.</p>` : '')).join('') + '</section>').join('');
     const ticked = FS.ticked, bar = ticked.length === 2 ? `<div class="kpf-bar" role="region" aria-label="Compare with Ken"><ul class="kpf-sel">${ticked.map((t) => `<li><span><b>${esc(t.name)}</b> <i>${esc(t.tag || '')}</i></span><button type="button" data-f="untick" data-slug="${esc(t.slug)}" aria-label="Remove ${esc(t.name)}">✕</button></li>`).join('')}</ul><a class="kpf-wa" data-f="askmulti" href="https://wa.me/6590908898" target="_blank" rel="noopener">Compare these with Ken →</a><p>Ken's view on these two.${ticked.every((t) => t.research) ? ` Or <a href="../../research/#/compare/${esc(ticked[0].slug)}/${esc(ticked[1].slug)}" data-f="go" data-id="${esc(ticked[0].slug)}">see them side by side ›</a> with their recent sales.` : ''} You can compare two at a time.</p></div>`
       // A5-18: after the first tick, say what happens next
       : ticked.length === 1 ? `<div class="kpf-bar" role="status"><p>Pick one more to compare. You can compare two at a time.</p></div>` : '';
     const chg = res.changes.length ? `<ul class="kpf-chg">${res.changes.map((c) => `<li><button class="kpf-link" type="button" data-f="chg" data-id="${esc(c.id)}">${esc(c.label)}</button> <span>${esc(c.text)}</span></li>`).join('')}</ul>` : '';
     let body = '';
-    const noneChg = res.changes.length ? `<ul class="kpf-chg kpf-chg--act">${res.changes.map((c) => `<li><button class="kpf-link" type="button" data-f="chg" data-id="${esc(c.id)}">${esc(c.id === 'size' ? 'Include nearby sizes' : c.id === 'area' ? 'Look across all Singapore' : c.id === 'budget' ? 'Widen the budget range' : c.label)} →</button></li>`).join('')}</ul>` : '';
+    const noneChg = res.changes.length ? `<ul class="kpf-chg kpf-chg--act">${res.changes.map((c) => `<li><button class="kpf-link" type="button" data-f="chg" data-id="${esc(c.id)}">${esc(c.id === 'size' ? 'Include nearby sizes' : c.id === 'area' ? 'Look across all Singapore' : c.id === 'budget' ? 'Widen the budget range' : c.id.indexOf('radius-') === 0 ? c.label + ' · ' + c.text : c.label)} →</button></li>`).join('')}</ul>` : '';
     if (res.state === 'none' && res.constraintNone) body = `<div class="kpf-msg kpf-none"><p class="kpf-nh"><b>${esc(res.noneText)}</b></p>${res.changes.length ? '<p>You can change one thing:</p>' : ''}${noneChg}<p class="kpf-note">Or <a href="#" data-f="ken">ask Ken what may work</a>.</p></div>`;
+    else if (res.state === 'none' && res.near) body = `<div class="kpf-msg kpf-none"><p class="kpf-nh"><b>${esc(res.noneText)}</b></p><p>Try a wider radius or a higher budget.</p>${noneChg}<p class="kpf-note">Or <a href="#" data-f="ken">ask Ken what may work</a>.</p></div>`;
     else if (res.state === 'none') body = `<div class="kpf-msg kpf-none"><p class="kpf-nh"><b>Nothing matched this search</b></p><p>Try a nearby size or broaden the area.</p>${noneChg}<p class="kpf-note">Or <a href="#" data-f="ken">ask Ken what may work</a>.</p></div>`;
     else body = list + (res.state === 'few' ? `<div class="kpf-msg"><p>${esc(res.fewText)}</p>${chg}</div>` : '');
     body += otherHtml;
+    // Matching developments with no verified map position: listed apart, never implied to be inside the radius.
+    const UNP_CAP = 6, CLS_TXT = { ec: 'Executive Condominium', cluster: 'Cluster housing' };
+    const unpHtml = () => {
+      const items = res.near && res.near.unplaced ? res.near.unplaced : []; if (!items.length) return '';
+      const shown = FS.unpAll || items.length <= UNP_CAP + 2 ? items : items.slice(0, UNP_CAP), what = (m) => (m.sales.length > 1 ? 'New launch and resale' : m.sales[0] === 'new' ? 'New launch' : 'Resale') + (CLS_TXT[m.cls] ? ' · ' + CLS_TXT[m.cls] : '') + ' · ' + (m.priced ? 'Huttons prices near your budget' : 'Sales near your budget');
+      return `<details class="kpf-unp" id="kpfUnplaced"${FS.unpOpen ? ' open' : ''}><summary data-f="unpsum">Fit your budget, but no map position (${items.length})</summary><p class="kpf-gsub">Not confirmed to be within ${esc(FI.radiusText(FS.near.r))} of ${esc(NR.label)}, so not sorted by distance.</p><ul class="kpf-unl">${shown.map((m) => `<li>${m.link ? `<a data-f="go" data-id="${esc(m.id)}" href="${esc(m.link)}">${esc(m.name)}</a>` : `<b>${esc(m.name)}</b>`}<span>${esc(what(m))}</span></li>`).join('')}</ul>${items.length > shown.length ? `<p class="kpf-moreb"><button class="kpf-more" type="button" data-f="unpall">Show ${items.length - shown.length} more <span aria-hidden="true">⌄</span></button></p>` : ''}</details>`;
+    };
+    // Upcoming launches with no price anywhere in Groundwork: possibilities, never budget matches.
+    const upHtml = () => {
+      const u = res.upcoming; if (!u) return '';
+      const more = u.near ? `<p class="kpf-quiet kpf-upmore"><a href="https://kentanthepropertyguy.com/#developments" target="_blank" rel="noopener">Browse other upcoming launches <span aria-hidden="true">↗</span></a></p>` : '';
+      if (!u.items.length) return more;
+      return `<section class="kpf-up" aria-labelledby="kpfUpH"><h3 class="kpf-gh" id="kpfUpH">Upcoming launches${u.near ? ' within ' + esc(FI.radiusText(FS.near.r)) : ''}</h3><p class="kpf-gsub">${u.near ? 'Verified location inside this radius. ' : ''}No current price here, so these are possibilities, not budget matches.</p><ul class="kpf-unl">${u.items.map((i) => `<li><a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(i.name)} <span aria-hidden="true">↗</span></a><span>${esc(i.dist != null ? distText(i.dist) + (i.tagline ? ' · ' : '') : '')}${esc(i.tagline)}</span></li>`).join('')}</ul>${more}</section>`;
+    };
+    body += unpHtml() + upHtml();
     const sizeWhy = sz.source === 'inferred' ? 'You didn’t give a size in square feet, so we used the sizes that typically sold at your budget' + (sz.extended ? ', extended upward because you chose More space' : '') + (sz.mixed ? ', worked out separately for new launches and resale. ' : ' (about ' + sizeFmt(sz.lo, sz.hi) + '). ') + 'We don’t convert bedrooms into square feet.' : 'The size is your own range, ' + sizeFmt(sz.lo, sz.hi) + '. We don’t convert bedrooms into square feet.';
     const unWhy = res.unsupported.length ? `<h4>What we didn’t use to build this list</h4><ul>${res.unsupported.map((u) => `<li><b>${esc(u.title)}:</b> ${esc(u.text)}</li>`).join('')}</ul>` : '';
     const hasNew = openTo === 'new' || openTo === 'both';
@@ -330,13 +474,15 @@
     setKen(true);
     const gapLines = (res.sizeGap || []).map((g) => 'We couldn’t work out a typical size for ' + (g === 'new' ? 'new launches' : 'resale homes') + ' at this budget, so they aren’t listed from sales data. Add a size under Change search to include them.');
     const effectLines = (res.bedroomNote ? [res.bedroomNote] : []).concat(res.effect || []).concat(gapLines), effectHtml = effectLines.length ? `<div class="kpf-effect">${effectLines.map((t) => `<p>${esc(t)}</p>`).join('')}</div>` : '';
-    root.innerHTML = `<section class="kpf" aria-labelledby="kpfH">${head}${summary}${effectHtml}${body}${meth}${bar}</section>`;
+    root.innerHTML = `<section class="kpf" aria-labelledby="kpfH">${head}${summary}${nearHtml(res)}${effectHtml}${body}${meth}${bar}</section>`;
+    syncNearMap(res, niEarly);
     const pl = FI.analytics(res, bandOf(budget)), key = JSON.stringify(pl);
     if (!FS.seen[key]) { FS.seen[key] = 1; KPT.track('find_shown', pl); }
     window.__kptFind = res;   // read by tests
   }
   function bandOf(b) { const m = b, step = 200000; if (m < 600000) return 'under-0.6m'; if (m >= 4000000) return '4m-plus'; const lo = Math.floor(m / step) * step; return (lo / 1e6).toFixed(1) + '-' + ((lo + step) / 1e6).toFixed(1) + 'm'; }
   function findInput(e) {
+    if (e.target && e.target.id === 'kpfNearQ') { nearTyped(e.target.value); return; }
     const t = e.target; if (!FS || !FS.draft || !t || !t.id) return;
     if (t.id === 'kpfBudget') { t.value = typedAmt(t.value); FS.draft.budget = t.value; }
     else if (t.id === 'kpfFrom') FS.draft.from = t.value; else if (t.id === 'kpfTo') FS.draft.to = t.value; else if (t.id === 'kpfText') FS.draft.text = t.value.replace(/\s+/g, ' ').slice(0, 40);
@@ -370,7 +516,17 @@
     }
     if (f === 'untick') { const i = FS.ticked.findIndex((x) => x.slug === t.dataset.slug); if (i > -1) FS.ticked.splice(i, 1); renderFind(); return; }
     if (f === 'info') { FS.info = !FS.info; renderFindView(); return; }
+    if (f === 'unplaced') { e.preventDefault(); FS.unpOpen = true; renderFindView(); const el = $('kpfUnplaced'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); return; }
+    if (f === 'unpsum') { FS.unpOpen = !t.parentNode.open; return; }
+    if (f === 'unpall') { FS.unpAll = true; FS.unpOpen = true; renderFindView(); return; }
     if (f === 'more') { FS.more[t.dataset.sale] = true; renderFind(); return; }
+    if (f === 'nearpick') { pickNear(t.dataset.t, t.dataset.n); return; }
+    if (f === 'nearr') { const r = Number(t.dataset.r); if (FS.near && RADII.indexOf(r) > -1 && r !== FS.near.r) { FS.near.r = r; renderFind(); const b = document.querySelector('#findRoot [data-f=nearr][aria-checked=true]'); if (b) b.focus(); } return; }
+    if (f === 'nearclear') { FS.near = null; NR = null; FS.nearEdit = false; FS.nearErr = ''; renderFind(); return; }
+    if (f === 'nearchange') { FS.nearEdit = !FS.nearEdit; renderFindView(); const i = $('kpfNearQ'); if (i) i.focus(); return; }
+    if (f === 'maptog') { FS.mapOpen = FS.mapOpen === false; renderFindView(); return; }
+    if (f === 'zin') { if (nmView) nmView.zoom(1); return; }
+    if (f === 'zout') { if (nmView) nmView.zoomOut(1); return; }
     if (f === 'ken') { e.preventDefault(); const kv = $('kenView'); if (kv) kv.click(); return; }
     if (f === 'ddsum') { FS.ddOpen = !t.parentNode.open; return; }
     if (f === 'dfree') { if (FS.draft) FS.draft.freehold = !!t.checked; return; }
@@ -385,7 +541,8 @@
     else if (f === 'locpick') FS.locPick = true;
     else if (f === 'locskip') { FS.districts = []; FS.loc = 'skipped'; }
     else if (f === 'chg') {
-      const id = t.dataset.id; if (id === 'area') { FS.districts = []; FS.text = ''; }
+      const id = t.dataset.id; if (id === 'area') { FS.districts = []; FS.text = ''; FS.near = null; NR = null; }
+      else if (id.indexOf('radius-') === 0) { if (FS.near && RADII.indexOf(Number(id.slice(7))) > -1) FS.near.r = Number(id.slice(7)); }
       else if (id === 'size') { const sz = FI.sizeWindows(FS.explicit, findStep, openToNow(), sizeOpts()).size; if (sz && sz.mixed) FS.widenSize = true; else if (sz) FS.explicit = { from: sz.lo - FI.T.sizePad, to: sz.hi + FI.T.sizePad, widened: true, typed: sz.source === 'explicit' && !!(FS.explicit && FS.explicit.typed) }; }
       else if (id === 'budget') FS.widen = true;
       else if (id === 'region') FS.regionSoft = true;

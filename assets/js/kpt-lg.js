@@ -21,9 +21,9 @@
   const SALE_WORDS = { resale: ['resale', 'resales', 'resold'], 'new sale': ['new sale', 'new sales', 'sold'], 'sub-sale': ['sub-sale', 'sub-sales', 'sold'] };
   // Development class (shared register): condo | ec | cluster. Rows and models from older data carry none and are condos.
   const CLS = {
-    condo: { label: 'Condominium', what: 'a private residential development', like: '' },
-    ec: { label: 'Executive Condominium', what: 'an executive condominium (EC)', like: 'Executive condominiums are sold under different rules from private condominiums, so their prices are not comparable with condominium prices. Comparisons here are with other ECs only.' },
-    cluster: { label: 'Cluster housing', what: 'a strata landed (cluster housing) development', like: 'Strata landed homes in a gated development sell at different price levels from condominiums. Comparisons here are with other cluster-housing developments only.' },
+    condo: { label: 'Condominium', what: 'a private residential development', short: '', like: '' },
+    ec: { label: 'Executive Condominium', what: 'an executive condominium (EC)', short: 'Priced under different rules from private condominiums, so compared only with other ECs.', like: 'Executive condominiums are sold under different rules from private condominiums, so their prices are not comparable with condominium prices. Comparisons here are with other ECs only.' },
+    cluster: { label: 'Cluster housing', what: 'a strata landed (cluster housing) development', short: 'Priced differently from condominiums, so compared only with other cluster housing.', like: 'Strata landed homes in a gated development sell at different price levels from condominiums. Comparisons here are with other cluster-housing developments only.' },
   };
   const clsOf = (x) => (x && CLS[x.cls] ? x.cls : 'condo');
   const ALSO = { condo: ['condominium sale', 'condominium sales'], ec: ['EC sale', 'EC sales'], cluster: ['cluster-housing sale', 'cluster-housing sales'] };
@@ -50,9 +50,9 @@
     const age = Math.floor(((now == null ? Date.now() : now) - Date.parse(m.asOf + 'T00:00:00Z')) / 864e5);
     return { age, state: age > FRESH.expiredDays ? 'expired' : age > FRESH.staleDays ? 'stale' : 'ok', from12: ymLabel(ymAdd(m.latestMonth, -11)), to: ymLabel(m.latestMonth), first: ymLabel(m.monthStart), asOf: dayLabel(m.asOf) };
   }
-  function freshLine(m, now) {
+  function freshLine(m, now, cls) {
     const F = freshness(m, now); if (!F) return '';
-    return '<p class="lg-fine lg-center" data-lg-fresh="' + F.state + '">The past 12 months are ' + esc(F.from12) + ' to ' + esc(F.to) + ', from URA records retrieved ' + esc(F.asOf) + '. ' + esc(F.to) + ' may be incomplete: sales reported later are added in later updates.' +
+    return '<p class="' + (cls || 'lg-fine lg-center') + '" data-lg-fresh="' + F.state + '">Sales from ' + esc(F.from12) + ' to ' + esc(F.to) + ', from URA records retrieved ' + esc(F.asOf) + '. ' + esc(F.to) + ' may be incomplete.' +
       (F.state !== 'ok' ? ' <b>These records are ' + (F.state === 'expired' ? 'over nine months' : 'over four months') + ' old, so newer sales aren’t included' + (F.state === 'expired' ? ' and no typical price is shown' : '') + '.</b>' : '') + '</p>';
   }
   function dataSpan(m) {
@@ -92,9 +92,9 @@
   function projectPill(M) {
     const A = M.answer, w = words(M), f = A && A.facts;
     if (!A) return '';
-    if (A.state === 'recent' && strong(M)) return '<span class="lg-pill" data-lg-ev="good">Based on ' + plural(f.recentN, w[0], w[1]) + ' of this size across ' + f.recentMonths + ' of the last 12 months. Enough to read as a typical price. Past sales, not a valuation.</span>';
-    if (A.state === 'recent') { const s = STRONG(); return '<span class="lg-pill warn" data-lg-ev="limited">Based on only ' + plural(f.recentN, w[0], w[1]) + ' of this size, in ' + plural(f.recentMonths, 'month') + ' of the last 12. A typical price needs at least ' + s.sales + ' sales over ' + s.months + ' months, so read this as a first look.</span>'; }
-    if (A.state === 'recent-thin') return '<span class="lg-pill warn" data-lg-ev="limited">Based on only ' + plural(f.recentN, w[0], w[1]) + ' of this size in the last 12 months. Read this as a first look, not a settled price.</span>';
+    if (A.state === 'recent' && strong(M)) return '<span class="lg-pill" data-lg-ev="good">Based on ' + plural(f.recentN, w[0], w[1]) + ' of this size across ' + f.recentMonths + ' of the last 12 months. Past sales, not a valuation.</span>';
+    if (A.state === 'recent') { const s = STRONG(); return '<span class="lg-pill warn" data-lg-ev="limited">Based on only ' + plural(f.recentN, 'comparable ' + w[0], 'comparable ' + w[1]) + (f.recentN >= s.sales ? ', in ' + plural(f.recentMonths, 'month') : '') + '. Interpret with care.</span>'; }
+    if (A.state === 'recent-thin') return '<span class="lg-pill warn" data-lg-ev="limited">Based on only ' + plural(f.recentN, 'comparable ' + w[0], 'comparable ' + w[1]) + '. Interpret with care.</span>';
     if (A.state === 'older') return '<span class="lg-pill warn" data-lg-ev="older">No ' + w[1] + ' of this size in the last 12 months. Older sales may not reflect today’s prices.</span>';
     return '<span class="lg-pill grey" data-lg-ev="none">There aren’t enough recent ' + w[1] + ' with a recorded size to show a typical price.</span>';
   }
@@ -102,6 +102,24 @@
     const where = [M.street ? 'on ' + titleCase(M.street) : '', district(M) ? 'in ' + district(M) : ''].filter(Boolean).join(' '), ten = M.tenure && M.tenure.mixed ? 'with mixed tenure in these records' : tenurePhrase(M.tenure);
     const s1 = esc(M.name) + ' is <span data-lg-what>' + CLS[clsOf(M)].what + '</span>' + (where ? ' ' + esc(where) : '') + (ten ? ', ' + esc(ten) : '') + '.';
     return [s1, esc(activitySentence(M)), priceSentence(M)].filter(Boolean).join(' ');
+  }
+
+  // Phase 2 (answer first): what the development is, in one short line. The price is not repeated here; the answer block above it carries it.
+  function projectFacts(M) {
+    const where = [M.street ? 'on ' + titleCase(M.street) : '', district(M) ? 'in ' + district(M) : ''].filter(Boolean).join(' '), ten = M.tenure && M.tenure.mixed ? 'with mixed tenure in these records' : tenurePhrase(M.tenure);
+    return [esc(M.name) + ' is <span data-lg-what>' + CLS[clsOf(M)].what + '</span>' + (where ? ' ' + esc(where) : '') + (ten ? ', ' + esc(ten) : '') + '.', esc(activitySentence(M))].filter(Boolean).join(' ');
+  }
+  // The answer: the median price for the size on show, with its sample size and price basis right beside it (never further down the page).
+  function answerBlock(M, mf) {
+    const A = M.answer || {}, f = A.facts || {}, w = words(M), sz = A.size && A.size.label ? sqft(A.size.label) : '';
+    const priced = (A.state === 'recent' || A.state === 'recent-thin') && f.recentMedian != null;
+    const k = priced ? 'Median price per sq ft (PSF)' + (sz ? ' · ' + sz : '') + ' · ' + w[1] + ', last 12 months' : (A.price && A.price.label ? A.price.label : 'Recent sales') + (sz ? ' · ' + sz : '');
+    const v = priced ? '<span class="lg-ans-v">' + money(f.recentMedian) + '<small> psf</small></span>' : '<span class="lg-ans-v txt">' + esc(A.price && A.price.value ? A.price.value : 'not available yet') + '</span>';
+    const lines = A.lines && A.state !== 'recent' ? A.lines.map((l) => l.text).join(' ') : '';
+    const basis = ((strong(M) ? '' : 'Past sales, not a valuation.') + newNote(M) + (lines ? ' ' + lines : '')).trim();
+    return '<div class="lg-ans" data-lg-ans="' + esc(A.state || '') + '"><p class="lg-ans-k">' + k + '</p><p class="lg-ans-main">' + v + '</p>' + projectPill(M) +
+      (basis ? '<p class="lg-fine lg-ans-basis" data-lg-basis>' + esc(basis) + '</p>' : '') +
+      (M.tenure && M.tenure.mixed ? '<p class="lg-fine" data-lg-mixed>' + esc(mixedLine(M.tenure)) + '</p>' : '') + freshLine(mf, undefined, 'lg-fine') + '</div>';
   }
 
   /* ---------- the five-year line (handoff §6.1) ---------- */
@@ -219,11 +237,13 @@
   function methodHtml(M, IN) {
     const found = IN && IN.found && IN.found.length ? '<h3 style="font-size:16px">What KPT found</h3><ul class="lg-list">' + IN.found.map((f) => '<li data-ins="' + esc(f.id) + '">' + esc(f.text) + '</li>').join('') + '</ul>' : '';
     const checks = IN && IN.checklist ? '<h3 style="font-size:16px">What KPT checked</h3>' + IN.checklist.map((c) => '<div data-area="' + esc(c.id) + '"><b>' + esc(c.label) + '</b>' + c.lines.map((l) => '<p class="kpr-chk-' + esc(l.status) + '">' + esc(l.text) + (l.note ? ' <span class="lg-fine">' + esc(l.note) + '</span>' : '') + '</p>').join('') + '</div>').join('') : '';
+    const A0 = M.answer, f0 = A0 && A0.facts, s0 = STRONG(), w0 = words(M);
+    const rule = (A0 && (A0.state === 'recent' || A0.state === 'recent-thin') && f0 && !strong(M)) ? '<p data-lg-rule>Why “interpret with care”: a typical price needs at least ' + s0.sales + ' ' + esc(w0[1]) + ' of the same size across at least ' + s0.months + ' months. This size has ' + plural(f0.recentN, w0[0], w0[1]) + ' in ' + plural(f0.recentMonths, 'month') + ' of the last 12, so the median is a first look, not a settled price.</p>' : '';
     const read = (M.read || []).map((r) => '<p>' + esc(r.text) + '</p>').join('');
     const all = M.history && M.history.all && M.history.all.points.length ? '<p>' + esc(M.history.all.text) + ' Overall PSF mixes every size sold, and that mix changes over time.' + (M.history.mixShift ? ' ' + esc(M.history.mixShift.text) : '') + '</p>' : '';
     const floors = M.floors && M.floors.rows && M.floors.rows.length ? '<h3 style="font-size:16px">By floor band, ' + esc(sqft(M.floors.band)) + ', ' + esc(M.floors.window) + '</h3><ul class="lg-list">' + M.floors.rows.map((r) => '<li>Floors ' + esc(r.band) + ': median ' + money(r.psf.med) + ' · ' + esc(r.evidence.line) + '</li>').join('') + '</ul><p class="lg-fine">' + esc(M.floors.note) + '</p>' : '';
     const ctx = M.context ? '<h3 style="font-size:16px">Market context, not direct comparables</h3><p>' + esc(M.context.note) + '</p>' + M.context.rows.map((r) => '<p><b>' + esc(String(r.label).replace(/^District D(\d+)/, 'District $1')) + ':</b> ' + r.windows.map((w) => esc(w.label) + ', ' + plural(w.n, 'sale') + ' from ' + plural(w.projects, 'project') + ', median ' + money(w.psf.med)).join(' · ') + '</p>').join('') : '';
-    return '<details class="lg-fold" id="evidence"><summary>How we worked this out<small>Sales checked, size, recency, floors</small></summary><div class="in">' + found + read + all + checks + floors + ctx +
+    return '<details class="lg-fold" id="evidence"><summary>How we worked this out<small>Sales checked, size, recency, floors</small></summary><div class="in">' + (clsOf(M) !== 'condo' ? '<p data-lg-classnote>' + esc(CLS[clsOf(M)].like) + '</p>' : '') + rule + found + read + all + checks + floors + ctx +
       '<h3 style="font-size:16px">What the sales can’t tell you</h3><ul class="lg-list">' + (M.notMeasured || []).map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul>' +
       '<p class="lg-fine">' + esc(M.notes && M.notes.psf) + ' ' + esc(M.history && M.history.note) + '</p></div></details>';
   }
@@ -277,16 +297,15 @@
     const chart = lineChart(chartPts, '#5a55d6', 'Median ' + (words(M)[0]) + ' PSF of ' + (f.label || '') + ' homes at ' + M.name + ' in each 12-month period, oldest to newest');
     const ken = M.ken ? '<div class="lg-tile" style="grid-column:1/-1"><b>Ken’s Take</b><p>“' + esc(M.ken.note) + '”</p><p class="lg-fine">Ken’s judgement, not URA data.</p></div>' : '';
     return '<div class="lg-page" data-lg="project" data-state="' + esc(A.state || '') + '">' +
-      '<header class="lg-hero"><div class="lg-wrap">' +
+      '<header class="lg-hero lg-hero--ans"><div class="lg-wrap">' +
         '<button class="kpr-back lg-back" type="button" data-act="home">← Search another development</button>' +
-        (kick ? '<p class="lg-kicker">' + esc(kick) + '</p>' : '') +
-        '<h1 class="lg-name" tabindex="-1">' + esc(M.name) + '</h1>' +
-        '<p class="lg-lead lg-center" data-lg-lead>' + projectLead(M) + '</p>' + projectPill(M) +
-        (clsOf(M) !== 'condo' ? '<p class="lg-fine lg-center" data-lg-class="' + clsOf(M) + '">' + esc(CLS[clsOf(M)].like) + '</p>' : '') + (alsoLine(M) ? '<p class="lg-fine lg-center" data-lg-also>' + esc(alsoLine(M)) + '</p>' : '') +
-        (M.tenure && M.tenure.mixed ? '<p class="lg-fine lg-center" data-lg-mixed>' + esc(mixedLine(M.tenure)) + '</p>' : '') + freshLine(mf) +
-        (A.lines && A.state !== 'recent' ? '<p class="lg-fine lg-center">' + A.lines.map((l) => esc(l.text)).join(' ') + '</p>' : '') +
+        '<div class="lg-id"><p class="lg-kicker lg-idline"><span class="lg-cls" data-lg-cls="' + clsOf(M) + '">' + esc(CLS[clsOf(M)].label) + '</span>' + [M.street ? esc(titleCase(M.street)) : '', esc(district(M))].filter(Boolean).join(' · ') + '</p>' +
+        '<h1 class="lg-name" tabindex="-1">' + esc(M.name) + '</h1></div>' +
+        answerBlock(M, mf) +
         ((M.bands || []).length ? '<div class="lg-sizes"><span class="lbl">' + sizeLine(M) + '</span><div class="lg-chips" role="group" aria-label="Size">' + sizeChips(M) + '</div>' + sizeForm(S) + '</div>' : '') +
         actions(M) +
+        '<p class="lg-fine lg-facts" data-lg-lead>' + projectFacts(M) + '</p>' +
+        (clsOf(M) !== 'condo' ? '<p class="lg-fine lg-facts" data-lg-class="' + clsOf(M) + '">' + esc(CLS[clsOf(M)].short) + '</p>' : '') + (alsoLine(M) ? '<p class="lg-fine lg-facts" data-lg-also>' + esc(alsoLine(M)) + '</p>' : '') +
       '</div></header>' +
       '<section class="lg-band grey" id="lgCompare"><div class="lg-wrap" style="gap:22px"><div class="lg-head"><p class="lg-kicker">Compare</p><h2>Often compared with ' + esc(M.name) + '</h2><p class="lg-sub" data-lg-sugg-sub>Developments that share enough recent sales in the same sizes for a fair comparison.</p></div>' +
         '<div class="lg-sugg" data-lg-sugg></div><p class="lg-fine lg-center">Or <a href="#/compare/' + esc(M.id) + '" data-lg-pick>search for any other development</a>.</p></div></section>' +

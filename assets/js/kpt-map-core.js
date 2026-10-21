@@ -214,5 +214,37 @@
     return m;
   }
 
-  return { create, esc, fmt, fmtM, band, ym, hav, dist, distA, pdist, inside, icon, ICON, MKT, WINL, supported, likeOK };
+  /* ---------- (i) help: the secondary explanation, one tap or hover away ----------
+     help(text, label) returns a small "i" button. The text stays in the page (hidden, linked by aria-describedby), so it is never lost to a screen reader or a search, and is shown in one floating
+     tip: on hover or keyboard focus on a desktop, on tap on a phone. One tip at a time; Escape or a tap elsewhere closes it. Used by the Map and by the budget tool's embedded Map. */
+  let helpN = 0;
+  const help = (text, label) => { const id = 'gwi-' + (++helpN); return `<span class="gwi-w"><button type="button" class="gwi" aria-label="${esc(label || 'More information')}" aria-expanded="false" aria-describedby="${id}">i</button><span class="gwi-t" id="${id}" hidden>${esc(text)}</span></span>`; };
+  if (typeof document !== 'undefined' && !window.__gwiInit) {
+    window.__gwiInit = true;
+    let tip = null, cur = null, pinned = false;
+    const hide = () => { if (tip) { tip.remove(); tip = null; } if (cur) { cur.setAttribute('aria-expanded', 'false'); cur = null; } pinned = false; };
+    const show = (b) => {
+      if (cur === b) return; hide();
+      const t = b.parentNode.querySelector('.gwi-t'); if (!t) return;
+      tip = document.createElement('div'); tip.className = 'gwi-tip'; tip.setAttribute('role', 'tooltip'); tip.textContent = t.textContent; document.body.appendChild(tip);
+      const r = b.getBoundingClientRect(), w = Math.min(300, window.innerWidth - 24); tip.style.width = w + 'px';
+      const left = Math.max(12, Math.min(r.left + r.width / 2 - w / 2, window.innerWidth - w - 12)); tip.style.left = left + 'px';
+      const h = tip.offsetHeight, below = r.bottom + 8 + h <= window.innerHeight - 8; tip.style.top = (below ? r.bottom + 8 : Math.max(8, r.top - 8 - h)) + 'px';
+      b.setAttribute('aria-expanded', 'true'); cur = b;
+    };
+    const hoverable = () => window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches;
+    document.addEventListener('mouseover', (e) => { const b = hoverable() && e.target.closest && e.target.closest('.gwi'); if (b && !pinned) show(b); });
+    document.addEventListener('mouseout', (e) => { const b = e.target.closest && e.target.closest('.gwi'); if (b && !pinned && cur === b && !(e.relatedTarget && b.contains(e.relatedTarget))) hide(); });
+    document.addEventListener('focusin', (e) => { const b = hoverable() && e.target.closest && e.target.closest('.gwi'); if (b && !pinned) show(b); });   // touch: the tap's own click opens it (a focus event first would make that click close it again)
+    document.addEventListener('focusout', (e) => { if (e.target.closest && e.target.closest('.gwi') && !pinned) hide(); });
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest && e.target.closest('.gwi');
+      if (b) { e.preventDefault(); e.stopPropagation(); if (cur === b && (pinned || !hoverable())) hide(); else { show(b); pinned = true; } return; }
+      if (tip && !(e.target.closest && e.target.closest('.gwi-tip'))) hide();
+    }, true);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && tip) hide(); });
+    window.addEventListener('scroll', () => { if (tip) hide(); }, true); window.addEventListener('resize', hide);
+  }
+
+  return { create, esc, help, fmt, fmtM, band, ym, hav, dist, distA, pdist, inside, icon, ICON, MKT, WINL, supported, likeOK };
 });

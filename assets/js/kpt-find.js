@@ -18,7 +18,7 @@
   // Thresholds (all in one place so tests and the methodology read the same numbers).
   const T = { budgetPct: 0.10, widenBudgetPct: 0.15, minSales: 3, goodSales: 5, minActiveMonths: 2, recencyMonths: 6, perStreet: 2, maxCards: 5, bothResale: 3, bothNew: 2, sizePad: 100,
     inferMinDeals: 15, referenceStep: 50000, referenceMaxUp: 0.5,
-    invFreshHours: 48, invMaxDays: 7, invFutureMs: 3600000, invBand: 100, invSchema: 2, moreMax: 5, maxMessage: 400 };
+    radii: [500, 1000, 2000, 3000], nearFirst: 6, nearResale: 4, nearNew: 2, nearOther: 12, nearMax: 60, invFreshHours: 48, invMaxDays: 7, invFutureMs: 3600000, invBand: 100, invSchema: 2, moreMax: 5, maxMessage: 400 };
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   // Reviewed district to general-area names. UI orientation only: a district contains places not named here, and no project is ever said to be "in" a named neighbourhood.
@@ -149,6 +149,12 @@
   function matchDistricts(text) { return resolveArea(text).districts; }
   const textMatch = (p, text) => { const q = String(text || '').toLowerCase().replace(/\s+/g, ' ').trim(); return !q || q.length < 3 || (p.name + ' ' + p.street).toLowerCase().indexOf(q) > -1; };
 
+  /* ---- Radius search (optional). o.near = { dist: {id: metres} for every mapped development within the widest radius, radius, pos: {id: 1} for every mapped development, label }.
+   *  Distances are straight-line. A development with no map position can never be inside a radius, so it is counted and named instead of silently dropped. */
+  const nearOn = (o) => !!(o && o.near && o.near.dist);
+  const nearHas = (o, id) => { const d = o.near.dist[id]; return d != null && d <= o.near.radius; };
+  const radiusText = (r) => (r >= 1000 ? String(r / 1000).replace(/\.0$/, '') + ' km' : r + ' m');
+
   /* ---------------------------------------------------------------- unsupported answers */
   /* V10.3.3: the questionnaire's bedroom answer -> Huttons bedroom numbers (5 = "5+"). "3BR + Study / larger" means 3 bedrooms or larger for matching only; our data cannot say whether any home has a study. Not sure / unknown = no bedroom matching. */
   const BED_MAP = { '1br': [1], '2br': [2], '3br': [3], '3br-study': [3, 4, 5], '4br-plus': [4, 5] };
@@ -161,9 +167,11 @@
   function unsupported(a, ctx) {
     a = a || {}; ctx = ctx || {}; const out = [], pr = a.priorities || [], ds = ctx.districts || [];
     const dtxt = ds.length ? (ds.length === 1 ? 'District ' + Number(ds[0]) : 'Districts ' + ds.map(Number).join(' and ')) : '';
-    const dist = (what, card) => ds.length ? 'We narrowed the list to ' + dtxt + ' (generally ' + ds.map((d) => DISTRICT_AREAS[d]).join('; ') + ') because of the area you chose. Our sales data can’t show distance to ' + what + ', so a district is as close as this list gets.'
+    const dist = (what, card) => ctx.near ? nr + ' Our sales data can’t show distance to ' + what + ', so this uses the place you searched, not ' + what + '.' : ds.length ? 'We narrowed the list to ' + dtxt + ' (generally ' + ds.map((d) => DISTRICT_AREAS[d]).join('; ') + ') because of the area you chose. Our sales data can’t show distance to ' + what + ', so a district is as close as this list gets.'
       : ctx.skipped ? 'Our sales data can’t show distance to ' + what + ', and the list isn’t narrowed by area, so it covers all of Singapore.' : 'Our sales data can’t show distance to ' + what + ', so this list doesn’t consider it.';
-    if (a.where === 'areas') out.push({ id: 'areas', title: 'Specific area', text: ds.length ? 'We narrowed the list to ' + dtxt + ' (generally ' + ds.map((d) => DISTRICT_AREAS[d]).join('; ') + '). A district contains places not named here, so this doesn’t reach street or neighbourhood level.' : ctx.skipped ? 'The list isn’t narrowed by area, so it covers all of Singapore.' : 'Choose an area to narrow the list.', card: 'your exact area within the district' });
+    const nr = ctx.near ? 'We listed developments within ' + radiusText(ctx.near.radius) + ' of ' + ctx.near.label + ', measured in a straight line.' : '';
+    if (a.where === 'areas' && nr) out.push({ id: 'areas', title: 'Specific area', text: nr + ' A radius is not a postal district or a neighbourhood boundary.', card: null });
+    else if (a.where === 'areas') out.push({ id: 'areas', title: 'Specific area', text: ds.length ? 'We narrowed the list to ' + dtxt + ' (generally ' + ds.map((d) => DISTRICT_AREAS[d]).join('; ') + '). A district contains places not named here, so this doesn’t reach street or neighbourhood level.' : ctx.skipped ? 'The list isn’t narrowed by area, so it covers all of Singapore.' : 'Choose an area to narrow the list.', card: 'your exact area within the district' });
     if (a.where === 'school') out.push({ id: 'school', title: 'Near a particular school', text: dist('schools'), card: 'how close this is to your school' });
     if (a.where === 'family') out.push({ id: 'family', title: 'Near family', text: dist('where your family lives'), card: 'how close this is to your family' });
     if (a.where === 'work') out.push({ id: 'work', title: 'Near work', text: dist('your workplace'), card: 'how close this is to your workplace' });
@@ -248,8 +256,10 @@
       if (o.freehold && p.tg !== 4) return;
       if (o.regions && o.regions.indexOf(p.seg) < 0) return;      // V10.3.4: Closer to the centre = Core Central + Rest of Central only
       if (!textMatch(p, o.text)) return;
-      const m = matchProject(ix, p, sale, o); if (m) out.push(m);
+      if (nearOn(o) && !nearHas(o, p.id)) return;                  // radius search: mapped and within the radius
+      const m = matchProject(ix, p, sale, o); if (m) { if (nearOn(o)) m.dist = o.near.dist[p.id]; out.push(m); }
     });
+    if (nearOn(o)) return out.sort((x, y) => x.dist - y.dist || compare(x, y));   // radius search: nearest first, then the usual evidence order
     const po = prefOrder(o.prefs, sale, o.regionRank);
     return out.sort(po ? (x, y) => po(x, y) || compare(x, y) : compare);
   }
@@ -374,7 +384,7 @@
   function newCandidates(ix, o) {
     const inv = o.inv, uraAll = {}; if (!o.noWin) eligible(ix, 'new', o).forEach((m) => { uraAll[m.id] = m; });
     const out = [], seen = {};
-    const pass = (rec) => !((o.regions && o.regions.indexOf(rec.seg) < 0) || (o.districts && o.districts.length && o.districts.indexOf(rec.d) < 0) || (o.freehold && rec.tg !== 4) || !textMatch(rec, o.text));
+    const pass = (rec) => !((o.regions && o.regions.indexOf(rec.seg) < 0) || (o.districts && o.districts.length && o.districts.indexOf(rec.d) < 0) || (o.freehold && rec.tg !== 4) || !textMatch(rec, o.text) || (nearOn(o) && !nearHas(o, rec.id)));
     inv.slugs.forEach((slug) => {
       const ip = inv.bySlug[slug], r = recordFor(ix, ip); if (!r || !pass(r.rec)) return;
       const fr = freshness(inv, ip), usable = fr && ip.status === 'ok', m = usable ? invMatch(ip, o) : null, u = uraAll[slug] || null;
@@ -387,7 +397,8 @@
     const po = prefOrder(o.prefs, 'new', o.regionRank);
     // V10.3.2: when a priority is active, a and b (Huttons shows homes around the budget and size) form one band, so the priority orders them together; c and d stay below it. With no priority the four tiers are unchanged.
     const BAND = po ? { a: 0, b: 0, c: 2, d: 3 } : TIER;
-    return out.sort((x, y) => BAND[x.tier] - BAND[y.tier] || (po ? po(x, y) : 0) || (x.tier === 'a' || x.tier === 'b'
+    const nd = (x) => (nearOn(o) ? o.near.dist[x.id] : 0);
+    return out.sort((x, y) => nd(x) - nd(y) || BAND[x.tier] - BAND[y.tier] || (po ? po(x, y) : 0) || (x.tier === 'a' || x.tier === 'b'
       ? SUP_RANK[x.sup.kind] - SUP_RANK[y.sup.kind] || (x.fresh === y.fresh ? 0 : x.fresh === 'fresh' ? -1 : 1) || (x.name < y.name ? -1 : x.name > y.name ? 1 : 0)
       : compare(x.ura, y.ura)));
   }
@@ -477,7 +488,9 @@
     const ans = Object.assign({}, input.answers, { priorities: ((input.answers && input.answers.priorities) || []).filter((p) => p !== 'newer' || eff.on.indexOf('newer') > -1) });   // only a priority that is applied is described as applied
     const types0 = saleTypes(input.openTo), bedSel = bedsFor(input.answers && input.answers.size), beds = inv && types0.indexOf('new') > -1 ? bedSel : null;     // V10.3.3
     if (beds) ans.bedMode = types0.length === 2 ? 'both' : 'new';
-    const un = unsupported(ans, input.loc || { districts: input.districts || [] }), base = { budget: input.budget, cap: input.range && input.range.high > 0 ? input.range.high : null, range: input.range && input.range.high > 0 ? { low: input.range.low, high: input.range.high } : null, pct: input.pct === T.widenBudgetPct ? T.widenBudgetPct : T.budgetPct, lo: input.size.lo, hi: input.size.hi, districts: input.districts || [], freehold: !!input.freehold, text: input.text || '', openTo: input.openTo, prefs: eff.on.slice() };
+    const nearIn = input.near && input.near.dist ? input.near : null;
+    const un = unsupported(ans, Object.assign({}, input.loc || { districts: input.districts || [] }, nearIn ? { near: { label: nearIn.label, radius: nearIn.radius } } : {})), base = { budget: input.budget, cap: input.range && input.range.high > 0 ? input.range.high : null, range: input.range && input.range.high > 0 ? { low: input.range.low, high: input.range.high } : null, pct: input.pct === T.widenBudgetPct ? T.widenBudgetPct : T.budgetPct, lo: input.size.lo, hi: input.size.hi, districts: input.districts || [], freehold: !!input.freehold, text: input.text || '', openTo: input.openTo, prefs: eff.on.slice() };
+    if (nearIn) base.near = nearIn;
     if (beds) { base.beds = beds; base.bedWord = BED_WORDS[input.answers.size]; }
     if (bedSel) base.bedChosen = true;      // V10.3.6: a bedroom was chosen; resale cards say its layout is still to be confirmed
     if (input.sizes) { base.sizes = {}; types0.forEach((s) => { const w = input.sizes[s]; if (w && w.lo > 0 && w.hi > w.lo) base.sizes[s] = { lo: w.lo, hi: w.hi, source: w.source }; }); }      // V10.3.6: one window per sale type
@@ -489,17 +502,23 @@
     const total = types.reduce((a, s) => a + eligibleN[s], 0);
     // 3 resale + 2 new when both qualify; any gap is filled from the other group; one chosen type gets up to 5
     let chosen = {};
-    if (types.length === 1) chosen[types[0]] = takeCapped(lists[types[0]], T.maxCards);
+    if (nearIn) {      // radius search: every match in the radius is listed (nearest first); the first few show, the rest sit under "Show more"
+      const r0 = lists.resale || [], n0 = lists.new || [];
+      if (types.length === 1) chosen[types[0]] = lists[types[0]].slice(0, T.nearFirst);
+      else { let r = r0.slice(0, T.nearResale), n = n0.slice(0, T.nearNew); if (r.length < T.nearResale) n = n0.slice(0, T.nearFirst - r.length); if (n.length < T.nearNew) r = r0.slice(0, T.nearFirst - n.length); chosen = { resale: r, new: n }; }
+    } else if (types.length === 1) chosen[types[0]] = takeCapped(lists[types[0]], T.maxCards);
     else {
       let r = takeCapped(lists.resale, T.bothResale), n = takeCapped(lists.new, T.bothNew);
       if (r.length < T.bothResale) n = takeCapped(lists.new, T.maxCards - r.length);
       if (n.length < T.bothNew) r = takeCapped(lists.resale, T.maxCards - n.length);
       chosen = { resale: r, new: n };
     }
-    const mk = (c) => (inv && c.sale === 'new' ? cardInv(c, forType(base, 'new') || base, un) : resaleDecor(card(c, forType(base, c.sale) || base, un, ix)));
+    const mk0 = (c) => (inv && c.sale === 'new' ? cardInv(c, forType(base, 'new') || base, un) : resaleDecor(card(c, forType(base, c.sale) || base, un, ix)));
+    const mk = (c) => { const x = mk0(c); if (nearIn && nearIn.dist[x.id] != null) x.dist = nearIn.dist[x.id]; return x; };
     const groups = types.map((s) => {
       const g = { sale: s, label: s === 'new' ? NEW_LABEL : 'Resale', note: s === 'new' ? (inv ? NEW_NOTE_INV : NEW_NOTE) : null, eligible: eligibleN[s], cards: (chosen[s] || []).map(mk) };
-      if (inv && types.length === 2) { const all = takeCapped(lists[s], T.moreMax); g.more = all.slice((chosen[s] || []).length).map(mk); }
+      if (nearIn) g.more = lists[s].slice(0, T.nearMax).slice((chosen[s] || []).length).map(mk);
+      else if (inv && types.length === 2) { const all = takeCapped(lists[s], T.moreMax); g.more = all.slice((chosen[s] || []).length).map(mk); }
       if (bedSel) {      // V10.3.6: one muted line under the group heading. New launch says it matches the bedrooms only when every card shown has a confirmed bedroom match.
         const shownCards = g.cards.concat(g.more || []);
         g.sub = s === 'resale' ? GROUP_SUB.resale : !beds ? null : shownCards.every((c) => c.simple && c.simple.badge) ? GROUP_SUB.new : GROUP_SUB.newSome;
@@ -510,13 +529,15 @@
     // Executive Condominiums and cluster housing: the same budget, size and area rules, listed apart from the condominiums (never pooled). A development already listed above
     // (an EC the Huttons inventory covers) is not repeated.
     const listed = {}; groups.forEach((g) => g.cards.concat(g.more || []).forEach((c) => { listed[c.id] = 1; }));
+    const othIds = {};
     const otherTypes = ['ec', 'cluster'].map((cls) => {
       const pool = ix.others && ix.others[cls]; if (!pool || !pool.length) return null;
       const sub = Object.assign({}, ix, { projects: pool }), gs = [];
       types.forEach((s) => {
         const ob = forType(base, s); if (!ob || ob.noWin) return;
         const all = eligible(sub, s, Object.assign({}, ob, { inv: null })).filter((c) => !listed[c.id]);
-        const cards = takeCapped(all, T.bothResale).map((c) => resaleDecor(card(c, ob, un, sub)));
+        all.forEach((c) => { othIds[c.id] = c.name; });
+        const cards = (nearIn ? all.slice(0, T.nearOther) : takeCapped(all, T.bothResale)).map((c) => { const x = resaleDecor(card(c, ob, un, sub)); if (nearIn) x.dist = c.dist; return x; });
         if (cards.length) gs.push({ sale: s, label: s === 'new' ? 'Developer sales' : 'Resale', eligible: all.length, cards });
       });
       return gs.length ? { cls, label: CLS_SECTION[cls], note: CLS_NOTE[cls], groups: gs } : null;
@@ -526,6 +547,31 @@
       dataLine: 'Based on actual sales in the last 12 months (to ' + ymLabel(ix.latest) + ') around your budget and size.',
       orderLine: 'Listed by how much recent evidence there is, not by quality or value.', changes: [], reference: null, noneText: null };
     if (otherTypes.length) out.otherTypes = otherTypes;
+    if (nearIn) {
+      const ids = {}; types.forEach((s) => lists[s].forEach((c) => { ids[c.id] = 1; })); Object.keys(othIds).forEach((id) => { ids[id] = 1; });
+      // Matching developments with no map position can't be placed in a radius: counted, named and listed apart, never silently dropped and never implied to be inside it.
+      // This includes new launches that match on Huttons prices (URA publishes no position for most recent launches).
+      const nb = Object.assign({}, base, { near: null }), miss = {}, inRes = {}, clsOf = {}; ix.projects.concat(ix.otherAll || []).forEach((p) => { inRes[p.id] = 1; }); ['ec', 'cluster'].forEach((k) => ((ix.others && ix.others[k]) || []).forEach((p) => { clsOf[p.id] = k; }));
+      const noteMiss = (c, s, priced) => { const m = miss[c.id] || (miss[c.id] = { id: c.id, name: displayName(c.name), cls: clsOf[c.id] || 'condo', sales: [], priced: false, link: null }); if (m.sales.indexOf(s) < 0) m.sales.push(s); if (priced) m.priced = true; if (!m.link && inRes[c.id]) m.link = '../../research/index.html#/p/' + c.id + '/' + s; };
+      const pools = [['condo', ix.projects]].concat((ix.others && ix.others.ec) ? [['ec', ix.others.ec]] : [], (ix.others && ix.others.cluster) ? [['cluster', ix.others.cluster]] : []);
+      types.forEach((s) => { const ob = forType(nb, s); if (!ob) return; pools.forEach((pl) => {
+        if (pl[0] === 'condo' && ob.inv && s === 'new') newCandidates(ix, ob).forEach((c) => { if (!nearIn.pos[c.id]) noteMiss(c, s, c.tier === 'a' || c.tier === 'b'); });
+        else if (!ob.noWin) eligible(Object.assign({}, ix, { projects: pl[1] }), s, Object.assign({}, ob, { inv: null })).forEach((c) => { if (!nearIn.pos[c.id]) noteMiss(c, s, false); });
+      }); });
+      const unplaced = Object.keys(miss).map((k) => miss[k]).sort((a, b) => (a.priced === b.priced ? 0 : a.priced ? -1 : 1) || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0)), mnames = unplaced.map((m) => m.name);
+      out.near = { radius: nearIn.radius, label: nearIn.label, devs: Object.keys(ids).length, ids: Object.keys(ids), noPos: unplaced.length, noPosNames: mnames.slice(0, 4), unplaced };
+      out.dataLine = 'Based on actual sales in the last 12 months (to ' + ymLabel(ix.latest) + ') around your budget and size, for developments within ' + radiusText(nearIn.radius) + ' of ' + nearIn.label + '.';
+    }
+    /* Upcoming launches with no price evidence in Groundwork (not in the URA index, not in current Huttons inventory): listed apart as possibilities, never as budget matches.
+       input.launches = the launch microsites from data/research/sites.json. With no place chosen all are listed. With a place chosen, only a launch with a verified position (lat, lon) inside the radius is listed; one without a position is never offered as local. */
+    if (types.indexOf('new') > -1 && Array.isArray(input.launches) && input.launches.length) {
+      // Independent of the Huttons layer: a launch is left out only when URA sales or CURRENT Huttons prices already cover it. A missing or expired inventory covers nothing, and never changes budget matching.
+      const known = {}; ix.projects.concat(ix.otherAll || []).forEach((p) => { known[p.id] = 1; }); if (inv) Object.keys(inv.bySlug || {}).forEach((k) => { const ip = inv.bySlug[k]; if (ip.status === 'ok' && freshness(inv, ip)) known[k] = 1; });
+      const all = input.launches.filter((l) => l && l.id && l.name && l.url && !known[l.id]).map((l) => { const placed = !!(nearIn && nearIn.sitePos && nearIn.sitePos[l.id]); return { id: l.id, name: l.name, tagline: l.tagline || '', url: l.url, placed, dist: placed ? nearIn.siteDist[l.id] : null }; });
+      // With a place chosen, only a launch whose verified position is inside the radius is listed; the rest are not offered as local possibilities (out.upcoming.more says some exist, for a discreet link).
+      const items = (nearIn ? all.filter((x) => x.placed && x.dist <= nearIn.radius) : all).sort((a, b) => (a.dist || 0) - (b.dist || 0) || (a.name < b.name ? -1 : 1));
+      if (items.length || (nearIn && all.length)) out.upcoming = { near: !!nearIn, more: all.length - items.length, items };
+    }
     if (inv && types.indexOf('new') > -1) {
       out.inventory = { active: true, checkedAt: new Date(inv.fileAt).toISOString() };
       out.dataLine = 'Based on actual URA sales in the last 12 months (to ' + ymLabel(ix.latest) + ') around your budget and size, plus a check of current Huttons inventory where we could make one. This is a starting list, not a recommendation.';
@@ -542,10 +588,10 @@
         ? 'Closer to the centre: Core Central and Rest of Central regions only' + (types.some((sl) => !base.prefs.some((q) => PREF_CMP[q] && (q !== 'newer' || sl === 'resale'))) ? ', Core Central first.' : '.')
         : '';
     }
-    if (eff.on.indexOf('newer') > -1) say.newer = 'Newer building: resale homes are listed by lease start year, newest first. Lease start is not the completion year.';
+    if (eff.on.indexOf('newer') > -1 && !nearIn) say.newer = 'Newer building: resale homes are listed by lease start year, newest first. Lease start is not the completion year.';
     if (eff.on.indexOf('space') > -1) say.space = input.size.mixed ? 'More space: slightly larger sizes are included, and larger sizes are listed first.' : 'More space: sizes up to ' + num(input.size.hi) + ' sqft are included, and larger sizes are listed first.';
     if (beds && say.space) say.space = types0.length === 2 ? say.space + ' New launch: larger homes of your bedroom choice come first.' : 'More space: larger homes of your bedroom choice are listed first.';   // V10.3.3
-    eff.on.forEach((p) => effect.push(say[p]));      // in the order the buyer chose them
+    eff.on.forEach((p) => { if (say[p]) effect.push(say[p]); });      // in the order the buyer chose them
     eff.off.forEach((o) => {
       if (o.why === 'soft') effect.push('Closer to the centre was removed for this search: all regions are included.');
       else if (o.why === 'area') effect.push('Closer to the centre wasn’t applied: the area you chose already sets the location.');
@@ -563,6 +609,8 @@
     if (beds) out.orderLine = out.orderLine.replace('whether your budget sits within the range currently shown in Huttons', 'whether Huttons currently shows homes of the bedrooms you chose around your budget').replace('whether Huttons currently shows homes around your budget and size', 'whether Huttons currently shows homes of the bedrooms you chose around your budget');   // V10.3.3
 
     const asText = (n) => n + (n === 1 ? ' development' : ' developments');
+    // radius search: the next radius up that adds at least one development
+    const widerRadius = (b, have) => { for (const r of T.radii) { if (r <= b.near.radius) continue; const n = count(ix, Object.assign({}, b, { near: Object.assign({}, b.near, { radius: r }) })); if (n > have) return { id: 'radius-' + r, label: 'Widen to ' + radiusText(r), count: n, text: asText(n) }; } return null; };
     // V10.3.4: one-click ways to broaden a search that a hard requirement has narrowed. Offered only when they would add results; nothing is ever applied automatically.
     const relax = [];
     if (state === 'none' || state === 'few') {
@@ -574,21 +622,28 @@
       const alts = [];
       const sz = count(ix, Object.assign({}, base, { lo: base.lo - T.sizePad, hi: base.hi + T.sizePad, sizes: padSizes(base.sizes, T.sizePad) })); if (sz > total) alts.push({ id: 'size', label: input.size.mixed ? 'Include nearby sizes' : 'Include nearby sizes (' + sizeText(base.lo - T.sizePad, base.hi + T.sizePad) + ')', count: sz, text: asText(sz) });
       const bd = count(ix, Object.assign({}, base, { pct: T.widenBudgetPct })); if (bd > total) alts.push({ id: 'budget', label: 'Widen the budget range to ±15%', count: bd, text: asText(bd) });
-      if (base.districts.length || base.text) { const ar = count(ix, Object.assign({}, base, { districts: [], text: '' })); if (ar > total) alts.push({ id: 'area', label: 'Look across all of Singapore', count: ar, text: asText(ar) }); }
+      if (base.districts.length || base.text || base.near) { const ar = count(ix, Object.assign({}, base, { districts: [], text: '', near: null })); if (ar > total) alts.push({ id: 'area', label: 'Look across all of Singapore', count: ar, text: asText(ar) }); }
+      if (base.near) { const w = widerRadius(base, total); if (w) alts.unshift(w); }
       out.changes = relax.concat(alts);
-      out.fewText = 'Only ' + total + (total === 1 ? ' development' : ' developments') + (base.districts.length || base.text ? ' in this area' : '') + ' had enough recent sales to list.' + (alts.length ? ' You can change one thing to see more:' : '');
+      out.fewText = 'Only ' + total + (total === 1 ? ' development' : ' developments') + (base.near ? ' within ' + radiusText(base.near.radius) : base.districts.length || base.text ? ' in this area' : '') + ' had enough recent sales to list.' + (alts.length ? ' You can change one thing to see more:' : '');
     }
     if (state === 'none') {
-      const area = base.districts.length ? ' in ' + (base.districts.length === 1 ? 'District ' + Number(base.districts[0]) : 'these districts') : base.text ? ' matching “' + base.text + '”' : '';
+      const area = base.near ? ' within ' + radiusText(base.near.radius) + ' of ' + base.near.label : base.districts.length ? ' in ' + (base.districts.length === 1 ? 'District ' + Number(base.districts[0]) : 'these districts') : base.text ? ' matching “' + base.text + '”' : '';
       let t = 'No development' + area + ' had at least ' + T.minSales + ' sales of homes of ' + (input.size.mixed ? 'the sizes that typically sold' : sizeText(base.lo, base.hi)) + ' in the last 12 months at prices near ' + m2(base.budget) + '.';
       if (input.typical && input.typical.lo && !(input.size.source === 'inferred')) t += ' Around ' + m2(base.budget) + ', the homes that sold were typically about ' + sizeText(input.typical.lo, input.typical.hi) + ' (see above).';
       out.noneText = t;
       // reference: the lowest budget (in $50k steps, up to +50%) at which at least 3 developments qualify, with every other choice unchanged
       for (let b = base.budget + T.referenceStep; b <= base.budget * (1 + T.referenceMaxUp); b += T.referenceStep) { if (count(ix, Object.assign({}, base, { budget: b, cap: null, range: null })) >= T.minSales) { out.reference = { budget: b, text: 'For reference, at about ' + m2(b) + ' we did find developments with enough sales of that size.' }; break; } }
-      const widerArea = (base.districts.length || base.text) ? count(ix, Object.assign({}, base, { districts: [], text: '' })) : 0;
+      const widerArea = (base.districts.length || base.text || base.near) ? count(ix, Object.assign({}, base, { districts: [], text: '', near: null })) : 0;
       if (widerArea >= T.minSales) out.changes = [{ id: 'area', label: 'Look across all of Singapore', count: widerArea, text: asText(widerArea) }];
+      if (base.near) {      // simple ways forward: a wider radius, or a wider budget range
+        const ch = [], w = widerRadius(base, 0); if (w) ch.push(w);
+        if (base.pct !== T.widenBudgetPct) { const bd = count(ix, Object.assign({}, base, { pct: T.widenBudgetPct })); if (bd > 0) ch.push({ id: 'budget', label: 'Widen the budget range to ±15%', count: bd, text: asText(bd) }); }
+        out.changes = ch.concat(out.changes);
+      }
       if (base.regions || base.freehold || base.beds) { out.noneText = 'No matches found with all your selections.'; out.reference = null; out.constraintNone = true; out.changes = relax.concat(out.changes); }
     }
+    if (nearIn) out.orderLine = 'Nearest first, by straight-line distance, then by how much recent evidence there is. Not by quality or value.';
     return out;
   }
 
@@ -605,6 +660,7 @@
     'Closer to the centre limits the list to the Core Central and Rest of Central regions, using URA’s region classification. It is not a measure of physical distance. Core Central is listed before Rest of Central unless another priority orders the list.',
     'If freehold or a longer tenure was a priority, only freehold and leases of 900 years or more are shown, and you can remove that filter.',
     'Area filters use postal districts. If you told us where you want to be, we suggest a district and ask you to confirm it before it is used; places that sit in more than one district, or that we don’t recognise, are left for you to choose. The area names are general: a district contains places not named. We don’t match schools, workplaces, family locations, exact distances or neighbourhoods.',
+    'Near a place: if you chose a road, MRT station, neighbourhood or development, only developments within your radius are listed, nearest first. Distances are straight-line (as the crow flies), not walking or driving distance. A road is measured from one point on it and a neighbourhood from its centre. Developments with no map position can’t be placed in a radius, so we say how many matched but are left out.',
     'Where a new launch card says “Current availability not confirmed”, URA’s data can’t tell us whether the developer still has units to sell. Where we also check Huttons inventory, a card with no current match for your size and budget says the same. That isn’t the same as there being none.',
     '“Does this suit me?” and “Compare these with Ken” open WhatsApp with a message ready to send. It names the project or projects and includes your budget, the size range if you typed one, and the district if you confirmed one. Nothing from Huttons or URA is included, and you can edit it before sending.',
     'This is a shortlist of developments worth investigating. It is not a recommendation or a valuation, and it doesn’t show what is for sale now or its asking price.',
@@ -625,7 +681,7 @@
     return { budget_band: budgetBand, result_bucket: bucket(res.shown), size_source: res.size.source, area_filter: !!(res.filters.districts.length || res.filters.text), sale_groups: res.groups.map((g) => g.sale).join('+') || 'none' };
   }
 
-  return { VERSION, T, DISTRICT_AREAS, AREA_ALIASES, AREA_CHOICES, NEW_LABEL, NEW_NOTE, NEW_NOTE_INV, resolveArea, districtLabel, districtShort, BASE_NOT_EVAL, METHOD, METHOD_INV, ANALYTICS_KEYS, HUT,
+  return { VERSION, T, radiusText, DISTRICT_AREAS, AREA_ALIASES, AREA_CHOICES, NEW_LABEL, NEW_NOTE, NEW_NOTE_INV, resolveArea, districtLabel, districtShort, BASE_NOT_EVAL, METHOD, METHOD_INV, ANALYTICS_KEYS, HUT,
     prepareInventory, freshness, invMatch, bedsFor, effectivePrefs, prefOrder, support, newCandidates, whenText, handoffMessage, askEvent, typeNoun,
     displayName, prepare, inferSize, sizeWindow, sizeWindows, BED_WORDS, GROUP_SUB, matchDistricts, unsupported, notEvaluated, matchProject, eligible, shortlist, count, compare, why, card, analytics, bucket, m2, p2, num, sizeText, ymLabel, monthsBetween };
 });

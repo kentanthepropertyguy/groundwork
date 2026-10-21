@@ -304,3 +304,55 @@ body.lg .kpe-sec h2{ font-size:30px; }
 body.lg .lg-pick .kpr-sugg-h{ margin:14px 0 0; font-size:14px; font-weight:600; color:var(--kpt-muted); letter-spacing:0; text-transform:none; }
 body.lg .lg-pick .kpr-note{ margin:0; font-size:13px; color:var(--kpt-muted); line-height:1.5; }
 body.lg .lg-pick ul.kpr-results[role=list]{ background:var(--kpt-grey); border-radius:22px; padding:8px; border:0; box-shadow:none; }
+
+/* ==========================================================================
+   Phase 2 (Oct 2026): Research, answer first. Presentation only; scoped to the Research page (body.kpr).
+   One heading scale for every Research view (landing, development, comparison): 44px on desktop, 32px on phones, the scale the newer pages use.
+   The development page leads with its name, type and typical price; background and method sit lower or in disclosures.
+   ========================================================================== */
+body.kpr .lg-hero h1, body.kpr .lg-hero h1.lg-name, body.kpr .lg-hero h1.md, body.kpr .lg-hero h1.xl{ font-size:44px; line-height:1.08; letter-spacing:-.03em; }
+body.kpr .lg-hero{ padding:40px 22px 44px; }
+body.kpr .lg-band{ padding:56px 22px; }
+body.kpr .lg-band.tight{ padding-top:40px; padding-bottom:40px; }
+body.kpr .lg-head h2{ font-size:32px; line-height:1.12; }
+body.kpr .lg-pc h2{ font-size:28px; }
+body.kpr .lg-pc .big{ font-size:48px; }
+
+/* the development page header: left aligned, one column, the answer inside the first screen */
+body.kpr .lg-hero--ans{ text-align:left; padding-top:24px; padding-bottom:36px; }
+body.kpr .lg-hero--ans .lg-wrap{ justify-items:stretch; gap:16px; max-width:760px; }
+body.kpr .lg-hero--ans .lg-back{ justify-self:start; }
+body.kpr .lg-hero--ans .lg-id{ display:grid; gap:6px; }
+body.kpr .lg-hero--ans .lg-idline{ font-size:15px; font-weight:500; color:var(--kpt-muted); display:flex; flex-wrap:wrap; align-items:center; gap:4px 0; }
+body.kpr .lg-hero--ans .lg-cls{ background:#F3EBD8; color:#6F5415; border-radius:var(--kpt-pill); padding:3px 10px; font-size:13px; font-weight:600; margin-right:8px; }
+body.kpr .lg-hero--ans .lg-cls[data-lg-cls="condo"]{ background:var(--kpt-grey); color:var(--kpt-body); }
+body.kpr .lg-hero--ans .lg-center, body.kpr .lg-hero--ans .lg-fine{ text-align:left; justify-self:start; }
+body.kpr .lg-ans{ background:var(--kpt-grey); border-radius:var(--kpt-radius); padding:20px 22px; display:grid; gap:8px; justify-items:start; }
+body.kpr .lg-ans-k{ font-size:14px; font-weight:600; color:var(--kpt-muted); line-height:1.35; margin:0; }
+body.kpr .lg-ans-main{ margin:0; }
+body.kpr .lg-ans-v{ font-size:44px; font-weight:700; letter-spacing:-.035em; line-height:1.05; color:var(--kpt-ink); font-variant-numeric:tabular-nums; }
+body.kpr .lg-ans-v small{ font-size:17px; font-weight:500; letter-spacing:0; color:var(--kpt-muted); }
+body.kpr .lg-ans-v.txt{ font-size:24px; letter-spacing:-.02em; line-height:1.2; }
+body.kpr .lg-ans .lg-pill{ font-size:14px; }
+body.kpr .lg-ans .lg-fine{ max-width:62ch; }
+body.kpr .lg-hero--ans .lg-sizes{ justify-items:start; }
+body.kpr .lg-hero--ans .lg-chips{ justify-content:flex-start; }
+body.kpr .lg-hero--ans .lg-sizeform{ justify-content:flex-start; }
+body.kpr .lg-hero--ans .lg-sizeform .err, body.kpr .lg-hero--ans #sizeNote{ text-align:left !important; }
+body.kpr .lg-hero--ans .lg-acts{ margin:0; max-width:none; display:flex; flex-wrap:wrap; gap:8px; }
+body.kpr .lg-hero--ans .lg-act{ display:inline-flex; flex-direction:row; align-items:center; justify-items:initial; padding:0 16px; min-height:44px; border-radius:var(--kpt-pill); gap:8px; font-size:14px; white-space:nowrap; }
+body.kpr .lg-hero--ans .lg-run{ margin:0 !important; text-align:left; max-width:62ch; }
+body.kpr .lg-hero--ans .lg-facts{ max-width:62ch; }
+body.kpr .lg-hero--ans .kpr-onmap{ margin:0; }
+@media (max-width:719px){
+  body.kpr .lg-hero h1, body.kpr .lg-hero h1.lg-name, body.kpr .lg-hero h1.md, body.kpr .lg-hero h1.xl{ font-size:32px; line-height:1.1; }
+  body.kpr .lg-hero{ padding:28px 16px 32px; }
+  body.kpr .lg-hero--ans{ padding-top:14px; padding-bottom:28px; }
+  body.kpr .lg-band{ padding:36px 16px; }
+  body.kpr .lg-band.tight{ padding-top:28px; padding-bottom:28px; }
+  body.kpr .lg-head h2{ font-size:24px; }
+  body.kpr .lg-pc h2{ font-size:22px; } body.kpr .lg-pc .big{ font-size:36px; }
+  body.kpr .lg-ans{ padding:16px 16px; border-radius:18px; }
+  body.kpr .lg-ans-v{ font-size:38px; } body.kpr .lg-ans-v.txt{ font-size:20px; }
+  body.kpr .lg-hero--ans .lg-act{ padding:0 14px; min-height:42px; }
+}

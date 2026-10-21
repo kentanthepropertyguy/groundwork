@@ -163,3 +163,13 @@ body.kpm{margin:0;background:#fff;color:var(--gw-ink);font-family:var(--gw-font)
   .kpm .rr{grid-template-columns:58px 76px 1fr auto;gap:6px;font-size:11.5px}
   .kpm .tilefail{font-size:11.5px;padding:8px 10px;top:72px}
 }
+
+/* (i) help: a small round button; its text opens in one floating tip (hover or focus on a desktop, tap on a phone) */
+.gwi-w{display:inline-flex!important;vertical-align:middle;margin:0 0 0 6px!important;font-size:inherit!important;color:inherit!important}
+.gwi-t{display:none!important}
+.gwi-w .gwi{position:relative;width:18px;height:18px;padding:0;border:1px solid #9AA3B5;border-radius:50%;background:#fff;color:#4A5568;font:italic 700 11px/1 Georgia,'Times New Roman',serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.gwi-w .gwi::after{content:"";position:absolute;inset:-13px}
+.gwi-w .gwi:hover,.gwi-w .gwi:focus-visible,.gwi-w .gwi[aria-expanded="true"]{background:#14203F;border-color:#14203F;color:#fff;outline:none}
+.gwi-w .gwi:focus-visible{box-shadow:0 0 0 3px rgba(46,79,209,.35)}
+.gwi-tip{position:fixed;z-index:5000;box-sizing:border-box;padding:10px 12px;background:#14203F;color:#fff;border-radius:10px;box-shadow:0 10px 28px rgba(20,32,63,.28);font:400 13px/1.45 system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;pointer-events:none}
+
