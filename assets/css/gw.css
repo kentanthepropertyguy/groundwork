@@ -651,3 +651,32 @@ body.gw-legacy .gw-strip-host{max-width:760px;padding:0}
 
 @media (min-width:720px){.gw-tg-q .gw-tls{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .gw-paths + .gw-jres{margin-top:18px !important}
+
+/* ---- One page-head scale, one form style, one Ken band (every page that uses the shared hero) ----
+   Page headings are 44px (32px on a phone), left-aligned, with a 17px lead; fields are 12px-radius; the Ken band is a compact strip. */
+.gw-h1-s,.gw-launch .gw-h1-l{font-size:44px;line-height:1.05}
+.gw-hero-s{padding:40px 0 14px}
+.gw-hero.gw-hero-s .gw-wrap{justify-items:start;text-align:left;gap:12px}
+.gw-hero-s .gw-center{margin-left:0;margin-right:0;text-align:left}
+.gw-hero-s .gw-lead{font-size:17px;max-width:56ch}
+body[data-view="directory"] .kpe-hero .kpt-h1{font-size:44px;line-height:1.05;letter-spacing:-.04em}
+body[data-view="directory"] .kpe-hero .kpt-lede{font-size:17px;max-width:56ch}
+.gw-fld input,.gw-fld select{border-radius:12px;font-size:16px;min-height:48px}
+.gw-ken{padding:36px 0}
+.gw-ken .in{grid-template-columns:88px 1fr;gap:24px}
+.gw-ken img{width:88px;height:88px}
+.gw-ken .t{gap:8px}
+.gw-ken h2{font-size:24px;line-height:1.15}
+.gw-ken .gw-sub{font-size:16px}
+/* Property values & market prices: the entry is the search itself, in the same flat column as Buyer Search */
+.gw-jwrap,.gw-tdir{max-width:1040px}   /* content lines up with the heading above it */
+.gw-jres{text-align:left}
+body[data-view="worth"] .gw-jsec{padding:6px 0 48px}
+body[data-view="worth"] .gw-vx{border:0;border-radius:0;padding:0;background:none;max-width:720px}
+@media (max-width:719px){
+  .gw-h1-s,.gw-launch .gw-h1-l{font-size:32px;line-height:1.1}
+  .gw-hero-s{padding:22px 0 8px}.gw-hero-s .gw-lead{font-size:16px}
+  body[data-view="directory"] .kpe-hero .kpt-h1{font-size:32px}
+  .gw-ken{padding:28px 0}.gw-ken .in{grid-template-columns:64px 1fr;gap:14px;align-items:start}.gw-ken img{width:64px;height:64px}.gw-ken h2{font-size:20px}
+  body[data-view="worth"] .gw-jsec{padding:4px 0 32px}
+}

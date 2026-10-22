@@ -253,6 +253,38 @@ try:
     page.tap('.bs details[data-sx=pr] > summary'); page.wait_for_timeout(200)
     check('phone: a section opens inside the scrolling sheet', page.locator('.bs details[data-sx=pr][open]').count() == 1 and page.evaluate("document.documentElement.scrollWidth <= innerWidth"))
     real = [e for e in errs if 'onemap' not in e.lower()]; check('phone: no console errors with layers', not real, real[:3]); ctx.close()
+    # ---------------------------------------------------------------- first view and position
+    print('first view and position')
+    FRAME = """(() => { const A = KPT_MAP_APP, m = A.view.get(), sz = m.getSize(), xs = [], ys = [];
+      A.M.PM.forEach(p => { if (typeof p.lat === 'number') { const q = m.latLngToContainerPoint([p.lat, p.lon]); xs.push(q.x); ys.push(q.y); } });
+      xs.sort((a, b) => a - b); ys.sort((a, b) => a - b); const lo = Math.floor(xs.length * .02), hi = Math.floor(xs.length * .98), c = m.getCenter();
+      return { z: m.getZoom(), box: [xs[lo], ys[lo], xs[hi], ys[hi]], w: sz.x, h: sz.y, c: [c.lat, c.lng] }; })()"""
+    for nm, vw, vh, mob in (('desktop 1440', 1440, 900, False), ('laptop 1280', 1280, 720, False), ('wide 1920', 1920, 1080, False), ('phone 390', 390, 844, True)):
+        kw = dict(viewport={'width': vw, 'height': vh}); kw.update(dict(device_scale_factor=2, has_touch=True, is_mobile=True) if mob else {})
+        ctx = br.new_context(**kw); page, errs = fresh(ctx); open_(page); page.wait_for_timeout(600); f = page.evaluate(FRAME)
+        bw, bh = f['box'][2] - f['box'][0], f['box'][3] - f['box'][1]
+        usable_w = f['w'] - (20 + 20 if mob else 20 + 360)
+        check(f'{nm}: the first view shows where the homes are, filling the usable map rather than a corner of it', bw >= 0.7 * usable_w and f['box'][0] >= -2 and f['box'][2] <= f['w'] + 2 and f['box'][1] >= 60 and f['box'][3] <= f['h'] - (120 if mob else 40), f)
+        if not mob: check(f'{nm}: and sits left of the results card, clear of it', f['box'][2] <= f['w'] - 340, f)
+        check(f'{nm}: the zoom is never below the basemap\'s lowest level', f['z'] >= 11, f['z']); ctx.close()
+    # a direct link opens on the place, with its ring in view, on a phone as well as on a desktop
+    for nm, vw, vh, mob in (('desktop', 1440, 900, False), ('phone', 390, 844, True)):
+        kw = dict(viewport={'width': vw, 'height': vh}); kw.update(dict(device_scale_factor=2, has_touch=True, is_mobile=True) if mob else {})
+        for hsh in ('#p=jadescape&r=1000', '#pl=mrt%3AToa+Payoh+MRT', '#pl=road%3ASpringwood+Crescent+%28Queenstown%29', '#pl=area%3ABishan'):
+            ctx = br.new_context(**kw); page, errs = fresh(ctx); open_(page, hsh); page.wait_for_timeout(1200)
+            g = page.evaluate("(() => { const r = document.querySelector('.leaflet-overlay-pane path[stroke-dasharray]'); const b = r ? r.getBoundingClientRect() : null; const sh = document.querySelector('.dp, .bs').getBoundingClientRect(); return { z: KPT_MAP_APP.view.get().getZoom(), ring: !!b, l: b && b.left, r: b && b.right, t: b && b.top, bt: b && b.bottom, sheetTop: sh.top, sheetLeft: sh.left, vw: innerWidth }; })()")
+            fits = g['ring'] and ((g['l'] >= -2 and g['r'] <= g['vw'] + 2) if mob else (g['r'] <= g['sheetLeft'] + 2)) and (g['bt'] <= g['sheetTop'] + 2 if mob else True)
+            check(f'{nm}: {hsh}: a direct link centres and zooms to the place, and its whole ring is visible', fits, g); ctx.close()
+    # Back from Research puts the map where it was; a fresh link frames normally
+    for nm, vw, vh, mob in (('desktop', 1440, 900, False), ('phone', 390, 844, True)):
+        kw = dict(viewport={'width': vw, 'height': vh}); kw.update(dict(device_scale_factor=2, has_touch=True, is_mobile=True) if mob else {})
+        ctx = br.new_context(**kw); page, errs = fresh(ctx); page.goto(URL + '#p=jadescape&r=1000'); page.wait_for_function('window.KPT_MAP_APP && window.KPT_MAP_APP.evReady', timeout=20000); page.wait_for_timeout(900)
+        f0 = page.evaluate(FRAME); page.evaluate("(() => { const m = KPT_MAP_APP.view.get(); m.panBy([90, -60], { animate: false }); m.setZoom(m.getZoom() + 1, { animate: false }); })()")
+        page.wait_for_function("sessionStorage.getItem('kpt.map.pos') && JSON.parse(sessionStorage.getItem('kpt.map.pos')).z === KPT_MAP_APP.view.get().getZoom()", timeout=5000); moved = page.evaluate(FRAME)
+        page.goto(URL + '../'); page.wait_for_timeout(300); page.go_back(); page.wait_for_function('window.KPT_MAP_APP && window.KPT_MAP_APP.evReady', timeout=20000); page.wait_for_timeout(900); back = page.evaluate(FRAME)
+        check(f'{nm}: coming back from Research keeps the map position the visitor left it in', abs(back['z'] - moved['z']) < 0.01 and abs(back['c'][0] - moved['c'][0]) < 0.0005 and abs(back['c'][1] - moved['c'][1]) < 0.0005 and 'Jadescape' in txt(page, '.dp h2, .bs h2'), (moved, back))
+        page.goto('about:blank'); page.goto(URL + '#p=jadescape&r=1000'); page.wait_for_function('window.KPT_MAP_APP && window.KPT_MAP_APP.evReady', timeout=20000); page.wait_for_timeout(900); fresh_ = page.evaluate(FRAME)
+        check(f'{nm}: a fresh link to the same place frames the place again, not the old position', abs(fresh_['z'] - f0['z']) < 0.01 and abs(fresh_['c'][0] - f0['c'][0]) < 0.0005, (f0, fresh_)); ctx.close()
     br.close()
 finally:
     srv.terminate()

@@ -254,14 +254,15 @@
   const sheetH = () => (($('.bs') || {}).offsetHeight || 300) + 16;
   const DEVPAD = (m) => m ? { tl: [28, S.more && !S.min ? 16 : 84], br: [28, sheetH()] } : { tl: [48, 84], br: [420, 70] };
   const mapProps = (fit) => Object.assign(mapProps1(fit), { layers: S.layers });
+  const evOK = () => { for (const k in M.EV) return true; return false; };   // the prices have arrived, so the card (and the sheet's height) is final
   function mapProps1(fit) {
     const md = mode(), m = narrow(), pad = DEVPAD(m);
     if (md === 'start' || (md === 'dev' && !M.BY[S.proj].pos)) return { keep: md === 'dev', key: 'start|' + (m ? 'm' : 'd'), projects: M.PM, selected: null, cmp: [], amen: [], world: true, fit, minZoom: 11, pad: m ? { tl: [20, 84], br: [20, (($('.bs') || {}).offsetHeight || 150) + 16] } : { tl: [20, 76], br: [360, 60] } };
     if (md === 'place') {
       const d = M.placeData(S.place, S.pr); if (!d) return { keep: false, key: 'start|' + (m ? 'm' : 'd'), projects: M.PM, selected: null, cmp: [], amen: [], world: true, fit, minZoom: 11, pad: m ? { tl: [20, 84], br: [20, (($('.bs') || {}).offsetHeight || 150) + 16] } : { tl: [20, 76], br: [360, 60] } };   // a place not found (an old link, or the road files still loading): the whole island, never an error
-      if (d.t === 'area') return { key: 'a|' + S.place.n + '|' + (m ? 'm' + (S.more ? 'x' : '') + (S.min ? 'n' : '') : 'd'), projects: M.PM, selected: null, cmp: [], amen: [], bounds: d.bounds, areaRings: d.a.rings, place: { lat: null, chipAt: d.centre, label: d.title, sub: 'Neighbourhood' }, fit, minZoom: 11, pad };
+      if (d.t === 'area') return { key: 'a|' + S.place.n + '|' + (m ? 'm' + (S.more ? 'x' : '') + (S.min ? 'n' : '') : 'd') + (evOK() ? '' : '|wait'), ready: evOK(), projects: M.PM, selected: null, cmp: [], amen: [], bounds: d.bounds, areaRings: d.a.rings, place: { lat: null, chipAt: d.centre, label: d.title, sub: 'Neighbourhood' }, fit, minZoom: 11, pad };
       const list = d.list.slice(0, m && !S.more ? 3 : 6), cmp = list.map((x) => x.p.n), dl = d.r / 111320, dn = d.r / (111320 * Math.cos(d.lat * Math.PI / 180));
-      return { key: 'p|' + S.place.t + S.place.n + '|' + d.r + '|' + (m ? 'm' + (S.more ? 'x' : '') + (S.min ? 'n' : '') : 'd'), projects: M.PM, selected: null, cmp, amen: [], circle: { lat: d.lat, lon: d.lon, r: d.r }, place: { lat: d.lat, lon: d.lon, label: d.title, sub: d.t === 'mrt' ? 'MRT station' : d.s.lab }, fitPts: [[d.lat, d.lon], [d.lat + dl, d.lon], [d.lat - dl, d.lon], [d.lat, d.lon + dn], [d.lat, d.lon - dn]], zoom: 15, minZoom: 11, fit, pad };
+      return { key: 'p|' + S.place.t + S.place.n + '|' + d.r + '|' + (m ? 'm' + (S.more ? 'x' : '') + (S.min ? 'n' : '') : 'd') + (evOK() ? '' : '|wait'), ready: evOK(), projects: M.PM, selected: null, cmp, amen: [], circle: { lat: d.lat, lon: d.lon, r: d.r }, place: { lat: d.lat, lon: d.lon, label: d.title, sub: d.t === 'mrt' ? 'MRT station' : d.s.lab }, fitPts: [[d.lat, d.lon], [d.lat + dl, d.lon], [d.lat - dl, d.lon], [d.lat, d.lon + dn], [d.lat, d.lon - dn]], zoom: 15, minZoom: 11, fit, pad };
     }
     return mapProps0(fit);
   }
@@ -273,11 +274,11 @@
     const pts = [shown, ...cmp].map((n) => [M.BY[n].lat, M.BY[n].lon]).concat(near);
     const c = M.BY[shown];
     if (S.pr !== 1000) { const dl = S.pr / 111320, dn = S.pr / (111320 * Math.cos(c.lat * Math.PI / 180)); pts.push([c.lat + dl, c.lon], [c.lat, c.lon + dn]); }   // a radius the visitor chose is shown whole
-    return { key: 'f|' + shown + '|' + S.radius + '|' + S.pr + '|' + (m ? 'm' + (S.more ? 'x' : '') + (S.min ? 'n' : '') : 'd'), projects: M.PM, selected: shown, cmp, amen, circle: { lat: c.lat, lon: c.lon, r: S.pr, soft: true }, hl: S.hl, fitPts: pts, zoom: 15, minZoom: 14, fit: !!fit, pad };
+    return { key: 'f|' + shown + '|' + S.radius + '|' + S.pr + '|' + (m ? 'm' + (S.more ? 'x' : '') + (S.min ? 'n' : '') : 'd') + (M.EV[shown] ? '' : '|wait'), ready: !!M.EV[shown], projects: M.PM, selected: shown, cmp, amen, circle: { lat: c.lat, lon: c.lon, r: S.pr, soft: true }, hl: S.hl, fitPts: pts, zoom: 15, minZoom: 14, fit: !!fit, pad };
   }
   function mountMap(el) {
     const sh = $('.bs'); if (sh) $('.mapstage').style.setProperty('--shh', sh.offsetHeight + 'px');
-    view.create(el, { onSelect: dotPick, onPlace: placePick });
+    view.create(el, { onSelect: dotPick, onPlace: placePick, persistPos: true });
     const pr = mapProps(true); pr.fit = true; view.update(pr);
   }
   function dotPick(n) { loadProject(n); S.start = false; go(true); }

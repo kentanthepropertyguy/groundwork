@@ -102,6 +102,31 @@
     if (!handoff || !handoff.budget || handoff.budget.high !== S.req.budget) { next.budget = { low: S.req.budget, high: S.req.budget, single: true }; next.edited = true; }
     handoff = next; M.writeHandoff(window.sessionStorage, next);
   }
+  /* The form and its results are two entries of this one page, so Back from the results is the form (with every requirement kept) and Forward is the results again.
+     Only that step makes an entry: editing, zooming, layers, selecting and opening panels never add one. */
+  const hs = () => { try { const st = history.state; return st && (st.kd === 'f' || st.kd === 'r') ? st : null; } catch (e) { return null; } };
+  function setHist(kd, push) {
+    const st = { kd: kd, snap: kd === 'r' ? snapshot() : null };
+    try { if (push) history.pushState(st, ''); else history.replaceState(st, ''); } catch (e) { /* history not available: Back simply leaves the page */ }
+  }
+  function toForm() {
+    destroyMap(); document.body.classList.remove('kd-hasmap'); delete document.body.dataset.kdView; wasStage = false;
+    S.mode = 'entry'; S.edit = false; S.sel = null; S.sheetMin = false; S.lyrOpen = false; S.errBudget = ''; lockPage(false);
+    S.draftBudget = S.req.budget ? money(S.req.budget) : '';
+    if (!(handoff && handoff.budget && handoff.budget.high === S.req.budget)) srcLine = '';   // "From your plan" only while the budget is still the plan's
+    renderAll(); window.scrollTo({ top: 0 });
+  }
+  function toResults(snap) {
+    const go = () => { S.mode = 'results'; S.edit = false; S.shown = {}; S.sel = null; S.lyrOpen = false; renderAll(); persist(); window.scrollTo({ top: 0 }); };
+    if (snap && snap.req) {
+      S.req = Object.assign({}, BLANK, snap.req); S.draftBudget = S.req.budget ? money(S.req.budget) : ''; S.near = null; NR = null; nearErr = ''; S.pendingWhere = '';
+      loadData().then(() => restorePlace(snap.near)).then(go);
+    } else loadData().then(go);
+  }
+  addEventListener('popstate', (e) => {
+    const st = e.state && (e.state.kd === 'f' || e.state.kd === 'r') ? e.state : null; if (!st || !S.ready) return;
+    if (st.kd === 'f') { if (S.mode !== 'entry') toForm(); } else toResults(st.snap);
+  });
   const SIZE_BEDS = { '1br': 1, '2br': 2, '3br': 3, '3br-study': 3, '4br-plus': 4 };
   /** Starting requirements from whatever the buyer arrived with: a saved search, a planner budget, or the answers of the earlier Buy journey (read, never discarded). */
   function initial() {
@@ -435,12 +460,12 @@
   /** A requirement changed: recompute, redraw the results, remember the search. `form` = the form needs to redraw as well (its segmented controls, bedroom note, radius chips). */
   function commit(form) {
     if (S.mode === 'results') { S.shown = {}; if (form) { const keep = document.activeElement && document.activeElement.id; renderForm(); bindInputs(); if (keep && $(keep) && /^kd(Budget|Min|Place)$/.test(keep)) $(keep).focus(); } renderResults(); }
-    persist();
+    persist(); const st = hs(); if (st && st.kd === 'r' && S.mode === 'results') setHist('r', false);
   }
   function show() {
     if (!applyBudget(true)) { const i = $('kdBudget'); if (i) i.focus(); return; }
     $('root').innerHTML = '<p class="kd-load">Loading…</p>';
-    loadData().then(() => { S.mode = 'results'; S.edit = false; S.shown = {}; renderAll(); persist(); const h = $('kdH'); if (h && h.scrollIntoView) window.scrollTo({ top: 0 }); });
+    loadData().then(() => { S.mode = 'results'; S.edit = false; S.shown = {}; renderAll(); persist(); setHist('r', true); const h = $('kdH'); if (h && h.scrollIntoView) window.scrollTo({ top: 0 }); });
   }
   function onClick(e) {
     const card = e.target.closest ? e.target.closest('.kd-card[data-pid]') : null;   // a card (not one of its links or buttons) chooses that development on the map
@@ -499,16 +524,26 @@
   }
   function start() {
     handoff = M.readHandoff(window.sessionStorage);
-    const init = initial();
+    const st = hs();   // coming back to this page through Back, Forward or a reload: the entry says whether it was the form or the results
+    let init = initial();
+    if (st && st.kd === 'r' && st.snap && st.snap.req && st.snap.req.budget) init = { req: Object.assign({}, BLANK, st.snap.req), near: st.snap.near, from: init && init.from };
     if (init) { S.req = Object.assign({}, BLANK, init.req); if (init.req.budget) S.draftBudget = money(init.req.budget); S.view = 'list'; }
-    if (init && init.planner && S.req.budget && D.clean(S.req).budget) {   // a budget from a planner: the buyer chooses area and type first, then Show developments (never straight to islandwide results)
+    const valid = !!(init && S.req.budget && D.clean(S.req).budget);
+    if (valid && init.planner) {   // a budget from a planner: the buyer chooses area and type first, then Show developments (never straight to islandwide results)
       srcLine = 'From your plan: ' + (init.range ? m2(init.range.low) + '–' + m2(init.range.high) + '. The top of the range is filled in as your maximum.' : 'about ' + m2(S.req.budget) + '.');
-      S.mode = 'entry'; renderAll(); loadData(); return;
+      S.mode = 'entry'; renderAll(); loadData(); if (!st) setHist('f', false); S.ready = true; return;
     }
-    if (init && S.req.budget && D.clean(S.req).budget) {
+    if (valid && !(st && st.kd === 'f')) {
       $('root').innerHTML = '<p class="kd-load">Loading…</p>';
-      loadData().then(() => restorePlace(init.near, init.where)).then(() => { S.mode = 'results'; renderAll(); if (!init.near && !init.where) persist(); });
-    } else { S.mode = 'entry'; renderAll(); loadData(); }
+      loadData().then(() => restorePlace(init.near, init.where)).then(() => {
+        S.mode = 'results'; renderAll(); if (!init.near && !init.where) persist();
+        if (!st) { setHist('f', false); setHist('r', true); }   // a saved search opens on its results, with the prefilled form one step back
+        S.ready = true;
+      });
+    } else if (valid) {   // Back to the form: every requirement is still there
+      $('root').innerHTML = '<p class="kd-load">Loading…</p>';
+      loadData().then(() => restorePlace(init.near, init.where)).then(() => { S.mode = 'entry'; if (!(handoff && handoff.budget && handoff.budget.high === S.req.budget)) srcLine = ''; renderAll(); S.ready = true; });
+    } else { S.mode = 'entry'; renderAll(); loadData(); if (!st) setHist('f', false); S.ready = true; }
   }
   document.addEventListener('click', (e) => {
     const b = e.target.closest && e.target.closest('[data-lyr]');
