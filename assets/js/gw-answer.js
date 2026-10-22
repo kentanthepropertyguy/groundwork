@@ -31,7 +31,7 @@
   const nn = (x) => (num(x) !== null && x > 0 ? x : 0);
   const has = (x) => num(x) !== null;
   const round2 = (x) => Math.round(x * 100) / 100;
-  const STEP = 10000;                        // figures are shown rounded DOWN to this
+  const STEP = 1000;                         // figures are shown rounded DOWN to this
   const FLOOR_PRICE = 100000, REF_PRICE = 500000;
   const CEIL_PRICE = Math.min(C.LIMITS.money.max, 50e6);
   const floorStep = (x) => Math.floor(x / STEP + 1e-9) * STEP;
@@ -89,7 +89,7 @@
     out.contrib = out.kind === 'new' && (has(s.saveMo) || has(s.cpfMo));          // monthly amounts given: new launches are then checked
     out.saveMo = out.kind === 'new' ? nn(s.saveMo) : 0; out.cpfMo = out.kind === 'new' ? nn(s.cpfMo) : 0;
     out.checked = out.kind === 'completed' || out.contrib;
-    const c = s.cushion || { months: 6 };
+    const c = s.cushion || { amount: 0 };   // no reserve is held back unless the buyer asks for one ("Set aside" in More options keeps money out of the purchase; a cushion here is an API option only)
     out.cushion = has(c.amount) ? { amount: Math.max(0, c.amount) } : { months: MONTHS.indexOf(c.months) >= 0 || (has(c.months) && c.months > 0) ? c.months : 6 };
     const f = s.flat || {};
     // Ownership, housing loans, monthly mortgage commitments and the sale are four separate answers (Phase B):
@@ -142,7 +142,7 @@
     const prelim = C.progressive({ price: P, age: B.iwaaUse, years: n.years, ratePct: n.ratePct, loans: loansForLtv, kind: 'private', buyers: buyersP });
     if (!prelim.ok) return { ok: false, why: 'rules', prog: prelim };
     // the loan taken is the buyer's preferred loan when it is below what the numbers allow; never above it
-    const incomeCap = n.prefLoan === null ? t.maxLoan : Math.min(t.maxLoan, n.prefLoan);
+    const incomeCap = over.noIncomeCap ? prelim.loanMax : (n.prefLoan === null ? t.maxLoan : Math.min(t.maxLoan, n.prefLoan));   // noIncomeCap: what the cash and CPF support if income were no limit
     const capped = incomeCap < prelim.loanMax - 0.5;
     const prog = capped ? C.progressive({ price: P, age: B.iwaaUse, years: n.years, ratePct: n.ratePct, loans: loansForLtv, kind: 'private', buyers: buyersP, loanCap: incomeCap }) : prelim;
     if (!prog.ok) return { ok: false, why: 'rules', prog: prog };
@@ -193,7 +193,7 @@
   function todayIso() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 
   /* ---------------- the search ---------------- */
-  // greatest price on the $10,000 grid for which test(evaluation) holds (what is shown is this price, so what is shown always passes); null when the floor does not
+  // greatest price on the $1,000 grid for which test(evaluation) holds (what is shown is this price, so what is shown always passes); null when the floor does not
   function maxPrice(n, mode, test, over) {
     const f = (P) => { const x = evaluate(n, mode, P, over); return x.ok && test(x); };
     let lo = Math.ceil(FLOOR_PRICE / STEP), hi = Math.floor(CEIL_PRICE / STEP);
@@ -202,10 +202,18 @@
     while (hi - lo > 1) { const m = Math.floor((lo + hi) / 2); if (f(m * STEP)) lo = m; else hi = m; }
     return lo * STEP;
   }
+  // the exact highest whole-dollar price between a price on the grid (which passes) and the next one up; shown in the breakdown only
+  function exactPrice(n, mode, test, over, base) {
+    const f = (P) => { const x = evaluate(n, mode, P, over); return x.ok && test(x); };
+    let lo = base, hi = base + STEP;
+    while (hi - lo > 1) { const m = Math.floor((lo + hi) / 2); if (f(m)) lo = m; else hi = m; }
+    return lo;
+  }
   const fitsT = (x) => x.fits, comfT = (x) => x.zone === 'comfortable';
   function solve(n, mode, over) {
     const hi = maxPrice(n, mode, fitsT, over);
-    const co = hi === null ? null : maxPrice(n, mode, comfT, over);
+    // with no reserve asked for (the default) every price that fits is also "comfortable", so one search answers both
+    const co = hi === null ? null : (n.cushion.amount === 0 ? hi : maxPrice(n, mode, comfT, over));
     return { highest: hi, comfortable: co };
   }
 
@@ -276,6 +284,13 @@
       return res;
     }
     res.state = 'ok'; res.highest = head.highest; res.comfortable = head.comfortable;
+    // THE answer: the highest price at which every test passes (the cash and CPF, the loan limit, the income-supported loan, the dated payments), less any
+    // reserve the buyer chose to hold back. The three limits below only explain it. They are never alternative headline budgets.
+    res.budget = head.comfortable !== null ? head.comfortable : head.highest;
+    res.limitedBy = limitedByOf(n, basis, res.budget);
+    res.exactBudget = () => { if (res._eb === undefined) { const t0 = head.comfortable !== null && n.cushion.amount !== 0 ? comfT : fitsT; res._eb = exactPrice(n, basis, (x) => t0(x) && x.gap <= 1e-9, undefined, res.budget); } return res._eb; };
+    // the highest price the cash and CPF alone support, as if income were no limit (worked out only when asked for, e.g. by the breakdown)
+    res.fundsPrice = () => { if (res._fp === undefined) res._fp = maxPrice(n, basis, fitsT, { noIncomeCap: true }); return res._fp; };
     res.tenure = tenureInfo(n, ten, basis, head);
     res.options = () => tenureRows(s, n, ten, basis, solveC);
     // 3. the price being looked at: the buyer's own, else the comfortable budget (else the highest). quote(P) re-judges another price without searching again.
@@ -287,6 +302,15 @@
     if (!q0) { res.state = 'invalid'; res.errors = [{ key: 'price', text: 'This price could not be worked out. Please check it.' }]; return res; }
     res.price = tried; res.at = q0.at; res.zone = q0.zone; res.range = q0.range; if (q0.fixes) res.fixes = q0.fixes;
     return res;
+  }
+  // What stops the price rising by one more step, judged on the next price up by taking income (and any loan the buyer chose) out of the test: if the price would then fit,
+  // the income-supported loan (or the chosen loan) is the limit; if not, it is the cash and CPF (with the loan limit, stamp duty and minimum cash) or, when the cash is enough
+  // on paper, a dated payment.
+  function limitedByOf(n, mode, price) {
+    const up = price + STEP, nf = evaluate(n, mode, up, { noIncomeCap: true });
+    if (!nf.ok) return 'funds';
+    if (nf.fits) { const nx = evaluate(n, mode, up); return nx.ok && nx.limit === 'choice' ? 'choice' : 'income'; }
+    return nf.gap <= 0.5 && nf.covered === false ? 'payments' : 'funds';
   }
   /* ---------------- tenure: the suggestion, and every valid alternative ---------------- */
   // The longest loan the suggestion will consider: 30 years and ending by age 75, never shorter than the standard tenure. A planning convention only.

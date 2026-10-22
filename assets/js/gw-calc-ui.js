@@ -51,7 +51,7 @@
     ssd: { path: 'ssd/', title: 'Seller’s Stamp Duty (SSD)', name: 'Selling within 4 years?', tag: 'SSD', short: 'Seller’s Stamp Duty on a private home', h1: 'Selling within 4 years?', intro: 'Whether Seller’s Stamp Duty (SSD) applies when you sell a private home, and how much.', group: 'sell' },
   };
   const EXISTING = {
-    planner: { path: 'planner/', title: 'What can I afford?', name: 'What can I afford?', tag: 'Comfortable budget', short: 'Your comfortable budget and the highest the numbers allow', group: 'buy', icon: 'planner' },
+    planner: { path: 'planner/', title: 'What can I afford?', name: 'What can I afford?', tag: 'Maximum budget', short: 'Your maximum property budget, from your cash, CPF and income', group: 'buy', icon: 'planner' },
     'payment-planner': { path: 'payment-planner/', title: 'Payment timeline', name: 'Payment timeline', tag: 'Payment dates', short: 'See when and how much you need to pay.', group: 'buy', icon: 'payment-planner' },
     'hdb-upgrade': { path: 'hdb-upgrade/', title: 'Can I afford to upgrade from my HDB?', name: 'HDB upgrade planner', tag: 'Direct budget calculation', short: 'Your private-home budget if you sell your flat first', group: 'upgrade' },
     'what-can-i-buy': { path: 'what-can-i-buy/', title: 'What can this budget buy?', name: 'What can this budget buy?', tag: 'Search by budget, area and must-haves', short: 'Developments with recent sales within your budget', group: 'research' },

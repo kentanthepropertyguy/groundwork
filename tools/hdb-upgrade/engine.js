@@ -317,13 +317,13 @@
   function describeAssumptions(A, defaultsApplied) {
     const list = [
       { id: 'incomeCaps', kind: 'modelling', text: `Planning range allows ${Math.round(A.incomeCapLow * 100)}%–${Math.round(A.incomeCapHigh * 100)}% of gross income for all debt repayments.` },
-      { id: 'reserve', kind: 'modelling', text: `$${A.reserve.toLocaleString('en-SG')} is held back as a cash reserve.` },
       { id: 'tenure', kind: 'modelling', text: `Planning loan term is capped at ${A.planningTenureCap} years.` },
       { id: 'rate', kind: 'modelling', text: `Instalments are shown at ${Math.round(A.planningRate * 1000) / 10}% a year.` },
       { id: 'costs', kind: 'modelling', text: 'Selling and purchase costs are our estimates, not government figures.' },
       { id: 'income', kind: 'lender', text: 'Income is counted as entered; lenders may discount variable income.' },
       { id: 'mop', kind: 'default', text: 'Assumes your flat has completed its minimum occupation period.' },
     ];
+    if (A.reserve > 0) list.splice(1, 0, { id: 'reserve', kind: 'modelling', text: `$${A.reserve.toLocaleString('en-SG')} is held back as a cash reserve.` });
     const defaults = {
       residency: 'Assumes all buyers are Singapore Citizens.',
       otherMonthlyDebt: 'Assumes no other monthly debt repayments.',
