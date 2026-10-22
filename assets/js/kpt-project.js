@@ -64,6 +64,8 @@
       const c = q.replace(/ /g, '');
       sdoc.compact.forEach((k, r) => { if (c.length >= 3 && k.indexOf(c) !== -1) score.set(r, 3); });
     }
+    // "The Jadescape" finds Jadescape: a leading "The" is optional (names are kept as URA writes them, with or without it)
+    if (!score.size && /^THE .+/.test(q)) return search(index, sdoc, q.slice(4), opts);
     return Array.from(score.keys())
       .sort((a, b) => score.get(a) - score.get(b) || index.rows[b][N] - index.rows[a][N] || (index.rows[a][F.name] < index.rows[b][F.name] ? -1 : 1))
       .slice(0, limit).map((r) => rowObject(index, r));

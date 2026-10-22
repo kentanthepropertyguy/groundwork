@@ -137,7 +137,7 @@ try:
         def rask(q):
             pg.goto(f'http://127.0.0.1:{P}/research/'); pg.wait_for_selector('#q'); pg.fill('#q', q)
             pg.wait_for_function("(q)=>{const r=document.querySelector('#res');return r&&r.innerText.trim().length>5}", arg=q, timeout=8000); pg.wait_for_timeout(400)
-            return pg.inner_text('#res'), pg.eval_on_selector_all('#res button', 'b=>b.map(x=>x.dataset.launch||x.dataset.id||x.dataset.road||"")')
+            return pg.inner_text('#res'), pg.eval_on_selector_all('#res button:not([data-mapq])', 'b=>b.map(x=>x.dataset.launch||x.dataset.id||x.dataset.road||"")')
         found = {}
         for q in ('serra', 'serra residences', 'the serra residences'):
             t, ids = rask(q); found[q] = ids; shot(pg, f'research-{q.replace(" ", "-")}-{vn}')

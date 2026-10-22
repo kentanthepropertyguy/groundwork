@@ -130,6 +130,24 @@
     if (!PO) throw new Error('kpt-map-core: gw-postal.js must be loaded first');
     m.PC = PO.PC; m.postalCode = PO.code; m.postalValid = PO.valid; m.postalMsg = PO.msg; m.postalState = PO.state; m.lookupPostal = PO.lookup;
 
+    /* ---- HDB resale blocks (data/map/hdb.json): positions only. Prices are never stored here: a block's resale evidence is read from the HDB resale files by gw-hdb.js,
+       with the same calculations Research and Property values use. A block with no verified position is simply not in the file, never placed by a guess. ---- */
+    m.HDBM = null;
+    m.setHdb = (doc) => {
+      if (!doc || !Array.isArray(doc.rows) || !Array.isArray(doc.towns) || !Array.isArray(doc.streets)) return;
+      const byKey = {}, pts = doc.rows.map((r) => { const town = doc.towns[r[2]], street = doc.streets[r[1]], key = town + '/' + String(r[0]).toLowerCase() + '/' + PO.slug(street), o = { key, block: r[0], street, town, lat: r[3], lon: r[4], n: r[5] }; byKey[key] = o; return o; });
+      m.HDBM = { doc, pts, byKey, within: (b) => pts.filter((p) => p.lat >= b.getSouth() && p.lat <= b.getNorth() && p.lon >= b.getWest() && p.lon <= b.getEast()) };
+    };
+    m.hdbTown = (id) => PO.TITLE(String(id).replace(/-/g, ' '));
+    /* "155 bishan st 13", "blk 155": the blocks that match (a block number alone lists a few of that number, with their towns) */
+    m.hdbSearch = (q, max) => {
+      if (!m.HDBM) return [];
+      const x = /^\s*(?:blk|block)?\s*(\d{1,4}[a-z]?)\b\s*(.*)$/i.exec(String(q || '')); if (!x) return [];
+      const blk = x[1].toUpperCase(), rk = PO.roadKey(x[2]), out = [];
+      for (const p of m.HDBM.pts) { if (p.block !== blk) continue; if (rk && PO.roadKey(p.street).indexOf(rk) < 0) continue; out.push(p); if (out.length >= (max || 4)) break; }
+      return out.map((p) => ({ t: 'hdb', n: p.key, label: 'Blk ' + p.block + ' ' + PO.streetName(p.street), sub: 'HDB block · ' + m.hdbTown(p.town) }));
+    };
+
     /* ---- price evidence ---- */
     const cellsOf = (name, mk, win = 0) => EV[name] ? EV[name].mk[mk].filter((c) => c[1] === win).map((c) => ({ bin: c[0], n: c[2], act: c[3], last: c[4], q1: c[5], med: c[6], q3: c[7], pmed: c[8], sub: c[9] })).sort((a, b) => a.bin - b.bin) : [];
     m.cellsOf = cellsOf;
@@ -222,6 +240,7 @@
         ...pick(P.filter((p) => !p.up), (p) => p.n, (p) => ({ t: 'dev', n: p.n, sub: `D${Number(p.district)}${CLS[p.cls].short ? ' · ' + CLS[p.cls].short : ''} · ${p.t12} sale${p.t12 === 1 ? '' : 's'} in 12 months` }), 3, (p) => p.t12),
         ...upPick(t),
         ...pick(AM.schools, (s) => s.n, (s) => ({ t: 'school', n: s.n, sub: s.lab }), 2),
+        ...m.hdbSearch(q, 4),
         ...(roadQuery(t) ? pick(AM.roads, (r) => r.title, (r) => ({ t: 'road', n: r.key, label: r.title, sub: r.area ? 'Road · ' + r.area : 'Road' }), 3, (r) => (r.landed ? 1 : 0)) : [])
       ];
     };
@@ -253,6 +272,12 @@
         const list = devsNear(rd.lat, rd.lon, r);
         const ar = rd.area || areaAt(rd.lat, rd.lon);
         return { t: 'road', title: rd.title, meta: 'Road' + (ar ? ' · ' + ar : ''), s: { lat: rd.lat, lon: rd.lon, lab: 'Road' }, list, r, lat: rd.lat, lon: rd.lon, road: rd, ups: upNear(rd.lat, rd.lon, r) };
+      }
+      if (pl.t === 'hdb') {
+        /* an HDB block: its own position is the centre, so the same radius shows the developments and launches around it */
+        const h = m.HDBM && m.HDBM.byKey[pl.n]; if (!h) return null;
+        const list = devsNear(h.lat, h.lon, r), ar = areaAt(h.lat, h.lon);
+        return { t: 'hdb', title: 'Blk ' + h.block + ' ' + PO.streetName(h.street), meta: 'HDB flat · ' + m.hdbTown(h.town) + (ar && ar.toLowerCase() !== m.hdbTown(h.town).toLowerCase() ? ' · ' + ar : ''), s: { lat: h.lat, lon: h.lon, lab: 'HDB block' }, list, r, lat: h.lat, lon: h.lon, ups: upNear(h.lat, h.lon, r), hdb: h };
       }
       if (pl.t === 'dev') {
         /* a selected development or launch: its own position is the centre, so the same optional radius works (nearby developments, launches and sites). Never a guess: no position, no radius. */

@@ -24,6 +24,9 @@
   const ymAdd = (n, k) => { let y = Math.floor(n / 100), m = n % 100 + k; while (m < 1) { m += 12; y -= 1; } while (m > 12) { m -= 12; y += 1; } return y * 100 + m; };
   const money = (n) => '$' + Math.round(n).toLocaleString('en-US');
   const title = (s) => String(s).toLowerCase().replace(/(^|[\s\-/(])([a-z])/g, (x, a, b) => a + b.toUpperCase());
+  // HDB writes roads short ("BISHAN ST 13"); the Research view spells them out ("Bishan Street 13") with the shared module's streetName
+  const GPM = () => root.GW_POSTAL || (typeof require === 'function' ? (() => { try { return require('./gw-postal.js'); } catch (e) { return null; } })() : null);
+  const streetName = (s) => { const g = GPM(); return g && g.streetName ? g.streetName(s) : title(s); };
   const flatLabel = (t) => /^\d ROOM$/.test(t) ? t[0] + '-room' : title(t);
 
   /* ---------------- pure: HDB comparable resales ---------------- */
@@ -144,6 +147,7 @@
   const tenure = (t) => { if (t === 'FH') return 'Freehold'; const [y, s] = String(t).split('|'); if (!y) return '—'; return +y >= 900 ? y + '-yr' : y + '-yr' + (s ? ' from ' + s : ''); };
 
   /* ---------------- messages (home and plan only; never finances) ---------------- */
+  const hdbViewMsg = (c) => 'Hi Ken, I’m looking at a ' + flatLabel(c.flatType) + ' HDB flat at Blk ' + c.block + ' ' + title(c.street) + '. I’ve looked at recent resales on Groundwork and would like your view.';
   const hdbMsg = (c) => 'Hi Ken, I own a ' + flatLabel(c.flatType) + ' HDB flat at Blk ' + c.block + ' ' + title(c.street) + '. I’ve looked at recent resales on Groundwork and would like your view on what mine could fetch.';
   const landedMsg = (c) => 'Hi Ken, I own ' + LHOUSE[c.ltype] + ' on ' + title(c.street) + '. I’ve looked at recent sales on Groundwork and would like a personalised assessment of my home.';
   const streetMsg = (name, first) => 'Hi Ken, I’m looking at landed homes on ' + title(name) + '. Groundwork found no recorded sales there since ' + ym(first) + '. Could you help me understand prices along this street?';
@@ -189,28 +193,32 @@
   }
   // HDB result. o.path: the visitor is on the "Upgrading from HDB" path, so the next step is offered here, not only at the top.
   function hdbResult(d, c, T, I, r, o) {
-    o = o || {};
-    const where = 'Blk ' + c.block + ' ' + title(c.street), ft = flatLabel(c.flatType), win = ym(I.windowFrom) + ' – ' + ym(I.latestMonth), st = d.level !== 'block';
+    o = o || {}; const ST = o.view ? streetName : title;
+    const where = 'Blk ' + c.block + ' ' + ST(c.street), ft = flatLabel(c.flatType), win = ym(I.windowFrom) + ' – ' + ym(I.latestMonth), st = d.level !== 'block';
+    const yb = o.view ? 'this block' : 'your block', ys = o.view ? 'this street' : 'your street';   // the Research view speaks to a buyer as well as an owner
     let h = '<div class="gw-vx-res" data-vx-level="' + d.level + '"><p class="gw-ex">' + esc(where) + ' · ' + esc(ft) + '</p>';
-    if (d.level === 'block') h += '<h3>' + d.n + ' resales of ' + ft + ' flats in your block in the last 2 years</h3>';
-    else if (d.level === 'street') h += '<h3>' + d.n + ' resales of ' + ft + ' flats on ' + esc(title(c.street)) + ' in the last 2 years</h3><p class="gw-vx-why">' + (d.blockN ? 'Only ' + d.blockN + ' in your block, so these are the sales on your street.' : 'None in your block, so these are the sales on your street.') + '</p>';
-    else if (d.level === 'thin') h += '<h3>Only ' + d.n + ' resale' + (d.n === 1 ? '' : 's') + ' of ' + ft + ' flats on ' + esc(title(c.street)) + ' in the last 2 years</h3><p class="gw-vx-why">Too few for a fair range, so we list ' + (d.n === 1 ? 'it' : 'them') + ' without one.</p>';
-    else h += '<h3>No resales of ' + ft + ' flats on ' + esc(title(c.street)) + ' in the last 2 years</h3><p class="gw-vx-why">HDB registered none from ' + win + '. Check the flat type, or ask Ken for a view.</p>';
+    if (d.level === 'block') h += '<h3>' + d.n + ' resales of ' + ft + ' flats in ' + yb + ' in the last 2 years</h3>';
+    else if (d.level === 'street') h += '<h3>' + d.n + ' resales of ' + ft + ' flats on ' + esc(ST(c.street)) + ' in the last 2 years</h3><p class="gw-vx-why">' + (d.blockN ? 'Only ' + d.blockN + ' in ' + yb + ', so these are the sales on ' + ys + '.' : 'None in ' + yb + ', so these are the sales on ' + ys + '.') + '</p>';
+    else if (d.level === 'thin') h += '<h3>Only ' + d.n + ' resale' + (d.n === 1 ? '' : 's') + ' of ' + ft + ' flats on ' + esc(ST(c.street)) + ' in the last 2 years</h3><p class="gw-vx-why">Too few for a fair range, so we list ' + (d.n === 1 ? 'it' : 'them') + ' without one.</p>';
+    else h += '<h3>No resales of ' + ft + ' flats on ' + esc(ST(c.street)) + ' in the last 2 years</h3><p class="gw-vx-why">HDB registered none from ' + win + '. Check the flat type, or ask Ken for a view.</p>';
     if (d.lo !== undefined) h += '<div class="gw-vx-sum"><span>Sold for</span><b>' + money(d.lo) + ' – ' + money(d.hi) + '</b>' + (d.q1 !== undefined ? '<small>The middle ' + d.midN + ' of ' + d.n + ' sold for ' + money(d.q1) + ' – ' + money(d.q3) + '</small>' : '') + '</div>' + dotsSvg(d, c, st);
     if (d.n) {
       const leases = [...new Set(d.rows.map((x) => x[7]))].sort(), areas = d.rows.map((x) => x[6]).sort((a, b) => a - b);
       h += '<p class="gw-fine">Registered ' + ym(d.oldest) + ' – ' + ym(d.newest) + ' · ' + (areas[0] === areas[areas.length - 1] ? areas[0] + ' sqm' : areas[0] + '–' + areas[areas.length - 1] + ' sqm') + ' · lease began ' + (leases.length === 1 ? leases[0] : leases[0] + '–' + leases[leases.length - 1]) + '</p>';
       if (d.stale) h += '<p class="gw-vx-warn">The most recent of these was registered in ' + ym(d.newest) + '. Prices may have moved since.</p>';
-      if (d.street) { const s2 = d.street; h += '<p class="gw-vx-alt" data-vx-street-recent>More recent on ' + esc(title(c.street)) + ': ' + s2.n + ' resales of ' + ft + ' flats in the last 2 years, the latest registered ' + ym(s2.newest) + '. They sold for ' + money(s2.lo) + ' – ' + money(s2.hi) + (s2.q1 !== undefined ? '; the middle ' + s2.midN + ' of ' + s2.n + ' for ' + money(s2.q1) + ' – ' + money(s2.q3) : '') + '.</p>'; }
+      if (d.street) { const s2 = d.street; h += '<p class="gw-vx-alt" data-vx-street-recent>More recent on ' + esc(ST(c.street)) + ': ' + s2.n + ' resales of ' + ft + ' flats in the last 2 years, the latest registered ' + ym(s2.newest) + '. They sold for ' + money(s2.lo) + ' – ' + money(s2.hi) + (s2.q1 !== undefined ? '; the middle ' + s2.midN + ' of ' + s2.n + ' for ' + money(s2.q1) + ' – ' + money(s2.q3) : '') + '.</p>'; }
       const head = [['Registered'], ...(st ? [['Blk']] : []), ['Floor'], ['Sqm', 1], ['Price', 1]];
-      const tbl = table(head, d.rows.map((x) => ({ cls: st && x[1] === c.block ? 'you' : '', cells: [ym(x[0]), ...(st ? [esc(x[1]) + (x[1] === c.block ? '<span class="gw-vh"> (your block)</span>' : '')] : []), x[4] + '–' + x[5], x[6], money(x[9])] })), 'sales', d.lo !== undefined);
+      const tbl = table(head, d.rows.map((x) => ({ cls: st && x[1] === c.block ? 'you' : '', cells: [ym(x[0]), ...(st ? [esc(x[1]) + (x[1] === c.block ? '<span class="gw-vh"> (' + yb + ')</span>' : '')] : []), x[4] + '–' + x[5], x[6], money(x[9])] })), 'sales', d.lo !== undefined);
       h += d.lo !== undefined ? '<details class="gw-vx-all"><summary>See all ' + d.n + ' sales</summary>' + tbl + '</details>' : tbl;
     }
     h += '<p class="gw-vx-note"><b>Past sales, not a valuation.</b> Floor, facing, condition and renovation can put your flat above or below these. HDB gives an official value only to a buyer, after an Option to Purchase.</p>';
+    if (o.mid) h += o.mid;   // the Research view puts nearby blocks and the Map here
+    else if (o.deep) h += '<a class="gw-vx-next" href="' + r + 'research/' + esc(o.deep) + '" data-gw-go="hdb-research"><b>Compare nearby blocks</b><span>Other blocks’ resales of this flat type, and where this block is on the Map ›</span></a>';
     if (o.path) h += '<div class="gw-pathnext"><a class="gw-btn pri" href="' + r + 'tools/sale-proceeds/#hdb" data-gw-go="up-sale-proceeds">Next: your sale proceeds ›</a><span>Step 2 of 4 · the cash and CPF you’d have after selling</span></div>';
     if (d.lo !== undefined && d.n >= 3 && ASKM()) h += ASKM().panelHtml('hdb', { lo: d.lo, q1: d.q1, q3: d.q3, hi: d.hi, n: d.n, midN: d.midN, level: d.level, where, ft }, { title: 'Buying here? Check an asking price' });
-    h += kenCta({ head: 'Want a view on your own flat?', text: 'Ken can tell you where yours might sit against these sales, and what would move it.', msg: hdbMsg(c), label: 'Ask Ken what mine could fetch', ctx: 'worth-hdb' });
-    if (!o.path) h += moveNext(r);
+    if (o.view) h += kenCta({ head: 'Want a view on a flat here?', text: 'Ken can tell you where a flat in this block might sit against these sales, and what would move it.', msg: hdbViewMsg(c), label: 'Ask Ken on WhatsApp', ctx: 'worth-hdb' });
+    else h += kenCta({ head: 'Want a view on your own flat?', text: 'Ken can tell you where yours might sit against these sales, and what would move it.', msg: hdbMsg(c), label: 'Ask Ken what mine could fetch', ctx: 'worth-hdb' });
+    if (!o.path && !o.view) h += moveNext(r);
     h += '<p class="gw-vx-src">HDB resale registrations ' + win + (I.latestMonth === +I.asOf.slice(0, 4) * 100 + +I.asOf.slice(5, 7) ? ' (' + MON[I.latestMonth % 100 - 1] + ' so far)' : '') + ', updated by HDB on ' + fmtDay(I.sourceUpdated) + '. Excludes resales that may not reflect the full market price, such as those between relatives. ' +
       '<a href="' + esc(I.source.url) + '" target="_blank" rel="noopener" data-gw-go="hdb-data">Check on data.gov.sg ›</a> · <a href="' + HDB_INFO + '" target="_blank" rel="noopener" data-gw-go="hdb-info">HDB’s resale information ›</a><br>' + esc(I.attribution) + ' Not endorsed by HDB.</p>';
     return h + '</div>';
@@ -420,7 +428,7 @@
       if (!sel || !T) return; // R2.2: no flat-type button acts without a chosen block
       press($$('[data-vx-ft]', H.ft), $$('[data-vx-ft]', H.ft).filter((b) => +b.dataset.vxFt === t)[0]);
       const d = hdbComps(T, sel.block, sel.s, t), c = { town: T.id, block: sel.block, street: sel.street, flatType: I.types[t] };
-      H.out.innerHTML = hdbResult(d, c, T, I, r, { path: (ctx.get() || {}).path === 'upgrade' }); waSet(H.out, hdbMsg(c));
+      H.out.innerHTML = hdbResult(d, c, T, I, r, { path: (ctx.get() || {}).path === 'upgrade', deep: root.GW_POSTAL && root.GW_POSTAL.hdbHash ? root.GW_POSTAL.hdbHash(c) : '' }); waSet(H.out, hdbMsg(c));
       ctx.set({ type: 'hdb', hdb: Object.assign(c, { n: d.n, lo: d.lo, hi: d.hi, level: d.level, asOf: I.sourceVersion }) });
       track('tool_completed', { tool_name: 'hdb-value', level: d.level, count: d.n, flat_type: I.types[t] });
       if (user) reveal(H.out);
@@ -646,5 +654,5 @@
     window.addEventListener('hashchange', () => { if (box.isConnected && box.offsetParent !== null) fromHash(); });
   }
   if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount(); }
-  return { mount, streetQuery, nearStreets, edits, noSalesHtml, unsupportedHtml, unavailableHtml, streetMsg, UNSUP, splitNote, hdbComps, landedComps, hdbTypes, landedTypes, blockMatches, streetMatches, normBlock, hdbResult, landedResult, nearbyHtml, nearbyMsg, awayText, kmText, pageHtml, hdbMsg, landedMsg, condoMsg, flatLabel, title, tenure, ym, money, LTYPE, HDB_MIN_BLOCK, HDB_MIN_STREET, MID_MIN, LANDED_MIN };
+  return { mount, streetQuery, nearStreets, edits, noSalesHtml, unsupportedHtml, unavailableHtml, streetMsg, UNSUP, splitNote, hdbComps, landedComps, hdbTypes, landedTypes, blockMatches, streetMatches, normBlock, hdbResult, hdbViewMsg, streetName, table, fig, dotsSvg, landedResult, nearbyHtml, nearbyMsg, awayText, kmText, pageHtml, hdbMsg, landedMsg, condoMsg, flatLabel, title, tenure, ym, money, LTYPE, HDB_MIN_BLOCK, HDB_MIN_STREET, MID_MIN, LANDED_MIN };
 });

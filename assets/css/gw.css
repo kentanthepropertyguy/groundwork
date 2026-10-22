@@ -737,3 +737,7 @@ body.lg .gw-rws .lg-sb .kpr-results{margin-top:12px}
   body.lg .gw-rws .lg-sb .kpr-search>input{height:52px;font-size:17px}
   .gw-rrow{padding:12px 14px}
 }
+/* HDB research (gw-hdb.js): nearby blocks and next steps */
+.gw-hv{display:grid;gap:18px}.gw-hv .gw-chips{margin-top:8px}.gw-hv-next{display:grid;gap:10px;margin:6px 0}
+.gw-hv-near .gw-vx-t a{color:var(--gw-ink);text-decoration:none}.gw-hv-near .gw-vx-t a b{color:var(--gw-blue)}.gw-hv-near .gw-vx-t a:hover{text-decoration:underline}
+.gw-hv-near .gw-vx-t small{display:block;color:var(--gw-mute,#6b7280);font-size:12.5px}

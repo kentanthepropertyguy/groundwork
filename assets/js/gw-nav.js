@@ -81,7 +81,7 @@
       t: ['asking price', 'hdb asking price', 'check asking price', 'is the asking price fair', 'resale flat price', 'buying a resale flat', 'cov', 'cash over valuation', 'overpriced'] },
     { id: 'ask-condo', name: 'Check a condo asking price', tag: 'Pick the development, then “Check an asking price”', href: 'research/', icon: 'research', search: 1, sec: 'research',
       t: ['asking price', 'condo asking price', 'check asking price', 'is the asking price fair', 'condo price', 'psf', 'price per square foot', 'overpriced', 'condo valuation'] },
-    { id: 'research', name: 'Research a development', tag: 'Prices by size · compare', short: 'Any of 2,000+ private developments', href: 'research/', icon: 'research', start: 1, sec: 'research',
+    { id: 'research', name: 'Research a development', tag: 'Prices by size · compare', short: 'Any of 2,000+ private developments', href: 'research/#/', icon: 'research', start: 1, sec: 'research',
       t: ['research', 'development', 'condo', 'condominium', 'apartment', 'project', 'transactions', 'transacted', 'psf', 'price per square foot', 'compare', 'comparison', 'compare condos', 'condo prices', 'private property', 'ura', 'caveats', 'valuation', 'condo valuation'] },
     { id: 'guide', name: 'Guide me', tag: 'Not sure where to start? Step by step', short: 'Tell us your goal; we take you through it', href: 'journey/', icon: 'guide', start: 1, sec: 'guide',
       t: ['guide', 'guide me', 'help me figure it out', 'figure it out', 'guided', 'guided journey', 'help', 'help me', 'where to start', 'start', 'beginner', 'first time', 'first home', 'first-time buyer', 'steps', 'plan', 'planning', 'what should i do', 'not sure'] },
@@ -188,6 +188,7 @@
       else if (q.length >= 4 && (' ' + dnorm(r[F.street])).indexOf(' ' + q) >= 0) s = 15;
       if (s) out.push({ s, r });
     });
+    if (!out.length && /^the .{2,}/.test(q)) return matchDevs(ix, q.slice(4), max);   // "The Jadescape" finds Jadescape: a leading "The" is optional
     if (!out.length && qc.length >= TYPO_MIN) {   // "jadscape" → Jadescape: one slip against the start of a name or one of its words
       ix.rows.forEach((r, k) => { const n = names[k], nc = n.replace(/ /g, ''); if (oneEdit(nc.slice(0, qc.length), qc) || oneEdit(nc.slice(0, qc.length + 1), qc) || oneEdit(nc.slice(0, Math.max(0, qc.length - 1)), qc) || n.split(' ').some((w) => w.length >= TYPO_MIN && oneEdit(w, qc))) out.push({ s: 20, r }); });
     }
@@ -375,19 +376,17 @@
     // ---- postal codes and new launches in the same box ----
     // A six-digit postal code is looked up with the shared module (gw-postal.js, the one the Map and Property values use) and sent where that address belongs:
     // an HDB block or a landed home to Property values, a condo, EC or cluster development to its Research page, a launch or any other address to the Map. Only loaded when a code is typed.
-    const POSTAL_JS = 'assets/js/gw-postal.js?v=675423cd19';
+    const POSTAL_JS = 'assets/js/gw-postal.js?v=d497db9fdd';
     const PC_RE = /^\s*(?:s(?:ingapore)?\s*\(?)?(\d{6})\)?\s*$/i;
     let postalP = null, pdP = null, upP = null;
     const loadPostal = () => postalP || (postalP = root.GW_POSTAL ? Promise.resolve(root.GW_POSTAL) : new Promise((ok) => { const s = document.createElement('script'); s.src = base + POSTAL_JS; s.onload = () => ok(root.GW_POSTAL || null); s.onerror = () => { postalP = null; ok(null); }; document.head.appendChild(s); }));
     const getJ = (f) => fetch(base + f).then((x) => (x.ok ? x.json() : null)).catch(() => null);
     const loadUp = () => upP || (upP = getJ('data/map/upcoming.json').then((d) => (d && Array.isArray(d.items) ? d : null)));
-    const loadPd = () => pdP || (pdP = Promise.all([getJ('data/registry/index.json'), loadUp(), getJ('data/value/hdb/index.json').then((i) => (i ? getJ('data/value/hdb/streets.json?v=' + encodeURIComponent(i.sourceVersion)) : null)), getJ('data/value/landed/index.json')]).then((a) => ({ reg: a[0] && a[0].rows, up: a[1] && a[1].items, hdb: a[2], landed: a[3] })));
-    // which kind of address: the same order Property values uses (development, HDB block, landed home), else just a place
+    const loadPd = () => pdP || (pdP = loadPostal().then((GP) => (GP ? GP.loadData(base) : {})));
+    // which kind of address: the shared sorting in gw-postal.js (same order Property values uses: development, HDB block, landed home, else a place); names are shown as Research shows them
     function classifyAddr(GP, a, D) {
-      if (a.building) { const m = GP.devMatch(a, D.reg || [], D.up || []); if (m.kind !== 'none') { const x = m.list[0]; return Array.isArray(x) ? { k: 'dev', id: x[0], name: displayName(x[1]), cls: x[14] } : { k: 'up', id: x.id, name: x.name }; } }
-      if (D.hdb && GP.hdbTowns(a, D.hdb).length) return { k: 'hdb' };
-      if (D.landed && D.landed.streets) { const rk = GP.roadKey(a.road); if (rk && D.landed.streets.some((x) => GP.roadKey(x[0]) === rk)) return { k: 'landed' }; }
-      return { k: 'place' };
+      const c = GP.classify(a, D);
+      return c.name ? Object.assign({}, c, { name: displayName(c.name) }) : c;
     }
     const mapPc = (a) => base + 'research/map/#pl=' + encodeURIComponent('postal:' + a.n);
     // -> option rows for one resolved address: the destination that fits it first, "View on Map" second
@@ -397,6 +396,7 @@
       let first;
       if (c.k === 'dev') first = opt(kn(), base + 'research/#/p/' + encodeURIComponent(c.id), svg('dev') + '<span><b>' + esc(c.name) + '</b><small>' + esc(({ ec: 'Executive Condominium', cluster: 'Cluster housing' }[c.cls] || 'Condominium') + ' · ' + a.title + ' · ' + a.code) + '</small></span>', id('postal-development'));
       else if (c.k === 'up') first = opt(kn(), base + 'research/map/#p=' + encodeURIComponent(c.id), ico + '<span><b>' + esc(c.name) + '</b><small>' + esc('New launch or site · ' + a.code) + '</small></span>', id('postal-launch'));
+      else if (c.k === 'hdb' && c.h && root.GW_POSTAL) first = opt(kn(), base + 'research/' + root.GW_POSTAL.hdbHash(c.h), svg('worth') + '<span><b>Blk ' + esc(c.h.block) + ' ' + esc(root.GW_POSTAL.streetName(c.h.street)) + '</b><small>HDB flat · ' + esc(c.h.townName || '') + ' · ' + a.code + ' · Resale prices</small></span>', id('postal-hdb'));
       else if (c.k === 'hdb') first = opt(kn(), base + 'journey/worth/#pc=' + a.code, svg('worth') + '<span><b>' + esc(a.title) + '</b><small>HDB flat · ' + a.code + ' · Property values</small></span>', id('postal-hdb'));
       else if (c.k === 'landed') first = opt(kn(), base + 'journey/worth/#pc=' + a.code, svg('worth') + '<span><b>' + esc(a.title) + '</b><small>Landed home · ' + a.code + ' · Property values</small></span>', id('postal-landed'));
       else first = opt(kn(), mapPc(a), ico + '<span><b>' + esc(a.title) + '</b><small>' + esc((a.building && a.sub ? a.sub.split(' · ')[0] + ' · ' : '') + a.code + ' · Open on Map') + '</small></span>', id('postal-map'));
@@ -406,7 +406,8 @@
     // new launches and awarded sites (data/map/upcoming.json) by name or any name they are known by; the Map holds their panel
     function matchUps(doc, query, skipNames, skipIds) {
       const q = dnorm(query); if (q.length < 3 || !doc || !doc.items) return [];
-      return doc.items.map((it) => { let s = 0; [it.name].concat(it.aliases || []).forEach((a) => { const n = dnorm(a); const v = n === q ? 3 : n.indexOf(q) === 0 ? 2 : (' ' + n).indexOf(' ' + q) >= 0 ? 1 : 0; if (v > s) s = v; }); return { s, it }; })
+      const qs = /^the .{2,}/.test(q) ? [q, q.slice(4)] : [q];   // a leading "The" is optional
+      return doc.items.map((it) => { let s = 0; [it.name].concat(it.aliases || []).forEach((a) => { const n = dnorm(a); qs.forEach((qq) => { const v = n === qq ? 3 : n.indexOf(qq) === 0 ? 2 : (' ' + n).indexOf(' ' + qq) >= 0 ? 1 : 0; if (v > s) s = v; }); }); return { s, it }; })
         .filter((x) => x.s && skipNames.indexOf(dnorm(x.it.name)) < 0 && skipIds.indexOf(x.it.id) < 0).sort((a, b) => b.s - a.s).slice(0, 3).map((x) => x.it);
     }
     const upSub = (u) => [u.kind === 'launch' ? 'New launch' : u.unnamed ? 'Awarded ' + (u.agency || 'URA') + ' site, no project name yet' : 'Awarded ' + (u.agency || 'URA') + ' site', u.district ? 'District ' + Number(u.district) : u.area || '', 'On the Map'].filter(Boolean).join(' · ');
@@ -463,7 +464,11 @@
             if (my !== seq) return;
             if (r.state !== 'ok') { render(q, [], [], false, false, [], [], { state: r.state, note: GP.msg(r.state, code) }); track('search_postal', { state: r.state }); return; }
             const items = r.list.map((a) => ({ a, c: classifyAddr(GP, a, D) }));
-            render(q, [], [], false, false, [], [], { state: 'ok', items }); track('search_postal', { state: 'ok', kind: items[0] && items[0].c.k });
+            // an HDB address goes to its block's resale research: find the block and town as the resale records spell them
+            return Promise.all(items.map((x) => (x.c.k === 'hdb' && GP.hdbBlock ? GP.hdbBlock(x.a, x.c.towns, base).then((h) => { x.c = Object.assign({}, x.c, { h }); }).catch(() => null) : null))).then(() => {
+              if (my !== seq) return;
+              render(q, [], [], false, false, [], [], { state: 'ok', items }); track('search_postal', { state: 'ok', kind: items[0] && items[0].c.k });
+            });
           });
         });
       }
