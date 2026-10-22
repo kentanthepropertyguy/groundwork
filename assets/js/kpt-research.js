@@ -556,6 +556,8 @@
   function parseHash(h) {
     const s = String(h || '').replace(/^#\/?/, '').split('?')[0].split('/').filter(Boolean), id = (x) => (/^[a-z0-9-]{1,80}$/.test(x || '') ? x : null), sale = (x) => (SALE_CODE[x] ? x : null);
     if (s[0] === 'p' && id(s[1])) return { view: 'project', id: s[1], sale: sale(s[2]) };
+    // One HDB block's research: #/hdb/<town>/<block>/<street>[/<flat type>]. Public facts only (never a postal code, a price or anything typed).
+    if (s[0] === 'hdb' && /^[a-z][a-z-]{1,30}$/.test(s[1] || '') && /^\d{1,4}[a-z]{0,2}$/.test(s[2] || '') && /^[a-z0-9-]{2,70}$/.test(s[3] || '')) return { view: 'hdb', town: s[1], block: s[2].toUpperCase(), street: s[3], type: /^[a-z0-9-]{3,24}$/.test(s[4] || '') ? s[4] : null };
     if (s[0] === 'compare' && id(s[1]) && id(s[2])) return { view: 'compare', a: s[1], b: s[2], sale: sale(s[3]) };
     if (s[0] === 'compare' && id(s[1])) return { view: 'pick', a: s[1] };
     // The Research home has three options (a development, property prices & past sales, a budget); Browse every development opens the first with its A–Z list.
@@ -564,7 +566,7 @@
     if (s[0] === 'browse') return { view: 'home', opt: 'dev', az: true };
     return { view: 'home', opt: 'dev' };
   }
-  const buildHash = (v) => (v.view === 'project' ? '#/p/' + v.id + (v.sale ? '/' + v.sale : '') : v.view === 'compare' ? '#/compare/' + v.a + '/' + v.b + (v.sale ? '/' + v.sale : '') : v.view === 'pick' ? '#/compare/' + v.a : '#/');
+  const buildHash = (v) => (v.view === 'hdb' ? '#/hdb/' + v.town + '/' + String(v.block).toLowerCase() + '/' + v.street + (v.type ? '/' + v.type : '') : v.view === 'project' ? '#/p/' + v.id + (v.sale ? '/' + v.sale : '') : v.view === 'compare' ? '#/compare/' + v.a + '/' + v.b + (v.sale ? '/' + v.sale : '') : v.view === 'pick' ? '#/compare/' + v.a : '#/');
 
   return { BUILD, analyseProject, analyseComparison, interpret, summarise, evidence, defaultSale, saleOptions, focusBin, movement, matchNote, pairKey, sameDistrict, waMessage, analytics, parseHash, buildHash, displayName, bandLabel, bandShort, fmtMonth, monthsAgo, windowKey, num, psf,
     SALE_LABEL, NOT_MEASURED, HEADLINE, ANALYTICS_EVENTS, ANALYTICS_KEYS, SUBSTITUTE_NOTE, CONTEXT_NOTE, HISTORY_NOTE, PSF_NOTE, FLOOR_NOTE };

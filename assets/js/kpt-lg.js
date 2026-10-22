@@ -186,7 +186,8 @@
   const lnorm = (v) => String(v == null ? '' : v).normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[’'`]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
   function matchLaunches(items, query, max) {
     const q = lnorm(query); if (q.length < 3 || !Array.isArray(items)) return [];
-    return items.map((it) => { let sc = 0; [it.name].concat(it.aliases || []).forEach((a) => { const n = lnorm(a), v = n === q ? 3 : n.indexOf(q) === 0 ? 2 : (' ' + n).indexOf(' ' + q) >= 0 ? 1 : 0; if (v > sc) sc = v; }); return { sc, it }; })
+    const qs = /^the .{2,}/.test(q) ? [q, q.slice(4)] : [q];   // a leading "The" is optional
+    return items.map((it) => { let sc = 0; [it.name].concat(it.aliases || []).forEach((a) => { const n = lnorm(a); qs.forEach((qq) => { const v = n === qq ? 3 : n.indexOf(qq) === 0 ? 2 : (' ' + n).indexOf(' ' + qq) >= 0 ? 1 : 0; if (v > sc) sc = v; }); }); return { sc, it }; })
       .filter((x) => x.sc).sort((a, b) => b.sc - a.sc).slice(0, max || 3).map((x) => x.it);
   }
   let launchP = null;

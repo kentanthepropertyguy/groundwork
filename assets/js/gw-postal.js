@@ -4,6 +4,9 @@
    - lookup(code): the address OneMap holds for a Singapore postal code (OneMap's public address search; a typed code is sent to OneMap, which also serves the basemap).
    - roadKey / nameKey: the one way a road or a development name is compared (OneMap writes "AVENUE", HDB's records write "AVE").
    - hdbTowns / devMatch: which HDB town or which development an address is. Pure functions over data the caller already holds; no network, no DOM.
+   - hdbHash: the address of one HDB block's research page in Research (#/hdb/<town>/<block>/<street>/<flat type>): public facts only.
+   - hdbBlock: an HDB address -> its town, block and street as the resale records spell them (reads the town files in turn).
+   - loadData / classify: the one way an address is sorted into a development, a new launch, an HDB block, a landed street or just a place. The site search and Research's search both use it.
    Nothing here values a property. It only finds which one an address is.
    ========================================================================== */
 (function (root, factory) {
@@ -64,5 +67,47 @@
     if (b.length >= 5) { const nr = idx.filter((x) => x.street && roadKey(x.street) === rk && x.names.some((n) => { const k = nameKey(n); return k.length >= 5 && (k.includes(b) || b.includes(k)); })); if (nr.length) return { kind: 'near', list: nr.map((x) => x.row) }; }
     return { kind: 'none', list: [] };
   }
-  return { code, valid, msg, lookup, state: stateOf, PC, TITLE, roadKey, nameKey, hdbTowns, devMatch, ONEMAP };
+  /* ---- what kind of address: the data it needs is read once per page (loadData), the sorting is pure (classify).
+     Order: a development by name (condo, EC, cluster) or a new launch, then an HDB block (its road is an HDB road), then a landed street, else a place.
+     -> { k: 'dev', id, name, cls } | { k: 'up', id, name } | { k: 'hdb', towns } | { k: 'landed' } | { k: 'place' } */
+  let dataP = null;
+  function loadData(base) {
+    if (dataP) return dataP;
+    const getJ = (f) => fetch(base + f).then((x) => (x.ok ? x.json() : null)).catch(() => null);
+    return (dataP = Promise.all([getJ('data/registry/index.json'), getJ('data/map/upcoming.json'), getJ('data/value/hdb/index.json').then((i) => (i ? getJ('data/value/hdb/streets.json?v=' + encodeURIComponent(i.sourceVersion)) : null)), getJ('data/value/landed/index.json')])
+      .then((a) => ({ reg: a[0] && a[0].rows, up: a[1] && Array.isArray(a[1].items) ? a[1].items : null, hdb: a[2], landed: a[3] })));
+  }
+  function classify(a, D) {
+    D = D || {};
+    if (a.building) { const m = devMatch(a, D.reg || [], D.up || []); if (m.kind !== 'none') { const x = m.list[0]; return Array.isArray(x) ? { k: 'dev', id: x[0], name: x[1], cls: x[14] } : { k: 'up', id: x.id, name: x.name }; } }
+    if (D.hdb) { const t = hdbTowns(a, D.hdb); if (t.length) return { k: 'hdb', towns: t }; }
+    if (D.landed && D.landed.streets) { const rk = roadKey(a.road); if (rk && D.landed.streets.some((x) => roadKey(x[0]) === rk)) return { k: 'landed' }; }
+    return { k: 'place' };
+  }
+
+  /* HDB writes roads short ("BISHAN ST 13"); a buyer reads "Bishan Street 13" */
+  const LONGW = { ST: 'Street', AVE: 'Avenue', RD: 'Road', DR: 'Drive', CRES: 'Crescent', CL: 'Close', PL: 'Place', TER: 'Terrace', LOR: 'Lorong', JLN: 'Jalan', NTH: 'North', STH: 'South', CTRL: 'Central', UPP: 'Upper', BT: 'Bukit', TG: 'Tanjong', KG: 'Kampong', GDNS: 'Gardens', HTS: 'Heights', MKT: 'Market', BLVD: 'Boulevard', LN: 'Lane', PK: 'Park', "C'WEALTH": 'Commonwealth' };
+  const cap = (w) => w.charAt(0) + w.slice(1).toLowerCase();
+  const streetName = (s) => String(s || '').split(' ').map((w, i) => (w === 'ST' && i === 0 ? 'St' : LONGW[w]) || cap(w)).join(' ');
+  /* ---- the address of one HDB block's research: c = { town: 'bishan', block: '155', street: 'BISHAN ST 13', flatType?: '4 ROOM' } -> '#/hdb/bishan/155/bishan-st-13/4-room' ---- */
+  const slug = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  const hdbHash = (c) => '#/hdb/' + [c.town, String(c.block).toLowerCase(), slug(c.street)].concat(c.flatType ? [slug(c.flatType)] : []).join('/');
+  /* ---- an HDB address -> { town, block, street, found } as the resale records spell them, or null.
+     towns: hdbTowns(a, streets). Reads the town files in turn. found = the block itself has a resale in the records; false = only its street does (research still opens, on the street's sales). ---- */
+  function hdbBlock(a, towns, base, f) {
+    const ff = f || (typeof fetch === 'function' ? fetch : null); if (!ff) return Promise.resolve(null);
+    const getJ = (u) => Promise.resolve(ff(u)).then((x) => (x && x.ok ? x.json() : null)).catch(() => null);
+    return getJ(base + 'data/value/hdb/index.json').then((I) => {
+      if (!I) return null;
+      const blk = String(a.blk || '').toUpperCase().replace(/\s+/g, ''), rk = roadKey(a.road); let street = null;
+      const next = (i) => (i >= towns.length ? Promise.resolve(street) : getJ(base + 'data/value/hdb/t/' + towns[i] + '.json?v=' + encodeURIComponent(I.sourceVersion)).then((T) => {
+        if (!T) return next(i + 1);
+        const s = T.streets.findIndex((x) => roadKey(x) === rk); if (s < 0) return next(i + 1);
+        const r = { town: towns[i], townName: T.town, block: blk, street: T.streets[s], found: T.blocks.some((b) => b[0] === blk && b[1] === s) };
+        if (r.found) return r; if (!street) street = r; return next(i + 1);
+      }));
+      return next(0);
+    });
+  }
+  return { code, valid, msg, lookup, state: stateOf, PC, TITLE, roadKey, nameKey, hdbTowns, devMatch, loadData, classify, hdbBlock, slug, hdbHash, streetName, ONEMAP };
 });

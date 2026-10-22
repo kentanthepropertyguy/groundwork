@@ -24,4 +24,5 @@ then bump the asset version hashes for any changed script. Adding or removing a 
 - Launches, sites and development positions are one pass (section 0 of `UPCOMING.md`): `fetch-onemap-uc.js`, `fetch-onemap-names.js`, this refresh, then `build-upcoming.js`.
 - `node tools/market-data/build-upcoming.js --as-of YYYY-MM-DD` after editing `upcoming-register.json` or when URA publishes new Sale Sites; commit `data/map/upcoming.json`. See `UPCOMING.md`.
 - `node tools/market-data/build-hdb-streets.js` after any HDB resale data refresh (HDB road to town, used by postal-code search on Property values).
-- `node tools/market-data/tests/upcoming-tests.js` and `node research/tests/postal-tests.js`.
+- HDB block positions for the Map layer, after any HDB resale data refresh: `node tools/market-data/fetch-onemap-hdb.js` (live OneMap, only blocks not already saved; add `--retry` for the ones it could not place, and run it again if it reports blocks "not answered"), then `node tools/market-data/build-hdb-map.js`. Commit `sources/onemap-hdb.json` and `data/map/hdb.json`, report the coverage line, and run `node research/tests/hdb-tests.js`. Blocks OneMap cannot place stay out of the file; never fill them in by hand.
+- `node tools/market-data/tests/upcoming-tests.js`, `node research/tests/postal-tests.js` and `node research/tests/hdb-tests.js`.

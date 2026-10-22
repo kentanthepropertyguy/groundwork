@@ -11,7 +11,7 @@
   const base = new URL('../../data/map/', location.href).href;
   const getJson = (f) => fetch(base + f + '?v=' + BUILD).then((r) => { if (!r.ok) throw new Error(f + ' ' + r.status); return r.json(); });
   const LY = window.KPT_MAP_VIEW.layers;
-  const S = { proj: null, start: true, place: null, band: null, rc: {}, hl: null, more: false, min: false, am: false, sec: {}, layers: LY.load(), lyrOpen: false, radius: 2000, pr: 1000, nall: false, q: '', qi: -1, suggOpen: false };
+  const S = { proj: null, start: true, place: null, band: null, rc: {}, hl: null, more: false, min: false, am: false, sec: {}, layers: LY.load(), lyrOpen: false, hft: null, hdbEv: null, radius: 2000, pr: 1000, nall: false, q: '', qi: -1, suggOpen: false };
   const PCR = {};   // postal code -> the last OneMap answer
   let M, view;
 
@@ -22,12 +22,13 @@
     if (pl && pl.includes(':')) { const i = pl.indexOf(':'); S.place = { t: pl.slice(0, i), n: pl.slice(i + 1) }; S.start = false; }
     else if (id && M.BYID[id]) { if (M.BYID[id].n !== S.proj) loadProject(M.BYID[id].n); S.start = false; }
     if (q.get('r') && S.proj) S.radius = +q.get('r');
+    S.hft = S.place && S.place.t === 'hdb' && /^[a-z0-9-]{3,24}$/.test(q.get('ft') || '') ? q.get('ft') : null;
     const nr = +(S.place ? q.get('r') : q.get('nr'));   // the nearby radius; on a development, r is the price-comparison radius
     S.pr = M.RADII.includes(nr) ? nr : 1000; S.nall = false; S.min = false;
   }
   function addr() {
     const q = new URLSearchParams();
-    if (S.place) { q.set('pl', S.place.t + ':' + S.place.n); if (S.place.t !== 'area' && S.pr !== 1000) q.set('r', S.pr); } else if (!S.start && S.proj) { q.set('p', M.BY[S.proj].id); if (!M.BY[S.proj].up) q.set('r', S.radius); if (S.pr !== 1000 && M.BY[S.proj].pos) q.set('nr', S.pr); }
+    if (S.place) { q.set('pl', S.place.t + ':' + S.place.n); if (S.place.t !== 'area' && S.pr !== 1000) q.set('r', S.pr); if (S.place.t === 'hdb' && S.hft) q.set('ft', S.hft); } else if (!S.start && S.proj) { q.set('p', M.BY[S.proj].id); if (!M.BY[S.proj].up) q.set('r', S.radius); if (S.pr !== 1000 && M.BY[S.proj].pos) q.set('nr', S.pr); }
     return q.toString() ? '#' + q : location.pathname + location.search;
   }
   let lastHash = location.hash;
@@ -37,15 +38,49 @@
   addEventListener('popstate', onNav); addEventListener('hashchange', onNav);
 
   /* ---------------- search ---------------- */
-  const SECH = { area: 'Neighbourhoods', mrt: 'MRT stations', dev: 'Developments', up: 'New launches and sites', school: 'Schools', road: 'Roads', postal: 'Postal code' };
-  const SCOL = { area: '#14203F', mrt: '#C9372C', dev: '#2E4FD1', up: '#2E4FD1', school: '#6D4BC4', road: '#1F7A6B', postal: '#0E8C89' };
-  const glyph = (k, sz = 13) => `<span class="gl" style="background:${SCOL[k] || '#6B7280'}">${icon({ up: 'dev', postal: 'area' }[k] || k, sz)}</span>`;
-  const what = () => `development, ${M.hasRoads() ? 'road, ' : ''}MRT station${M.hasSchools() ? ', school' : ''}, neighbourhood or postal code`;
+  const SECH = { area: 'Neighbourhoods', mrt: 'MRT stations', dev: 'Developments', up: 'New launches and sites', school: 'Schools', road: 'Roads', postal: 'Postal code', hdb: 'HDB blocks' };
+  const SCOL = { area: '#14203F', mrt: '#C9372C', dev: '#2E4FD1', up: '#2E4FD1', school: '#6D4BC4', road: '#1F7A6B', postal: '#0E8C89', hdb: '#D9822B' };
+  const glyph = (k, sz = 13) => `<span class="gl" style="background:${SCOL[k] || '#6B7280'}">${icon({ up: 'dev', postal: 'area', hdb: 'dev' }[k] || k, sz)}</span>`;
+  const what = () => `development, ${M.hasRoads() ? 'road, ' : ''}MRT station${M.hasSchools() ? ', school' : ''}, neighbourhood, HDB block or postal code`;
   const noMatch = () => `No match. Try a ${what()}.`;
   const PCMSG = new Proxy({}, { get: (_, st) => (c) => M.postalMsg(st, c) });
+  /* ---------------- HDB resale blocks: positions (data/map/hdb.json) and the resale evidence behind a block's panel ---------------- */
+  let hdbP = null;
+  const loadHdb = () => hdbP || (hdbP = getJson('hdb.json').then((doc) => { M.setHdb(doc); return !!M.HDBM; }).catch(() => { hdbP = null; return false; }));
+  // The evidence is read with Property values' own functions (gw-value.js) over its own files, so a block and flat type read the same here as in Research.
+  const hdbBase = new URL('../../data/value/hdb/', location.href).href;
+  // gw-value.js and gw-hdb.js (the code Research and Property values already use) are fetched only when an HDB block's panel is first opened; their addresses carry their own file hashes
+  let hdbLibP = null;
+  const hdbLib = () => hdbLibP || (hdbLibP = (window.GWV && window.GWH ? Promise.resolve() : Array.from((document.getElementById('gwLazy-hdb') || { content: { children: [] } }).content.children).reduce((p, n) => p.then(() => new Promise((ok, no) => {
+    const e = document.createElement('script'); e.src = n.getAttribute('src'); e.async = false; e.onload = () => ok(); e.onerror = () => no(new Error('hdb')); document.head.appendChild(e);
+  })), Promise.resolve())).then(() => { if (!window.GWV || !window.GWH) throw new Error('hdb'); }).catch((e) => { hdbLibP = null; throw e; }));
+  const hdbJ = {}, hdbJson = (u) => hdbJ[u] || (hdbJ[u] = fetch(u).then((r) => { if (!r.ok) throw new Error(u); return r.json(); }).catch((e) => { delete hdbJ[u]; throw e; }));
+  function ensureHdbEv(h) {
+    if (S.hdbEv && S.hdbEv.key === h.key) return;
+    const ev = S.hdbEv = { key: h.key, state: 'loading' };
+    Promise.all([hdbLib(), hdbJson(hdbBase + 'index.json')]).then((a) => hdbJson(hdbBase + 't/' + h.town + '.json?v=' + encodeURIComponent(a[1].sourceVersion)).then((T) => { T.id = h.town; ev.I = a[1]; ev.T = T; ev.state = 'ok'; }))
+      .catch(() => { ev.state = 'error'; }).then(() => { if (S.hdbEv === ev && S.place && S.place.t === 'hdb' && S.place.n === h.key) refreshCard(); });
+  }
+  const hdbSection = (d) => {
+    const h = d.hdb, ev = S.hdbEv && S.hdbEv.key === h.key ? S.hdbEv : null; ensureHdbEv(h);
+    if (!ev || ev.state === 'loading') return '<div class="sec hdbs" data-hdb-panel="loading"><div class="sh"><b>Recent HDB resales</b></div><p class="basis" style="margin:8px 0 0">Loading the resale records…</p></div>';
+    if (ev.state === 'error') return '<div class="sec hdbs" data-hdb-panel="error"><div class="sh"><b>Recent HDB resales</b></div><p class="basis" style="margin:8px 0 0">The resale records could not be loaded just now. Please try again in a moment.</p></div>';
+    const GV = window.GWV, GH = window.GWH, I = ev.I, T = ev.T, si = T.streets.indexOf(h.street), ty = GV.hdbTypes(T, h.block, si);
+    const want = S.hft ? I.types.findIndex((t) => GH.typeSlug(t) === S.hft) : -1, t = want >= 0 && ty.all.indexOf(want) >= 0 ? want : (ty.inBlock.length === 1 ? ty.inBlock[0] : -1);
+    const chips = ty.all.map((x) => `<button type="button" class="hft" data-hft="${GH.typeSlug(I.types[x])}" aria-pressed="${x === t}">${esc(GV.flatLabel(I.types[x]))}</button>`).join('');
+    let body = '<p class="basis" style="margin:8px 0 0">Choose a flat type to see what flats like it sold for.</p>', link = '';
+    if (t >= 0) {
+      const c = { town: h.town, block: h.block, street: h.street, flatType: I.types[t] };
+      body = GH.evidenceHtml(GV.hdbComps(T, h.block, si, t), { flatType: I.types[t], street: h.street, I });
+      link = `<a class="btn" href="../${esc(window.GW_POSTAL.hdbHash(c))}" data-gw-go="hdb-research" data-m-hdb>Open full HDB research ›</a>`;
+    } else link = `<a class="lnk" href="../${esc(window.GW_POSTAL.hdbHash({ town: h.town, block: h.block, street: h.street }))}" data-gw-go="hdb-research" data-m-hdb>Open full HDB research ›</a>`;
+    return `<div class="sec hdbs" data-hdb-panel="ok"><div class="sh"><b>Recent HDB resales</b><span>last 2 years</span></div><div class="hfts" role="group" aria-label="Flat type">${chips}</div>${body}<div class="hact">${link}</div></div>`;
+  };
+  // a postal code that is an HDB block with a position on the layer: one row to its resale prices
+  const hdbOfAddr = (a) => { if (!a || !M.HDBM || !a.blk) return null; const rk = window.GW_POSTAL.roadKey(a.road), b = String(a.blk).toUpperCase(); return M.HDBM.pts.find((p) => p.block === b && window.GW_POSTAL.roadKey(p.street) === rk) || null; };
   /* what the search box offers for what is typed: names from the map's own data, or (for a six-digit number) the address OneMap finds for that postal code */
   function suggestions() {
-    const code = M.postalCode(S.q); if (!code) return { list: M.places(S.q), msg: '' };
+    const code = M.postalCode(S.q); if (!code) { if (!M.HDBM && /^\s*(blk|block)?\s*\d{1,4}[a-z]?\b/i.test(S.q)) loadHdb().then(() => { if (S.suggOpen) refreshSugg(); }); return { list: M.places(S.q), msg: '' }; }
     const r = PCR[code];
     if (!r) { PCR[code] = { state: 'loading', list: [] }; M.lookupPostal(code).then((x) => { PCR[code] = x; if (M.postalCode(S.q) === code && S.suggOpen) refreshSugg(); }); return { list: [], msg: PCMSG.loading(code) }; }
     if (r.state === 'ok') return { list: r.list.map((o) => ({ t: 'postal', n: o.n, label: o.title, sub: o.sub })), msg: '' };
@@ -209,11 +244,13 @@
       const n = mobile && !S.more ? 0 : 6;
       body += `<div class="sec"><div class="sh"><b>Developments${help('Most active in the last 12 months first. Select one to see prices by size.', 'How developments are ordered')}</b><span>${d.devs.length} with recorded sales</span></div>${n ? d.devs.slice(0, n).map((p) => devRow({ p, e: M.EV[p.n] }, false)).join('') : ''}</div>${d.ups.length && n ? `<div class="sec"><div class="sh"><b>New launches and sites</b><span>${d.ups.length} with no recorded sales</span></div>${d.ups.slice(0, 3).map((p) => `<button type="button" class="nb" data-pick="dev|${esc(p.n)}"><b>${esc(p.n)}</b><span class="m">${esc(M.upTag(p))}</span><i aria-hidden="true">›</i></button>`).join('')}</div>` : ''}`;
     } else {
-      const nx = M.RADII[M.RADII.indexOf(d.r) + 1];
-      body = `<div class="sec" style="margin-top:14px;padding-top:0;border:0"><div class="sh"><b>Developments within ${radText(d.r)}${help(d.t === 'mrt' ? 'Straight-line distance from the nearest exit, not walking time.' : d.t === 'road' ? 'Straight-line distance from the middle of the road, not walking time. The road’s position is approximate, and no house is placed on it.' : 'Straight-line distance, not walking time. Living near a school does not decide admission; check the MOE registration rules.', 'How distances are measured')}</b><span>${d.list.length} with recorded sales</span></div>${radHtml()}${d.list.length ? d.list.slice(0, mobile && !S.more ? 3 : 6).map((x) => devRow(x)).join('') : `<p class="basis" style="margin:8px 0 0">None with recorded sales within ${radText(d.r)}.</p>${nx ? `<button type="button" class="lnk" data-pr="${nx}">Look within ${radText(nx)} ›</button>` : ''}`}</div>${d.ups && d.ups.length && (!mobile || S.more) ? `<div class="sec"><div class="sh"><b>New launches and sites${help('Launches and awarded government land sale sites with a verified location. They have no recorded sales, so no prices are shown.', 'About these')}</b><span>${d.ups.length} within ${radText(d.r)}</span></div>${d.ups.slice(0, 3).map(upRow).join('')}</div>` : ''}${d.t === 'road' ? roadLanded(d) : ''}`;
+      const nx = M.RADII[M.RADII.indexOf(d.r) + 1], hb = d.t === 'postal' ? hdbOfAddr(M.PC[pl.n]) : null;
+      if (d.t === 'postal' && !M.HDBM && !hdbP) loadHdb().then((ok) => { if (ok && S.place && S.place.t === 'postal') render(); });
+      const hideDevs = d.t === 'hdb' && mobile && !S.more;
+      body = (d.t === 'hdb' ? hdbSection(d) : hb ? `<div class="sec" style="margin-top:14px;padding-top:0;border:0"><button type="button" class="nb" data-pick="hdb|${esc(hb.key)}"><b>HDB resale prices for Blk ${esc(hb.block)}</b><span class="m">By flat type, from HDB records</span><i aria-hidden="true">›</i></button></div>` : '') + (hideDevs ? '' : `<div class="sec" style="margin-top:14px;padding-top:0;border:0"><div class="sh"><b>Developments within ${radText(d.r)}${help(d.t === 'mrt' ? 'Straight-line distance from the nearest exit, not walking time.' : d.t === 'road' ? 'Straight-line distance from the middle of the road, not walking time. The road’s position is approximate, and no house is placed on it.' : 'Straight-line distance, not walking time. Living near a school does not decide admission; check the MOE registration rules.', 'How distances are measured')}</b><span>${d.list.length} with recorded sales</span></div>${radHtml()}${d.list.length ? d.list.slice(0, mobile && !S.more ? 3 : 6).map((x) => devRow(x)).join('') : `<p class="basis" style="margin:8px 0 0">None with recorded sales within ${radText(d.r)}.</p>${nx ? `<button type="button" class="lnk" data-pr="${nx}">Look within ${radText(nx)} ›</button>` : ''}`}</div>${d.ups && d.ups.length && (!mobile || S.more) ? `<div class="sec"><div class="sh"><b>New launches and sites${help('Launches and awarded government land sale sites with a verified location. They have no recorded sales, so no prices are shown.', 'About these')}</b><span>${d.ups.length} within ${radText(d.r)}</span></div>${d.ups.slice(0, 3).map(upRow).join('')}</div>` : ''}${d.t === 'road' ? roadLanded(d) : ''}`);
     }
     if (!mobile) return `<aside class="dp" aria-label="${esc(d.title)}"><div class="dp-in">${head}${body}</div></aside>`;
-    const more = (d.t === 'area' ? d.devs.length : d.list.length + (d.ups ? d.ups.length : 0)) > 3 ? `<div class="bs-act"><button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">${d.t === 'area' ? 'Developments' : 'More developments'} ${S.more ? '⌄' : '⌃'}</button></div>` : '';
+    const more = (d.t === 'area' ? d.devs.length : d.list.length + (d.ups ? d.ups.length : 0)) > (d.t === 'hdb' ? 0 : 3) ? `<div class="bs-act"><button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">${d.t === 'area' ? 'Developments' : d.t === 'hdb' ? 'Developments nearby' : 'More developments'} ${S.more ? '⌄' : '⌃'}</button></div>` : '';
     return `<aside class="bs${S.more ? ' open' : ''}" aria-label="${esc(d.title)}"><div class="bs-hd"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}</div>${body}${more}</aside>`;
   }
   function startCard(mobile) {
@@ -225,7 +262,7 @@
   const mode = () => S.place ? 'place' : (S.start || !S.proj) ? 'start' : 'dev';
   function legendHtml() {
     const md = mode(), shown = md === 'dev' ? S.proj : null, sp = shown && M.BY[shown].pos ? shown : null, L = S.layers;
-    return `<div class="mapkey" aria-label="Map key">${L.homes ? '<span><i class="a"></i>Development</span>' : ''}${sp || md === 'place' ? '<span><i class="s"></i>Selected</span>' : ''}${L.mrt ? '<span><i class="m"></i>MRT</span>' : ''}${L.school && M.hasSchools() ? '<span><i class="sc"></i>School</span>' : ''}${L.shops ? '<span><i class="sh"></i>Shops and parks</span>' : ''}${sp && M.EV[sp] ? '<span><i class="t"></i>Nearby comparison</span>' : ''}${L.launch && M.UP.some((p) => p.pos) ? '<span><i class="u"></i>New launch or site</span>' : ''}</div>`;
+    return `<div class="mapkey" aria-label="Map key">${L.homes ? '<span><i class="a"></i>Development</span>' : ''}${sp || md === 'place' ? '<span><i class="s"></i>Selected</span>' : ''}${L.mrt ? '<span><i class="m"></i>MRT</span>' : ''}${L.school && M.hasSchools() ? '<span><i class="sc"></i>School</span>' : ''}${L.shops ? '<span><i class="sh"></i>Shops and parks</span>' : ''}${L.hdb && M.HDBM ? '<span><i class="hd"></i>HDB block</span>' : ''}${sp && M.EV[sp] ? '<span><i class="t"></i>Nearby comparison</span>' : ''}${L.launch && M.UP.some((p) => p.pos) ? '<span><i class="u"></i>New launch or site</span>' : ''}</div>`;
   }
   function stage() {
     const m = narrow(), md = mode(), shown = md === 'dev' ? S.proj : null, sp = shown && M.BY[shown].pos ? shown : null;
@@ -249,11 +286,12 @@
     const card = $('.dp,.bs'); if (!card) return render(); const sc = card.querySelector('.dp-in'), top = sc ? sc.scrollTop : card.scrollTop, m = narrow();
     card.outerHTML = S.place ? placeCard(S.place, m) : cardFor(S.proj, m);
     const n = $('.dp,.bs'), s2 = n.querySelector('.dp-in'); if (s2) s2.scrollTop = top; else n.scrollTop = top;
+    const st = $('.mapstage'); if (st && n.classList.contains('bs')) st.style.setProperty('--shh', n.offsetHeight + 'px');
     view.update(mapProps(false));
   }
   const sheetH = () => (($('.bs') || {}).offsetHeight || 300) + 16;
   const DEVPAD = (m) => m ? { tl: [28, S.more && !S.min ? 16 : 84], br: [28, sheetH()] } : { tl: [48, 84], br: [420, 70] };
-  const mapProps = (fit) => Object.assign(mapProps1(fit), { layers: S.layers });
+  const mapProps = (fit) => Object.assign(mapProps1(fit), { layers: S.layers, hdbSel: S.place && S.place.t === 'hdb' ? S.place.n : null });
   const evOK = () => { for (const k in M.EV) return true; return false; };   // the prices have arrived, so the card (and the sheet's height) is final
   function mapProps1(fit) {
     const md = mode(), m = narrow(), pad = DEVPAD(m);
@@ -262,7 +300,7 @@
       const d = M.placeData(S.place, S.pr); if (!d) return { keep: false, key: 'start|' + (m ? 'm' : 'd'), projects: M.PM, selected: null, cmp: [], amen: [], world: true, fit, minZoom: 11, pad: m ? { tl: [20, 84], br: [20, (($('.bs') || {}).offsetHeight || 150) + 16] } : { tl: [20, 76], br: [360, 60] } };   // a place not found (an old link, or the road files still loading): the whole island, never an error
       if (d.t === 'area') return { key: 'a|' + S.place.n + '|' + (m ? 'm' + (S.more ? 'x' : '') + (S.min ? 'n' : '') : 'd') + (evOK() ? '' : '|wait'), ready: evOK(), projects: M.PM, selected: null, cmp: [], amen: [], bounds: d.bounds, areaRings: d.a.rings, place: { lat: null, chipAt: d.centre, label: d.title, sub: 'Neighbourhood' }, fit, minZoom: 11, pad };
       const list = d.list.slice(0, m && !S.more ? 3 : 6), cmp = list.map((x) => x.p.n), dl = d.r / 111320, dn = d.r / (111320 * Math.cos(d.lat * Math.PI / 180));
-      return { key: 'p|' + S.place.t + S.place.n + '|' + d.r + '|' + (m ? 'm' + (S.more ? 'x' : '') + (S.min ? 'n' : '') : 'd') + (evOK() ? '' : '|wait'), ready: evOK(), projects: M.PM, selected: null, cmp, amen: [], circle: { lat: d.lat, lon: d.lon, r: d.r }, place: { lat: d.lat, lon: d.lon, label: d.title, sub: d.t === 'mrt' ? 'MRT station' : d.s.lab }, fitPts: [[d.lat, d.lon], [d.lat + dl, d.lon], [d.lat - dl, d.lon], [d.lat, d.lon + dn], [d.lat, d.lon - dn]], zoom: 15, minZoom: 11, fit, pad };
+      return { key: 'p|' + S.place.t + S.place.n + '|' + d.r + '|' + (m ? 'm' + (S.more ? 'x' : '') + (S.min ? 'n' : '') : 'd') + (evOK() ? '' : '|wait'), ready: evOK(), projects: M.PM, selected: null, cmp, amen: [], circle: { lat: d.lat, lon: d.lon, r: d.r }, place: { lat: d.lat, lon: d.lon, label: d.title, sub: d.t === 'mrt' ? 'MRT station' : d.s.lab, keep: d.t === 'hdb' }, fitPts: [[d.lat, d.lon], [d.lat + dl, d.lon], [d.lat - dl, d.lon], [d.lat, d.lon + dn], [d.lat, d.lon - dn]], zoom: 15, minZoom: 11, fit, pad };
     }
     return mapProps0(fit);
   }
@@ -278,9 +316,11 @@
   }
   function mountMap(el) {
     const sh = $('.bs'); if (sh) $('.mapstage').style.setProperty('--shh', sh.offsetHeight + 'px');
-    view.create(el, { onSelect: dotPick, onPlace: placePick, persistPos: true, onSources: openSources });
+    view.create(el, { onSelect: dotPick, onPlace: placePick, onHdb: hdbPick, persistPos: true, onSources: openSources });
     const pr = mapProps(true); pr.fit = true; view.update(pr);
   }
+  // a block chosen on the map: the radius the visitor chose stays, the map centres on the block, and the panel changes to the block
+  function hdbPick(key) { S.start = false; S.more = false; S.min = false; S.hl = null; S.nall = false; S.hft = null; S.place = { t: 'hdb', n: key }; go(true); }
   function dotPick(n) { loadProject(n); S.start = false; go(true); }
   function placePick(t, n) { S.start = false; S.more = false; S.min = false; S.hl = null; S.pr = 1000; S.nall = false; S.place = { t, n }; go(true); }
   function pickItem(v) { const i = v.indexOf('|'), t = v.slice(0, i), n = v.slice(i + 1); S.suggOpen = false; S.q = ''; S.qi = -1; if (t === 'dev') dotPick(n); else placePick(t, n); }
@@ -294,6 +334,7 @@
     el.innerHTML = `Project locations and prices: URA private residential transaction data (PMI_Resi_Transaction), to ${esc(ym(+String(M.latestMonth).replace('-', '')))}. Developments are private condominiums, executive condominiums (ECs) and strata cluster housing, each compared only with its own type. Neighbourhood data: contains information from ${list}, from <a href="https://data.gov.sg" target="_blank" rel="noopener noreferrer">data.gov.sg</a>, made available under the terms of the ${lic}.` +
       (geo.length ? ` School and supermarket positions: contains information from ${line(geo[0])} from <a href="https://www.onemap.gov.sg" target="_blank" rel="noopener noreferrer">onemap.gov.sg</a>, made available under the terms of the ${lic}.` : '') +
       (M.hasRoads() ? ' Road positions: OneMap, Singapore Land Authority, made available under the terms of the ' + lic + '; one approximate point for each road, never a house.' : '') +
+      (M.HDBM ? ` HDB resale blocks: ${esc(M.HDBM.doc.resales)}; block positions from OneMap (Singapore Land Authority), ${M.HDBM.pts.length.toLocaleString('en-SG')} of ${(M.HDBM.doc.coverage.blocks).toLocaleString('en-SG')} blocks located, and a block with no verified position is not shown. These are past resale registrations, not current listings or an official HDB valuation.` : '') +
       (M.upDoc && M.UP.length ? ` New launches and sites: ${M.upDoc.sources.map(line).join('; ')}. Under-construction launches are placed from OneMap’s address records and awarded sites from the official URA site boundary; a project with no verified location is not placed on the map. Postal codes are looked up through OneMap when typed.` : ' Postal codes are looked up through OneMap when typed.') +
       ` Basemap: OneMap, © contributors | Singapore Land Authority. Distances are straight-line. Not endorsed by any of these agencies.`;
   }
@@ -321,7 +362,7 @@
     if (fl) { try { sessionStorage.setItem('kpt.map.out', JSON.stringify({ id: fl.dataset.mFull, h: location.hash, n: history.length })); } catch (x) { /* Back to Map then opens the Map for that development */ } }
     if (SP.open && !(e.target.closest && (e.target.closest('#sources') || e.target.closest('.m-src')))) closeSources(false);
     if (!M) return;
-    const t = e.target.closest('[data-lyr],[data-dpclose],[data-dpmin],[data-dpshow],[data-dpmore],[data-nall],[data-dot],[data-radius],[data-pr],[data-am-more],[data-pick],[data-zoom],[data-band],[data-rc],[data-am],[data-sources]');
+    const t = e.target.closest('[data-lyr],[data-dpclose],[data-dpmin],[data-dpshow],[data-dpmore],[data-nall],[data-dot],[data-radius],[data-pr],[data-am-more],[data-pick],[data-zoom],[data-band],[data-rc],[data-am],[data-sources],[data-hft]');
     if (!t) { if (S.lyrOpen && !e.target.closest('.lyr')) { S.lyrOpen = false; drawLayers(); } if (!e.target.closest('.srch') && S.suggOpen) { S.suggOpen = false; render(); } return; }
     if (S.lyrOpen && !t.hasAttribute('data-lyr') && !e.target.closest('.lyr')) { S.lyrOpen = false; drawLayers(); }
     const d = t.dataset;
@@ -340,6 +381,7 @@
     if (d.band) { S.band = S.band === d.band ? null : d.band; refreshCard(); return; }
     if (d.rc) { S.rc[d.rc] = !S.rc[d.rc]; refreshCard(); return; }
     if (d.am) { S.hl = S.hl === d.am ? null : d.am; view.hl(S.hl, true, narrow() ? { tl: [28, 84], br: [28, sheetH()] } : { tl: [48, 84], br: [420, 70] }); return; }
+    if (d.hft) { S.hft = S.hft === d.hft ? null : d.hft; history.replaceState(null, '', addr()); lastHash = location.hash; refreshCard(); return; }
     if (d.pick) { pickItem(d.pick); return; }
     if (d.zoom) { if (+d.zoom > 0) view.zoom(1); else view.zoomOut(1); return; }
   });
@@ -360,6 +402,7 @@
   document.addEventListener('change', (e) => {
     const c = M && e.target.matches && e.target.matches('[data-layer]') ? e.target : null; if (!c) return;
     S.layers[c.dataset.layer] = c.checked; LY.save(S.layers); view.update({ layers: S.layers }); const k = $('.mapkey'); if (k) k.outerHTML = legendHtml();
+    if (c.dataset.layer === 'hdb' && c.checked && !M.HDBM) loadHdb().then((ok) => { if (!ok) { S.layers.hdb = false; LY.save(S.layers); drawLayers(); const k2 = $('.mapkey'); if (k2) k2.outerHTML = legendHtml(); return; } view.update({ layers: S.layers, hdbSel: S.place && S.place.t === 'hdb' ? S.place.n : null }); const k2 = $('.mapkey'); if (k2) k2.outerHTML = legendHtml(); });
   });
   /* a section opened or closed: remembered while the same development stays selected; the amenities section also decides how many amenities are marked on the map */
   document.addEventListener('toggle', (e) => {
@@ -377,8 +420,17 @@
   const fail = (msg) => { app.innerHTML = `<div class="kpm-state"><h1>The map could not load</h1><p>${esc(msg)} Please refresh the page. If it keeps happening, the Research pages still work: <a href="../">open Research</a>.</p></div>`; };
   // New launches and awarded GLS sites (data/map/upcoming.json) load with the places; if that file is missing the Map simply has none of them.
   Promise.all([getJson('places.json'), getJson('amen.json'), getJson('upcoming.json').catch(() => null)]).then(([pl, am, up]) => {
-    M = K.create(pl, am, S); M.setUpcoming(up); M.upDoc = up; view = window.KPT_MAP_VIEW(K, M); if (location.hash === '#sources') { try { history.replaceState(null, '', location.pathname + location.search); lastHash = location.hash; } catch (x) { /* ignore */ } SP.pending = true; } parseHash(); notices(); render(); if (SP.pending) openSources();
+    M = K.create(pl, am, S); M.hdbOK = true; M.setUpcoming(up); M.upDoc = up; view = window.KPT_MAP_VIEW(K, M); if (location.hash === '#sources') { try { history.replaceState(null, '', location.pathname + location.search); lastHash = location.hash; } catch (x) { /* ignore */ } SP.pending = true; } parseHash(); notices(); render(); if (SP.pending) openSources();
+    // Research's first search sends a place, road or station here as words only (never a postal code or anything private): one clear match opens, otherwise the choices are shown
+    let hq = ''; try { hq = sessionStorage.getItem('kpt.map.q') || ''; sessionStorage.removeItem('kpt.map.q'); } catch (x) { /* no storage: the Map opens as usual */ }
+    if (hq && S.start && !S.place) {
+      const low = (x) => String(x || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(), want = low(hq), hit = M.places(hq).filter((x) => low(x.label || x.n) === want || low(x.n) === want);
+      if (hit.length === 1) pickItem(hit[0].t + '|' + hit[0].n);
+      else { S.q = hq.slice(0, 80); S.suggOpen = true; render(); const i = $('#q'); if (i) i.focus(); }
+    }
     window.KPT_MAP_APP = { S, M, view, render, go };
+    // HDB block positions load only when they are wanted: a shared HDB link, or the layer switched on in an earlier visit
+    if ((S.place && S.place.t === 'hdb') || S.layers.hdb) loadHdb().then((ok) => { if (!ok && S.layers.hdb) { S.layers.hdb = false; } else if (ok) { notices(); render(); } });
     // Prices load after the first paint; schools and supermarkets only if that file has been cleared for publication (no file, no layer).
     getJson('ev.json').then((ev) => { M.setEvidence(ev); render(); window.KPT_MAP_APP.evReady = true; }).catch(() => fail('Prices could not be loaded.'));
     if (am.extra) getJson(am.extra).then((ex) => { M.setExtra(ex); notices(); render(); }).catch(() => {});

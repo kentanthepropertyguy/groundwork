@@ -11,26 +11,26 @@
   const ATTR = '<img src="https://www.onemap.gov.sg/web-assets/images/logo/om_logo.png" alt="" onerror="this.style.display=\'none\'"> <a href="https://www.onemap.gov.sg/" target="_blank" rel="noopener">OneMap</a> &copy; contributors | Singapore Land Authority';
 
   /* ---- Layers: what the map shows besides the selection. One small control; the choice is remembered for the visit (this tab) and shared by the Map and Budget Search. ---- */
-  const LKEY = 'kpt.map.layers', LDEF = { homes: true, launch: true, mrt: true, school: false, shops: false };
-  const LLAB = { homes: 'Private homes', launch: 'New launches and GLS sites', mrt: 'MRT stations', school: 'Schools', shops: 'Shops and parks' };
+  const LKEY = 'kpt.map.layers', LDEF = { homes: true, launch: true, mrt: true, school: false, shops: false, hdb: false };
+  const LLAB = { homes: 'Private homes', launch: 'New launches and GLS sites', mrt: 'MRT stations', school: 'Schools', shops: 'Shops and parks', hdb: 'HDB resale blocks' }, LNOTE = { hdb: 'Zoom in to see blocks' };
   const layers = {
     DEF: LDEF,
     load() { const o = Object.assign({}, LDEF); try { const j = JSON.parse(sessionStorage.getItem(LKEY) || 'null'); if (j && typeof j === 'object') Object.keys(LDEF).forEach((k) => { if (typeof j[k] === 'boolean') o[k] = j[k]; }); } catch (e) { /* storage unavailable: the defaults */ } return o; },
     save(st) { try { sessionStorage.setItem(LKEY, JSON.stringify(st)); } catch (e) { /* the choice just is not remembered */ } },
     /* only the layers that have something behind them on this page */
-    avail(M) { return Object.keys(LDEF).filter((k) => k === 'homes' || k === 'mrt' || (k === 'launch' && M.UP.some((p) => p.pos)) || (k === 'school' && M.hasSchools()) || (k === 'shops' && (M.AM.parks.length || M.AM.food.length || M.hasShops()))); },
+    avail(M) { return Object.keys(LDEF).filter((k) => k === 'homes' || k === 'mrt' || (k === 'launch' && M.UP.some((p) => p.pos)) || (k === 'school' && M.hasSchools()) || (k === 'shops' && (M.AM.parks.length || M.AM.food.length || M.hasShops())) || (k === 'hdb' && M.hdbOK)); },
     label: (k) => LLAB[k],
     /* the control: a quiet button and, when open, a small list of switches */
     html(st, open, M) {
       const av = layers.avail(M);
-      return `<div class="lyr"><button type="button" class="lyr-b" data-lyr aria-expanded="${!!open}" aria-controls="lyr-p"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/></svg>Layers</button>${open ? `<div class="lyr-p" id="lyr-p" role="group" aria-label="Map layers">${av.map((k) => `<label class="lyr-r"><input type="checkbox" data-layer="${k}"${st[k] ? ' checked' : ''}><span>${LLAB[k]}</span></label>`).join('')}</div>` : ''}</div>`;
+      return `<div class="lyr"><button type="button" class="lyr-b" data-lyr aria-expanded="${!!open}" aria-controls="lyr-p"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/></svg>Layers</button>${open ? `<div class="lyr-p" id="lyr-p" role="group" aria-label="Map layers">${av.map((k) => `<label class="lyr-r"><input type="checkbox" data-layer="${k}"${st[k] ? ' checked' : ''}><span>${LLAB[k]}${LNOTE[k] ? ` <em>${LNOTE[k]}</em>` : ''}</span></label>`).join('')}</div>` : ''}</div>`;
     }
   };
 
   root.KPT_MAP_VIEW = function (K, M) {      // K = KPT_MAP (helpers), M = the model made by KPT_MAP.create
     const { esc, icon } = K;
     const canHover = typeof matchMedia === 'function' && matchMedia('(hover: hover) and (pointer: fine)').matches;
-    let map, tiles, layer, labelsG, selG, el, onSelect, onPlace, cur = {}, failed = false, saved = null, stats = null, loadingEl = null, failEl = null, tileTimer = null;
+    let map, tiles, layer, labelsG, selG, hdbG, el, onSelect, onPlace, onHdb, cur = {}, failed = false, saved = null, stats = null, loadingEl = null, failEl = null, tileTimer = null;
 
     /* Where the homes are: the island with the stray outliers trimmed, so the first view is useful straight away. */
     function worldBounds() {
@@ -56,21 +56,21 @@
     /* the first view can sit between two zoom levels (so the island fills the screen); putting it back must not round it */
     function setViewExact(c, z) { const ss = map.options.zoomSnap; map.options.zoomSnap = 0.25; try { map.setView(c, z, { animate: false }); } finally { map.options.zoomSnap = ss; } }
     function create(container, opts) {
-      el = container; onSelect = opts.onSelect; onPlace = opts.onPlace; cur = {}; el.classList.add('kpm-soft');
+      el = container; onSelect = opts.onSelect; onPlace = opts.onPlace; onHdb = opts.onHdb; cur = {}; el.classList.add('kpm-soft');
       pos0 = opts.persistPos ? readPos() : null;
       map = L.map(el, { zoomControl: false, attributionControl: false, scrollWheelZoom: true, zoomSnap: 1, dragging: true, tap: true, inertia: true });
       tiles = L.tileLayer(TILES, { detectRetina: true, maxZoom: 19, minZoom: 11 }).addTo(map);
       const ac = L.control.attribution({ position: 'bottomright', prefix: false }).addAttribution(ATTR).addTo(map);
       // The full-screen Map keeps its sources behind this small link, beside the OneMap attribution that is always shown.
       if (opts.onSources) { const b = document.createElement('button'); b.type = 'button'; b.className = 'm-src'; b.setAttribute('aria-haspopup', 'dialog'); b.textContent = 'Data & sources'; b.addEventListener('click', (ev) => { ev.preventDefault(); opts.onSources(); }); ac.getContainer().appendChild(b); }
-      layer = L.layerGroup().addTo(map); labelsG = L.layerGroup().addTo(map); selG = L.layerGroup().addTo(map);
+      layer = L.layerGroup().addTo(map); hdbG = L.layerGroup().addTo(map); labelsG = L.layerGroup().addTo(map); selG = L.layerGroup().addTo(map);
       // Basemap health: count real tile loads and errors (Leaflet's 'load' fires even when every tile failed).
       stats = { ok: 0, err: 0 }; failed = false; el.setAttribute('data-tiles', 'loading');
       loadingEl = document.createElement('div'); loadingEl.className = 'tilewait'; loadingEl.textContent = 'Loading the map…'; el.appendChild(loadingEl);
       tiles.on('tileload', () => { stats.ok++; if (stats.ok === 1) { el.setAttribute('data-tiles', 'loaded'); if (loadingEl) { loadingEl.remove(); loadingEl = null; } if (failed) recover(); } });
       tiles.on('tileerror', () => { stats.err++; if (stats.ok === 0 && stats.err >= 3) fail(); });
       clearTimeout(tileTimer); tileTimer = setTimeout(() => { if (stats && stats.ok === 0) fail(); }, 12000);
-      map.on('zoomend', () => { if (cur.projects) update({}); }); map.on('moveend', () => { if (cur.projects) drawLabels(); if (opts.persistPos) rememberPos(); });
+      map.on('zoomend', () => { if (cur.projects) update({}); }); map.on('moveend', () => { if (cur.projects) { drawLabels(); drawHdb(); } if (opts.persistPos) rememberPos(); });
       return map;
     }
     function fail() {
@@ -87,7 +87,7 @@
        Runs after every placement, so a restored view or a sheet that has grown or shrunk (rows added, expanded, resized) never leaves the dot underneath it. */
     const CHIP_UP = 76, DOT_DOWN = 34;   // the chip reaches this far above the dot, the dot, its halo and the OneMap attribution strip this far below
     function keepSelectedInView() {
-      const sel = cur.selected && M.BY[cur.selected] && M.BY[cur.selected].pos ? M.BY[cur.selected] : null; if (!sel || !cur.pad || !map) return;
+      const sel = cur.selected && M.BY[cur.selected] && M.BY[cur.selected].pos ? M.BY[cur.selected] : (cur.place && cur.place.keep && cur.place.lat != null ? cur.place : null); if (!sel || !cur.pad || !map) return;   // an HDB block's sheet grows when its resale records arrive: the block is kept in view then too
       const pd = cur.pad, sz = map.getSize(), pt = map.latLngToContainerPoint([sel.lat, sel.lon]);
       const top = pd.tl[1] + CHIP_UP, bottom = sz.y - pd.br[1] - DOT_DOWN, left = pd.tl[0], right = sz.x - pd.br[0];   // the dot may sit anywhere in this box
       const clampY = bottom < top ? bottom + 24 : Math.min(Math.max(pt.y, top), bottom), clampX = right < left ? (left + right) / 2 : Math.min(Math.max(pt.x, left), right);
@@ -128,7 +128,29 @@
       for (const n of cmp) { const p = BY[n]; if (p && p.pos) dot(p, { fillColor: '#0E8C89', fillOpacity: .95, weight: 2, match: true }).addTo(layer); }
       if (cur.circle) L.circle([cur.circle.lat, cur.circle.lon], { radius: cur.circle.r, color: '#2E4FD1', weight: 2, opacity: cur.circle.soft ? .55 : .8, dashArray: '7 5', fillColor: '#2E4FD1', fillOpacity: cur.circle.soft ? .02 : .06, interactive: false }).addTo(selG);
       if (cur.areaRings) L.polygon(cur.areaRings, { color: '#14203F', weight: 2, opacity: .75, fillColor: '#2E4FD1', fillOpacity: .05, dashArray: '6 5', interactive: false }).addTo(selG);
-      drawLabels();
+      drawHdb(); drawLabels();
+    }
+    /* The HDB resale layer: blocks only (never a price or a label on the map), and only from street level. Zoomed out they gather into counted groups; zoom in and they separate.
+       The chosen block is drawn with a ring. Independent of every other layer. */
+    function drawHdb() {
+      if (!hdbG) return; hdbG.clearLayers();
+      const LY = Object.assign({}, LDEF, cur.layers); if (!LY.hdb || !M.HDBM || !map || !map._loaded) return;
+      const z = map.getZoom(); if (z < 13) return;
+      const pts = M.HDBM.within(map.getBounds().pad(0.1)), cell = z >= 17 ? 0 : 46, groups = {}, single = [];
+      pts.forEach((p) => { if (!cell) { single.push([p]); return; } const q = map.latLngToContainerPoint([p.lat, p.lon]), k = Math.floor(q.x / cell) + ':' + Math.floor(q.y / cell); (groups[k] = groups[k] || []).push(p); });
+      const all = cell ? Object.keys(groups).map((k) => groups[k]) : single;
+      all.forEach((g) => {
+        if (g.length === 1) {
+          const p = g[0], on = p.key === cur.hdbSel, mk = L.circleMarker([p.lat, p.lon], { radius: on ? 8 : 5.5, color: on ? '#14203F' : '#fff', weight: on ? 3 : 1.5, fillColor: '#D9822B', fillOpacity: 1, bubblingMouseEvents: false }).addTo(hdbG);
+          mk.bindTooltip('Blk ' + p.block + ' ' + String(p.street).toLowerCase().replace(/(^|[\s-])([a-z])/g, (x, a, b) => a + b.toUpperCase()), { direction: 'top', offset: [0, -6], className: 'hdbtip' });
+          mk.on('click', (ev) => { L.DomEvent.stopPropagation(ev); onHdb && onHdb(p.key); });
+        } else {
+          const la = g.reduce((a, p) => a + p.lat, 0) / g.length, lo = g.reduce((a, p) => a + p.lon, 0) / g.length;
+          const mk = L.marker([la, lo], { icon: L.divIcon({ className: 'hdbg', html: '<span>' + g.length + '</span>', iconSize: [30, 30], iconAnchor: [15, 15] }), keyboard: false, title: g.length + ' HDB blocks. Zoom in.' }).addTo(hdbG);
+          mk.on('click', (ev) => { L.DomEvent.stopPropagation(ev); map.setView([la, lo], Math.min(18, z + 2), { animate: false }); });
+        }
+      });
+      if (cur.hdbSel && M.HDBM.byKey[cur.hdbSel] && !pts.some((p) => p.key === cur.hdbSel)) { const p = M.HDBM.byKey[cur.hdbSel]; L.circleMarker([p.lat, p.lon], { radius: 8, color: '#14203F', weight: 3, fillColor: '#D9822B', fillOpacity: 1, interactive: false }).addTo(hdbG); }
     }
     const pts = new WeakMap();   // a park is a boundary; it is marked at the middle of its first ring
     const parkPt = (k) => { let c = pts.get(k); if (!c) { const r = k.rings[0] || [[0, 0]]; c = { n: k.n, lat: r.reduce((a, q) => a + q[0], 0) / r.length, lon: r.reduce((a, q) => a + q[1], 0) / r.length }; pts.set(k, c); } return c; };
@@ -167,7 +189,7 @@
       }
     }
     function hl(id, pan, pad) { if (!map) return; cur.hl = id; drawLabels(); if (pan && id) { const a = (cur.amen || []).find((x) => x.id === id); if (a) map.panInside([a.lat, a.lon], { paddingTopLeft: pad ? pad.tl : [40, 90], paddingBottomRight: pad ? pad.br : [40, 40], animate: true }); } }
-    return { create, update, hl, zoom: (d) => map.zoomIn(d), zoomOut: (d) => map.zoomOut(d), get: () => map, destroy: () => { clearTimeout(tileTimer); if (map) { saved = { key: cur.key, center: map.getCenter(), zoom: map.getZoom() }; map.remove(); map = null; } }, failed: () => failed, invalidate: () => map && map.invalidateSize() };
+    return { create, update, drawHdb, hl, zoom: (d) => map.zoomIn(d), zoomOut: (d) => map.zoomOut(d), get: () => map, destroy: () => { clearTimeout(tileTimer); if (map) { saved = { key: cur.key, center: map.getCenter(), zoom: map.getZoom() }; map.remove(); map = null; } }, failed: () => failed, invalidate: () => map && map.invalidateSize() };
   };
   root.KPT_MAP_VIEW.layers = layers;
 })(typeof self !== 'undefined' ? self : this);

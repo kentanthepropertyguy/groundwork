@@ -143,7 +143,7 @@ try:
         t, h = ask('368060'); shot(pg, f'followup-search-368060-{vn}')
         check(f'{vn}: 368060 gives a resolved address, not "Nothing matches"', 'Mount Vernon' in t and 'Nothing matches' not in t, t)
         check(f'{vn}: a condo goes to its Research page, with View on Map second', 'research/#/p/bartley-ridge' in h[0] and 'research/map/#pl=postal' in h[1] and 'View on Map' in t, h)
-        t, h = ask('570155'); check(f'{vn}: an HDB block goes to HDB property values', 'journey/worth/#pc=570155' in h[0] and 'HDB' in t, (t, h))
+        t, h = ask('570155'); check(f'{vn}: an HDB block goes to its HDB Research page, with View on Map second', 'research/#/hdb/bishan/155/bishan-st-13' in h[0] and 'research/map/#pl=postal' in h[1] and 'HDB' in t, (t, h))
         t, h = ask('575749'); check(f'{vn}: Jadescape goes to its Research page', 'research/#/p/jadescape' in h[0], h)
         t, h = ask('545688'); check(f'{vn}: an EC goes to its Research page', 'research/#/p/hundred-palms-residences' in h[0] and 'Executive' in t, (t, h))
         t, h = ask('999999'); check(f'{vn}: an invalid code is explained', 'not a Singapore postal code' in t and not h, t)
