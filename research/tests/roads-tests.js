@@ -70,8 +70,8 @@ t('every page that loads the shared search script points at its current version 
   walk(root).forEach((f) => { const m = /gw-nav\.js\?v=([0-9a-f]+)/.exec(fs.readFileSync(f, 'utf8')); if (m) { n++; assert.strictEqual(m[1], cur, path.relative(root, f)); } });
   assert.ok(n >= 20, 'pages ' + n);
 });
-t('the Browse page script and the Map scripts carry new versions', () => {
-  assert.ok(new RegExp('kpt-directory\\.js\\?v=' + sha('assets/js/kpt-directory.js')).test(fs.readFileSync(path.join(root, 'projects/index.html'), 'utf8')));
+t('the Browse address redirects into Research, and the Map scripts carry new versions', () => {
+  assert.ok(/research\/#\/browse/.test(fs.readFileSync(path.join(root, 'projects/index.html'), 'utf8')));
   const m = fs.readFileSync(path.join(root, 'research/map/index.html'), 'utf8'); ['core', 'view', 'app'].forEach((x) => assert.ok(new RegExp('kpt-map-' + x + '\\.js\\?v=2026-10-\\d+\\.\\d+').test(m), x));
 });
 console.log('\n' + pass + ' passed, ' + fail + ' failed'); process.exit(fail ? 1 : 0);

@@ -27,7 +27,7 @@ def opn(ctx, path):
     pg.goto(BASE + path); pg.wait_for_timeout(700); return pg, errs
 METRICS = """(() => { const h = document.querySelector('h1'), c = getComputedStyle(h), r = h.getBoundingClientRect();
   return { size: parseFloat(c.fontSize), align: c.textAlign, left: Math.round(r.left), scroll: document.documentElement.scrollWidth <= innerWidth + 1 }; })()"""
-PAGES = [('Guide me', '/journey/'), ('Property values', '/journey/worth/'), ('Tools', '/tools/'), ('Budget Search', '/tools/what-can-i-buy/'), ('Browse', '/projects/'), ('Mortgage', '/tools/mortgage/'), ('HDB Upgrade', '/tools/hdb-upgrade/'), ('Homepage', '/'), ('Research', '/research/')]
+PAGES = [('Guide me', '/journey/'), ('Property values', '/journey/worth/'), ('Tools', '/tools/'), ('Budget Search', '/tools/what-can-i-buy/'), ('Mortgage', '/tools/mortgage/'), ('HDB Upgrade', '/tools/hdb-upgrade/'), ('Homepage', '/'), ('Research', '/research/')]
 try:
   with sync_playwright() as p:
     br = p.chromium.launch()
@@ -37,10 +37,10 @@ try:
             pg, errs = opn(ctx, path); m = pg.evaluate(METRICS)
             check(f'{vn}: {nm}: the page heading is {want}px', abs(m['size'] - want) < 0.6, m)
             check(f'{vn}: {nm}: no sideways scrolling and no script errors', m['scroll'] and not errs, (m, errs[:2]))
-            if nm != 'Research': check(f'{vn}: {nm}: the heading is left-aligned', m['align'] in ('left', 'start'), m)
+            check(f'{vn}: {nm}: the heading is left-aligned', m['align'] in ('left', 'start'), m)
             left_edges[nm] = m['left']; pg.close()
         # the content below a heading starts where the heading starts
-        for nm, path, sel in (('Guide me', '/journey/', '.gw-paths a'), ('Property values', '/journey/worth/', '[data-vx-pc] input, .gw-vx-pc input'), ('Tools', '/tools/', '.gw-tl')):
+        for nm, path, sel in (('Guide me', '/journey/', '.gw-paths a'), ('Property values', '/journey/worth/', '[data-vx-pc] input, .gw-vx-pc input'), ('Tools', '/tools/', '.gw-tl'), ('Research', '/research/', '#q')):
             pg, errs = opn(ctx, path); l = pg.evaluate("(s) => { const e = [...document.querySelectorAll(s)].find(x => x.getBoundingClientRect().width > 0); return e ? Math.round(e.getBoundingClientRect().left) : null }", sel)
             check(f'{vn}: {nm}: the content lines up with the heading', l is not None and abs(l - left_edges[nm]) <= 2, (l, left_edges[nm])); pg.close()
         # the Ken band is a compact strip, not a section of its own

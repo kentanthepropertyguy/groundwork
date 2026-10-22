@@ -60,7 +60,9 @@
       pos0 = opts.persistPos ? readPos() : null;
       map = L.map(el, { zoomControl: false, attributionControl: false, scrollWheelZoom: true, zoomSnap: 1, dragging: true, tap: true, inertia: true });
       tiles = L.tileLayer(TILES, { detectRetina: true, maxZoom: 19, minZoom: 11 }).addTo(map);
-      L.control.attribution({ position: 'bottomright', prefix: false }).addAttribution(ATTR).addTo(map);
+      const ac = L.control.attribution({ position: 'bottomright', prefix: false }).addAttribution(ATTR).addTo(map);
+      // The full-screen Map keeps its sources behind this small link, beside the OneMap attribution that is always shown.
+      if (opts.onSources) { const b = document.createElement('button'); b.type = 'button'; b.className = 'm-src'; b.setAttribute('aria-haspopup', 'dialog'); b.textContent = 'Data & sources'; b.addEventListener('click', (ev) => { ev.preventDefault(); opts.onSources(); }); ac.getContainer().appendChild(b); }
       layer = L.layerGroup().addTo(map); labelsG = L.layerGroup().addTo(map); selG = L.layerGroup().addTo(map);
       // Basemap health: count real tile loads and errors (Leaflet's 'load' fires even when every tile failed).
       stats = { ok: 0, err: 0 }; failed = false; el.setAttribute('data-tiles', 'loading');

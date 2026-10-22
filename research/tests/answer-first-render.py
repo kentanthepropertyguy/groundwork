@@ -25,7 +25,9 @@ try:
         pg.goto(base); pg.wait_for_selector('#q', timeout=15000)
         pg.type('#q', 'horizon green', delay=5)
         pg.wait_for_selector('#res [role=option], #res button, #res a', timeout=10000)
-        pg.click('#res >> text=Horizon Green >> nth=0'); pg.wait_for_selector('[data-lg-ans]', timeout=10000)
+        pg.click('#res >> text=Horizon Green >> nth=0'); pg.wait_for_url('**/research/map/#p=*', timeout=10000)   # a positioned development opens the Map first; its analysis is one tap away
+        check(vn+': search -> a positioned development opens the Map on it', '#p=horizon-green' in pg.url, pg.url)
+        pg.goto(base + '#/p/horizon-green'); pg.wait_for_selector('[data-lg-ans]', timeout=10000)
         check(vn+': search -> Horizon Green page shows class chip, name and answer', pg.inner_text('[data-lg-cls]') != '' and 'Horizon Green' in pg.inner_text('h1') and pg.query_selector('.lg-ans-v'))
         top = pg.evaluate("[...document.querySelectorAll('.lg-cls,.lg-name,.lg-ans-v,.lg-pill,[data-lg-basis]')].map(e => Math.round(e.getBoundingClientRect().bottom))")
         check(vn+': class, name, price and sample-size line all sit inside the first screen ('+str(max(top))+'px)', max(top) <= (844 if vn == 'phone' else 900), top)

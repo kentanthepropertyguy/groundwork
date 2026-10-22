@@ -158,18 +158,21 @@
       '<p class="gw-fine">' + esc(String(S.band).replace('sqft', 'sq ft')) + ' resales, ' + esc(S.period) + ', median price per square foot</p>' + row(S.a, S.psf[0], 'var(--gw-a)') + row(S.b, S.psf[1], 'var(--gw-b)') +
       '<a class="gw-rex-go" href="sample/" data-gw-nav-to="sample">Open the free sample report ›</a><p class="gw-fine">The sample is prepared with AI assistance from public sources and URA data, not reviewed by Ken.</p></div>';
   }
-  function landingHtml(total) {
-    return '<div class="lg-page"><header class="lg-hero" style="padding-bottom:28px"><div class="lg-wrap">' +
-      '<nav class="gw-secs" aria-label="Ways to use Groundwork"><a href="../journey/" data-gw-nav-to="journey">Guide me</a><a href="../tools/" data-gw-nav-to="tools">Tools</a><a href="./" data-gw-nav-to="research" aria-current="page">Research</a></nav>' +
-      '<p class="lg-kicker">Research</p><h1 class="md" tabindex="-1">Which property are you looking at?</h1>' +
-      '<div class="lg-sb" id="sb" style="width:100%"></div>' +
-      '<p class="lg-fine lg-center" id="lgCount">Type part of a name. If several match, check the street and district to pick the one you mean.</p></div></header>' +
-      '<section class="lg-band tight" style="padding-top:0"><div class="lg-wrap" style="max-width:760px">' +
-      // Everything else in Research, one tap away (the same pages the menu lists under Research).
-      '<div class="gw-rmore"><p class="gw-lane">More ways to research</p><div class="gw-rlinks">' +
-      [['../journey/worth/', 'Property prices &amp; past sales', 'HDB, condo and landed sales · asking price', 'worth'], ['../tools/what-can-i-buy/', 'What can this budget buy?', 'Search by budget, area and must-haves', 'what-can-i-buy'], ['../projects/', 'Browse every development', 'A–Z list', 'directory']]
-        .map((x) => '<a href="' + x[0] + '" data-gw-nav-to="' + x[3] + '"><b>' + x[1] + '</b><small>' + x[2] + '</small></a>').join('') + '</div></div>' + sampleExample() +
-      '<p class="lg-fine lg-center" data-lg-scope>Can’t see it? Research covers private condos and apartments, executive condominiums (ECs) and strata cluster houses with sales in the last five years, each kept to its own type. A launch with no sales yet is listed without prices and opens on the Map, and landed homes on their own land are found by road. <a href="../projects/">Browse all ' + (total ? num(total) + ' ' : '') + 'developments</a>, including new launches with sites of their own.</p></div></section></div>';
+  // Research home: three ways in, one open at a time. The page script (research/index.html) switches them and fills the workspaces.
+  const RESEARCH_OPTS = [
+    ['dev', 'A development', 'Prices, sizes and a comparison', 'Development', 'Research a development', 'A condo, executive condominium or cluster-housing development, or a road.'],
+    ['prices', 'Property prices & past sales', 'HDB, condo and landed', 'Prices & sales', 'Property prices & past sales', 'What similar homes sold for, and whether an asking price is reasonable. Search by postal code, or choose the type of home.'],
+    ['budget', 'What can this budget buy?', 'By budget, area and must-haves', 'Budget', 'What can this budget buy?', 'Tell us your budget and what matters. We show the developments that fit.']];
+  function landingHtml(total, opt) {
+    const cur = opt || 'dev', n = total ? num(total) : '';
+    const tabs = RESEARCH_OPTS.map((o) => '<button type="button" class="gw-ropt" data-opt="' + o[0] + '" id="opt-' + o[0] + '" aria-expanded="' + (o[0] === cur) + '" aria-controls="ws-' + o[0] + '"><b><span class="l">' + esc(o[1]) + '</span><span class="s">' + esc(o[3]) + '</span></b><small>' + esc(o[2]) + '</small></button>').join('');
+    const ws = (o, inner) => '<section class="gw-rws" id="ws-' + o[0] + '" aria-labelledby="ws-' + o[0] + '-h"' + (o[0] === cur ? '' : ' hidden') + '><h2 id="ws-' + o[0] + '-h">' + esc(o[4]) + '</h2><p class="gw-rws-sub">' + esc(o[5]) + '</p>' + inner + '</section>';
+    const dev = '<div class="lg-sb" id="sb"></div><p class="lg-fine" id="lgCount">Type part of a name. If several match, check the street and district.</p>' +
+      '<div id="rwOwn"></div><div class="gw-raz"><button type="button" class="gw-razb" id="azBtn" aria-expanded="false" aria-controls="rwAz">Or browse all ' + (n ? n + ' ' : '') + 'developments A–Z</button><div id="rwAz" hidden></div></div>' + sampleExample() +
+      '<p class="lg-fine" data-lg-scope>Can’t see it? Research covers private condos and apartments, executive condominiums (ECs) and strata cluster houses with sales in the last five years, each kept to its own type. A launch with no sales yet is listed without prices and opens on the Map, and landed homes on their own land are found by road.</p>';
+    return '<div class="lg-page gw-rhome"><header class="gw-rhead"><h1 tabindex="-1">What would you like to research?</h1><p class="gw-rlede">Free, from URA and HDB records. Your entries stay when you switch.</p></header>' +
+      '<div class="gw-ropts" role="group" aria-label="What to research">' + tabs + '</div>' +
+      ws(RESEARCH_OPTS[0], dev) + ws(RESEARCH_OPTS[1], '<div id="rwPrices" class="gw-rhost"><p class="lg-fine">Loading…</p></div>') + ws(RESEARCH_OPTS[2], '<div id="rwBudget" class="gw-rhost"><p class="lg-fine">Loading…</p></div>') + '</div>';
   }
   // One search result row (the page's searchBox keeps its own events and keyboard handling).
   function resultRow(r, i, max, R) {

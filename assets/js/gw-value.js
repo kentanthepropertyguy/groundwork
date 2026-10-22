@@ -331,9 +331,10 @@
   }
 
   /* ---------------- browser behaviour ---------------- */
-  function mount() {
+  // el: a box to bring to life (Research mounts the same page body in its own workspace); without it, the page's own [data-gw-value]
+  function mount(el) {
     if (typeof document === 'undefined') return;
-    const box = document.querySelector('[data-gw-value]'); if (!box) return;
+    const hosted = !!(el && el.nodeType === 1), box = hosted ? el : document.querySelector('[data-gw-value]'); if (!box || box.__gwv) return; box.__gwv = true;
     const KPT = root.KPT || { track: function () {} }, track = (n, p) => { try { KPT.track(n, p || {}); } catch (e) { /* analytics unavailable */ } };
     const ctx = (root.GWJ && root.GWJ.ctx) || { get: () => ({}), set: () => {} };
     const r = document.body.dataset.root || '../../', base = r + 'data/value/';
@@ -362,7 +363,7 @@
       current = v;
       press(types, b); panes.forEach((p) => { p.hidden = p.dataset.vxPane !== v; });
       ctx.set({ type: v });
-      if (user) { track('tool_started', { tool_name: 'worth-router', step: 'type', value: v }); try { history.replaceState(null, '', '#' + v); } catch (e) { /* ignore */ } }
+      if (user) { track('tool_started', { tool_name: 'worth-router', step: 'type', value: v }); if (!hosted) { try { history.replaceState(null, '', '#' + v); } catch (e) { /* ignore */ } } }   // hosted in Research: the address stays #/prices
       if (v === 'hdb') hdbInit(); else if (v === 'landed') landedInit();
     }
     types.forEach((b) => b.addEventListener('click', () => pickType(b.dataset.vxType, true)));
@@ -641,8 +642,9 @@
 
     // Start: the address (#hdb, #condo, #landed, #landed:<road>), else what this tab already told us.
     if (!fromHash() && ctx.get().type) pickType(ctx.get().type, false);
-    window.addEventListener('hashchange', () => { fromHash(); });
+    // the Research page keeps this box while its address changes between options; only an address meant for this box (#hdb, #condo, #landed…, #pc=) is read
+    window.addEventListener('hashchange', () => { if (box.isConnected && box.offsetParent !== null) fromHash(); });
   }
   if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount(); }
-  return { streetQuery, nearStreets, edits, noSalesHtml, unsupportedHtml, unavailableHtml, streetMsg, UNSUP, splitNote, hdbComps, landedComps, hdbTypes, landedTypes, blockMatches, streetMatches, normBlock, hdbResult, landedResult, nearbyHtml, nearbyMsg, awayText, kmText, pageHtml, hdbMsg, landedMsg, condoMsg, flatLabel, title, tenure, ym, money, LTYPE, HDB_MIN_BLOCK, HDB_MIN_STREET, MID_MIN, LANDED_MIN };
+  return { mount, streetQuery, nearStreets, edits, noSalesHtml, unsupportedHtml, unavailableHtml, streetMsg, UNSUP, splitNote, hdbComps, landedComps, hdbTypes, landedTypes, blockMatches, streetMatches, normBlock, hdbResult, landedResult, nearbyHtml, nearbyMsg, awayText, kmText, pageHtml, hdbMsg, landedMsg, condoMsg, flatLabel, title, tenure, ym, money, LTYPE, HDB_MIN_BLOCK, HDB_MIN_STREET, MID_MIN, LANDED_MIN };
 });

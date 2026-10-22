@@ -40,8 +40,8 @@
   const PSF_NOTE = 'PSF is approximate: price divided by floor area converted from whole square metres.';
   const FLOOR_NOTE = 'URA floor bands only. This does not show an exact floor.';
   const HEADLINE = { good: 'Good recent overlap for comparison', limited: 'Limited recent overlap', none: 'No like-for-like transaction evidence found' };
-  const ANALYTICS_EVENTS = ['research_search', 'research_project_selected', 'research_size_focus', 'research_compare_started', 'research_comparison_viewed', 'research_whatsapp_clicked'];
-  const ANALYTICS_KEYS = ['results', 'project_id', 'project_a', 'project_b', 'sale_type', 'window', 'overlap', 'has_evidence', 'context', 'sale_types'];
+  const ANALYTICS_EVENTS = ['research_search', 'research_project_selected', 'research_size_focus', 'research_compare_started', 'research_comparison_viewed', 'research_whatsapp_clicked', 'research_option_selected', 'research_map_opened'];
+  const ANALYTICS_KEYS = ['results', 'project_id', 'project_a', 'project_b', 'sale_type', 'window', 'overlap', 'has_evidence', 'context', 'sale_types', 'option', 'from'];
 
   /* ---------- small helpers ---------- */
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -547,6 +547,8 @@
     if (['good', 'limited', 'none'].indexOf(d.overlap) > -1) out.overlap = d.overlap;
     if (typeof d.has_evidence === 'boolean') out.has_evidence = d.has_evidence;
     if (['project', 'comparison'].indexOf(d.context) > -1) out.context = d.context;
+    if (['dev', 'prices', 'budget'].indexOf(d.option) > -1) out.option = d.option;
+    if (['home', 'analysis'].indexOf(d.from) > -1) out.from = d.from;
     if (Number.isInteger(d.sale_types) && d.sale_types >= 0 && d.sale_types <= 3) out.sale_types = d.sale_types;
     return out;
   }
@@ -556,7 +558,11 @@
     if (s[0] === 'p' && id(s[1])) return { view: 'project', id: s[1], sale: sale(s[2]) };
     if (s[0] === 'compare' && id(s[1]) && id(s[2])) return { view: 'compare', a: s[1], b: s[2], sale: sale(s[3]) };
     if (s[0] === 'compare' && id(s[1])) return { view: 'pick', a: s[1] };
-    return { view: 'home' };
+    // The Research home has three options (a development, property prices & past sales, a budget); Browse every development opens the first with its A–Z list.
+    if (s[0] === 'prices') return { view: 'home', opt: 'prices' };
+    if (s[0] === 'budget') return { view: 'home', opt: 'budget' };
+    if (s[0] === 'browse') return { view: 'home', opt: 'dev', az: true };
+    return { view: 'home', opt: 'dev' };
   }
   const buildHash = (v) => (v.view === 'project' ? '#/p/' + v.id + (v.sale ? '/' + v.sale : '') : v.view === 'compare' ? '#/compare/' + v.a + '/' + v.b + (v.sale ? '/' + v.sale : '') : v.view === 'pick' ? '#/compare/' + v.a : '#/');
 
