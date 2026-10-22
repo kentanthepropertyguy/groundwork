@@ -32,8 +32,32 @@
     const canHover = typeof matchMedia === 'function' && matchMedia('(hover: hover) and (pointer: fine)').matches;
     let map, tiles, layer, labelsG, selG, el, onSelect, onPlace, cur = {}, failed = false, saved = null, stats = null, loadingEl = null, failEl = null, tileTimer = null;
 
+    /* Where the homes are: the island with the stray outliers trimmed, so the first view is useful straight away. */
+    function worldBounds() {
+      const la = [], lo = [];
+      (M.PM || []).forEach((p) => { if (typeof p.lat === 'number' && typeof p.lon === 'number') { la.push(p.lat); lo.push(p.lon); } });
+      if (la.length < 20) return null;
+      const num = (a, b) => a - b; la.sort(num); lo.sort(num);
+      const q = (a, f) => a[Math.min(a.length - 1, Math.max(0, Math.round((a.length - 1) * f)))];
+      return L.latLngBounds([q(la, 0.02), q(lo, 0.02)], [q(la, 0.98), q(lo, 0.98)]);
+    }
+    /* Back from a Research page reloads this one: put the map back where the visitor left it (same address, same kind of screen). Never on a fresh link. */
+    const POSKEY = 'kpt.map.pos', wide = () => (window.innerWidth || 0) >= 700;
+    const navType = () => { try { const e = performance.getEntriesByType('navigation')[0]; return e ? e.type : ''; } catch (x) { return ''; } };
+    function readPos() {
+      if (navType() !== 'back_forward' && navType() !== 'reload') return null;
+      try { const v = JSON.parse(sessionStorage.getItem(POSKEY)); return v && v.h === location.hash && v.w === wide() && Array.isArray(v.c) && isFinite(v.z) ? v : null; } catch (x) { return null; }
+    }
+    let posT = null, pos0 = null;
+    function rememberPos() {
+      clearTimeout(posT);
+      posT = setTimeout(() => { if (!map || !map._loaded) return; try { const c = map.getCenter(); sessionStorage.setItem(POSKEY, JSON.stringify({ h: location.hash, w: wide(), c: [+c.lat.toFixed(5), +c.lng.toFixed(5)], z: map.getZoom() })); } catch (x) { /* storage not available */ } }, 250);
+    }
+    /* the first view can sit between two zoom levels (so the island fills the screen); putting it back must not round it */
+    function setViewExact(c, z) { const ss = map.options.zoomSnap; map.options.zoomSnap = 0.25; try { map.setView(c, z, { animate: false }); } finally { map.options.zoomSnap = ss; } }
     function create(container, opts) {
       el = container; onSelect = opts.onSelect; onPlace = opts.onPlace; cur = {}; el.classList.add('kpm-soft');
+      pos0 = opts.persistPos ? readPos() : null;
       map = L.map(el, { zoomControl: false, attributionControl: false, scrollWheelZoom: true, zoomSnap: 1, dragging: true, tap: true, inertia: true });
       tiles = L.tileLayer(TILES, { detectRetina: true, maxZoom: 19, minZoom: 11 }).addTo(map);
       L.control.attribution({ position: 'bottomright', prefix: false }).addAttribution(ATTR).addTo(map);
@@ -44,7 +68,7 @@
       tiles.on('tileload', () => { stats.ok++; if (stats.ok === 1) { el.setAttribute('data-tiles', 'loaded'); if (loadingEl) { loadingEl.remove(); loadingEl = null; } if (failed) recover(); } });
       tiles.on('tileerror', () => { stats.err++; if (stats.ok === 0 && stats.err >= 3) fail(); });
       clearTimeout(tileTimer); tileTimer = setTimeout(() => { if (stats && stats.ok === 0) fail(); }, 12000);
-      map.on('zoomend', () => { if (cur.projects) update({}); }); map.on('moveend', () => { if (cur.projects) drawLabels(); });
+      map.on('zoomend', () => { if (cur.projects) update({}); }); map.on('moveend', () => { if (cur.projects) drawLabels(); if (opts.persistPos) rememberPos(); });
       return map;
     }
     function fail() {
@@ -73,7 +97,13 @@
       if (o.keep && saved) o = Object.assign({}, o, { key: saved.key });   // a development with no position: leave the map where the visitor had it
       cur = Object.assign(cur, o);
       if (!map._loaded || o.fit) {
-        if (saved && saved.key === o.key) map.setView(saved.center, saved.zoom, { animate: false });
+        if (saved && saved.key === o.key) setViewExact(saved.center, saved.zoom);
+        else if (pos0 && cur.ready !== false) { const v = pos0; pos0 = null; setViewExact(v.c, Math.max(11, v.z)); }
+        else if (cur.world && worldBounds()) {   // the whole island, framed to fill the usable area (not under the search box or the sheet), at a zoom that suits this screen
+          const pd = cur.pad, ss = map.options.zoomSnap; map.options.zoomSnap = 0.25;
+          try { map.fitBounds(worldBounds(), { paddingTopLeft: [pd.tl[0] + 12, pd.tl[1] + 12], paddingBottomRight: [pd.br[0] + 12, pd.br[1] + 12], animate: false, maxZoom: 13.5 }); } finally { map.options.zoomSnap = ss; }
+          if (map.getZoom() < 11) map.setView(worldBounds().getCenter(), 11, { animate: false });
+        }
         else if (cur.world) { const pd = cur.pad, sz = map.getSize(), c0 = [1.362, 103.81]; map.setView(c0, sz.x < 600 ? 11 : 12, { animate: false }); const rx = (pd.tl[0] + sz.x - pd.br[0]) / 2, ry = (pd.tl[1] + sz.y - pd.br[1]) / 2, p0 = map.latLngToContainerPoint(c0); map.panBy([Math.round(p0.x - rx), Math.round(p0.y - ry)], { animate: false }); }
         else if (cur.bounds) map.fitBounds(cur.bounds, { paddingTopLeft: cur.pad.tl, paddingBottomRight: cur.pad.br, animate: false, maxZoom: 16 });
         else {
