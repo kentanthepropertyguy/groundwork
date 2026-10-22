@@ -273,3 +273,24 @@ body.gw-confirming .pa-bar{display:none !important}
   .pa-go .gw-btn{flex:1 1 100%;text-align:center}
   .pa-borrow{padding:0 14px}
 }
+
+/* Buyer view (package 1): one answer, two supporting figures, dates and assumptions on demand */
+.pa-hd-max .pa-figs,.pa-hd-price .pa-figs{grid-template-columns:repeat(2,minmax(0,1fr))}
+.pa-max.pa-txt{font-size:clamp(30px,4.2vw,40px);line-height:1.1}
+.pa-t-over .pa-max{color:var(--pa-bad)}.pa-t-warn .pa-max{color:var(--pa-warn)}.pa-t-ok.pa-hd-price .pa-max{color:var(--pa-ok)}
+.pa-salenow,.pa-proj{margin:0;font-size:14.5px;line-height:1.45;color:var(--gw-body);max-width:var(--gw-measure)}
+.pa-proj{padding:10px 12px;border-radius:12px;background:var(--pa-warn-soft);color:var(--gw-ink)}
+.pa-salenow b,.pa-proj b{color:var(--gw-ink)}
+.pa-dateline{margin:0;display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;font-size:14px;line-height:1.45;color:var(--gw-body)}
+.pa-dl-k{font-weight:700;color:var(--gw-ink)}
+.pa-dl-s{flex:1 1 100%;color:var(--gw-body)}.pa-dl-s b{color:var(--gw-ink)}
+.pa-elig{margin:0}
+.pa-from{margin:0}
+.pa-pricebox .pa-l em{font-style:normal;font-weight:400;font-size:13px;color:var(--gw-muted);margin-left:6px}
+.pa-asm p{margin:0 0 8px;font-size:14px;line-height:1.5;color:var(--gw-body)}.pa-asm p:last-child{margin-bottom:12px}.pa-asm b{color:var(--gw-ink)}
+.pa-dd{margin:0 0 10px}
+@media (max-width:899px){
+  .pa-max.pa-txt{font-size:30px}
+  .pa-hd-price .pa-figs .pa-fig .s{display:block;font-size:12.5px;margin:0;order:3;flex:1 1 100%}
+  .pa-hd-price .pa-figs .pa-fig{flex-wrap:wrap}
+}

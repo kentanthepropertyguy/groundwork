@@ -14,6 +14,8 @@
 })(typeof self !== 'undefined' ? self : this, function (root) {
   'use strict';
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const V = root.GW_VIEW || (typeof require === 'function' ? require('./gw-buyer-view.js') : null);   // the buyer's view of an answer (gw-buyer-view.js)
+  let VIEW_CTX = { otpEntered: false, priceTxt: '' };   // what the page knows that the result does not: an option date was typed; a price arrived from Research
   const PHONE = '6590908898', REF = 'KPT-PLANNER';
   const waUrl = (m) => 'https://wa.me/' + PHONE + '?text=' + encodeURIComponent(m);
   const $ = (n) => (n < 0 ? '−$' : '$') + Math.round(Math.abs(n)).toLocaleString('en-US');
@@ -92,8 +94,8 @@
       '<div data-status></div><div class="pa-head" data-head></div>' +
       '<details class="pa-borrow" data-borrow hidden><summary><span id="pa-l-borrow">Borrow less than the most</span><em data-borrow-sum></em></summary><div class="pa-borrow-r"><div class="pa-pin"><i>$</i><input id="pa-borrow" type="text" inputmode="decimal" autocomplete="off" data-k="prefLoan" data-t="money" aria-describedby="pa-borrow-note" aria-invalid="false"></div><button type="button" class="pa-link" data-borrow-max hidden>Use the most</button></div>' +
       '<input type="range" class="pa-range pa-brange" data-borrow-range aria-labelledby="pa-l-borrow" min="0" max="1000000" step="10000"><small class="pa-hint" id="pa-borrow-note" data-borrow-note></small><small class="pa-err" data-err="prefLoan" role="alert" hidden></small></details><div data-tenure></div>' +
-      '<div class="pa-pricebox" data-pricebox hidden><div class="pa-prow"><label class="pa-l" for="pa-price">Try a price</label><div class="pa-pw"><div class="pa-pin"><i>$</i><input id="pa-price" type="text" inputmode="numeric" autocomplete="off" data-k="price" data-t="money" aria-describedby="pa-price-err"></div><button type="button" class="pa-link pa-reset" data-reset-price hidden>Back to my maximum</button></div></div>' +
-      '<div class="pa-rangeW"><input type="range" class="pa-range" data-range aria-label="Price to try" min="100000" max="3000000" step="10000"></div><div class="pa-rlab"><span data-rlo></span><span data-rhi></span></div><small class="pa-err" id="pa-price-err" data-err="price" role="alert" hidden></small></div>' +
+      '<div class="pa-pricebox" data-pricebox hidden><p class="pa-fine pa-from" data-price-from hidden></p><div class="pa-prow"><label class="pa-l" for="pa-price">Property price <em>optional</em></label><div class="pa-pw"><div class="pa-pin"><i>$</i><input id="pa-price" type="text" inputmode="numeric" autocomplete="off" data-k="price" data-t="money" placeholder="A price you are considering" aria-describedby="pa-price-err"></div><button type="button" class="pa-link pa-reset" data-reset-price hidden>Back to my maximum</button></div></div>' +
+      '<small class="pa-err" id="pa-price-err" data-err="price" role="alert" hidden></small></div>' +
       '<div data-next></div><div data-tiles></div><div data-how></div>' +
       '<p class="pa-foot" data-foot hidden>Estimates from MAS, IRAS and HDB rules checked 9 Oct 2026. Not a bank offer or approval.</p>' +
       '<div class="pa-ask" data-ask hidden><a class="gw-btn sec" data-ask-wa href="https://wa.me/' + PHONE + '" target="_blank" rel="noopener" data-gw-wa="planner-ask">Talk it through with Ken</a><span class="pa-fine">Opens WhatsApp with a short message and none of your figures.</span></div>' +
@@ -112,18 +114,15 @@
   // One answer, then the three figures that explain it. The maximum property budget is the highest price at which every test passes (cash and CPF, the loan limit,
   // the income-supported loan, the dated payments); the borrowing capacity (what income supports), the loan at that price and the monthly mortgage sit under it.
   // One sentence says which limit decided it. There are never two competing headline budgets.
-  const LIMIT_TXT = {
-    funds: 'Your current budget is limited by your available cash and CPF.',
-    income: 'Your current budget is limited by your borrowing capacity.',
-    choice: 'Your current budget is limited by the loan amount you chose.',
-    payments: 'Your current budget is limited by the cash and CPF you will have when each payment is due.',
-  };
-  function figs(res) {
-    const b = res.budget !== undefined ? res.budget : (res.comfortable !== null ? res.comfortable : res.highest), at = res.atComfortable || res.atHighest;
-    const cap = res.borrow && res.borrow.max > 0 ? '<div class="pa-fig"><div class="k">Your borrowing capacity</div><div class="v">' + $s(Math.floor(res.borrow.max / 1e4) * 1e4) + '</div><div class="s"><p>The most your income supports, over ' + plural(res.years) + '.</p></div></div>' : '';
-    const loan = at ? '<div class="pa-fig"><div class="k">Loan at this price</div><div class="v">' + $(at.loan) + '</div><div class="s"><p>' + (at.limit === 'choice' ? 'The loan you chose.' : pc(at.ltv) + ' of the price at most.') + '</p></div></div>' : '';
-    const inst = at ? '<div class="pa-fig"><div class="k">Monthly mortgage</div><div class="v">' + $(at.monthly) + '</div><div class="s"><p>Over ' + plural(res.years) + ' at ' + rateTxt(res) + '.</p></div></div>' : '';
-    return '<p class="pa-max" data-max>' + $(b) + '</p><div class="pa-figs">' + cap + loan + inst + '</div><p class="pa-why" data-why>' + (LIMIT_TXT[res.limitedBy] || LIMIT_TXT.funds) + '</p>';
+  const LIMIT_TXT = V.LIMIT_TXT;
+  // One answer (the headline: the maximum, or the verdict on a price), one sentence, two supporting figures. Everything in it comes from GW_VIEW.build(), which only
+  // reads what GW_ANSWER already worked out. The loan at the price, the stamp duty and the working are one tap away, never in front of the answer.
+  const figOf = (f) => '<div class="pa-fig"><div class="k">' + esc(f.k) + '</div><div class="v">' + esc(f.v) + '</div><div class="s"><p>' + esc(f.s) + '</p></div></div>';
+  const DATE_BADGE = { unchecked: 'plain', standard: 'plain', option: 'plain', monthly: 'plain' };
+  function datelineHtml(v, held) {
+    const d = v.dates, st = d.result === 'short' ? tag('bad', 'Short') : d.result === 'projected' ? tag('est', 'Projected shortfall') : d.result === 'ok' ? tag('ok', 'Covered') : '';
+    const more = d.basis === 'unchecked' ? ' <button type="button" class="pa-link" data-focus="saveMo">Add monthly amounts</button>' : (d.hasTable && !held ? ' <button type="button" class="pa-link" data-open-dates>See dates</button>' : '');
+    return '<p class="pa-dateline" data-dateline><span class="pa-dl-k">Payment dates</span> ' + tag(DATE_BADGE[d.basis] || 'plain', esc(d.label)) + (st ? ' ' + st : '') + '<span class="pa-dl-s">' + d.summary + more + '</span></p>';
   }
 
   // The sale of the home, in plain words. Counted: cash and CPF separately. Not counted: what is known, and exactly what is missing.
@@ -153,10 +152,11 @@
   }
 
   // The next step, straight under the answer: the Budget Search form, already holding this budget (Groundwork keeps it in this tab only).
-  const goHtml = () => '<div class="pa-go"><a class="gw-btn pri" href="../what-can-i-buy/" data-pa-explore data-gw-go="what-can-i-buy">Explore properties within my budget</a><a class="pa-link" href="../payment-planner/" data-pa-dates>Check the payment dates</a></div>';
+  const goHtml = () => '<div class="pa-go"><a class="gw-btn pri" href="../what-can-i-buy/" data-pa-explore data-gw-go="what-can-i-buy">Explore properties within my budget</a></div>';
   function headHtml(res, held, waitText) {
     const kick = '<p class="pa-kick">Your maximum property budget</p>';
     if (res && res.state === 'hdb') return '<div class="pa-intro pa-hdb">' + '<p class="pa-kick">HDB flat</p><h2 class="pa-lead">An HDB flat needs the HDB calculator</h2>' + hdbRoute(false) + '</div>';
+    if ((!res || res.state === 'empty') && VIEW_CTX.priceTxt) return '<div class="pa-intro">' + '<p class="pa-kick">A price from Research</p><h2 class="pa-lead">Can you afford this price?</h2><p class="pa-p">' + esc(VIEW_CTX.priceTxt) + ' Add your age and income to find out. The answer updates as you type, and nothing leaves this device.</p></div>';
     if (!res || res.state === 'empty') return '<div class="pa-intro">' + kick + '<h2 class="pa-lead">What is your maximum budget?</h2><p class="pa-p">Add your age and income to start. The answer updates as you type, and nothing leaves this device.</p></div>';
     if (res.state === 'no-income') return '<div class="pa-intro">' + kick + '<h2 class="pa-lead">No bank loan to work out</h2><p class="pa-p">Your income is entered as $0, so there is no income to lend against. Add income, including a co-borrower’s, to see what a bank could lend. Leave it blank if you have not decided yet.</p></div>';
     if (res.state === 'income' || res.state === 'ask-home' || res.state === 'ask-flat') {
@@ -165,37 +165,15 @@
     }
     if (res.state === 'out-of-reach') return '<div class="pa-intro">' + kick + '<h2 class="pa-lead">Nothing fits these figures yet</h2><p class="pa-p">' + (res.lever ? 'The biggest lever is cash: about <b>' + $(res.lever.amount) + '</b> more would bring a ' + $s(res.lever.forPrice) + ' home within reach.' : 'Adding cash is the biggest lever.') + '</p></div>';
     if (res.state === 'invalid') return '<div class="pa-intro">' + kick + '<h2 class="pa-lead">Check the entries marked on the left</h2></div>';
-    const badge = res.estimate ? tag('est', 'Estimate · payments not checked yet') : tag('ok', 'Payments checked');
-    const basis = basisHtml(res);
-        let more = '';
-    if (res.beneath && res.beneath.sell && res.beneath.sell.highest !== null) { const b = res.beneath.sell; more = '<p class="pa-beneath">' + (res.beneath.why === 'buy' ? 'Buying first, the sale isn’t counted yet, so this is the cautious figure. ' : 'Not sure yet, so this is the cautious figure. ') + '<b>Selling first</b>, you could afford ' + 'up to <b>' + $s(b.highest) + '</b>' + '.</p>'; }
+    const v = V.build(res, VIEW_CTX), basis = res.facts && res.facts.flatLoan === 'unsure' ? basisHtml(res) : '';   // a home loan the buyer is unsure of changes the answer, so that cautious view stays in front
+    let more = '';
+    if (res.beneath && res.beneath.sell && res.beneath.sell.highest !== null) { const sb = res.beneath.sell; more = '<p class="pa-beneath">' + (res.beneath.why === 'buy' ? 'Buying first, the sale isn’t counted yet, so this is the cautious figure. ' : 'Not sure yet, so this is the cautious figure. ') + '<b>Selling first</b>, you could afford up to <b>' + $s(sb.highest) + '</b>.</p>'; }
     else if (res.saleNote === 'missing' && res.sale) more = '<p class="pa-beneath">' + saleLine(res.sale) + '</p>';
-    return '<div class="pa-hd"><div class="pa-hdt">' + kick + (held ? '' : badge) + '</div>' + figs(res) + (held ? '' : goHtml()) + basis + cpfNote(res) + more + '</div>' + (held ? '<p class="pa-wait" role="status">' + esc(waitText) + '</p>' : '');
-  }
-
-  // The verdict on the price being tried. A price that does not fit is said calmly, in amber, with the date it first falls short; the way out follows.
-  function statusHtml(res) {
-    const a = res.at, zone = res.zone, P = res.price;
-    let kind, text;
-    if (zone === 'comfortable') { kind = 'ok'; text = '<b>' + $m(P) + ' works.</b> ' + (a.spare >= 1000 ? $(round100(a.spare)) + ' of your cash stays in hand after buying.' : 'It uses almost all of your cash and CPF.'); }
-    else if (zone === 'tight') { kind = 'warn'; text = '<b>' + $m(P) + ' is tight.</b> It works, but only ' + $(round100(a.spare)) + ' is left in hand after buying, less than the ' + $(round100(a.cushion)) + ' you keep aside.'; }
-    else {
-      kind = 'warn';
-      const firstOk = a.checked && a.covered === false && a.firstGap && a.firstAmt > 0, total = a.gap > 0.5 ? a.gap : a.peak, amount = firstOk ? a.firstAmt : total, lbl = String((firstOk ? a.firstCause : a.peakCause) || ''), when = /completion/i.test(lbl) ? ', when completion is due' : (lbl ? ', for ' + esc(lbl.toLowerCase()) : '');
-      if (a.checked && a.covered === false && a.firstGap) text = '<b>' + $m(P) + ' doesn’t fit yet.</b> You would be ' + $(round100(amount)) + ' short on ' + day(a.firstGap) + when + '.' + (firstOk && total - a.firstAmt > 100 ? ' Across the later payments you are ' + $(round100(total)) + ' short in total.' : '');
-      else text = '<b>' + $m(P) + ' doesn’t fit yet.</b> You would be ' + $(round100(a.gap)) + ' short' + (a.cashShort > 0 && a.flexShort === 0 ? ' in cash, which CPF can’t cover.' : '.');
-    }
-    return '<div class="pa-status ' + kind + '" role="status"><i class="pa-ic" aria-hidden="true">' + (kind === 'ok' ? '✓' : '!') + '</i><p>' + text + '</p></div>';
-  }
-
-  // The price being tried: the bank loan at that price, what it takes in cash and CPF, the instalment, and the way on to the payment dates.
-  function tilesHtml(res) {
-    const a = res.at;
-    const why = a.limit === 'income' ? 'Limited by your income' : a.limit === 'choice' ? 'Your choice' : pc(a.ltv) + ' of the price';
-    const pct = a.monthlyPct ? pc(a.monthlyPct) + ' of your income' : '';
-    const title = 'At ' + $(res.price);
-    const t = (k, v, s) => '<div class="pa-tile"><div class="k">' + k + '</div><div class="v">' + v + '</div><div class="s">' + s + '</div></div>';
-    return '<div class="pa-price"><h3 class="pa-h3">' + esc(title) + '</h3><div class="pa-tiles">' + t(a.limit === 'choice' ? 'Loan you chose' : 'Estimated bank loan', $(a.loan), esc(a.limit === 'choice' ? 'Your choice · the most would be ' + $(a.maxLoan) : why)) + t('Cash and CPF needed', $(a.upfront), 'You have ' + $(a.have) + (a.haveCpf > 0 ? ', counting your CPF as entered' : '')) + t('Monthly mortgage', $(a.monthly), 'Over ' + plural(res.years) + (pct ? ' · ' + esc(pct) : '')) + '</div></div>';
+    const sale = v.sale ? '<p class="pa-salenow" data-sale-line>' + v.sale.html + '</p>' + (v.sale.warning ? '<p class="pa-proj" data-sale-warn>' + v.sale.warning + '</p>' : '') : '';
+    return '<div class="pa-hd pa-hd-' + v.mode + ' pa-t-' + v.tone + '"><div class="pa-hdt"><p class="pa-kick">' + esc(v.kicker) + '</p>' + (held ? '' : tag('est', 'Estimate')) + '</div>' +
+      '<p class="pa-max' + (v.mode === 'price' && v.answer === null || v.projected ? ' pa-txt' : '') + '" data-answer' + (v.mode === 'max' ? ' data-max' : '') + '>' + esc(v.headline) + '</p>' +
+      '<p class="pa-why" data-why>' + v.lead + '</p>' + sale + '<div class="pa-figs">' + v.supports.map(figOf).join('') + '</div>' + datelineHtml(v, held) +
+      '<p class="pa-fine pa-elig" data-elig>' + esc(V.ELIGIBILITY.short) + '</p>' + (held ? '' : goHtml()) + basis + more + '</div>' + (held ? '<p class="pa-wait" role="status">' + esc(waitText) + '</p>' : '');
   }
 
   const rowsOf = (res) => (res._rows || (res._rows = res.options ? res.options() : []));
@@ -249,7 +227,6 @@
       }).join('');
       return '<div class="pa-fixes"><p class="pa-kick">Ways to close the ' + $(round100(gap)) + ' gap</p><ul>' + rows + '</ul><p class="pa-fine">Nothing changes until you apply. You can undo it.</p></div>';
     }
-    if (res.estimate && res.kind === 'new') return '<p class="pa-nudge">Add what goes in each month, on the left, and we’ll check every payment date. <button type="button" class="pa-link" data-focus="saveMo">Add monthly amounts</button></p>';
     return '';
   }
   function prevBlock(res, f) {
@@ -257,6 +234,25 @@
     const row = (k, x, y) => '<div class="pa-pr"><span>' + k + '</span><b>' + x + ' <i aria-hidden="true">→</i><span class="sr"> becomes </span> ' + y + '</b></div>';
     const rows = (f.kind === 'price' ? row('Price', $(a.P), $(b.P)) : row('Cash', $(a.haveCash), $(b.haveCash))) + row('You would borrow', $(a.loan), $(b.loan)) + row('Cash and CPF needed', $(a.upfront), $(b.upfront)) + row('Result', st(a), st(b));
     return '<div class="pa-prev" data-prev-box="' + f.kind + '" hidden>' + rows + '<div class="pa-prev-b"><button type="button" class="pa-btn pri" data-apply="' + f.kind + '">Apply</button><button type="button" class="pa-btn" data-cancel>Cancel</button><span class="pa-fine">Nothing changes until you apply. You can undo it.</span></div></div>';
+  }
+
+  // The payment dates, on demand. What they were based on is stated first (standard schedule, the option date typed, or the monthly amounts typed); a shortfall found here is a
+  // projection from those entries, and the table never claims more than was tested.
+  const TL_LINK = '<p class="pa-fine"><a class="pa-link" href="../payment-planner/" data-pa-dates>Open the payment timeline</a> for every date and each option.</p>';
+  function datesHtml(res) {
+    const a = res.at, v = V.build(res, VIEW_CTX), d = v.dates;
+    if (!(res.checked && a && a.tl)) return '<details class="pa-how" data-dates-d><summary><span>Payment dates</span><em>' + esc(d.label.toLowerCase()) + '</em></summary><p class="pa-fine pa-dd">' + d.summary + '</p>' + TL_LINK + '</details>';
+    const ev = a.tl.events.filter((e) => e.type === 'pay'), prov = ev.some((e) => e.provisional), gapLine = a.covered === false && a.firstGap ? '<p class="pa-p pa-gapline">' + d.summary + '</p>' : '';
+    const basisTxt = d.basis === 'standard' ? 'Standard schedule: the option fee on signing, the rest of the 5% after 14 days, stamp duty within 14 days, the balance at completion. Dated from today.' : d.basis === 'option' ? 'Standard schedule, dated from the option date you entered.' : 'Tested with the monthly amounts you entered. Stages with no date yet are tested at the earliest day they could be called.';
+    return '<details class="pa-how" data-dates-d><summary><span>Payment dates</span><em>' + esc(d.label.toLowerCase()) + '</em></summary><div class="pa-dates" data-dates><p class="pa-fine pa-dd">' + basisTxt + '</p>' + gapLine + '<div class="pa-tw"><table class="pa-t"><thead><tr><th>Date</th><th>Payment</th><th class="n">Amount</th><th class="n">Cash</th><th class="n">CPF</th><th class="n">Bank loan</th></tr></thead><tbody>' +
+      ev.map((e) => '<tr' + (e.uncovered > 0 ? ' class="short"' : '') + '><td>' + day(e.date) + (e.confidence === 'estimate' && e.id !== 'top' && e.id !== 'csc' ? ' <small>earliest</small>' : '') + '</td><td>' + esc(e.label) + (e.provisional ? ' <span class="pa-badge est">Provisional</span>' : '') + (e.uncovered > 0 ? ' <span class="pa-badge bad">Short ' + $(round100(e.uncovered)) + '</span>' : '') + '</td><td class="n">' + $(e.amount) + '</td><td class="n">' + (e.cashUsed ? $(e.cashUsed) : '–') + '</td><td class="n">' + (e.cpfUsed ? $(e.cpfUsed) : '–') + '</td><td class="n">' + (e.bank ? $(e.bank) : '–') + '</td></tr>').join('') + '</tbody></table></div>' +
+      '<p class="pa-fine">' + (prov ? 'The final 15% is shown as one provisional payment: the exact split between the certificate of statutory completion and legal completion is still to be verified. ' : '') + 'A later payment into your account never pays an earlier bill.</p>' + TL_LINK + '</div></details>';
+  }
+  // What the answer assumes, on demand: what is and is not confirmed, how CPF and the home were counted, the rate and tenure.
+  function assumptionsHtml(res) {
+    const a = res.at || res.atComfortable || res.atHighest, cpf = cpfNote(res), basis = res.facts && res.facts.flatLoan === 'unsure' ? '' : basisHtml(res);
+    return '<details class="pa-how" data-asm-d><summary><span>Assumptions</span><em>eligibility, CPF, rate</em></summary><div class="pa-asm"><p><b>Eligibility is not confirmed.</b> ' + esc(V.ELIGIBILITY.text) + '</p>' + cpf + basis +
+      '<p>Instalments use your expected rate of ' + rateTxt(res) + ' over ' + plural(res.years) + '. Banks test the loan at the higher of 4% and that rate.</p>' + (a && a.checked === false ? '<p>A new launch is not tested against its payment dates until you add what goes in each month.</p>' : '') + '</div></details>';
   }
 
   function howHtml(res, st) {
@@ -293,16 +289,8 @@
     if (res.basis === 'sell' && res.sale) L.push(row('Your sale', saleLine(res.sale) + (res.sale.source === 'estimated' ? ' This is the price, less the loan, your CPF refund as you entered it (it includes the accrued interest, which we do not estimate), the agent’s fee and legal costs. Cash and CPF are kept apart, and nothing is counted until the sale completes and the CPF is released.' : '')));
     else if (res.sale && !res.sale.counted) L.push(row('Your sale', saleLine(res.sale)));
     if (res.basis === 'keep') L.push(row('Your home', 'Counted as kept. Three things are worked out separately: the property you own (ABSD where it applies), the housing loan you still owe (it lowers the loan limit on the new home), and the monthly instalment (it reduces what your income can carry).' + (res.facts && res.facts.flatLoan === 'unsure' ? ' You were not sure about the loan, so it is counted; the fully paid result is shown beside the headline.' : '')));
-    // dates
-    let dates = '';
-    if (res.checked && a.tl) {
-      const ev = a.tl.events.filter((e) => e.type === 'pay'), prov = ev.some((e) => e.provisional), gapLine = a.covered === false && a.firstGap ? '<p class="pa-p pa-gapline"><b>Runs short on ' + day(a.firstGap) + '</b> (' + esc((a.peakCause || 'a payment').toLowerCase()) + ') by ' + $(round100(a.peak)) + '.</p>' : '';
-      dates = '<div class="pa-dates" data-dates><p class="pa-sub">Payment dates</p>' + gapLine + '<div class="pa-tw"><table class="pa-t"><thead><tr><th>Date</th><th>Payment</th><th class="n">Amount</th><th class="n">Cash</th><th class="n">CPF</th><th class="n">Bank loan</th></tr></thead><tbody>' +
-        ev.map((e) => '<tr' + (e.uncovered > 0 ? ' class="short"' : '') + '><td>' + day(e.date) + (e.confidence === 'estimate' && e.id !== 'top' && e.id !== 'csc' ? ' <small>earliest</small>' : '') + '</td><td>' + esc(e.label) + (e.provisional ? ' <span class="pa-badge est">Provisional</span>' : '') + (e.uncovered > 0 ? ' <span class="pa-badge bad">Short ' + $(round100(e.uncovered)) + '</span>' : '') + '</td><td class="n">' + $(e.amount) + '</td><td class="n">' + (e.cashUsed ? $(e.cashUsed) : '–') + '</td><td class="n">' + (e.cpfUsed ? $(e.cpfUsed) : '–') + '</td><td class="n">' + (e.bank ? $(e.bank) : '–') + '</td></tr>').join('') + '</tbody></table></div>' +
-        '<p class="pa-fine">' + (res.kind === 'new' ? 'Stages with no date yet are tested at the earliest day they could be called. ' : '') + (prov ? 'The final 15% is shown as one provisional payment: the exact split between the certificate of statutory completion and legal completion is still to be verified. ' : '') + 'A later payment into your account never pays an earlier bill.</p></div>';
-    } else dates = '<p class="pa-fine">The dated payments appear here once you add what goes in each month' + (res.kind === 'new' ? '' : '') + '.</p>';
     L.push(row('Rules', 'IRAS (BSD, ABSD), MAS Notices 632 and 645, CPF Board and the Housing Developers Rules, as recorded in Groundwork’s rules file (checked 9 Oct 2026). Planning conventions checked 15 Oct 2026.'));
-    return '<details class="pa-how" data-how-d><summary><span>How we worked this out</span><em>income, limits, stamp duty, payment dates</em></summary><dl class="pa-dl">' + L.join('') + '</dl>' + dates + '</details>';
+    return datesHtml(res) + assumptionsHtml(res) + '<details class="pa-how" data-how-d><summary><span>How we worked this out</span><em>income, limits, stamp duty</em></summary><dl class="pa-dl">' + L.join('') + '</dl></details>';
   }
 
   /* ---------------- browser ---------------- */
@@ -315,6 +303,7 @@
     const $$ = (s, el) => [].slice.call((el || box).querySelectorAll(s)), q = (s) => box.querySelector(s);
     const out = { head: q('[data-head]'), tenure: q('[data-tenure]'), pricebox: q('[data-pricebox]'), status: q('[data-status]'), tiles: q('[data-tiles]'), next: q('[data-next]'), how: q('[data-how]'), foot: q('[data-foot]'), ask: q('[data-ask]'), bar: q('[data-bar]') };
     const SHARE = 'gw.fin.v1', OWN = 'gw.ans.v1', HAND = 'gw.hand.v1';
+    const FROM = { typical: 'Price from Research: the typical recent price in past sales, not a valuation or a listing.', asking: 'Price from Research: the asking price you entered there.' };
     const store = (k) => ({ get() { try { return JSON.parse(root.sessionStorage.getItem(k) || '{}') || {}; } catch (e) { return {}; } }, remove() { try { root.sessionStorage.removeItem(k); } catch (e) { /* storage blocked */ } }, set(o) { try { root.sessionStorage.setItem(k, JSON.stringify(o)); } catch (e) { /* storage blocked */ } } });
     const shared = store(SHARE), own = store(OWN), hand = store(HAND);
     const parseMoney = (s) => { const p = C.parseMoney(String(s).replace(/\.$/, '')); return p; };
@@ -337,7 +326,7 @@
     }
 
     // ---- read the entries ----
-    let cmpOpen = false, ptouched = false, errs = {}, last = null, lastOk = null, res = null, undo = null, stDirty = false, tmr = null, firstEdit = false, completedOnce = false;
+    let priceFrom = null, cmpOpen = false, ptouched = false, errs = {}, last = null, lastOk = null, res = null, undo = null, stDirty = false, tmr = null, firstEdit = false, completedOnce = false;
     function readMoney(k) { const g = field(k); if (!g || (k !== 'price' && k !== 'prefLoan' && !live(g))) return undefined; const t = g.value.trim(); if (t === '') return undefined; const p = parseMoney(t); if (p.error) { errs[k] = p.error; return undefined; } return p.value; }
     function readNum(k, eg) { const g = field(k); if (!g || !live(g)) return undefined; const t = g.value.trim(); if (t === '') return undefined; const p = C.parseNum(t, eg); if (p.error) { errs[k] = p.error; return undefined; } return p.value; }
     function live(el) { for (let p = el; p && p !== box; p = p.parentElement) if (p.hidden) return false; return true; }
@@ -385,23 +374,33 @@
     }
     function adjSummary(s) { const e = q('[data-adj-sum]'); if (!e) return; e.textContent = [s.otp ? 'option ' + day(s.otp) : '', s.setAside > 0 ? '$' + fmtMoney(s.setAside) + ' set aside' : ''].filter(Boolean).join(' · '); }
     function setPriceUi(r) {
-      const rg = q('[data-range]'), pf = field('price'), box2 = out.pricebox;
+      const pf = field('price'), box2 = out.pricebox;
       if (!r || r.state !== 'ok') { box2.hidden = true; return; }
-      box2.hidden = false; const g = r.range;
-      rg.min = String(g.lo); rg.max = String(g.hi); rg.step = String(g.step); rg.value = String(Math.min(g.hi, Math.max(g.lo, r.price)));
-      const pct = (x) => Math.max(0, Math.min(100, (x - g.lo) / (g.hi - g.lo) * 100));
-      const hpt = pct(r.budget !== undefined ? r.budget : r.highest), cpt = hpt;
-      rg.style.setProperty('--ok', cpt.toFixed(1) + '%'); rg.style.setProperty('--lim', hpt.toFixed(1) + '%'); rg.style.setProperty('--pos', pct(r.price).toFixed(1) + '%');
-      q('[data-rlo]').textContent = $s(g.lo); q('[data-rhi]').textContent = $s(g.hi);
-      if (document.activeElement !== pf) pf.value = fmtMoney(r.price);
+      box2.hidden = false;
+      if (document.activeElement !== pf && r.priceIsOwn) pf.value = fmtMoney(r.price);
       q('[data-reset-price]').hidden = !r.priceIsOwn;
-      rg.setAttribute('aria-valuetext', $(r.price) + ', ' + (r.zone === 'comfortable' ? 'comfortable' : r.zone === 'tight' ? 'tight' : 'over'));
+      paintFrom();
+    }
+    // a price that arrived from Research is said once, in words, until the buyer changes it
+    function paintFrom() {
+      const el = q('[data-price-from]'); if (!el) return;
+      if (priceFrom && field('price').value.replace(/[^\d]/g, '') !== priceFrom.val) priceFrom = null;
+      el.hidden = !priceFrom; el.textContent = priceFrom ? priceFrom.txt : '';
     }
     // the answer column stays in view beside the entries only while it fits the window; a taller one scrolls with the page, so nothing is cut off
     const outEl = q('[data-out]');
     function fitSticky() { if (outEl) outEl.classList.toggle('pa-tall', outEl.scrollHeight > (root.innerHeight || 800) - 100); }
     root.addEventListener('resize', fitSticky); box.addEventListener('toggle', fitSticky, true);
     let heldHtml = null;
+    // the three on-demand sections keep their open state while the answer is redrawn; what the page knows that the result does not (an option date typed, a price that arrived) is handed to the view
+    const DET = ['data-dates-d', 'data-asm-d', 'data-how-d'], openDet = () => DET.filter((a) => { const d = q('[' + a + ']'); return d && d.open; }), reopen = (l) => l.forEach((a) => { const d = q('[' + a + ']'); if (d) d.open = true; });
+    // the loan tenure sits under Assumptions; it comes forward only when a longer tenure would add to the budget
+    function drawTenure(r) {
+      const t = r && r.tenure, nud = !!(t && t.nudge), html = t ? tenureHtml(r, cmpOpen, yAdj()) : '';
+      out.tenure.innerHTML = nud ? html : '';
+      const ab = q('[data-asm-d] .pa-asm'); if (ab && !nud && html) ab.insertAdjacentHTML('afterbegin', html);
+    }
+    const ctxNow = () => { const o = field('otp'); VIEW_CTX.otpEntered = !!(o && o.value && o.value !== todayIso); VIEW_CTX.priceTxt = priceFrom ? priceFrom.what : ''; };
     // the most the age allows, from the buyers' ages alone (no income, cash or price needed): the same limit the calculation applies (C.tenureLimit)
     const ageLimit = () => { try { return C.tenureLimit({ kind: 'private', borrowers: readEntries().buyers.map((b) => ({ age: b.age, fixed: b.fixed || 0, variable: b.variable || 0 })) }); } catch (e) { return null; } };
     // the line under the loan-years field: its usual hint, or, after an over-long entry was corrected, what it was changed from and why
@@ -414,7 +413,7 @@
     }
     let tenureFld = null; const yAdj = () => { const y = field('years'); return y && +y.dataset.adjustedFrom > 0 ? +y.dataset.adjustedFrom : 0; };
     function recalc() {
-      dirty = false; applyWhen();
+      dirty = false; applyWhen(); ctxNow();
       const s = readEntries(); stDirty = false;
       const r = A.assess(s);
       // the tenure field shows the tenure the calculation used (gw-money.js): a longer one typed is replaced by it once the field is not being typed in
@@ -429,8 +428,8 @@
         out.foot.hidden = true; out.ask.hidden = true;
       } else if (ok) {
         last = r; lastOk = r;
-        out.head.className = 'pa-head'; out.head.innerHTML = headHtml(r); out.tenure.innerHTML = tenureHtml(r, cmpOpen, yAdj());
-        setPriceUi(r); setBorrowUi(r); out.status.innerHTML = r.priceIsOwn ? statusHtml(r) : ''; out.tiles.innerHTML = r.priceIsOwn ? tilesHtml(r) : ''; out.next.innerHTML = nextHtml(r, st); out.how.innerHTML = howHtml(r, st);
+        const od = openDet(); ctxNow(); out.head.className = 'pa-head'; out.head.innerHTML = headHtml(r);
+        setPriceUi(r); setBorrowUi(r); out.status.innerHTML = ''; out.tiles.innerHTML = ''; out.next.innerHTML = nextHtml(r, st); out.how.innerHTML = howHtml(r, st); drawTenure(r); reopen(od);
         out.foot.hidden = false; out.ask.hidden = false; heldHtml = out.head.innerHTML;
         if (!completedOnce) { completedOnce = true; track('tool_completed', {}); }
       } else if (lastOk && (bad || r.state === 'empty' || r.state === 'no-income' || r.state === 'income' || r.state === 'ask-home' || r.state === 'ask-flat')) {
@@ -492,7 +491,8 @@
     function save() {
       const o = snapshot(); if (Object.keys(o).length) own.set(o); else own.remove();
       const s = shared.get(); $$('[data-share]').forEach((x) => { if (!live(x)) return; const v = x.dataset.t === 'chip' ? chipVal(x) : x.value; if (v !== null && v !== '' && !(x.dataset.t === 'chip' && v === (x.dataset.default || ''))) s[x.dataset.share] = v; else delete s[x.dataset.share]; });
-      const p = field('price'); if (p && p.value !== '' && res && res.priceIsOwn) s.buyPrice = p.value; else if (p && p.value === '') delete s.buyPrice; if (Object.keys(s).length) shared.set(s); else shared.remove();
+      const p = field('price'); if (p && p.value !== '' && res && res.priceIsOwn) s.buyPrice = p.value; else if (p && p.value === '') delete s.buyPrice; if (!priceFrom) delete s.buyFrom;
+      if (Object.keys(s).length) shared.set(s); else shared.remove();
       if (last && res && res.state === 'ok' && !Object.keys(errs).length) { const en = readEntries(); hand.set(handoffOf(en, res)); planHandoff(en, res); } else { hand.remove(); planHandoff(null, null); }
     }
     // The maximum budget goes on to Budget Search ("What can this budget buy?", in Research too) in this tab only (kpt.handoff), as the hdb planner does: the search opens with it filled in,
@@ -524,6 +524,7 @@
       const cm = t('[data-cmp]'); if (cm) { cmpOpen = !cmpOpen; const bx = q('[data-cmp-box]'); if (bx) bx.hidden = !cmpOpen; $$('[data-cmp]').forEach((x) => { x.setAttribute('aria-expanded', String(cmpOpen)); const ar = x.querySelector('[aria-hidden]'); if (ar) ar.textContent = cmpOpen ? '▴' : '▾'; }); if (cmpOpen) track('planner_tenure_compare', {}); fitSticky(); return; }
       const us = t('[data-use]'); if (us) { const f = field('years'); if (f) { f.value = us.dataset.use === 'auto' ? '' : us.dataset.use; delete f.dataset.adjustedFrom; } track('planner_tenure_use', { choice: us.dataset.use === 'auto' ? 'suggested' : 'own' }); clearTimeout(tmr); recalc(); return; }
       const fo = t('[data-focus]'); if (fo) { const f = field(fo.dataset.focus); if (f) { f.scrollIntoView({ block: 'center', behavior: 'smooth' }); f.focus({ preventScroll: true }); } return; }
+      const odt = t('[data-open-dates]'); if (odt) { const d = q('[data-dates-d]'); if (d) { d.open = true; d.scrollIntoView({ block: 'start', behavior: 'smooth' }); } track('planner_dates_open', {}); return; }
       const oh = t('[data-open-how]'); if (oh) { const d = q('[data-how-d]'); if (d) { d.open = true; d.scrollIntoView({ block: 'start', behavior: 'smooth' }); } return; }
       const bm = t('[data-borrow-max]'); if (bm) { field('prefLoan').value = ''; track('planner_borrow', { choice: 'most' }); clearTimeout(tmr); recalc(); return; }
       const rp = t('[data-reset-price]'); if (rp) { ptouched = false; field('price').value = ''; clearTimeout(tmr); recalc(); return; }
@@ -533,9 +534,8 @@
       if (t('[data-undo]')) { undoFix(); return; }
       if (t('[data-pa-explore]')) { track('planner_explore', {}); return; }
     });
-    // ---- price: the slider and the typed price are one control ----
+    // ---- price: typed (or arriving from Research); no slider ----
     let rafT = null;
-    function priceFromRange() { const rg = q('[data-range]'); ptouched = true; field('price').value = fmtMoney(+rg.value); changedPrice(true); }
     function changedPrice(fromRange) { if (!res || res.state !== 'ok') { changed(); return; } dirty = true; clearTimeout(rafT); rafT = setTimeout(() => quoteNow(fromRange), fromRange ? 0 : 140); if (!firstEdit) { firstEdit = true; track('tool_started', {}); } }
     function quoteNow() {
       dirty = false;
@@ -545,10 +545,9 @@
       errs = {}; const qt = res.quote(p.value); if (!qt) return;
       res.price = p.value; res.priceIsOwn = true; res.at = qt.at; res.zone = qt.zone; res.range = qt.range; res.fixes = qt.fixes; last = res; lastOk = res;
       const s = readEntries(); const st = { monthly: (s.saveMo || 0) + (s.cpfMo || 0), twoBuyers: s.buyers.length > 1 };
-      paintErrors([]); out.status.innerHTML = statusHtml(res); out.tiles.innerHTML = tilesHtml(res); out.next.innerHTML = nextHtml(res, st); const keepOpen = q('[data-how-d]') && q('[data-how-d]').open; out.how.innerHTML = howHtml(res, st); if (keepOpen) q('[data-how-d]').open = true;
+      paintErrors([]); const od = openDet(); ctxNow(); out.head.innerHTML = headHtml(res); out.status.innerHTML = ''; out.tiles.innerHTML = ''; out.next.innerHTML = nextHtml(res, st); out.how.innerHTML = howHtml(res, st); drawTenure(res); reopen(od);
       setPriceUi(res); setBorrowUi(res); save(); fitSticky();
     }
-    q('[data-range]').addEventListener('input', priceFromRange);
     function borrowFromRange() { const rg = q('[data-borrow-range]'), f = field('prefLoan'), v = +rg.value; f.value = v >= +rg.max || (res && res.at && v >= res.at.maxLoan - 5000) ? '' : fmtMoney(v); track('planner_borrow', { choice: f.value === '' ? 'most' : 'less' }); changed(); }
     // ---- fixes: preview, apply, undo (exact restore of every entry) ----
     function applyFix(kind) {
@@ -570,11 +569,13 @@
     const sv = shared.get(), ov = own.get();
     const start = Object.assign({}, ov);
     $$('[data-share]').forEach((x) => { const v = sv[x.dataset.share]; const k = x.dataset.k; if (v !== undefined && v !== '' && start[k] === undefined) start[k] = v; });
-    if (sv.buyPrice && start.price === undefined) { start.price = sv.buyPrice; start._pt = true; }
+    // a price handed over from Research ("Can I afford this?") replaces an earlier one and is named until the buyer changes it; the figures here are the buyer's own
+    if (sv.buyPrice && (start.price === undefined || sv.buyFrom)) { start.price = sv.buyPrice; start._pt = true; }
+    if (sv.buyFrom && sv.buyPrice && FROM[sv.buyFrom]) priceFrom = { txt: FROM[sv.buyFrom], what: 'The price you brought from Research.', val: String(sv.buyPrice).replace(/[^\d]/g, '') };
     if (start['buyers.1.age'] !== undefined || start['buyers.1.fixed'] !== undefined || start['buyers.1.res'] !== undefined && sv['buyers.1.res']) { if (start.who === undefined) start.who = 'two'; }
     apply(start);
     recalc();
   }
   if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount(); }
-  return { saleLine, basisHtml, pageHtml, formHtml, headHtml, statusHtml, tilesHtml, tenureHtml, nextHtml, howHtml, figs, goHtml, $s, $m, REF, LIMIT_TXT };
+  return { saleLine, basisHtml, pageHtml, formHtml, headHtml, tenureHtml, nextHtml, howHtml, datesHtml, assumptionsHtml, datelineHtml, goHtml, $s, $m, REF, LIMIT_TXT };
 });

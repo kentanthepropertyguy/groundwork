@@ -317,7 +317,7 @@
       // The line is filled after the page is drawn, once find.json has given the median price (afterProject); until then it is hidden.
       // V2-01: on a first-look page (no typical price) the line is still there, hidden, so an asking price typed above can be sent on.
       (T || canAsk ? '<p class="lg-run" data-lg-run-line data-typical="" hidden><span data-lg-run-what></span> ' +
-        '<a href="../tools/payment-planner/" data-lg-run="payment-planner"><b>Plan the payments</b></a> · <a href="../tools/stamp-duty/" data-lg-run="stamp-duty">Stamp duty</a> · <a href="../tools/mortgage/" data-lg-run="mortgage">Mortgage (75% loan)</a>' + (M.sale && M.sale.selected === 'new' ? ' · <a href="../tools/progressive-payments/" data-lg-run="progressive">New launch payments</a>' : '') + '</p>' : '');
+        '<a href="../tools/planner/" data-lg-run="planner"><b>Can I afford this?</b></a> · <a href="../tools/payment-planner/" data-lg-run="payment-planner">Plan the payments</a> · <a href="../tools/stamp-duty/" data-lg-run="stamp-duty">Stamp duty</a> · <a href="../tools/mortgage/" data-lg-run="mortgage">Mortgage (75% loan)</a>' + (M.sale && M.sale.selected === 'new' ? ' · <a href="../tools/progressive-payments/" data-lg-run="progressive">New launch payments</a>' : '') + '</p>' : '');
   }
   // ctx: { S, IN, root }
   function projectHtml(M, ctx) {
@@ -417,6 +417,8 @@
     try {
       const k = 'gw.fin.v1', s = JSON.parse(root.sessionStorage.getItem(k) || '{}') || {};
       s.buyPrice = String(price); if (a.dataset.lgRun === 'mortgage') s.loan = String(Math.round(price * 0.75));
+      // "Can I afford this?": the Planner names where the price came from (the typical recent price in past sales, or the asking price typed here) until the buyer changes it
+      if (a.dataset.lgRun === 'planner') s.buyFrom = askedPrice() ? 'asking' : 'typical'; else delete s.buyFrom;
       root.sessionStorage.setItem(k, JSON.stringify(s));
     } catch (e) { /* storage blocked: the calculator opens empty */ }
     try { KPT().track('tool_selected', { tool: 'calc-' + a.dataset.lgRun, placement: 'research-project' }); } catch (e) { /* analytics unavailable */ }
