@@ -242,14 +242,16 @@ t('every analytics key is on the allow-list and none looks like free text', () =
 
 console.log('Routes (D2) and suggestions (D10)');
 t('parseHash: home, project, project+sale, compare, compare+sale, pick', () => {
-  assert.deepStrictEqual(RS.parseHash('#/'), { view: 'home' }); assert.deepStrictEqual(RS.parseHash(''), { view: 'home' });
+  assert.deepStrictEqual(RS.parseHash('#/'), { view: 'home', opt: 'dev' }); assert.deepStrictEqual(RS.parseHash(''), { view: 'home', opt: 'dev' });
+  assert.deepStrictEqual(RS.parseHash('#/prices'), { view: 'home', opt: 'prices' }); assert.deepStrictEqual(RS.parseHash('#/budget'), { view: 'home', opt: 'budget' });
+  assert.deepStrictEqual(RS.parseHash('#/browse'), { view: 'home', opt: 'dev', az: true });
   assert.deepStrictEqual(RS.parseHash('#/p/thomson-grand'), { view: 'project', id: 'thomson-grand', sale: null });
   assert.deepStrictEqual(RS.parseHash('#/p/thomson-grand/new'), { view: 'project', id: 'thomson-grand', sale: 'new' });
   assert.deepStrictEqual(RS.parseHash('#/compare/a/b'), { view: 'compare', a: 'a', b: 'b', sale: null });
   assert.deepStrictEqual(RS.parseHash('#/compare/a/b/resale'), { view: 'compare', a: 'a', b: 'b', sale: 'resale' });
   assert.deepStrictEqual(RS.parseHash('#/compare/a'), { view: 'pick', a: 'a' });
 });
-t('parseHash ignores junk, bad sale types and script-ish ids', () => { assert.deepStrictEqual(RS.parseHash('#/p/<script>'), { view: 'home' }); assert.strictEqual(RS.parseHash('#/p/x/bogus').sale, null); assert.deepStrictEqual(RS.parseHash('#/zzz'), { view: 'home' }); });
+t('parseHash ignores junk, bad sale types and script-ish ids', () => { assert.deepStrictEqual(RS.parseHash('#/p/<script>'), { view: 'home', opt: 'dev' }); assert.strictEqual(RS.parseHash('#/p/x/bogus').sale, null); assert.deepStrictEqual(RS.parseHash('#/zzz'), { view: 'home', opt: 'dev' }); });
 t('buildHash round-trips', () => ['#/', '#/p/a', '#/p/a/new', '#/compare/a/b', '#/compare/a/b/sub', '#/compare/a'].forEach((h) => assert.strictEqual(RS.buildHash(RS.parseHash(h)), h)));
 t('no size appears in any hash', () => assert.ok(!/size|sqft/.test(RS.buildHash({ view: 'project', id: 'a', sale: 'new', size: 1300 }))));
 t('same-district suggestions use the approved label, not "Similar"', () => { const s = RS.sameDistrict(R.index, P.slugify('GRAND'), 5); assert.ok(/^Other projects in D\d+$/.test(s.label), s.label); assert.ok(!/similar/i.test(s.label)); assert.ok(s.rows.every((r) => r.id !== 'grand')); });

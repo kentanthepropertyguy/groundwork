@@ -139,7 +139,7 @@
     const pricesBody = `<div class="mkts">${marketHtml(name, 'sec', nb.ref)}${marketHtml(name, 'new', nb.ref)}${pos ? '<p class="basis" style="margin:2px 0 0">Select a size to compare nearby.</p>' : ''}${classNote(name)}</div>`;
     const nopos = `<p class="basis nopos">Not on the map yet, so neighbourhood and nearby prices are not shown.${help('URA’s data has no verified location for this development, so it cannot be placed on the map or measured against anything nearby. Its own prices by size are still shown.', 'Why there is no map position')}</p>`;
     const secs = sx('pr', 'Prices by size', pricesBody) + (pos ? sx('cmp', nb.mode === 'compare' ? 'Compare nearby homes' : 'Nearby prices', nearbyHtml(name, nb)) + sx('am', amTitle(), amenBody(name)) + sx('nbr', 'Explore nearby developments', nearHtml(name, mobile)) : '') + sx('meth', 'Data and methodology', methBody());
-    const open = `<a class="btn b" href="../#/p/${esc(p.id)}">Open Research page ›</a>`;
+    const open = `<a class="btn b" href="../#/p/${esc(p.id)}" data-m-full="${esc(p.id)}">Open full analysis ›</a>`;
     const top = leadHtml(name) + (pos ? keyHtml(name) : nopos);
     if (!mobile) return `<aside class="dp" aria-label="Selected development"><div class="dp-in">${head}${top}<div class="sxs">${secs}</div></div><div class="dp-foot">${open}</div></aside>`;
     const tog = `<button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">More about this home ${S.more ? '⌄' : '⌃'}</button>`;
@@ -170,7 +170,7 @@
     ].join('');
     const srcs = `<ul class="meth">${(u.src || []).map((x) => `<li>${srcLink(x)}</li>`).join('')}${u.posSrc ? `<li>Location: ${esc(u.posSrc)}</li>` : ''}</ul>`;
     const secs = (rows.length > 3 ? sx('more', 'More project details', dl(rows.slice(3))) : '') + (p.pos ? sx('am', amTitle(), amenBody(name, 'site')) + sx('nbr', 'Explore nearby developments', nearHtml(name, mobile)) : '') + ((u.src && u.src.length) || u.posSrc ? sx('meth', 'Data and sources', srcs) : '');
-    const links = (u.ms ? `<a class="btn b" href="${esc(u.ms)}" target="_blank" rel="noopener noreferrer">Open project microsite ↗</a>` : '') + (u.rs ? `<a class="btn ${u.ms ? 'g' : 'b'}" href="../#/p/${esc(u.rs)}">Research page ›</a>` : '');
+    const links = (u.ms ? `<a class="btn b" href="${esc(u.ms)}" target="_blank" rel="noopener noreferrer">Open project microsite ↗</a>` : '') + (u.rs ? `<a class="btn ${u.ms ? 'g' : 'b'}" href="../#/p/${esc(u.rs)}" data-m-full="${esc(u.rs)}">Research page ›</a>` : '');
     const top = facts + notes + (p.pos ? keyHtml(name) : '');
     if (!mobile) return `<aside class="dp" aria-label="Selected development"><div class="dp-in">${head}${top}<div class="sxs">${secs}</div></div>${links ? `<div class="dp-foot dp-foot2">${links}</div>` : ''}</aside>`;
     return `<aside class="bs${S.more ? ' open' : ''}" aria-label="Selected development"><div class="bs-hd"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}${p.pos ? radStrip(name) : ''}</div>${top}${S.more && secs ? `<div class="sxs">${secs}</div>` : ''}<div class="bs-act">${links}${secs ? `<button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">More about this site ${S.more ? '⌄' : '⌃'}</button>` : ''}</div></aside>`;
@@ -278,7 +278,7 @@
   }
   function mountMap(el) {
     const sh = $('.bs'); if (sh) $('.mapstage').style.setProperty('--shh', sh.offsetHeight + 'px');
-    view.create(el, { onSelect: dotPick, onPlace: placePick, persistPos: true });
+    view.create(el, { onSelect: dotPick, onPlace: placePick, persistPos: true, onSources: openSources });
     const pr = mapProps(true); pr.fit = true; view.update(pr);
   }
   function dotPick(n) { loadProject(n); S.start = false; go(true); }
@@ -301,15 +301,32 @@
   /* the Layers control alone is redrawn, so the map does not move */
   function drawLayers() { const el = $('.lyr'); if (el) el.outerHTML = LY.html(S.layers, S.lyrOpen, M); }
 
+  /* ---------------- data and sources: one small panel opened from the Map corner, never a page section ---------------- */
+  const SP = { open: false, from: null };
+  function openSources() {
+    const el = document.getElementById('sources'); if (!el) return;
+    SP.open = true; SP.from = document.activeElement; el.hidden = false; document.body.classList.add('kpm-srcopen');
+    const x = el.querySelector('[data-src-close]'); if (x) x.focus();
+  }
+  function closeSources(back) {
+    const el = document.getElementById('sources'); if (!el || !SP.open) return;
+    SP.open = false; el.hidden = true; document.body.classList.remove('kpm-srcopen');
+    if (back) { const f = SP.from && SP.from.isConnected ? SP.from : document.querySelector('.m-src'); if (f && f.focus) f.focus(); }
+  }
+  document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('[data-src-close]')) closeSources(true); });
+
   /* ---------------- events ---------------- */
   document.addEventListener('click', (e) => {
+    const fl = e.target.closest && e.target.closest('a[data-m-full]');
+    if (fl) { try { sessionStorage.setItem('kpt.map.out', JSON.stringify({ id: fl.dataset.mFull, h: location.hash, n: history.length })); } catch (x) { /* Back to Map then opens the Map for that development */ } }
+    if (SP.open && !(e.target.closest && (e.target.closest('#sources') || e.target.closest('.m-src')))) closeSources(false);
     if (!M) return;
     const t = e.target.closest('[data-lyr],[data-dpclose],[data-dpmin],[data-dpshow],[data-dpmore],[data-nall],[data-dot],[data-radius],[data-pr],[data-am-more],[data-pick],[data-zoom],[data-band],[data-rc],[data-am],[data-sources]');
     if (!t) { if (S.lyrOpen && !e.target.closest('.lyr')) { S.lyrOpen = false; drawLayers(); } if (!e.target.closest('.srch') && S.suggOpen) { S.suggOpen = false; render(); } return; }
     if (S.lyrOpen && !t.hasAttribute('data-lyr') && !e.target.closest('.lyr')) { S.lyrOpen = false; drawLayers(); }
     const d = t.dataset;
     if (t.hasAttribute('data-lyr')) { S.lyrOpen = !S.lyrOpen; drawLayers(); const b = $('.lyr-b'); if (b) b.focus(); return; }
-    if (t.hasAttribute('data-sources')) { const s = document.getElementById('sources'); if (s) s.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    if (t.hasAttribute('data-sources')) { openSources(); return; }
     if (t.hasAttribute('data-dpclose')) { S.start = true; S.more = false; S.min = false; S.place = null; go(true); return; }
     if (t.hasAttribute('data-dpmin')) { S.min = true; go(false); return; }
     if (t.hasAttribute('data-dpshow')) { S.min = false; go(false); return; }
@@ -329,6 +346,7 @@
   document.addEventListener('mouseover', (e) => { const t = e.target.closest && e.target.closest('[data-am]'); if (t && !narrow() && view) view.hl(t.dataset.am, false); });
   document.addEventListener('mouseout', (e) => { const t = e.target.closest && e.target.closest('[data-am]'); if (t && !narrow() && view) view.hl(S.hl, false); });
   document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && SP.open) { closeSources(true); return; }
     if (!M) return;
     if (e.key === 'Escape') { if (S.lyrOpen) { S.lyrOpen = false; drawLayers(); const b = $('.lyr-b'); if (b) b.focus(); return; } if (S.suggOpen) { S.suggOpen = false; render(); } return; }
     if (e.key === '/' && !e.target.matches('input,textarea')) { const i = $('#q'); if (i) { e.preventDefault(); i.focus(); } return; }
@@ -359,7 +377,7 @@
   const fail = (msg) => { app.innerHTML = `<div class="kpm-state"><h1>The map could not load</h1><p>${esc(msg)} Please refresh the page. If it keeps happening, the Research pages still work: <a href="../">open Research</a>.</p></div>`; };
   // New launches and awarded GLS sites (data/map/upcoming.json) load with the places; if that file is missing the Map simply has none of them.
   Promise.all([getJson('places.json'), getJson('amen.json'), getJson('upcoming.json').catch(() => null)]).then(([pl, am, up]) => {
-    M = K.create(pl, am, S); M.setUpcoming(up); M.upDoc = up; view = window.KPT_MAP_VIEW(K, M); parseHash(); notices(); render();
+    M = K.create(pl, am, S); M.setUpcoming(up); M.upDoc = up; view = window.KPT_MAP_VIEW(K, M); if (location.hash === '#sources') { try { history.replaceState(null, '', location.pathname + location.search); lastHash = location.hash; } catch (x) { /* ignore */ } SP.pending = true; } parseHash(); notices(); render(); if (SP.pending) openSources();
     window.KPT_MAP_APP = { S, M, view, render, go };
     // Prices load after the first paint; schools and supermarkets only if that file has been cleared for publication (no file, no layer).
     getJson('ev.json').then((ev) => { M.setEvidence(ev); render(); window.KPT_MAP_APP.evReady = true; }).catch(() => fail('Prices could not be loaded.'));

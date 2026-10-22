@@ -73,9 +73,9 @@
       t: ['hdb upgrade', 'upgrade', 'upgrading', 'upgrader', 'hdb to condo', 'hdb to private', 'upgrade from hdb', 'can i afford to upgrade', 'afford a condo', 'private property budget', 'sell hdb buy condo', 'next home budget', 'budget'] },
     { id: 'map', name: 'Map', tag: 'Homes, prices and what is nearby', short: 'See what is around a home, and what nearby homes sold for', href: 'research/map/', icon: 'map', menu: 1, sec: 'research',
       t: ['map', 'maps', 'on a map', 'nearby', 'near me', 'around', 'neighbourhood', 'neighborhood', 'location', 'area', 'schools', 'school', 'mrt', 'near mrt', 'amenities', 'supermarket', 'park', 'explore', 'where'] },
-    { id: 'what-can-i-buy', name: 'What can this budget buy?', tag: 'Search by budget, area and must-haves', short: 'Developments with recent sales within your budget', href: 'tools/what-can-i-buy/', icon: 'what-can-i-buy', menu: 1, sec: 'research',
+    { id: 'what-can-i-buy', name: 'What can this budget buy?', tag: 'Search by budget, area and must-haves', short: 'Developments with recent sales within your budget', href: 'research/#/budget', icon: 'what-can-i-buy', menu: 1, sec: 'research',
       t: ['what can i buy', 'budget', 'my budget', 'price range', 'find a condo', 'find a home', 'which condo', 'shortlist', 'space', 'size', 'sq ft', 'square feet', 'older condo', 'newer condo'] },
-    { id: 'worth', name: 'Property prices & past sales', tag: 'HDB, condo and landed sales · asking price', short: 'What comparable homes sold for', href: 'journey/worth/', icon: 'worth', menu: 1, sec: 'research',
+    { id: 'worth', name: 'Property prices & past sales', tag: 'HDB, condo and landed sales · asking price', short: 'What comparable homes sold for', href: 'research/#/prices', icon: 'worth', menu: 1, sec: 'research',
       t: ['valuation', 'value', 'home value', 'worth', 'whats my home worth', 'how much is my flat worth', 'how much is my home worth', 'hdb price', 'hdb prices', 'hdb resale', 'resale price', 'resale prices', 'hdb valuation', 'asking price', 'fair price', 'overpriced', 'is the price fair', 'my block', 'block resales', 'recent sales', 'landed', 'landed prices', 'terrace', 'semi d', 'bungalow', 'transacted price', 'property value', 'property values', 'market price', 'market prices', 'home prices', 'house prices', 'condo price', 'condo prices', 'condo value', 'landed sales', 'landed value', 'comparable sales', 'hdb and home prices', 'what is my home worth', 'what is my house worth', 'how much is my house worth', 'what is my property worth', 'home worth'] },
     { id: 'ask-hdb', name: 'Check an HDB asking price', tag: 'Against resales in the block', href: 'journey/worth/#hdb', icon: 'worth', search: 1, sec: 'research',
       t: ['asking price', 'hdb asking price', 'check asking price', 'is the asking price fair', 'resale flat price', 'buying a resale flat', 'cov', 'cash over valuation', 'overpriced'] },
@@ -93,7 +93,7 @@
       t: ['sell', 'selling', 'sell my home', 'sell my flat', 'home value'] },
     { id: 'guide-move', name: 'Sell and buy again', tag: 'Moving to another home, or downsizing', href: 'journey/#move', icon: 'guide', search: 1, sec: 'guide',
       t: ['moving', 'move', 'downsize', 'downsizing', 'right size', 'rightsizing', 'sell condo', 'sell landed', 'sell then buy'] },
-    { id: 'directory', name: 'Browse every development', tag: 'A–Z list', href: 'projects/', icon: 'list', start: 1, sec: 'research',
+    { id: 'directory', name: 'Browse every development', tag: 'A–Z list', href: 'research/#/browse', icon: 'list', start: 1, sec: 'research',
       t: ['browse', 'all developments', 'directory', 'list', 'a to z', 'every development', 'all condos'] },
     { id: 'sample', name: 'Sample research report', tag: 'Jadescape or Thomson Three?', href: 'research/sample/', icon: 'doc', search: 1, sec: 'research',
       t: ['sample', 'report', 'sample report', 'research report', 'detailed research', 'comparison report'] },
@@ -109,7 +109,7 @@
   const SECTIONS = {
     guide: { name: 'Guide me', href: 'journey/', nav: 'journey', q: 'Not sure where to start?', say: 'Pick your goal. We take you through the right tools, step by step.', ids: ['guide-buy', 'guide-up', 'guide-sell', 'guide-move'] },
     tools: { name: 'Tools', href: 'tools/', nav: 'tools', q: 'Know what to work out?', say: 'Calculators for stamp duty, loans, sale proceeds and more.', ids: ['planner', 'stamp-duty', 'tdsr', 'msr', 'mortgage', 'payment-planner', 'sale-proceeds', 'ssd', 'hdb-upgrade'] },
-    research: { name: 'Research', href: 'research/', nav: 'research', q: 'Looking at a property?', say: 'What homes really sold for, from URA and HDB records.', ids: ['research', 'map', 'worth', 'what-can-i-buy', 'directory', 'sample'] },
+    research: { name: 'Research', href: 'research/', nav: 'research', q: 'Looking at a property?', say: 'What homes really sold for, from URA and HDB records.', ids: ['research', 'map', 'worth', 'what-can-i-buy', 'sample'] },
   };
   const SEC_ORDER = ['guide', 'tools', 'research'];
   const MENU_TOOLS = SECTIONS.tools.ids;
@@ -442,10 +442,10 @@
         if (roads && roads.length) h += group('Roads and streets', roads.map((d) => opt(k++, roadLandedHref(base, d), svg('map') + '<span><b>' + esc(d.title) + '</b><small>' + esc((d.area ? d.area + ' · ' : '') + 'What landed homes sold for nearby') + '</small></span>', ' data-gw-nav-to="road"')).join(''));
         if (devFirst) h += toolsHtml();
         // Audit A5-11: if the development list couldn't load, say so instead of quietly showing tools only.
-        if (failed) after += '<p class="gw-sx-note" data-gw-sx-failed>Development search didn’t load. Check your connection and try again, or <a href="' + base + 'projects/" data-gw-nav-to="directory">browse every development</a>.</p>';
+        if (failed) after += '<p class="gw-sx-note" data-gw-sx-failed>Development search didn’t load. Check your connection and try again, or <a href="' + base + 'research/#/browse" data-gw-nav-to="directory">browse every development</a>.</p>';
         if (loading) after += '<p class="gw-sx-note">Searching developments…</p>';
         else if (!tools.length && !all.length && !(roads && roads.length) && !(ups && ups.length) && !pc && !failed) after += '<p class="gw-sx-note">Nothing matches “' + esc(q.slice(0, 40)) + '”. ' + (devsOnly ? 'Try part of the development’s name.' : 'Try a development name, or words like stamp duty, ABSD, mortgage, valuation or HDB upgrade.') + '</p>';
-        else if (all.length) after += '<a class="gw-sx-more" href="' + base + 'projects/" data-gw-nav-to="directory">Not listed? Browse every development ›</a>';
+        else if (all.length) after += '<a class="gw-sx-more" href="' + base + 'research/#/browse" data-gw-nav-to="directory">Not listed? Browse every development ›</a>';
         res.innerHTML = (h ? '<div role="listbox" id="' + inp.getAttribute('aria-controls') + '" aria-label="Search results" style="display:grid;gap:1px">' + h + '</div>' : '') + after;
         res.hidden = false; inp.setAttribute('aria-expanded', 'true'); if (body) body.hidden = true;
         setActive(0);

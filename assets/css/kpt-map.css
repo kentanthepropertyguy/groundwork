@@ -15,7 +15,7 @@ body.kpm{margin:0;background:#fff;color:var(--gw-ink);font-family:var(--gw-font)
 
 /* header and footer are the shared Groundwork ones (gw.css); the page only reserves the header's height */
 /* stage */
-.kpm .mapstage{position:relative;height:calc(100vh - var(--m-hh));height:calc(100dvh - var(--m-hh));min-height:560px;background:var(--m-paper2);overflow:hidden;isolation:isolate;letter-spacing:normal;--shh:0px;font:14px/1.45 var(--sans)}
+.kpm .mapstage{position:relative;height:calc(100vh - var(--m-hh));height:calc(100dvh - var(--m-hh));min-height:0;background:var(--m-paper2);overflow:hidden;isolation:isolate;letter-spacing:normal;--shh:0px;font:14px/1.45 var(--sans)}
 .kpm .map{position:absolute;inset:0}
 .kpm .kpm-state{max-width:520px;margin:80px auto;padding:0 20px}
 .kpm .kpm-state h1{font-size:22px;margin:0 0 8px;color:var(--m-ink)}
@@ -134,17 +134,33 @@ body.kpm{margin:0;background:#fff;color:var(--gw-ink);font-family:var(--gw-font)
 .kpm .map.nomap .leaflet-tile-pane{display:none}
 .kpm .map.nomap{background-color:#EFEDE7;background-image:linear-gradient(rgba(20,32,63,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(20,32,63,.07) 1px,transparent 1px);background-size:48px 48px}
 
-/* sources, below the map */
-.kpm .kpm-sources{max-width:1040px;margin:0 auto;padding:28px 22px 6px;font-family:var(--gw-font)}
-.kpm .kpm-sources h2{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:0 0 8px}
-.kpm .kpm-sources p{font-size:12px;line-height:1.55;color:var(--m-mut);margin:0;max-width:760px}
-.kpm .kpm-sources a{text-decoration:underline;color:var(--gw-blue)}
+/* data and sources: a small panel opened from the Map corner (the page itself has no section or footer below the Map) */
+.kpm .m-src{font:inherit;background:none;border:0;padding:2px 0 2px 2px;margin:0;color:var(--m-ink);text-decoration:underline;cursor:pointer;white-space:nowrap}
+.kpm .m-src:focus-visible{outline:2px solid var(--m-sig);outline-offset:2px;border-radius:4px}
+.kpm .kpm-src{position:fixed;z-index:900;right:12px;bottom:40px;width:min(460px,calc(100vw - 24px));max-height:min(72vh,560px);max-height:min(72dvh,560px);display:flex;flex-direction:column;background:#fff;border:1px solid var(--m-line);border-radius:16px;box-shadow:0 18px 48px rgba(20,32,63,.22),0 1px 3px rgba(20,32,63,.1);font-family:var(--gw-font);letter-spacing:normal}
+.kpm .kpm-src[hidden]{display:none}
+.kpm .kpm-src-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px 10px 18px;border-bottom:1px solid var(--m-line)}
+.kpm .kpm-src h2{margin:0;font-size:15px;font-weight:700;color:var(--m-ink);letter-spacing:-.01em}
+.kpm .kpm-src-x{flex:none;width:36px;height:36px;border-radius:50%;border:0;background:none;font-size:22px;line-height:1;color:var(--m-mut);cursor:pointer}
+.kpm .kpm-src-x:hover{background:var(--m-paper)}
+.kpm .kpm-src-bd{padding:12px 18px 16px;overflow:auto;overscroll-behavior:contain;min-height:0}
+.kpm .kpm-src p{font-size:12.5px;line-height:1.55;color:var(--m-mut);margin:0 0 10px}
+.kpm .kpm-src a{color:var(--gw-blue);text-decoration:underline}
+.kpm .kpm-src .kpm-src-who{color:var(--m-text)}
+.kpm .kpm-src-nav{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px}
+
+/* the Map is a full-screen workspace: the header, then the Map to the bottom of the window; the page itself never scrolls */
+html:has(> body.kpm){height:100%;overflow:hidden}
+body.kpm{height:100vh;height:100dvh;overflow:hidden;display:flex;flex-direction:column}
+body.kpm > .gw-nav{flex:none}
+.kpm #app{flex:1 1 0;min-height:0;position:relative;display:flex;flex-direction:column}
+.kpm #app > .mapstage{flex:1 1 0;height:auto;min-height:0}
+.kpm .dp-in,.kpm .bs,.kpm .sugg,.kpm .lyr-p{overscroll-behavior:contain}
 
 /* phones: the map with a compact bottom sheet */
 @media (max-width:760px){
   .kpm{--m-hh:56px}
-  .kpm .kpm-sources{padding:28px 16px 6px}
-  .kpm .mapstage{min-height:480px}
+  .kpm .kpm-src{left:8px;right:8px;bottom:8px;width:auto;max-height:70dvh}
   .kpm .mapsearch{left:12px;right:12px;top:12px;width:auto;max-width:none}
   .kpm .mapsearch .srch input{height:48px;font-size:16px}
   .kpm .srch kbd{display:none}

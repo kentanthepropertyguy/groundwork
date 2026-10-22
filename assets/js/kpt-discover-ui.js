@@ -10,6 +10,8 @@
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const params = new URLSearchParams(location.search);
   const REVIEW = CFG.review || /^(localhost|127\.0\.0\.1)$/.test(location.hostname);   // ?inventory= and ?now= work only on localhost or in test mode, never on the live site
+  // EMB: the requirements form hosted inside the Research page (research/). Only the form lives there; Show developments opens this page's results. BASE is the path to the site root.
+  const EMB = !!CFG.embed, BASE = CFG.ROOT || '../../';
   const MAP_V = CFG.MAP_V, RADII = D.T.radii, NEAR_TYPES = ['dev', 'mrt', 'area', 'road', 'school', 'postal'];
   const BUDGET_ERR = 'Enter a budget between $300,000 and $20,000,000.';
   const money = (n) => Number(n).toLocaleString('en-SG');
@@ -38,11 +40,11 @@
   function loadNear() {
     if (nmLoad) return nmLoad;
     const g = (u, must) => fetch(u + '?v=' + MAP_V).then((r) => { if (!r.ok) throw new Error(u); return r.json(); }).catch((e) => { if (must) throw e; return null; });
-    addCss('../../assets/vendor/leaflet/leaflet.css'); addCss('../../assets/css/kpt-map.css?v=' + MAP_V);
-    nmLoad = Promise.all([addJs('../../assets/vendor/leaflet/leaflet.js').then(() => addJs('../../assets/js/gw-postal.js?v=' + MAP_V)).then(() => addJs('../../assets/js/kpt-map-core.js?v=' + MAP_V)).then(() => addJs('../../assets/js/kpt-map-view.js?v=' + MAP_V)), g('../../data/map/places.json', true), g('../../data/map/amen.json', true), g('../../data/map/upcoming.json')])
+    addCss(BASE + 'assets/vendor/leaflet/leaflet.css'); addCss(BASE + 'assets/css/kpt-map.css?v=' + MAP_V);
+    nmLoad = Promise.all([addJs(BASE + 'assets/vendor/leaflet/leaflet.js').then(() => addJs(BASE + 'assets/js/gw-postal.js?v=' + MAP_V)).then(() => addJs(BASE + 'assets/js/kpt-map-core.js?v=' + MAP_V)).then(() => addJs(BASE + 'assets/js/kpt-map-view.js?v=' + MAP_V)), g(BASE + 'data/map/places.json', true), g(BASE + 'data/map/amen.json', true), g(BASE + 'data/map/upcoming.json')])
       .then((a) => {
         NM = window.KPT_MAP.create(a[1], a[2], { band: null, radius: 1000 }); NM.setUpcoming(a[3]);   // launches and awarded GLS sites join the same place index as the Map's
-        return Promise.all([g('../../data/value/landed/geo.json'), g('../../data/value/landed/geo-more.json'), a[2].extra ? g('../../data/map/' + a[2].extra) : null])
+        return Promise.all([g(BASE + 'data/value/landed/geo.json'), g(BASE + 'data/value/landed/geo-more.json'), a[2].extra ? g(BASE + 'data/map/' + a[2].extra) : null])
           .then((b) => { if (b[0] || b[1]) NM.setRoads(b[0], b[1]); if (b[2]) NM.setExtra(b[2]); return NM; });
       }).catch((e) => { nmLoad = null; throw e; });
     return nmLoad;
@@ -124,7 +126,7 @@
     } else loadData().then(go);
   }
   addEventListener('popstate', (e) => {
-    const st = e.state && (e.state.kd === 'f' || e.state.kd === 'r') ? e.state : null; if (!st || !S.ready) return;
+    const st = e.state && (e.state.kd === 'f' || e.state.kd === 'r') ? e.state : null; if (EMB || !st || !S.ready) return;
     if (st.kd === 'f') { if (S.mode !== 'entry') toForm(); } else toResults(st.snap);
   });
   const SIZE_BEDS = { '1br': 1, '2br': 2, '3br': 3, '3br-study': 3, '4br-plus': 4 };
@@ -388,7 +390,7 @@
     const root = $('root'), bey = $('beyond'); if (bey) bey.hidden = S.mode === 'entry';
     if (S.mode === 'entry') {
       root.className = 'kd is-entry';
-      root.innerHTML = `<div class="kd-entry"><p class="kd-eye">I’m looking to buy</p><h1 class="kd-h1">What are you looking for?</h1><p class="kd-lede">Tell us your maximum and where. Add requirements if you have them, and change any of it later without starting again.</p>${srcLine ? `<p class="kd-src">${esc(srcLine)}</p>` : ''}<div id="kdForm" class="kd-form"></div>${srcLine ? '' : '<p class="kd-fine">Not sure of your budget? <a href="../hdb-upgrade/">Work out your planning position first ›</a></p>'}</div>`;
+      root.innerHTML = `<div class="kd-entry">${EMB ? '' : '<p class="kd-eye">I’m looking to buy</p><h1 class="kd-h1">What are you looking for?</h1><p class="kd-lede">Tell us your maximum and where. Add requirements if you have them, and change any of it later without starting again.</p>'}${srcLine ? `<p class="kd-src">${esc(srcLine)}</p>` : ''}<div id="kdForm" class="kd-form"></div>${srcLine ? '' : '<p class="kd-fine">Not sure of your budget? <a href="' + BASE + 'tools/hdb-upgrade/">Work out your planning position first ›</a></p>'}</div>`;
       $('kdForm').innerHTML = formHtml(true); bindInputs(); return;
     }
     root.className = 'kd is-results' + (S.edit ? ' is-edit' : '');
@@ -464,6 +466,8 @@
   }
   function show() {
     if (!applyBudget(true)) { const i = $('kdBudget'); if (i) i.focus(); return; }
+    // Hosted in Research: remember the search for this tab, then open the results page (Back returns here with the form as it was).
+    if (EMB) { persist(); try { window.sessionStorage.setItem('kpt.find.from', 'research'); } catch (e) { /* the results page then keeps its own prefilled form one step back */ } location.href = BASE + 'tools/what-can-i-buy/'; return; }
     $('root').innerHTML = '<p class="kd-load">Loading…</p>';
     loadData().then(() => { S.mode = 'results'; S.edit = false; S.shown = {}; renderAll(); persist(); setHist('r', true); const h = $('kdH'); if (h && h.scrollIntoView) window.scrollTo({ top: 0 }); });
   }
@@ -522,7 +526,19 @@
     }
     return Promise.resolve();
   }
+  const plannerLine = (init) => 'From your plan: ' + (init.range ? m2(init.range.low) + '–' + m2(init.range.high) + '. The top of the range is filled in as your maximum.' : 'about ' + m2(S.req.budget) + '.');
+  // Hosted in Research: always the requirements form, prefilled from the saved search or a planner's budget; nothing is shown until Show developments.
+  function embedStart() {
+    handoff = M.readHandoff(window.sessionStorage);
+    const init = initial();
+    if (init) { S.req = Object.assign({}, BLANK, init.req); if (init.req.budget) S.draftBudget = money(init.req.budget); S.view = 'list'; }
+    const valid = !!(init && S.req.budget && D.clean(S.req).budget);
+    if (valid && init.planner) srcLine = plannerLine(init);
+    S.mode = 'entry'; renderAll(); S.ready = true;
+    if (valid) loadData().then(() => (init.near || init.where ? restorePlace(init.near, init.where) : null)).then(() => { if (S.mode === 'entry' && (S.near || S.pendingWhere) && !document.activeElement.matches('input')) renderAll(); });
+  }
   function start() {
+    if (EMB) { embedStart(); return; }
     handoff = M.readHandoff(window.sessionStorage);
     const st = hs();   // coming back to this page through Back, Forward or a reload: the entry says whether it was the form or the results
     let init = initial();
@@ -530,14 +546,15 @@
     if (init) { S.req = Object.assign({}, BLANK, init.req); if (init.req.budget) S.draftBudget = money(init.req.budget); S.view = 'list'; }
     const valid = !!(init && S.req.budget && D.clean(S.req).budget);
     if (valid && init.planner) {   // a budget from a planner: the buyer chooses area and type first, then Show developments (never straight to islandwide results)
-      srcLine = 'From your plan: ' + (init.range ? m2(init.range.low) + '–' + m2(init.range.high) + '. The top of the range is filled in as your maximum.' : 'about ' + m2(S.req.budget) + '.');
+      srcLine = plannerLine(init);
       S.mode = 'entry'; renderAll(); loadData(); if (!st) setHist('f', false); S.ready = true; return;
     }
     if (valid && !(st && st.kd === 'f')) {
       $('root').innerHTML = '<p class="kd-load">Loading…</p>';
       loadData().then(() => restorePlace(init.near, init.where)).then(() => {
         S.mode = 'results'; renderAll(); if (!init.near && !init.where) persist();
-        if (!st) { setHist('f', false); setHist('r', true); }   // a saved search opens on its results, with the prefilled form one step back
+        // a saved search opens on its results, with the prefilled form one step back; arriving from the Research form, the form is the Research page itself, so this entry is simply the results
+        if (!st) { let fromR = false; try { fromR = window.sessionStorage.getItem('kpt.find.from') === 'research'; window.sessionStorage.removeItem('kpt.find.from'); } catch (e) { fromR = false; } if (fromR) setHist('r', false); else { setHist('f', false); setHist('r', true); } }
         S.ready = true;
       });
     } else if (valid) {   // Back to the form: every requirement is still there
@@ -559,6 +576,6 @@
   // Ken: a quiet, generic WhatsApp link (no budget, place or search in it)
   const BEYOND_WA = 'Hi Ken, I was using Groundwork and have a question.';
   const kb = $('kenBeyond'); if (kb) kb.href = KPT.waLink({ message: BEYOND_WA });
-  window.__kd = { S, state: () => S, res: () => lastRes, parseBudget };
+  window.__kd = { S, state: () => S, res: () => lastRes, parseBudget, embed: EMB };
   start();
 })();

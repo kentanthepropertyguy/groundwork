@@ -248,7 +248,7 @@ console.log('The page');
 const html = fs.readFileSync(path.join(root, 'tools/what-can-i-buy/index.html'), 'utf8'), ui = fs.readFileSync(path.join(root, 'assets/js/kpt-discover-ui.js'), 'utf8'), D = require(path.join(root, 'assets/js/kpt-discover.js')), page = html + '\n' + ui, mapPage = fs.readFileSync(path.join(root, 'research/map/index.html'), 'utf8');
 t('the Map files load only when a place is typed (no static script or stylesheet for the Map or Leaflet)', () => {
   assert.ok(!/<script[^>]+(leaflet|kpt-map-)/.test(html)); assert.ok(!/<link[^>]+(leaflet|kpt-map)/.test(html));
-  assert.ok(/nmLoad = Promise\.all\(\[addJs\('\.\.\/\.\.\/assets\/vendor\/leaflet\/leaflet\.js'\)/.test(ui)); assert.ok(/root\.addEventListener\('focusin'[^\n]*loadNear\(\)/.test(ui));
+  assert.ok(/nmLoad = Promise\.all\(\[addJs\(BASE \+ 'assets\/vendor\/leaflet\/leaflet\.js'\)/.test(ui)); assert.ok(/root\.addEventListener\('focusin'[^\n]*loadNear\(\)/.test(ui));
 });
 t('the page asks for the same Map file versions as the Map page (so the browser reuses them and a bump cannot split them)', () => {
   const mv = (/MAP_V: '([^']+)'/.exec(html) || [])[1], want = (/kpt-map-core\.js\?v=([^"']+)/.exec(mapPage) || [])[1];
