@@ -17,9 +17,9 @@
     incomeCapLow: 0.35,
     incomeCapHigh: 0.45,
 
-    // Cash held back for renovation/moving/emergencies. Reduces funds available for the
-    // purchase AND counts as cash in the liquidity (minimum-cash) check.
-    reserve: 50000,
+    // Cash the buyer chooses to hold back. $0 by default: every eligible dollar counts unless the buyer sets one aside.
+    // When above $0 it reduces funds available for the purchase AND counts as cash in the liquidity (minimum-cash) check.
+    reserve: 0,
 
     // Planning tenure cap, applied after the regulatory limits.
     planningTenureCap: 25,

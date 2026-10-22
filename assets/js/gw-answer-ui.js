@@ -90,9 +90,9 @@
       '<aside class="pa-form" aria-label="Your details">' + formHtml() + '</aside>' +
       '<div class="pa-out" data-out aria-live="polite">' +
       '<div data-status></div><div class="pa-head" data-head></div>' +
-      '<div class="pa-borrow" data-borrow hidden><p class="pa-l" id="pa-l-borrow">How much would you like to borrow?</p><div class="pa-borrow-r"><div class="pa-pin"><i>$</i><input id="pa-borrow" type="text" inputmode="decimal" autocomplete="off" data-k="prefLoan" data-t="money" aria-describedby="pa-borrow-note" aria-invalid="false"></div><button type="button" class="pa-link" data-borrow-max hidden>Use the most</button></div>' +
-      '<input type="range" class="pa-range pa-brange" data-borrow-range aria-labelledby="pa-l-borrow" min="0" max="1000000" step="10000"><small class="pa-hint" id="pa-borrow-note" data-borrow-note></small><small class="pa-err" data-err="prefLoan" role="alert" hidden></small></div><div data-tenure></div>' +
-      '<div class="pa-pricebox" data-pricebox hidden><div class="pa-prow"><label class="pa-l" for="pa-price">Try a price</label><div class="pa-pw"><div class="pa-pin"><i>$</i><input id="pa-price" type="text" inputmode="numeric" autocomplete="off" data-k="price" data-t="money" aria-describedby="pa-price-err"></div><button type="button" class="pa-link pa-reset" data-reset-price hidden>Use my comfortable budget</button></div></div>' +
+      '<details class="pa-borrow" data-borrow hidden><summary><span id="pa-l-borrow">Borrow less than the most</span><em data-borrow-sum></em></summary><div class="pa-borrow-r"><div class="pa-pin"><i>$</i><input id="pa-borrow" type="text" inputmode="decimal" autocomplete="off" data-k="prefLoan" data-t="money" aria-describedby="pa-borrow-note" aria-invalid="false"></div><button type="button" class="pa-link" data-borrow-max hidden>Use the most</button></div>' +
+      '<input type="range" class="pa-range pa-brange" data-borrow-range aria-labelledby="pa-l-borrow" min="0" max="1000000" step="10000"><small class="pa-hint" id="pa-borrow-note" data-borrow-note></small><small class="pa-err" data-err="prefLoan" role="alert" hidden></small></details><div data-tenure></div>' +
+      '<div class="pa-pricebox" data-pricebox hidden><div class="pa-prow"><label class="pa-l" for="pa-price">Try a price</label><div class="pa-pw"><div class="pa-pin"><i>$</i><input id="pa-price" type="text" inputmode="numeric" autocomplete="off" data-k="price" data-t="money" aria-describedby="pa-price-err"></div><button type="button" class="pa-link pa-reset" data-reset-price hidden>Back to my maximum</button></div></div>' +
       '<div class="pa-rangeW"><input type="range" class="pa-range" data-range aria-label="Price to try" min="100000" max="3000000" step="10000"></div><div class="pa-rlab"><span data-rlo></span><span data-rhi></span></div><small class="pa-err" id="pa-price-err" data-err="price" role="alert" hidden></small></div>' +
       '<div data-next></div><div data-tiles></div><div data-how></div>' +
       '<p class="pa-foot" data-foot hidden>Estimates from MAS, IRAS and HDB rules checked 9 Oct 2026. Not a bank offer or approval.</p>' +
@@ -109,22 +109,21 @@
   const rateTxt = (res) => pc((res.ratePct === undefined ? 4 : res.ratePct) / 100, 2);
   const R_MAT = root.GW_RULES && root.GW_RULES.bankLtv && root.GW_RULES.bankLtv.maturityAge || 75;
   const maxTenure = () => (root.GW_RULES && root.GW_RULES.bankLtv && root.GW_RULES.bankLtv.maxTenure && root.GW_RULES.bankLtv.maxTenure.private) || 35;
-  // Three figures, each saying what it is: what the bank may lend (a loan, for the tenure shown), what the buyer can comfortably pay (loan plus cash, CPF,
-  // reserves and payment dates), and what the loan costs each month. The bank's lending capacity is never presented as the buyer's budget.
+  // One answer, then the three figures that explain it. The maximum property budget is the highest price at which every test passes (cash and CPF, the loan limit,
+  // the income-supported loan, the dated payments); the borrowing capacity (what income supports), the loan at that price and the monthly mortgage sit under it.
+  // One sentence says which limit decided it. There are never two competing headline budgets.
+  const LIMIT_TXT = {
+    funds: 'Your current budget is limited by your available cash and CPF.',
+    income: 'Your current budget is limited by your borrowing capacity.',
+    choice: 'Your current budget is limited by the loan amount you chose.',
+    payments: 'Your current budget is limited by the cash and CPF you will have when each payment is due.',
+  };
   function figs(res) {
-    const c = res.comfortable, hi = res.highest, at = res.atComfortable || res.atHighest, onC = c !== null && res.atComfortable;
-    const priceTxt = onC ? 'the ' + $s(c) + ' budget' : 'the ' + $s(hi) + ' highest price';
-    const limit = !at ? '' : at.limit === 'income'
-      ? 'Your income is what limits it: it supports ' + $s(at.incomeLoan) + ', where the loan limit would allow ' + $s(at.ruleLoan) + '.'
-      : at.limit === 'choice' ? 'You chose to borrow less than the most the numbers allow.' : 'The loan limit is what limits it (' + pc(at.ltv) + ' of the price). Your income would support up to ' + $s(at.incomeLoan) + '.';
-    const chosen = at && at.limit === 'choice';
-    const loanFig = at ? '<div class="pa-fig"><div class="k">Maximum estimated loan</div><div class="d">The most the bank may lend</div><div class="v">' + $s(at.maxLoan) + '</div><div class="s"><p>Over ' + plural(res.years) + ', at ' + priceTxt + '.</p><p>' + (chosen ? 'You chose to borrow ' + $s(at.loan) + ' of it.' : limit) + '</p></div></div>' : '';
-    const stretch = c !== null && hi > c ? ' You could stretch to <b>' + $s(hi) + '</b>.' : '';
-    const budget = c !== null
-      ? '<div class="pa-fig main"><div class="k">Comfortable budget</div><div class="d">What you can comfortably pay</div><div class="v">' + $s(c) + '</div><div class="s"><p>' + (res.atComfortable ? 'Loan plus your cash and CPF, with ' + $(round100(res.atComfortable.spare)) + ' left in hand after buying.' : '') + stretch + '</p></div></div>'
-      : '<div class="pa-fig main"><div class="k">Comfortable budget</div><div class="d">What you can comfortably pay</div><div class="v none">Not yet</div><div class="s"><p>Nothing leaves your cushion in hand. The most the numbers allow is <b>' + $s(hi) + '</b>' + (res.atHighest ? (res.atHighest.spare < 1000 ? ', which leaves almost nothing in hand.' : ', which leaves about ' + $(round100(res.atHighest.spare)) + ' in hand.') : '.') + '</p></div></div>';
-    const inst = at ? '<div class="pa-fig"><div class="k">Monthly instalment</div><div class="d">What the loan costs each month</div><div class="v">' + $(at.monthly) + '</div><div class="s"><p>On the ' + $s(at.loan) + ' you would borrow, over ' + plural(res.years) + ' at your expected ' + rateTxt(res) + '.</p></div></div>' : '';
-    return '<div class="pa-figs">' + loanFig + budget + inst + '</div>';
+    const b = res.budget !== undefined ? res.budget : (res.comfortable !== null ? res.comfortable : res.highest), at = res.atComfortable || res.atHighest;
+    const cap = res.borrow && res.borrow.max > 0 ? '<div class="pa-fig"><div class="k">Your borrowing capacity</div><div class="v">' + $s(Math.floor(res.borrow.max / 1e4) * 1e4) + '</div><div class="s"><p>The most your income supports, over ' + plural(res.years) + '.</p></div></div>' : '';
+    const loan = at ? '<div class="pa-fig"><div class="k">Loan at this price</div><div class="v">' + $(at.loan) + '</div><div class="s"><p>' + (at.limit === 'choice' ? 'The loan you chose.' : pc(at.ltv) + ' of the price at most.') + '</p></div></div>' : '';
+    const inst = at ? '<div class="pa-fig"><div class="k">Monthly mortgage</div><div class="v">' + $(at.monthly) + '</div><div class="s"><p>Over ' + plural(res.years) + ' at ' + rateTxt(res) + '.</p></div></div>' : '';
+    return '<p class="pa-max" data-max>' + $(b) + '</p><div class="pa-figs">' + cap + loan + inst + '</div><p class="pa-why" data-why>' + (LIMIT_TXT[res.limitedBy] || LIMIT_TXT.funds) + '</p>';
   }
 
   // The sale of the home, in plain words. Counted: cash and CPF separately. Not counted: what is known, and exactly what is missing.
@@ -147,16 +146,18 @@
     if (res.basis !== 'keep') return '';
     let t;
     if (f.flatLoan === 'no') t = 'Keeping your home, fully paid: it still counts as a property you own (for ABSD), but no loan or instalment counts.';
-    else if (f.flatLoan === 'unsure') t = '<span class="pa-badge est">Cautious view</span> You are not sure whether you still owe on your home, so it is counted as if you do: its loan' + (f.flatInstal > 0 ? ' and ' + $(f.flatInstal) + ' instalment' : '') + ' count.' + (res.ifPaid ? ' <b>If it is fully paid</b>, you could afford ' + (res.ifPaid.comfortable !== null ? 'about <b>' + $s(res.ifPaid.comfortable) + '</b> comfortably, up to <b>' + $s(res.ifPaid.highest) + '</b>' : 'up to <b>' + $s(res.ifPaid.highest) + '</b>') + '.' : '');
+    else if (f.flatLoan === 'unsure') t = '<span class="pa-badge est">Cautious view</span> You are not sure whether you still owe on your home, so it is counted as if you do: its loan' + (f.flatInstal > 0 ? ' and ' + $(f.flatInstal) + ' instalment' : '') + ' count.' + (res.ifPaid ? ' <b>If it is fully paid</b>, you could afford ' + 'up to <b>' + $s(res.ifPaid.highest) + '</b>' + '.' : '');
     else t = 'Keeping your home: its loan and instalment count.';
     if (f.otherOwned > 0) t += ' Your other property counts too' + (f.otherLoans > 0 ? ', with ' + (f.otherLoans === 1 ? 'its loan' : 'its ' + f.otherLoans + ' loans') + ' and ' + $(f.otherInstal) + ' a month' : '') + '.';
     return '<p class="pa-basis">' + t + '</p>';
   }
 
+  // The next step, straight under the answer: the Budget Search form, already holding this budget (Groundwork keeps it in this tab only).
+  const goHtml = () => '<div class="pa-go"><a class="gw-btn pri" href="../what-can-i-buy/" data-pa-explore data-gw-go="what-can-i-buy">Explore properties within my budget</a><a class="pa-link" href="../payment-planner/" data-pa-dates>Check the payment dates</a></div>';
   function headHtml(res, held, waitText) {
-    const kick = '<p class="pa-kick">You can afford</p>';
+    const kick = '<p class="pa-kick">Your maximum property budget</p>';
     if (res && res.state === 'hdb') return '<div class="pa-intro pa-hdb">' + '<p class="pa-kick">HDB flat</p><h2 class="pa-lead">An HDB flat needs the HDB calculator</h2>' + hdbRoute(false) + '</div>';
-    if (!res || res.state === 'empty') return '<div class="pa-intro">' + kick + '<h2 class="pa-lead">What can you comfortably afford?</h2><p class="pa-p">Add your age and income to start. The answer updates as you type, and nothing leaves this device.</p></div>';
+    if (!res || res.state === 'empty') return '<div class="pa-intro">' + kick + '<h2 class="pa-lead">What is your maximum budget?</h2><p class="pa-p">Add your age and income to start. The answer updates as you type, and nothing leaves this device.</p></div>';
     if (res.state === 'no-income') return '<div class="pa-intro">' + kick + '<h2 class="pa-lead">No bank loan to work out</h2><p class="pa-p">Your income is entered as $0, so there is no income to lend against. Add income, including a co-borrower’s, to see what a bank could lend. Leave it blank if you have not decided yet.</p></div>';
     if (res.state === 'income' || res.state === 'ask-home' || res.state === 'ask-flat') {
       const prompt = res.state === 'income' ? 'Add your cash and CPF to see what that buys.' : res.state === 'ask-home' ? 'Answer the property questions on the left to see your budget.' : (PROMPTASK[(res.ask || [])[0]] || 'Answer the property questions on the left.');
@@ -167,27 +168,16 @@
     const badge = res.estimate ? tag('est', 'Estimate · payments not checked yet') : tag('ok', 'Payments checked');
     const basis = basisHtml(res);
         let more = '';
-    if (res.beneath && res.beneath.sell && res.beneath.sell.highest !== null) { const b = res.beneath.sell; more = '<p class="pa-beneath">' + (res.beneath.why === 'buy' ? 'Buying first, the sale isn’t counted yet, so this is the cautious figure. ' : 'Not sure yet, so this is the cautious figure. ') + '<b>Selling first</b>, you could afford ' + (b.comfortable !== null ? 'about <b>' + $s(b.comfortable) + '</b> comfortably, up to <b>' + $s(b.highest) + '</b>' : 'up to <b>' + $s(b.highest) + '</b>') + '.</p>'; }
+    if (res.beneath && res.beneath.sell && res.beneath.sell.highest !== null) { const b = res.beneath.sell; more = '<p class="pa-beneath">' + (res.beneath.why === 'buy' ? 'Buying first, the sale isn’t counted yet, so this is the cautious figure. ' : 'Not sure yet, so this is the cautious figure. ') + '<b>Selling first</b>, you could afford ' + 'up to <b>' + $s(b.highest) + '</b>' + '.</p>'; }
     else if (res.saleNote === 'missing' && res.sale) more = '<p class="pa-beneath">' + saleLine(res.sale) + '</p>';
-    return '<div class="pa-hd"><div class="pa-hdt">' + kick + (held ? '' : badge) + '</div>' + figs(res) + basis + cpfNote(res) + more + '</div>' + (held ? '<p class="pa-wait" role="status">' + esc(waitText) + '</p>' : '');
-  }
-
-  function cushionHtml(res, cur) {
-    if (!res || res.state !== 'ok') return '';
-    const m = cur.months, amt = cur.amount;
-    const at = res.atComfortable || res.atHighest;
-    const text = amt !== undefined ? 'Keeps ' + $(amt) + ' aside' : 'Keeps ' + m + ' months of instalments aside' + (at ? ' (about ' + $(round100(at.cushion)) + ')' : '');
-    const opts = [[3, '3 months'], [6, '6 months'], [12, '12 months']];
-    return '<div class="pa-cush"><span class="pa-cush-t">' + esc(text) + '</span> <button type="button" class="pa-link" data-cush-toggle aria-expanded="false">Change</button>' +
-      '<div class="pa-cush-o" data-cush-o hidden><div class="pa-chips" role="group" aria-label="Keep in hand after buying" data-cush-chips>' + opts.map((o) => '<button type="button" class="pa-chip" data-cush="' + o[0] + '" aria-pressed="' + (amt === undefined && m === o[0]) + '">' + o[1] + '</button>').join('') + '<button type="button" class="pa-chip" data-cush="amount" aria-pressed="' + (amt !== undefined) + '">Own amount</button></div>' +
-      '<label class="pa-f pa-cush-a" data-cush-a' + (amt === undefined ? ' hidden' : '') + '><span>Amount to keep in hand</span><div class="pa-in pa-m"><i>$</i><input type="text" inputmode="decimal" autocomplete="off" data-k="cushionAmount" data-t="money" aria-invalid="false"></div><small class="pa-err" data-err="cushionAmount" role="alert" hidden></small></label></div></div>';
+    return '<div class="pa-hd"><div class="pa-hdt">' + kick + (held ? '' : badge) + '</div>' + figs(res) + (held ? '' : goHtml()) + basis + cpfNote(res) + more + '</div>' + (held ? '<p class="pa-wait" role="status">' + esc(waitText) + '</p>' : '');
   }
 
   // The verdict on the price being tried. A price that does not fit is said calmly, in amber, with the date it first falls short; the way out follows.
   function statusHtml(res) {
     const a = res.at, zone = res.zone, P = res.price;
     let kind, text;
-    if (zone === 'comfortable') { kind = 'ok'; text = '<b>' + $m(P) + ' works, comfortably.</b> ' + $(round100(a.spare)) + ' stays in hand after buying' + (a.monthly > 0 ? ', about ' + Math.max(1, Math.floor(a.spare / a.monthly)) + ' months of instalments' : '') + '.'; }
+    if (zone === 'comfortable') { kind = 'ok'; text = '<b>' + $m(P) + ' works.</b> ' + (a.spare >= 1000 ? $(round100(a.spare)) + ' of your cash stays in hand after buying.' : 'It uses almost all of your cash and CPF.'); }
     else if (zone === 'tight') { kind = 'warn'; text = '<b>' + $m(P) + ' is tight.</b> It works, but only ' + $(round100(a.spare)) + ' is left in hand after buying, less than the ' + $(round100(a.cushion)) + ' you keep aside.'; }
     else {
       kind = 'warn';
@@ -203,10 +193,9 @@
     const a = res.at;
     const why = a.limit === 'income' ? 'Limited by your income' : a.limit === 'choice' ? 'Your choice' : pc(a.ltv) + ' of the price';
     const pct = a.monthlyPct ? pc(a.monthlyPct) + ' of your income' : '';
-    const title = res.priceIsOwn ? 'Your price: ' + $(res.price) : 'At ' + $m(res.price) + (res.comfortable !== null && res.price === res.comfortable ? ', your comfortable budget' : ', the highest the numbers allow');
+    const title = 'At ' + $(res.price);
     const t = (k, v, s) => '<div class="pa-tile"><div class="k">' + k + '</div><div class="v">' + v + '</div><div class="s">' + s + '</div></div>';
-    return '<div class="pa-price"><h3 class="pa-h3">' + esc(title) + '</h3><div class="pa-tiles">' + t(a.limit === 'choice' ? 'Loan you chose' : 'Estimated bank loan', $(a.loan), esc(a.limit === 'choice' ? 'Your choice · the most would be ' + $(a.maxLoan) : why)) + t('Cash and CPF needed', $(a.upfront), 'You have ' + $(a.have) + (a.haveCpf > 0 ? ', counting your CPF as entered' : '')) + t('Monthly instalment', $(a.monthly), 'Over ' + plural(res.years) + (pct ? ' · ' + esc(pct) : '')) + '</div>' +
-      '<a class="gw-btn pri pa-cta" href="../payment-planner/" data-pa-dates>Check the payment dates →</a></div>';
+    return '<div class="pa-price"><h3 class="pa-h3">' + esc(title) + '</h3><div class="pa-tiles">' + t(a.limit === 'choice' ? 'Loan you chose' : 'Estimated bank loan', $(a.loan), esc(a.limit === 'choice' ? 'Your choice · the most would be ' + $(a.maxLoan) : why)) + t('Cash and CPF needed', $(a.upfront), 'You have ' + $(a.have) + (a.haveCpf > 0 ? ', counting your CPF as entered' : '')) + t('Monthly mortgage', $(a.monthly), 'Over ' + plural(res.years) + (pct ? ' · ' + esc(pct) : '')) + '</div></div>';
   }
 
   const rowsOf = (res) => (res._rows || (res._rows = res.options ? res.options() : []));
@@ -255,7 +244,7 @@
     if (res.zone === 'over' && res.fixes && res.fixes.length) {
       const a = res.at, gap = a.gap > 0.5 ? a.gap : a.peak;
       const rows = res.fixes.map((f) => {
-        if (f.kind === 'price') return '<li class="pa-fix"><div class="pa-fix-t"><b>Lower the price to ' + $m(f.to) + '</b><span>' + (f.after.zone === 'comfortable' ? 'Comfortable, with money to spare.' : 'It fits, but it would be tight.') + '</span></div><button type="button" class="pa-btn" data-prev="price" aria-expanded="false">Preview</button>' + prevBlock(res, f) + '</li>';
+        if (f.kind === 'price') return '<li class="pa-fix"><div class="pa-fix-t"><b>Lower the price to ' + $m(f.to) + '</b><span>' + (f.after.zone === 'comfortable' ? 'It fits.' : 'It fits, but it would be tight.') + '</span></div><button type="button" class="pa-btn" data-prev="price" aria-expanded="false">Preview</button>' + prevBlock(res, f) + '</li>';
         return '<li class="pa-fix"><div class="pa-fix-t"><b>Add about ' + $(f.add) + ' more cash</b><span>Covers ' + $m(res.price) + (f.after.zone === 'comfortable' ? '.' : ', but it would be tight.') + '</span></div><button type="button" class="pa-btn" data-prev="cash" aria-expanded="false">Preview</button>' + prevBlock(res, f) + '</li>';
       }).join('');
       return '<div class="pa-fixes"><p class="pa-kick">Ways to close the ' + $(round100(gap)) + ' gap</p><ul>' + rows + '</ul><p class="pa-fine">Nothing changes until you apply. You can undo it.</p></div>';
@@ -275,8 +264,17 @@
     const row = (k, v) => '<div><dt>' + k + '</dt><dd>' + v + '</dd></div>';
     // loan: what the income supports, what the loan limit allows, and the lower of the two
     const rows = rowsOf(res), stdRow = rows.filter((r) => r.isStd)[0] || {}, stdPc = stdRow.ltv ? pc(stdRow.ltv) : '75%', age = Math.round(B.iwaaUse);
+
     const reason = a.lower ? ' It is ' + pc(a.ltv) + ', not ' + stdPc + ', because ' + (a.lowerWhy === 'age' ? 'a ' + plural(a.years) + ' loan from age ' + age + ' runs past age 65.' : 'a loan over 30 years takes the lower limit.') : ' This is the standard limit.';
     const lr = (k, p, amt, cls) => '<div class="pa-lr' + (cls ? ' ' + cls : '') + '"><div><b>' + k + '</b><p>' + p + '</p></div><span class="pa-amt">' + $(amt) + '</span></div>';
+    // how the maximum was reached: two separate limits, worked out on their own and then together (the price is searched for, loan and costs moving with it)
+    { const fp = typeof res.fundsPrice === 'function' ? res.fundsPrice() : null, mx = res.budget !== undefined ? res.budget : res.highest, lim = res.limitedBy, ic = a.incomeLoan, ex = typeof res.exactBudget === 'function' ? res.exactBudget() : null;
+      const lead = lim === 'income' ? 'Your borrowing capacity is the limit. ' : lim === 'choice' ? 'The loan you chose is the limit. ' : lim === 'payments' ? 'A payment date is the limit. ' : 'Your cash and CPF are the limit. ';
+      L.push(row('Your maximum budget', lead + 'It is the highest price where the loan, the stamp duty, the minimum cash and your cash and CPF all work together, as each of them changes with the price.<div class="pa-lim">' +
+        (fp !== null && fp !== undefined ? lr('What your cash and CPF support', 'The highest price your ' + $(a.haveCash + a.haveCpf) + ' of cash and CPF reaches with the most the loan limit allows, after stamp duty, if income were no limit.', fp) : '') +
+        lr('What your income supports', 'The most you could borrow: your borrowing capacity (see Your loan below). It does not set a price by itself; it limits the loan.', ic) +
+        lr('Your maximum budget', 'The highest price at which both hold' + (lim === 'payments' ? ', and every dated payment can be met' : '') + '.' + (ex !== null && ex !== mx ? ' Worked out exactly it is ' + $(ex) + '; shown rounded down to the nearest $1,000.' : ''), mx, 'res') + '</div>'));
+    }
     L.push(row('Your loan', '<div class="pa-lim">' +
       lr('What your income supports', '55% of the ' + $(round100(B.assessable)) + ' a month the bank counts' + (a.debts > 0 ? ', less ' + $(a.debts) + ' of debts' + (a.flatInstal ? ' (including your home’s instalment)' : '') : '') + ', tested at ' + pc(res.borrow.rate, 2) + ' (banks use the higher of 4% and your rate) over ' + plural(a.years) + '.', a.incomeLoan) +
       lr('What the loan limit allows', pc(a.ltv) + ' of the ' + $(a.P) + ' price' + (a.loans ? ' (a housing loan you still have counts, so the limit is lower)' : '') + '.' + esc(reason) + ' (MAS Notice 632)', a.ruleLoan) +
@@ -290,7 +288,7 @@
     // duty
     L.push(row('Stamp duty', 'Buyer’s stamp duty <b>' + $(a.bsd) + '</b>' + (a.absd > 0 ? ' and additional buyer’s stamp duty (' + pc(a.absdRate) + ') <b>' + $(a.absd) + '</b>' : ', with no additional buyer’s stamp duty') + '. Paid in cash within 14 days of signing.'));
     // cash and CPF
-    L.push(row('Cash and CPF', 'Cash alone pays the booking fee, the ' + pc(a.minCash) + ' minimum cash (' + $(a.cashMin) + ') and stamp duty: <b>' + $(a.cashOnly) + '</b>. The other <b>' + $(a.flexNeed) + '</b> can be cash or CPF. CPF is counted as you entered it, for this price only: no valuation or lease limit is applied, and the home is taken to be worth its price. What stays in hand is cash, not CPF.'));
+    L.push(row('Cash and CPF', 'Cash alone pays the booking fee, the ' + pc(a.minCash) + ' minimum cash (' + $(a.cashMin) + ') and stamp duty: <b>' + $(a.cashOnly) + '</b>. The other <b>' + $(a.flexNeed) + '</b> can be cash or CPF. CPF is counted as you entered it, for this price only: no valuation or lease limit is applied, and the home is taken to be worth its price. What stays in hand is cash, not CPF. Not included: legal and valuation fees, renovation and furnishing. To hold money back for them, use “Set aside” under More options.'));
     // sale
     if (res.basis === 'sell' && res.sale) L.push(row('Your sale', saleLine(res.sale) + (res.sale.source === 'estimated' ? ' This is the price, less the loan, your CPF refund as you entered it (it includes the accrued interest, which we do not estimate), the agent’s fee and legal costs. Cash and CPF are kept apart, and nothing is counted until the sale completes and the CPF is released.' : '')));
     else if (res.sale && !res.sale.counted) L.push(row('Your sale', saleLine(res.sale)));
@@ -351,18 +349,15 @@
         const age = readNum('buyers.' + n + '.age', n ? '33' : '35'), fixed = readMoney('buyers.' + n + '.fixed'), variable = readMoney('buyers.' + n + '.variable');
         buyers.push({ res: val('buyers.' + n + '.res') || 'SC', age: age, fixed: fixed, variable: variable });
       });
-      const cushion = box.querySelector('[data-cush-chips]') ? cushionState() : { months: 6 };
       const owns = val('owns'), home = owns === 'none' ? 'none' : (owns ? (val('home') || null) : null), order = val('order') || null;
       const s = { kind: val('kind') || 'new', buyers: buyers, debts: readMoney('debts'), ratePct: readNum('ratePct', '4'), years: readNum('years', '30'), cash: readMoney('cash'), cpf: readMoney('cpf'), setAside: readMoney('setAside'),
-        saveMo: readMoney('saveMo'), cpfMo: readMoney('cpfMo'), cushion: cushion, home: home, order: order, price: ptouched ? readMoney('price') : undefined, otp: val('otp') || undefined,
+        saveMo: readMoney('saveMo'), cpfMo: readMoney('cpfMo'), home: home, order: order, price: ptouched ? readMoney('price') : undefined, otp: val('otp') || undefined,
         owned: owns === 'two' ? 2 : owns === 'one' ? 1 : undefined, otherLoans: owns === 'two' && val('otherLoans') !== '' ? +val('otherLoans') : undefined, otherInstal: readMoney('otherInstal'), prefLoan: readMoney('prefLoan'),
         flat: { type: val('flat.type') || 'hdb', hasLoan: val('flat.hasLoan') || undefined, instalment: readMoney('flat.instalment'), price: readMoney('flat.price'), loan: readMoney('flat.loan'), cpfRefund: readMoney('flat.cpfRefund'),
           overrideCash: readMoney('flat.overrideCash'), overrideCpf: readMoney('flat.overrideCpf'), costs: readMoney('flat.costs'), heldOver4: val('flat.held') === 'yes' ? true : undefined } };
       if (home === 'none') s.flat = {};
       return s;
     }
-    let cush = { months: 6 };
-    function cushionState() { if (val('cushionAmount') !== '' && cush.amount !== undefined) { const p = parseMoney(val('cushionAmount')); if (p.error) { errs.cushionAmount = p.error; return { months: 6 }; } return { amount: p.value }; } return cush.amount !== undefined ? { amount: 0 } : { months: cush.months }; }
 
     // ---- compute and draw ----
     const WAIT = (r, s) => { if (r.state === 'invalid') { const e = (r.errors || [])[0]; const f = e && field(e.key); const lab = f ? (f.closest('.pa-f') && f.closest('.pa-f').querySelector('span') ? f.closest('.pa-f').querySelector('span').textContent.replace(/\s*optional\s*$/, '').trim().toLowerCase() : e.key) : ''; return 'Paused: check ' + (lab || 'your entries') + '.'; }
@@ -384,7 +379,7 @@
       rg.max = String(cap); rg.value = String(choice ? r.at.loan : Math.min(mx, cap)); rg.setAttribute('aria-valuetext', $(choice ? r.at.loan : mx));
       rg.style.setProperty('--pos', (Math.min(100, (+rg.value) / cap * 100)).toFixed(1) + '%');
       f.placeholder = 'the most: ' + fmtMoney(Math.floor(mx));
-      q('[data-borrow-max]').hidden = f.value.trim() === '';
+      q('[data-borrow-max]').hidden = f.value.trim() === ''; const bs = q('[data-borrow-sum]'); if (bs) bs.textContent = choice ? 'borrowing ' + $(r.at.loan) : 'borrowing the most';
       const typed = f.value.trim() !== '' ? parseMoney(f.value) : null;
       q('[data-borrow-note]').textContent = choice ? 'You would borrow ' + $(r.at.loan) + ' of the ' + $(mx) + ' the bank may lend at this price. Borrowing less means more cash and CPF now and a smaller instalment.' : typed && !typed.error && typed.value > mx ? 'That is more than the ' + $(mx) + ' the numbers allow at this price, so ' + $(mx) + ' is used.' : 'Up to ' + $(mx) + ', the most the numbers allow at this price. Borrowing less means more cash and CPF now and a smaller instalment.';
     }
@@ -395,7 +390,7 @@
       box2.hidden = false; const g = r.range;
       rg.min = String(g.lo); rg.max = String(g.hi); rg.step = String(g.step); rg.value = String(Math.min(g.hi, Math.max(g.lo, r.price)));
       const pct = (x) => Math.max(0, Math.min(100, (x - g.lo) / (g.hi - g.lo) * 100));
-      const cpt = r.comfortable !== null && r.comfortable !== undefined ? pct(r.comfortable) : 0, hpt = pct(r.highest);
+      const hpt = pct(r.budget !== undefined ? r.budget : r.highest), cpt = hpt;
       rg.style.setProperty('--ok', cpt.toFixed(1) + '%'); rg.style.setProperty('--lim', hpt.toFixed(1) + '%'); rg.style.setProperty('--pos', pct(r.price).toFixed(1) + '%');
       q('[data-rlo]').textContent = $s(g.lo); q('[data-rhi]').textContent = $s(g.hi);
       if (document.activeElement !== pf) pf.value = fmtMoney(r.price);
@@ -434,9 +429,8 @@
         out.foot.hidden = true; out.ask.hidden = true;
       } else if (ok) {
         last = r; lastOk = r;
-        out.head.className = 'pa-head'; out.head.innerHTML = headHtml(r) + cushionHtml(r, cush); out.tenure.innerHTML = tenureHtml(r, cmpOpen, yAdj());
-        restoreCushionUi(s);
-        setPriceUi(r); setBorrowUi(r); out.status.innerHTML = statusHtml(r); out.tiles.innerHTML = tilesHtml(r); out.next.innerHTML = nextHtml(r, st); out.how.innerHTML = howHtml(r, st);
+        out.head.className = 'pa-head'; out.head.innerHTML = headHtml(r); out.tenure.innerHTML = tenureHtml(r, cmpOpen, yAdj());
+        setPriceUi(r); setBorrowUi(r); out.status.innerHTML = r.priceIsOwn ? statusHtml(r) : ''; out.tiles.innerHTML = r.priceIsOwn ? tilesHtml(r) : ''; out.next.innerHTML = nextHtml(r, st); out.how.innerHTML = howHtml(r, st);
         out.foot.hidden = false; out.ask.hidden = false; heldHtml = out.head.innerHTML;
         if (!completedOnce) { completedOnce = true; track('tool_completed', {}); }
       } else if (lastOk && (bad || r.state === 'empty' || r.state === 'no-income' || r.state === 'income' || r.state === 'ask-home' || r.state === 'ask-flat')) {
@@ -450,7 +444,6 @@
       if (r.state === 'ok' || (lastOk && !bad)) out.foot.hidden = false;
       paintYearsHint(); barUpdate(); wa(); save(); fitSticky();
     }
-    function restoreCushionUi(s) { /* the chips are redrawn with the head; keep the amount field in step */ const f = field('cushionAmount'); if (f && cush.amount !== undefined && document.activeElement !== f) f.value = cush.amount ? fmtMoney(cush.amount) : f.value; }
 
     // ---- the persistent bar (phones) ----
     const mq = root.matchMedia ? root.matchMedia('(max-width: 899px)') : { matches: false };
@@ -459,7 +452,7 @@
     const kbUp = () => (root.visualViewport ? root.visualViewport.height < root.innerHeight * 3 / 4 : false);
     function barUpdate() {
       const r = last, show = mq.matches && !!r && !headVisible && !typing() && !kbUp();
-      if (r) { q('[data-bar-k]').textContent = 'Comfortable budget'; q('[data-bar-v]').textContent = r.comfortable !== null ? 'about ' + $s(r.comfortable) : 'up to ' + $s(r.highest); }
+      if (r) { q('[data-bar-k]').textContent = 'Maximum budget'; q('[data-bar-v]').textContent = $(r.budget !== undefined ? r.budget : r.highest); }
       out.bar.hidden = !show; document.body.classList.toggle('pa-has-bar', !!show);
     }
     document.addEventListener('focusin', () => setTimeout(barUpdate, 0)); document.addEventListener('focusout', () => setTimeout(barUpdate, 60));
@@ -472,7 +465,7 @@
     function snapshot() {
       const o = {};
       $$('[data-k]').forEach((x) => { const k = x.dataset.k; if (k === 'price' && !ptouched) return; const v = x.dataset.t === 'chip' ? chipVal(x) : x.value; if (v === '' || v === null) return; if (k === 'otp' && v === todayIso) return; if (x.dataset.t === 'chip' && v === (x.dataset.default || '')) return; o[k] = v; });
-      if (ptouched) o._pt = true; if (bonusOn[0] || bonusOn[1]) o._bonus = [bonusOn[0], bonusOn[1]]; if (cush.amount !== undefined || cush.months !== 6) o._cush = cush;
+      if (ptouched) o._pt = true; if (bonusOn[0] || bonusOn[1]) o._bonus = [bonusOn[0], bonusOn[1]];
       return o;
     }
     function apply(o) {
@@ -484,7 +477,6 @@
       $$('[data-k]').forEach((x) => { const k = x.dataset.k; const v = o[k]; if (x.dataset.t === 'chip') setChip(x, v === undefined ? (x.dataset.default || '') : v); else x.value = v === undefined ? (k === 'otp' ? todayIso : '') : v; });
       showBonus(0, !!(o._bonus && o._bonus[0] || o['buyers.0.variable'])); showBonus(1, !!(o._bonus && o._bonus[1] || o['buyers.1.variable']));
       if (o['buyers.0.variable']) field('buyers.0.variable').value = o['buyers.0.variable']; if (o['buyers.1.variable']) field('buyers.1.variable').value = o['buyers.1.variable'];
-      cush = o._cush || { months: 6 };
     }
     // What the Payment Timeline needs to show the same numbers: the buyer's own entries, nothing else. Tab-only (gw.hand.v1); never in an address, an analytics event or the WhatsApp message.
     function handoffOf(s, r) {
@@ -501,7 +493,19 @@
       const o = snapshot(); if (Object.keys(o).length) own.set(o); else own.remove();
       const s = shared.get(); $$('[data-share]').forEach((x) => { if (!live(x)) return; const v = x.dataset.t === 'chip' ? chipVal(x) : x.value; if (v !== null && v !== '' && !(x.dataset.t === 'chip' && v === (x.dataset.default || ''))) s[x.dataset.share] = v; else delete s[x.dataset.share]; });
       const p = field('price'); if (p && p.value !== '' && res && res.priceIsOwn) s.buyPrice = p.value; else if (p && p.value === '') delete s.buyPrice; if (Object.keys(s).length) shared.set(s); else shared.remove();
-      if (last && res && res.state === 'ok' && !Object.keys(errs).length) hand.set(handoffOf(readEntries(), res)); else hand.remove();
+      if (last && res && res.state === 'ok' && !Object.keys(errs).length) { const en = readEntries(); hand.set(handoffOf(en, res)); planHandoff(en, res); } else { hand.remove(); planHandoff(null, null); }
+    }
+    // The maximum budget goes on to Budget Search ("What can this budget buy?", in Research too) in this tab only (kpt.handoff), as the hdb planner does: the search opens with it filled in,
+    // the buyer chooses where and what, and the requirements chosen there come back with it. Never in an address, an analytics event or the WhatsApp message.
+    function planHandoff(en, r) {
+      try {
+        const st = root.sessionStorage, old = (() => { try { return JSON.parse(st.getItem('kpt.handoff')); } catch (e) { return null; } })();
+        if (!en || !r || r.state !== 'ok' || !(r.budget > 0)) { if (old && old.from === 'planner') st.removeItem('kpt.handoff'); return; }
+        if (old && old.from !== 'planner' && !firstEdit) return;
+        const ages = en.buyers.map((b) => b.age).filter(Boolean), h = { v: 1, from: 'planner', state: 'ok', budget: { low: r.budget, high: r.budget, single: true }, maxAge: ages.length ? Math.max.apply(null, ages) : null, src: null };
+        if (old && old.from === 'planner' && !old.edited && old.budget && old.budget.high === h.budget.high) { if (old.find) h.find = old.find; if (old.find2) h.find2 = old.find2; }
+        st.setItem('kpt.handoff', JSON.stringify(h));
+      } catch (e) { /* storage unavailable: Budget Search then asks for a budget */ }
     }
     let dirty = false; root.__paSettled = () => !dirty;
     const changed = () => { dirty = true; if (!firstEdit) { firstEdit = true; track('tool_started', {}); } clearTimeout(tmr); tmr = setTimeout(recalc, 100); };
@@ -517,10 +521,6 @@
       const chip = t('.pa-chips[data-k] .pa-chip');
       if (chip) { const g = chip.parentElement, was = chipVal(g); setChip(g, chip.dataset.v); if (g.dataset.k === 'order' && was === chip.dataset.v) { /* stays chosen */ } if (g.dataset.k === 'home' || g.dataset.k === 'order' || g.dataset.k === 'kind' || g.dataset.k === 'who') track('planner_choice', { field: g.dataset.k, value: chip.dataset.v }); if (g.dataset.k === 'who' && chip.dataset.v === 'two') { /* second buyer row appears */ } clearTimeout(tmr); recalc(); return; }
       const bn = t('[data-bonus]'); if (bn) { showBonus(+bn.dataset.bonus, true); const f = field('buyers.' + bn.dataset.bonus + '.variable'); if (f) f.focus(); changed(); return; }
-      const ct = t('[data-cush-toggle]'); if (ct) { const o = q('[data-cush-o]'); o.hidden = !o.hidden; ct.setAttribute('aria-expanded', String(!o.hidden)); return; }
-      const cu = t('[data-cush]'); if (cu) {
-        const v = cu.dataset.cush; if (v === 'amount') { const cur = res && res.atComfortable ? Math.round(res.atComfortable.cushion / 1000) * 1000 : 0; cush = { amount: cur }; } else cush = { months: +v };
-        track('planner_cushion', { choice: v }); const keepOpen = true; clearTimeout(tmr); recalc(); const o = q('[data-cush-o]'); if (o && keepOpen) { o.hidden = false; const tg = q('[data-cush-toggle]'); if (tg) tg.setAttribute('aria-expanded', 'true'); } const af = field('cushionAmount'); if (af && cush.amount !== undefined) { af.value = cush.amount ? fmtMoney(cush.amount) : ''; af.focus(); } return; }
       const cm = t('[data-cmp]'); if (cm) { cmpOpen = !cmpOpen; const bx = q('[data-cmp-box]'); if (bx) bx.hidden = !cmpOpen; $$('[data-cmp]').forEach((x) => { x.setAttribute('aria-expanded', String(cmpOpen)); const ar = x.querySelector('[aria-hidden]'); if (ar) ar.textContent = cmpOpen ? '▴' : '▾'; }); if (cmpOpen) track('planner_tenure_compare', {}); fitSticky(); return; }
       const us = t('[data-use]'); if (us) { const f = field('years'); if (f) { f.value = us.dataset.use === 'auto' ? '' : us.dataset.use; delete f.dataset.adjustedFrom; } track('planner_tenure_use', { choice: us.dataset.use === 'auto' ? 'suggested' : 'own' }); clearTimeout(tmr); recalc(); return; }
       const fo = t('[data-focus]'); if (fo) { const f = field(fo.dataset.focus); if (f) { f.scrollIntoView({ block: 'center', behavior: 'smooth' }); f.focus({ preventScroll: true }); } return; }
@@ -531,6 +531,7 @@
       if (t('[data-cancel]')) { $$('[data-prev-box]').forEach((x) => { x.hidden = true; }); $$('[data-prev]').forEach((x) => x.setAttribute('aria-expanded', 'false')); return; }
       const ap = t('[data-apply]'); if (ap && res && res.fixes) { applyFix(ap.dataset.apply); return; }
       if (t('[data-undo]')) { undoFix(); return; }
+      if (t('[data-pa-explore]')) { track('planner_explore', {}); return; }
     });
     // ---- price: the slider and the typed price are one control ----
     let rafT = null;
@@ -575,5 +576,5 @@
     recalc();
   }
   if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount(); }
-  return { saleLine, basisHtml, pageHtml, formHtml, headHtml, statusHtml, tilesHtml, tenureHtml, nextHtml, howHtml, cushionHtml, figs, $s, $m, REF };
+  return { saleLine, basisHtml, pageHtml, formHtml, headHtml, statusHtml, tilesHtml, tenureHtml, nextHtml, howHtml, figs, goHtml, $s, $m, REF, LIMIT_TXT };
 });

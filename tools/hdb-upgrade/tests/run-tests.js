@@ -37,7 +37,10 @@ const PROFILES = [
     input: sc({ salePrice: 780000, outstandingLoan: 200000, cashSavings: 40000, residency: 'has-pr', buyers: [{ age: 37, income: 9000 }, { age: 36, income: 7000 }] }),
     exp: { state: 'standard', low: 1.49, high: 1.64, reg: 1.79, regLonger: false, longer: null, diag: 'mixed' } },
 ];
-const results = PROFILES.map((p) => ({ p, r: E.analyse(p.input) }));
+// The expected values above were worked out with a $50,000 cash reserve held back. No reserve applies by default any more (it is $0 unless a buyer chooses one), so these runs
+// ask for that reserve explicitly: the reserve arithmetic stays covered, and the default is tested separately below.
+const RES = { reserve: 50000 };
+const results = PROFILES.map((p) => ({ p, r: E.analyse(p.input, RES) }));
 
 console.log('\nUnit tests — regulatory arithmetic');
 test('BSD reproduces IRAS published example ($4,500,100 -> $209,606)', () => assert.strictEqual(E.bsd(4500100), 209606));
@@ -113,7 +116,7 @@ test('profile 2: headline is NOT optimised across structures (A-only 1.72-1.88, 
   const r = results[1].r; assert.ok(r.planning.high < 1.95e6);
 });
 test('planningStructure=bestOf reproduces the old optimised numbers (switch works)', () => {
-  const r = E.analyse(PROFILES[1].input, { planningStructure: 'bestOf' });
+  const r = E.analyse(PROFILES[1].input, { planningStructure: 'bestOf', reserve: 50000 });
   near(r.planning.low, 1.80e6, 15000, 'low'); near(r.planning.high, 1.99e6, 15000, 'high'); assert.strictEqual(r.longerTenure, null);
 });
 test('lender-dependent figure is separate and flagged, never inside the planning range', () => {
@@ -140,14 +143,14 @@ test('cash-limited profile 1 collapses to a single figure with the agreed diagno
 test('no refund + savings too small -> "not-confirmed"', () => assert.strictEqual(results[0].r.cash.status, 'not-confirmed'));
 test('profile 2: savings alone cover reserve + 5% -> confirmed without a refund figure', () => assert.strictEqual(results[1].r.cash.status, 'confirmed'));
 test('refund provided and cash sufficient -> confirmed', () => {
-  const r = E.analyse(Object.assign({}, PROFILES[0].input, { cpfRefund: 300000 })); assert.strictEqual(r.cash.status, 'confirmed');
+  const r = E.analyse(Object.assign({}, PROFILES[0].input, { cpfRefund: 300000 }), RES); assert.strictEqual(r.cash.status, 'confirmed');
 });
 test('refund absorbs the proceeds -> cash short, no workable result under the reserve', () => {
-  const r = E.analyse(Object.assign({}, PROFILES[0].input, { cpfRefund: 440000 }));
+  const r = E.analyse(Object.assign({}, PROFILES[0].input, { cpfRefund: 440000 }), RES);
   assert.ok(r.state === 'no-result' && r.reason === 'cash-short');
 });
 test('refund larger than (price - loan) is capped at price - loan (CPF rule)', () => {
-  const a = E.analyse(Object.assign({}, PROFILES[0].input, { cpfRefund: 450000 })), b = E.analyse(Object.assign({}, PROFILES[0].input, { cpfRefund: 900000 }));
+  const a = E.analyse(Object.assign({}, PROFILES[0].input, { cpfRefund: 450000 }), RES), b = E.analyse(Object.assign({}, PROFILES[0].input, { cpfRefund: 900000 }), RES);
   assert.strictEqual(a.state, b.state);
 });
 test('moderate cash shortfall reduces price and reports minimum-cash', () => {
@@ -158,6 +161,17 @@ test('moderate cash shortfall reduces price and reports minimum-cash', () => {
 test('reserve both reduces funds and counts as cash (changing reserve moves the price)', () => {
   const a = E.analyse(PROFILES[0].input, { reserve: 0 }), b = E.analyse(PROFILES[0].input, { reserve: 50000 });
   assert.ok(a.planning.high - b.planning.high >= 100000, 'a $50k reserve removes >= $100k of price at the cash-limited top end (about 3.4x leverage)');
+});
+
+test('no reserve by default: $0 unless the buyer chooses one, and nothing on the result mentions a buffer', () => {
+  assert.strictEqual(require('../assumptions.js').reserve === undefined ? 0 : require('../assumptions.js').reserve, 0);
+  PROFILES.forEach((p) => {
+    const d = E.analyse(p.input), z = E.analyse(p.input, { reserve: 0 }), k = E.analyse(p.input, RES);
+    assert.deepStrictEqual(d.planning, z.planning, p.name + ': the default equals an explicit $0');
+    assert.ok(d.planning.high >= k.planning.high, p.name + ': dropping the default reserve never lowers the range');
+    assert.ok(!d.assumptions.some((a) => a.id === 'reserve'), p.name + ': no reserve assumption is listed by default');
+  });
+  assert.ok(E.analyse(PROFILES[0].input, RES).assumptions.some((a) => a.id === 'reserve'), 'a chosen reserve is listed');
 });
 
 console.log('\nAssumptions are configurable');

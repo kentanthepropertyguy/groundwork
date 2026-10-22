@@ -1,6 +1,6 @@
 /* GROUNDWORK — Planner screen (Stage 1). Builds on gw.css (same tokens, buttons, header).
    Light and restrained: the answer is large type on open space; only the price box, the status and the fixes are set off. No decorative motion.
-   Phones: one column, entries first, a slim bar with the comfortable budget once the answer scrolls out of view. Desktop (≥900px): entries left, answer right. */
+   Phones: one column, entries first, a slim bar with the maximum budget once the answer scrolls out of view. Desktop (≥900px): entries left, answer right. */
 .pa{--pa-bad:#B3261E;--pa-bad-soft:#FBE9E7;--pa-ok:#1F7A3D;--pa-ok-soft:#E9F5ED;--pa-warn:#8A5A00;--pa-warn-soft:#FFF4DB;--pa-sig:#0B63CE;--pa-sig-soft:#EAF2FC;--pa-lead:#F5F8FD;position:relative;color:var(--gw-body)}
 .pa *{box-sizing:border-box}.pa [hidden],.pa-bar[hidden]{display:none !important}
 .pa-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:28px}
@@ -247,3 +247,29 @@ body.gw-confirming .pa-bar{display:none !important}
 .pa-hdb{gap:10px}
 .pa-cpfnote{margin:10px 0 0;font-size:13px;line-height:1.45;color:var(--gw-muted)}
 .pa-cpfnote b{color:var(--gw-ink);font-weight:700}
+
+/* ---- the answer: one maximum budget, three figures that explain it, one line on what limits it (Oct 2026) ---- */
+.pa-max{margin:0;font-size:clamp(36px,5vw,48px);line-height:1.05;letter-spacing:-.03em;font-weight:700;color:var(--gw-ink);font-variant-numeric:tabular-nums}
+.pa-why{margin:0;font-size:15.5px;line-height:1.45;color:var(--gw-ink);max-width:var(--gw-measure)}
+.pa-go{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.pa-go .gw-btn{min-height:48px;width:auto}
+.pa-figs .pa-fig:first-child{background:none}
+.pa-figs .pa-fig{padding:16px 20px 18px}
+.pa-figs .pa-fig .v{font-size:clamp(22px,2.4vw,28px);margin-top:6px}
+.pa-figs .pa-fig .s{font-size:13px;margin-top:4px}
+.pa-borrow{padding:0 18px}
+.pa-borrow>summary{list-style:none;cursor:pointer;display:flex;flex-wrap:wrap;gap:2px 12px;align-items:baseline;min-height:48px;padding:12px 0;font-weight:600;color:var(--gw-ink);font-size:15px}
+.pa-borrow>summary::-webkit-details-marker{display:none}
+.pa-borrow>summary::after{content:"+";margin-left:auto;font-size:20px;font-weight:400;color:var(--gw-muted)}
+.pa-borrow[open]>summary::after{content:"–"}
+.pa-borrow>summary em{font-style:normal;font-weight:400;font-size:13px;color:var(--gw-muted)}
+.pa-borrow>summary:focus-visible{outline:2px solid var(--gw-blue);outline-offset:2px}
+.pa-borrow[open]{padding-bottom:16px}
+@media (max-width:899px){
+  .pa-figs .pa-fig{flex-direction:row;align-items:baseline;justify-content:space-between;gap:12px;padding:12px 16px}
+  .pa-figs .pa-fig .v{margin:0;font-size:22px;order:2}
+  .pa-figs .pa-fig .k{order:1}
+  .pa-figs .pa-fig .s,.pa-figs .pa-fig .d{display:none}
+  .pa-go .gw-btn{flex:1 1 100%;text-align:center}
+  .pa-borrow{padding:0 14px}
+}
