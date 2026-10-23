@@ -392,8 +392,16 @@
   /* ---------------- 6. MSR ---------------- */
   // i: { scenario: 'hdb-loan'|'hdb-bank'|'ec', borrowers, propertyLoans, otherDebts, lease, tenure, loans }
   // i: { scenario, household: 'family'|'extended'|'single' (HDB loan), borrowers, propertyLoans, otherDebts, lease, tenure, loans }
+  // A specific HDB resale flat: what the loan, the cash and the CPF look like at its price and valuation (R.valuation). The loan limit and the minimum cash are on the LOWER of the
+  // price and the valuation; the price above the valuation is cash only. `maxLoan` is what the income supports; the loan taken is the smaller of that and the limit on the lower value.
+  function flatCheck(i, maxLoan, ltv, minCashPct) {
+    if (!pos(i.price)) return null;
+    const P = i.price, V = pos(i.valuation) ? i.valuation : null, base = V !== null && V < P ? V : P, cov = P - base;
+    const loanLimit = base * ltv, loan = Math.min(maxLoan, loanLimit), cashMin = base * minCashPct, cashOnly = cashMin + cov, down = P - loan;
+    return { price: P, valuation: V, base, cov, ltv, loanLimit, loan, incomeLimited: maxLoan < loanLimit - 0.5, minCashPct, cashMin, cashOnly, down, cashOrCpf: Math.max(0, down - cashOnly), dutyBase: V !== null && V > P ? V : P };
+  }
   function msr(i) {
-    const B = borrowers(i.borrowers), bad = B.bad.concat(moneyBad(i, ['propertyLoans', 'otherDebts']), rangeBad(i, ['tenure', 'lease'])); if (bad.length) return invalid(bad);
+    const B = borrowers(i.borrowers), bad = B.bad.concat(moneyBad(i, ['propertyLoans', 'otherDebts', 'price', 'valuation']), rangeBad(i, ['tenure', 'lease'])); if (bad.length) return invalid(bad);
     const need = [];
     if (!(B.gross > 0)) need.push('income'); if (B.iwaa === null) need.push('age');
     if (need.length) return missing(need);
@@ -430,7 +438,7 @@
       if (!pos(i.lease)) notes.push({ id: 'lease-unknown', text: 'If the flat’s remaining lease doesn’t cover the youngest applicant to age 95, HDB lends less than 75% of the price: enter the remaining lease to check.' });
       if (pos(i.tenure) && i.tenure > maxT) notes.push({ id: 'capped', text: 'Tenure capped at ' + maxT + ' years, the most HDB allows here.' });
       notes.push({ id: 'commitments', text: 'HDB also looks at your other loans and commitments, such as car loans and card bills, so it may lend less than this.' });
-      return { ok: true, scenario: sc, household, ceiling: ceil, B, rate, tenure: { years, max: maxT, lease: pos(i.lease) ? i.lease : null }, msrCap, prop, forNew, maxLoan: loan, ltv, priceAtLtv: loan / ltv, binding: 'msr', notes };
+      return { ok: true, scenario: sc, household, ceiling: ceil, B, rate, tenure: { years, max: maxT, lease: pos(i.lease) ? i.lease : null }, msrCap, prop, forNew, maxLoan: loan, ltv, priceAtLtv: loan / ltv, binding: 'msr', flat: flatCheck(i, loan, ltv, H.minCash), notes };
     }
     const kind = sc === 'ec' ? 'private' : 'hdb', t = bankTenure(kind, B.iwaaUse, i.tenure);
     const msrCap = R.msr * B.assessable, tdsrCap = R.tdsr * B.assessable;
@@ -440,14 +448,14 @@
     if (loan > LIMITS.loan.max) return invalid([{ field: 'income', text: LIMITS.loan.text }]);
     if (sc === 'ec') notes.push({ id: 'ec-ceiling', text: 'New EC buyers have a household income ceiling: $16,000 a month, or $18,000 for EC sites whose land tender closed on or after 24 Aug 2026. MSR applies to ECs bought from the developer.' });
     if (t.capped) notes.push({ id: 'capped', text: t.cappedBy === 'age' ? 'Tenure capped at ' + t.allowed + ' years: banks usually end a loan by age ' + R.bankLtv.maturityAge + ' (lender policy, not a MAS rule).' : 'Tenure capped at ' + t.max + ' years, the MAS maximum here.' });
-    return { ok: true, scenario: sc, B, rate: sr, tenure: t, msrCap, tdsrCap, prop, other, forNewMsr, forNewTdsr, forNew, maxLoan: loan, ltv: row.ltv, minCash: row.minCash, priceAtLtv: loan / row.ltv, binding: forNewMsr <= forNewTdsr ? 'msr' : 'tdsr', notes, longer: longerOf(t, forNew, sr, i.loans) };
+    return { ok: true, scenario: sc, B, rate: sr, tenure: t, msrCap, tdsrCap, prop, other, forNewMsr, forNewTdsr, forNew, maxLoan: loan, ltv: row.ltv, minCash: row.minCash, priceAtLtv: loan / row.ltv, binding: forNewMsr <= forNewTdsr ? 'msr' : 'tdsr', flat: sc === 'hdb-bank' ? flatCheck(i, loan, row.ltv, row.minCash) : null, notes, longer: longerOf(t, forNew, sr, i.loans) };
   }
 
   /* ---------------- 7. Progressive payments (uncompleted private home or EC) ---------------- */
   // i: { price, kind: 'private'|'ec', age, buyers, entity, loans: 0|1|2, ratePct, years, cpf }
   //   age = the borrower's age (the income-weighted average for joint borrowers); needed for individuals, not for a company
   function progressive(i) {
-    const bad = moneyBad(i, ['price', 'cpf']).concat(rangeBad(i, ['ratePct', 'years']), !i.entity ? rangeBad(i, ['age']) : []); if (bad.length) return invalid(bad);
+    const bad = moneyBad(i, ['price', 'cpf', 'valuation']).concat(rangeBad(i, ['ratePct', 'years']), !i.entity ? rangeBad(i, ['age']) : []); if (bad.length) return invalid(bad);
     const need = []; if (!pos(i.price)) need.push('price'); if (!i.entity && !pos(i.age)) need.push('age');
     if (need.length) return missing(need);
     // no tenure given: the longest one that keeps the standard limit at this age (30 years or less AND ending by 65); where there is none (65 or over) the
@@ -466,11 +474,14 @@
     const row = i.entity ? { ltv: R.entityLtv, minCash: 1 - R.entityLtv } : (lower ? R.bankLtv.lower : R.bankLtv.standard)[Math.min(nn(i.loans), 2)];
     // R1.2: an optional ceiling on the loan in dollars (e.g. what the borrower's income supports). Absent or not lower than the rule limit, nothing changes.
     // The rule limit and minimum cash stay as the table sets them; whatever the smaller loan does not cover is cash or CPF.
-    const ruleLoanMax = P * row.ltv, loanCapped = num(i.loanCap) !== null && i.loanCap >= 0 && i.loanCap < ruleLoanMax;
-    const loanMax = loanCapped ? i.loanCap : ruleLoanMax, cashMin = P * row.minCash, cpfOrCash = P - loanMax - cashMin;
+    // An optional valuation (a RESALE only: a new launch has none at purchase; see R.valuation). The loan limit, the minimum cash and the part CPF may pay are worked on the LOWER
+    // of the price and the valuation; what the price is above the valuation (cash over valuation) is cash only; stamp duty is on the HIGHER of the two.
+    const V = pos(i.valuation) ? i.valuation : null, base = V !== null && V < P ? V : P, cov = P - base, dutyBase = V !== null && V > P ? V : P;
+    const ruleLoanMax = base * row.ltv, loanCapped = num(i.loanCap) !== null && i.loanCap >= 0 && i.loanCap < ruleLoanMax;
+    const loanMax = loanCapped ? i.loanCap : ruleLoanMax, cashMin = base * row.minCash, cpfOrCash = base - loanMax - cashMin;
     const rate = num(i.ratePct) === null ? R.stressRate : i.ratePct / 100;
-    const duty = stampDuty({ price: P, kind: i.kind === 'ec' ? 'ec' : 'private', buyers: i.buyers, entity: i.entity });
-    let cashLeft = cashMin, flexLeft = cpfOrCash, cpfLeft = num(i.cpf) === null ? null : Math.max(0, i.cpf), drawn = 0;
+    const duty = stampDuty({ price: dutyBase, kind: i.kind === 'ec' ? 'ec' : 'private', buyers: i.buyers, entity: i.entity });
+    let cashLeft = cashMin + cov, flexLeft = cpfOrCash, cpfLeft = num(i.cpf) === null ? null : Math.max(0, i.cpf), drawn = 0;
     const stages = R.pps.map((s) => {
       let amt = P * s.pct; const o = { id: s.id, name: s.name, pct: s.pct, amount: amt, cash: 0, cpf: 0, flex: 0, loan: 0 };
       const take = (left) => { const x = Math.min(amt, left); amt -= x; return x; };
@@ -486,7 +497,7 @@
     // tenure left blank and a longer one allowed: what it would give, at the lower limit (one line on the result; not applied)
     const longer = !i.entity && !pos(i.years) && !i._noLonger && allowed > years ? (() => { const x = progressive(Object.assign({}, i, { years: allowed, _noLonger: true })); return x.ok ? { years: x.years, ltv: x.ltv, loanMax: x.loanMax, finalMonthly: x.finalMonthly } : null; })() : null;
     return {
-      ok: true, price: P, ltv: row.ltv, minCash: row.minCash, loanMax, ruleLoanMax, loanCapped, cashMin, cpfOrCash, rate, years, stages, duty, lower, entity: !!i.entity, tenureCapped: wanted > years, tenureCappedBy: wanted > years ? (ageCap < R.bankLtv.maxTenure.private ? 'age' : 'max') : null, tenureAllowed: allowed, maturityAge: R.bankLtv.maturityAge, tenureAsked: pos(i.years) ? i.years : null, defaulted: !pos(i.years), longer, autoLower: !i.lowerLtv && lower,
+      ok: true, price: P, ltv: row.ltv, minCash: row.minCash, loanMax, ruleLoanMax, loanCapped, cashMin, cpfOrCash, valuation: V, base, cov, dutyBase, rate, years, stages, duty, lower, entity: !!i.entity, tenureCapped: wanted > years, tenureCappedBy: wanted > years ? (ageCap < R.bankLtv.maxTenure.private ? 'age' : 'max') : null, tenureAllowed: allowed, maturityAge: R.bankLtv.maturityAge, tenureAsked: pos(i.years) ? i.years : null, defaulted: !pos(i.years), longer, autoLower: !i.lowerLtv && lower,
       lowerWhy: !lower ? null : longTenure ? 'tenure' : pastAge ? 'age' : (i.lowerLtv ? 'chosen' : null), age: i.entity ? null : i.age, stdYears,
       totals: { cash: sum('cash'), cpf: sum('cpf'), flex: sum('flex'), loan: sum('loan') }, upfront8wk: upfront,
       finalMonthly: instal(loanMax, rate, years), cpfGiven: cpfLeft !== null,
@@ -565,7 +576,7 @@
       return compose('MSR estimate',
         [['Scenario', SCEN[r.scenario]], r.scenario === 'hdb-loan' ? ['Household', HOUSEHOLD[r.household]] : null].concat(ownerLines(i.borrowers)).concat([pos(i.propertyLoans) ? ['Existing property loan instalments', $(i.propertyLoans) + '/month'] : null, pos(i.otherDebts) ? ['Other monthly debts', $(i.otherDebts)] : null, pos(i.lease) ? ['Remaining lease', i.lease + ' years'] : null, pos(i.tenure) ? ['Tenure wanted', i.tenure + ' years'] : null, r.scenario !== 'hdb-loan' ? ['Housing loans outstanding', String(nn(i.loans))] : null]),
         [['MSR limit (30%)', $(r.msrCap) + '/month'], r.tdsrCap ? ['TDSR limit (55%)', $(r.tdsrCap) + '/month'] : null, ['Left for the new loan', $(r.forNew) + '/month' + (r.tdsrCap ? ' (' + r.binding.toUpperCase() + ' is the limit)' : '')],
-          ['Indicative maximum loan', $(r.maxLoan) + ' over ' + r.tenure.years + ' years at ' + pc(r.rate)], r.ltv < 0.5 ? ['Loan limit with this lease', 'only ' + pc(r.ltv, 1) + ' of the price'] : ['Price this loan supports at ' + pc(r.ltv) + ' LTV', $(r.priceAtLtv)]],
+          ['Indicative maximum loan', $(r.maxLoan) + ' over ' + r.tenure.years + ' years at ' + pc(r.rate)], r.ltv < 0.5 ? ['Loan limit with this lease', 'only ' + pc(r.ltv, 1) + ' of the price'] : ['Price this loan supports at ' + pc(r.ltv) + ' LTV', $(r.priceAtLtv)]].concat(r.flat ? [['At the flat price of ' + $(r.flat.price) + (r.flat.valuation ? ' (valuation ' + $(r.flat.valuation) + ')' : ''), 'loan ' + $(r.flat.loan) + ', ' + $(r.flat.down) + ' to pay beyond it' + (r.flat.cashOnly > 0.5 ? ', of which ' + $(r.flat.cashOnly) + ' cash only' + (r.flat.cov > 0.5 && r.flat.cashOnly > r.flat.cov + 0.5 ? ' (including ' + $(r.flat.cov) + ' over valuation)' : r.flat.cov > 0.5 ? ' (over valuation)' : '') : '')]] : []),
         r.notes.map((n) => n.text));
     },
     progressive(i, r) {

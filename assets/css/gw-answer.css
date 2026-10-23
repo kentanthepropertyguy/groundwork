@@ -275,7 +275,17 @@ body.gw-confirming .pa-bar{display:none !important}
 }
 
 /* Buyer view (package 1): one answer, two supporting figures, dates and assumptions on demand */
-.pa-hd-max .pa-figs,.pa-hd-price .pa-figs{grid-template-columns:repeat(2,minmax(0,1fr))}
+.pa-hd-max .pa-figs{grid-template-columns:repeat(2,minmax(0,1fr))}
+/* a price being judged: three figures in a row (cash and CPF needed, loan, monthly mortgage); the first takes a full row where the column is narrow */
+.pa-hd-price .pa-figs{grid-template-columns:repeat(3,minmax(0,1fr))}
+.pa-hd-price .pa-figs .pa-fig{padding:16px 16px 18px}
+.pa-hd-price .pa-figs .pa-fig .v{font-size:clamp(20px,1.9vw,25px)}
+.pa-hint[hidden]{display:none}
+@media (max-width:1279px){
+  .pa-hd-price .pa-figs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pa-hd-price .pa-figs .pa-fig:first-child{grid-column:1/-1;border-bottom:1px solid var(--gw-line)}
+  .pa-hd-price .pa-figs .pa-fig:nth-child(2){border-left:0}
+}
 .pa-max.pa-txt{font-size:clamp(30px,4.2vw,40px);line-height:1.1}
 .pa-t-over .pa-max{color:var(--pa-bad)}.pa-t-warn .pa-max{color:var(--pa-warn)}.pa-t-ok.pa-hd-price .pa-max{color:var(--pa-ok)}
 .pa-salenow,.pa-proj{margin:0;font-size:14.5px;line-height:1.45;color:var(--gw-body);max-width:var(--gw-measure)}
@@ -298,3 +308,7 @@ body.gw-confirming .pa-bar{display:none !important}
 /* Package 2: the sale carried over from Sale proceeds, and the cash/CPF you have now */
 .pa-from-sale{margin:0 0 12px;padding:8px 12px;border-left:3px solid var(--gw-blue);background:var(--gw-tint,rgba(31,95,191,.06));border-radius:0 8px 8px 0;color:var(--gw-body)}
 .pa-now{margin:4px 0 0}
+
+/* Package 4: an optional valuation under the price (a completed home only); a second quiet link beside "Add bonus" */
+.pa-valbox{display:flex;flex-direction:column;gap:6px}.pa-valbox[hidden]{display:none}
+.pa-adds{display:flex;flex-wrap:wrap;gap:0 18px}.pa-adds .pa-link[hidden]{display:none}.pa-bonus{margin-top:2px}.pa-rentsell{margin:6px 0 0}.pa-rentsell[hidden]{display:none}

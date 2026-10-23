@@ -103,7 +103,19 @@
     // factor (remaining lease - 20) / (75 - youngest age) reproduces all three worked examples in the MOM/MND release of
     // 9 May 2019 (audit A2-09): https://www.mom.gov.sg/newsroom/press-releases/2019/0509-more-flexibility-to-buy-a-home-for-life
     // HDB also considers current loans and financial commitments (car loans, card bills) when it sets the loan (A2-10).
-    hdbLoan: { stressRate: 0.03, ltv: 0.75, maxTenureYears: 25, endAge: 65, leaseBufferYears: 20, oaRetain: 20000, leaseCoverAge: 95 },
+    // Minimum cash with an HDB loan: NONE. The downpayment (price, or the lower of price and valuation, less the loan) "can be paid in full using your CPF Ordinary Account"; only the part of the
+    // price above the valuation (cash over valuation) is cash. The 5% minimum cash belongs to a BANK loan. Option fee and exercise fee (the deposit) cannot be paid with CPF and are paid in cash
+    // first, but they are part of the price, not extra (CPF Board, "3 differences between an HDB loan and a bank loan"; CPF Housing Scheme T&C Part A 1(b)(i); checked 24 Oct 2026).
+    hdbLoan: { stressRate: 0.03, ltv: 0.75, minCash: 0, maxTenureYears: 25, endAge: 65, leaseBufferYears: 20, oaRetain: 20000, leaseCoverAge: 95 },
+    // VALUATION (a resale, private or HDB). The loan limit (LTV), the minimum cash and the CPF that may be used are all worked on the LOWER of the price and the
+    // valuation; the part of the price above the valuation (cash over valuation) is paid in cash, and neither the loan nor CPF can cover it; stamp duty is on the
+    // HIGHER of the price and the market value. A new launch has no valuation at purchase, so this never applies to one. Sources, checked 24 Oct 2026:
+    //   CPF Board, "Can I use my CPF savings for the down payment of my property": minimum 5% cash of "the lower of the purchase price or valuation"; CPF is based on the lower of the two;
+    //     "the portion of the purchase price that is above the property's market value" is cash. https://www.cpf.gov.sg/service/article/can-i-use-my-cpf-savings-for-the-down-payment-of-my-property
+    //   Bank loan for an HDB flat or private home: at least 5% of the lower in cash (CPF Board); an HDB loan needs no minimum cash (see hdbLoan above).
+    //   HDB, Resale acceptance and approval: initial payment "based on the lower of the resale price or value"; stamp duty "based on selling price or market valuation, whichever is higher".
+    //   IRAS: stamp duty and ABSD are charged on the higher of the purchase price and the market value.
+    valuation: { loanBasis: 'lower', cashOverInCash: true, dutyBasis: 'higher', checked: '2026-10-24' },
     // CPF Board release, 22 Sep 2026: OA interest 2.5% and HDB concessionary loan rate 2.6% for 1 Oct – 31 Dec 2026.
     // https://www.cpf.gov.sg/member/infohub/news/news-releases/government-extends-4-per-cent-interest-rate-floor-on-special-medisave-and-retirement-account-monies-until-31-december-2027
     // https://www.hdb.gov.sg/managing-my-home/finances/loan-matters/interest-rate
@@ -217,6 +229,7 @@
       msr: 'MAS Notice 645 (MSR 30%); HDB, Housing loan from HDB (3% floor, 75% LTV pro-rated by lease, 25 years, income ceilings)',
       ltv: 'MAS Notice 632 (rev. 21 Aug 2025): loan tenure and loan-to-value limits',
       cpf: 'CPF Board: refund of CPF principal plus accrued interest on sale; no cash top-up if sold at market value; OA rate 2.5%',
+      valuation: 'CPF Board (down payment of a property; 3 differences between an HDB loan and a bank loan; CPF Housing Scheme terms), HDB (resale acceptance and approval), IRAS: loan and CPF on the lower of price and valuation; cash over valuation in cash; an HDB loan needs no minimum cash, a bank loan does; the option fee and exercise payment are paid in cash; stamp duty on the higher',
       pps: 'Housing Developers Rules: standard progressive payment schedule',
       plannerConventions: 'Planning conventions (not statutory rules): dates and defaults the Payment Timeline Planner uses when the real date is unknown; each is shown as an estimate and editable',
     },

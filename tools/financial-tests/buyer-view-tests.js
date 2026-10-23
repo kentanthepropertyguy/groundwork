@@ -41,17 +41,17 @@ function judged(s, price) { const r = A.assess(s); if (price) { const q = r.quot
   ok(v.headline === money(r100(shortAll)) + ' short' && v.shortfall === r100(shortAll) && r100(shortAll) === 419600, 'price: the headline is the specific shortfall, $419,600 (independent: $719,600 needed less $300,000)', [v.headline, shortAll]);
   ok(v.need.total === need && v.need.minCash === minCash && v.need.minCash === 219600, 'price: minimum cash $219,600 = 5% ($125,000) + stamp duty ($94,600)', v.need);
   ok(Math.abs(v.need.shortCash - shortCash) < 1 && /CPF cannot cover/.test(plain(v.lead)) && plain(v.lead).indexOf(money(r100(shortCash))) > 0, 'price: the cash CPF cannot cover is $119,600', plain(v.lead));
-  ok(plain(v.lead).indexOf('You need ' + money(need) + ' in cash and CPF, at least ' + money(minCash) + ' of it in cash') === 0, 'price: the need and the minimum cash are stated in that order', plain(v.lead));
+  ok(v.supports[0].k === 'Cash and CPF needed' && v.supports[0].v === money(need) && v.supports[0].s.indexOf('At least ' + money(minCash) + ' in cash') === 0, 'price: the first figure is the cash and CPF needed, with the cash-only part', v.supports[0]);
   ok(plain(v.lead).indexOf('Your maximum is $1,087,000') > 0, 'price: the maximum stays in one clause, not a second headline', plain(v.lead));
-  ok(v.supports.length === 2 && v.supports[0].k === 'Bank loan' && v.supports[0].v === money(loan) && v.supports[1].k === 'Monthly mortgage', 'price: two supporting figures, the loan ($1,875,000) and the monthly mortgage', v.supports);
+  ok(v.supports.length === 3 && v.supports[1].k === 'Bank loan' && v.supports[1].v === money(loan) && v.supports[2].k === 'Monthly mortgage', 'price: three figures: cash and CPF needed, the loan ($1,875,000) and the monthly mortgage', v.supports);
   const ann = (rate, yrs) => { const n = yrs * 12, i = rate / 12; return (1 - Math.pow(1 + i, -n)) / i; };
-  ok(Math.abs(Number(v.supports[1].v.replace(/[$,]/g, '')) - Math.round(loan / ann(.04, 30))) <= 1, 'price: the monthly mortgage is the annuity at 4% over 30 years', v.supports[1].v);
+  ok(Math.abs(Number(v.supports[2].v.replace(/[$,]/g, '')) - Math.round(loan / ann(.04, 30))) <= 1, 'price: the monthly mortgage is the annuity at 4% over 30 years', v.supports[2].v);
 }
 // affordable and tight
 {
   const v = V.build(judged(base(), 900000), {});
   ok(v.headline === 'Within your budget' && v.tone === 'ok' && v.answer === null, 'price: $900,000 is within budget', v.headline);
-  ok(plain(v.lead).indexOf('You need $246,600 in cash and CPF, at least $66,600 of it in cash, and have $300,000') > 0, 'price: $900,000 needs $246,600 (independent: 225,000 + 21,600 duty), minimum cash $66,600', plain(v.lead));
+  ok(v.supports[0].v === '$246,600' && v.supports[0].s === 'At least $66,600 in cash · You have $300,000', 'price: $900,000 needs $246,600 (independent: 225,000 + 21,600 duty), minimum cash $66,600', v.supports[0]);
   ok(plain(v.lead).indexOf('$33,400') === 0, 'price: $33,400 of cash would stay in hand ($100,000 - 66,600)', plain(v.lead));
   const t = V.build(judged(base(), 1087000), {});
   ok(t.headline === 'Within your budget, but tight' || t.headline === 'Within your budget', 'price: the maximum itself still fits', t.headline);
@@ -76,7 +76,7 @@ function judged(s, price) { const r = A.assess(s); if (price) { const q = r.quot
   ok(r.at.gap <= 0.5 && r.at.covered === false, 'projected: the scenario is covered in total but a later payment is not (engine)', [r.at.gap, r.at.covered]);
   ok(v.projected === true && v.headline === 'Projected shortfall' && v.dates.result === 'projected' && /Projected shortfall from/.test(plain(v.dates.summary)) && /not a shortfall today/.test(plain(v.dates.summary)), 'projected: a future shortfall is labelled as projected, in the headline and the dates line', [v.headline, plain(v.dates.summary)]);
   ok(!/\bshort\b$/.test(v.headline), 'projected: the headline is not a plain "$X short"', v.headline);
-  ok(plain(v.lead).indexOf('cover the price, but not every payment as it falls due') > 0, 'projected: the sentence says the price is covered but a later payment is not', plain(v.lead));
+  ok(plain(v.lead).indexOf('cover the price, but not every payment on time') > 0, 'projected: the sentence says the price is covered but a later payment is not', plain(v.lead));
 }
 
 // ---- 4. selling first: what is in hand now is kept apart from what the sale adds on completion ----
@@ -93,8 +93,11 @@ function judged(s, price) { const r = A.assess(s); if (price) { const q = r.quot
   // the first payments exceed what is in hand now -> a labelled projection
   const big = judged(sell, 3400000), vb = V.build(big, {});
   const early = bsd(3400000) + .01 * 3400000 + .04 * 3400000;
-  ok(vb.sale.warning && /^Projected:/.test(plain(vb.sale.warning)) && plain(vb.sale.warning).indexOf(money(r100(early))) > 0 && /before your sale completes/.test(plain(vb.sale.warning)), 'sale: option + exercise + stamp duty ($313,600) above the $300,000 in hand is flagged, as a projection', plain(vb.sale.warning || ''));
-  ok(vh.sale.warning === null, 'sale: no projection when the early payments fit what is in hand', vh.sale.warning);
+  ok(vb.sale.warning && /^Projected:/.test(plain(vb.sale.warning)) && plain(vb.sale.warning).indexOf(money(r100(early))) > 0 && /before your sale completes/.test(plain(vb.sale.warning)), 'sale: option + exercise + stamp duty ($313,600) above the $100,000 of cash in hand is flagged, as a projection', plain(vb.sale.warning || ''));
+  // the early payments are cash: CPF cannot pay an option fee or reimburse the seller, and is released only at completion. $219,600 is above the $100,000 of cash even though cash + CPF is $300,000.
+  ok(vh.sale.warning && /paid in cash/.test(plain(vh.sale.warning)) && /\$100,000/.test(plain(vh.sale.warning)), 'sale: early payments are compared with cash only (CPF is not counted)', vh.sale.warning);
+  const lo = judged(sell, 1200000), vl = V.build(lo, {});
+  ok(vl.sale.warning === null, 'sale: no projection when the early payments fit the cash in hand ($92,600 against $100,000)', vl.sale.warning);
   // not counted: nothing is invented
   const miss = judged(base({ home: 'sell', order: 'sell', owned: 1, flat: { type: 'hdb', price: 900000, hasLoan: 'yes', instalment: 1200 } })), vm = V.build(miss, {});
   ok(vm && vm.sale === null && miss.saleNote === 'missing', 'sale: with figures missing, no sale is counted and no sale line is drawn', [vm && vm.sale, miss.saleNote]);

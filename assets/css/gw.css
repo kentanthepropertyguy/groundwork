@@ -743,3 +743,6 @@ body.lg .gw-rws .lg-sb .kpr-results{margin-top:12px}
 .gw-hv{display:grid;gap:18px}.gw-hv .gw-chips{margin-top:8px}.gw-hv-next{display:grid;gap:10px;margin:6px 0}
 .gw-hv-near .gw-vx-t a{color:var(--gw-ink);text-decoration:none}.gw-hv-near .gw-vx-t a b{color:var(--gw-blue)}.gw-hv-near .gw-vx-t a:hover{text-decoration:underline}
 .gw-hv-near .gw-vx-t small{display:block;color:var(--gw-mute,#6b7280);font-size:12.5px}
+
+/* Package 4: a specific HDB flat under the loan limit */
+.gw-flat{margin-top:16px;padding-top:14px;border-top:1px solid var(--gw-line,#e5e7eb)}.gw-flat-h{margin:0 0 8px;font-weight:600;font-size:15px}.gw-flat .gw-notes{margin-top:12px}
