@@ -294,3 +294,7 @@ body.gw-confirming .pa-bar{display:none !important}
   .pa-hd-price .pa-figs .pa-fig .s{display:block;font-size:12.5px;margin:0;order:3;flex:1 1 100%}
   .pa-hd-price .pa-figs .pa-fig{flex-wrap:wrap}
 }
+
+/* Package 2: the sale carried over from Sale proceeds, and the cash/CPF you have now */
+.pa-from-sale{margin:0 0 12px;padding:8px 12px;border-left:3px solid var(--gw-blue);background:var(--gw-tint,rgba(31,95,191,.06));border-radius:0 8px 8px 0;color:var(--gw-body)}
+.pa-now{margin:4px 0 0}

@@ -64,6 +64,8 @@
     const H = type === 'hdb' && c.hdb && c.hdb.block ? c.hdb : null, Ld = type === 'landed' && c.landed && c.landed.street ? c.landed : null;
     const planner = { href: r + 'tools/hdb-upgrade/', label: 'Work out my budget ›', data: 'data-gw-go="hdb-upgrade"' };
     const find = { href: r + 'tools/what-can-i-buy/', label: 'See what it buys ›', data: 'data-gw-go="what-can-i-buy"' };
+    // Package 2: for a private home or landed seller, the budget step is the Planner, opened with the sale already in it (tools/planner/#sell; the figures come from Sale proceeds, in this tab only).
+    const nextBuy = { href: r + 'tools/planner/#sell', label: 'What can I buy next? ›', data: 'data-gw-go="planner-sell"' };
     // R2.1: the sale proceeds calculator sits between "what it could fetch" and "what I can afford". Figures typed there fill the planner (this tab only).
     const proceeds = (n, kind) => step(n, 'Work out your sale proceeds', 'Cash and CPF back, after the loan and costs.', { href: r + 'tools/sale-proceeds/#' + kind, label: 'Work out my sale proceeds ›', data: 'data-gw-go="sale-proceeds"' });
     const hdbWorth = H ? step(1, 'What flats like yours sold for', 'Blk ' + H.block + ' ' + title(H.street) + ', ' + flatLabel(H.flatType) + (H.lo !== undefined && H.hi !== undefined ? ': ' + H.n + ' recent resales, ' + money(H.lo) + ' – ' + money(H.hi) + '.' : '.'), { href: r + 'journey/worth/#hdb', label: 'See the sales again ›', data: 'data-gw-go="worth-hdb"' })
@@ -89,18 +91,20 @@
     } else if (type === 'condo') {
       // R2.1: no typed text goes into a link; the development is picked with the search on Research.
       head = d === 'smaller' ? 'Moving from your condo to somewhere smaller' : 'Moving from your condo';
-      lead = 'What homes like yours sold for, then what your next budget buys.';
+      lead = 'What homes like yours sold for, your sale proceeds, then what you could buy next.';
       S.push(step(1, 'See what homes in your development sold for', 'Recent sales by size in your development.', { href: r + 'research/', label: 'Look up my development ›', data: 'data-gw-go="research"' }));
       S.push(proceeds(2, 'private'));
-      S.push(step(3, 'See what your next budget buys', 'Sizes and developments at the budget you’d have.', find));
+      S.push(step(3, 'Work out what you could buy next', 'Your sale proceeds carry over into your maximum budget. Cash and CPF now, and what the sale adds once it completes, stay apart.', nextBuy));
+      S.push(step(4, 'See what it buys', 'Sizes and developments at that budget.', find));
       S.push(kenStep(d === 'smaller' ? 'Work out what you’d free up with Ken' : 'Talk through the move with Ken', 'Sale proceeds, CPF refunds, timing and where to buy next depend on your own loan and dates. Ken works through them with you.', msg, 'Ask Ken on WhatsApp', 'move-condo'));
       if (d === 'smaller') note = 'Thinking of an HDB flat next? HDB’s eligibility rules apply, and HDB’s calculator covers HDB loans.';
     } else {
       head = 'Moving from your landed home';
-      lead = 'Sales on your street, then what your next budget buys. Every landed home differs, so Ken can look at yours with you.';
+      lead = 'Sales on your street, your sale proceeds, then what you could buy next. Every landed home differs, so Ken can look at yours with you.';
       S.push(step(1, Ld ? 'Sales on ' + title(Ld.street) : 'See recent sales on your street', 'Sales on your street, by type of house.', { href: r + 'journey/worth/#landed', label: Ld ? 'See the sales again ›' : 'Look up my street ›', data: 'data-gw-go="worth-landed"' }));
       S.push(proceeds(2, 'private'));
-      S.push(step(3, 'See what your next budget buys', 'Sizes and developments at the budget you’d have.', find));
+      S.push(step(3, 'Work out what you could buy next', 'Your sale proceeds carry over into your maximum budget. Cash and CPF now, and what the sale adds once it completes, stay apart.', nextBuy));
+      S.push(step(4, 'See what it buys', 'Sizes and developments at that budget.', find));
       S.push(kenStep('Get an assessment of your home from Ken', 'Land size, condition and rebuild potential make every landed home different. Ken looks at yours with you.', msg, 'Ask Ken for an assessment', 'move-landed'));
     }
     return { head, lead, steps: S.join(''), note, noteHref: note ? HDB_BUDGET : '' };

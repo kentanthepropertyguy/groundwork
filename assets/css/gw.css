@@ -57,7 +57,7 @@ html.gw-lock,html.gw-lock body{overflow:hidden}
 .gw-mg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .gw-mt{display:grid;gap:5px;align-content:start;padding:12px;border:1px solid var(--gw-line);border-radius:14px;color:var(--gw-ink) !important;text-decoration:none !important;min-height:92px;min-width:0}
 .gw-mt b{font-size:14.5px}
-.gw-mall{font-weight:600;font-size:14.5px;color:var(--gw-blue) !important;text-decoration:none !important;padding:8px 2px;min-height:40px;display:flex;align-items:center}
+.gw-mall{font-weight:600;font-size:14.5px;color:var(--gw-blue) !important;text-decoration:none !important;padding:10px 2px;min-height:40px;display:block;text-wrap:balance;line-height:1.35}
 .gw-mask{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--gw-green);color:#fff !important;border-radius:980px;min-height:48px;font-weight:600;font-size:15.5px;text-decoration:none !important;margin-top:6px}
 
 /* ---------- unified search (R2.1): tools and developments in one box ---------- */
@@ -555,9 +555,9 @@ body.gw-legacy .gw-strip-host{max-width:760px;padding:0}
 /* charts keep their labels at reading size on wide screens */
 .gw-vx-dots{max-width:440px}.gw-ask-svg{max-width:460px}
 
-/* ---- R2.1: three ways in — Guide me, Tools, Research — named the same in the header, menu, homepage, footer and search ---- */
-/* Menu: search, then the three sections with everything in each (side by side on a wide screen), then Home, Ken's sites, Ask Ken. */
-@media (min-width:900px){.gw-drop{width:min(900px,calc(100vw - 48px))}}
+/* ---- four ways in — Buy, Sell, Research, Tools (R2.1, package 2) — named the same in the header, menu, homepage, footer and search ---- */
+/* Menu: search, then the four sections with everything in each (side by side on a wide screen), then Home, Ken's sites, Ask Ken. */
+@media (min-width:900px){.gw-drop{width:min(1040px,calc(100vw - 48px))}}
 .gw-mcols{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
 .gw-ms{display:grid;gap:4px;align-content:start;min-width:0}
 .gw-msh{display:flex;align-items:center;gap:6px;min-height:36px;color:var(--gw-ink) !important;text-decoration:none !important}
@@ -569,11 +569,12 @@ body.gw-legacy .gw-strip-host{max-width:760px;padding:0}
 .gw-mfoot{display:grid;gap:2px;border-top:1px solid var(--gw-line);padding-top:10px}
 .gw-mhome{display:flex;align-items:center;gap:10px;min-height:42px;padding:6px 10px;border-radius:12px;font-weight:600;font-size:14.5px;color:var(--gw-ink) !important;text-decoration:none !important}
 .gw-mhome:hover{background:var(--gw-grey)}.gw-mhome svg{color:var(--gw-blue)}
-@media (max-width:639px){.gw-ms-tools .gw-ml{grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 6px}.gw-ms-tools .gw-mi small{display:none}.gw-ms-tools .gw-mi{min-height:44px}}
-@media (min-width:640px){.gw-mcols{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.gw-mfoot{display:flex;flex-wrap:wrap;align-items:center;gap:6px 20px}.gw-mfoot .gw-mi{flex:0 1 auto}.gw-mfoot .gw-mi b,.gw-mfoot .gw-mi small{white-space:nowrap}.gw-mfoot .gw-mask{margin:0 0 0 auto;padding:0 18px}.gw-mfoot .gw-mclear{flex:1 1 100%;margin:4px 0 0}}
+@media (max-width:639px){.gw-ms-tools .gw-ml,.gw-ms-buy .gw-ml,.gw-ms-sell .gw-ml{grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 6px}.gw-ms-tools .gw-mi small,.gw-ms-buy .gw-mi small,.gw-ms-sell .gw-mi small{display:none}.gw-ms-tools .gw-mi,.gw-ms-buy .gw-mi,.gw-ms-sell .gw-mi{min-height:44px}}
+@media (min-width:640px){.gw-mcols{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.gw-mfoot{display:flex;flex-wrap:wrap;align-items:center;gap:6px 20px}.gw-mfoot .gw-mi{flex:0 1 auto}.gw-mfoot .gw-mi b,.gw-mfoot .gw-mi small{white-space:nowrap}.gw-mfoot .gw-mask{margin:0 0 0 auto;padding:0 18px}.gw-mfoot .gw-mclear{flex:1 1 100%;margin:4px 0 0}}
+@media (min-width:900px){.gw-mcols{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}}
 /* Search results say which section each page belongs to. */
 .gw-sec{font-style:normal;font-weight:700;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;padding:1px 6px;border-radius:6px;margin-right:4px;background:#EEF4FC;color:var(--gw-blue)}
-.gw-sec-guide{background:#FBF3DF;color:#7A5B0E}.gw-sec-research{background:#EEF0F6;color:var(--gw-ink)}
+.gw-sec-guide,.gw-sec-buy,.gw-sec-sell{background:#FBF3DF;color:#7A5B0E}.gw-sec-research{background:#EEF0F6;color:var(--gw-ink)}
 /* Homepage: search, then three doors. */
 .gw-launch .gw-l-search{max-width:760px}
 .gw-doors{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;margin-top:6px}
