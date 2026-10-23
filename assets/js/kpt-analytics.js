@@ -30,7 +30,7 @@ window.KPT = window.KPT || {};
     return out;
   }
   // R2.2: one identifier per tool, whichever page or button names it. tool_name stays as it was for GA4 reports.
-  const TOOL_ALIAS = { "worth-hdb": "hdb-value", "worth-landed": "landed-sales", "worth-landed-street": "landed-sales", "worth-condo": "condo-value", "up-ken": "upgrade-path", "journey-buy": "buy-journey", "research-journey": "research", "worth-router": "property-values", "worth": "property-values", "move-router": "move-journey" };
+  const TOOL_ALIAS = { "worth-hdb": "hdb-value", "worth-landed": "landed-sales", "worth-landed-street": "landed-sales", "worth-condo": "condo-value", "up-ken": "upgrade-path", "journey-buy": "buy-journey", "research-journey": "research", "worth-router": "property-values", "worth": "property-values", "move-router": "move-journey", "planner-sell": "planner" };
   function toolId(params) {
     const raw = params && (params.tool || params.tool_name); if (!raw || typeof raw !== "string") return null;
     const t = raw.replace(/^calc-/, "").replace(/-ask$/, "");

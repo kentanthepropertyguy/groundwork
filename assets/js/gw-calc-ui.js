@@ -261,7 +261,8 @@
           r.netCash < 0 ? ['Cash you’d need to add', $(-r.netCash), 'tot'] : ['Cash left after costs', $(r.netCash), 'tot']])) +
         sources(['The CPF refund goes back to the owners’ CPF accounts' + (r.owner55 ? '; owners aged 55 and above have it go first to their Retirement Account, up to the Full Retirement Sum' : '') + '. It can go towards your next home, subject to CPF rules.', 'Option money you receive in cash is part of the selling price, and goes back to CPF if a refund is due.', 'Commission and legal fees are your estimates.'].concat(r.type === 'hdb' ? ['SSD isn’t included: most HDB flats are past the SSD period when sold, but a SERS replacement flat sold within its SSD period can still attract it (IRAS).'] : []),
           'Rules: CPF refund of principal (including housing grants) plus accrued interest, and any amount pledged at 55; no cash top-up if sold at market value (CPF Board). SSD (IRAS). GST 9%. Checked 9 Oct 2026.') +
-        next(r.type === 'hdb' || !r.ssd ? [['../hdb-upgrade/', 'Budget for my next home', 'hdb-upgrade', r.type === 'hdb'], ['../payment-planner/', 'Buying a new launch next?', 'payment-planner']] : [['../ssd/', 'Seller’s Stamp Duty in detail', 'calc-ssd'], ['../tdsr/', 'How much could I borrow next?', 'calc-tdsr']]);
+        // "What can I buy next?" goes to the Planner with this sale carried over (see sellHandoff); the specialist tools stay one tap away
+        next([['../planner/#sell', 'What can I buy next?', 'planner-sell', true]].concat(r.type === 'hdb' ? [['../hdb-upgrade/', 'HDB upgrade planner', 'hdb-upgrade']] : [['../ssd/', 'Seller’s Stamp Duty in detail', 'calc-ssd'], ['../tdsr/', 'How much could I borrow next?', 'calc-tdsr']], [['../payment-planner/', 'Buying a new launch next?', 'payment-planner']]));
     },
     tdsr(r) {
       if (r.noTenure) return r.cause === 'maturity' ? '<p class="gw-warn">Banks usually end a loan by age 75, so no bank loan tenure fits at this age.</p>' : '<p class="gw-warn">The standard loan tenure ends at age 65, so at this age there is none. Enter a loan tenure to see the limit: a loan that runs past 65 takes the lower loan limit.</p>';
@@ -416,6 +417,26 @@
     }
     const FN = { mortgage: 'mortgage', 'stamp-duty': 'stampDuty', ssd: 'ssd', 'sale-proceeds': 'saleProceeds', tdsr: 'tdsr', msr: 'msr', progressive: 'progressive' };
     let last = null, lastSig = '', startedT = false, doneT = false;
+    // Sale proceeds -> Planner ("What can I buy next?"): the sale figures wait in this tab only (gw.sell.v1) until the Planner is opened from that button. Only what was entered goes: a blank loan or CPF refund
+    // stays blank there (the Planner then asks for it, as it does for anyone). The cash and CPF are carried as the Planner's own "your own figures" ONLY when the Planner's usual estimate would give different
+    // numbers (your own commission, legal fees, early-repayment penalty or a Seller's Stamp Duty). Otherwise the Planner works them out itself from the same engine, so the two pages cannot disagree.
+    function sellHandoff(v, r) {
+      const ss = (() => { try { return root.sessionStorage; } catch (e) { return null; } })(); if (!ss) return;
+      try {
+        if (!r || !r.ok || !(typeof v.price === 'number' && v.price > 0)) { ss.removeItem('gw.sell.v1'); return; }
+        const h = { v: 1, type: v.type === 'hdb' ? 'hdb' : 'private', price: v.price };
+        if (typeof v.loan === 'number') h.loan = v.loan;
+        const hasCpf = typeof v.cpfPrincipal === 'number' || typeof v.cpfInterest === 'number';
+        if (hasCpf) { h.cpfRefund = r.cpfRefund; if (v.cpfInterestEstimated) h.interestEstimated = true; }
+        if (h.type === 'private' && !r.ssdMissing && !(r.costs && r.costs.ssd > 0)) h.held = true;
+        if (typeof h.loan === 'number' && hasCpf && r.netCash >= 0 && !r.loanShortfall) {
+          const e = C.saleEstimate({ type: h.type, price: h.price, loan: h.loan, cpfRefund: h.cpfRefund, heldOver4: h.type === 'private' ? !!h.held : undefined }, { owner55: !!r.owner55, today: todayIso });
+          const cpfNow = r.owner55 ? 0 : r.cpfRefund;
+          if (!e.counted || Math.abs(e.cash - r.netCash) >= 1 || Math.abs(e.cpf - cpfNow) >= 1) { h.overrideCash = Math.round(r.netCash); h.overrideCpf = Math.round(r.cpfRefund); }
+        }
+        ss.setItem('gw.sell.v1', JSON.stringify(h));
+      } catch (e) { /* storage blocked: the Planner then asks for the sale itself */ }
+    }
     function recalc() {
       applyWhen();
       const v = values(); let r;
@@ -428,6 +449,7 @@
         if (tenureFld.settle(applied)) { recalc(); return; }
         tenureFld.hint(applied);
       }
+      if (id === 'sale-proceeds') sellHandoff(v, r);
       if (r.ok || r.error) { out.innerHTML = RENDER[id](r, v); }
       else if (r.invalid && r.invalid.length) {
         // a value we can't use: say which and why, and show no result (A5-02, A5-06, A5-07, A5-22)

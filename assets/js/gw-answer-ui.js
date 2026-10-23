@@ -51,15 +51,15 @@
   function buyerRow(n) {
     const name = n ? 'Second buyer' : 'You';
     return '<div class="pa-buyer" data-row="b' + n + '"' + (n ? ' hidden' : '') + '>' + (n ? '<p class="pa-bl">' + name + '</p>' : '') +
-      '<div class="pa-pair">' + numf('buyers.' + n + '.age', 'Age', '', { share: n ? undefined : 'borrowers.0.age', ph: n ? '' : 'e.g. 35' }) + money('buyers.' + n + '.fixed', 'Income / month', { ph: 'before CPF' }) + '</div>' +
-      '<button type="button" class="pa-link" data-bonus="' + n + '">+ Add bonus</button><div class="pa-bonus" data-bonusbox="' + n + '" hidden>' + money('buyers.' + n + '.variable', 'Bonus or commission / month', { opt: true, hint: 'Yearly total ÷ 12. Banks count 70% of it.' }) + '</div></div>';
+      '<div class="pa-pair">' + numf('buyers.' + n + '.age', 'Age', '', { share: 'borrowers.' + n + '.age', ph: n ? '' : 'e.g. 35' }) + money('buyers.' + n + '.fixed', 'Income / month', { share: 'borrowers.' + n + '.fixed', ph: 'before CPF' }) + '</div>' +
+      '<button type="button" class="pa-link" data-bonus="' + n + '">+ Add bonus</button><div class="pa-bonus" data-bonusbox="' + n + '" hidden>' + money('buyers.' + n + '.variable', 'Bonus or commission / month', { opt: true, share: 'borrowers.' + n + '.variable', hint: 'Yearly total ÷ 12. Banks count 70% of it.' }) + '</div></div>';
   }
   function formHtml() {
     return '<section class="pa-sec" aria-labelledby="pa-h-you"><h2 class="pa-h" id="pa-h-you">You</h2>' +
       chips('who', 'Buying', [['alone', 'Buying alone'], ['two', 'With someone']], { value: 'alone', cls: 'pa-who' }) + buyerRow(0) + buyerRow(1) +
       chips('buyers.0.res', 'Residency, you', RES, { value: 'SC', share: 'buyers.0.res' }) + chips('buyers.1.res', 'Residency, second buyer', RES, { value: 'SC', share: 'buyers.1.res', when: 'who:two' }) + '</section>' +
       '<section class="pa-sec" aria-labelledby="pa-h-own"><h2 class="pa-h" id="pa-h-own">Your property now</h2>' +
-      chips('owns', 'Do you own a property now?', [['none', 'No'], ['one', 'Yes, one'], ['two', 'Yes, two or more']], { value: '' }) +
+      chips('owns', 'Do you own a property now?', [['none', 'No'], ['one', 'Yes, one'], ['two', 'Yes, two or more']], { value: '', share: 'buyers.0.owned' }) +
       '<div class="pa-own" data-when="owns:one,two" hidden>' +
       chips('home', 'What will you do with your home?', [['keep', 'Keep it'], ['sell', 'Sell it']], { value: '' }) +
       chips('flat.hasLoan', 'Do you still owe a housing loan on it?', [['yes', 'Yes'], ['no', 'No, fully paid'], ['unsure', 'Not sure']], { value: '' }) +
@@ -67,14 +67,15 @@
       '<p class="pa-note" data-when="flat.hasLoan:unsure" hidden>Not sure? We count it as a loan, the cautious view, and show what changes if it is fully paid.</p>' +
       '<div data-when="owns:two" hidden>' + chips('otherLoans', 'Housing loans on your other property', [['0', 'None'], ['1', 'One'], ['2', 'Two']], { value: '' }) +
       '<div data-when="otherLoans:1,2" hidden>' + money('otherInstal', 'Their monthly instalments, together', { ph: 'e.g. 2,000' }) + '</div></div></div>' +
-      '<div class="pa-sale" data-when="home:sell" hidden><h3 class="pa-h3">Sale of your home</h3>' + chips('flat.type', 'What are you selling?', [['hdb', 'HDB flat'], ['private', 'Private home']], { value: 'hdb' }) +
+      '<div class="pa-sale" data-when="home:sell" hidden><h3 class="pa-h3">Sale of your home</h3><p class="pa-note pa-from-sale" data-sale-from role="status" hidden></p>' + chips('flat.type', 'What are you selling?', [['hdb', 'HDB flat'], ['private', 'Private home']], { value: 'hdb', share: 'homeType' }) +
       '<div data-when="flat.type:private" hidden>' + chips('flat.held', 'Have you owned it for more than 4 years?', [['yes', 'Yes'], ['no', 'No']], { value: '' }) + '<p class="pa-note" data-when="flat.held:no" hidden>Selling within 4 years brings Seller’s Stamp Duty, which depends on when you bought. Use “Enter your own figures” below.</p></div>' +
-      '<div class="pa-pair">' + money('flat.price', 'Expected sale price') + money('flat.loan', 'Loan left on it', { ph: 'type 0 if none' }) + '</div>' +
+      '<div class="pa-pair">' + money('flat.price', 'Expected sale price', { share: 'sellPrice' }) + money('flat.loan', 'Loan left on it', { ph: 'type 0 if none', share: 'outstandingLoan' }) + '</div>' +
       money('flat.cpfRefund', 'CPF to be refunded, including accrued interest', { ph: 'from your CPF statement', hint: 'Leave it blank if you do not know yet. We do not estimate the interest, so the sale is not counted until you add it.' }) +
       '<details class="pa-adv" data-ovr><summary>Enter your own figures instead</summary><div class="pa-adv-b"><div class="pa-pair">' + money('flat.overrideCash', 'Cash you expect from the sale') + money('flat.overrideCpf', 'CPF you expect back') + '</div>' + money('flat.costs', 'Selling costs, agent fee and legal', { opt: true, hint: 'Replaces the usual estimate.' }) + '<p class="pa-fine">When you enter the cash and CPF yourself, we use those figures as they are.</p></div></details>' +
       '<p class="pa-sale-r" data-sale-r aria-live="polite"></p>' + chips('order', 'What happens first?', [['sell', 'Sell first'], ['buy', 'Buy first'], ['unsure', 'Not sure yet']], { value: '' }) + '</div>' +
       money('debts', 'Other monthly debts (car, cards, personal loans)', { opt: true, ph: '0', cls: 'pa-gap', hint: 'Home loan instalments are asked above, so leave them out here.' }) + '</section>' +
-      '<section class="pa-sec" aria-labelledby="pa-h-money"><h2 class="pa-h" id="pa-h-money">Your money</h2><div class="pa-pair">' + money('cash', 'Cash', { ph: 'e.g. 300,000' }) + money('cpf', 'CPF OA you plan to use', { share: 'cpfOa', ph: 'e.g. 150,000', hint: CPF_HINT }) + '</div>' +
+      '<section class="pa-sec" aria-labelledby="pa-h-money"><h2 class="pa-h" id="pa-h-money">Your money</h2><div class="pa-pair">' + money('cash', 'Cash', { share: 'cash', ph: 'e.g. 300,000' }) + money('cpf', 'CPF OA you plan to use', { share: 'cpfOa', ph: 'e.g. 150,000', hint: CPF_HINT }) + '</div>' +
+      '<p class="pa-note pa-now" data-when="home:sell" hidden>Cash and CPF you have now. Your sale proceeds are counted separately, so leave them out here.</p>' +
       '<p class="pa-note pa-cpfhint">CPF can cap what goes towards a home: its valuation and withdrawal limits, the home’s lease and your age. We do not check these, so enter the amount CPF has confirmed.</p>' +
       '<div data-when="kind:new"><p class="pa-l pa-l2">Each month towards the home</p><div class="pa-pair">' + money('saveMo', 'Cash', { ph: 'e.g. 3,000' }) + money('cpfMo', 'CPF', { ph: 'e.g. 2,000' }) + '</div><p class="pa-note">Used to check each payment date.</p></div>' +
       '<p class="pa-fine">Stays on this device.</p></section>' +
@@ -302,7 +303,10 @@
     const track = (n, p) => { try { KPT.track(n, Object.assign({ tool_name: 'planner' }, p || {})); } catch (e) { /* analytics unavailable */ } };
     const $$ = (s, el) => [].slice.call((el || box).querySelectorAll(s)), q = (s) => box.querySelector(s);
     const out = { head: q('[data-head]'), tenure: q('[data-tenure]'), pricebox: q('[data-pricebox]'), status: q('[data-status]'), tiles: q('[data-tiles]'), next: q('[data-next]'), how: q('[data-how]'), foot: q('[data-foot]'), ask: q('[data-ask]'), bar: q('[data-bar]') };
-    const SHARE = 'gw.fin.v1', OWN = 'gw.ans.v1', HAND = 'gw.hand.v1';
+    const SHARE = 'gw.fin.v1', OWN = 'gw.ans.v1', HAND = 'gw.hand.v1', SELL = 'gw.sell.v1';
+    // How this page's answers read in the shared figures. "Do you own a property?" is the calculators' count (0, 1, 2); a "0" there is their pre-set choice, not an answer, so it is not carried here.
+    // A home that is an EC is sold like a private home here.
+    const SHARE_MAP = { owns: { to: { none: '0', one: '1', two: '2' }, from: { '1': 'one', '2': 'two' } }, 'flat.type': { to: { hdb: 'hdb', private: 'private' }, from: { hdb: 'hdb', private: 'private', ec: 'private' } } };
     const FROM = { typical: 'Price from Research: the typical recent price in past sales, not a valuation or a listing.', asking: 'Price from Research: the asking price you entered there.' };
     const store = (k) => ({ get() { try { return JSON.parse(root.sessionStorage.getItem(k) || '{}') || {}; } catch (e) { return {}; } }, remove() { try { root.sessionStorage.removeItem(k); } catch (e) { /* storage blocked */ } }, set(o) { try { root.sessionStorage.setItem(k, JSON.stringify(o)); } catch (e) { /* storage blocked */ } } });
     const shared = store(SHARE), own = store(OWN), hand = store(HAND);
@@ -490,7 +494,12 @@
     let saveT = null;
     function save() {
       const o = snapshot(); if (Object.keys(o).length) own.set(o); else own.remove();
-      const s = shared.get(); $$('[data-share]').forEach((x) => { if (!live(x)) return; const v = x.dataset.t === 'chip' ? chipVal(x) : x.value; if (v !== null && v !== '' && !(x.dataset.t === 'chip' && v === (x.dataset.default || ''))) s[x.dataset.share] = v; else delete s[x.dataset.share]; });
+      const s = shared.get(); $$('[data-share]').forEach((x) => {
+        // a second buyer who has been taken away is removed from the shared figures too, as the calculators do
+        if (!live(x)) { if (/^(borrowers|buyers)\.1\./.test(x.dataset.share) && !live(field('buyers.1.age'))) delete s[x.dataset.share]; return; }
+        let v = x.dataset.t === 'chip' ? chipVal(x) : x.value; const m = SHARE_MAP[x.dataset.k]; if (m && v) v = m.to[v];
+        if (x.dataset.k === 'flat.type' && v === 'private' && s[x.dataset.share] === 'ec') return;   // the Sale proceeds page said EC: it stays EC there
+        if (v !== null && v !== undefined && v !== '' && !(x.dataset.t === 'chip' && x.dataset.k !== 'owns' && v === (x.dataset.default || ''))) s[x.dataset.share] = v; else delete s[x.dataset.share]; });
       const p = field('price'); if (p && p.value !== '' && res && res.priceIsOwn) s.buyPrice = p.value; else if (p && p.value === '') delete s.buyPrice; if (!priceFrom) delete s.buyFrom;
       if (Object.keys(s).length) shared.set(s); else shared.remove();
       if (last && res && res.state === 'ok' && !Object.keys(errs).length) { const en = readEntries(); hand.set(handoffOf(en, res)); planHandoff(en, res); } else { hand.remove(); planHandoff(null, null); }
@@ -568,13 +577,40 @@
     // ---- restore: the other calculators' shared details, then this tab's own entries ----
     const sv = shared.get(), ov = own.get();
     const start = Object.assign({}, ov);
-    $$('[data-share]').forEach((x) => { const v = sv[x.dataset.share]; const k = x.dataset.k; if (v !== undefined && v !== '' && start[k] === undefined) start[k] = v; });
+    // a figure typed in another tool is the latest entry of that figure (every tool writes the shared figures as it is edited), so it is shown here; this page's own entries fill the rest
+    $$('[data-share]').forEach((x) => { let v = sv[x.dataset.share]; const k = x.dataset.k; const m = SHARE_MAP[k]; if (m && v !== undefined) v = m.from[v]; if (v !== undefined && v !== '') start[k] = v; });
+    // the CPF refund on the home being sold is the Sale proceeds page's principal plus accrued interest (both entered there); it is never worked out from either alone
+    { const pr = parseMoney(String(sv.cpfPrincipal || '')), it = parseMoney(String(sv.cpfInterest || '')); if (start['flat.cpfRefund'] === undefined && sv.cpfPrincipal && sv.cpfInterest && !pr.error && !it.error && pr.value !== undefined && it.value !== undefined) start['flat.cpfRefund'] = fmtMoney(pr.value + it.value); }
     // a price handed over from Research ("Can I afford this?") replaces an earlier one and is named until the buyer changes it; the figures here are the buyer's own
     if (sv.buyPrice && (start.price === undefined || sv.buyFrom)) { start.price = sv.buyPrice; start._pt = true; }
     if (sv.buyFrom && sv.buyPrice && FROM[sv.buyFrom]) priceFrom = { txt: FROM[sv.buyFrom], what: 'The price you brought from Research.', val: String(sv.buyPrice).replace(/[^\d]/g, '') };
+    // Arriving from Sale proceeds ("What can I buy next?") or the journey's step 3 (tools/planner/#sell): the home is being sold, and the sale figures come with the buyer. The cash and CPF
+    // entered here stay what the buyer has NOW; the sale is counted on its own and only once it completes. Only the sale figures are replaced; nothing else the buyer typed here is touched.
+    let saleFrom = null;
+    if (/^#sell$/.test(root.location.hash || '')) {
+      const sh = store(SELL).get(), has1 = sh && sh.v === 1;
+      if (!start.owns) start.owns = 'one';
+      start.home = 'sell'; if (!start.order) start.order = 'sell';
+      const put = (k, n) => { if (typeof n === 'number' && isFinite(n)) start[k] = fmtMoney(Math.round(n)); };
+      if (has1) {
+        start['flat.type'] = sh.type === 'hdb' ? 'hdb' : 'private';
+        put('flat.price', sh.price); put('flat.loan', sh.loan); put('flat.cpfRefund', sh.cpfRefund);
+        if (typeof sh.costs === 'number') put('flat.costs', sh.costs); else delete start['flat.costs'];
+        if (sh.held) start['flat.held'] = 'yes';
+        if (typeof sh.overrideCash === 'number') { put('flat.overrideCash', sh.overrideCash); put('flat.overrideCpf', sh.overrideCpf || 0); } else { delete start['flat.overrideCash']; delete start['flat.overrideCpf']; }
+      }
+      { const lv = parseMoney(String(start['flat.loan'] || '')); if (!start['flat.hasLoan'] && start['flat.loan'] !== undefined && !lv.error && lv.value !== undefined) start['flat.hasLoan'] = lv.value > 0 ? 'yes' : 'no'; }
+      saleFrom = { sale: !!has1, estimated: !!(has1 && sh.interestEstimated), any: !!(has1 || start['flat.price'] !== undefined) };
+      store(SELL).remove(); try { root.history.replaceState(null, '', root.location.pathname + root.location.search); } catch (e) { /* history blocked */ }
+    }
     if (start['buyers.1.age'] !== undefined || start['buyers.1.fixed'] !== undefined || start['buyers.1.res'] !== undefined && sv['buyers.1.res']) { if (start.who === undefined) start.who = 'two'; }
     apply(start);
+    if (saleFrom && saleFrom.any) {
+      const n = q('[data-sale-from]');
+      if (n) { n.textContent = (saleFrom.sale ? 'Carried over from Sale proceeds. Change anything here and only this page changes.' : 'Using the sale figures you entered earlier in this tab.') + (saleFrom.estimated ? ' Its CPF interest was an estimate, so check the refund against your CPF statement.' : ''); n.hidden = false; }
+    }
     recalc();
+    if (saleFrom) save();
   }
   if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount(); }
   return { saleLine, basisHtml, pageHtml, formHtml, headHtml, tenureHtml, nextHtml, howHtml, datesHtml, assumptionsHtml, datelineHtml, goHtml, $s, $m, REF, LIMIT_TXT };

@@ -61,7 +61,7 @@
       t: ['msr', 'mortgage servicing ratio', 'hdb loan', 'hdb loan limit', 'ec', 'executive condo', 'executive condominium', 'hfe', 'hdb flat eligibility', 'bto', 'resale flat loan', 'hdb flat loan', 'hdb borrow'] },
     { id: 'progressive', name: 'New launch payments', tag: 'Progressive payments', short: 'A quick split by stage, with no dates', href: 'tools/progressive-payments/', icon: 'progressive', search: 1, sec: 'tools',
       t: ['progressive payment', 'progressive payments', 'progressive', 'new launch payment', 'payment schedule', 'under construction', 'uncompleted', 'booking fee', 'option fee', 'developer', 'construction stages', 'stages', 'top', 'temporary occupation permit', 'downpayment', 'down payment', 'cash needed', 'company buyer', 'company purchase', 'buying through a company', 'entity'] },
-    { id: 'planner', name: 'Planner: what can I afford?', tag: 'Maximum budget', short: 'Your maximum property budget, from your cash, CPF and income', href: 'tools/planner/', icon: 'planner', menu: 1, sec: 'tools',
+    { id: 'planner', name: 'What can I afford?', tag: 'Maximum budget', short: 'Your maximum property budget, from your cash, CPF and income', href: 'tools/planner/', icon: 'planner', menu: 1, sec: 'tools',
       t: ['planner', 'what can i afford', 'afford', 'affordability', 'comfortable budget', 'maximum budget', 'maximum property budget', 'budget', 'how much can i afford', 'highest price', 'new launch budget', 'upgrade budget', 'keep my flat', 'sell first'] },
     { id: 'payment-planner', name: 'Payment timeline', tag: 'Payment dates', short: 'See when and how much you need to pay.', href: 'tools/payment-planner/', icon: 'payment-planner', menu: 1, sec: 'tools',
       t: ['payment timeline', 'new launch payments', 'new launch payment', 'progressive payments', 'progressive payment', 'progressive', 'payment schedule', 'booking fee', 'option fee', 'downpayment', 'down payment', 'under construction', 'construction stages', 'cash flow', 'cashflow', 'timeline', 'planner', 'payment planner', 'shortfall', 'funding gap', 'buy first', 'sell first', 'buy first sell later', 'sell first buy later', 'bridging', 'absd refund', 'when to pay', 'payment dates', 'how much cash do i need', 'cash needed', 'cpf needed', 'upgrade timing'] },
@@ -85,13 +85,13 @@
       t: ['research', 'development', 'condo', 'condominium', 'apartment', 'project', 'transactions', 'transacted', 'psf', 'price per square foot', 'compare', 'comparison', 'compare condos', 'condo prices', 'private property', 'ura', 'caveats', 'valuation', 'condo valuation'] },
     { id: 'guide', name: 'Guide me', tag: 'Not sure where to start? Step by step', short: 'Tell us your goal; we take you through it', href: 'journey/', icon: 'guide', start: 1, sec: 'guide',
       t: ['guide', 'guide me', 'help me figure it out', 'figure it out', 'guided', 'guided journey', 'help', 'help me', 'where to start', 'start', 'beginner', 'first time', 'first home', 'first-time buyer', 'steps', 'plan', 'planning', 'what should i do', 'not sure'] },
-    { id: 'guide-up', name: 'Upgrade from HDB', tag: 'The complete four-step process: value, proceeds, budget, homes', href: 'journey/#up', icon: 'hdb-upgrade', search: 1, sec: 'guide',
+    { id: 'guide-up', name: 'Upgrade from HDB', tag: 'The complete four-step process: value, proceeds, budget, homes', href: 'journey/#up', icon: 'hdb-upgrade', search: 1, sec: 'sell',
       t: ['hdb upgrade', 'upgrade', 'upgrading', 'upgrade from hdb', 'sell hdb', 'moving', 'move', 'right size', 'rightsizing', 'downsizing', 'downgrade'] },
-    { id: 'guide-buy', name: 'I’m looking to buy', tag: 'A first home, or another without selling', href: 'journey/#buy', icon: 'home', search: 1, sec: 'guide',
+    { id: 'guide-buy', name: 'I’m looking to buy', tag: 'A first home, or another without selling', href: 'journey/#buy', icon: 'home', search: 1, sec: 'buy',
       t: ['buy', 'buying', 'looking to buy', 'first home', 'first property', 'buy a condo', 'buy a home', 'purchase'] },
-    { id: 'guide-sell', name: 'I’m planning to sell', tag: 'What homes like yours sold for, then your proceeds', href: 'journey/#sell', icon: 'worth', search: 1, sec: 'guide',
+    { id: 'guide-sell', name: 'I’m planning to sell', tag: 'What homes like yours sold for, then your proceeds', href: 'journey/#sell', icon: 'worth', search: 1, sec: 'sell',
       t: ['sell', 'selling', 'sell my home', 'sell my flat', 'home value'] },
-    { id: 'guide-move', name: 'Sell and buy again', tag: 'Moving to another home, or downsizing', href: 'journey/#move', icon: 'guide', search: 1, sec: 'guide',
+    { id: 'guide-move', name: 'Sell and buy again', tag: 'Moving to another home, or downsizing', href: 'journey/#move', icon: 'guide', search: 1, sec: 'sell',
       t: ['moving', 'move', 'downsize', 'downsizing', 'right size', 'rightsizing', 'sell condo', 'sell landed', 'sell then buy'] },
     { id: 'directory', name: 'Browse every development', tag: 'A–Z list', href: 'research/#/browse', icon: 'list', start: 1, sec: 'research',
       t: ['browse', 'all developments', 'directory', 'list', 'a to z', 'every development', 'all condos'] },
@@ -105,13 +105,16 @@
       t: ['whatsapp', 'ask ken', 'ask', 'contact', 'talk', 'call', 'message', 'speak to agent', 'appointment', 'viewing', 'help me'] },
   ];
   const byId = {}; ENTRIES.forEach((e) => { byId[e.id] = e; });
-  // The three ways in, named the same everywhere (header, menu, homepage, footer, search results).
+  // The four ways in, named the same everywhere (header, menu, homepage, footer, search results): Buy · Sell · Research · Tools.
+  // Buy and Sell open the guided path for that goal (journey/#buy, journey/#sell); "guide" is the page itself and stays findable by search and in the menu footer.
   const SECTIONS = {
     guide: { name: 'Guide me', href: 'journey/', nav: 'journey', q: 'Not sure where to start?', say: 'Pick your goal. We take you through the right tools, step by step.', ids: ['guide-buy', 'guide-up', 'guide-sell', 'guide-move'] },
+    buy: { name: 'Buy', href: 'journey/#buy', nav: 'buy', q: 'Looking to buy?', say: 'Work out your maximum budget, then explore the homes within it.', ids: ['guide-buy', 'planner', 'what-can-i-buy', 'payment-planner'] },
+    sell: { name: 'Sell', href: 'journey/#sell', nav: 'sell', q: 'Planning to sell?', say: 'See what homes like yours sold for, then what you would take home.', ids: ['guide-sell', 'worth', 'sale-proceeds', 'guide-up', 'guide-move'] },
     tools: { name: 'Tools', href: 'tools/', nav: 'tools', q: 'Know what to work out?', say: 'Calculators for stamp duty, loans, sale proceeds and more.', ids: ['planner', 'stamp-duty', 'tdsr', 'msr', 'mortgage', 'payment-planner', 'sale-proceeds', 'ssd', 'hdb-upgrade'] },
-    research: { name: 'Research', href: 'research/', nav: 'research', q: 'Looking at a property?', say: 'What homes really sold for, from URA and HDB records.', ids: ['research', 'map', 'worth', 'what-can-i-buy', 'sample'] },
+    research: { name: 'Research', href: 'research/', nav: 'research', q: 'Looking at a property?', say: 'What homes really sold for, from URA and HDB records. The Map is part of Research.', ids: ['research', 'map', 'worth', 'what-can-i-buy', 'directory', 'sample'] },
   };
-  const SEC_ORDER = ['guide', 'tools', 'research'];
+  const SEC_ORDER = ['buy', 'sell', 'research', 'tools'];
   const MENU_TOOLS = SECTIONS.tools.ids;
   const QUICK = ['stamp-duty', 'tdsr', 'mortgage', 'sale-proceeds', 'hdb-upgrade'];
   const href = (e, r) => (e.ext ? e.href : (r || '') + e.href);
@@ -263,14 +266,14 @@
       '<input id="' + id + 'i" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="' + id + 'l" placeholder="' + esc(placeholder || 'Search a tool, development or postal code') + '"></label>' +
       '<div class="gw-sx-res" id="' + id + 'r" hidden></div>' + (after || '') + '</div>';
   }
-  // The full menu: search, then the three ways in (Guide me, Tools, Research) with everything in each, then Ken's other sites.
+  // The full menu: search, then the four ways in (Buy, Sell, Research, Tools) with everything in each, then Ken's other sites.
   // Side by side on a wide screen, one after another on a phone.
   function menuHtml(r) {
     const sec = (k) => { const S = SECTIONS[k]; return '<section class="gw-ms gw-ms-' + k + '"><a class="gw-msh" href="' + r + S.href + '" data-gw-nav-to="' + S.nav + '"><b>' + S.name + '</b><span aria-hidden="true">›</span></a><p class="gw-msq">' + esc(S.q) + '</p>' +
-      '<div class="gw-ml">' + S.ids.map((id) => row(byId[id], r)).join('') + '</div>' + (k === 'tools' ? '<a class="gw-mall" href="' + r + 'tools/" data-gw-nav-to="tools">All tools, with what each one does ›</a>' : '') + '</section>'; };
+      '<div class="gw-ml">' + S.ids.filter((id) => k === 'research' || k === 'tools' || k === 'guide' || SECTIONS.research.ids.indexOf(id) < 0).map((id) => row(byId[id], r)).join('') + '</div>' + (k === 'tools' ? '<a class="gw-mall" href="' + r + 'tools/" data-gw-nav-to="tools">All tools, with what each one does ›</a>' : '') + '</section>'; };
     return '<div class="gw-mx">' + searchHtml('menu', 'Search, e.g. ABSD or Jadescape') +
       '<div class="gw-mx-body" data-gw-menu-body><div class="gw-mcols">' + SEC_ORDER.map(sec).join('') + '</div>' +
-      '<div class="gw-mfoot"><a class="gw-mhome" href="' + (r || './') + '" data-gw-nav-to="home">' + svg('home', 18) + 'Home</a>' + row(byId['main-site'], r) + row(byId.launches, r) +
+      '<div class="gw-mfoot"><a class="gw-mhome" href="' + (r || './') + '" data-gw-nav-to="home">' + svg('home', 18) + 'Home</a>' + row(byId.guide, r) + row(byId['main-site'], r) + row(byId.launches, r) +
       '<a class="gw-mask" href="' + esc(ASK) + '" target="_blank" rel="noopener" data-gw-nav-to="ask">' + svg('chat', 20) + 'Ask Ken on WhatsApp</a>' +
       // Audit V3-05: one place, on every page, to remove the figures this tab remembers for the tools
       '<p class="gw-mclear"><button type="button" class="gw-link" data-gw-clear-all>Clear my figures</button> <span>Removes the figures this tab remembers for every tool.</span></p></div></div></div>';
@@ -280,7 +283,7 @@
     const S = SECTIONS[k];
     return '<div class="gw-door gw-door-' + k + '"><p class="gw-lane">' + esc(S.q) + '</p><h2 class="gw-door-t"><a href="' + r + S.href + '" data-gw-nav-to="' + S.nav + '">' + S.name + ' <span aria-hidden="true">›</span></a></h2><p class="gw-door-s">' + esc(S.say) + '</p>' + inner + (more || '') + '</div>';
   }
-  // On the three section pages (phones and tablets): the same three names as one row, the current one marked.
+  // On the section pages (phones and tablets): the same four names as one row, the current one marked.
   function secSwitch(cur, r) {
     return '<nav class="gw-secs" aria-label="Ways to use Groundwork">' + SEC_ORDER.map((k) => { const S = SECTIONS[k]; return '<a href="' + r + S.href + '" data-gw-nav-to="' + S.nav + '"' + (k === cur ? ' aria-current="page"' : '') + '>' + S.name + '</a>'; }).join('') + '</nav>';
   }
@@ -551,6 +554,11 @@
       const off = host.querySelector('[data-gw-strip-off]'); if (off) off.addEventListener('click', () => { setCtx({ path: null }); host.remove(); document.documentElement.classList.remove('gw-onpath'); });
     };
     showStrip();
+    // Buy · Sell: on the guided-path page the link for the open path is marked (Buy for #buy, Sell for #sell); the other paths mark neither.
+    if (/\/journey\/?$/.test(location.pathname)) {
+      const mark = () => { const h = (location.hash || '').replace('#', ''); [].slice.call(document.querySelectorAll('.gw-nav .gw-links a[data-kpt-nav], .gw-secs a[data-gw-nav-to]')).forEach((a) => { const k = a.getAttribute('data-kpt-nav') || a.getAttribute('data-gw-nav-to'); if (k === 'buy' || k === 'sell') { if (k === h) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); } }); };
+      mark(); window.addEventListener('hashchange', mark);
+    }
     // The four-step page (journey #up): finished steps ticked, the main button points at the next one.
     const upBox = document.querySelector('[data-gw-up]');
     if (upBox) {
