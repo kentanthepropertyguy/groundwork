@@ -112,9 +112,12 @@
     buy: { name: 'Buy', href: 'journey/#buy', nav: 'buy', q: 'Looking to buy?', say: 'Work out your maximum budget, then explore the homes within it.', ids: ['guide-buy', 'planner', 'what-can-i-buy', 'payment-planner'] },
     sell: { name: 'Sell', href: 'journey/#sell', nav: 'sell', q: 'Planning to sell?', say: 'See what homes like yours sold for, then what you would take home.', ids: ['guide-sell', 'worth', 'sale-proceeds', 'guide-up', 'guide-move'] },
     tools: { name: 'Tools', href: 'tools/', nav: 'tools', q: 'Know what to work out?', say: 'Calculators for stamp duty, loans, sale proceeds and more.', ids: ['planner', 'stamp-duty', 'tdsr', 'msr', 'mortgage', 'payment-planner', 'sale-proceeds', 'ssd', 'hdb-upgrade'] },
+    map: { name: 'Map', href: 'research/map/', nav: 'map', q: '', say: '', ids: [] },
     research: { name: 'Research', href: 'research/', nav: 'research', q: 'Looking at a property?', say: 'What homes really sold for, from URA and HDB records. The Map is part of Research.', ids: ['research', 'map', 'worth', 'what-can-i-buy', 'directory', 'sample'] },
   };
   const SEC_ORDER = ['buy', 'sell', 'research', 'tools'];
+  // Main navigation: Buy · Sell · Research · Map · Tools (header, footer and the phone row). The menu keeps its four columns; the Map card stays in Research's column.
+  const NAV_ORDER = ['buy', 'sell', 'research', 'map', 'tools'];
   const MENU_TOOLS = SECTIONS.tools.ids;
   const QUICK = ['stamp-duty', 'tdsr', 'mortgage', 'sale-proceeds', 'hdb-upgrade'];
   const href = (e, r) => (e.ext ? e.href : (r || '') + e.href);
@@ -285,7 +288,7 @@
   }
   // On the section pages (phones and tablets): the same four names as one row, the current one marked.
   function secSwitch(cur, r) {
-    return '<nav class="gw-secs" aria-label="Ways to use Groundwork">' + SEC_ORDER.map((k) => { const S = SECTIONS[k]; return '<a href="' + r + S.href + '" data-gw-nav-to="' + S.nav + '"' + (k === cur ? ' aria-current="page"' : '') + '>' + S.name + '</a>'; }).join('') + '</nav>';
+    return '<nav class="gw-secs" aria-label="Ways to use Groundwork">' + NAV_ORDER.map((k) => { const S = SECTIONS[k]; return '<a href="' + r + S.href + '" data-gw-nav-to="' + S.nav + '"' + (k === cur ? ' aria-current="page"' : '') + '>' + S.name + '</a>'; }).join('') + '</nav>';
   }
   function researchRows(r) { return '<div class="gw-ml gw-rrows"><a class="gw-mi gw-mi-map" href="' + r + 'research/map/" data-gw-nav-to="map"><img src="' + r + 'assets/img/map-thumb.webp" alt="" width="720" height="298" loading="lazy" decoding="async"><span><b>Map</b><small>Search a place, road or development. See what is nearby.</small></span></a>' + SECTIONS.research.ids.filter((id) => id !== 'map').slice(0, 3).map((id) => row(byId[id], r)).join('') + '</div>'; }
   // Homepage quick tools: five tools and "All tools".
@@ -554,6 +557,22 @@
       const off = host.querySelector('[data-gw-strip-off]'); if (off) off.addEventListener('click', () => { setCtx({ path: null }); host.remove(); document.documentElement.classList.remove('gw-onpath'); });
     };
     showStrip();
+    // Journey or standalone (Package 3). A tool opened from a journey (Buy or Sell in the menu, a Journey page, Research, the Planner, the step strip) gets "?j=1" on its address: only that marker, never a figure.
+    // The tool then shares figures with the journey, as before. A tool opened from Tools (the Tools menu column, All tools, search results, a typed address) has no marker and starts a fresh, independent calculation.
+    const TOOL_PAGE = /\/tools\/(?!what-can-i-buy\/?$)[a-z0-9-]+\/?$/;
+    const ALONE = '.gw-ms-tools, .gw-sx, .gw-tdir, .gw-qt, .gw-foot, .gw-secs';
+    const fromJourney = (a) => {
+      if (a.closest(ALONE)) return false;
+      if (a.closest('.gw-ms-buy, .gw-ms-sell, .gw-strip, [data-gw-journey]')) return true;
+      return /\/(journey|research)\//.test(root.location.pathname) || !!document.querySelector('[data-pa]') || /[?&]j=1(&|$)/.test(root.location.search);
+    };
+    const markJourney = (e) => {
+      const a = e.target && e.target.closest ? e.target.closest('a[href]') : null; if (!a) return;
+      let u; try { u = new URL(a.getAttribute('href'), root.location.href); } catch (x) { return; }
+      if (u.origin !== root.location.origin || !TOOL_PAGE.test(u.pathname) || u.searchParams.get('j') === '1' || !fromJourney(a)) return;
+      u.searchParams.set('j', '1'); a.setAttribute('href', u.pathname + u.search + u.hash);
+    };
+    document.addEventListener('click', markJourney, true); document.addEventListener('auxclick', markJourney, true);
     // Buy · Sell: on the guided-path page the link for the open path is marked (Buy for #buy, Sell for #sell); the other paths mark neither.
     if (/\/journey\/?$/.test(location.pathname)) {
       const mark = () => { const h = (location.hash || '').replace('#', ''); [].slice.call(document.querySelectorAll('.gw-nav .gw-links a[data-kpt-nav], .gw-secs a[data-gw-nav-to]')).forEach((a) => { const k = a.getAttribute('data-kpt-nav') || a.getAttribute('data-gw-nav-to'); if (k === 'buy' || k === 'sell') { if (k === h) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); } }); };
@@ -603,5 +622,5 @@
     }
   }
   if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount(); }
-  return { upDone, finStamp, clearJourney, oneEdit, deaccent, ENTRIES, SECTIONS, SEC_ORDER, doorHtml, researchRows, secSwitch, row, MENU_TOOLS, QUICK, UP, MAIN, LAUNCHES, ASK, ICON, svg, norm, matchTools, scoredTools, matchDevs, matchSites, matchRoads, roadList, roadTitle, roadKey, roadLandedHref, roadMapHref, findRoads, roadsNow, displayName, menuHtml, searchHtml, quickHtml, stripHtml, href, esc };
+  return { upDone, finStamp, clearJourney, oneEdit, deaccent, ENTRIES, SECTIONS, SEC_ORDER, NAV_ORDER, doorHtml, researchRows, secSwitch, row, MENU_TOOLS, QUICK, UP, MAIN, LAUNCHES, ASK, ICON, svg, norm, matchTools, scoredTools, matchDevs, matchSites, matchRoads, roadList, roadTitle, roadKey, roadLandedHref, roadMapHref, findRoads, roadsNow, displayName, menuHtml, searchHtml, quickHtml, stripHtml, href, esc };
 });

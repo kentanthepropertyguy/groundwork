@@ -1,4 +1,4 @@
-// Package 2: one navigation, Buy · Sell · Research · Tools, the same on every page. Run from the site folder:  node tools/financial-tests/nav-tests.js
+// Packages 2-3: one navigation, Buy · Sell · Research · Map · Tools, the same on every page. Run from the site folder:  node tools/financial-tests/nav-tests.js
 // Reads the static markup (what a visitor gets before any script runs) of every page that carries the site header.
 const fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '../..');
@@ -19,10 +19,10 @@ for (const f of pages) {
   const rel = path.relative(ROOT, f), t = fs.readFileSync(f, 'utf8');
   const hdr = (t.match(/<nav class="gw-links"[^>]*>(.*?)<\/nav>/s) || [])[1] || '';
   const links = [...hdr.matchAll(/<a\b([^>]*)>(.*?)<\/a>/gs)].map((m) => ({ attrs: m[1], text: m[2].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim(), href: (m[1].match(/href="([^"]*)"/) || [])[1] }));
-  check(rel + ': header reads Buy · Sell · Research · Tools · New launches', links.map((l) => l.text).join('|') === 'Buy|Sell|Research|Tools|New launches ↗', links.map((l) => l.text));
-  check(rel + ': Map is not a top-level header item', !links.some((l) => /^Map$/.test(l.text)));
+  check(rel + ': header reads Buy · Sell · Research · Map · Tools · New launches', links.map((l) => l.text).join('|') === 'Buy|Sell|Research|Map|Tools|New launches ↗', links.map((l) => l.text));
+  check(rel + ': Map is a top-level header item and opens the one Map', links.filter((l) => /^Map$/.test(l.text)).length === 1 && /(^|\/)research\/map\/$/.test((links.find((l) => /^Map$/.test(l.text)) || {}).href || ''));
   const cur = links.filter((l) => /aria-current/.test(l.attrs)).map((l) => l.text);
-  const want = /^tools\//.test(rel) ? ['Tools'] : rel === 'journey/worth/index.html' ? ['Sell'] : /^research\//.test(rel) ? ['Research'] : [];
+  const want = /^tools\//.test(rel) ? ['Tools'] : rel === 'journey/worth/index.html' ? ['Sell'] : rel === 'research/map/index.html' ? ['Map'] : /^research\//.test(rel) ? ['Research'] : [];
   // the planner, timeline and calculators belong to Tools; journey/ pages mark Buy or Sell from the address, in the browser
   check(rel + ': at most one header item is the current page', cur.length <= 1, cur);
   check(rel + ': current section is ' + (want.join() || 'none until the browser marks it'), cur.join() === want.join() || (!want.length && !cur.length), cur);
@@ -47,11 +47,31 @@ for (const f of pages) {
   check(rel + ': no dead local link in header, menu or footer', all.every((h) => resolves(f, h)), all.filter((h) => !resolves(f, h)));
 }
 const uniq = new Set(Object.values(sig)); check('the header is the same list of destinations on every page', uniq.size === 1, [...uniq]);
+// phone section row: the same five, and the All Tools page (Package 3)
+for (const f of pages) {
+  const rel = path.relative(ROOT, f), t = fs.readFileSync(f, 'utf8'), sm = t.match(/<nav class="gw-secs"[^>]*>(.*?)<\/nav>/s);
+  if (sm) check(rel + ': phone section row reads Buy · Sell · Research · Map · Tools', [...sm[1].matchAll(/<a\b[^>]*>(.*?)<\/a>/gs)].map((x) => x[1].replace(/<[^>]+>/g, '').trim()).join('|') === 'Buy|Sell|Research|Map|Tools');
+}
+{
+  const t = fs.readFileSync(path.join(ROOT, 'tools/index.html'), 'utf8'), main = t.slice(t.indexOf('<main'), t.indexOf('</main>'));
+  check('All Tools: two types, Guided planning and Quick calculators', [...main.matchAll(/<h2 id="tg-[a-z]+">(.*?)<\/h2>/g)].map((x) => x[1]).join('|') === 'Guided planning|Quick calculators');
+  check('All Tools: Quick calculators are Financing, Purchase costs & payments, Selling', [...main.matchAll(/<h3 id="tg-[a-z]+">(.*?)<\/h3>/g)].map((x) => x[1]).join('|') === 'Financing|Purchase costs &amp; payments|Selling');
+  const guided = (main.match(/aria-labelledby="tg-guided">(.*?)<\/section>/s) || [])[1] || '';
+  check('All Tools: Guided planning holds What can I afford?, HDB upgrade planner, Full payment planning', [...guided.matchAll(/data-tool="([^"]+)"/g)].map((x) => x[1]).join('|') === 'planner|hdb-upgrade|payment-planner-full', guided.length);
+  check('All Tools: Full payment planning opens the existing Payment timeline at its Funding check', /href="payment-planner\/#funding" data-tool="payment-planner-full"/.test(main));
+  const tools = [...main.matchAll(/<a class="gw-tl" href="[^"]*" data-tool="([^"]+)"/g)].map((x) => x[1]);
+  ['planner', 'hdb-upgrade', 'payment-planner-full', 'tdsr', 'msr', 'mortgage', 'stamp-duty', 'payment-planner', 'progressive', 'sale-proceeds', 'ssd'].forEach((k) => check('All Tools lists ' + k + ' once', tools.filter((x) => x === k).length === 1, tools));
+  check('All Tools: nothing that lives under Research is listed here', !tools.some((x) => /^(worth|what-can-i-buy|research)$/.test(x)), tools);
+  check('All Tools: no example result and no HDB-in-four-steps sentence', !/1\.09|Example result|four steps/i.test(main));
+  check('All Tools: search is kept', /data-gw-search="tools"/.test(main));
+  check('All Tools: no tile opens a journey-marked address', !/j=1/.test(main));
+}
 // the single source for the labels, and the order the sections are shown in
 global.self = global; global.window = global;
 let GWN = null; try { global.document = undefined; GWN = require(path.join(ROOT, 'assets/js/gw-nav.js')); } catch (e) { /* browser-only: the markup checks above carry it */ }
 if (GWN && GWN.SECTIONS) {
   check('gw-nav.js lists the sections Buy, Sell, Research, Tools', GWN.SEC_ORDER && GWN.SEC_ORDER.join() === 'buy,sell,research,tools', GWN.SEC_ORDER);
+  check('gw-nav.js lists the main navigation Buy, Sell, Research, Map, Tools', GWN.NAV_ORDER && GWN.NAV_ORDER.join() === 'buy,sell,research,map,tools', GWN.NAV_ORDER);
   // every tool folder is a registered tool with its own address, so the Tools directory can list it
   const dirs = fs.readdirSync(path.join(ROOT, 'tools'), { withFileTypes: true }).filter((d) => d.isDirectory() && fs.existsSync(path.join(ROOT, 'tools', d.name, 'index.html'))).map((d) => d.name);
   const hrefs = (GWN.ENTRIES || []).map((e) => e.href);

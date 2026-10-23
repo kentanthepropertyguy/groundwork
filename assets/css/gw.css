@@ -295,6 +295,7 @@ body[data-view="directory"] .kpe-count{text-align:left}
 /* ---------- R2 (Ken, 9 Oct 2026): tools directory and calculators ---------- */
 .gw-tdir{max-width:980px;display:grid;gap:30px}
 .gw-tg h2{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gw-muted);margin-bottom:12px}
+.gw-tg h3{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gw-muted);margin:22px 0 12px}.gw-tg-top>h2{font-size:21px;font-weight:700;letter-spacing:-.01em;text-transform:none;color:var(--gw-ink);margin-bottom:14px}.gw-tg-top>h3:first-of-type{margin-top:0}
 .gw-tls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .gw-tl{display:grid;grid-template-columns:40px minmax(0,1fr);column-gap:12px;row-gap:2px;align-items:start;padding:16px;border:1px solid var(--gw-line);border-radius:16px;background:#fff;color:var(--gw-ink) !important;text-decoration:none !important}
 .gw-tl svg{grid-row:span 2;width:40px;height:40px;padding:8px;border-radius:12px;background:#EEF4FC;color:var(--gw-blue)}
@@ -323,7 +324,7 @@ body.gw-legacy .kpt-hero-sub{max-width:none}
 .gw-ph-l{font-weight:700;font-size:14px;color:var(--gw-ink);display:flex;gap:12px;align-items:center}
 .gw-link{background:none;border:0;padding:0;font:inherit;color:var(--gw-blue);cursor:pointer;font-weight:600}
 .gw-add{justify-self:start;font-size:15px;min-height:32px}.gw-add[hidden]{display:none}
-.gw-saved{background:#F3F7FD;border-radius:10px;padding:8px 12px}
+.gw-saved,.gw-reuse{background:#F3F7FD;border-radius:10px;padding:8px 12px}.gw-reuse{margin:0 0 14px}
 .gw-res-h{display:grid;gap:2px}.gw-res-h span{font-size:14px;color:var(--gw-muted);font-weight:600}
 .gw-res-h b{font-size:40px;letter-spacing:-.03em;line-height:1.05;font-variant-numeric:tabular-nums}.gw-res-h small{font-size:14px;color:var(--gw-body)}
 .gw-rows{margin:0;display:grid;background:#fff;border-radius:14px;padding:2px 14px}
@@ -393,7 +394,7 @@ body.gw-legacy .kpt-hero-sub{max-width:none}
 /* 44 px tap areas for small links */
 .gw-crumb{display:inline-flex;align-items:center;min-height:44px;margin-bottom:0}
 .gw-more summary{min-height:44px;display:flex;align-items:center}
-.gw-fld small .gw-link,.gw-saved .gw-link{display:inline-block;padding:12px 4px;margin:-12px -4px}
+.gw-fld small .gw-link,.gw-saved .gw-link,.gw-reuse .gw-link{display:inline-block;padding:12px 4px;margin:-12px -4px}
 /* results drawn to scale: where the money goes */
 .gw-stack{margin:0;display:grid;gap:8px;background:#fff;border-radius:14px;padding:12px 14px}
 .gw-stack figcaption{font-size:13px;font-weight:600;color:var(--gw-muted)}
@@ -598,6 +599,7 @@ body.gw-legacy .gw-strip-host{max-width:760px;padding:0}
 .gw-secs a{display:flex;align-items:center;min-height:36px;padding:0 15px;border-radius:980px;font:600 14px/1 var(--gw-font);color:var(--gw-muted) !important;text-decoration:none !important;white-space:nowrap}
 .gw-secs a[aria-current="page"]{background:var(--gw-ink);color:#fff !important}
 @media (min-width:900px){.gw-secs{display:none}}
+@media (max-width:420px){.gw-secs a{padding:0 11px}}
 .gw-tother{font-size:14px;color:var(--gw-muted);margin:4px 0 0 !important}.gw-tother a{font-weight:600}
 /* Research landing: everything else in Research. */
 .gw-rmore{display:grid;gap:10px;margin:0 0 18px;font-family:var(--gw-font)}
@@ -609,7 +611,6 @@ body.gw-legacy .gw-strip-host{max-width:760px;padding:0}
 @media (max-width:899px){.gw-secs + .gw-kicker,.gw-secs + .lg-kicker{display:none}}
 .gw-rlinks a{padding:10px 14px}
 /* Examples kept within reach: the planner's example on All tools, the sample report's on Research. */
-.gw-tex{margin-top:12px;max-width:520px}
 .gw-rex{display:grid;gap:8px;margin:0 0 18px;padding:16px;border:1px solid var(--gw-line);border-radius:16px;background:#FAFAFC;font-family:var(--gw-font)}
 .gw-rex-h{font-size:17px;font-weight:700;color:var(--gw-ink);margin:0 !important;letter-spacing:-.01em}
 .gw-rex-r{display:flex;justify-content:space-between;gap:12px;font-size:14.5px}.gw-rex-r small{font-weight:400;color:var(--gw-muted)}

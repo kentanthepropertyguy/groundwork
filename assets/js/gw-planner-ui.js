@@ -572,9 +572,14 @@
     const $$ = (s, el) => [].slice.call((el || box).querySelectorAll(s));
     const q = (s) => box.querySelector(s);
     const out = { sum: q('[data-sum]'), verdict: q('[data-verdict]'), result: q('[data-result]'), detail: q('[data-detail]'), assume: q('[data-assume]'), compare: q('[data-compare]'), timeline: q('[data-timeline]'), instal: q('[data-instal]'), more: q('[data-more]'), more_em: q('[data-more-em]'), note: q('[data-acts-note]') };
-    const SHARE = 'gw.fin.v1', OWN = 'gw.plan.v1', HAND = 'gw.hand.v1';
+    // Journey or standalone: arriving from a consumer journey (?j=1: the Planner's button, the Buy menu, a guided step) keeps the connected behaviour; opened from Tools it is its own calculation.
+    // A standalone Timeline starts blank, keeps its own entries over a refresh (reload / back-forward) in this tab, and neither reads nor writes the shared figures.
+    const journey = /[?&]j=1(&|$)/.test(root.location.search);
+    const again = (() => { try { const n = root.performance.getEntriesByType('navigation')[0]; return !!n && (n.type === 'reload' || n.type === 'back_forward'); } catch (e) { return false; } })();
+    const SHARE = 'gw.fin.v1', OWN = journey ? 'gw.plan.v1' : 'gw.pro.payment-planner.v1', HAND = 'gw.hand.v1';
     const store = (k) => ({ get() { try { return JSON.parse(root.sessionStorage.getItem(k) || '{}') || {}; } catch (e) { return {}; } }, set(o) { try { root.sessionStorage.setItem(k, JSON.stringify(o)); } catch (e) { /* storage blocked */ } }, del() { try { root.sessionStorage.removeItem(k); } catch (e) { /* ignore */ } } });
     const shared = store(SHARE), own = store(OWN), hand = store(HAND);
+    if (!journey && !again) own.del();
     let carried = false, techOpen = false;
     const parseMoney = (s) => { const p = C.parseMoney(s); return p.value === undefined ? null : p.value; };
     const fmtMoney = (v) => (v === null ? '' : v.toLocaleString('en-US', { maximumFractionDigits: 2 }));
@@ -584,7 +589,7 @@
     const setChip = (g, v) => { $$('button', g).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === v))); };
     $$('[data-t="chip"]').forEach((g) => $$('button', g).forEach((b) => b.addEventListener('click', () => { setChip(g, b.dataset.v); if (g.dataset.k === 'order') syncOrder(b.dataset.v); { const other = g.dataset.k === 'flatLoan' ? 'flatLoanSpecial' : g.dataset.k === 'flatLoanSpecial' ? 'flatLoan' : null, og2 = other && box.querySelector('[data-k="' + other + '"]'); if (og2) setChip(og2, ''); } changed(g); })));
     const rowOf = (k) => box.querySelector('[data-row="' + k + '"]');
-    const showRow = (k, on) => { const r = rowOf(k); if (!r) return; r.hidden = !on; const add = box.querySelector('[data-add="' + k + '"]'); if (add) add.hidden = on; if (!on) { const s = shared.get(); Object.keys(s).forEach((key) => { if (key.indexOf(k + '.') === 0) delete s[key]; }); shared.set(s); } };
+    const showRow = (k, on) => { const r = rowOf(k); if (!r) return; r.hidden = !on; const add = box.querySelector('[data-add="' + k + '"]'); if (add) add.hidden = on; if (!on && journey) { const s = shared.get(); Object.keys(s).forEach((key) => { if (key.indexOf(k + '.') === 0) delete s[key]; }); shared.set(s); } };
     $$('[data-add]').forEach((b) => b.addEventListener('click', () => { showRow(b.dataset.add, true); recalc(); }));
     $$('[data-remove]').forEach((b) => b.addEventListener('click', () => { showRow(b.dataset.remove, false); recalc(); }));
     const live = (el) => { for (let p = el; p && p !== box; p = p.parentElement) if (p.hidden) return false; return true; };
@@ -868,8 +873,8 @@
       wa();
     }
     const save = () => {
-      const s = shared.get(); $$('[data-share]').forEach((x) => { if (!live(x)) return; const val = x.dataset.t === 'chip' ? chipVal(x) : x.value; if (val !== null && val !== '') s[x.dataset.share] = val; else delete s[x.dataset.share]; }); shared.set(s);
-      const o = {}; $$('[data-k]').forEach((x) => { if (x.dataset.share) return; const val = x.dataset.t === 'chip' ? chipVal(x) : x.dataset.t === 'check' ? (x.checked ? '1' : '0') : x.value; if (val !== null && val !== '') o[x.dataset.k] = val; }); own.set(o);
+      if (journey) { const s = shared.get(); $$('[data-share]').forEach((x) => { if (!live(x)) return; const val = x.dataset.t === 'chip' ? chipVal(x) : x.value; if (val !== null && val !== '') s[x.dataset.share] = val; else delete s[x.dataset.share]; }); shared.set(s); }
+      const o = {}; $$('[data-k]').forEach((x) => { if (x.dataset.share && journey) return; const val = x.dataset.t === 'chip' ? chipVal(x) : x.dataset.t === 'check' ? (x.checked ? '1' : '0') : x.value; if (val !== null && val !== '') o[x.dataset.k] = val; }); own.set(o);
     };
     let tmr; const changed = (el) => {
       if (!startedT) { startedT = true; track('tool_started', {}); }
@@ -888,13 +893,14 @@
         const a = aEl ? C.parseNum(aEl.value).value : undefined; const L = C.tenureLimit({ kind: 'private', age: typeof a === 'number' ? a : undefined }); return L ? L.allowed : 0;
       }, recalc: () => { clearTimeout(tmr); recalc(); }, changed: () => save() }); }
     // ---- restore: shared details from the other calculators, then the planner's own ----
-    const sv = shared.get();
+    const sv = journey ? shared.get() : {};
     $$('[data-share]').forEach((x) => { const val = sv[x.dataset.share]; if (val === undefined || val === null || val === '') return; const m = /^buyers\.1\./.exec(x.dataset.share); if (m) showRow('buyers.1', true); if (x.dataset.t === 'chip') setChip(x, val); else x.value = x.dataset.t === 'money' && parseMoney(val) !== null ? fmtMoney(parseMoney(val)) : val; });
     if (sv.housingLoans === '1' || sv.housingLoans === '2') { /* a counted loan elsewhere: keep the safe default "still outstanding" */ }
     const ov = own.get();
-    $$('[data-k]').forEach((x) => { if (x.dataset.share) return; const val = ov[x.dataset.k]; if (val === undefined) return; if (x.dataset.t === 'chip') setChip(x, val); else if (x.dataset.t === 'check') x.checked = val === '1'; else x.value = x.dataset.t === 'money' && parseMoney(val) !== null ? fmtMoney(parseMoney(val)) : val; });
+    $$('[data-k]').forEach((x) => { if (x.dataset.share && journey) return; const val = ov[x.dataset.k]; if (val === undefined) return; if (x.dataset.t === 'chip') setChip(x, val); else if (x.dataset.t === 'check') x.checked = val === '1'; else x.value = x.dataset.t === 'money' && parseMoney(val) !== null ? fmtMoney(parseMoney(val)) : val; });
     // ---- the buyer's details from What can I afford? (tab-only, gw.hand.v1): applied once, when the Planner has just written them; after that the entries here are the buyer's own ----
     (function fromPlanner() {
+      if (!journey) return; // a standalone Timeline never picks up the Planner's figures
       const h = hand.get(); if (!h || h.v !== 1) return;
       carried = true; if (!h.fresh) return;
       const put = (k, val) => { const x = box.querySelector('[data-k="' + k + '"]'); if (!x || val === undefined || val === null) return; if (x.dataset.t === 'chip') setChip(x, String(val)); else if (x.dataset.t === 'money') x.value = val === '' ? '' : fmtMoney(+val); else x.value = String(val); };
@@ -907,6 +913,7 @@
       h.fresh = false; hand.set(h);
       save();
     })();
+    if (!journey) { const so = q('.pl-startover'); if (so) { const nb = document.createElement('button'); nb.type = 'button'; nb.className = 'pl-linkbtn'; nb.setAttribute('data-pl-new', ''); nb.textContent = 'New calculation'; so.insertBefore(nb, so.firstChild); nb.addEventListener('click', () => { own.del(); try { root.location.replace(root.location.pathname + root.location.search); } catch (e) { root.location.reload(); } }); } }
     if (root.location && String(root.location.hash) === '#company') { const eg0 = box.querySelector('[data-k="entity"]'); if (eg0) setChip(eg0, '1'); }
     syncOrder(chipVal(orderGroup) || '');
     // ---- the two screens: an ARIA tablist; the one not shown is not displayed (never removed), so every entry stays live ----
