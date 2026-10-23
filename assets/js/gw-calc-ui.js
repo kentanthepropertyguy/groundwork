@@ -60,15 +60,15 @@
   };
   // Tools work out a number from your own figures. Looking up what homes sold for (Property values & prices, Research, What can this
   // budget buy?) is listed under Research in the menu and on the homepage, so each feature has one home.
-  const ORDER = { buy: ['planner', 'stamp-duty', 'tdsr', 'msr', 'mortgage', 'payment-planner', 'progressive'], sell: ['sale-proceeds', 'ssd'], upgrade: ['hdb-upgrade'] };
-  const GROUPS = [['buy', 'Buying'], ['sell', 'Selling'], ['upgrade', 'Upgrading from HDB']];
+  const ORDER = { guided: ['planner', 'hdb-upgrade'], fin: ['tdsr', 'msr', 'mortgage'], cost: ['stamp-duty', 'payment-planner', 'progressive'], sell: ['sale-proceeds', 'ssd'] };
+  const GROUPS = [['fin', 'Financing'], ['cost', 'Purchase costs & payments'], ['sell', 'Selling']];
 
-  // The tools page: a compact directory. Plain names first, the term people know as a tag (r = path from /tools/, i.e. '').
-  function directoryHtml(o) {
-    o = o || {}; // o.exampleUp: a real example result from the planner, shown beside it (from the page builder)
-    const tile = (id) => { const t = TOOLS[id] || EXISTING[id]; return '<a class="gw-tl" href="' + t.path + '" data-tool="' + id + '">' + svg(t.icon || id) + '<span class="gw-tl-t"><b>' + esc(t.name) + '</b><em>' + esc(t.tag) + '</em></span><span class="gw-tl-s">' + esc(t.short) + '</span></a>'; };
-    return GROUPS.map((g) => '<section class="gw-tg" aria-labelledby="tg-' + g[0] + '"><h2 id="tg-' + g[0] + '">' + g[1] + '</h2><div class="gw-tls">' + ORDER[g[0]].map(tile).join('') + '</div>' +
-      (g[0] === 'upgrade' ? '<p class="gw-fine gw-tg-more">Want the complete process? <a href="../journey/#up" data-tool="upgrade-path">Upgrade from HDB in four steps: flat value, sale proceeds, budget, what it buys ›</a></p>' + (o.exampleUp || '') : '') + '</section>').join('');
+  // The tools page (mirrors tools/index.html, which is static): Guided planning (connected), then Quick calculators (each independent) in three groups.
+  function directoryHtml() {
+    const tile = (id, o) => { const t = TOOLS[id] || EXISTING[id]; o = o || {}; return '<a class="gw-tl" href="' + (o.href || t.path) + '" data-tool="' + (o.tool || id) + '">' + svg(t.icon || id) + '<span class="gw-tl-t"><b>' + esc(o.name || t.name) + '</b><em>' + esc(o.tag || t.tag) + '</em></span><span class="gw-tl-s">' + esc(o.short || t.short) + '</span></a>'; };
+    const full = tile('payment-planner', { href: 'payment-planner/#funding', tool: 'payment-planner-full', name: 'Full payment planning', tag: 'Dates and funding check', short: 'Every payment and when it falls, then check you can fund it from your cash, CPF and loan.' });
+    return '<section class="gw-tg gw-tg-top" aria-labelledby="tg-guided"><h2 id="tg-guided">Guided planning</h2><div class="gw-tls">' + ORDER.guided.map((i) => tile(i)).join('') + full + '</div></section>' +
+      '<section class="gw-tg gw-tg-top" aria-labelledby="tg-quick"><h2 id="tg-quick">Quick calculators</h2>' + GROUPS.map((g) => '<h3 id="tg-' + g[0] + '">' + esc(g[1]) + '</h3><div class="gw-tls">' + ORDER[g[0]].map((i) => tile(i)).join('') + '</div>').join('') + '</section>';
   }
 
   /* ---------------- fields (markup) ---------------- */
@@ -340,6 +340,13 @@
       const B = C.borrowers(list); return B.iwaa === null || B.bad.length ? null : ageUp(B.iwaa);
     };
     const store = { get() { try { return JSON.parse(root.sessionStorage.getItem(KEY) || '{}') || {}; } catch (e) { return {}; } }, set(o) { try { root.sessionStorage.setItem(KEY, JSON.stringify(o)); } catch (e) { /* storage blocked */ } } };
+    // Journey or standalone (Package 3). Opened from a journey (address ends ?j=1, set by the link; gw-nav.js) the calculator shares figures with the journey, as before.
+    // Opened any other way (Tools, search, a typed address) it is standalone: it starts fresh, takes nothing from another tool and gives nothing to one. Its own entries
+    // (gw.pro.<tool>.v1, this tab) come back only when this same page is refreshed or returned to. "New calculation" clears just this calculator.
+    const journey = /[?&]j=1(&|$)/.test(root.location.search);
+    const again = (() => { try { const n = root.performance.getEntriesByType('navigation')[0]; return !!n && (n.type === 'reload' || n.type === 'back_forward'); } catch (e) { return false; } })();
+    const OWNKEY = 'gw.pro.' + id + '.v1';
+    const own = { get() { try { return JSON.parse(root.sessionStorage.getItem(OWNKEY) || 'null'); } catch (e) { return null; } }, set(o) { try { root.sessionStorage.setItem(OWNKEY, JSON.stringify(o)); } catch (e) { /* storage blocked */ } }, remove() { try { root.sessionStorage.removeItem(OWNKEY); } catch (e) { /* storage blocked */ } } };
     // one shared parser (A5-02): an amount it can't read is never turned into another number
     const parseMoney = (s) => { const p = C.parseMoney(s); return p.value === undefined ? null : p.value; };
     const fmtMoney = (v) => (v === null ? '' : v.toLocaleString('en-US', { maximumFractionDigits: 2 }));
@@ -351,7 +358,7 @@
     $$('[data-t="chip"]').forEach((g) => $$('button', g).forEach((b) => b.addEventListener('click', () => { setChip(g, b.dataset.v); changed(g); })));
     // second buyer / borrower
     const rowOf = (k) => box.querySelector('[data-row="' + k + '"]');
-    const showRow = (k, on) => { const r = rowOf(k); if (!r) return; r.hidden = !on; const add = box.querySelector('[data-add="' + k + '"]'); if (add) add.hidden = on; if (!on) { $$('input', r).forEach((x) => { x.value = ''; }); const s = store.get(); Object.keys(s).forEach((key) => { if (key.indexOf(k + '.') === 0) delete s[key]; }); store.set(s); } };
+    const showRow = (k, on) => { const r = rowOf(k); if (!r) return; r.hidden = !on; const add = box.querySelector('[data-add="' + k + '"]'); if (add) add.hidden = on; if (!on) { $$('input', r).forEach((x) => { x.value = ''; }); if (journey) { const s = store.get(); Object.keys(s).forEach((key) => { if (key.indexOf(k + '.') === 0) delete s[key]; }); store.set(s); } } };
     $$('[data-add]').forEach((b) => b.addEventListener('click', () => { showRow(b.dataset.add, true); const f = rowOf(b.dataset.add).querySelector('input,button'); if (f) f.focus(); recalc(); }));
     $$('[data-remove]').forEach((b) => b.addEventListener('click', () => { showRow(b.dataset.remove, false); recalc(); }));
     // conditional fields: data-when="key:v1,v2"
@@ -416,7 +423,7 @@
       } catch (e) { return 0; }
     }
     const FN = { mortgage: 'mortgage', 'stamp-duty': 'stampDuty', ssd: 'ssd', 'sale-proceeds': 'saleProceeds', tdsr: 'tdsr', msr: 'msr', progressive: 'progressive' };
-    let last = null, lastSig = '', startedT = false, doneT = false;
+    let last = null, lastSig = '', startedT = false, doneT = false, afterCalc = () => {};
     // Sale proceeds -> Planner ("What can I buy next?"): the sale figures wait in this tab only (gw.sell.v1) until the Planner is opened from that button. Only what was entered goes: a blank loan or CPF refund
     // stays blank there (the Planner then asks for it, as it does for anyone). The cash and CPF are carried as the Planner's own "your own figures" ONLY when the Planner's usual estimate would give different
     // numbers (your own commission, legal fees, early-repayment penalty or a Seller's Stamp Duty). Otherwise the Planner works them out itself from the same engine, so the two pages cannot disagree.
@@ -449,7 +456,6 @@
         if (tenureFld.settle(applied)) { recalc(); return; }
         tenureFld.hint(applied);
       }
-      if (id === 'sale-proceeds') sellHandoff(v, r);
       if (r.ok || r.error) { out.innerHTML = RENDER[id](r, v); }
       else if (r.invalid && r.invalid.length) {
         // a value we can't use: say which and why, and show no result (A5-02, A5-06, A5-07, A5-22)
@@ -458,13 +464,14 @@
       } else { out.innerHTML = '<p class="gw-fine">Enter ' + (r.missing || []).map((m) => LABEL[m] || m).join(', ').replace(/, ([^,]*)$/, ' and $1') + ' to see the result.</p>'; }
       paintTenure(v, r);
       last = r.ok && !r.noTenure ? { v, r } : null; send.hidden = !last; pinRefresh(); // nothing to send when there is no loan to show (A2-08)
+      afterCalc();
       const sig = JSON.stringify(v); if (sig !== lastSig) { note.innerHTML = ''; lastSig = sig; } // a copied message stays until the details change
       if (last && !doneT) { doneT = true; track('tool_completed', { tool_name: 'calc-' + id }); }
     }
     let tmr; const changed = (el) => {
       if (!startedT) { startedT = true; track('tool_started', { tool_name: 'calc-' + id }); }
       // remember shared details for this tab
-      const s = store.get(), jointNl = id === 'progressive' && joint(s); $$('[data-share]').forEach((x) => { if (!live(x) || (jointNl && x.dataset.share === 'borrowers.0.age')) return; const val = x.dataset.t === 'chip' ? chipVal(x) : x.value; if (val !== null && val !== '') s[x.dataset.share] = val; else delete s[x.dataset.share]; }); store.set(s);
+      if (journey) { const s = store.get(), jointNl = id === 'progressive' && joint(s); $$('[data-share]').forEach((x) => { if (!live(x) || (jointNl && x.dataset.share === 'borrowers.0.age')) return; const val = x.dataset.t === 'chip' ? chipVal(x) : x.value; if (val !== null && val !== '') s[x.dataset.share] = val; else delete s[x.dataset.share]; }); store.set(s); }
       clearTimeout(tmr); tmr = setTimeout(recalc, 120);
     };
     // money fields: commas appear as you type, the same behaviour as the Payment Timeline (gw-money.js)
@@ -487,16 +494,54 @@
     // tab's figures, borrower 1's age is not that: fill in the weighted age from both borrowers' ages and incomes (after the MAS
     // haircuts, exactly as How much can I borrow? works it out), or leave the field empty when it can't be worked out.
     const nlAge = id === 'progressive' && joint(saved) ? jointAge(saved) : undefined;
-    $$('[data-share]').forEach((x) => {
+    if (journey) $$('[data-share]').forEach((x) => {
       if (nlAge !== undefined && x.dataset.share === 'borrowers.0.age') { if (nlAge !== null) { x.value = String(nlAge); used = true; } return; }
       const val = saved[x.dataset.share]; if (val === undefined || val === null || val === '') return;
       const m = /^(buyers|borrowers)\.1\./.exec(x.dataset.share); if (m) showRow(m[1] + '.1', true);
       if (x.dataset.t === 'chip') { if (val !== x.dataset.default) used = true; setChip(x, val); } else { x.value = x.dataset.t === 'money' && parseMoney(val) !== null ? fmtMoney(parseMoney(val)) : val; used = true; }
     });
-    const sv = box.querySelector('[data-saved]'); sv.hidden = !used;
-    box.querySelector('[data-clear]').addEventListener('click', () => {
+    // this calculator's own entries: every field, for a refresh or a return to this page (never for another tool)
+    const fieldVal = (x) => (x.dataset.t === 'chip' ? (chipVal(x) || '') : x.dataset.t === 'check' ? (x.checked ? '1' : '0') : x.value);
+    const saveOwn = () => { const o = {}; $$('[data-k]').forEach((x) => { o[x.dataset.k] = fieldVal(x); }); if (estimated) o.__est = 1; own.set(o); };
+    const dirty = () => $$('[data-k]').some((x) => { const t = x.dataset.t, d = x.dataset.default; if (t === 'chip') return (chipVal(x) || '') !== (d || ''); if (t === 'check') return (x.checked ? '1' : '0') !== (d === '1' ? '1' : '0'); if (t === 'date') return x.value !== (x.dataset.today ? todayIso : ''); return x.value !== (d !== undefined ? d : ''); });
+    const restoreOwn = (o) => {
+      $$('[data-k]').forEach((x) => {
+        const k = x.dataset.k; if (!Object.prototype.hasOwnProperty.call(o, k)) return; const val = o[k], t = x.dataset.t;
+        const m = /^(buyers|borrowers)\.1\./.exec(k); if (m && val !== '' && val !== x.dataset.default) showRow(m[1] + '.1', true);
+        if (t === 'chip') { if (val !== '') setChip(x, val); } else if (t === 'check') x.checked = val === '1'; else x.value = t === 'money' && parseMoney(val) !== null ? fmtMoney(parseMoney(val)) : val;
+      });
+      if (o.__est) { estimated = true; }
+    };
+    if (again) { const o = own.get(); if (o) restoreOwn(o); } else if (!journey) own.remove();
+    const resetFields = () => {
       $$('[data-k]').forEach((x) => { const d = x.dataset.default; if (x.dataset.t === 'chip') setChip(x, d); else if (x.dataset.t === 'check') x.checked = d === '1'; else if (x.dataset.t === 'date') x.value = x.dataset.today ? todayIso : ''; else x.value = d !== undefined ? d : ''; });
       ['buyers.1', 'borrowers.1'].forEach((k) => showRow(k, false));
+    };
+    const sv = box.querySelector('[data-saved]'); sv.hidden = !used;
+    if (!journey) {
+      // standalone: one plain action, "New calculation", for this calculator only
+      sv.innerHTML = '<button type="button" class="gw-link" data-new>New calculation</button> <span>Clears this calculator only.</span>'; sv.hidden = !dirty();
+      sv.querySelector('[data-new]').addEventListener('click', () => { resetFields(); own.remove(); estimated = false; const ex = box.querySelector('[data-est]'); if (ex) ex.hidden = true; if (bh) { bh.hidden = true; bh.textContent = ''; } sv.hidden = true; reuseOffer(); recalc(); });
+    }
+    // explicit, optional reuse: only when this tab's journey holds figures this calculator asks for, and only into empty fields
+    const reuseNames = { age: 'age', fixed: 'income', variable: 'income', rental: 'income', buyPrice: 'price', sellPrice: 'price', ssdPrice: 'price', loan: 'loan', outstandingLoan: 'loan', debts: 'debts', housingLoans: 'home loans', cpfOa: 'CPF', cpfPrincipal: 'CPF', cpfInterest: 'CPF', cash: 'cash', res: 'residency', owned: 'homes owned', homeType: 'home type' };
+    const reuseVal = (x) => (nlAge !== undefined && x.dataset.share === 'borrowers.0.age' ? (nlAge === null ? undefined : String(nlAge)) : saved[x.dataset.share]);
+    const reusable = () => (journey ? [] : $$('[data-share]').filter((x) => { const v = reuseVal(x); if (v === undefined || v === null || v === '') return false; return x.dataset.t === 'chip' ? (chipVal(x) || '') === (x.dataset.default || '') && v !== (x.dataset.default || '') : x.value === '' || x.value === x.dataset.default; }));
+    const reuseBox = document.createElement('p'); reuseBox.className = 'gw-fine gw-reuse'; reuseBox.hidden = true; box.querySelector('.gw-calc-in').insertAdjacentElement('afterbegin', reuseBox);
+    function reuseOffer() {
+      const list = reusable(); if (!list.length) { reuseBox.hidden = true; return; }
+      const names = []; list.forEach((x) => { const n = reuseNames[x.dataset.share.replace(/^(?:buyers|borrowers)\.\d\./, '')]; if (n && names.indexOf(n) < 0) names.push(n); });
+      reuseBox.innerHTML = '<button type="button" class="gw-link" data-reuse>Reuse figures from your journey</button>' + (names.length ? ' <span>(' + esc(names.slice(0, 4).join(', ')) + ')</span>' : ''); reuseBox.hidden = false;
+      reuseBox.querySelector('[data-reuse]').addEventListener('click', () => {
+        reusable().forEach((x) => { const m = /^(buyers|borrowers)\.1\./.exec(x.dataset.share); if (m) showRow(m[1] + '.1', true); const v = reuseVal(x); if (x.dataset.t === 'chip') setChip(x, v); else x.value = x.dataset.t === 'money' && parseMoney(v) !== null ? fmtMoney(parseMoney(v)) : v; });
+        reuseBox.hidden = true; changed(); recalc();
+      });
+    }
+    reuseOffer();
+    afterCalc = () => { saveOwn(); if (!journey) { const d = dirty(); sv.hidden = !d; if (d) reuseBox.hidden = true; } };
+    const clearAll = box.querySelector('[data-clear]');   // journey mode only: standalone shows "New calculation" instead
+    if (clearAll) clearAll.addEventListener('click', () => {
+      resetFields();
       // A6-07: every figure this tab holds for the journey goes, not just the calculators' own (gw.fin.v1, gw.ctx.v1,
       // kpt.hdb.input, kpt.buy.input, kpt.handoff and any other gw.* / kpt.* key)
       // V1-03: which path the visitor is on and what they own stay (no figure), so the step strip stays, as GWN.clearJourney() does
@@ -535,6 +580,8 @@
     const applyPreset = () => { const P = (PRESETS[id] || {})[(root.location.hash || '').replace('#', '')]; if (!P) return false; Object.keys(P).forEach((k) => { const g = box.querySelector('[data-k="' + k + '"]'); if (g && g.dataset.t === 'chip') setChip(g, P[k]); }); return true; };
     if (applyPreset()) { /* the link's choice wins over a choice remembered from another calculator */ }
     root.addEventListener('hashchange', () => { if (applyPreset()) recalc(); });
+    // Sale proceeds -> Planner: the sale is handed over only when the visitor taps "What can I buy next?" (never left waiting in the tab)
+    if (id === 'sale-proceeds') { const hand = (e) => { const a = e.target && e.target.closest ? e.target.closest('a[data-gw-go="planner-sell"]') : null; if (a && last) sellHandoff(last.v, last.r); }; box.addEventListener('click', hand, true); box.addEventListener('auxclick', hand, true); }
     // ---- Sale proceeds: the resales this tab looked up for the visitor's block, beside the price ----
     const bh = box.querySelector('[data-gw-blockhint]');
     if (bh) { try { const c = root.GWJ && root.GWJ.ctx ? root.GWJ.ctx.get() : {}, H = c.hdb; if (H && H.lo !== undefined && H.hi !== undefined && H.block) { bh.textContent = 'Blk ' + H.block + ', ' + String(H.flatType || '').toLowerCase().replace(/^(\d) room$/, '$1-room') + ': ' + H.n + ' recent resales at ' + $(H.lo) + ' – ' + $(H.hi) + '. '; bh.hidden = false; } } catch (e) { /* no context */ } }

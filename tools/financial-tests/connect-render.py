@@ -1,6 +1,6 @@
 import json, os, pathlib, re, socket, subprocess, sys, time
 from playwright.sync_api import sync_playwright
-"""Package 2 browser checks: the figures a buyer types are reused between tools, a sale carries from Sale proceeds into the Planner without being counted twice,
+"""Package 2 and 3 browser checks: the figures a buyer types are reused between tools, a sale carries from Sale proceeds into the Planner without being counted twice,
 and nothing is overwritten, left in the address, or kept after "Clear all my figures". Run from the site folder:  python3 tools/financial-tests/connect-render.py"""
 SITE = pathlib.Path(__file__).resolve().parents[2]
 PNG = bytes.fromhex('89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d49444154789c6360000002000001e221bc330000000049454e44ae426082')
@@ -38,8 +38,13 @@ def sale_page(pg, kind='hdb', price='800,000', loan='200,000', cpfp='150,000', c
     pg.wait_for_timeout(500)
 def tool_cash(pg):
     h = pg.inner_text('[data-out] .gw-res-h'); return num(pg.inner_text('[data-out] .gw-res-h b')), h
+def watch(pg):
+    # copy what is waiting in the tab at the moment "What can I buy next?" is tapped (the Planner removes it once used)
+    pg.evaluate("()=>document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('a[data-gw-go=\"planner-sell\"]'))sessionStorage.setItem('t.sell',sessionStorage.getItem('gw.sell.v1')||'')},false)")
+def sell_h(pg):
+    v = pg.evaluate("()=>sessionStorage.getItem('t.sell')"); return json.loads(v) if v else None
 def arrive(pg):
-    pg.click('[data-out] a[data-gw-go="planner-sell"]'); pg.wait_for_selector('[data-pa]'); settle(pg)
+    watch(pg); pg.click('[data-out] a[data-gw-go="planner-sell"]'); pg.wait_for_selector('[data-pa]'); settle(pg)
 def planner_sale_numbers(pg):
     # the sale as the buyer sees it counted: "Your sale adds about $X in cash and $Y in CPF" (in the answer once the sale counts)
     t = pg.inner_text('[data-pa]'); m = re.search(r'sale adds about \$([\d,]+) in cash(?: and \$([\d,]+) in CPF)?', t)
@@ -59,9 +64,9 @@ try:
         check(vn + ': Sale proceeds gives "What can I buy next?" as its main next step', pg.query_selector('[data-out] a.gw-btn.pri[data-gw-go="planner-sell"]') is not None)
         nxt = pg.inner_text('[data-out] .gw-next')
         check(vn + ': the specialist tools stay offered beside it (HDB upgrade planner, new launch)', 'HDB upgrade planner' in nxt and 'new launch' in nxt.lower(), nxt)
-        h = store(pg, 'gw.sell.v1')
-        check(vn + ': hand-over waits in this tab only, with the entered figures and no override when the Planner would agree', h and h['type'] == 'hdb' and h['price'] == 800000 and h['loan'] == 200000 and h['cpfRefund'] == 170000 and 'overrideCash' not in h, h)
-        arrive(pg)
+        check(vn + ': nothing is left waiting in the tab until the button is tapped', store(pg, 'gw.sell.v1') is None)
+        arrive(pg); h = sell_h(pg)
+        check(vn + ': hand-over is made when the button is tapped, with the entered figures and no override when the Planner would agree', h and h['type'] == 'hdb' and h['price'] == 800000 and h['loan'] == 200000 and h['cpfRefund'] == 170000 and 'overrideCash' not in h, h)
         check(vn + ': arrival address carries no figures (hash cleared)', pg.url.rstrip('/').endswith('/tools/planner') and '#' not in pg.url, pg.url)
         check(vn + ': hand-over is used once and removed', store(pg, 'gw.sell.v1') is None)
         check(vn + ': "Do you own" = Yes, one; "Sell it"; "Sell first" are set by the button', pg.get_attribute('.pa-chips[data-k="owns"] [data-v="one"]', 'aria-pressed') == 'true' and pg.get_attribute('.pa-chips[data-k="home"] [data-v="sell"]', 'aria-pressed') == 'true' and pg.get_attribute('.pa-chips[data-k="order"] [data-v="sell"]', 'aria-pressed') == 'true')
@@ -86,26 +91,31 @@ try:
         # ---- shared figures: typed once, reused
         s = store(pg, 'gw.fin.v1') or {}
         check(vn + ': age, income, cash and CPF are shared (tab only)', s.get('borrowers.0.age') == '40' and s.get('borrowers.0.fixed') == '21,000' and s.get('cash') == '100,000' and s.get('cpfOa') == '200,000', s)
-        check(vn + ': sale price, loan and home type are shared; the stored share never holds an address or a name', s.get('sellPrice') == '800,000' and s.get('outstandingLoan') == '200,000' and s.get('cpfPrincipal') == '150,000')
+        check(vn + ': the shared store holds figures only, never an address or a name', '@' not in json.dumps(s) and 'address' not in json.dumps(s).lower())
+        # inside the journey (marked arrival) the figures carry; opened from Tools they do not
+        pg.goto(B + '/tools/payment-planner/?j=1'); pg.wait_for_selector('[data-k="cash"]', state='attached'); pg.wait_for_timeout(500)
+        check(vn + ': in a journey the Payment Timeline opens with the same cash and CPF', pg.input_value('[data-k="cash"]') == '100,000' and pg.input_value('[data-k="cpf"]') == '200,000', (pg.input_value('[data-k="cash"]'), pg.input_value('[data-k="cpf"]')))
         pg.goto(B + '/tools/payment-planner/'); pg.wait_for_selector('[data-k="cash"]', state='attached'); pg.wait_for_timeout(500)
-        check(vn + ': the Payment Timeline opens with the same cash and CPF', pg.input_value('[data-k="cash"]') == '100,000' and pg.input_value('[data-k="cpf"]') == '200,000', (pg.input_value('[data-k="cash"]'), pg.input_value('[data-k="cpf"]')))
+        check(vn + ': opened from Tools the Payment Timeline starts blank', pg.input_value('[data-k="cash"]') == '' and pg.input_value('[data-k="cpf"]') == '', (pg.input_value('[data-k="cash"]'), pg.input_value('[data-k="cpf"]')))
+        pg.goto(B + '/tools/tdsr/?j=1'); pg.wait_for_selector('[data-share="borrowers.0.age"]', state='attached'); pg.wait_for_timeout(500)
+        check(vn + ': in a journey How much can I borrow? opens with the same age and income', pg.input_value('[data-share="borrowers.0.age"]') == '40' and pg.input_value('[data-share="borrowers.0.fixed"]') == '21,000', pg.input_value('[data-share="borrowers.0.age"]'))
         pg.goto(B + '/tools/tdsr/'); pg.wait_for_selector('[data-share="borrowers.0.age"]', state='attached'); pg.wait_for_timeout(500)
-        check(vn + ': How much can I borrow? opens with the same age and income', pg.input_value('[data-share="borrowers.0.age"]') == '40' and pg.input_value('[data-share="borrowers.0.fixed"]') == '21,000', pg.input_value('[data-share="borrowers.0.age"]'))
+        check(vn + ': opened from Tools How much can I borrow? starts blank, with an optional reuse line', pg.input_value('[data-share="borrowers.0.age"]') == '' and pg.input_value('[data-share="borrowers.0.fixed"]') == '' and pg.is_visible('[data-reuse]'), pg.input_value('[data-share="borrowers.0.age"]'))
         pg.goto(B + '/tools/hdb-upgrade/'); pg.wait_for_timeout(400)
         check(vn + ': the HDB upgrade planner is still reachable and loads', pg.query_selector('main') is not None)
         ctx.close()
         # ---- 2. custom costs and Seller's Stamp Duty: the Planner takes the tool's own cash and CPF, so the two always agree
         ctx, pg, errs = page(br, kw); sale_page(pg, more={'commissionPct': '1', 'legal': '5,000'})
-        cash2, _ = tool_cash(pg); h = store(pg, 'gw.sell.v1')
+        cash2, _ = tool_cash(pg)
+        arrive(pg); h = sell_h(pg); fill_person(pg)
         check(vn + ': own commission and legal fees travel as the sale\'s own cash and CPF', h and h.get('overrideCash') == cash2 and h.get('overrideCpf') == 170000, (h, cash2))
-        arrive(pg); fill_person(pg)
         check(vn + ': Planner tie-out with own costs', planner_sale_numbers(pg) == (cash2, 170000), (planner_sale_numbers(pg), cash2))
         ctx.close()
         ctx, pg, errs = page(br, kw)
         sale_page(pg, kind='private', price='1,600,000', loan='500,000', cpfp='300,000', cpfi='60,000', dates=('2024-06-01', time.strftime('%Y-%m-%d')))
-        cash3, head3 = tool_cash(pg); h = store(pg, 'gw.sell.v1')
+        cash3, head3 = tool_cash(pg)
+        arrive(pg); h = sell_h(pg); fill_person(pg)
         check(vn + ': a private home sold inside the SSD period carries the SSD-inclusive figures', h and h['type'] == 'private' and h.get('overrideCash') == cash3 and 'held' not in h, (h, cash3, head3))
-        arrive(pg); fill_person(pg)
         check(vn + ': Planner tie-out for a private sale with SSD', planner_sale_numbers(pg) == (cash3, 360000), (planner_sale_numbers(pg), cash3))
         ctx.close()
         # ---- 3. never overwrite what the buyer typed; only the sale figures change
@@ -141,7 +151,7 @@ try:
         check(vn + ': the Tools directory still lists every specialist tool', not miss, miss)
         ctx.close()
         ctx, pg, errs = page(br, kw); pg.goto(B + '/research/map/'); pg.wait_for_timeout(800)
-        check(vn + ': the Map is still its own page, and Research is the section marked', pg.eval_on_selector_all('.gw-links a[aria-current]', 'e=>e.map(x=>x.textContent.trim())') == ['Research'])
+        check(vn + ': the Map is still its own page, and Map is the section marked', pg.eval_on_selector_all('.gw-links a[aria-current]', 'e=>e.map(x=>x.textContent.trim())') == ['Map'])
         check(vn + ': no script errors on the Map page', not [e for e in errs if 'Tile' not in e], errs)
         ctx.close()
     br.close()
