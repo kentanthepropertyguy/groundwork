@@ -79,12 +79,25 @@
     out.html = nowTxt + (shortCash > 0
       ? 'Your sale would not cover its loan and costs, so you would add about ' + b($(shortCash)) + ' of your own cash.'
       : 'Your sale adds about ' + b($(s.cash)) + ' in cash' + (s.cpf > 0 ? ' and ' + b($(s.cpf)) + ' in CPF' : '') + ', but only once it completes.');
-    // the first payments (option fee, exercise, stamp duty) fall due soon after signing; if they exceed what is in hand, the sale must complete first. Labelled as a projection.
+    // the first payments (option fee, exercise payment, stamp duty) fall due soon after signing and are paid in CASH: CPF cannot pay an option fee, cannot reimburse a payment already made to the seller,
+    // and is released only at completion. If they exceed the cash in hand, the sale must complete first. Labelled as a projection.
     const due = a.tl && a.tl.events ? a.tl.events.filter((e) => e.type === 'pay' && /^(option|exercise|bsd)$/.test(e.id)) : [];
     const early = due.reduce((t, e) => t + (e.amount || 0), 0);
-    if (due.length && early > cashNow + cpfNow + 0.5) out.warning = 'Projected: the option fee, exercise payment and stamp duty come to ' + b($(r100(early))) + ', more than the ' + b($(cashNow + cpfNow)) + ' you have now. If they fall due before your sale completes, you would be about ' + b($(r100(early - cashNow - cpfNow))) + ' short at that point.';
+    if (due.length && early > cashNow + 0.5) out.warning = 'Projected: the option fee, exercise payment and stamp duty come to ' + b($(r100(early))) + ' and are paid in cash (CPF is used only at completion), more than the ' + b($(cashNow)) + ' in cash you have now. If they fall due before your sale completes, you would be about ' + b($(r100(early - cashNow))) + ' short at that point.';
     return out;
   }
+
+  // A valuation the buyer entered for THIS price (a completed home only). Below the price: the loan, the minimum cash and the CPF are on the valuation and the difference is
+  // cash. At or above the price: nothing changes for the loan (the lower of the two is the price), except that stamp duty is on the higher. One sentence; the working is in the breakdown.
+  function valuationOf(a) {
+    if (!a || a.valuation === null || a.valuation === undefined) return null;
+    const cov = a.cov || 0, V = a.valuation;
+    const html = cov > 0.5
+      ? 'The valuation of ' + b($m(V)) + ' is ' + b($(r100(cov))) + ' below the price. That part is paid in cash, and the loan is worked on the valuation.'
+      : (a.dutyBase > a.P + 0.5 ? 'The valuation of ' + b($m(V)) + ' is above the price: the loan is worked on the price, stamp duty on the valuation.' : 'The valuation of ' + b($m(V)) + ' is not below the price, so it changes nothing here.');
+    return { value: V, cov: cov, base: a.base, html: html };
+  }
+  const ELIGIBILITY_VAL = { label: ELIGIBILITY.label, short: ELIGIBILITY.short, text: 'Estimated from MAS lending rules and the valuation you entered. A bank’s own assessment and your CPF usage limits are not checked, so this is not a confirmation that you qualify.' };
 
   // The view of one result. `o`: { otpEntered: the buyer typed an option date, twoBuyers }.
   function build(res, o) {
@@ -100,7 +113,7 @@
       v.headline = $(budget); v.answer = budget;
       v.lead = LIMIT_TXT[res.limitedBy] || LIMIT_TXT.funds;
       v.supports = [
-        a ? { k: 'Monthly mortgage', v: $(a.monthly), s: 'Over ' + plural(res.years) + ' at ' + rateTxt(res) } : null,
+        a ? { k: 'Monthly mortgage', v: $(a.monthly), s: plural(res.years) + ' at ' + rateTxt(res) } : null,
         cap ? { k: 'Borrowing capacity', v: $s(cap), s: 'The most your income supports' } : null,
       ].filter(Boolean);
       return v;
@@ -108,25 +121,29 @@
     // a price being judged: ONE verdict, the money it needs, and the cash part that CPF cannot pay
     const P = res.price, zone = res.zone, need = a.upfront, haveT = a.have, minCash = a.cashOnly;
     v.kicker = 'At ' + $m(P);
-    const needLine = 'You need ' + b($(need)) + ' in cash and CPF, at least ' + b($(minCash)) + ' of it in cash' + (v.sale ? '.' : ', and have ' + b($(haveT)) + '.');
+    // the cash and CPF the purchase needs is a figure tile (what is needed, the cash-only part, what you have), not a sentence
+    const needTile = { k: 'Cash and CPF needed', v: $(need), s: 'At least ' + $(minCash) + ' in cash' + (v.sale ? '' : ' · You have ' + $(haveT)) };
     v.need = { total: need, minCash: minCash, have: haveT, shortCash: a.cashShort > 0.5 ? a.cashShort : 0 };
+    v.valuation = valuationOf(a); if (v.valuation) v.eligibility = ELIGIBILITY_VAL;
+    const valTxt = v.valuation ? ' ' + v.valuation.html : '';
     if (zone === 'comfortable' || zone === 'tight') {
       v.tone = zone === 'tight' ? 'warn' : 'ok'; v.headline = zone === 'tight' ? 'Within your budget, but tight' : 'Within your budget'; v.answer = null;
-      v.lead = (zone === 'tight' ? 'Only ' + b($(r100(a.spare))) + ' of cash would be left after buying. ' : (a.spare >= 1000 ? b($(r100(a.spare))) + ' of your cash would stay in hand after buying. ' : 'It uses almost all of your cash and CPF. ')) + needLine;
+      v.lead = (zone === 'tight' ? 'Only ' + b($(r100(a.spare))) + ' of cash would be left after buying.' : (a.spare >= 1000 ? b($(r100(a.spare))) + ' of your cash would stay in hand after buying.' : 'It uses almost all of your cash and CPF.')) + valTxt;
     } else if (a.gap > 0.5) {
       v.tone = 'over'; v.answer = r100(a.gap); v.headline = $(r100(a.gap)) + ' short'; v.shortfall = r100(a.gap);
-      v.lead = needLine + (v.need.shortCash ? ' ' + b($(r100(a.cashShort))) + ' of the shortfall is cash, which CPF cannot cover.' : '') + ' Your maximum is ' + b($(budget)) + '.';
+      v.lead = 'Your cash and CPF are not enough for this price.' + (v.need.shortCash ? ' ' + b($(r100(a.cashShort))) + ' of the shortfall is cash, which CPF cannot cover.' : '') + valTxt + ' Your maximum is ' + b($(budget)) + '.';
     } else {
       // the price is covered in total, but a dated payment is not: said as a projection, never as a shortfall today
       v.tone = 'over'; v.answer = r100(a.peak || (a.firstAmt || 0)); v.headline = 'Projected shortfall'; v.projected = true;
-      v.lead = 'Your cash and CPF cover the price, but not every payment as it falls due' + (v.dates.first ? ': from ' + b(day(v.dates.first.date)) + ' you are projected to be ' + b($(r100(v.dates.first.amount))) + ' short (' + esc(v.dates.first.cause) + ')' : '') + '. Your maximum is ' + b($(budget)) + '.';
+      v.lead = 'Your cash and CPF cover the price, but not every payment on time' + (v.dates.first ? '. From ' + b(day(v.dates.first.date)) + ' you are projected ' + b($(r100(v.dates.first.amount))) + ' short (' + esc(v.dates.first.cause) + ')' : '') + '.' + valTxt + ' Your maximum is ' + b($(budget)) + '.';
     }
     v.supports = [
-      { k: 'Bank loan', v: $(a.loan), s: (a.limit === 'choice' ? 'The loan you chose' : a.limit === 'income' ? 'Limited by your income' : pc(a.ltv) + ' of the price') + (cap ? ' · you can borrow up to ' + $s(cap) : '') },
-      { k: 'Monthly mortgage', v: $(a.monthly), s: 'Over ' + plural(res.years) + ' at ' + rateTxt(res) + (a.monthlyPct ? ' · ' + pc(a.monthlyPct) + ' of your income' : '') },
+      needTile,
+      { k: 'Bank loan', v: $(a.loan), s: (a.limit === 'choice' ? 'The loan you chose' : a.limit === 'income' ? 'Limited by your income' : pc(a.ltv) + (a.cov > 0.5 ? ' of the valuation' : ' of the price')) + (cap ? ' · Can borrow up to ' + $s(cap) : '') },
+      { k: 'Monthly mortgage', v: $(a.monthly), s: plural(res.years) + ' at ' + rateTxt(res) + (a.monthlyPct ? ' · ' + pc(a.monthlyPct) + ' of your income' : '') },
     ];
     return v;
   }
 
-  return { build: build, datesOf: datesOf, saleOf: saleOf, LIMIT_TXT: LIMIT_TXT, ELIGIBILITY: ELIGIBILITY, fmt: { $: $, $s: $s, $m: $m, day: day } };
+  return { build: build, datesOf: datesOf, saleOf: saleOf, valuationOf: valuationOf, LIMIT_TXT: LIMIT_TXT, ELIGIBILITY: ELIGIBILITY, fmt: { $: $, $s: $s, $m: $m, day: day } };
 });

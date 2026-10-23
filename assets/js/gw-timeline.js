@@ -84,7 +84,7 @@
     if (entity && kind === 'ec') bad.push({ field: 'kind', text: 'A company or other entity can buy a new launch or a completed private home here. An EC is sold only to eligible households, so it is not planned for a company.' });
     if (entity && (i.order || 'none') !== 'none') bad.push({ field: 'order', text: 'A company purchase is planned with no home to sell.' });
     const otp = undated ? D(UNDATED_REF) : D(i.otp); if (!otp) bad.push({ field: 'otp', text: 'Option date must be a valid date (YYYY-MM-DD).' });
-    ['price', 'cash', 'cpf', 'saveMo', 'cpfMo'].forEach((k) => { if (num(i[k]) !== null && (i[k] < 0 || i[k] > C.LIMITS.money.max)) bad.push({ field: k, text: i[k] < 0 ? 'Amounts can’t be negative.' : C.LIMITS.money.text }); });
+    ['price', 'cash', 'cpf', 'saveMo', 'cpfMo', 'valuation'].forEach((k) => { if (num(i[k]) !== null && (i[k] < 0 || i[k] > C.LIMITS.money.max)) bad.push({ field: k, text: i[k] < 0 ? 'Amounts can’t be negative.' : C.LIMITS.money.text }); });
     if (num(i.age) !== null && (i.age < C.LIMITS.age.min || i.age > C.LIMITS.age.max)) bad.push({ field: 'age', text: C.LIMITS.age.text });
     if (num(i.ratePct) !== null && (i.ratePct < C.LIMITS.ratePct.min || i.ratePct > C.LIMITS.ratePct.max)) bad.push({ field: 'ratePct', text: C.LIMITS.ratePct.text });
     if (num(i.years) !== null && (i.years < C.LIMITS.years.min || i.years > C.LIMITS.years.max)) bad.push({ field: 'years', text: C.LIMITS.years.text });
@@ -137,12 +137,18 @@
     if (order === 'sell' && removes) assumptions.push({ id: 'sold-ownership', text: 'Sold first: the flat is no longer owned when the new home is bought, so it is not counted for ABSD.' });
 
     // --- the stage split and duty come from the live engine, unchanged ---
-    const prog = C.progressive({ price: P, age: entity ? undefined : i.age, years: years0, ratePct: num(i.ratePct) === null ? undefined : i.ratePct, loans, cpf: undefined, kind: kind === 'ec' ? 'ec' : 'private', buyers, loanCap: loanCapIn, entity });
+    const prog = C.progressive({ price: P, age: entity ? undefined : i.age, years: years0, ratePct: num(i.ratePct) === null ? undefined : i.ratePct, loans, cpf: undefined, kind: kind === 'ec' ? 'ec' : 'private', buyers, loanCap: loanCapIn, entity, valuation: kind === 'completed' && pos(i.valuation) ? i.valuation : undefined });
     if (!prog.ok) return prog;
     const years = prog.years;
     const duty = prog.duty; if (!duty.ok) return duty;
     const rate = prog.rate, ltvRow = { ltv: prog.ltv, minCash: prog.minCash, lower: prog.lower, lowerWhy: prog.lowerWhy, loans, flatLoan, basis: loanBasis, endAge: R.bankLtv.endAge, special: unverifiedExcl ? { state: flatLoan, accepted: accepted, ifAccepted: (function () { const a = C.progressive({ price: P, age: i.age, years: years0, ratePct: num(i.ratePct) === null ? undefined : i.ratePct, loans: Math.max(0, loans - (accepted ? 0 : 1)), kind: kind === 'ec' ? 'ec' : 'private', buyers, loanCap: loanCapIn }); return a.ok ? { ltv: a.ltv, minCash: a.minCash, loanMax: a.loanMax, lower: a.lower } : null; })() } : null, capped: prog.loanCapped, ruleLoanMax: prog.ruleLoanMax };
-    const loanMax = prog.loanMax, cashMin = prog.cashMin;
+    const loanMax = prog.loanMax, cashMin = prog.cashMin, cov = prog.cov || 0;
+    // A valuation below the price (a completed home): the loan, the minimum cash and the CPF are on the valuation; the part above it is cash, due at completion (R.valuation).
+    if (prog.valuation !== null && prog.valuation !== undefined) {
+      if (cov > 0) assumptions.push({ id: 'valuation', text: 'Valuation ' + Math.round(prog.valuation) + ' is ' + Math.round(cov) + ' below the price: the loan limit, the minimum cash and the CPF you can use are worked on the valuation, and the ' + Math.round(cov) + ' above it is paid in cash at completion (CPF and the loan cannot cover it).' });
+      else if (prog.dutyBase > P) assumptions.push({ id: 'valuation-high', text: 'Valuation ' + Math.round(prog.valuation) + ' is above the price: the loan is worked on the price (the lower), and stamp duty on the valuation (the higher of the two, IRAS).' });
+      else assumptions.push({ id: 'valuation-equal', text: 'Valuation ' + Math.round(prog.valuation) + ' is not below the price, so the loan, the minimum cash and the CPF are worked on the price.' });
+    }
 
     // --- events: obligations (rule), developer dates (developer), conventions (estimate), assumptions (assumption) ---
     const ev = [];
@@ -152,15 +158,15 @@
     let dutyDate;
     if (kind === 'completed') {
       const K = CONVENTIONS.completed; const exD = addDays(otp, K.exerciseDays); dutyDate = addDays(exD, K.dutyDays); const compD = D(dates.completion) || addDays(otp, K.completionDays);
-      // the live engine's funding order: booking (option) fee always cash → minimum cash → cash or CPF → bank
-      const optAmt = P * K.optionPct, exAmt = P * K.exercisePct, rest = P - optAmt - exAmt;
-      let cashLeft = Math.max(0, cashMin - optAmt);
-      const exCash = Math.min(exAmt, cashLeft); cashLeft -= exCash;
-      pay({ id: 'option', date: otp, label: 'Option fee', pct: K.optionPct, amount: optAmt, cash: optAmt, confidence: 'estimate', source: 'Planning convention: 1% option fee, cash (D5). Your option sets the actual amount.' });
-      pay({ id: 'exercise', date: exD, label: 'Exercise the option', pct: K.exercisePct, amount: exAmt, cash: exCash, flex: exAmt - exCash, confidence: 'estimate', source: 'Planning convention: 4% on exercise within 14 days (D5). Your option sets the actual terms.' });
+      // The deposit is paid to the seller before completion, in cash: an option fee cannot be paid with CPF, CPF cannot reimburse money already paid to the seller out of your own funds, and CPF is released
+      // only at completion, through the lawyers, after the cash part is paid (CPF Housing Scheme T&C Part B 1(b)(i) and (vi), Part C 3; checked 24 Oct 2026). The cash already paid is credited against the
+      // cash-only part of the completion balance (the minimum cash and any cash over valuation), so nothing is counted twice.
+      const optAmt = P * K.optionPct, exAmt = P * K.exercisePct, rest = P - optAmt - exAmt, cashPaid = optAmt + exAmt;
+      pay({ id: 'option', date: otp, label: 'Option fee', pct: K.optionPct, amount: optAmt, cash: optAmt, confidence: 'estimate', source: 'Planning convention: 1% option fee, cash (D5). CPF cannot pay an option fee. Your option sets the actual amount.' });
+      pay({ id: 'exercise', date: exD, label: 'Exercise the option', pct: K.exercisePct, amount: exAmt, cash: exAmt, confidence: 'estimate', source: 'Planning convention: 4% on exercise within 14 days, cash (D5). CPF is released only at completion and cannot reimburse a payment already made to the seller. Your option sets the actual terms.' });
       pay({ id: 'bsd', date: dutyDate, label: 'Buyer’s stamp duty (BSD)', amount: duty.bsd, cash: duty.bsd, confidence: 'rule', source: 'IRAS: within 14 days of exercising; paid in cash first, CPF may reimburse later.' });
       if (duty.absd > 0) pay({ id: 'absd', date: dutyDate, label: 'ABSD ' + Math.round(duty.absdRate * 100) + '%', amount: duty.absd, cash: duty.absd, confidence: 'rule', source: 'IRAS: within 14 days of exercising; paid in cash first. Any refund is conditional.' });
-      const compCash = Math.min(cashLeft, rest - loanMax); const compFlex = rest - loanMax - compCash;
+      const compCash = Math.min(Math.max(0, cashMin + cov - cashPaid), rest - loanMax); const compFlex = rest - loanMax - compCash;   // cash-only (minimum cash + cash over valuation) less the cash already paid
       pay({ id: 'completion', date: compD, label: 'Completion', pct: 1 - K.optionPct - K.exercisePct, amount: rest, cash: compCash, flex: compFlex, bank: loanMax, confidence: dates.completion ? 'developer' : 'estimate', source: dates.completion ? 'Completion date as supplied.' : 'Planning convention: completion 12 weeks after the option (D5). Your S&P sets the actual date.' });
       lastDate = compD;
     } else {
@@ -260,7 +266,7 @@
     const headline = { peak: round2(peak), peakAt: peakAt && iso(peakAt), peakCause, firstGap: firstGap && iso(firstGap), coveredOn: uncoveredEnd > 0 ? null : (coveredOn && iso(coveredOn)), coveredBy: uncoveredEnd > 0 ? null : coveredBy, uncoveredEnd };
     const out = {
       ok: true, version: VERSION, kind, order, entity, undated, price: P, otp: iso(otp), saleDate: saleDate && iso(saleDate), keysDate: iso(keysDate), horizonMonths: horizon,
-      loan: Object.assign({}, ltvRow, { loanMax, cashMin, cpfOrCash: prog.cpfOrCash, years, ratePct: rate * 100, stressRatePct: R.stressRate * 100, tenureCapped: prog.tenureCapped, tenureCappedBy: prog.tenureCappedBy, tenureAsked: prog.tenureAsked, tenureAllowed: prog.tenureAllowed }),
+      loan: Object.assign({}, ltvRow, { loanMax, cashMin, cpfOrCash: prog.cpfOrCash, valuation: prog.valuation === undefined ? null : prog.valuation, base: prog.base, cov, years, ratePct: rate * 100, stressRatePct: R.stressRate * 100, tenureCapped: prog.tenureCapped, tenureCappedBy: prog.tenureCappedBy, tenureAsked: prog.tenureAsked, tenureAllowed: prog.tenureAllowed }),
       instalment: { final: round2(prog.finalMonthly), finalStress: round2(C.instal(loanMax, Math.max(R.stressRate, rate), years)), basis: 'Instalment at the quoted rate once the loan is fully drawn; the stress figure uses the higher of ' + (R.stressRate * 100) + '% and the quoted rate (MAS Notice 645), for TDSR only.' },
       duty: { bsd: duty.bsd, absd: duty.absd, absdRate: duty.absdRate, total: duty.total, notes: duty.notes, remissions: duty.remissions, date: iso(dutyDate) },
       events, series, headline, totals: { amount: sum('amount'), cash: sum('cashUsed'), cpf: sum('cpfUsed'), bank: sum('bank'), uncovered: sum('uncovered') },

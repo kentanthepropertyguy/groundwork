@@ -39,12 +39,12 @@
       (compact ? '' : '<p class="pa-fine">It is built for an HDB flat with an HDB loan or a bank loan. Your age carries over from here.</p>');
   }
   // What the CPF figure is, and is not. The planner uses the amount the buyer entered; whether CPF allows that much for this home is not checked.
-  const CPF_HINT = 'What CPF allows you to use, not necessarily your whole balance.';
+  const CPF_HINT = 'The CPF you can use for this home, not your whole balance. We don’t check CPF’s limits.';
   const cpfNote = (res) => { const a = res.at || res.atComfortable || res.atHighest; return a && a.haveCpf > 0 ? '<p class="pa-cpfnote"><b>CPF is as you entered it.</b> We have not checked it against CPF’s valuation limit, withdrawal limit, the home’s lease or your age, so it is not confirmed as usable. Whatever CPF does not allow has to be paid in cash.</p>' : ''; };
 
   /* ---------------- fields ---------------- */
   const err = (k) => '<small class="pa-err" data-err="' + k + '" role="alert" hidden></small>';
-  const money = (k, label, o) => { o = o || {}; return '<label class="pa-f' + (o.cls ? ' ' + o.cls : '') + '"' + (o.when ? ' data-when="' + o.when + '"' : '') + '><span>' + label + (o.opt ? ' <em>optional</em>' : '') + '</span><div class="pa-in pa-m"><i>$</i><input type="text" inputmode="decimal" autocomplete="off" data-k="' + k + '" data-t="money"' + (o.share ? ' data-share="' + o.share + '"' : '') + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') + ' aria-invalid="false"></div>' + (o.hint ? '<small class="pa-hint">' + o.hint + '</small>' : '') + err(k) + '</label>'; };
+  const money = (k, label, o) => { o = o || {}; return '<label class="pa-f' + (o.cls ? ' ' + o.cls : '') + '"' + (o.when ? ' data-when="' + o.when + '"' : '') + '><span>' + label + (o.opt ? ' <em>optional</em>' : '') + '</span><div class="pa-in pa-m"><i>$</i><input type="text" inputmode="decimal" autocomplete="off" data-k="' + k + '" data-t="money"' + (o.share ? ' data-share="' + o.share + '"' : '') + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') + ' aria-invalid="false"></div>' + (o.hint ? '<small class="pa-hint"' + (o.hintWhen ? ' data-when="' + o.hintWhen + '" hidden' : '') + '>' + o.hint + '</small>' : '') + err(k) + '</label>'; };
   const numf = (k, label, unit, o) => { o = o || {}; return '<label class="pa-f' + (o.cls ? ' ' + o.cls : '') + '"><span>' + label + '</span><div class="pa-in"><input type="text" inputmode="decimal" autocomplete="off" data-k="' + k + '" data-t="num"' + (o.share ? ' data-share="' + o.share + '"' : '') + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') + ' aria-invalid="false">' + (unit ? '<i class="u">' + unit + '</i>' : '') + '</div>' + (o.hint ? '<small class="pa-hint">' + o.hint + '</small>' : '') + err(k) + '</label>'; };
   const datef = (k, label) => '<label class="pa-f"><span>' + label + '</span><div class="pa-in"><input type="date" data-k="' + k + '" data-t="date"></div>' + err(k) + '</label>';
   const chips = (k, label, opts, o) => { o = o || {}; return '<div class="pa-q' + (o.cls ? ' ' + o.cls : '') + '"' + (o.when ? ' data-when="' + o.when + '"' : '') + '><span class="pa-l" id="pa-l-' + k.replace(/\W/g, '-') + '">' + label + '</span><div class="pa-chips" role="group" aria-labelledby="pa-l-' + k.replace(/\W/g, '-') + '" data-k="' + k + '" data-t="chip"' + (o.share ? ' data-share="' + o.share + '"' : '') + ' data-default="' + esc(o.value || '') + '">' + opts.map((x) => '<button type="button" class="pa-chip" data-v="' + x[0] + '" aria-pressed="' + (x[0] === o.value) + '">' + x[1] + '</button>').join('') + '</div></div>'; };
@@ -52,7 +52,9 @@
     const name = n ? 'Second buyer' : 'You';
     return '<div class="pa-buyer" data-row="b' + n + '"' + (n ? ' hidden' : '') + '>' + (n ? '<p class="pa-bl">' + name + '</p>' : '') +
       '<div class="pa-pair">' + numf('buyers.' + n + '.age', 'Age', '', { share: 'borrowers.' + n + '.age', ph: n ? '' : 'e.g. 35' }) + money('buyers.' + n + '.fixed', 'Income / month', { share: 'borrowers.' + n + '.fixed', ph: 'before CPF' }) + '</div>' +
-      '<button type="button" class="pa-link" data-bonus="' + n + '">+ Add bonus</button><div class="pa-bonus" data-bonusbox="' + n + '" hidden>' + money('buyers.' + n + '.variable', 'Bonus or commission / month', { opt: true, share: 'borrowers.' + n + '.variable', hint: 'Yearly total ÷ 12. Banks count 70% of it.' }) + '</div></div>';
+      '<div class="pa-adds"><button type="button" class="pa-link" data-bonus="' + n + '">+ Add bonus</button><button type="button" class="pa-link" data-rent="' + n + '">+ Add rental income</button></div>' +
+      '<div class="pa-bonus" data-bonusbox="' + n + '" hidden>' + money('buyers.' + n + '.variable', 'Bonus or commission / month', { opt: true, share: 'borrowers.' + n + '.variable', hint: 'Yearly total ÷ 12. Banks count 70% of it.' }) + '</div>' +
+      '<div class="pa-bonus" data-rentbox="' + n + '" hidden>' + money('buyers.' + n + '.rental', 'Rental income / month', { opt: true, share: 'borrowers.' + n + '.rental', hint: 'Only with a stamped tenancy that has at least 6 months left. Banks count 70% of it.' }) + '<p class="pa-hint pa-rentsell" data-rentsell hidden>If you’re selling a property, include only rental income you’ll still receive after the sale.</p></div></div>';
   }
   function formHtml() {
     return '<section class="pa-sec" aria-labelledby="pa-h-you"><h2 class="pa-h" id="pa-h-you">You</h2>' +
@@ -73,16 +75,15 @@
       money('flat.cpfRefund', 'CPF to be refunded, including accrued interest', { ph: 'from your CPF statement', hint: 'Leave it blank if you do not know yet. We do not estimate the interest, so the sale is not counted until you add it.' }) +
       '<details class="pa-adv" data-ovr><summary>Enter your own figures instead</summary><div class="pa-adv-b"><div class="pa-pair">' + money('flat.overrideCash', 'Cash you expect from the sale') + money('flat.overrideCpf', 'CPF you expect back') + '</div>' + money('flat.costs', 'Selling costs, agent fee and legal', { opt: true, hint: 'Replaces the usual estimate.' }) + '<p class="pa-fine">When you enter the cash and CPF yourself, we use those figures as they are.</p></div></details>' +
       '<p class="pa-sale-r" data-sale-r aria-live="polite"></p>' + chips('order', 'What happens first?', [['sell', 'Sell first'], ['buy', 'Buy first'], ['unsure', 'Not sure yet']], { value: '' }) + '</div>' +
-      money('debts', 'Other monthly debts (car, cards, personal loans)', { opt: true, ph: '0', cls: 'pa-gap', hint: 'Home loan instalments are asked above, so leave them out here.' }) + '</section>' +
+      money('debts', 'Other monthly debts (car, cards, personal loans)', { opt: true, ph: '0', cls: 'pa-gap', hint: 'Leave out home loan instalments. They are asked above.', hintWhen: 'owns:one,two' }) + '</section>' +
       '<section class="pa-sec" aria-labelledby="pa-h-money"><h2 class="pa-h" id="pa-h-money">Your money</h2><div class="pa-pair">' + money('cash', 'Cash', { share: 'cash', ph: 'e.g. 300,000' }) + money('cpf', 'CPF OA you plan to use', { share: 'cpfOa', ph: 'e.g. 150,000', hint: CPF_HINT }) + '</div>' +
       '<p class="pa-note pa-now" data-when="home:sell" hidden>Cash and CPF you have now. Your sale proceeds are counted separately, so leave them out here.</p>' +
-      '<p class="pa-note pa-cpfhint">CPF can cap what goes towards a home: its valuation and withdrawal limits, the home’s lease and your age. We do not check these, so enter the amount CPF has confirmed.</p>' +
       '<div data-when="kind:new"><p class="pa-l pa-l2">Each month towards the home</p><div class="pa-pair">' + money('saveMo', 'Cash', { ph: 'e.g. 3,000' }) + money('cpfMo', 'CPF', { ph: 'e.g. 2,000' }) + '</div><p class="pa-note">Used to check each payment date.</p></div>' +
       '<p class="pa-fine">Stays on this device.</p></section>' +
       '<section class="pa-sec" aria-labelledby="pa-h-home"><h2 class="pa-h" id="pa-h-home">The home</h2>' + chips('kind', 'What are you buying?', [['new', 'New launch'], ['completed', 'Completed private home'], ['hdb', 'HDB flat']], { value: 'new' }) +
       '<div class="pa-route" data-when="kind:hdb" hidden>' + hdbRoute(true) + '</div>' +
       '<p class="pa-note">Buying an EC, or buying before you sell? Use the <a href="../payment-planner/">payment timeline</a>.</p></section>' +
-      '<section class="pa-sec" aria-labelledby="pa-h-loan"><h2 class="pa-h" id="pa-h-loan">The loan</h2><div class="pa-pair">' + numf('ratePct', 'Interest rate you expect', '% a year', { ph: '4', hint: 'Your instalment uses this. Banks test the loan at the higher of 4% and this rate.' }) + numf('years', 'Loan years', 'years', { ph: 'suggested for you', hint: 'Leave it empty and we suggest one. More than a bank allows is cut back to the maximum.' }) + '</div></section>' +
+      '<section class="pa-sec" aria-labelledby="pa-h-loan"><h2 class="pa-h" id="pa-h-loan">The loan</h2><div class="pa-pair">' + numf('ratePct', 'Interest rate you expect', '% a year', { ph: '4', hint: 'Sets your monthly mortgage. Banks test at 4% or higher.' }) + numf('years', 'Loan years', 'years', { ph: 'suggested for you', hint: 'Leave empty and we suggest one.' }) + '</div></section>' +
       '<details class="pa-adj" data-adj><summary><span>More options</span><em data-adj-sum></em></summary><div class="pa-adj-b">' +
       datef('otp', 'Option date') + money('setAside', 'Set aside for fees and renovation', { opt: true, ph: '0', hint: 'Kept out of the money used for the purchase.' }) + '</div></details>';
   }
@@ -96,9 +97,11 @@
       '<details class="pa-borrow" data-borrow hidden><summary><span id="pa-l-borrow">Borrow less than the most</span><em data-borrow-sum></em></summary><div class="pa-borrow-r"><div class="pa-pin"><i>$</i><input id="pa-borrow" type="text" inputmode="decimal" autocomplete="off" data-k="prefLoan" data-t="money" aria-describedby="pa-borrow-note" aria-invalid="false"></div><button type="button" class="pa-link" data-borrow-max hidden>Use the most</button></div>' +
       '<input type="range" class="pa-range pa-brange" data-borrow-range aria-labelledby="pa-l-borrow" min="0" max="1000000" step="10000"><small class="pa-hint" id="pa-borrow-note" data-borrow-note></small><small class="pa-err" data-err="prefLoan" role="alert" hidden></small></details><div data-tenure></div>' +
       '<div class="pa-pricebox" data-pricebox hidden><p class="pa-fine pa-from" data-price-from hidden></p><div class="pa-prow"><label class="pa-l" for="pa-price">Property price <em>optional</em></label><div class="pa-pw"><div class="pa-pin"><i>$</i><input id="pa-price" type="text" inputmode="numeric" autocomplete="off" data-k="price" data-t="money" placeholder="A price you are considering" aria-describedby="pa-price-err"></div><button type="button" class="pa-link pa-reset" data-reset-price hidden>Back to my maximum</button></div></div>' +
-      '<small class="pa-err" id="pa-price-err" data-err="price" role="alert" hidden></small></div>' +
+      '<small class="pa-err" id="pa-price-err" data-err="price" role="alert" hidden></small>' +
+      '<div class="pa-valbox" data-valbox hidden><div class="pa-prow"><label class="pa-l" for="pa-val">Bank valuation <em>optional</em></label><div class="pa-pw"><div class="pa-pin"><i>$</i><input id="pa-val" type="text" inputmode="numeric" autocomplete="off" data-k="valuation" data-t="money" placeholder="If you already have it" aria-describedby="pa-val-hint pa-val-err"></div></div></div>' +
+      '<small class="pa-hint" id="pa-val-hint">Banks lend on the lower of price and valuation. Any price above the valuation is paid in cash.</small><small class="pa-err" id="pa-val-err" data-err="valuation" role="alert" hidden></small></div></div>' +
       '<div data-next></div><div data-tiles></div><div data-how></div>' +
-      '<p class="pa-foot" data-foot hidden>Estimates from MAS, IRAS and HDB rules checked 9 Oct 2026. Not a bank offer or approval.</p>' +
+      '<p class="pa-foot" data-foot hidden>Estimates from MAS, IRAS and HDB rules, checked 9 Oct 2026.</p>' +
       '<div class="pa-ask" data-ask hidden><a class="gw-btn sec" data-ask-wa href="https://wa.me/' + PHONE + '" target="_blank" rel="noopener" data-gw-wa="planner-ask">Talk it through with Ken</a><span class="pa-fine">Opens WhatsApp with a short message and none of your figures.</span></div>' +
       '<div class="pa-startover"><button type="button" class="pa-link" data-gw-clear-all aria-expanded="false">Clear all my figures</button></div>' +
       '</div></div>' +
@@ -118,7 +121,7 @@
   const LIMIT_TXT = V.LIMIT_TXT;
   // One answer (the headline: the maximum, or the verdict on a price), one sentence, two supporting figures. Everything in it comes from GW_VIEW.build(), which only
   // reads what GW_ANSWER already worked out. The loan at the price, the stamp duty and the working are one tap away, never in front of the answer.
-  const figOf = (f) => '<div class="pa-fig"><div class="k">' + esc(f.k) + '</div><div class="v">' + esc(f.v) + '</div><div class="s"><p>' + esc(f.s) + '</p></div></div>';
+  const figOf = (f) => '<div class="pa-fig"><div class="k">' + esc(f.k) + '</div><div class="v">' + esc(f.v) + '</div><div class="s">' + String(f.s).split(' · ').map((t) => '<p>' + esc(t) + '</p>').join('') + '</div></div>';
   const DATE_BADGE = { unchecked: 'plain', standard: 'plain', option: 'plain', monthly: 'plain' };
   function datelineHtml(v, held) {
     const d = v.dates, st = d.result === 'short' ? tag('bad', 'Short') : d.result === 'projected' ? tag('est', 'Projected shortfall') : d.result === 'ok' ? tag('ok', 'Covered') : '';
@@ -274,7 +277,7 @@
     }
     L.push(row('Your loan', '<div class="pa-lim">' +
       lr('What your income supports', '55% of the ' + $(round100(B.assessable)) + ' a month the bank counts' + (a.debts > 0 ? ', less ' + $(a.debts) + ' of debts' + (a.flatInstal ? ' (including your home’s instalment)' : '') : '') + ', tested at ' + pc(res.borrow.rate, 2) + ' (banks use the higher of 4% and your rate) over ' + plural(a.years) + '.', a.incomeLoan) +
-      lr('What the loan limit allows', pc(a.ltv) + ' of the ' + $(a.P) + ' price' + (a.loans ? ' (a housing loan you still have counts, so the limit is lower)' : '') + '.' + esc(reason) + ' (MAS Notice 632)', a.ruleLoan) +
+      lr('What the loan limit allows', pc(a.ltv) + ' of the ' + (a.cov > 0.5 ? $(a.base) + ' valuation (banks lend on the lower of the price and the valuation)' : $(a.P) + ' price') + (a.loans ? ' (a housing loan you still have counts, so the limit is lower)' : '') + '.' + esc(reason) + ' (MAS Notice 632)', a.ruleLoan) +
       lr('Maximum estimated loan', 'The lower of the two. ' + (a.limit === 'income' ? 'Income is what holds you back here.' : 'The loan limit is what holds you back here.') + ' The bank decides what it lends.', a.maxLoan, 'res') +
       (a.limit === 'choice' ? lr('Loan you chose', 'You chose to borrow less than the most. Your instalment and the cash and CPF needed follow this amount.', a.loan, 'res') : '') + '</div>'));
     L.push(row('Your instalment', '<b>' + $(a.monthly) + '</b> a month on ' + $(a.loan) + ', worked at your expected rate of ' + pc(res.ratePct / 100, 2) + ' over ' + plural(a.years) + '. The higher test rate is used only to check what you can borrow, never to price your instalment.'));
@@ -283,9 +286,9 @@
     const tt = res.tenure;
     if (tt) L.push(row('Your tenure', (tt.manual ? 'You chose ' + plural(tt.years) + ', so that is what is used. ' : (tt.std < 1 ? plural(tt.years) + ' is used: no tenure keeps the standard loan limit at your age, so it is the longest a bank usually lends. ' : plural(tt.years) + ' is used: the longest loan that keeps the standard loan limit at your age. ')) + (tt.cappedFrom ? 'You entered ' + plural(tt.cappedFrom) + ', but ' + plural(tt.years) + ' is the longest a bank usually lends at your age, so that is what is used. ' : '') + 'A longer one, up to ' + plural(tt.cap) + ' and ending by about age ' + R_MAT + ', is only offered when it adds 5% or more to your budget, and it takes the lower loan limit. ' + plural(Math.min(maxTenure(), tt.allowed || maxTenure())) + ' is the longest a loan can run at your age. Banks usually end a loan by age ' + R_MAT + ' (lender policy, not a MAS rule) but set their own age limits, so check with yours.' + cmpTable(rows, tt, false)));
     // duty
-    L.push(row('Stamp duty', 'Buyer’s stamp duty <b>' + $(a.bsd) + '</b>' + (a.absd > 0 ? ' and additional buyer’s stamp duty (' + pc(a.absdRate) + ') <b>' + $(a.absd) + '</b>' : ', with no additional buyer’s stamp duty') + '. Paid in cash within 14 days of signing.'));
+    L.push(row('Stamp duty', 'Buyer’s stamp duty <b>' + $(a.bsd) + '</b>' + (a.absd > 0 ? ' and additional buyer’s stamp duty (' + pc(a.absdRate) + ') <b>' + $(a.absd) + '</b>' : ', with no additional buyer’s stamp duty') + '. Paid in cash within 14 days of signing.' + (a.dutyBase > a.P + 0.5 ? ' Worked on the valuation of ' + $(a.dutyBase) + ', because stamp duty is charged on the higher of the price and the market value (IRAS).' : '')));
     // cash and CPF
-    L.push(row('Cash and CPF', 'Cash alone pays the booking fee, the ' + pc(a.minCash) + ' minimum cash (' + $(a.cashMin) + ') and stamp duty: <b>' + $(a.cashOnly) + '</b>. The other <b>' + $(a.flexNeed) + '</b> can be cash or CPF. CPF is counted as you entered it, for this price only: no valuation or lease limit is applied, and the home is taken to be worth its price. What stays in hand is cash, not CPF. Not included: legal and valuation fees, renovation and furnishing. To hold money back for them, use “Set aside” under More options.'));
+    L.push(row('Cash and CPF', 'Cash alone pays the booking fee, the ' + pc(a.minCash) + ' minimum cash (' + $(a.cashMin) + ')' + (a.cov > 0.5 ? ', the ' + $(a.cov) + ' by which the price is above the valuation' : '') + ' and stamp duty: <b>' + $(a.cashOnly) + '</b>. The other <b>' + $(a.flexNeed) + '</b> can be cash or CPF. CPF is counted as you entered it, for this price only: ' + (a.valuation !== null && a.valuation !== undefined ? 'the loan, the minimum cash and the CPF part are worked on the valuation you entered (the lower of price and valuation), and CPF’s own limits and the home’s lease are not applied' : 'no valuation or lease limit is applied, and the home is taken to be worth its price') + '. What stays in hand is cash, not CPF. Not included: legal and valuation fees, renovation and furnishing. To hold money back for them, use “Set aside” under More options.'));
     // sale
     if (res.basis === 'sell' && res.sale) L.push(row('Your sale', saleLine(res.sale) + (res.sale.source === 'estimated' ? ' This is the price, less the loan, your CPF refund as you entered it (it includes the accrued interest, which we do not estimate), the agent’s fee and legal costs. Cash and CPF are kept apart, and nothing is counted until the sale completes and the CPF is released.' : '')));
     else if (res.sale && !res.sale.counted) L.push(row('Your sale', saleLine(res.sale)));
@@ -320,13 +323,16 @@
     const val = (k) => { const g = field(k); return !g ? '' : g.dataset.t === 'chip' ? chipVal(g) : g.value; };
 
     // ---- showing and hiding what is not yet relevant ----
-    const bonusOn = { 0: false, 1: false };
+    const bonusOn = { 0: false, 1: false }, rentOn = { 0: false, 1: false };
     function showBonus(n, on) { bonusOn[n] = on; const b = q('[data-bonusbox="' + n + '"]'), l = q('[data-bonus="' + n + '"]'); if (b) b.hidden = !on; if (l) l.hidden = on; if (!on) { const f = field('buyers.' + n + '.variable'); if (f) f.value = ''; } }
+    function showRent(n, on) { rentOn[n] = on; const b = q('[data-rentbox="' + n + '"]'), l = q('[data-rent="' + n + '"]'); if (b) b.hidden = !on; if (l) l.hidden = on; if (!on) { const f = field('buyers.' + n + '.rental'); if (f) f.value = ''; } }
     function applyWhen() {
       if (val('owns') === 'none') { const hg = field('home'); if (hg && chipVal(hg)) setChip(hg, ''); }
       $$('[data-when]').forEach((el) => { const parts = el.dataset.when.split(':'), k = parts[0], vs = parts[1].split(','); const v = val(k); el.hidden = vs.indexOf('*') >= 0 ? !(v !== '' && v !== undefined) : vs.indexOf(v) < 0; });
+      // selling first: rental income from the property being sold stops at the sale, so the buyer is asked to enter only what continues
+      const sellFirst = val('owns') !== 'none' && val('home') === 'sell' && val('order') === 'sell'; $$('[data-rentsell]').forEach((el) => { el.hidden = !sellFirst; });
       const two = val('who') === 'two'; const r = q('[data-row="b1"]'); if (r) r.hidden = !two;
-      if (!two) { ['age', 'fixed', 'variable'].forEach((f) => { const x = field('buyers.1.' + f); if (x) x.value = ''; }); showBonus(1, false); }
+      if (!two) { ['age', 'fixed', 'variable', 'rental'].forEach((f) => { const x = field('buyers.1.' + f); if (x) x.value = ''; }); showBonus(1, false); showRent(1, false); }
     }
 
     // ---- read the entries ----
@@ -339,12 +345,12 @@
       const two = val('who') === 'two', buyers = [];
       [0, 1].forEach((n) => {
         if (n === 1 && !two) return;
-        const age = readNum('buyers.' + n + '.age', n ? '33' : '35'), fixed = readMoney('buyers.' + n + '.fixed'), variable = readMoney('buyers.' + n + '.variable');
-        buyers.push({ res: val('buyers.' + n + '.res') || 'SC', age: age, fixed: fixed, variable: variable });
+        const age = readNum('buyers.' + n + '.age', n ? '33' : '35'), fixed = readMoney('buyers.' + n + '.fixed'), variable = readMoney('buyers.' + n + '.variable'), rental = readMoney('buyers.' + n + '.rental');
+        buyers.push({ res: val('buyers.' + n + '.res') || 'SC', age: age, fixed: fixed, variable: variable, rental: rental });
       });
       const owns = val('owns'), home = owns === 'none' ? 'none' : (owns ? (val('home') || null) : null), order = val('order') || null;
       const s = { kind: val('kind') || 'new', buyers: buyers, debts: readMoney('debts'), ratePct: readNum('ratePct', '4'), years: readNum('years', '30'), cash: readMoney('cash'), cpf: readMoney('cpf'), setAside: readMoney('setAside'),
-        saveMo: readMoney('saveMo'), cpfMo: readMoney('cpfMo'), home: home, order: order, price: ptouched ? readMoney('price') : undefined, otp: val('otp') || undefined,
+        saveMo: readMoney('saveMo'), cpfMo: readMoney('cpfMo'), home: home, order: order, price: ptouched ? readMoney('price') : undefined, valuation: ptouched ? readMoney('valuation') : undefined, otp: val('otp') || undefined,
         owned: owns === 'two' ? 2 : owns === 'one' ? 1 : undefined, otherLoans: owns === 'two' && val('otherLoans') !== '' ? +val('otherLoans') : undefined, otherInstal: readMoney('otherInstal'), prefLoan: readMoney('prefLoan'),
         flat: { type: val('flat.type') || 'hdb', hasLoan: val('flat.hasLoan') || undefined, instalment: readMoney('flat.instalment'), price: readMoney('flat.price'), loan: readMoney('flat.loan'), cpfRefund: readMoney('flat.cpfRefund'),
           overrideCash: readMoney('flat.overrideCash'), overrideCpf: readMoney('flat.overrideCpf'), costs: readMoney('flat.costs'), heldOver4: val('flat.held') === 'yes' ? true : undefined } };
@@ -383,6 +389,7 @@
       box2.hidden = false;
       if (document.activeElement !== pf && r.priceIsOwn) pf.value = fmtMoney(r.price);
       q('[data-reset-price]').hidden = !r.priceIsOwn;
+      { const vb = q('[data-valbox]'); if (vb) vb.hidden = !(r.priceIsOwn && r.kind === 'completed'); }   // a valuation belongs to a price the buyer is considering, on a completed home only
       paintFrom();
     }
     // a price that arrived from Research is said once, in words, until the buyer changes it
@@ -406,7 +413,7 @@
     }
     const ctxNow = () => { const o = field('otp'); VIEW_CTX.otpEntered = !!(o && o.value && o.value !== todayIso); VIEW_CTX.priceTxt = priceFrom ? priceFrom.what : ''; };
     // the most the age allows, from the buyers' ages alone (no income, cash or price needed): the same limit the calculation applies (C.tenureLimit)
-    const ageLimit = () => { try { return C.tenureLimit({ kind: 'private', borrowers: readEntries().buyers.map((b) => ({ age: b.age, fixed: b.fixed || 0, variable: b.variable || 0 })) }); } catch (e) { return null; } };
+    const ageLimit = () => { try { return C.tenureLimit({ kind: 'private', borrowers: readEntries().buyers.map((b) => ({ age: b.age, fixed: b.fixed || 0, variable: b.variable || 0, rental: b.rental || 0 })) }); } catch (e) { return null; } };
     // the line under the loan-years field: its usual hint, or, after an over-long entry was corrected, what it was changed from and why
     function paintYearsHint() {
       const y = field('years'), h = y && y.closest('label') && y.closest('label').querySelector('.pa-hint'); if (!h) return;
@@ -467,8 +474,8 @@
     // ---- storage ----
     function snapshot() {
       const o = {};
-      $$('[data-k]').forEach((x) => { const k = x.dataset.k; if (k === 'price' && !ptouched) return; const v = x.dataset.t === 'chip' ? chipVal(x) : x.value; if (v === '' || v === null) return; if (k === 'otp' && v === todayIso) return; if (x.dataset.t === 'chip' && v === (x.dataset.default || '')) return; o[k] = v; });
-      if (ptouched) o._pt = true; if (bonusOn[0] || bonusOn[1]) o._bonus = [bonusOn[0], bonusOn[1]];
+      $$('[data-k]').forEach((x) => { const k = x.dataset.k; if ((k === 'price' || k === 'valuation') && !ptouched) return; const v = x.dataset.t === 'chip' ? chipVal(x) : x.value; if (v === '' || v === null) return; if (k === 'otp' && v === todayIso) return; if (x.dataset.t === 'chip' && v === (x.dataset.default || '')) return; o[k] = v; });
+      if (ptouched) o._pt = true; if (bonusOn[0] || bonusOn[1]) o._bonus = [bonusOn[0], bonusOn[1]]; if (rentOn[0] || rentOn[1]) o._rent = [rentOn[0], rentOn[1]];
       return o;
     }
     function apply(o) {
@@ -479,15 +486,19 @@
       ptouched = !!(o._pt || (o.price && o._pt === undefined));
       $$('[data-k]').forEach((x) => { const k = x.dataset.k; const v = o[k]; if (x.dataset.t === 'chip') setChip(x, v === undefined ? (x.dataset.default || '') : v); else x.value = v === undefined ? (k === 'otp' ? todayIso : '') : v; });
       showBonus(0, !!(o._bonus && o._bonus[0] || o['buyers.0.variable'])); showBonus(1, !!(o._bonus && o._bonus[1] || o['buyers.1.variable']));
+      showRent(0, !!(o._rent && o._rent[0] || o['buyers.0.rental'])); showRent(1, !!(o._rent && o._rent[1] || o['buyers.1.rental']));
+      if (o['buyers.0.rental']) field('buyers.0.rental').value = o['buyers.0.rental']; if (o['buyers.1.rental']) field('buyers.1.rental').value = o['buyers.1.rental'];
       if (o['buyers.0.variable']) field('buyers.0.variable').value = o['buyers.0.variable']; if (o['buyers.1.variable']) field('buyers.1.variable').value = o['buyers.1.variable'];
     }
     // What the Payment Timeline needs to show the same numbers: the buyer's own entries, nothing else. Tab-only (gw.hand.v1); never in an address, an analytics event or the WhatsApp message.
+    // varIncome carries bonus, commission and rental income together: banks count 70% of each (R.variableIncomeHaircut = R.rentalIncomeHaircut, checked by income-tests.js), so every test the Timeline runs is the same
     function handoffOf(s, r) {
       const sum = (k) => s.buyers.reduce((a, b) => a + (b[k] > 0 ? b[k] : 0), 0), pos = (x) => (x > 0 ? x : 0), keep = r.basis === 'keep', sell = r.basis === 'sell';
       const h = { v: 1, fresh: true, kind: r.kind, price: r.price, years: r.tenure && r.tenure.manual ? r.years : '', ratePct: r.ratePct, age: Math.round(r.B.iwaaUse * 100) / 100, cash: Math.max(0, pos(s.cash) - pos(s.setAside)), cpf: pos(s.cpf),
-        income: sum('fixed'), varIncome: sum('variable'), debts: pos(s.debts) + (r.at ? r.at.flatInstal : 0), otp: s.otp || '', order: sell ? 'sell' : 'none',
+        income: sum('fixed'), varIncome: sum('variable') + sum('rental'), debts: pos(s.debts) + (r.at ? r.at.flatInstal : 0), otp: s.otp || '', order: sell ? 'sell' : 'none',
         buyers: s.buyers.map((b) => ({ res: b.res, owned: keep || sell ? (r.facts ? r.facts.owned : 1) : 0 })), loansOther: r.at ? r.at.loans : 0, prefLoan: r.at && r.at.limit === 'choice' ? r.at.loan : '' };
       if (r.kind === 'new') { h.saveMo = pos(s.saveMo); h.cpfMo = pos(s.cpfMo); }
+      if (r.kind === 'completed' && r.priceIsOwn && s.valuation > 0) h.valuation = s.valuation;   // the valuation belongs to this price only
       if (sell && r.sale && r.sale.counted) { const f = s.flat || {}; h.sale = { type: f.type || 'hdb', heldOver4: f.heldOver4 === true, price: f.price, loan: f.loan, cpfRefund: f.cpfRefund, overrideCash: f.overrideCash, overrideCpf: f.overrideCpf, costs: f.costs }; }
       return h;
     }
@@ -529,6 +540,7 @@
       const t = (s) => e.target.closest(s);
       const chip = t('.pa-chips[data-k] .pa-chip');
       if (chip) { const g = chip.parentElement, was = chipVal(g); setChip(g, chip.dataset.v); if (g.dataset.k === 'order' && was === chip.dataset.v) { /* stays chosen */ } if (g.dataset.k === 'home' || g.dataset.k === 'order' || g.dataset.k === 'kind' || g.dataset.k === 'who') track('planner_choice', { field: g.dataset.k, value: chip.dataset.v }); if (g.dataset.k === 'who' && chip.dataset.v === 'two') { /* second buyer row appears */ } clearTimeout(tmr); recalc(); return; }
+      const rn = t('[data-rent]'); if (rn) { showRent(+rn.dataset.rent, true); const f = field('buyers.' + rn.dataset.rent + '.rental'); if (f) f.focus(); changed(); return; }
       const bn = t('[data-bonus]'); if (bn) { showBonus(+bn.dataset.bonus, true); const f = field('buyers.' + bn.dataset.bonus + '.variable'); if (f) f.focus(); changed(); return; }
       const cm = t('[data-cmp]'); if (cm) { cmpOpen = !cmpOpen; const bx = q('[data-cmp-box]'); if (bx) bx.hidden = !cmpOpen; $$('[data-cmp]').forEach((x) => { x.setAttribute('aria-expanded', String(cmpOpen)); const ar = x.querySelector('[aria-hidden]'); if (ar) ar.textContent = cmpOpen ? '▴' : '▾'; }); if (cmpOpen) track('planner_tenure_compare', {}); fitSticky(); return; }
       const us = t('[data-use]'); if (us) { const f = field('years'); if (f) { f.value = us.dataset.use === 'auto' ? '' : us.dataset.use; delete f.dataset.adjustedFrom; } track('planner_tenure_use', { choice: us.dataset.use === 'auto' ? 'suggested' : 'own' }); clearTimeout(tmr); recalc(); return; }
@@ -536,7 +548,7 @@
       const odt = t('[data-open-dates]'); if (odt) { const d = q('[data-dates-d]'); if (d) { d.open = true; d.scrollIntoView({ block: 'start', behavior: 'smooth' }); } track('planner_dates_open', {}); return; }
       const oh = t('[data-open-how]'); if (oh) { const d = q('[data-how-d]'); if (d) { d.open = true; d.scrollIntoView({ block: 'start', behavior: 'smooth' }); } return; }
       const bm = t('[data-borrow-max]'); if (bm) { field('prefLoan').value = ''; track('planner_borrow', { choice: 'most' }); clearTimeout(tmr); recalc(); return; }
-      const rp = t('[data-reset-price]'); if (rp) { ptouched = false; field('price').value = ''; clearTimeout(tmr); recalc(); return; }
+      const rp = t('[data-reset-price]'); if (rp) { ptouched = false; field('price').value = ''; field('valuation').value = ''; clearTimeout(tmr); recalc(); return; }
       const pv = t('[data-prev]'); if (pv) { const k = pv.dataset.prev, b = q('[data-prev-box="' + k + '"]'); $$('[data-prev-box]').forEach((x) => { if (x !== b) { x.hidden = true; } }); $$('[data-prev]').forEach((x) => { if (x !== pv) x.setAttribute('aria-expanded', 'false'); }); b.hidden = !b.hidden; pv.setAttribute('aria-expanded', String(!b.hidden)); track('planner_preview', { fix: k }); return; }
       if (t('[data-cancel]')) { $$('[data-prev-box]').forEach((x) => { x.hidden = true; }); $$('[data-prev]').forEach((x) => x.setAttribute('aria-expanded', 'false')); return; }
       const ap = t('[data-apply]'); if (ap && res && res.fixes) { applyFix(ap.dataset.apply); return; }

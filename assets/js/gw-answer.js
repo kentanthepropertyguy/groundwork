@@ -47,9 +47,9 @@
     (s.buyers || []).forEach((b, k) => {
       const at = (f) => 'buyers.' + k + '.' + f;
       if (has(b.age) && (b.age < L.age.min || b.age > L.age.max)) add(at('age'), L.age.text);
-      ['fixed', 'variable'].forEach((f) => { if (has(b[f]) && (b[f] < 0 || b[f] > L.income.max)) add(at(f), b[f] < 0 ? 'Amounts can’t be negative.' : L.income.text); });
+      ['fixed', 'variable', 'rental'].forEach((f) => { if (has(b[f]) && (b[f] < 0 || b[f] > L.income.max)) add(at(f), b[f] < 0 ? 'Amounts can’t be negative.' : L.income.text); });
     });
-    ['cash', 'cpf', 'saveMo', 'cpfMo', 'debts', 'price', 'setAside', 'prefLoan', 'otherInstal'].forEach((k) => { if (has(s[k]) && (s[k] < 0 || s[k] > L.money.max)) add(k, s[k] < 0 ? 'Amounts can’t be negative.' : L.money.text); });
+    ['cash', 'cpf', 'saveMo', 'cpfMo', 'debts', 'price', 'valuation', 'setAside', 'prefLoan', 'otherInstal'].forEach((k) => { if (has(s[k]) && (s[k] < 0 || s[k] > L.money.max)) add(k, s[k] < 0 ? 'Amounts can’t be negative.' : L.money.text); });
     if (has(s.ratePct) && (s.ratePct < L.ratePct.min || s.ratePct > L.ratePct.max)) add('ratePct', L.ratePct.text);
     if (has(s.years) && (s.years < L.years.min || s.years > L.years.max)) add('years', L.years.text);
     const f = s.flat || {};
@@ -59,19 +59,20 @@
   }
 
   /* ---------------- the entries, read once ---------------- */
-  // s: { kind: 'new'|'completed', buyers: [{ res, age, fixed, variable }], debts, ratePct (default 4), years (default: longest keeping the standard limit),
+  // s: { kind: 'new'|'completed', buyers: [{ res, age, fixed, variable, rental }], debts, ratePct (default 4), years (default: longest keeping the standard limit),
   //      cash, cpf, setAside, saveMo, cpfMo (null/undefined = not given), cushion: { months } | { amount },
   //      home: null | 'none' | 'keep' | 'sell', order: null | 'sell' | 'buy' | 'unsure', flat: { instalment, price, loan, cpfPrincipal, cpfInterest, years, type: 'hdb'|'private' },
-  //      price (the price being tried), otp (YYYY-MM-DD) }
+  //      price (the price being tried), valuation (optional, a completed home only: the bank's or HDB's valuation of THAT price; never asked of everyone, never assumed), otp (YYYY-MM-DD) }
   function read(s) {
     s = s || {};
-    const buyers = (s.buyers || []).filter((b) => b && (has(b.age) || has(b.fixed) || has(b.variable)));
-    const list = buyers.map((b) => ({ age: b.age, fixed: nn(b.fixed), variable: nn(b.variable) }));
+    const buyers = (s.buyers || []).filter((b) => b && (has(b.age) || has(b.fixed) || has(b.variable) || has(b.rental)));
+    // rental income is optional and advanced: GW_CALC.borrowers counts it at 70% (the same MAS 30% haircut as variable income), exactly as How much can I borrow? does
+    const list = buyers.map((b) => ({ age: b.age, fixed: nn(b.fixed), variable: nn(b.variable), rental: nn(b.rental) }));
     const B = C.borrowers(list);
     const complete = buyers.length > 0 && buyers.every((b) => has(b.age)) && B.gross > 0 && B.iwaa !== null;
     const rate = has(s.ratePct) ? s.ratePct : 4;
     // $0 typed for every buyer is an answer (no income to lend against); a blank income is not (it cannot be checked yet)
-    const zeroIncome = buyers.length > 0 && buyers.every((b) => has(b.age)) && B.gross <= 0 && buyers.every((b) => has(b.fixed) || has(b.variable));
+    const zeroIncome = buyers.length > 0 && buyers.every((b) => has(b.age)) && B.gross <= 0 && buyers.every((b) => has(b.fixed) || has(b.variable) || has(b.rental));
     const out = { s: s, buyers: buyers, list: list, B: B, complete: complete, zeroIncome: zeroIncome, ratePct: rate, kind: s.kind === 'completed' ? 'completed' : 'new' };
     if (!complete) return out;
     const probe = C.tdsr({ kind: 'private', borrowers: list, debts: 0, loans: 0, tenure: has(s.years) ? s.years : undefined, quotedRatePct: rate });
@@ -101,6 +102,7 @@
     out.otherInstal = out.otherOwned > 0 && out.otherLoans > 0 ? nn(s.otherInstal) : 0;
     out.flatLoan = loanOf(f);                                   // 'yes' | 'no' | 'unsure' | null (not answered)
     out.flatInstal = out.flatLoan === 'no' ? 0 : nn(f.instalment);
+    out.valuation = out.kind === 'completed' && has(s.valuation) && s.valuation > 0 ? s.valuation : null;   // applies to the buyer's own price only (see assess: quote)
     out.prefLoan = has(s.prefLoan) ? Math.max(0, s.prefLoan) : null;   // the loan the buyer would like to take (never above what the numbers allow)
     out.sale = saleOf(s, out);
     return out;
@@ -139,18 +141,20 @@
     if (!t.ok || t.noTenure) return { ok: false, why: 'income', t: t };
     const loansForLtv = nn(n.otherLoans) + (flatCounts ? 1 : 0);
     const buyersP = n.buyers.map((b) => ({ res: b.res || 'SC', owned: owned }));
-    const prelim = C.progressive({ price: P, age: B.iwaaUse, years: n.years, ratePct: n.ratePct, loans: loansForLtv, kind: 'private', buyers: buyersP });
+    const V = n.kind === 'completed' && nn(over.valuation) > 0 ? over.valuation : undefined;   // a valuation belongs to ONE price (the buyer's own), never to the search
+    const prelim = C.progressive({ price: P, age: B.iwaaUse, years: n.years, ratePct: n.ratePct, loans: loansForLtv, kind: 'private', buyers: buyersP, valuation: V });
     if (!prelim.ok) return { ok: false, why: 'rules', prog: prelim };
     // the loan taken is the buyer's preferred loan when it is below what the numbers allow; never above it
     const incomeCap = over.noIncomeCap ? prelim.loanMax : (n.prefLoan === null ? t.maxLoan : Math.min(t.maxLoan, n.prefLoan));   // noIncomeCap: what the cash and CPF support if income were no limit
     const capped = incomeCap < prelim.loanMax - 0.5;
-    const prog = capped ? C.progressive({ price: P, age: B.iwaaUse, years: n.years, ratePct: n.ratePct, loans: loansForLtv, kind: 'private', buyers: buyersP, loanCap: incomeCap }) : prelim;
+    const prog = capped ? C.progressive({ price: P, age: B.iwaaUse, years: n.years, ratePct: n.ratePct, loans: loansForLtv, kind: 'private', buyers: buyersP, loanCap: incomeCap, valuation: V }) : prelim;
     if (!prog.ok) return { ok: false, why: 'rules', prog: prog };
     const loan = prog.loanMax, duty = prog.duty.total, absd = prog.duty.absd || 0, bsd = prog.duty.bsd;
     const sale = mode === 'sell' && n.sale && n.sale.counted ? n.sale : null;
     const cash = Math.max(0, Math.max(0, n.cash - n.setAside) + nn(over.addCash) + (sale ? sale.cash : 0)), cpf = n.cpf + (sale ? sale.cpf : 0);
     // cash and CPF are different money: cash-only items first, then cash-or-CPF
-    const cashOnly = prog.cashMin + duty, flexNeed = Math.max(0, P - loan - prog.cashMin);
+    const cov = prog.cov || 0;   // cash over valuation: cash only, on top of the minimum cash and the duties (R.valuation)
+    const cashOnly = prog.cashMin + cov + duty, flexNeed = Math.max(0, P - loan - prog.cashMin - cov);
     const cashShort = Math.max(0, cashOnly - cash), cashLeftAfterOnly = Math.max(0, cash - cashOnly);
     const flexShort = Math.max(0, flexNeed - (cpf + cashLeftAfterOnly));
     const gap = cashShort + flexShort;
@@ -158,13 +162,13 @@
     const leftCash = Math.max(0, cash - cashOnly - cashForFlex);   // cash in hand after buying, statically; CPF left is not counted
     const monthly = C.instal(loan, prog.rate, n.years);
     const res = { ok: true, P: P, mode: mode, owned: owned, years: n.years, loan: loan, maxLoan: Math.min(prelim.loanMax, t.maxLoan), ruleLoan: prog.ruleLoanMax, incomeLoan: t.maxLoan, prefLoan: n.prefLoan, assessRate: t.rate, limit: capped ? (n.prefLoan !== null && n.prefLoan < t.maxLoan - 0.5 ? 'choice' : 'income') : 'rule', ltv: prog.ltv, minCash: prog.minCash, cashMin: prog.cashMin, lower: prog.lower, lowerWhy: prog.lowerWhy,
-      bsd: bsd, absd: absd, absdRate: prog.duty.absdRate, duty: duty, dutyNotes: prog.duty.notes, down: P - loan, upfront: P - loan + duty, have: cash + cpf, haveCash: cash, haveCpf: cpf, cashOnly: cashOnly, flexNeed: flexNeed,
+      valuation: V === undefined ? null : V, cov: cov, base: prog.base, dutyBase: prog.dutyBase, bsd: bsd, absd: absd, absdRate: prog.duty.absdRate, duty: duty, dutyNotes: prog.duty.notes, down: P - loan, upfront: P - loan + duty, have: cash + cpf, haveCash: cash, haveCpf: cpf, cashOnly: cashOnly, flexNeed: flexNeed,
       gap: gap, cashShort: cashShort, flexShort: flexShort, leftCash: leftCash, monthly: monthly, monthlyPct: B.gross > 0 ? monthly / B.gross : null, debts: debts, flatInstal: instal, loans: loansForLtv, prog: prog, t: t, sale: sale };
     res.cushion = n.cushion.amount !== undefined ? n.cushion.amount : n.cushion.months * monthly;
     let covered = null, tl = null;
     if (n.checked) {
       const inp = { kind: n.kind, price: P, otp: n.s.otp || todayIso(), buyers: n.buyers.map((b) => ({ res: b.res || 'SC', owned: mode === 'sell' ? n.ownedNow : owned })), age: B.iwaaUse, ratePct: n.ratePct, years: n.years, cash: cash, cpf: n.cpf, saveMo: n.saveMo, cpfMo: n.cpfMo,
-        order: mode === 'sell' ? 'sell' : 'none', loansOther: loansForLtv, flatLoan: 'none', sale: mode === 'sell' ? { cash: 0, cpf: sale ? sale.cpf : 0, removesOwnership: true } : {}, loanCap: capped ? incomeCap : undefined, dates: { mode: 'grouped' } };
+        order: mode === 'sell' ? 'sell' : 'none', loansOther: loansForLtv, flatLoan: 'none', sale: mode === 'sell' ? { cash: 0, cpf: sale ? sale.cpf : 0, removesOwnership: true } : {}, loanCap: capped ? incomeCap : undefined, valuation: V, dates: { mode: 'grouped' } };
       // the sale cash is already in `cash`; the engine adds a sell-first sale's own figures, so it is given only the CPF part
       tl = T.timeline(inp);
       if (!tl.ok) return { ok: false, why: 'timeline', tl: tl };
@@ -294,11 +298,11 @@
     res.tenure = tenureInfo(n, ten, basis, head);
     res.options = () => tenureRows(s, n, ten, basis, solveC);
     // 3. the price being looked at: the buyer's own, else the comfortable budget (else the highest). quote(P) re-judges another price without searching again.
-    const quote = (P) => { const at = evaluate(n, basis, P); if (!at.ok) return null; const q = { price: P, at: at, zone: at.zone }; if (at.zone === 'over') q.fixes = fixesFor(n, basis, P, at, head); q.range = rangeFor(head.highest, P); return q; };
+    const quote = (P, V) => { const at = evaluate(n, basis, P, { valuation: V }); if (!at.ok) return null; const q = { price: P, at: at, zone: at.zone }; if (at.zone === 'over') q.fixes = fixesFor(n, basis, P, at, head, V); q.range = rangeFor(head.highest, P); return q; };
     const tried = has(s.price) && s.price > 0 ? s.price : (head.comfortable !== null ? head.comfortable : head.highest);
     res.quote = quote; res.priceIsOwn = has(s.price) && s.price > 0;
     res.atComfortable = head.comfortable !== null ? evaluate(n, basis, head.comfortable) : null; res.atHighest = evaluate(n, basis, head.highest);
-    const q0 = quote(tried);
+    const q0 = quote(tried, res.priceIsOwn ? n.valuation : undefined);   // a valuation is that one price's: the maximum above is worked as if the valuation matched the price
     if (!q0) { res.state = 'invalid'; res.errors = [{ key: 'price', text: 'This price could not be worked out. Please check it.' }]; return res; }
     res.price = tried; res.at = q0.at; res.zone = q0.zone; res.range = q0.range; if (q0.fixes) res.fixes = q0.fixes;
     return res;
@@ -385,20 +389,20 @@
     return { lo: lo, hi: Math.min(hi, CEIL_PRICE), step: STEP };
   }
   // the least extra cash ($1,000 steps) that makes `P` fit; null when none does
-  function needCashFor(n, mode, P) {
-    const f = (x) => { const e = evaluate(n, mode, P, { addCash: x }); return e.ok && e.fits; };
+  function needCashFor(n, mode, P, V) {
+    const f = (x) => { const e = evaluate(n, mode, P, { addCash: x, valuation: V }); return e.ok && e.fits; };
     if (f(0)) return 0;
     let lo = 0, hi = 1000;
     while (!f(hi)) { lo = hi; hi *= 2; if (hi > C.LIMITS.money.max) return null; }
     for (let k = 0; k < 60 && hi - lo > 1000; k++) { const m = (lo + hi) / 2; if (f(m)) hi = m; else lo = m; }
     return ceilStep(hi, 1000);
   }
-  function fixesFor(n, mode, P, at, head) {
+  function fixesFor(n, mode, P, at, head, V) {
     const list = [];
     const target = head.comfortable !== null ? head.comfortable : head.highest;
     if (target !== null && target < P) { const e = evaluate(n, mode, target); if (e.ok) list.push({ id: 'price', kind: 'price', from: P, to: target, after: e }); }
-    const x = needCashFor(n, mode, P);
-    if (x !== null && x > 0) { const e = evaluate(n, mode, P, { addCash: x }); if (e.ok) list.push({ id: 'cash', kind: 'cash', add: x, after: e }); }
+    const x = needCashFor(n, mode, P, V);
+    if (x !== null && x > 0) { const e = evaluate(n, mode, P, { addCash: x, valuation: V }); if (e.ok) list.push({ id: 'cash', kind: 'cash', add: x, after: e }); }
     return list;
   }
 

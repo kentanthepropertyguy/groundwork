@@ -62,8 +62,9 @@ try:
         hd = pg.inner_text('[data-answer]')
         check(vn + ': $900,000 is affordable and says so in the headline', 'Within your budget' in hd, hd)
         f2 = pg.eval_on_selector_all('.pa-fig', 'e=>e.map(x=>x.innerText.replace(/\\s+/g," ").trim())')
-        check(vn + ': $900,000 shows the loan and monthly mortgage as supporting figures', len(f2) == 2 and 'ank loan' in f2[0] and 'onthly mortgage' in f2[1] and f2[0].count('$') >= 1, f2)
-        check(vn + ': $900,000 states the cash and CPF needed and the minimum cash', re.search(r'You need \$246,600 in cash and CPF, at least \$66,600 of it in cash', pg.inner_text('[data-why]')) is not None, pg.inner_text('[data-why]'))
+        check(vn + ': $900,000 shows cash and CPF needed, the loan and the monthly mortgage as three figures', len(f2) == 3 and 'Cash and CPF needed' in f2[0] and 'ank loan' in f2[1] and 'onthly mortgage' in f2[2] and f2[1].count('$') >= 1, f2)
+        check(vn + ': $900,000 states the cash and CPF needed and the minimum cash in the first figure', re.search(r'Cash and CPF needed \$246,600 At least \$66,600 in cash', f2[0]) is not None and 'You have $300,000' in f2[0], f2[0])
+        check(vn + ': $900,000 lead is one short sentence, not the figures', pg.inner_text('[data-why]').strip() == '$33,400 of your cash would stay in hand after buying.', pg.inner_text('[data-why]'))
         check(vn + ': no second price card or status banner is drawn', pg.inner_text('[data-tiles]').strip() == '' and pg.inner_text('[data-status]').strip() == '')
         pg.fill('#pa-price', '1,300,000'); settle(pg)
         hd = pg.inner_text('[data-answer]'); nx = pg.inner_text('[data-next]')
@@ -72,7 +73,7 @@ try:
         pg.fill('#pa-price', '2,500,000'); settle(pg)
         hd = pg.inner_text('[data-answer]'); wy = pg.inner_text('[data-why]')
         check(vn + ': $2.5m: headline is the specific shortfall, $419,600', hd.strip() == '$419,600 short', hd)
-        check(vn + ': $2.5m: states the minimum cash ($219,600) and the cash CPF cannot cover ($119,600)', '$219,600 of it in cash' in wy and '$119,600' in wy and 'CPF cannot cover' in wy, wy)
+        check(vn + ': $2.5m: states the minimum cash ($219,600) and the cash CPF cannot cover ($119,600)', '$119,600' in wy and 'CPF cannot cover' in wy and 'At least $219,600 in cash' in pg.inner_text('.pa-figs').replace('\n', ' '), wy)
         dl = pg.inner_text('[data-dateline]')
         check(vn + ': $2.5m: the first date that fails is named with its amount', re.search(r'First short on .*\$25,000', dl) is not None, dl)
         pg.click('[data-open-dates]'); pg.wait_for_timeout(200)
@@ -122,8 +123,12 @@ try:
     pg.fill('#pa-price', '3,400,000'); settle(pg)
     sw = pg.inner_text('[data-sale-warn]') if pg.query_selector('[data-sale-warn]') else ''
     check('sale: at $3.4m the option fee, exercise and stamp duty ($313,600) exceed what is in hand now and are flagged as a projection', 'Projected' in sw and '$313,600' in sw and 'before your sale completes' in sw, sw)
+    # the early payments are cash (CPF cannot pay an option fee or reimburse the seller; it is released at completion), so they are compared with the $100,000 of cash, not cash + CPF
     pg.fill('#pa-price', '1,400,000'); settle(pg)
-    check('sale: at $1.4m the price is within budget, the early payments fit what is in hand, so no projection is shown', 'Within your budget' in pg.inner_text('[data-answer]') and pg.query_selector('[data-sale-warn]') is None, pg.inner_text('[data-answer]'))
+    sw = pg.inner_text('[data-sale-warn]') if pg.query_selector('[data-sale-warn]') else ''
+    check('sale: at $1.4m the early payments ($110,600) exceed the $100,000 of cash in hand (CPF is not counted), so they are flagged', 'Projected' in sw and '$110,600' in sw and 'paid in cash' in sw, sw)
+    pg.fill('#pa-price', '1,200,000'); settle(pg)
+    check('sale: at $1.2m the price is within budget, the early payments ($92,600) fit the cash in hand, so no projection is shown', 'Within your budget' in pg.inner_text('[data-answer]') and pg.query_selector('[data-sale-warn]') is None, pg.inner_text('[data-answer]'))
     check('sale: the need line does not mix the sale into "have"', 'and have' not in pg.inner_text('[data-why]'), pg.inner_text('[data-why]'))
     check('sale: no script errors', not errs, errs); ctx.close()
     # a new launch: dates are NOT checked until the monthly amounts are entered; then they are labelled as theirs

@@ -136,12 +136,14 @@
       numf('tenure', 'Loan tenure', 'years', { opt: true, ph: 'longest standard', hint: TENURE_NOTE })) +
       chips('loans', 'Housing loans you still have', LOANS, { value: '0', share: 'housingLoans', hint: LOANS_HINT }),
     msr: () => chips('scenario', 'Buying', [['hdb-loan', 'HDB flat, HDB loan'], ['hdb-bank', 'HDB flat, bank loan'], ['ec', 'New EC, bank loan']], { value: 'hdb-loan' }) +
-      chips('household', 'Household', [['family', 'Family'], ['extended', 'Extended family'], ['single', 'Single, 35 or older']], { value: 'family', when: 'scenario:hdb-loan', hint: 'Income ceilings for an HDB loan: $16,000 a month for families, $24,000 for extended families, $8,000 for singles.' }) + borrowersBlock() + grid(
+      chips('household', 'Household', [['family', 'Family'], ['extended', 'Extended family'], ['single', 'Single, 35 or older']], { value: 'family', when: 'scenario:hdb-loan', hint: '<span data-when="household:family">HDB loan income ceiling: $16,000 a month.</span><span data-when="household:extended">HDB loan income ceiling: $24,000 a month.</span><span data-when="household:single">HDB loan income ceiling: $8,000 a month. Singles must be 35 or older.</span>' }) + borrowersBlock() + grid(
       money('propertyLoans', 'Existing property loan instalments', { opt: true, ph: 'per month, 0 if none' }) +
       money('otherDebts', 'Other monthly debt repayments', { opt: true, when: 'scenario:hdb-bank,ec', ph: 'car, cards, other loans' }) +
       numf('lease', 'Remaining lease of the flat', 'years', { opt: true, when: 'scenario:hdb-loan', ph: 'e.g. 70' }) +
       numf('tenure', 'Loan tenure', 'years', { opt: true, ph: 'longest allowed', hint: TENURE_NOTE })) +
-      chips('loans', 'Housing loans you still have', LOANS, { value: '0', share: 'housingLoans', when: 'scenario:hdb-bank,ec', hint: LOANS_HINT }),
+      chips('loans', 'Housing loans you still have', LOANS, { value: '0', share: 'housingLoans', when: 'scenario:hdb-bank,ec', hint: LOANS_HINT }) +
+      // Package 4: a specific resale flat. Optional and closed: the loan, the minimum cash and the CPF part are on the lower of the price and HDB's valuation; the price above the valuation is cash.
+      '<div data-when="scenario:hdb-loan,hdb-bank">' + more(money('price', 'Flat price', { opt: true, ph: 'the resale price agreed', hint: 'The price in your Option to Purchase.' }) + money('valuation', 'HDB’s valuation of the flat', { opt: true, ph: 'if you have it', hint: 'HDB and banks lend on the lower of the price and the valuation. What the price is above the valuation (cash over valuation) is paid in cash.' }), 'Check a specific flat') + '</div>',
     // A2-02: the borrower's age decides whether the loan runs past 65 (shared with the other calculators' first borrower)
     progressive: () => chips('kind', 'What are you buying?', KIND_STAMP.slice(0, 2), { value: 'private' }) + grid(money('price', 'Purchase price', { share: 'buyPrice', ph: 'e.g. 1,800,000' }) +
       numf('age', 'Borrower’s age', 'years', { share: 'borrowers.0.age', ph: 'e.g. 35', when: 'entity:0', hint: 'Two borrowers: their income-weighted average age (30 earning $3,000 and 50 earning $12,000 gives 46). How much can I borrow? works it out. MAS’s weighting is not confirmed, so results for two borrowers with variable or rental income are unverified.' }) +
@@ -201,6 +203,40 @@
     return '<figure class="gw-ssdt"><figcaption>Years after you bought, and the rate in each</figcaption><div class="trk" aria-hidden="true">' + reg.rates.map((x, i) => '<span' + (band === i ? ' class="on"' : '') + '><b>' + pc(x) + '</b><small>Year ' + (i + 1) + '</small></span>').join('') +
       '<span class="free' + (band === -1 ? ' on' : '') + '"><b>No SSD</b><small>From year ' + (yrs + 1) + '</small></span><i style="left:' + at.toFixed(1) + '%"></i></div><p class="gw-fine">The marker is your sale date: ' + esc(r.heldText) + ' after you bought' + (held > span ? ', beyond the SSD period' : '') + '.</p></figure>';
   }
+  // Package 4: what a specific resale flat needs (C.msr's `flat`): the loan limit and the minimum cash are on the LOWER of the price and the valuation; the price above the valuation is cash only.
+  function flatBlock(r) {
+    const f = r.flat; if (!f) return '';
+    const hdb = r.scenario === 'hdb-loan';
+    const cov = f.cov > 0.5, above = f.dutyBase > f.price + 0.5, cashRow = f.cashOnly > 0.5;
+    // an HDB loan needs no minimum cash (CPF OA can pay the whole downpayment); a bank loan needs its minimum cash. Cash over valuation is cash in both.
+    const why = hdb
+      ? (cov ? 'Cash only is the ' + $(f.cov) + ' above the valuation (cash over valuation). An HDB loan needs no minimum cash, so your CPF OA can pay the rest.' : 'An HDB loan needs no minimum cash: your CPF OA can pay the whole amount beyond the loan.')
+      : 'Cash only is the ' + pc(f.minCashPct) + ' minimum cash (' + $(f.cashMin) + ')' + (cov ? ' plus the ' + $(f.cov) + ' above the valuation (cash over valuation).' : '.');
+    return '<div class="gw-flat"><p class="gw-flat-h">' + (cov ? 'At ' + $(f.price) + ', with a valuation of ' + $(f.valuation) : 'At ' + $(f.price) + (f.valuation ? ', valuation ' + $(f.valuation) : '')) + '</p>' + rows([
+      ['Loan limit on the ' + (cov ? 'valuation' : 'price'), $(f.loanLimit) + ' (' + pc(f.ltv, f.ltv === 0.75 || !hdb ? 0 : 1) + ' of ' + $(f.base) + ')'],
+      [eligFlag(r) === 'age' ? 'Theoretical loan (singles age requirement not met)' : eligFlag(r) === 'ceiling' ? 'Theoretical loan (income above the HDB ceiling)' : 'Loan you could take', $(f.loan) + (f.incomeLimited ? ' (your income is the limit)' : ''), 'tot'],
+      ['To pay beyond the loan', $(f.down)],
+      cashRow ? ['Of which cash only', $(f.cashOnly)] : null,
+      ['Of which cash or CPF OA', $(f.cashOrCpf)]].filter(Boolean)) +
+      notes([why, 'The option and exercise fees are paid in cash when you sign. They are part of this amount, not extra.', above ? 'The valuation is above the price, so the loan is worked on the price. Stamp duty is on the higher, ' + $(f.dutyBase) + '.' : '', 'Stamp duty, legal fees and renovation are not included.'].filter(Boolean)) + '</div>';
+  }
+  // The HDB loan limit page: the calculator's notes in fewer words (the same facts; the full text stays in the WhatsApp message and the assumptions).
+  const HH_NAME = { family: 'families', extended: 'extended families', single: 'singles' };
+  // The calculator's own eligibility check (note id 'ceiling'): household income above the HDB loan ceiling for the household chosen. When it fires, that is the result;
+  // the loan the income would otherwise support stays on the page, labelled theoretical. Nothing is recalculated here.
+  // 'age': Single selected but the applicant is under 35 (note id 'single-age'); 'ceiling': income above the ceiling (note id 'ceiling'). Age leads if both apply.
+  const eligFlag = (r) => {
+    if (!(r && r.scenario === 'hdb-loan')) return '';
+    const ns = r.notes || [];
+    return ns.some((n) => n.id === 'single-age') ? 'age' : (r.ceiling && ns.some((n) => n.id === 'ceiling') ? 'ceiling' : '');
+  };
+  const ceilingOver = (r) => !!eligFlag(r);
+  const msrNote = (r) => (n) => {
+    if (n.id === 'ceiling' && r.ceiling) return 'Household income is above the $' + r.ceiling.toLocaleString('en-US') + ' a month HDB loan ceiling for ' + (HH_NAME[r.household] || 'your household') + '. You may need a bank loan instead.';
+    if (n.id === 'lease-unknown') return 'Add the remaining lease. If it won’t last until the youngest applicant is 95, HDB lends less than 75% of the price.';
+    if (n.id === 'commitments') return 'HDB also looks at your other loans, so it may lend less than this.';
+    return n;
+  };
   const RENDER = {
     mortgage(r) {
       return head('Monthly instalment', $(r.monthly), 'over ' + span(r.months)) +
@@ -288,18 +324,24 @@
         if (r.cause === 'age') return '<p class="gw-warn">The standard loan tenure ends at age 65, so at this age the rules leave no tenure for a new loan unless you choose one. Enter a loan tenure to see the limit: a loan that runs past 65 takes the lower loan limit.</p>';
         return '<p class="gw-warn">The loan rules leave no tenure for a new loan with these details.</p>';
       }
-      const t = r.tenure, hdb = r.scenario === 'hdb-loan';
-      return head('Indicative maximum loan', $(r.maxLoan), 'over ' + t.years + ' years, tested at ' + pc(r.rate)) +
+      const t = r.tenure, hdb = r.scenario === 'hdb-loan', over = ceilingOver(r);
+      const flag = eligFlag(r), minAge = (root.GW_RULES && root.GW_RULES.hdbSingleMinAge) || 35;
+      return (flag === 'age' ? head('HDB purchase eligibility', 'Singles age requirement not met', 'Singles buying an HDB flat under the Single Singapore Citizen scheme must be ' + minAge + ' or older, and the age entered is ' + r.B.youngest + '. This limits the purchase itself, so a bank loan does not change it. Other schemes may apply: confirm with an HFE letter.') +
+        rows([['Theoretical maximum HDB loan, if the requirements were met', $(r.maxLoan) + ' over ' + t.years + ' years, tested at ' + pc(r.rate), 'w']])
+        : flag === 'ceiling' ? head('HDB loan eligibility', 'Income above the ceiling', 'Household income ' + $(r.B.gross) + ' a month; the HDB loan ceiling for ' + (HH_NAME[r.household] || 'your household') + ' is ' + $(r.ceiling) + '. You may need a bank loan instead.') +
+        rows([['Theoretical maximum loan, if the ceiling were met', $(r.maxLoan) + ' over ' + t.years + ' years, tested at ' + pc(r.rate), 'w']])
+        : head('Indicative maximum loan', $(r.maxLoan), 'over ' + t.years + ' years, tested at ' + pc(r.rate))) +
         stack('Your monthly income, as ' + (hdb ? 'HDB' : 'banks') + ' count it', [['Existing property loans', Math.min(r.prop || 0, r.msrCap), 'c5'], ['Left for the new loan', r.forNew, 'c4'], !hdb ? ['Within 30% but over the TDSR limit', Math.max(0, r.msrCap - (r.prop || 0) - r.forNew), 'c3'] : null, ['Above the 30% limit', (hdb ? r.B.gross : r.B.assessable) - r.msrCap, 'c6']], ' a month') +
         // V1-06: when the lease leaves a very low loan limit, the "price" it implies is misleading, so say the limit instead
-        rows([r.ltv < 0.5 ? ['Loan limit with this lease', 'Only ' + pc(r.ltv, 1) + ' of the price can be borrowed with this lease'] : ['Price this loan supports', $(r.priceAtLtv) + ' (' + pc(r.ltv) + ' loan)']]) +
-        notes((r.notes || []).concat([tenureAssumed(r.tenure, r.ltv, r.longer, (l) => 'maximum loan ' + $(l.maxLoan) + '.')].filter(Boolean))) +
+        rows([r.ltv < 0.5 ? ['Loan limit with this lease', 'Only ' + pc(r.ltv, 1) + ' of the price can be borrowed with this lease'] : [over ? 'Price that theoretical loan supports' : 'Price this loan supports', $(r.priceAtLtv) + ' (' + pc(r.ltv) + ' loan)']]) +
+        flatBlock(r) +
+        notes((r.notes || []).filter((n) => !(flag === 'ceiling' && n.id === 'ceiling') && !(flag === 'age' && n.id === 'single-age')).map(msrNote(r)).concat([tenureAssumed(r.tenure, r.ltv, r.longer, (l) => 'maximum loan ' + $(l.maxLoan) + '.')].filter(Boolean))) +
         work(rows([['Income counted', $(hdb ? r.B.gross : r.B.assessable) + ' a month'], ['MSR limit, 30%', $(r.msrCap) + ' a month'], r.prop ? ['Less existing property loans', '−' + $(r.prop)] : null,
           !hdb ? ['TDSR limit, 55%, less all debts', $(r.forNewTdsr) + ' a month'] : null, ['Left for the new loan', $(r.forNew) + ' a month' + (!hdb ? ' (' + r.binding.toUpperCase() + ' is the limit)' : ''), 'tot'],
           hdb ? ['Tenure', t.years + ' years (the shortest of 25, 65 minus average age' + (t.lease ? ', lease minus 20' : '') + ')', 'w'] : ['Tenure', t.years + ' years (standard up to ' + t.std + ')'],
           ['Loan limit (LTV)', pc(r.ltv, r.ltv === 0.75 || !hdb ? 0 : 1)]])) +
-        sources([hdb ? 'HDB tests the loan at 3% or its loan rate, if higher (2.6% a year, valid to 31 Dec 2026). You need an HDB Flat Eligibility (HFE) letter; HDB decides the loan.' : 'Banks test the loan at 4% or their own higher rate, against both MSR and TDSR. They decide the final amount.'],
-          'Rules: MAS Notice 645 (MSR 30%, TDSR 55%, at 4%); HDB loan: 3% floor, 75% LTV pro-rated if the lease doesn’t cover the youngest applicant to 95, 25 years, income ceilings from 24 Aug 2026 (HDB, MND). Checked 9 Oct 2026.') +
+        sources([hdb ? 'HDB tests the loan at 3% or its loan rate, if higher (2.6% a year, valid to 31 Dec 2026). You need an HDB Flat Eligibility (HFE) letter, and everyone in the HFE application counts towards the income ceiling. HDB decides the loan.' : 'Banks test the loan at 4% or their own higher rate, against both MSR and TDSR. They decide the final amount.'],
+          'Rules: MAS Notice 645 (MSR 30%, TDSR 55%, at 4%); HDB loan: 3% floor, 75% LTV pro-rated if the lease doesn’t cover the youngest applicant to 95, 25 years, income ceilings from 24 Aug 2026 (HDB, MND). Checked 9 Oct 2026.' + (r.flat ? ' Valuation: the loan is on the lower of price and valuation; an HDB loan needs no minimum cash, a bank loan does; cash over valuation is cash (HDB, CPF Board). Checked 24 Oct 2026.' : '')) +
         next([['../tdsr/', 'TDSR in detail', 'calc-tdsr'], ['../mortgage/', 'Monthly instalment', 'calc-mortgage']]);
     },
     progressive(r) {
@@ -407,7 +449,7 @@
       }
       if (adj) o.adjustedFrom = adj;
       if (typeof v.loans === 'number') o.loans = v.loans;
-      const t = C.tenureNote(o); if (el.textContent !== t) el.textContent = t;
+      let t = C.tenureNote(o); if (o.hdbLoan) t = t.replace(' A shorter tenure is allowed.', ''); if (el.textContent !== t) el.textContent = t;
     }
     // New launch payments, TDSR and MSR: the loan-tenure field (the ones with a line under them) shows the tenure used (gw-money.js)
     const tenureEl = box.querySelector('[data-tenure-note]') && box.querySelector('[data-k="tenure"],[data-k="years"]');
@@ -554,7 +596,7 @@
     // ---- the assessment ----
     // R2.4: the assessment ends with the page's reference, e.g. (Ref KPT-CALC-SD · wati/oct): the page and campaign, never a figure
     const withRef = (m) => (root.KPT && root.KPT.waTag ? root.KPT.waTag(m) : m);
-    const message = () => withRef(C.messages[FN[id]](last.v, last.r) + (last.v.cpfInterestEstimated ? '\n(CPF accrued interest is a rough upper estimate at 2.5% a year on the full amount.)' : ''));
+    const message = () => withRef((id === 'msr' && ceilingOver(last.r) ? C.messages[FN[id]](last.v, last.r).replace('Indicative maximum loan', eligFlag(last.r) === 'age' ? 'Theoretical maximum HDB loan (singles age requirement not met, so not eligible to buy under that scheme)' : 'Theoretical maximum loan (income above the HDB loan ceiling, so not eligible for an HDB loan)') : C.messages[FN[id]](last.v, last.r)) + (last.v.cpfInterestEstimated ? '\n(CPF accrued interest is a rough upper estimate at 2.5% a year on the full amount.)' : ''));
     box.querySelector('[data-send-wa]').addEventListener('click', () => {
       if (!last) return;
       const msg = message();
