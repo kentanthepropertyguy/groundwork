@@ -1,6 +1,6 @@
 # Bedroom types, URA-first (built locally 24 Oct 2026; not released)
 
-Nothing on the site reads these outputs yet. Any release needs Ken's approval. Size bands stay the headline, and Budget Search never infers bedrooms.
+Research by bedroom type (V1, approved by Ken 24 Oct 2026) reads `data/projects/bedroom/`, built from the ACCEPTED snapshot by `build-bedroom-research.js` ("Publishing to Research" below). Nothing else on the site reads these outputs, and Budget Search never infers bedrooms.
 
 ## Evidence, in order
 
@@ -95,6 +95,24 @@ node tools/market-data/bedroom-metrics.js --raw <private URA folder> --report <p
 **If a step is skipped.** Skipping the fetch only leaves the window stale: it ends at the newest quarter present, and the run says so. It never widens. Files copied into the URA folder by hand are ignored by the classification and moved to the archive by the next fetch.
 
 The brochure pass is paused (Ken, 24 Oct 2026). Run it only when asked; it resumes where its page budget stopped.
+
+## Publishing to Research (`build-bedroom-research.js`, V1)
+
+Run after a classification run has been ACCEPTED (the checks above), with the same URA download as the Research data:
+
+```
+node tools/market-data/build-bedroom-research.js --raw <private URA folder> --snapshot <accepted snapshot.json> --site . --report <private folder>
+```
+
+- It does not classify. Each sale takes the accepted run's decision for its area (`v:` floor plans, `i:` URA rental records, null unclassified); the statistics are `bedroom-engine.js`'s (`analyse`, `cell`, `reading`).
+- It refuses a comparison snapshot, any window but 12 quarters, a data month different from `data/projects/manifest.json`, and a `--report` folder inside the site.
+- Published (`data/projects/bedroom/manifest.json` + `sNN.json`, sharded like `data/projects/detail`): aggregates only, resales only, per development and bedroom type. The gate is `bedroom-hybrid.js completeness()` (Claude C's review, 24 Oct 2026), applied unchanged:
+  - the development has at least 70% of its latest-24-month resales classified;
+  - the type has at least 5 classified resales in that window;
+  - at most 20% of the type's POSSIBLE recent resales are unclassified. Every unclassified size carries `possible` (private): the counts declared by at least 10% of the URA rental contracts touching it (all declared counts under 5 contracts), else the counts of the nearest classified sizes below and above. The publish step works it out from the accepted snapshot and the same 12 rental quarters (`possibleFor`), so the URA folder must hold those quarters; the layout side of a contradiction (3 sizes) is the one part it cannot see without the layout tables.
+  - A shown type also meets the typical-price rule (5 sales over 3 months) within 12 or 24 months. Types with under 5 classified recent resales are named, without figures; types withheld for coverage or ambiguity are not named.
+  - Price movement is the Market Pulse reading on the type's most-sold 100 sq ft band (resales of that type in that band, inside the sizes shown), and only when the development's classified share is at least 70% in both years and differs by at most 15 points.
+- The private report lists every development with what was published or withheld, and why.
 
 ## Private, always
 

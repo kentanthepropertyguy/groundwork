@@ -113,5 +113,19 @@ t('public view: layout-verified types only unless rental inference is allowed; l
   const low = Object.assign({}, S, { totals: Object.assign({}, S.totals, { resale: Object.assign({}, S.totals.resale, { share: 0.5 }) }) });
   assert.deepStrictEqual(H.publicView({ developments: [low] }).developments, {});
 });
+t('completeness gate: unclassified sizes carry their possible bedroom counts; a type is withheld when too many of its possible resales are unclassified', () => {
+  // 63 sqm: 2BR by rentals; 97 sqm: rentals 6 x 3BR + 4 x 2BR (mixed: could be 2 or 3); 80 sqm: no rentals (could be its neighbours, 2 or 3); 110 sqm: 3BR
+  const rentals = rent('60-70', '600-700', 2, 30).concat(rent('90-100', '1000-1100', 3, 6), rent('90-100', '1000-1100', 2, 4), rent('110-120', '1200-1300', 3, 30));
+  const rows = sale(63, 20).concat(sale(97, 6), sale(80, 2), sale(115, 24)).map((x) => Object.assign({ project: 'Q' }, x));
+  const S = H.classifyDevelopment(rows, null, rentals, { latest: 2026 * 12 + 8, periodMonths: 12, periods: 5, bin: 100 });
+  const m = new Map(S.mapping.map((x) => [x.sqm, x]));
+  assert.deepStrictEqual(m.get('97').possible.sort(), ['2', '3']); assert.deepStrictEqual(m.get('80').possible.sort(), ['2', '3']); assert.ok(!('possible' in m.get('63')));
+  const c = H.completeness(S, rows, 2026 * 12 + 8);
+  assert.strictEqual(c.unclassified, 8); assert.strictEqual(c.coverage, 44 / 52);
+  assert.deepStrictEqual([c.types['2'].kept, c.types['2'].ambiguous, c.types['2'].ok], [20, 8, false]);   // 8 / 28 = 29% > 20%: withheld
+  assert.deepStrictEqual([c.types['3'].kept, c.types['3'].ambiguous, c.types['3'].ok], [24, 8, false]);   // 8 / 32 = 25%: withheld
+  assert.strictEqual(H.completeness(S, rows, 2026 * 12 + 8, { maxAmbiguousShare: 0.3 }).types['3'].ok, true);
+  assert.deepStrictEqual(H.rentalPossible({ counts: { 2: 19, 3: 1 } }), ['2']); assert.deepStrictEqual(H.rentalPossible({ counts: { 2: 3, 3: 1 } }).sort(), ['2', '3']);
+});
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

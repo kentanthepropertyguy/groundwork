@@ -230,9 +230,27 @@
       detailHtml(p) + '</section>';
   }
 
+  /* ---------- a bedroom type's price movement (Research by bedroom type, assets/js/gw-bedroom.js) ---------- */
+  // Never a bedroom-wide median: t.trend is this module's own reading (CFG) for the type's most-sold 100 sq ft band, resales of that type in
+  // that band only (tools/market-data/build-bedroom-research.js). label: '3-bedroom'. Returns {tone, head, sub, band}.
+  function bedroomText(t) {
+    const r = t && t.trend, label = t ? t.label : '', band = r && r.bin != null ? bandLabel(r.bin) : '';
+    if (!r) return { tone: 'count', head: 'No resales to compare', sub: '', band: '' };
+    if (r.why === 'coverage') return { tone: 'count', band, head: 'Not enough matched sales to measure a trend', sub: 'Too few of this development’s resales in one of the last two years could be matched to a bedroom count to compare the years fairly.' };
+    if (r.evidence === 'none') return { tone: 'count', band, head: 'Not enough comparable sales to measure a trend', sub: 'We compare only ' + label + ' homes of the same size (' + band + ', the most-sold ' + label + ' size here). There ' + (r.a === 1 ? 'was 1 resale' : 'were ' + r.a + ' resales') + ' of them in the last 12 months and ' + r.b + ' the year before, too few to say how prices moved.' };
+    const rel = r.dir === 'higher' ? 'higher than' : r.dir === 'lower' ? 'lower than' : 'broadly the same as';
+    if (r.evidence === 'strong') {
+      const move = r.pct === 0 ? 'level with' : pct1(r.pct) + '% ' + (r.pct > 0 ? 'above' : 'below');
+      const why = r.dir !== 'stable' ? '' : r.withinNoise ? ', a difference within the spread of what those homes fetched' : r.pct === 0 ? '' : ', a small difference';
+      return { tone: r.dir, band, head: 'Resale prices for these homes are ' + rel + ' a year earlier', sub: 'Median psf of ' + label + ' homes of ' + band + ' is ' + move + ' the 12 months before' + why + ', from ' + r.a + ' recent and ' + r.b + ' earlier resales.' };
+    }
+    return { tone: 'limited', band, head: 'A first look: prices for these homes appear ' + rel + ' a year earlier', sub: 'Only ' + r.a + ' and ' + r.b + ' resales of ' + label + ' homes of ' + band + ' in the two years, so this is not a reliable measure of price movement.' };
+  }
+
   /* ---------- the next step: who is asking decides the question; the message carries the development and the finding ---------- */
   function finding(p) {
     if (!p) return '';
+    if (p.kind === 'bedroom') return p.text || '';   // Research by bedroom type: gw-bedroom.js words its own finding (type, typical price, period)
     const rel = p.dir === 'higher' ? 'higher than' : p.dir === 'lower' ? 'lower than' : 'broadly the same as';
     if (p.state === 'trend' && p.evidence === 'strong') return 'resale prices for ' + p.band.label + ' ' + rel + ' a year earlier';
     if (p.state === 'trend') return 'a first look, on few sales, with resale prices for ' + p.band.label + ' ' + rel + ' a year earlier';
@@ -252,5 +270,5 @@
     return { trend: p.dir || 'none', evidence: p.evidence, sale_type: p.sale && SALE[p.sale] ? p.sale : undefined };
   }
 
-  return { VERSION, CFG, compute, compact, snapshot, html, detailHtml, sizedActs, finding, waMessage, trackParams, monthLabel, bandLabel };
+  return { VERSION, CFG, compute, compact, snapshot, html, detailHtml, sizedActs, finding, waMessage, trackParams, monthLabel, bandLabel, bedroomText };
 });

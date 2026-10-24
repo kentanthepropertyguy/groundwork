@@ -1,0 +1,17 @@
+/* Research by bedroom type (assets/js/gw-bedroom.js): the type chips in the size question, and the price lines under the typical price.
+   Reuses the size picker's and the answer's look; nothing new to learn. */
+body.kpr .gwb-pick .gwb-chips{ justify-content:flex-start; }
+body.kpr .gwb-or{ gap:6px 14px; }
+body.kpr .gwb-or-l{ font-size:14px; color:var(--kpt-muted); }
+body.kpr .gwb-few{ margin:0; max-width:62ch; }
+body.kpr .gwb-ans .gwb-l{ margin:0; font-size:15.5px; line-height:1.5; color:var(--kpt-ink); max-width:62ch; }
+body.kpr .gwb-ans .gwb-bud{ color:var(--kpt-muted); font-size:14.5px; }
+body.kpr .gwb-ans .lg-ans-v small{ font-size:15px; font-weight:500; color:var(--kpt-muted); letter-spacing:0; }
+body.kpr .gwb-mp .mp-acts .kpr-link{ font:inherit; font-weight:600; color:var(--gw-blue,#0B63CE); background:none; border:0; padding:0; min-height:40px; display:inline-flex; align-items:center; cursor:pointer; text-decoration:none; }
+body.kpr .gwb-mp .mp-acts .kpr-link:hover{ text-decoration:underline; }
+@media (max-width:640px){
+  /* phone: the types stay one scrolling row, like every chip row on the site, and the select says "Choose a size" itself, so the
+     size question keeps the price and the Market Pulse on the first screen */
+  body.kpr .gwb-or-l{ display:none; }
+  body.kpr .gwb-ans .gwb-l{ font-size:15px; }
+}

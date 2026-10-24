@@ -452,7 +452,7 @@
       mountQuiet(app, hooks);
       return;
     }
-    const LG = root.KPTLG; if (LG && app.querySelector('[data-lg="project"]')) LG.afterProject(M, app, { root: ROOT || '../', track: hooks.track, onCompare: hooks.onCompare, manifest: m });
+    const LG = root.KPTLG; if (LG && app.querySelector('[data-lg="project"]')) LG.afterProject(M, app, { root: ROOT || '../', track: hooks.track, onCompare: hooks.onCompare, manifest: m, bedTypical: hooks.bedTypical || null });
     if (typeof fetch !== 'function' || !ROOT) return;
     (factIds[M.id] ? fetch(ROOT + 'data/registry/p/' + M.id + '.json').then((r) => (r.ok ? r.json() : null)).catch(() => null) : Promise.resolve(null)).then((p) => {
       if (!p) return;

@@ -595,7 +595,7 @@
         const st = root.sessionStorage, old = (() => { try { return JSON.parse(st.getItem('kpt.handoff')); } catch (e) { return null; } })();
         if (!en || !r || r.state !== 'ok' || !(r.budget > 0)) { if (old && old.from === 'planner') st.removeItem('kpt.handoff'); return; }
         if (old && old.from !== 'planner' && !firstEdit) return;
-        const ages = en.buyers.map((b) => b.age).filter(Boolean), h = { v: 1, from: 'planner', state: 'ok', budget: { low: r.budget, high: r.budget, single: true }, maxAge: ages.length ? Math.max.apply(null, ages) : null, src: null };
+        const ages = en.buyers.map((b) => b.age).filter(Boolean), h = { v: 1, from: 'planner', state: 'ok', budget: { low: r.budget, high: r.budget, single: true }, maxAge: ages.length ? Math.max.apply(null, ages) : null, src: null, j: journey ? 1 : 0 };   // j: worked out on the journey (Research compares its prices with it only then)
         if (old && old.from === 'planner' && !old.edited && old.budget && old.budget.high === h.budget.high) { if (old.find) h.find = old.find; if (old.find2) h.find2 = old.find2; }
         st.setItem('kpt.handoff', JSON.stringify(h));
       } catch (e) { /* storage unavailable: Budget Search then asks for a budget */ }

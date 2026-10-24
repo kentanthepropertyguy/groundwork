@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="../assets/css/kpt-compare-v2.css?v=ccef324e32">
 <link rel="stylesheet" href="../assets/css/kpt-lg.css?v=69a9a8cb4a">
 <link rel="stylesheet" href="../assets/css/gw-pulse.css?v=3387a27e04">
+<link rel="stylesheet" href="../assets/css/gw-bedroom.css?v=3a5cf8d969">
 <link rel="canonical" href="https://tools.kentanthepropertyguy.com/research/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Groundwork">
@@ -48,15 +49,16 @@
 <script src="../assets/js/kpt-analytics.js?v=3b78ef5642"></script>
 <script src="../assets/js/kpt-components.js?v=597f0bf0d3"></script>
 <script src="../assets/js/kpt-project.js?v=c9def7da05"></script>
-<script src="../assets/js/kpt-research.js?v=3019cead20"></script>
+<script src="../assets/js/kpt-research.js?v=4fa8834957"></script>
 <script src="../assets/js/kpt-intel.js?v=9474e171b4"></script>
 <script src="../assets/js/kpt-evidence.js?v=913139e3ad"></script>
 <script>window.GW_SAMPLE = {"a":"Jadescape","b":"Thomson Three","psf":[2323,2152],"band":"700–799 sqft","period":"Oct 2025 to Sep 2026"};</script>
 <script>window.GW_NOT_COVERED = {"ec":[],"cluster":["KEW LODGE"]};</script>
 <script src="../assets/js/gw-ask.js?v=bfe1e2e419"></script>
-<script src="../assets/js/gw-pulse.js?v=1c5e0e31a8"></script>
-<script src="../assets/js/kpt-lg.js?v=68f3aa2329"></script>
-<script src="../assets/js/kpt-compare-v2.js?v=2f193bb537"></script>
+<script src="../assets/js/gw-pulse.js?v=6b170dca99"></script>
+<script src="../assets/js/gw-bedroom.js?v=44c19ad8bb"></script>
+<script src="../assets/js/kpt-lg.js?v=eb22123903"></script>
+<script src="../assets/js/kpt-compare-v2.js?v=a2d54322b2"></script>
 <script src="../data/research/config.js?v=df6f3c6908"></script>
 <script>
 // Presentation only. All reasoning is in assets/js/kpt-research.js; all numbers come from the generated project data.
@@ -73,9 +75,19 @@
   const getJson = (u) => fetch(u + (u.indexOf('?') > -1 ? '&' : '?') + 'v=' + BUILD).then((r) => { if (!r.ok) throw new Error(u + ' ' + r.status); return r.json(); });
   const store = P.createStore(base, getJson);
   const TODAY = new Date().toISOString().slice(0, 10);
-  const S = { size: '', win: null, pairKey: null, cur: null };
-  try { S.size = sessionStorage.getItem('kpt.research.size') || ''; } catch (e) {}
-  const saveSize = () => { try { if (S.size) sessionStorage.setItem('kpt.research.size', S.size); else sessionStorage.removeItem('kpt.research.size'); } catch (e) {} };
+  const S = { size: '', bed: '', win: null, pairKey: null, cur: null };
+  // A size and a bedroom type are never both kept: choosing one clears the other. Both present can only mean the Map has just passed a size
+  // (it writes kpt.research.size only), so the size wins. Tab only; nothing typed leaves the device.
+  try { S.size = sessionStorage.getItem('kpt.research.size') || ''; S.bed = sessionStorage.getItem('kpt.research.bed') || ''; if (!/^(PH|[0-9])$/.test(S.bed) || S.size) { S.bed = ''; sessionStorage.removeItem('kpt.research.bed'); } } catch (e) {}
+  const saveBed = () => { try { if (S.bed) sessionStorage.setItem('kpt.research.bed', S.bed); else sessionStorage.removeItem('kpt.research.bed'); } catch (e) {} };
+  const saveSize = () => { if (S.size) { S.bed = ''; saveBed(); } try { if (S.size) sessionStorage.setItem('kpt.research.size', S.size); else sessionStorage.removeItem('kpt.research.size'); } catch (e) {} };
+  const chooseBed = (g) => { S.bed = g || ''; if (S.bed) { S.size = ''; saveSize(); } saveBed(); };
+  // Research by bedroom type: data/projects/bedroom (manifest, then one shard per development, like the detail files). No file, no types.
+  let bedMetaP = null;
+  const bedFor = (id, m) => { bedMetaP = bedMetaP || getJson('../data/projects/bedroom/manifest.json').catch(() => null);
+    return bedMetaP.then((bm) => (bm && window.GW_BED ? getJson('../data/projects/bedroom/' + P.shardName(P.shardOf(id, bm.shards)) + '.json').then((sh) => GW_BED.pick(sh, bm, id, m), () => null) : null)); };
+  // The maximum budget from What can I afford?, worked out on the journey in this tab (kpt.handoff, marked j). Compared with prices only.
+  const journeyBudget = () => { try { const h = JSON.parse(sessionStorage.getItem('kpt.handoff') || 'null'); return h && h.from === 'planner' && h.j === 1 && h.budget && h.budget.single && h.budget.high > 0 ? h.budget.high : null; } catch (e) { return null; } };
   const track = (ev, d) => { const pl = R.analytics(ev, d); if (pl) KPT.track(ev, pl); };
   // Market pulse: the report's own address (development id only; nothing typed) and the question the visitor came with (tab only, set by the Sell journey).
   const reportUrl = (id) => 'https://tools.kentanthepropertyguy.com/research/#/p/' + encodeURIComponent(id);
@@ -133,7 +145,7 @@
       <p class="kpr-note" id="sizeNote">${S.size ? '<button class="kpr-link" type="button" id="sizeClear">Clear</button> · ' : ''}Square feet only. Kept on this device, never sent to analytics or WhatsApp.</p><div class="kpr-err" id="sizeErr" role="alert"></div>${st ? `<div style="margin-top:6px">${st}</div>` : ''}</div>`;
     return `<details class="kpr-focus"${S.size ? ' open' : ''}><summary>Looking at a particular size?</summary>
       <div class="kpr-focus-row"><label class="kpr-note" for="sizeIn" style="margin:0">Size in sqft</label><input id="sizeIn" inputmode="numeric" autocomplete="off" placeholder="e.g. 1,000" value="${esc(S.size)}" aria-describedby="sizeNote"><button class="kpr-btn" type="button" id="sizeGo">Focus</button>${S.size ? '<button class="kpr-link" type="button" id="sizeClear">Clear</button>' : ''}</div>
-      <p class="kpr-note" id="sizeNote">Square feet only. We don't estimate bedrooms. This is kept on this device and is never sent to analytics or WhatsApp.</p><div class="kpr-err" id="sizeErr" role="alert"></div>${st ? `<div style="margin-top:8px">${st}</div>` : ''}</details>`;
+      <p class="kpr-note" id="sizeNote">Square feet only. This is kept on this device and is never sent to analytics or WhatsApp.</p><div class="kpr-err" id="sizeErr" role="alert"></div>${st ? `<div style="margin-top:8px">${st}</div>` : ''}</details>`;
   };
 
   // ---------------------------------------------------------------- home / search
@@ -429,10 +441,10 @@
   function mapOut(id) { try { const o = JSON.parse(sessionStorage.getItem('kpt.map.out') || 'null'); return o && (!id || o.id === id) ? o : null; } catch (e) { return null; } }
   function wireCommon(M, kind) {
     const wa = document.getElementById('wa');
-    if (wa && kind === 'project' && window.GW_PULSE) wa.href = KPT.waLink({ message: GW_PULSE.waMessage(S.pu, M.name, reportUrl(M.id), 'buy') });   /* S.pu is null until a size is chosen: the message then names the development only */
+    if (wa && kind === 'project' && window.GW_PULSE) wa.href = KPT.waLink({ message: GW_PULSE.waMessage(S.pu || S.bedWa, M.name, reportUrl(M.id), 'buy') });   /* S.pu is null until a size is chosen: the message then names the development only */
     else if (wa) wa.href = KPT.waLink({ message: M.wa });
     if (wa) { wa.addEventListener('click', () => KPT.track('whatsapp_click', Object.assign(R.analytics('research_whatsapp_clicked', kind === 'project' ? { context: 'project', project_id: M.id } : { context: 'comparison', project_a: M.a.id, project_b: M.b.id }) || {}, kind === 'project' ? { context: 'research-project', placement: 'project', intent: 'buy', ref: window.GW_PULSE && kind === 'project' ? 'KPT-PULSE-BUY' : 'KPT-RES-PRJ' } : { context: 'research-comparison', placement: 'comparison' }))); }
-    const wo = kind === 'project' ? document.getElementById('waOwn') : null; if (wo) { wo.href = KPT.waLink({ message: window.GW_PULSE ? GW_PULSE.waMessage(S.pu, M.name, reportUrl(M.id), 'sell') : "Hi Ken, I'm looking at " + M.name + " and would like to discuss selling or upgrading options. (Ref KPT-RES-OWN)" }); wo.addEventListener('click', () => KPT.track('whatsapp_click', Object.assign(R.analytics('research_whatsapp_clicked', { context: 'project', project_id: M.id }) || {}, { context: 'research-options', placement: 'project-options', intent: 'sell', ref: window.GW_PULSE ? 'KPT-PULSE-SELL' : 'KPT-RES-OWN' }))); }
+    const wo = kind === 'project' ? document.getElementById('waOwn') : null; if (wo) { wo.href = KPT.waLink({ message: window.GW_PULSE ? GW_PULSE.waMessage(S.pu || S.bedWa, M.name, reportUrl(M.id), 'sell') : "Hi Ken, I'm looking at " + M.name + " and would like to discuss selling or upgrading options. (Ref KPT-RES-OWN)" }); wo.addEventListener('click', () => KPT.track('whatsapp_click', Object.assign(R.analytics('research_whatsapp_clicked', { context: 'project', project_id: M.id }) || {}, { context: 'research-options', placement: 'project-options', intent: 'sell', ref: window.GW_PULSE ? 'KPT-PULSE-SELL' : 'KPT-RES-OWN' }))); }
     const b = $app.querySelector('[data-act=home]'); if (b) b.addEventListener('click', () => { location.hash = '#/'; });
     const mb = $app.querySelector('[data-act=map]'); if (mb) mb.addEventListener('click', () => { const o = mapOut(); if (o && o.n && history.length === o.n + 1) history.back(); else location.href = 'map/' + (o && /^#[\w=&.:%-]*$/.test(o.h || '') ? o.h : ''); });
     const sel = document.getElementById('sizeSel');
@@ -443,6 +455,11 @@
       go.addEventListener('click', apply); inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); apply(); } });
       const cl = document.getElementById('sizeClear'); if (cl) cl.addEventListener('click', () => { S.size = ''; saveSize(); rerender(); });
     }
+    if (kind === 'project') {
+      $app.querySelectorAll('[data-bed]').forEach((b) => b.addEventListener('click', () => { const g = b.dataset.bed; chooseBed(S.bed === g ? '' : g); rerender(); if (S.bed) track('research_bedroom_selected', { project_id: M.id, bedroom: S.bed, sale_type: M.sale.selected }); const n = $app.querySelector('[data-bed="' + g + '"]'); if (n) n.focus({ preventScroll: true }); }));
+      const bc = document.getElementById('bedClear'); if (bc) bc.addEventListener('click', () => { chooseBed(''); rerender(); });
+      const bs = document.getElementById('bedSwitch'); if (bs) bs.addEventListener('click', () => { S.size = ''; saveSize(); rerender(); const c = $app.querySelector('[data-bed]'); if (c) c.focus({ preventScroll: true }); });
+    }
   }
   function sizeEvent(M, kind) { if (S.size) once('size:' + S.size + ':' + kind, () => track('research_size_focus', { has_evidence: kind === 'project' ? !!(M.focus && M.focus.hasEvidence) : M.bands.some((b) => b.isFocus) })); }
 
@@ -451,12 +468,15 @@
     if (S.projId !== id) { S.evOpen = false; S.projId = id; }
     $app.innerHTML = '<div class="kpr-state"><div class="kpr-skel"></div><div class="kpr-skel" style="width:60%"></div><div class="kpr-skel" style="width:80%"></div></div>';
     store.manifest().then((m) => store.index().then((ix) => { const r = P.findById(ix, id); if (!r) throw new Error('nf'); return store.shard(id, m).then((d) => ({ m, p: d.projects[id], ix })); }))
-      .then((x) => Promise.all([loadPeers(x.p), loadNotes()]).then((y) => ({ m: x.m, p: x.p, ix: x.ix, peers: y[0], notes: y[1] })))
+      .then((x) => Promise.all([loadPeers(x.p), loadNotes(), bedFor(id, x.m)]).then((y) => ({ m: x.m, p: x.p, ix: x.ix, peers: y[0], notes: y[1], bed: y[2] })))
       .then((d) => {
         const draw = () => {
           S.rawP = d.p; S.rawM = d.m; const M = R.analyseProject(d.p, d.m, { sale: saleHash || undefined, sizeSqft: S.size || undefined, peers: d.peers, notes: d.notes, today: TODAY });
           document.body.dataset.view = 'project'; document.title = M.name + ' — Research — Groundwork';
-          if (window.KPTLG) { let IN = null; try { IN = window.KPTIntel ? KPTIntel.analyse(M, S.rawP, { sizeSqft: S.size || undefined, today: TODAY, monthStart: S.rawM && S.rawM.monthStart }) : null; } catch (e) { IN = null; } S.pu = window.GW_PULSE && M.focus && M.focus.userChosen && M.focus.bin != null ? (function () { try { const u = GW_PULSE.compute(S.rawP, S.rawM, { sale: M.sale.selected, bin: M.focus.bin }); u.userSized = true; return u; } catch (e) { return null; } })() : null;   /* a reading only for a size the visitor chose; never the most-sold size by default */ $app.innerHTML = KPTLG.projectHtml(M, { S, IN, PU: S.pu, forWho: forWho(), root: '../' }); } else $app.innerHTML = projectHtml(M);
+          if (window.KPTLG) { let IN = null; try { IN = window.KPTIntel ? KPTIntel.analyse(M, S.rawP, { sizeSqft: S.size || undefined, today: TODAY, monthStart: S.rawM && S.rawM.monthStart }) : null; } catch (e) { IN = null; } S.pu = window.GW_PULSE && M.focus && M.focus.userChosen && M.focus.bin != null ? (function () { try { const u = GW_PULSE.compute(S.rawP, S.rawM, { sale: M.sale.selected, bin: M.focus.bin }); u.userSized = true; return u; } catch (e) { return null; } })() : null;   /* a reading only for a size the visitor chose; never the most-sold size by default */
+            S.bv = window.GW_BED ? GW_BED.view(d.bed, M.sale.selected, S.size ? '' : S.bed) : null;   /* the type the visitor chose, only where this development shows it */
+            S.bedWa = S.bv && S.bv.t && !(M.focus && M.focus.userChosen) ? { kind: 'bedroom', text: GW_BED.finding(S.bv) } : null;
+            $app.innerHTML = KPTLG.projectHtml(M, { S, IN, PU: S.pu, BED: S.bv, budget: journeyBudget(), forWho: forWho(), root: '../' }); } else $app.innerHTML = projectHtml(M);
           { const mo = mapOut(M.id), bb = $app.querySelector('.lg-back'); if (mo && bb) { bb.textContent = '← Back to Map'; bb.dataset.act = 'map'; } }
           wireCommon(M, 'project'); sizeEvent(M, 'project');
           if (S.pu) {
@@ -469,10 +489,10 @@
             });
           }
           { const lead = $app.querySelector('[data-lg-lead]') || $app.querySelector('.kpr-meta'); if (lead) lead.insertAdjacentHTML('afterend', '<p class="lg-fine lg-center kpr-onmap"><a href="map/#p=' + encodeURIComponent(M.id) + '">See what is around it on the map ›</a></p>'); }
-          if (window.KPTV2) KPTV2.afterProject(M, $app, d.p, d.m, { R, searchBox, track, onPick: (x) => { location.hash = '#/p/' + x; }, onCompare: (x) => { S.win = null; location.hash = '#/compare/' + id + '/' + x; } });
+          if (window.KPTV2) KPTV2.afterProject(M, $app, d.p, d.m, { R, searchBox, track, bedTypical: S.bedWa ? GW_BED.typical(S.bv) : null, onPick: (x) => { location.hash = '#/p/' + x; }, onCompare: (x) => { S.win = null; location.hash = '#/compare/' + id + '/' + x; } });
           const evd = document.getElementById('evidence'); if (evd) evd.addEventListener('toggle', () => { S.evOpen = evd.open; });
           $app.querySelectorAll('[data-sale]').forEach((b) => b.addEventListener('click', () => { location.hash = R.buildHash({ view: 'project', id, sale: b.dataset.sale }); }));
-          $app.querySelectorAll('.kpr-row[data-bin], button.kpr-link[data-bin]').forEach((b) => b.addEventListener('click', () => { S.size = b.dataset.bin; saveSize(); draw(); const h = $app.querySelector('.kpr-panel'); if (h && window.innerWidth < 960) h.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }));
+          $app.querySelectorAll('.kpr-row[data-bin], button.kpr-link[data-bin], button.lg-btn[data-bin]').forEach((b) => b.addEventListener('click', () => { S.size = b.dataset.bin; saveSize(); draw(); if (b.matches('[data-gwb-size-trend], .lg-btn')) { const pk = document.getElementById('lgPick'); if (pk) pk.scrollIntoView({ block: 'start', behavior: 'smooth' }); } const h = $app.querySelector('.kpr-panel'); if (h && window.innerWidth < 960) h.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }));
           const cmp = document.getElementById('cmp'); if (cmp) cmp.addEventListener('click', () => track('research_compare_started', { project_id: id }));
           once('sel:' + id, () => track('research_project_selected', { project_id: id, sale_types: M.sale.options.length }));
           window.__kptResearchModel = M;
