@@ -6,7 +6,7 @@ let ok = 0, fail = 0;
 const check = (n, c, i) => { if (c) { ok++; } else { fail++; console.log('  FAIL', n, i === undefined ? '' : i); } };
 const walk = (d, o = []) => { for (const f of fs.readdirSync(d, { withFileTypes: true })) { if (/^(\.|node_modules|_)/.test(f.name)) continue; const p = path.join(d, f.name); if (f.isDirectory()) walk(p, o); else if (f.name.endsWith('.html')) o.push(p); } return o; };
 const pages = walk(ROOT).filter((f) => /class="gw-links"/.test(fs.readFileSync(f, 'utf8')));
-check('at least 20 pages carry the site header', pages.length >= 20, pages.length);
+check('at least 19 pages carry the site header (the old New launch payments address is a redirect and carries none)', pages.length >= 19, pages.length);
 const strip = (h) => h.replace(/^(\.\.\/)+/, '').replace(/^\.\//, '').replace(/^\//, '');
 const resolves = (from, href) => {
   if (/^(https?:|mailto:|tel:|#)/.test(href)) return true;
@@ -60,7 +60,7 @@ for (const f of pages) {
   check('All Tools: Guided planning holds What can I afford?, HDB upgrade planner, Full payment planning', [...guided.matchAll(/data-tool="([^"]+)"/g)].map((x) => x[1]).join('|') === 'planner|hdb-upgrade|payment-planner-full', guided.length);
   check('All Tools: Full payment planning opens the existing Payment timeline at its Funding check', /href="payment-planner\/#funding" data-tool="payment-planner-full"/.test(main));
   const tools = [...main.matchAll(/<a class="gw-tl" href="[^"]*" data-tool="([^"]+)"/g)].map((x) => x[1]);
-  ['planner', 'hdb-upgrade', 'payment-planner-full', 'tdsr', 'msr', 'mortgage', 'stamp-duty', 'payment-planner', 'progressive', 'sale-proceeds', 'ssd'].forEach((k) => check('All Tools lists ' + k + ' once', tools.filter((x) => x === k).length === 1, tools));
+  ['planner', 'hdb-upgrade', 'payment-planner-full', 'tdsr', 'msr', 'mortgage', 'stamp-duty', 'payment-planner', 'sale-proceeds', 'ssd'].forEach((k) => check('All Tools lists ' + k + ' once', tools.filter((x) => x === k).length === 1, tools));
   check('All Tools: nothing that lives under Research is listed here', !tools.some((x) => /^(worth|what-can-i-buy|research)$/.test(x)), tools);
   check('All Tools: no example result and no HDB-in-four-steps sentence', !/1\.09|Example result|four steps/i.test(main));
   check('All Tools: search is kept', /data-gw-search="tools"/.test(main));
@@ -75,6 +75,6 @@ if (GWN && GWN.SECTIONS) {
   // every tool folder is a registered tool with its own address, so the Tools directory can list it
   const dirs = fs.readdirSync(path.join(ROOT, 'tools'), { withFileTypes: true }).filter((d) => d.isDirectory() && fs.existsSync(path.join(ROOT, 'tools', d.name, 'index.html'))).map((d) => d.name);
   const hrefs = (GWN.ENTRIES || []).map((e) => e.href);
-  dirs.forEach((d) => check('tools/' + d + '/ is a registered destination' + (d === 'what-can-i-buy' ? ' (older address of the Research budget search; kept)' : ''), d === 'what-can-i-buy' || hrefs.some((h) => h && h.replace(/\/$/, '') === 'tools/' + d)));
+  dirs.forEach((d) => check('tools/' + d + '/ is a registered destination' + (d === 'what-can-i-buy' ? ' (older address of the Research budget search; kept)' : d === 'progressive-payments' ? ' (older address of New launch payments; now a redirect to the Payment timeline)' : ''), d === 'what-can-i-buy' || d === 'progressive-payments' || hrefs.some((h) => h && h.replace(/\/$/, '') === 'tools/' + d)));
 }
 console.log('nav-tests: ' + ok + ' passed, ' + fail + ' failed'); process.exit(fail ? 1 : 0);

@@ -178,6 +178,19 @@
       { id: 'csc', name: 'Certificate of Statutory Completion', pct: 0.15 },
     ],
 
+    // HDB flats: the payments an HDB purchase asks for, for the basic payment schedule only (not a funding or eligibility test). Checked 24 Oct 2026 on the HDB website:
+    // Option to Purchase (resale): option fee $1 to $1,000, paid when the seller grants the option; exercise fee when the option is exercised; the two together may not
+    // exceed $5,000; the option lasts 21 calendar days. Resale application: each side submits its part within the days in the OTP and within 7 days of each other; the fee is
+    // $40 (1- and 2-room) or $80 (3-room and larger) each; HDB accepts within 28 working days; completion is about 8 weeks after acceptance, the balance price on or before
+    // the completion appointment. New flat (BTO): $10 application fee; booking fee by flat type (July 2025 launch notice); the Agreement for Lease is signed within 9 months of
+    // booking, with the downpayment (10% of the price with an HDB loan, 20% with a bank loan, CPF and/or cash; the booking fee counts towards it); the balance before key collection.
+    // Stamp duty, legal fees and the other small fees are named, never added up: HDB sets their amounts and dates.
+    hdbPayments: {
+      checked: '2026-10-24',
+      resale: { optionFeeMax: 1000, feesMax: 5000, optionDays: 21, applicationFee: { small: 40, standard: 80 }, acceptanceWorkingDays: 28, completionWeeks: 8 },
+      bto: { applicationFee: 10, bookingFee: { flexi2: 500, room3: 1000, room4plus: 2000 }, signWithinMonths: 9, downpaymentPct: { hdbLoan: 0.10, bankLoan: 0.20 } },
+    },
+
     // GST on an agent's commission (IRAS: 9% from 1 Jan 2024), as the planner's assumptions already use.
     gst: 0.09,
 
@@ -231,6 +244,7 @@
       cpf: 'CPF Board: refund of CPF principal plus accrued interest on sale; no cash top-up if sold at market value; OA rate 2.5%',
       valuation: 'CPF Board (down payment of a property; 3 differences between an HDB loan and a bank loan; CPF Housing Scheme terms), HDB (resale acceptance and approval), IRAS: loan and CPF on the lower of price and valuation; cash over valuation in cash; an HDB loan needs no minimum cash, a bank loan does; the option fee and exercise payment are paid in cash; stamp duty on the higher',
       pps: 'Housing Developers Rules: standard progressive payment schedule',
+      hdbPayments: 'HDB: Option to Purchase, resale application and completion pages; new flat booking, Agreement for Lease and key collection pages (checked 24 Oct 2026)',
       plannerConventions: 'Planning conventions (not statutory rules): dates and defaults the Payment Timeline Planner uses when the real date is unknown; each is shown as an estimate and editable',
     },
   };

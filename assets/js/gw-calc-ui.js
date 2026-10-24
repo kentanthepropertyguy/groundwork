@@ -33,7 +33,6 @@
     msr: '<path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/><path d="M4 12h16" opacity=".45"/>',
     planner: '<path d="M4 19V9M10 19V5M16 19v-7M21 19H3"/>',
     'payment-planner': '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/><path d="M8 14h3M13 14h3M8 17h3"/>',
-    progressive: '<path d="M4 20h16"/><path d="M6 20v-4h3v4M10.5 20v-8h3v8M15 20V8h3v12"/>',
     'hdb-upgrade': '<path d="M3 12 9 7l6 5"/><path d="M5 11v8h8v-8"/><path d="M15 9l3-2 3 2v10h-6"/>',
     'what-can-i-buy': '<circle cx="11" cy="11" r="6"/><path d="m20 20-4.2-4.2"/>',
     worth: '<path d="M5 20V12m5 8V7m5 13v-6m5 6V4"/>',
@@ -46,7 +45,6 @@
     mortgage: { path: 'mortgage/', title: 'Mortgage repayment', name: 'Mortgage repayment', tag: 'Monthly instalment', short: 'Instalment, total interest and the income banks look for', h1: 'Mortgage repayment', intro: 'Your monthly instalment, total interest, and the income a bank’s stress test looks for.', group: 'buy' },
     tdsr: { path: 'tdsr/', title: 'TDSR', name: 'How much can I borrow?', tag: 'TDSR', short: 'Your loan limit from your income and debts', h1: 'How much can I borrow?', intro: 'The bank-loan limit under the Total Debt Servicing Ratio (TDSR), from your income and debts.', group: 'buy' },
     msr: { path: 'msr/', title: 'MSR for HDB flats and ECs', name: 'HDB and EC loan limit', tag: 'MSR', short: 'Loan limits for HDB flats and new ECs', h1: 'HDB and EC loan limit', intro: 'The Mortgage Servicing Ratio (MSR) limit for an HDB flat or a new EC, with an HDB or bank loan.', group: 'buy' },
-    progressive: { path: 'progressive-payments/', title: 'Progressive payments', name: 'New launch payments', tag: 'Progressive payments', short: 'A quick split by stage, with no dates. For the dates, use Payment timeline.', h1: 'New launch payments', intro: 'What a home under construction asks of you at each stage, from cash, CPF and the bank.', group: 'buy' },
     'sale-proceeds': { path: 'sale-proceeds/', title: 'Sale proceeds', name: 'Sale proceeds', tag: 'Cash and CPF back', short: 'The cash and CPF you get back when you sell', h1: 'Sale proceeds', intro: 'From selling price to the cash in your hand and the CPF back in your account.', group: 'sell' },
     ssd: { path: 'ssd/', title: 'Seller’s Stamp Duty (SSD)', name: 'Selling within 4 years?', tag: 'SSD', short: 'Seller’s Stamp Duty on a private home', h1: 'Selling within 4 years?', intro: 'Whether Seller’s Stamp Duty (SSD) applies when you sell a private home, and how much.', group: 'sell' },
   };
@@ -60,7 +58,7 @@
   };
   // Tools work out a number from your own figures. Looking up what homes sold for (Property values & prices, Research, What can this
   // budget buy?) is listed under Research in the menu and on the homepage, so each feature has one home.
-  const ORDER = { guided: ['planner', 'hdb-upgrade'], fin: ['tdsr', 'msr', 'mortgage'], cost: ['stamp-duty', 'payment-planner', 'progressive'], sell: ['sale-proceeds', 'ssd'] };
+  const ORDER = { guided: ['planner', 'hdb-upgrade'], fin: ['tdsr', 'msr', 'mortgage'], cost: ['stamp-duty', 'payment-planner'], sell: ['sale-proceeds', 'ssd'] };
   const GROUPS = [['fin', 'Financing'], ['cost', 'Purchase costs & payments'], ['sell', 'Selling']];
 
   // The tools page (mirrors tools/index.html, which is static): Guided planning (connected), then Quick calculators (each independent) in three groups.
@@ -144,12 +142,6 @@
       chips('loans', 'Housing loans you still have', LOANS, { value: '0', share: 'housingLoans', when: 'scenario:hdb-bank,ec', hint: LOANS_HINT }) +
       // Package 4: a specific resale flat. Optional and closed: the loan, the minimum cash and the CPF part are on the lower of the price and HDB's valuation; the price above the valuation is cash.
       '<div data-when="scenario:hdb-loan,hdb-bank">' + more(money('price', 'Flat price', { opt: true, ph: 'the resale price agreed', hint: 'The price in your Option to Purchase.' }) + money('valuation', 'HDB’s valuation of the flat', { opt: true, ph: 'if you have it', hint: 'HDB and banks lend on the lower of the price and the valuation. What the price is above the valuation (cash over valuation) is paid in cash.' }), 'Check a specific flat') + '</div>',
-    // A2-02: the borrower's age decides whether the loan runs past 65 (shared with the other calculators' first borrower)
-    progressive: () => chips('kind', 'What are you buying?', KIND_STAMP.slice(0, 2), { value: 'private' }) + grid(money('price', 'Purchase price', { share: 'buyPrice', ph: 'e.g. 1,800,000' }) +
-      numf('age', 'Borrower’s age', 'years', { share: 'borrowers.0.age', ph: 'e.g. 35', when: 'entity:0', hint: 'Two borrowers: their income-weighted average age (30 earning $3,000 and 50 earning $12,000 gives 46). How much can I borrow? works it out. MAS’s weighting is not confirmed, so results for two borrowers with variable or rental income are unverified.' }) +
-      numf('ratePct', 'Interest rate', '% a year', { value: '4', hint: '4% is the banks’ stress-test rate. Use the rate you’ve been quoted.' }) +
-      numf('years', 'Loan tenure', 'years', { opt: true, ph: 'longest standard', hint: TENURE_NOTE }) + money('cpf', 'CPF OA you plan to use', { opt: true, share: 'cpfOa', hint: 'What CPF allows you to use, not necessarily your whole balance.', ph: 'all buyers' })) +
-      chips('loans', 'Housing loans you still have', LOANS, { value: '0', share: 'housingLoans', hint: LOANS_HINT }) + chips('entity', 'Who is buying?', [['0', 'Individuals'], ['1', 'A company or other entity']], { value: '0' }) + buyersBlock(),
   };
 
   // The calculator section on each tool page.
@@ -158,6 +150,7 @@
     return '<section class="gw-calc" data-calc="' + id + '"><div class="gw-calc-in" aria-label="Your details">' + FORMS[id]() +
       '<p class="gw-fine gw-saved" data-saved hidden>Some details are filled in from your other calculations in this tab. <button type="button" class="gw-link" data-clear>Clear them</button> (this clears your figures from every tool in this tab).</p></div>' +
       '<div class="gw-calc-out"><div data-out aria-live="polite"><p class="gw-fine">Enter your details to see the result.</p></div>' +
+      (id === 'msr' ? '<div class="gw-sched" data-sched-host></div>' : '') +
       '<div class="gw-send" data-send hidden><button type="button" class="gw-btn wa" data-send-wa>Send my assessment to Ken on WhatsApp</button>' +
       '<p class="gw-fine">Your details and results go into the message, so Ken sees the full picture. You can edit it before sending.</p>' +
       '<p class="gw-fine"><button type="button" class="gw-link" data-send-copy>Copy it instead</button> · <a href="' + esc(waUrl('Hi Ken, I’m using the ' + t.title + ' calculator on Groundwork and have a question.')) + '" target="_blank" rel="noopener" data-gw-wa="calc-' + id + '-ask">Just a question? Ask Ken</a></p>' +
@@ -344,24 +337,6 @@
           'Rules: MAS Notice 645 (MSR 30%, TDSR 55%, at 4%); HDB loan: 3% floor, 75% LTV pro-rated if the lease doesn’t cover the youngest applicant to 95, 25 years, income ceilings from 24 Aug 2026 (HDB, MND). Checked 9 Oct 2026.' + (r.flat ? ' Valuation: the loan is on the lower of price and valuation; an HDB loan needs no minimum cash, a bank loan does; cash over valuation is cash (HDB, CPF Board). Checked 24 Oct 2026.' : '')) +
         next([['../tdsr/', 'TDSR in detail', 'calc-tdsr'], ['../mortgage/', 'Monthly instalment', 'calc-mortgage']]);
     },
-    progressive(r) {
-      const by = (s) => [s.cash ? 'cash ' + $(s.cash) : '', s.cpf ? 'CPF ' + $(s.cpf) : '', s.flex ? 'cash or CPF ' + $(s.flex) : '', s.loan ? 'loan ' + $(s.loan) : ''].filter(Boolean).join(' · ');
-      return head('Within 8 weeks of booking', $(r.stages[0].amount + r.stages[1].amount), '20% of the price' + (r.duty.ok ? ', plus ' + $(r.duty.total) + ' stamp duty within 14 days of signing' : '')) +
-        stack('How the price is paid', [['Cash (the minimum)', r.cashMin, 'c3'], ['Cash or CPF', r.cpfOrCash, 'c2'], ['Bank loan (' + pc(r.ltv) + ')', r.loanMax, 'c1']]) +
-        rows([['Loan tenure', r.years + ' years'], ['Instalment once fully drawn', $(r.finalMonthly) + ' a month', 'tot']]) +
-        // A2-02: a loan running past 65 takes the lower limit; A1-03: the stamp duty remissions and notes, as on Stamp duty
-        notes([r.entity ? 'A company or other entity can borrow up to 15% (MAS) and has no CPF, so the rest is cash.' : '',
-          r.lowerWhy === 'age' ? 'At age ' + r.age + ', a ' + r.years + '-year loan runs past 65, so the lower loan limit applies (MAS).' + (r.stdYears >= 1 ? ' A tenure of ' + r.stdYears + ' years or less keeps the standard limit.' : '') : '',
-          tenureAssumed({ defaulted: r.defaulted, years: r.years, noStd: r.stdYears !== null && r.stdYears < 1 }, r.ltv, r.longer, (l) => 'loan ' + $(l.loanMax) + ', ' + $(l.finalMonthly) + ' a month once fully drawn.'),
-          r.tenureCapped && r.tenureCappedBy === 'age' ? 'Tenure capped at ' + r.years + ' years: banks usually end a loan by age ' + r.maturityAge + ' (lender policy, not a MAS rule).' : '',
-          r.cpfGiven ? '' : 'Enter your CPF OA to split cash from CPF.'].filter(Boolean)) +
-        (r.duty.ok ? remitRows(r.duty) + notes(r.duty.notes) : '') +
-        work('<div class="gw-vx-tw"><table class="gw-vx-t gw-pps"><thead><tr><th>Stage</th><th class="r">Amount</th><th>Paid from</th><th class="r">Instalment after</th></tr></thead><tbody>' +
-          r.stages.map((s) => '<tr><td>' + esc(s.name) + ' <small>' + pc(s.pct) + '</small></td><td class="r">' + $(s.amount) + '</td><td>' + by(s) + '</td><td class="r">' + (s.monthly ? $(s.monthly) : '—') + '</td></tr>').join('') + '</tbody></table></div>', 'Each stage, and what you pay', true) +
-        sources([r.lowerWhy === 'tenure' ? 'A tenure over 30 years takes the lower loan limit (MAS).' : '', r.tenureCapped && r.tenureCappedBy === 'max' ? 'Tenure capped at 35 years, the MAS maximum.' : '', 'The loan is drawn stage by stage; instalments shown amortise what has been drawn at ' + pc(r.rate, 1) + ' over ' + r.years + ' years. Your bank sets the actual amounts.', 'Stage dates follow construction, so your developer’s schedule sets the timing. Your S&P sets the actual terms.', 'The booking fee is paid in cash. CPF use is subject to CPF rules.'].filter(Boolean),
-          'Rules: standard progressive payment schedule (Housing Developers Rules); MAS LTV limits; stamp duty as on the stamp duty calculator. Checked 9 Oct 2026.') +
-        next([['../payment-planner/', 'See the payment dates and check my funds', 'payment-planner', true], ['../stamp-duty/', 'Stamp duty in detail', 'calc-stamp-duty'], ['../tdsr/', 'Could I borrow this much?', 'calc-tdsr']]);
-    },
   };
 
   /* ---------------- browser behaviour ---------------- */
@@ -374,13 +349,6 @@
     const $$ = (s, el) => [].slice.call((el || box).querySelectorAll(s));
     // ---- shared details for this tab ----
     const KEY = 'gw.fin.v1';
-    // V1-01: a second borrower in this tab's figures, and the two borrowers' income-weighted age (null when it can't be worked out)
-    const joint = (s) => Object.keys(s).some((k) => /^borrowers\.1\./.test(k) && s[k] !== '' && s[k] !== null);
-    const jointAge = (s) => {
-      const list = [0, 1].map((n) => { const b = {}; ['fixed', 'variable', 'rental'].forEach((f) => { const p = C.parseMoney(s['borrowers.' + n + '.' + f] || ''); if (p.value !== undefined && !p.error) b[f] = p.value; }); const a = C.parseNum(s['borrowers.' + n + '.age'] || ''); if (a.value !== undefined && !a.error) b.age = a.value; return b; });
-      if (!list.every((b) => b.age > 0 && ((b.fixed || 0) + (b.variable || 0) + (b.rental || 0)) > 0)) return null;
-      const B = C.borrowers(list); return B.iwaa === null || B.bad.length ? null : ageUp(B.iwaa);
-    };
     const store = { get() { try { return JSON.parse(root.sessionStorage.getItem(KEY) || '{}') || {}; } catch (e) { return {}; } }, set(o) { try { root.sessionStorage.setItem(KEY, JSON.stringify(o)); } catch (e) { /* storage blocked */ } } };
     // Journey or standalone (Package 3). Opened from a journey (address ends ?j=1, set by the link; gw-nav.js) the calculator shares figures with the journey, as before.
     // Opened any other way (Tools, search, a typed address) it is standalone: it starts fresh, takes nothing from another tool and gives nothing to one. Its own entries
@@ -437,9 +405,7 @@
       const LA = C.LIMITS.age, okAge = (a) => typeof a === 'number' && a >= LA.min && a <= LA.max;
       const ofAge = (a, extra) => { const t = C.bankTenure('private', a); return Object.assign({ age: a, std: t.std, allowed: t.allowed, chosen: chosen > 0 ? chosen : 0 }, extra || {}); };
       let o = { chosen: chosen > 0 ? chosen : 0 };
-      if (id === 'progressive') {
-        if (v.entity) o.entity = true; else if (okAge(v.age)) o = ofAge(v.age);
-      } else if (id === 'msr' && v.scenario === 'hdb-loan') {
+      if (id === 'msr' && v.scenario === 'hdb-loan') {
         o.hdbLoan = true; if (ok && r.tenure && r.tenure.years >= 1) { o.years = r.tenure.years; o.max = r.tenure.max; }
       } else if (ok && r.B && r.tenure && r.tenure.std !== undefined) {
         o = { age: ageUp(r.B.iwaaUse), std: r.tenure.std, allowed: r.tenure.allowed, chosen: o.chosen, joint: r.B.list && r.B.list.length > 1, max: r.tenure.max, hdb: r.kind === 'hdb' || r.scenario === 'hdb-bank' };
@@ -458,13 +424,12 @@
     function tenureLimitNow() {
       try {
         const v = values(); let L = null;
-        if (id === 'progressive') L = v.entity ? null : C.tenureLimit({ kind: 'private', age: typeof v.age === 'number' ? v.age : undefined });
-        else if (id === 'msr') L = C.tenureLimit({ kind: v.scenario === 'hdb-bank' ? 'hdb' : v.scenario === 'hdb-loan' ? 'hdb-loan' : 'private', borrowers: v.borrowers, lease: v.lease });
+        if (id === 'msr') L = C.tenureLimit({ kind: v.scenario === 'hdb-bank' ? 'hdb' : v.scenario === 'hdb-loan' ? 'hdb-loan' : 'private', borrowers: v.borrowers, lease: v.lease });
         else L = C.tenureLimit({ kind: v.kind === 'hdb' ? 'hdb' : 'private', borrowers: v.borrowers });
         return L ? L.allowed : 0;
       } catch (e) { return 0; }
     }
-    const FN = { mortgage: 'mortgage', 'stamp-duty': 'stampDuty', ssd: 'ssd', 'sale-proceeds': 'saleProceeds', tdsr: 'tdsr', msr: 'msr', progressive: 'progressive' };
+    const FN = { mortgage: 'mortgage', 'stamp-duty': 'stampDuty', ssd: 'ssd', 'sale-proceeds': 'saleProceeds', tdsr: 'tdsr', msr: 'msr' };
     let last = null, lastSig = '', startedT = false, doneT = false, afterCalc = () => {};
     // Sale proceeds -> Planner ("What can I buy next?"): the sale figures wait in this tab only (gw.sell.v1) until the Planner is opened from that button. Only what was entered goes: a blank loan or CPF refund
     // stays blank there (the Planner then asks for it, as it does for anyone). The cash and CPF are carried as the Planner's own "your own figures" ONLY when the Planner's usual estimate would give different
@@ -486,15 +451,25 @@
         ss.setItem('gw.sell.v1', JSON.stringify(h));
       } catch (e) { /* storage blocked: the Planner then asks for the sale itself */ }
     }
+    // The payment schedule for the flat or EC being assessed (gw-paylist.js): the type and a price are all it needs. The type follows "Buying" above; a resale flat or a new flat (BTO) is chosen inside it.
+    // The flat price from "Check a specific flat" starts it until a price is typed in the schedule.
+    const SCHED = id === 'msr' && root.GW_PAYLIST && box.querySelector('[data-sched-host]') ? root.GW_PAYLIST.mount(box.querySelector('[data-sched-host]'), { key: 'msr', base: '../', title: 'Payment schedule', em: 'every payment, its amount and when' }) : null;
+    let schedSc = null;
+    function syncSched(v) {
+      if (!SCHED) return; const sc = v.scenario || 'hdb-loan';
+      if (sc !== schedSc) { schedSc = sc; if (sc === 'ec') SCHED.setKinds(['ec']); else SCHED.setKinds(['hdb-resale', 'hdb-bto'], { loan: sc === 'hdb-bank' ? 'bank' : 'hdb' }); }
+      if (sc !== 'ec' && typeof v.price === 'number' && v.price > 0) SCHED.suggest(v.price);
+    }
     function recalc() {
       applyWhen();
       const v = values(); let r;
+      syncSched(v);
       if (estimated) v.cpfInterestEstimated = true;
       if (inputErrs.length) r = { ok: false, missing: [], invalid: inputErrs };
       else { try { r = C[FN[id]](v); } catch (e) { r = { ok: false, missing: [] }; } }
       // the tenure field shows the tenure the calculation used: a longer one typed is replaced by it once the field is not being typed in
       if (tenureFld) {
-        const applied = r.ok ? (id === 'progressive' ? r.years : r.tenure && r.tenure.years) : 0;
+        const applied = r.ok ? (r.tenure && r.tenure.years) : 0;
         if (tenureFld.settle(applied)) { recalc(); return; }
         tenureFld.hint(applied);
       }
@@ -513,13 +488,13 @@
     let tmr; const changed = (el) => {
       if (!startedT) { startedT = true; track('tool_started', { tool_name: 'calc-' + id }); }
       // remember shared details for this tab
-      if (journey) { const s = store.get(), jointNl = id === 'progressive' && joint(s); $$('[data-share]').forEach((x) => { if (!live(x) || (jointNl && x.dataset.share === 'borrowers.0.age')) return; const val = x.dataset.t === 'chip' ? chipVal(x) : x.value; if (val !== null && val !== '') s[x.dataset.share] = val; else delete s[x.dataset.share]; }); store.set(s); }
+      if (journey) { const s = store.get(); $$('[data-share]').forEach((x) => { if (!live(x)) return; const val = x.dataset.t === 'chip' ? chipVal(x) : x.value; if (val !== null && val !== '') s[x.dataset.share] = val; else delete s[x.dataset.share]; }); store.set(s); }
       clearTimeout(tmr); tmr = setTimeout(recalc, 120);
     };
     // money fields: commas appear as you type, the same behaviour as the Payment Timeline (gw-money.js)
     if (root.GW_MONEY) { $$('input[data-t="money"]').forEach((x) => root.GW_MONEY.wire(x, { parse: parseMoney, max: C.LIMITS.money.max })); $$('input[data-t="num"]').forEach((x) => root.GW_MONEY.selectOnFocus(x)); }
     $$('input').forEach((x) => { x.addEventListener('input', () => changed(x)); x.addEventListener('change', () => changed(x)); });
-    if (tenureEl && root.GW_MONEY && root.GW_MONEY.tenureField) tenureFld = root.GW_MONEY.tenureField(tenureEl, { read: () => C.parseNum(tenureEl.value).value || null, max: () => (id === 'progressive' ? C.LIMITS.years.max : C.LIMITS.tenure.max), limit: tenureLimitNow, recalc: () => { clearTimeout(tmr); recalc(); } });
+    if (tenureEl && root.GW_MONEY && root.GW_MONEY.tenureField) tenureFld = root.GW_MONEY.tenureField(tenureEl, { read: () => C.parseNum(tenureEl.value).value || null, max: () => C.LIMITS.tenure.max, limit: tenureLimitNow, recalc: () => { clearTimeout(tmr); recalc(); } });
     // CPF accrued interest: a rough estimate only when the visitor asks for one, and only until they type their own figure
     let estimated = false;
     const est = box.querySelector('[data-estimate]');
@@ -535,9 +510,7 @@
     // V1-01: New launch payments needs the income-weighted average age (MAS Notice 632 footnote 6). With a second borrower in this
     // tab's figures, borrower 1's age is not that: fill in the weighted age from both borrowers' ages and incomes (after the MAS
     // haircuts, exactly as How much can I borrow? works it out), or leave the field empty when it can't be worked out.
-    const nlAge = id === 'progressive' && joint(saved) ? jointAge(saved) : undefined;
     if (journey) $$('[data-share]').forEach((x) => {
-      if (nlAge !== undefined && x.dataset.share === 'borrowers.0.age') { if (nlAge !== null) { x.value = String(nlAge); used = true; } return; }
       const val = saved[x.dataset.share]; if (val === undefined || val === null || val === '') return;
       const m = /^(buyers|borrowers)\.1\./.exec(x.dataset.share); if (m) showRow(m[1] + '.1', true);
       if (x.dataset.t === 'chip') { if (val !== x.dataset.default) used = true; setChip(x, val); } else { x.value = x.dataset.t === 'money' && parseMoney(val) !== null ? fmtMoney(parseMoney(val)) : val; used = true; }
@@ -567,7 +540,7 @@
     }
     // explicit, optional reuse: only when this tab's journey holds figures this calculator asks for, and only into empty fields
     const reuseNames = { age: 'age', fixed: 'income', variable: 'income', rental: 'income', buyPrice: 'price', sellPrice: 'price', ssdPrice: 'price', loan: 'loan', outstandingLoan: 'loan', debts: 'debts', housingLoans: 'home loans', cpfOa: 'CPF', cpfPrincipal: 'CPF', cpfInterest: 'CPF', cash: 'cash', res: 'residency', owned: 'homes owned', homeType: 'home type' };
-    const reuseVal = (x) => (nlAge !== undefined && x.dataset.share === 'borrowers.0.age' ? (nlAge === null ? undefined : String(nlAge)) : saved[x.dataset.share]);
+    const reuseVal = (x) => saved[x.dataset.share];
     const reusable = () => (journey ? [] : $$('[data-share]').filter((x) => { const v = reuseVal(x); if (v === undefined || v === null || v === '') return false; return x.dataset.t === 'chip' ? (chipVal(x) || '') === (x.dataset.default || '') && v !== (x.dataset.default || '') : x.value === '' || x.value === x.dataset.default; }));
     const reuseBox = document.createElement('p'); reuseBox.className = 'gw-fine gw-reuse'; reuseBox.hidden = true; box.querySelector('.gw-calc-in').insertAdjacentElement('afterbegin', reuseBox);
     function reuseOffer() {
@@ -637,7 +610,6 @@
     tdsr: { hdb: { kind: 'hdb' } },
     msr: { 'hdb-loan': { scenario: 'hdb-loan' }, 'hdb-bank': { scenario: 'hdb-bank' }, ec: { scenario: 'ec' } },
     'sale-proceeds': { hdb: { type: 'hdb' }, private: { type: 'private' }, ec: { type: 'ec' } },
-    progressive: { 'second-home': { loans: '1', 'buyers.0.owned': '1' }, company: { entity: '1' } },
     ssd: {},
   };
   let pinRefresh = () => {};

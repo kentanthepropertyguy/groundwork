@@ -147,7 +147,7 @@ try:
         check(vn + ': ... and Buy on the Buy journey', pg.eval_on_selector_all('.gw-links a[aria-current]', 'e=>e.map(x=>x.textContent.trim())') == ['Buy'])
         pg.goto(B + '/tools/'); pg.wait_for_timeout(600)
         hrefs = pg.eval_on_selector_all('main a', 'e=>e.map(x=>x.getAttribute("href"))')
-        miss = [t for t in ['planner', 'payment-planner', 'hdb-upgrade', 'sale-proceeds', 'ssd', 'stamp-duty', 'tdsr', 'msr', 'mortgage', 'progressive-payments'] if not any(h and ('tools/' + t + '/') in (('tools/' + h.split('tools/')[-1]) if 'tools/' in h else 'tools/' + h) for h in hrefs)]
+        miss = [t for t in ['planner', 'payment-planner', 'hdb-upgrade', 'sale-proceeds', 'ssd', 'stamp-duty', 'tdsr', 'msr', 'mortgage'] if not any(h and ('tools/' + t + '/') in (('tools/' + h.split('tools/')[-1]) if 'tools/' in h else 'tools/' + h) for h in hrefs)]
         check(vn + ': the Tools directory still lists every specialist tool', not miss, miss)
         ctx.close()
         ctx, pg, errs = page(br, kw); pg.goto(B + '/research/map/'); pg.wait_for_timeout(800)
