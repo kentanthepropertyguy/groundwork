@@ -1,4 +1,4 @@
-// Packages 2-3: one navigation, Buy · Sell · Research · Map · Tools, the same on every page. Run from the site folder:  node tools/financial-tests/nav-tests.js
+// One navigation, the same on every page (25 Oct 2026): Plan My Move · Research · Map · Calculators · New Launches. Run from the site folder:  node tools/financial-tests/nav-tests.js
 // Reads the static markup (what a visitor gets before any script runs) of every page that carries the site header.
 const fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '../..');
@@ -19,18 +19,23 @@ for (const f of pages) {
   const rel = path.relative(ROOT, f), t = fs.readFileSync(f, 'utf8');
   const hdr = (t.match(/<nav class="gw-links"[^>]*>(.*?)<\/nav>/s) || [])[1] || '';
   const links = [...hdr.matchAll(/<a\b([^>]*)>(.*?)<\/a>/gs)].map((m) => ({ attrs: m[1], text: m[2].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim(), href: (m[1].match(/href="([^"]*)"/) || [])[1] }));
-  check(rel + ': header reads Buy · Sell · Research · Map · Tools · New launches', links.map((l) => l.text).join('|') === 'Buy|Sell|Research|Map|Tools|New launches ↗', links.map((l) => l.text));
+  check(rel + ': header reads Plan My Move · Research · Map · Calculators · New Launches', links.map((l) => l.text).join('|') === 'Plan My Move|Research|Map|Calculators|New Launches ↗', links.map((l) => l.text));
+  const pm = links.find((l) => l.text === 'Plan My Move'), cl = links.find((l) => l.text === 'Calculators');
+  check(rel + ': Plan My Move opens Guide Me at its start (journey/, no path chosen); Calculators keeps the /tools/ address', pm && /(^|\/)journey\/$/.test(pm.href) && cl && /(^|\/)tools\/$/.test(cl.href), [pm, cl]);
   check(rel + ': Map is a top-level header item and opens the one Map', links.filter((l) => /^Map$/.test(l.text)).length === 1 && /(^|\/)research\/map\/$/.test((links.find((l) => /^Map$/.test(l.text)) || {}).href || ''));
   const cur = links.filter((l) => /aria-current/.test(l.attrs)).map((l) => l.text);
-  const want = /^tools\//.test(rel) ? ['Tools'] : rel === 'journey/worth/index.html' ? ['Sell'] : rel === 'research/map/index.html' ? ['Map'] : /^research\//.test(rel) ? ['Research'] : [];
-  // the planner, timeline and calculators belong to Tools; journey/ pages mark Buy or Sell from the address, in the browser
+  const want = /^tools\//.test(rel) ? ['Calculators'] : /^journey\//.test(rel) ? ['Plan My Move'] : rel === 'research/map/index.html' ? ['Map'] : /^research\//.test(rel) ? ['Research'] : [];
+  // the planner, timeline and calculators belong to Calculators; the Guide Me pages (journey/) belong to Plan My Move
   check(rel + ': at most one header item is the current page', cur.length <= 1, cur);
   check(rel + ': current section is ' + (want.join() || 'none until the browser marks it'), cur.join() === want.join() || (!want.length && !cur.length), cur);
   check(rel + ': header links point at pages that exist', links.every((l) => resolves(f, l.href)), links.filter((l) => !resolves(f, l.href)));
   sig[rel] = links.map((l) => strip(l.href).replace(/#.*$/, (h) => h)).join('|');
-  // menu: the four sections, in order, and Map inside Research
+  // menu: the three sections, in the order of the main navigation, and Map inside Research
   const sec = [...t.matchAll(/<section class="gw-ms gw-ms-([a-z]+)">/g)].map((m) => m[1]);
-  check(rel + ': menu sections are buy, sell, research, tools (guide row sits in the foot)', sec.join() === 'buy,sell,research,tools', sec);
+  check(rel + ': menu sections are Plan My Move, Research, Calculators', sec.join() === 'guide,research,tools', sec);
+  const gs = (t.match(/<section class="gw-ms gw-ms-guide">(.*?)<\/section>/s) || [])[1] || '';
+  check(rel + ': the Plan My Move column lists the four journeys', [...gs.matchAll(/<a class="gw-mi" href="([^"]*)"/g)].map((x) => x[1].replace(/^(\.\.\/)+|^\//, '')).join('|') === 'journey/#buy|journey/#sell|journey/#up|journey/#move');
+  check(rel + ': the menu says Calculators and never Tools or Buy or Sell as a heading', /<b>Calculators<\/b>/.test(t) && !/<b>(Tools|Buy or Sell|Buy|Sell)<\/b>/.test(t));
   const rs = (t.match(/<section class="gw-ms gw-ms-research">(.*?)<\/section>/s) || [])[1] || '';
   check(rel + ': Map stays reachable under Research in the menu', /href="((\.\.\/)*|\/)research\/map\/"/.test(rs));
   const names = [...t.matchAll(/<section class="gw-ms gw-ms-[a-z]+">(.*?)<\/section>/gs)].flatMap((m) => [...m[1].matchAll(/<a class="gw-mi" href="([^"]*)"/g)].map((x) => x[1]));
@@ -43,15 +48,16 @@ for (const f of pages) {
   check(rel + ': the old HDB upgrade planner is no longer linked (it is folded into What can I afford?; its address redirects)', !/href="((\.\.\/)*|\/)tools\/hdb-upgrade\/"/.test(t));
   const foot = (t.match(/<nav aria-label="Footer">(.*?)<\/nav>/s) || [])[1] || '';
   const fl = [...foot.matchAll(/<a\b[^>]*>(.*?)<\/a>/gs)].map((m) => m[1]);
-  if (rel !== 'research/map/index.html') check(rel + ': footer repeats Buy · Sell · Research · Tools, then Map', fl.slice(0, 5).join('|') === 'Buy|Sell|Research|Tools|Map', fl);
+  if (rel !== 'research/map/index.html') check(rel + ': footer repeats Plan My Move · Research · Calculators, then Map', fl.slice(0, 4).join('|') === 'Plan My Move|Research|Calculators|Map', fl);
   const all = [...(hdr + rs + ts + foot).matchAll(/href="([^"]*)"/g)].map((m) => m[1]);
   check(rel + ': no dead local link in header, menu or footer', all.every((h) => resolves(f, h)), all.filter((h) => !resolves(f, h)));
 }
-const uniq = new Set(Object.values(sig)); check('the header is the same list of destinations on every page', uniq.size === 1, [...uniq]);
-// phone section row: the same five, and the All Tools page (Package 3)
+// stray copies at the root ("index (19).html" and the like) are old duplicates, not pages of the site; they keep whatever header they were saved with
+const uniq = new Set(Object.entries(sig).filter(([k]) => !/ \(\d+\)\.html$/.test(k)).map(([, v]) => v)); check('the header is the same list of destinations on every page', uniq.size === 1, [...uniq]);
+// phone section row: the same four, and the All Tools page (Package 3)
 for (const f of pages) {
   const rel = path.relative(ROOT, f), t = fs.readFileSync(f, 'utf8'), sm = t.match(/<nav class="gw-secs"[^>]*>(.*?)<\/nav>/s);
-  if (sm) check(rel + ': phone section row reads Buy · Sell · Research · Map · Tools', [...sm[1].matchAll(/<a\b[^>]*>(.*?)<\/a>/gs)].map((x) => x[1].replace(/<[^>]+>/g, '').trim()).join('|') === 'Buy|Sell|Research|Map|Tools');
+  if (sm) check(rel + ': phone section row reads Plan My Move · Research · Map · Calculators', [...sm[1].matchAll(/<a\b[^>]*>(.*?)<\/a>/gs)].map((x) => x[1].replace(/<[^>]+>/g, '').trim()).join('|') === 'Plan My Move|Research|Map|Calculators');
 }
 {
   const t = fs.readFileSync(path.join(ROOT, 'tools/index.html'), 'utf8'), main = t.slice(t.indexOf('<main'), t.indexOf('</main>'));
@@ -80,8 +86,9 @@ for (const f of pages) {
 global.self = global; global.window = global;
 let GWN = null; try { global.document = undefined; GWN = require(path.join(ROOT, 'assets/js/gw-nav.js')); } catch (e) { /* browser-only: the markup checks above carry it */ }
 if (GWN && GWN.SECTIONS) {
-  check('gw-nav.js lists the sections Buy, Sell, Research, Tools', GWN.SEC_ORDER && GWN.SEC_ORDER.join() === 'buy,sell,research,tools', GWN.SEC_ORDER);
-  check('gw-nav.js lists the main navigation Buy, Sell, Research, Map, Tools', GWN.NAV_ORDER && GWN.NAV_ORDER.join() === 'buy,sell,research,map,tools', GWN.NAV_ORDER);
+  check('gw-nav.js lists the menu sections Plan My Move, Research, Calculators', GWN.SEC_ORDER && GWN.SEC_ORDER.join() === 'guide,research,tools', GWN.SEC_ORDER);
+  check('gw-nav.js lists the main navigation Plan My Move, Research, Map, Calculators', GWN.NAV_ORDER && GWN.NAV_ORDER.join() === 'move,research,map,tools', GWN.NAV_ORDER);
+  check('gw-nav.js names them Plan My Move and Calculators', GWN.SECTIONS.move.name === 'Plan My Move' && GWN.SECTIONS.tools.name === 'Calculators' && GWN.SECTIONS.tools.href === 'tools/' && GWN.SECTIONS.move.href === 'journey/');
   // every tool folder is a registered tool with its own address, so the Tools directory can list it
   const dirs = fs.readdirSync(path.join(ROOT, 'tools'), { withFileTypes: true }).filter((d) => d.isDirectory() && fs.existsSync(path.join(ROOT, 'tools', d.name, 'index.html'))).map((d) => d.name);
   const hrefs = (GWN.ENTRIES || []).map((e) => e.href);

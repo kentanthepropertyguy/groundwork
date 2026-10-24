@@ -81,8 +81,8 @@
       t: ['asking price', 'condo asking price', 'check asking price', 'is the asking price fair', 'condo price', 'psf', 'price per square foot', 'overpriced', 'condo valuation'] },
     { id: 'research', name: 'Research a development', tag: 'Prices by size · compare', short: 'Any of 2,000+ private developments', href: 'research/#/', icon: 'research', start: 1, sec: 'research',
       t: ['research', 'development', 'condo', 'condominium', 'apartment', 'project', 'transactions', 'transacted', 'psf', 'price per square foot', 'compare', 'comparison', 'compare condos', 'condo prices', 'private property', 'ura', 'caveats', 'valuation', 'condo valuation'] },
-    { id: 'guide', name: 'Guide me', tag: 'Not sure where to start? Step by step', short: 'Tell us your goal; we take you through it', href: 'journey/', icon: 'guide', start: 1, sec: 'guide',
-      t: ['guide', 'guide me', 'help me figure it out', 'figure it out', 'guided', 'guided journey', 'help', 'help me', 'where to start', 'start', 'beginner', 'first time', 'first home', 'first-time buyer', 'steps', 'plan', 'planning', 'what should i do', 'not sure'] },
+    { id: 'guide', name: 'Plan My Move', tag: 'Buy, sell or upgrade, step by step', short: 'Tell us your goal; we take you through it', href: 'journey/', icon: 'guide', start: 1, sec: 'guide',
+      t: ['plan my move', 'my move', 'guide', 'guide me', 'help me figure it out', 'figure it out', 'guided', 'guided journey', 'help', 'help me', 'where to start', 'start', 'beginner', 'first time', 'first home', 'first-time buyer', 'steps', 'plan', 'planning', 'what should i do', 'not sure'] },
     { id: 'guide-up', name: 'Upgrade from HDB', tag: 'The complete four-step process: value, proceeds, budget, homes', href: 'journey/#up', icon: 'hdb-upgrade', search: 1, sec: 'sell',
       t: ['hdb upgrade', 'upgrade', 'upgrading', 'upgrade from hdb', 'sell hdb', 'moving', 'move', 'right size', 'rightsizing', 'downsizing', 'downgrade'] },
     { id: 'guide-buy', name: 'I’m looking to buy', tag: 'A first home, or another without selling', href: 'journey/#buy', icon: 'home', search: 1, sec: 'buy',
@@ -95,7 +95,7 @@
       t: ['browse', 'all developments', 'directory', 'list', 'a to z', 'every development', 'all condos'] },
     { id: 'sample', name: 'Sample research report', tag: 'Jadescape or Thomson Three?', href: 'research/sample/', icon: 'doc', search: 1, sec: 'research',
       t: ['sample', 'report', 'sample report', 'research report', 'detailed research', 'comparison report'] },
-    { id: 'launches', name: 'New launches', tag: 'On Ken’s main site', href: LAUNCHES, icon: 'ext', ext: 1,
+    { id: 'launches', name: 'New Launches', tag: 'On Ken’s main site', href: LAUNCHES, icon: 'ext', ext: 1,
       t: ['new launches', 'new launch', 'launch', 'launches', 'showflat', 'show flat', 'development guides', 'lucerne grand', 'thomson reserve', 'hougang central', 'preview'] },
     { id: 'main-site', name: 'Ken Tan · The Property Guy', tag: 'Ken’s main site', href: MAIN, icon: 'ext', ext: 1,
       t: ['ken', 'ken tan', 'the property guy', 'about', 'about ken', 'agent', 'property agent', 'huttons', 'main site', 'contact', 'tiktok'] },
@@ -106,16 +106,20 @@
   // The four ways in, named the same everywhere (header, menu, homepage, footer, search results): Buy · Sell · Research · Tools.
   // Buy and Sell open the guided path for that goal (journey/#buy, journey/#sell); "guide" is the page itself and stays findable by search and in the menu footer.
   const SECTIONS = {
-    guide: { name: 'Guide me', href: 'journey/', nav: 'journey', q: 'Not sure where to start?', say: 'Pick your goal. We take you through the right tools, step by step.', ids: ['guide-buy', 'guide-up', 'guide-sell', 'guide-move'] },
+    guide: { name: 'Plan My Move', href: 'journey/', nav: 'journey', q: 'Buying, selling or both?', say: 'Pick your goal. We take you through the right tools, step by step.', ids: ['guide-buy', 'guide-sell', 'guide-up', 'guide-move'] },
     buy: { name: 'Buy', href: 'journey/#buy', nav: 'buy', q: 'Looking to buy?', say: 'Work out your maximum budget, then explore the homes within it.', ids: ['guide-buy', 'planner', 'what-can-i-buy', 'payment-planner'] },
     sell: { name: 'Sell', href: 'journey/#sell', nav: 'sell', q: 'Planning to sell?', say: 'See what homes like yours sold for, then what you would take home.', ids: ['guide-sell', 'worth', 'sale-proceeds', 'guide-up', 'guide-move'] },
-    tools: { name: 'Tools', href: 'tools/', nav: 'tools', q: 'Know what to work out?', say: 'Calculators for stamp duty, loans, sale proceeds and more.', ids: ['planner', 'stamp-duty', 'tdsr', 'msr', 'mortgage', 'payment-planner', 'sale-proceeds', 'ssd'] },
+    tools: { name: 'Calculators', href: 'tools/', nav: 'tools', q: 'Know what to work out?', say: 'Calculators for stamp duty, loans, sale proceeds and more.', ids: ['planner', 'stamp-duty', 'tdsr', 'msr', 'mortgage', 'payment-planner', 'sale-proceeds', 'ssd'] },
     map: { name: 'Map', href: 'research/map/', nav: 'map', q: '', say: '', ids: [] },
+    // The header's one way into buying and selling (25 Oct 2026): "Plan My Move", the Guide me page at its start, showing all four choices (Buy, Sell, Upgrade from HDB, Sell and buy again).
+    move: { name: 'Plan My Move', href: 'journey/', nav: 'journey', q: '', say: '', ids: [] },
     research: { name: 'Research', href: 'research/', nav: 'research', q: 'Looking at a property?', say: 'What homes really sold for, from URA and HDB records. The Map is part of Research.', ids: ['research', 'map', 'worth', 'what-can-i-buy', 'directory', 'sample'] },
   };
-  const SEC_ORDER = ['buy', 'sell', 'research', 'tools'];
-  // Main navigation: Buy · Sell · Research · Map · Tools (header, footer and the phone row). The menu keeps its four columns; the Map card stays in Research's column.
-  const NAV_ORDER = ['buy', 'sell', 'research', 'map', 'tools'];
+  // The menu's columns (25 Oct 2026) follow the main navigation: Plan My Move (the four journeys), Research (with the Map), Calculators.
+  const SEC_ORDER = ['guide', 'research', 'tools'];
+  // Main navigation (25 Oct 2026): Plan My Move · Research · Map · Calculators · New Launches (header; footer and phone row without New Launches). "Plan My Move" opens the Guide me page at its start.
+  // The full menu keeps its four columns (Buy, Sell, Research, Tools), whose links go straight to a chosen path.
+  const NAV_ORDER = ['move', 'research', 'map', 'tools'];
   const MENU_TOOLS = SECTIONS.tools.ids;
   const QUICK = ['stamp-duty', 'tdsr', 'mortgage', 'sale-proceeds', 'planner'];
   const href = (e, r) => (e.ext ? e.href : (r || '') + e.href);
@@ -267,14 +271,14 @@
       '<input id="' + id + 'i" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="' + id + 'l" placeholder="' + esc(placeholder || 'Search a tool, development or postal code') + '"></label>' +
       '<div class="gw-sx-res" id="' + id + 'r" hidden></div>' + (after || '') + '</div>';
   }
-  // The full menu: search, then the four ways in (Buy, Sell, Research, Tools) with everything in each, then Ken's other sites.
+  // The full menu: search, then the ways in (Plan My Move, Research, Calculators) with everything in each, then Ken's other sites.
   // Side by side on a wide screen, one after another on a phone.
   function menuHtml(r) {
     const sec = (k) => { const S = SECTIONS[k]; return '<section class="gw-ms gw-ms-' + k + '"><a class="gw-msh" href="' + r + S.href + '" data-gw-nav-to="' + S.nav + '"><b>' + S.name + '</b><span aria-hidden="true">›</span></a><p class="gw-msq">' + esc(S.q) + '</p>' +
-      '<div class="gw-ml">' + S.ids.filter((id) => k === 'research' || k === 'tools' || k === 'guide' || SECTIONS.research.ids.indexOf(id) < 0).map((id) => row(byId[id], r)).join('') + '</div>' + (k === 'tools' ? '<a class="gw-mall" href="' + r + 'tools/" data-gw-nav-to="tools">All tools, with what each one does ›</a>' : '') + '</section>'; };
+      '<div class="gw-ml">' + S.ids.filter((id) => k === 'research' || k === 'tools' || k === 'guide' || SECTIONS.research.ids.indexOf(id) < 0).map((id) => row(byId[id], r)).join('') + '</div>' + (k === 'tools' ? '<a class="gw-mall" href="' + r + 'tools/" data-gw-nav-to="tools">All calculators, with what each one does ›</a>' : '') + '</section>'; };
     return '<div class="gw-mx">' + searchHtml('menu', 'Search, e.g. ABSD or Jadescape') +
       '<div class="gw-mx-body" data-gw-menu-body><div class="gw-mcols">' + SEC_ORDER.map(sec).join('') + '</div>' +
-      '<div class="gw-mfoot"><a class="gw-mhome" href="' + (r || './') + '" data-gw-nav-to="home">' + svg('home', 18) + 'Home</a>' + row(byId.guide, r) + row(byId['main-site'], r) + row(byId.launches, r) +
+      '<div class="gw-mfoot"><a class="gw-mhome" href="' + (r || './') + '" data-gw-nav-to="home">' + svg('home', 18) + 'Home</a>' + row(byId['main-site'], r) + row(byId.launches, r) +
       '<a class="gw-mask" href="' + esc(ASK) + '" target="_blank" rel="noopener" data-gw-nav-to="ask">' + svg('chat', 20) + 'Ask Ken on WhatsApp</a>' +
       // Audit V3-05: one place, on every page, to remove the figures this tab remembers for the tools
       '<p class="gw-mclear"><button type="button" class="gw-link" data-gw-clear-all>Clear my figures</button> <span>Removes the figures this tab remembers for every tool.</span></p></div></div></div>';
@@ -571,9 +575,9 @@
       u.searchParams.set('j', '1'); a.setAttribute('href', u.pathname + u.search + u.hash);
     };
     document.addEventListener('click', markJourney, true); document.addEventListener('auxclick', markJourney, true);
-    // Buy · Sell: on the guided-path page the link for the open path is marked (Buy for #buy, Sell for #sell); the other paths mark neither.
+    // Plan My Move: marked on the guided-path page, whichever path is open.
     if (/\/journey\/?$/.test(location.pathname)) {
-      const mark = () => { const h = (location.hash || '').replace('#', ''); [].slice.call(document.querySelectorAll('.gw-nav .gw-links a[data-kpt-nav], .gw-secs a[data-gw-nav-to]')).forEach((a) => { const k = a.getAttribute('data-kpt-nav') || a.getAttribute('data-gw-nav-to'); if (k === 'buy' || k === 'sell') { if (k === h) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); } }); };
+      const mark = () => { [].slice.call(document.querySelectorAll('.gw-nav .gw-links a[data-kpt-nav], .gw-secs a[data-gw-nav-to]')).forEach((a) => { const k = a.getAttribute('data-kpt-nav') || a.getAttribute('data-gw-nav-to'); if (k === 'journey') a.setAttribute('aria-current', 'page'); }); };
       mark(); window.addEventListener('hashchange', mark);
     }
     // The four-step page (journey #up): finished steps ticked, the main button points at the next one.

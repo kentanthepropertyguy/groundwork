@@ -136,12 +136,14 @@ try:
     ctx = br.new_context(viewport={'width': 1440, 'height': 900}); page, errs = fresh(ctx)
     page.goto(URL.replace('map/', '') + '#/'); page.wait_for_selector('.kpr-onmap a[href="map/"]', timeout=20000)
     check('Research home offers the map under the search box', 'map' in txt(page, '.kpr-onmap a').lower() and page.locator('.kpr-onmap').count() == 1)
-    page.goto(URL.replace('map/', '') + '#/p/jadescape'); page.wait_for_selector('.kpr-onmap a[href^="map/#p="]', timeout=20000)
-    check('a Research project page links to that project on the map', page.get_attribute('.kpr-onmap a', 'href') == 'map/#p=jadescape', page.get_attribute('.kpr-onmap a', 'href'))
-    check('the link appears once', page.locator('.kpr-onmap').count() == 1)
-    page.click('.kpr-onmap a'); page.wait_for_function('window.KPT_MAP_APP && window.KPT_MAP_APP.evReady', timeout=20000)
+    # 25 Oct 2026: a project page opens with a "Location & amenities" shortcut (once) to its own small map; the full Map is one link from that section
+    page.goto(URL.replace('map/', '') + '#/p/jadescape'); page.wait_for_selector('.kpr-onmap [data-lg-loc-go]', timeout=20000)
+    check('a Research project page offers its Location & amenities, once', page.locator('.kpr-onmap').count() == 1 and 'Location' in txt(page, '.kpr-onmap [data-lg-loc-go]'))
+    check('the section links to that project on the full Map', page.get_attribute('#lgLoc [data-gwl-full]', 'href') == 'map/#p=jadescape', page.get_attribute('#lgLoc [data-gwl-full]', 'href'))
+    page.click('.kpr-onmap [data-lg-loc-go]'); page.wait_for_selector('#lgLoc .gwl-near', timeout=20000)
+    page.click('#lgLoc [data-gwl-full]'); page.wait_for_function('window.KPT_MAP_APP && window.KPT_MAP_APP.evReady', timeout=20000)
     check('the link lands on the map with that development selected', 'Jadescape' in txt(page, '.dp h2') and page.evaluate('location.pathname').endswith('/research/map/'))
-    # Package 3: the header is Buy · Sell · Research · Map · Tools. The Map is its own item and is the one marked current here; Research is not, and the Map is still in the Research menu column.
+    # The header is Plan My Move · Research · Map · Calculators. The Map is its own item and is the one marked current here; Research is not, and the Map is still in the Research menu column.
     check('map uses the shared Groundwork header: brand, Map marked current (and only Map), Research not marked, Map also under Research in the same menu', 'GROUNDWORK' in txt(page, '.gw-nav .gw-home b') and page.get_attribute('.gw-nav .gw-links a[data-kpt-nav=map]', 'aria-current') == 'page' and page.get_attribute('.gw-nav .gw-links a[data-kpt-nav=research]', 'aria-current') is None and page.locator('.gw-nav .gw-ms-research a[href$="research/map/"]').count() >= 1 and page.locator('.gw-nav .gw-links a[aria-current]').count() == 1 and page.get_attribute('.gw-nav .gw-home', 'href') == '../../' and page.locator('.gw-nav details.gw-menu').count() == 1)
     check('map is full-screen: no footer, and the URA attribution, credentials and privacy sit in the sources panel', page.locator('footer.gw-foot').count() == 0 and 'Singapore Open Data Licence' in page.evaluate("document.getElementById('sources').textContent") and 'CEA R007903D' in page.evaluate("document.getElementById('sources').textContent") and 'Ken Property Tools' not in txt(page, 'body'))
     check('the shared header sits above the map and the map fills the rest of the screen', page.evaluate("(() => { const h = document.querySelector('.gw-nav').getBoundingClientRect(), m = document.querySelector('.mapstage').getBoundingClientRect(); return Math.abs(h.bottom - m.top) < 1 && m.height >= innerHeight - h.height - 1; })()"))
