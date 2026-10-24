@@ -67,11 +67,18 @@ try:
         check(vn + ': nothing typed reaches an outgoing WhatsApp link', pg.evaluate("[...document.querySelectorAll('a[href*=\"wa.me\"]')].every(a => !/1800000|1,800,000|570155|jade/i.test(decodeURIComponent(a.href)))"))
         check(vn + ': no page errors', not errs, errs[:2]); ctx.close()
 
-        print('\n== 1. Development search → Map → full analysis → Back,', vn)
+        print('\n== 1. Development search → full analysis; Map → full analysis → Back,', vn)
+        # 25 Oct 2026: Research opens the development's full analysis directly; the Map is reached from the report or the navigation
         ctx, pg, errs = fresh(br, kw); home(pg); pg.fill('#q', 'jadescape'); pg.wait_for_selector('#res button[data-id]', timeout=8000)
-        pg.click('#res button[data-id]'); pg.wait_for_url('**/research/map/**', timeout=10000); pg.wait_for_function('window.KPT_MAP_APP && window.KPT_MAP_APP.evReady', timeout=20000); pg.wait_for_timeout(1200)
+        pg.click('#res button[data-id]'); pg.wait_for_url('**/research/#/p/jadescape', timeout=10000); pg.wait_for_selector('.lg-back', timeout=10000)
+        check(vn + ': a development chosen in Research opens its full analysis, not the Map', '/research/map/' not in pg.url and 'Jadescape' in pg.inner_text('h1'), pg.url)
+        pg.go_back(); pg.wait_for_selector('.gw-ropts', timeout=15000); pg.wait_for_function("document.querySelector('#q') && document.querySelector('#q').value === 'jadescape'", timeout=10000)
+        check(vn + ': Back returns to Research with the search still there', pg.input_value('#q') == 'jadescape', pg.input_value('#q'))
+        pg.go_forward(); pg.wait_for_selector('.lg-back', timeout=10000); check(vn + ': Forward reopens the analysis', '#/p/jadescape' in pg.url)
+        check(vn + ': no page errors', not errs, errs[:2]); ctx.close()
+        ctx, pg, errs = fresh(br, kw); pg.goto(B + '/research/map/#p=jadescape'); pg.wait_for_function('window.KPT_MAP_APP && window.KPT_MAP_APP.evReady', timeout=20000); pg.wait_for_selector('[data-m-full]', timeout=15000); pg.wait_for_timeout(600)
         t = card(pg)
-        check(vn + ': a positioned development opens the Map on it, with its summary', '#p=jadescape' in pg.url and 'Jadescape' in t and re.search(r'\$\s?[\d,]+', t) is not None, (pg.url, t[:120]))
+        check(vn + ': the Map shows the development with its summary', '#p=jadescape' in pg.url and 'Jadescape' in t and re.search(r'\$\s?[\d,]+', t) is not None, (pg.url, t[:120]))
         shot(pg, f'map-selected-{vn}')
         full = pg.query_selector('[data-m-full]')
         check(vn + ': “Open full analysis” is obvious', full is not None and 'Open full analysis' in full.inner_text() and full.is_visible())
@@ -85,10 +92,6 @@ try:
         sel = pg.evaluate("(document.querySelector('.dp .rad [aria-checked=true], .bs .rad [aria-checked=true]') || {dataset: {}}).dataset.pr")
         check(vn + ': Back to Map restores the selection and the radius', 'Jadescape' in card(pg) and sel == '2000' and 'p=jadescape' in pg.url, (sel, pg.url, hmap))
         check(vn + ': no page errors', not errs, errs[:2]); ctx.close()
-        # coming back from the Map restores the search that led there
-        ctx, pg, errs = fresh(br, kw); home(pg); pg.fill('#q', 'jadescape'); pg.wait_for_selector('#res button[data-id]', timeout=8000); pg.click('#res button[data-id]'); pg.wait_for_url('**/research/map/**', timeout=10000); pg.wait_for_timeout(800)
-        pg.go_back(); pg.wait_for_selector('.gw-ropts', timeout=15000); pg.wait_for_timeout(800)
-        check(vn + ': Back from the Map returns to Research with the search still there', pg.input_value('#q') == 'jadescape' and pg.query_selector('#res button[data-id]') is not None, pg.input_value('#q')); ctx.close()
         # reaching the analysis another way shows no Back to Map
         ctx, pg, errs = fresh(br, kw); pg.goto(B + '/research/#/p/jadescape'); pg.wait_for_selector('.lg-back', timeout=10000)
         check(vn + ': opened directly, the analysis keeps its own back link', 'Back to Map' not in pg.inner_text('.lg-back'), pg.inner_text('.lg-back')); ctx.close()

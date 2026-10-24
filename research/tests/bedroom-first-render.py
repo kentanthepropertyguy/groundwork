@@ -61,7 +61,7 @@ try:
             chips = pg.eval_on_selector_all('[data-bed]', 'e => e.map(x => [x.dataset.bed, x.getAttribute("aria-pressed")])')
             ok([c[0] for c in chips] == [t['g'] for t in sorted(rec(dev)['resale']['types'], key=lambda t: 99 if t['g'] == 'PH' else int(t['g']))] and all(c[1] == 'false' for c in chips), vn + ': one chip per supported type, none chosen', chips)
             ok(pg.locator('[data-gwb-ans]').count() == 0 and pg.locator('[data-lg-ov]').count() == 1 and '$' not in text(pg, '[data-lg-ov]'), vn + ': a neutral overview before a choice, no price')
-            ok(pg.locator('#sizeSel').count() == 1, vn + ': sqft still offered beside the types')
+            ok(pg.locator('#sizeSel').count() == 1 and pg.locator('[data-gwb-area]').is_visible() and pg.locator('#sizeSel').is_hidden(), vn + ': sqft still offered, behind a quiet "Search by floor area" (25 Oct 2026: bedrooms first)')
             click(pg, '[data-bed="2"]')
             a = text(pg, '[data-gwb-ans]')
             ok(short(t2['price'][2]) in a and 'typical price' in a, vn + ': the typical total price, from the data', (a[:120], short(t2['price'][2])))
@@ -87,8 +87,9 @@ try:
             ok(pg.locator('#bedSwitch').count() == 1, vn + ': a link back to bedrooms beside the chosen size')
             click(pg, '#bedSwitch')
             ok(text(pg, '#lgPickH') == 'How many bedrooms?' and pg.locator('[data-bed][aria-pressed="true"]').count() == 0 and pg.locator('[data-gwb-ans]').count() == 0, vn + ': back to bedrooms, nothing chosen')
-            # 3. bedrooms -> sqft through the drop-down
+            # 3. bedrooms -> sqft through the drop-down, opened from "Search by floor area"
             click(pg, '[data-bed="3"]')
+            pg.click('[data-gwb-area]'); pg.wait_for_selector('#gwbArea:not([hidden]) #sizeSel')
             v = pg.evaluate("(()=>{const o=[...document.querySelectorAll('#sizeSel optgroup option')];return o[0]&&o[0].value})()")
             pg.select_option('#sizeSel', v); pg.wait_for_timeout(450)
             ok(pg.locator('[data-gwb-ans]').count() == 0 and pg.locator('.lg-ans').count() == 1 and pg.locator('[data-mp]').count() == 1, vn + ': choosing a size switches to the size answer and its Market Pulse')

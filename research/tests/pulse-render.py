@@ -118,9 +118,9 @@ try:
         open_dev(pg, base, 'parc-clematis')
         check(f'{vn}: and the report then leads with the asking-price question', pg.evaluate("document.querySelector('[data-lg-for] > *').querySelector('a').id") == 'wa')
         # Home entry
-        pg.goto(f'http://127.0.0.1:{P}/'); pg.wait_for_selector('.gw-door-research', state='attached', timeout=10000)
-        door = pg.inner_text('.gw-door-research') if pg.is_visible('.gw-door-research') else pg.text_content('.gw-door-research')
-        check(f'{vn}: Home asks how the market is around you, inside the existing Research door (no new block)', 'market around you' in door and not pg.query_selector('[data-mp]'), door)
+        # 25 Oct 2026: the homepage Research door is one simple card into Research (its list of links was removed); Market Pulse lives in each report
+        pg.goto(f'http://127.0.0.1:{P}/'); pg.wait_for_selector('a.gw-door3[href="research/"]', state='attached', timeout=10000)
+        check(f'{vn}: Home keeps one Research door, and adds no Market Pulse block', pg.locator('a.gw-door3[href="research/"]').count() == 1 and not pg.query_selector('[data-mp]'))
         # Map: the line, the link, the way back
         pg.goto(f'http://127.0.0.1:{P}/research/map/#p=parc-clematis');
         pg.wait_for_function('window.KPT_MAP_APP && KPT_MAP_APP.evReady', timeout=20000)

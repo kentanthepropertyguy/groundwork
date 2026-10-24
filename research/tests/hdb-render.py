@@ -179,9 +179,10 @@ try:
 
         print('\n== 8. Condo, EC, cluster, landed and new-launch postal codes,', vn)
         for code, want, label in (('575749', 'jadescape', 'condo'), ('579819', 'bishan-loft', 'EC'), ('359419', 'dunsfold-18', 'cluster')):
-            ctx, pg, errs = fresh(br, kw); home(pg); pg.fill('#q', code); pg.wait_for_selector('#res button'); pg.keyboard.press('Enter'); pg.wait_for_url('**/research/map/**', timeout=20000)
-            pg.wait_for_selector('.dp h2, .bs h2'); full = pg.get_attribute('a[data-m-full]', 'href')
-            check(vn + ': ' + label + ' postal code opens that development on the Map, with the full Research one tap away', hash_(pg).startswith('#p=' + want) and full == '../#/p/' + want and not re.search(r'\d{6}', pg.url), (hash_(pg), full)); ctx.close()
+            ctx, pg, errs = fresh(br, kw); home(pg); pg.fill('#q', code); pg.wait_for_selector('#res button'); pg.keyboard.press('Enter'); pg.wait_for_url('**/research/#/p/' + want + '*', timeout=20000)
+            pg.wait_for_selector('.lg-back', timeout=20000)
+            # 25 Oct 2026: Research opens the development's full analysis directly (the Map is one link away, in its Location section)
+            check(vn + ': ' + label + ' postal code opens that development\'s full Research', hash_(pg).startswith('#/p/' + want) and '/research/map/' not in pg.url and not re.search(r'\d{6}', pg.url), hash_(pg)); ctx.close()
         ctx, pg, errs = fresh(br, kw); home(pg); pg.fill('#q', '459919'); pg.wait_for_selector('#res button'); rows = pg.inner_text('#res'); pg.keyboard.press('Enter'); pg.wait_for_function("location.hash === '#/prices'", timeout=20000)
         check(vn + ': a landed postal code goes to the landed research, with the code typed into its box (not the address)', 'Landed' in rows and pg.input_value('[data-vx-pc]') == '459919' and '459919' not in pg.url, rows); ctx.close()
         ctx, pg, errs = fresh(br, kw); home(pg); pg.fill('#q', '579600'); pg.wait_for_selector('#res button'); check(vn + ': a project not yet on sale (Thomson Reserve) is found by postal code', 'Thomson Reserve' in pg.inner_text('#res')); ctx.close()

@@ -239,7 +239,8 @@ ok(!/localStorage/.test(src + read('assets/js/gw-journey.js').match(/pulseFor[^\
 const lg = read('assets/js/kpt-lg.js');
 ok(/GLOBAL\.GW_PULSE\.html\(ctx\.PU, \{ forWho, mapHref/.test(lg) && /class="lg-kenstrips" id="next"/.test(lg), 'the page passes the question to the block and the cards carry the id the link scrolls to');
 ok(/How is the market around your home\?/.test(lg), 'Research\'s first screen asks how the market is');
-const home = read('index.html'); ok(/How’s the market around you\?/.test(home), 'Home: an entry point in the Research door, no new section');
+const home = read('index.html'); // 25 Oct 2026: the homepage's Research door is one card (its list of tool links was removed); Market Pulse is reached in every development's Research report
+ok(/<a class="gw-door gw-door3" href="research\/"/.test(home) && !/data-mp[ >]/.test(home), 'Home: the Research door leads to Research (where Market Pulse lives), no new section');
 ok(!/gw-pulse|data-mp/.test(home), 'Home gains no new block');
 const jr = read('journey/index.html'); ok(/data-pulse-for="sell"[^>]*>See how the market is moving in your development/.test(jr), 'Sell: a way into the development\'s market report');
 ok(/data-pulse-for="sell"/.test(read('assets/js/gw-journey.js')) && /pulseFor === 'sell' \|\| a\.dataset\.pulseFor === 'buy'/.test(read('assets/js/gw-journey.js')), 'the journey links set the owner\'s or the buyer\'s question');

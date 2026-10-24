@@ -57,7 +57,7 @@
   }
   function lineHtml(V) {
     if (V.g) return 'Showing ' + esc(label(V.g)) + ' homes, the type you chose.';
-    if (V.missing) return 'No reliable ' + esc(label(V.missing)) + ' figures here. Choose another type, or a size.';
+    if (V.missing) return 'No reliable ' + esc(label(V.missing)) + ' figures here. Choose another type, or search by floor area.';
     return 'Prices differ a lot between home types. Choose one to see what it sold for.';
   }
 

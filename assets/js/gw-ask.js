@@ -4,6 +4,9 @@
    (Research, the same size bands and evidence rules), or an HDB block's resales of that flat type (What's my home worth?).
    It rearranges those figures; it never estimates a value. Where there are too few sales it says so instead of judging.
    Wording on every check: recent sales, not a valuation; floor, facing, stack and condition can justify a different price.
+   25 Oct 2026: the answer first. A headline (above / within / below the recent comparable sale range, from place()), then a
+   proportional chart (range, middle half, median where supported, the asking marker, and each actual sale as a dot where the page
+   already has them: HDB only; condo bands hold aggregates, so no dots are drawn there), then the numbers, and one quiet line.
    Privacy: the asking price and size stay on the page. They are never put in a page address or analytics; the optional
    WhatsApp message to Ken is opened from a button (never a link the analytics tags can read), only when the visitor taps it.
    UMD: window.GWASK in the browser; Node uses the same functions in the tests.
@@ -16,7 +19,7 @@
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const num = (n) => Math.round(n).toLocaleString('en-US'), money = (n) => '$' + num(n);
   const PHONE = '6590908898', waUrl = (m) => 'https://wa.me/' + PHONE + '?text=' + encodeURIComponent(m);
-  const NOTE = 'Recent sales, not a valuation. Floor, facing, stack and condition can justify a different price.';
+  const NOTE = 'Recent sales are a guide, not a valuation. Floor, facing and condition may affect price.';
   // "1,780,000", "$1.78m", "780k". Never negative.
   const amount = (s) => { const t = String(s == null ? '' : s).trim().toLowerCase().replace(/[$,\s]/g, ''), m = /^(\d+(?:\.\d+)?)(m|mil|million|k)?$/.exec(t); if (!m) return NaN; return +m[1] * (m[2] ? (m[2] === 'k' ? 1e3 : 1e6) : 1); };
   // A5-23: say why a typed price can't be used (unreadable, too low to be a full price, or implausibly high), instead of asking again
@@ -58,21 +61,61 @@
     if (p === 'within') return 'Within the range of the ' + what + '.';
     return 'Within the ' + mid + ' of the ' + what + (d.med !== undefined ? ', ' + (x > d.med ? 'above' : x < d.med ? 'below' : 'at') + ' the typical ' + f(d.med) : '') + '.';
   }
-  // The range on one line: all sales (light), the middle half (dark), the typical figure (tick) and the asking price (marker).
-  function rangeSvg(x, d, f, label) {
-    const lo = Math.min(d.lo, x), hi = Math.max(d.hi, x), pad = (hi - lo) * 0.08 || hi * 0.04, a = lo - pad, b = hi + pad, W = 320;
-    const X = (v) => ((v - a) / (b - a) * W).toFixed(1);
-    let g = '<rect x="' + X(d.lo) + '" y="22" width="' + Math.max(2, X(d.hi) - X(d.lo)) + '" height="10" rx="5" fill="#D9DCE6"/>';
-    if (d.q1 !== undefined && d.q3 !== undefined && d.n >= MID_MIN) g += '<rect x="' + X(d.q1) + '" y="22" width="' + Math.max(2, X(d.q3) - X(d.q1)) + '" height="10" rx="5" fill="#5D6487"/>';
-    if (d.med !== undefined && d.n >= MID_MIN) g += '<rect x="' + (X(d.med) - 1) + '" y="18" width="2" height="18" fill="#16213E"/>';
-    g += '<circle cx="' + X(x) + '" cy="27" r="8" fill="#0B63CE" stroke="#fff" stroke-width="2.5"/>';
-    const ax = +X(x), anchor = ax < 60 ? 'start' : ax > W - 60 ? 'end' : 'middle';
-    g += '<text x="' + X(x) + '" y="10" font-size="11.5" font-weight="700" fill="#0B63CE" text-anchor="' + anchor + '">Asking ' + esc(f(x)) + '</text>';
-    g += '<text x="' + X(d.lo) + '" y="52" font-size="11" fill="#6B7280" text-anchor="' + (X(d.lo) < 40 ? 'start' : 'middle') + '">' + esc(f(d.lo)) + '</text>';
-    if (d.hi !== d.lo) g += '<text x="' + X(d.hi) + '" y="52" font-size="11" fill="#6B7280" text-anchor="' + (X(d.hi) > W - 40 ? 'end' : 'middle') + '">' + esc(f(d.hi)) + '</text>';
-    return '<svg class="gw-ask-svg" viewBox="-4 0 ' + (W + 8) + ' 58" role="img" aria-label="' + esc(label) + '">' + g + '</svg>';
+  // The headline groups place() into three: below | within | above (lower, middle and upper quarters are all within the range).
+  const verdict = (p) => (p === 'below' || p === 'above' ? p : p ? 'within' : null);
+  const VTEXT = { below: 'Below recent comparable sale range', within: 'Within recent comparable sale range', above: 'Above recent comparable sale range' };
+  // How far outside the range, against its nearest end: "6% above the highest sale". '' when within.
+  function gapText(x, d, v) {
+    if (v !== 'above' && v !== 'below') return '';
+    const pc = v === 'above' ? (x / d.hi - 1) * 100 : (1 - x / d.lo) * 100, r = Math.round(pc);
+    return (r < 1 ? 'Just ' + v : r + '% ' + v) + ' the ' + (v === 'above' ? 'highest' : 'lowest') + ' sale';
   }
-  const legend = (d, span) => '<p class="gw-ask-leg"><span><i class="a"></i>All ' + d.n + ' sales, ' + span + '</span>' + (d.n >= MID_MIN && d.q1 !== undefined ? '<span><i class="m"></i>' + (d.midN ? 'Middle ' + d.midN : 'Middle half (about)') + '</span>' : '') + (d.med !== undefined && d.n >= MID_MIN ? '<span><i class="t"></i>Typical</span>' : '') + '<span><i class="x"></i>Asking price</span></p>';
+  const showMed = (d) => d.med !== undefined && d.n >= MID_MIN;
+  const showMid = (d) => d.q1 !== undefined && d.q3 !== undefined && d.n >= MID_MIN;
+  // Median of actual sale prices (HDB, where the page lists every sale). Only with MID_MIN sales or more.
+  function median(ps) { if (!ps || ps.length < MID_MIN) return undefined; const s = ps.slice().sort((p, q) => p - q), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; }
+  // One proportional scale for everything: the range, the middle half, the median, the asking price (inside or outside the
+  // range) and, where given, each actual sale (ps) as a small dot, stacked where sales are close so none hides another.
+  function rangeSvg(x, d, f, label, ps) {
+    const lo = Math.min(d.lo, x), hi = Math.max(d.hi, x), pad = (hi - lo) * 0.07 || hi * 0.04, a = lo - pad, b = hi + pad, W = 320;
+    const X = (v) => (v - a) / (b - a) * W, F = (v) => v.toFixed(1);
+    let dots = '', DH = 0;
+    if (ps && ps.length) {
+      const R = ps.length > 40 ? 2.6 : 3.4, gx = 2 * R + 0.6, CAP = 4, placed = [];
+      ps.slice().sort((p, q) => p - q).forEach((v) => { const cx = X(v); let l = 0; while (placed.some((q) => q.l === l && Math.abs(q.x - cx) < gx)) l++; placed.push({ x: cx, l }); });
+      const rows = Math.max.apply(null, placed.map((p) => p.l)) + 1, dy = rows > CAP ? (CAP - 1) * (2 * R + 1) / (rows - 1) : 2 * R + 1;
+      DH = Math.min(rows, CAP) * (2 * R + 1) + 4;
+      placed.forEach((p) => { dots += '<circle cx="' + F(p.x) + '" cy="' + F(22 + DH - 4 - R - p.l * dy) + '" r="' + R + '" fill="#8A90A8" fill-opacity="0.85"/>'; });
+    }
+    const TY = 22 + DH + 10, lx = X(d.lo), hx = X(d.hi), ax = X(x);
+    let g = dots + '<rect x="' + F(lx) + '" y="' + (TY - 4) + '" width="' + F(Math.max(3, hx - lx)) + '" height="8" rx="4" fill="#DCE0EA"/>';
+    if (showMid(d)) g += '<rect x="' + F(X(d.q1)) + '" y="' + (TY - 4) + '" width="' + F(Math.max(3, X(d.q3) - X(d.q1))) + '" height="8" rx="4" fill="#5D6487"/>';
+    if (showMed(d)) g += '<rect x="' + F(X(d.med) - 1.25) + '" y="' + (TY - 9) + '" width="2.5" height="18" rx="1" fill="#16213E" stroke="#fff" stroke-width="1"/>';
+    // outside the range: a dashed run from the nearest end to the asking price shows the gap at true scale
+    if (x > d.hi) g += '<line x1="' + F(hx + 3) + '" x2="' + F(ax - 8) + '" y1="' + TY + '" y2="' + TY + '" stroke="#0B63CE" stroke-width="1.5" stroke-dasharray="3 3"/>';
+    if (x < d.lo) g += '<line x1="' + F(ax + 8) + '" x2="' + F(lx - 3) + '" y1="' + TY + '" y2="' + TY + '" stroke="#0B63CE" stroke-width="1.5" stroke-dasharray="3 3"/>';
+    g += '<line x1="' + F(ax) + '" x2="' + F(ax) + '" y1="19" y2="' + (TY - 7) + '" stroke="#0B63CE" stroke-width="2"/>';
+    g += '<circle cx="' + F(ax) + '" cy="' + TY + '" r="7.5" fill="#0B63CE" stroke="#fff" stroke-width="2.5"/>';
+    const anc = (px, m) => (px < m ? 'start' : px > W - m ? 'end' : 'middle');
+    g += '<text x="' + F(ax) + '" y="12" font-size="12" font-weight="700" fill="#0B63CE" text-anchor="' + anc(ax, 62) + '">Asking ' + esc(f(x)) + '</text>';
+    // value labels under the line, never on top of one another: lowest and highest apart if there is room, else one "lo – hi"
+    const vy = TY + 25, cy = TY + 37, lab = (px, v, cap, an) => '<text x="' + F(px) + '" y="' + vy + '" font-size="11.5" font-weight="600" fill="#374151" text-anchor="' + an + '">' + esc(v) + '</text><text x="' + F(px) + '" y="' + cy + '" font-size="10.5" fill="#6B7280" text-anchor="' + an + '">' + cap + '</text>';
+    if (d.hi === d.lo) g += lab(lx, f(d.lo), 'every sale', anc(lx, 40));
+    else if (hx - lx >= 104) {
+      g += lab(lx, f(d.lo), 'lowest', anc(lx, 40)) + lab(hx, f(d.hi), 'highest', anc(hx, 40));
+      if (showMed(d)) { const mx = X(d.med); if (mx - lx >= 76 && hx - mx >= 76) g += lab(mx, f(d.med), 'median', 'middle'); }
+    } else { const mid = (lx + hx) / 2; g += lab(mid, f(d.lo).replace(/ psf$/, '') + ' – ' + f(d.hi), 'lowest – highest', anc(mid, 70)); }
+    return '<svg class="gw-ask-svg" viewBox="-4 0 ' + (W + 8) + ' ' + (cy + 6) + '" role="img" aria-label="' + esc(label) + '">' + g + '</svg>';
+  }
+  const legend = (d, ps) => '<p class="gw-ask-leg"><span><i class="a"></i>Recent range</span>' + (showMid(d) ? '<span><i class="m"></i>' + (d.midN ? 'Middle ' + d.midN + ' sales' : 'Middle half (about)') + '</span>' : '') + (showMed(d) ? '<span><i class="t"></i>Median</span>' : '') + (ps && ps.length ? '<span><i class="s"></i>Each dot is one sale</span>' : '') + '<span><i class="x"></i>Asking price</span></p>';
+  // The answer, then the evidence in plain figures (so nobody has to read the chart to get it).
+  function verdictHtml(x, d, f, p, what) {
+    const v = verdict(p), gt = gapText(x, d, v);
+    return '<div class="gw-ask-v" data-ask-pos="' + v + '"><p class="gw-ask-vh">' + VTEXT[v] + (gt ? ' <span>' + esc(gt) + '</span>' : '') + '</p><p class="gw-ask-say">' + esc(sentence(x, d, f, what)) + '</p></div>';
+  }
+  const noneHtml = (t) => '<div class="gw-ask-v" data-ask-pos="none"><p class="gw-ask-vh">' + esc(t) + '</p></div>';
+  const nums = (rows) => '<dl class="gw-ask-nums">' + rows.filter(Boolean).map((r) => '<div><dt>' + esc(r[0]) + '</dt><dd>' + r[1] + '</dd></div>').join('') + '</dl>';
+  const span = (d, f) => (d.hi === d.lo ? esc(f(d.lo)) : esc(f(d.lo)) + ' – ' + esc(f(d.hi)));
 
   // ---- condos: one size band of a development (the band data comes from Research's own model) ----
   // B: { bin, label, n, months, lo, q1, med, q3, hi, latest } (the last 12 months, the sale type on show)
@@ -93,13 +136,15 @@
     const head = '<div class="gw-ask-h"><span>' + num(c.size) + ' sq ft at ' + money(x) + '</span><b>' + money(psf) + ' psf</b></div>';
     if (!b || !b.n) {
       const near = A.bands.filter((y) => y.n).map((y) => ({ y, d: Math.abs(y.bin - c.bin) })).sort((p, q) => p.d - q.d).slice(0, 2).map((p) => p.y).sort((p, q) => p.bin - q.bin);
-      return { state: 'none', psf, html: head + '<p class="gw-ask-say">No ' + words[1] + ' of ' + esc(sizeLabel(c.bin)) + ' homes here in the last 12 months, so there is nothing recent to place this price against.' + (near.length ? ' Nearest sizes with recent ' + words[1] + ': ' + near.map((y) => esc(y.label) + ' (' + y.n + ')').join(', ') + '.' : '') + '</p>' };
+      return { state: 'none', psf, html: noneHtml('No recent comparable sales') + head + '<p class="gw-ask-say">No ' + words[1] + ' of ' + esc(sizeLabel(c.bin)) + ' homes here in the last 12 months, so there is nothing recent to place this price against.' + (near.length ? ' Nearest sizes with recent ' + words[1] + ': ' + near.map((y) => esc(y.label) + ' (' + y.n + ')').join(', ') + '.' : '') + '</p>' };
     }
     if (!(b.n >= MIN_SALES && b.months >= MIN_MONTHS)) {
-      return { state: 'thin', psf, html: head + '<p class="gw-ask-say">Only ' + b.n + ' ' + (b.n === 1 ? words[0] : words[1]) + ' of ' + esc(b.label) + ' homes here in the last 12 months' + (b.n === 1 ? ', at ' + f(b.med) : ', all in ' + esc(b.latest)) + '. That is too few to judge an asking price against.</p>' };
+      return { state: 'thin', psf, html: noneHtml('Too few recent sales to compare') + head + '<p class="gw-ask-say">Only ' + b.n + ' ' + (b.n === 1 ? words[0] : words[1]) + ' of ' + esc(b.label) + ' homes here in the last 12 months' + (b.n === 1 ? ', at ' + f(b.med) : ', all in ' + esc(b.latest)) + '. That is too few to judge an asking price against.</p>' };
     }
     const d = { lo: b.lo, q1: b.q1, med: b.med, q3: b.q3, hi: b.hi, n: b.n }, what = b.n + ' ' + words[1] + ' of ' + b.label + ' homes here in the last 12 months';
-    return { state: 'ok', psf, pos: place(psf, d), html: head + rangeSvg(psf, d, f, 'Asking ' + f(psf) + ' against ' + what) + legend(d, 'last 12 months') + '<p class="gw-ask-say">' + esc(sentence(psf, d, f, what)) + '</p>' + edgeNote(A, c, words) };
+    const pos = place(psf, d);
+    return { state: 'ok', psf, pos, verdict: verdict(pos), html: verdictHtml(psf, d, f, pos, what) + rangeSvg(psf, d, f, 'Asking ' + f(psf) + ' against ' + what) + legend(d) +
+      nums([['Asking', money(x) + ' · <b>' + money(psf) + ' psf</b>'], ['Recent range', span(d, money) + ' psf'], showMed(d) ? ['Median', esc(f(d.med))] : null, ['Size band', esc(b.label)], ['Sales', b.n + ' ' + esc(b.n === 1 ? words[0] : words[1]) + ' · last 12 months']]) + edgeNote(A, c, words) };
   }
   // A4-18: a listing's round size can sit just above a band edge while URA records the same home just below it (65 sq m is
   // 699.65 sq ft, in the 600–699 band, but is usually listed as 700 sq ft). Name the band below too, with its own count and range.
@@ -121,8 +166,12 @@
     if (pi) return { state: 'input', html: warn(pi) };
     if (!(x >= PRICE_MIN)) return { state: 'input', html: '<p class="gw-fine">Enter the asking price to see where it sits.</p>' };
     if (!H || !(H.n >= 3) || H.lo === undefined) return { state: 'thin', html: '<p class="gw-ask-say">Too few resales here to judge an asking price against.</p>' };
-    const d = { lo: H.lo, q1: H.q1, q3: H.q3, hi: H.hi, n: H.n, midN: H.midN }, what = H.n + ' resales of ' + H.ft + ' flats ' + (H.level === 'block' ? 'in this block' : 'on this street') + ' in the last 2 years';
-    return { state: 'ok', pos: place(x, d), html: '<div class="gw-ask-h"><span>Asking price</span><b>' + money(x) + '</b></div>' + rangeSvg(x, d, money, 'Asking ' + money(x) + ' against ' + what) + legend(d, 'last 2 years') + '<p class="gw-ask-say">' + esc(sentence(x, d, money, what)) + '</p>' };
+    // H.ps: each sale's price, as the page's own sales list shows them; used only when it is the whole set
+    const ps = Array.isArray(H.ps) && H.ps.length === H.n ? H.ps : null;
+    const d = { lo: H.lo, q1: H.q1, med: median(ps), q3: H.q3, hi: H.hi, n: H.n, midN: H.midN }, where = H.level === 'block' ? 'in this block' : 'on this street', what = H.n + ' resales of ' + H.ft + ' flats ' + where + ' in the last 2 years';
+    const pos = place(x, d);
+    return { state: 'ok', pos, verdict: verdict(pos), html: verdictHtml(x, d, money, pos, what) + rangeSvg(x, d, money, 'Asking ' + money(x) + ' against ' + what, ps) + legend(d, ps) +
+      nums([['Asking', '<b>' + money(x) + '</b>'], ['Recent range', span(d, money)], showMed(d) ? ['Median', money(d.med)] : null, ['Flat type', esc(H.ft) + ' <small>(' + where + ')</small>'], ['Sales', H.n + ' resales · last 2 years']]) };
   }
   const hdbMsg = (H, price) => 'Hi Ken, I’m looking at a ' + H.ft + ' HDB flat at ' + H.where + ' with an asking price of ' + money(amount(price)) + '. I’ve checked it against recent resales on Groundwork. Could I get your view on it?';
 
@@ -140,7 +189,7 @@
       '<div class="gw-ask-top"><h2 class="gw-ask-t">' + esc(o.title || 'Check an asking price') + '</h2>' + (o.sub ? '<p class="gw-fine">' + esc(o.sub) + '</p>' : '') + '</div>' +
       '<div class="gw-ask-f">' + (kind === 'condo' ? field('size', 'Size', '', 'sq ft', 'e.g. 753') : '') + field('price', 'Asking price', '$', '', kind === 'condo' ? 'e.g. 1,780,000' : 'e.g. 680,000') + '</div>' +
       '<div class="gw-ask-out" data-ask-out aria-live="polite"><p class="gw-fine">' + (kind === 'condo' ? 'Type the size and price from the listing.' : 'Type the asking price.') + '</p></div>' +
-      '<p class="gw-ask-note"><b>' + NOTE + '</b> ' + esc(kind === 'hdb' ? 'HDB’s valuation, after the Option to Purchase, is separate.' : 'A bank valuation is separate.') + '</p>' +
+      '<p class="gw-ask-q">' + NOTE + '</p>' +
       '<div class="gw-ask-ken" data-ask-ken hidden><button type="button" class="gw-btn wa" data-ask-wa>Ask Ken about this price</button><p class="gw-fine">Opens WhatsApp with the ' + (kind === 'condo' ? 'development, size' : 'flat') + ' and price, to edit before sending. Your figures never go into the page address or analytics.</p></div></section>';
   }
 
@@ -156,7 +205,18 @@
     return { A, kind, size, price };
   }
   if (typeof document !== 'undefined') {
-    document.addEventListener('input', (e) => { const t = e.target; if (!t.matches || !t.matches('[data-ask-size],[data-ask-price]')) return; const sec = t.closest('[data-gw-ask]'); if (sec) compute(sec); });
+    // 25 Oct 2026: the asking price takes its thousands commas as it is typed (1,780,000), keeping the cursor where it was.
+    // Only plain digits are regrouped; "1.78m" or "780k" are left exactly as typed.
+    function commas(t) {
+      const v = t.value; if (!/^[\d,]*$/.test(v)) return;
+      const d = v.replace(/,/g, ''), out = d ? d.replace(/^0+(?=\d)/, '').replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '';
+      if (out === v) return;
+      const at = t.selectionStart == null ? v.length : t.selectionStart, before = v.slice(0, at).replace(/,/g, '').length;
+      t.value = out;
+      let i = 0, n = 0; while (i < out.length && n < before) { if (out[i] !== ',') n++; i++; }
+      try { t.setSelectionRange(i, i); } catch (x) { /* not focusable */ }
+    }
+    document.addEventListener('input', (e) => { const t = e.target; if (!t.matches || !t.matches('[data-ask-size],[data-ask-price]')) return; if (t.matches('[data-ask-price]')) commas(t); const sec = t.closest('[data-gw-ask]'); if (sec) compute(sec); });
     document.addEventListener('focusout', (e) => { const t = e.target; if (!t.matches || !t.matches('[data-ask-price]')) return; const v = amount(t.value); if (v > 0) t.value = num(v); });
     document.addEventListener('click', (e) => {
       const b = e.target.closest && e.target.closest('[data-ask-wa]'); if (!b) return;
@@ -167,5 +227,5 @@
       if (w) { try { w.opener = null; } catch (x) { /* ignore */ } } else root.location.href = 'https://wa.me/6590908898'; // blocked pop-up: the chat opens without the prepared figures
     });
   }
-  return { edgeNote, amount, place, sentence, rangeSvg, condoBand, condoResult, hdbResult, condoMsg, hdbMsg, panelHtml, NOTE, MID_MIN, MIN_SALES, MIN_MONTHS };
+  return { edgeNote, amount, place, verdict, VTEXT, gapText, median, sentence, rangeSvg, condoBand, condoResult, hdbResult, condoMsg, hdbMsg, panelHtml, NOTE, MID_MIN, MIN_SALES, MIN_MONTHS };
 });

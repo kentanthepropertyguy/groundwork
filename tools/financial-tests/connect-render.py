@@ -145,9 +145,9 @@ try:
         ctx, pg, errs = page(br, kw); pg.goto(B + '/journey/#sell'); pg.wait_for_timeout(600)
         check(vn + ': the Sell journey panel offers "What can I buy next?" to the Planner', pg.query_selector('a[data-gw-go="planner-sell"][href$="tools/planner/#sell"]') is not None)
         cur = pg.eval_on_selector_all('.gw-links a[aria-current]', 'e=>e.map(x=>x.textContent.trim())')
-        check(vn + ': the header marks Sell on the Sell journey', cur == ['Sell'], cur)
+        check(vn + ': the header marks Plan My Move on the Sell journey', cur == ['Plan My Move'], cur)
         pg.goto(B + '/journey/#buy'); pg.wait_for_timeout(500)
-        check(vn + ': ... and Buy on the Buy journey', pg.eval_on_selector_all('.gw-links a[aria-current]', 'e=>e.map(x=>x.textContent.trim())') == ['Buy'])
+        check(vn + ': ... and on the Buy journey', pg.eval_on_selector_all('.gw-links a[aria-current]', 'e=>e.map(x=>x.textContent.trim())') == ['Plan My Move'])
         pg.goto(B + '/tools/'); pg.wait_for_timeout(600)
         hrefs = pg.eval_on_selector_all('main a', 'e=>e.map(x=>x.getAttribute("href"))')
         miss = [t for t in ['planner', 'payment-planner', 'sale-proceeds', 'ssd', 'stamp-duty', 'tdsr', 'msr', 'mortgage'] if not any(h and ('tools/' + t + '/') in (('tools/' + h.split('tools/')[-1]) if 'tools/' in h else 'tools/' + h) for h in hrefs)]

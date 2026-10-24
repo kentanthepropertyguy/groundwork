@@ -157,7 +157,7 @@
     const mx = Math.max(S.psf[0], S.psf[1]), row = (n, v, c) => '<div class="gw-rex-r"><b style="color:' + c + '">' + esc(n) + '</b><b>$' + num(v) + ' <small>psf</small></b></div><div class="gw-bar"><i style="width:' + (v / mx * 86).toFixed(1) + '%;background:' + c + '"></i></div>';
     return '<div class="gw-rex"><p class="gw-lane">Example · sample research report</p><p class="gw-rex-h">' + esc(S.a) + ' or ' + esc(S.b) + '? What each really sells for, size by size.</p>' +
       '<p class="gw-fine">' + esc(String(S.band).replace('sqft', 'sq ft')) + ' resales, ' + esc(S.period) + ', median price per square foot</p>' + row(S.a, S.psf[0], 'var(--gw-a)') + row(S.b, S.psf[1], 'var(--gw-b)') +
-      '<a class="gw-rex-go" href="sample/" data-gw-nav-to="sample">Open the free sample report ›</a><p class="gw-fine">The sample is prepared with AI assistance from public sources and URA data, not reviewed by Ken.</p></div>';
+      '<a class="gw-rex-go" href="sample/" data-gw-nav-to="sample">Open the free sample report ›</a></div>';
   }
   // Research home: three ways in, one open at a time. The page script (research/index.html) switches them and fills the workspaces.
   const RESEARCH_OPTS = [
@@ -267,13 +267,15 @@
     // A size the visitor chose keeps the size question as it was (the price and the Market Pulse stay on a phone's first screen), with one link back to the types.
     if (bed && !ch) {
       const line = B.lineHtml(BV) + (BV.g ? ' <button type="button" class="kpr-link lg-clear" id="bedClear">Clear</button>' : '');
+      // 25 Oct 2026: the floor area is secondary, behind one quiet "Search by floor area" (it opens the same size drop-down and exact-size box).
       return '<div class="lg-sizes lg-pick gwb-pick" id="lgPick" data-lg-pick="' + (BV.g ? 'bed' : 'none') + '"><h2 class="lg-pick-h" id="lgPickH">How many bedrooms?</h2>' +
         B.chipsHtml(BV) +
-        '<div class="lg-pick-row gwb-or"><span class="gwb-or-l">Or by size</span><span class="lg-selwrap">' + sizeSelect(M) + '</span>' +
-        '<button type="button" class="kpr-link lg-typeit" data-lg-size aria-expanded="false" aria-controls="lgSize">Type an exact size</button></div>' +
         '<p class="lbl lg-pick-s" data-gwb-line>' + line + '</p>' +
-        (BV.few && BV.few.length ? '<p class="lg-fine gwb-few" data-gwb-few>Too few recent sales to show by type: ' + BV.few.map((g) => esc(B.label(g))).join(', ') + '. Choose a size for those.</p>' : '') +
-        sizeForm(S, M) + '</div>';
+        '<button type="button" class="kpr-link gwb-area-t" data-gwb-area aria-expanded="false" aria-controls="gwbArea">Search by floor area</button>' +
+        '<div class="gwb-area" id="gwbArea" hidden><div class="lg-pick-row"><span class="lg-selwrap">' + sizeSelect(M) + '</span>' +
+        '<button type="button" class="kpr-link lg-typeit" data-lg-size aria-expanded="false" aria-controls="lgSize">Type an exact size</button></div>' +
+        (BV.few && BV.few.length ? '<p class="lg-fine gwb-few" data-gwb-few>' + BV.few.map((g) => esc(B.label(g))).join(' and ') + ' homes have too few recent resales to show by type: choose their floor area here.</p>' : '') +
+        sizeForm(S, M) + '</div></div>';
     }
     const gone = B && BV && BV.missing && !ch ? '<p class="lg-fine gwb-few" data-gwb-none>Bedroom types aren’t shown for ' + esc(words(M)[1]) + ' here: too few of them could be matched to a bedroom count. Choose a size instead.</p>' : '';
     return '<div class="lg-sizes lg-pick" id="lgPick" data-lg-pick="' + (ch ? 'chosen' : 'none') + '"><h2 class="lg-pick-h" id="lgPickH">What size home are you looking at?</h2>' + gone +
@@ -420,7 +422,10 @@
         '<div class="lg-folds"><details class="lg-fold"><summary>Every size, in a table<small>' + plural((M.bands || []).length, 'size') + '</small></summary><div class="in">' + sizesTable(M) + '</div></details>' + saleTypes(M) + methodHtml(M, IN) +
         '<details class="lg-fold" id="lgSources"><summary>Sources</summary><div class="in" data-lg-sources><p>Prices and sales: ' + esc(dataSpan(mf)) + (M.recent && M.recent.latestLabel ? ' Latest ' + esc(words(M)[0]) + ' here: ' + esc(M.recent.latestLabel) + '.' : '') + esc(newNote(M)) + ' Small numbers next to a fact link to its source.</p>' + (bedAny ? '<p data-gwb-source>' + esc(GLOBAL.GW_BED.sourceText(BV)) + '</p>' : '') + '</div></details></div>' +
       '</div></section>' +
-      '<section class="lg-band tight" style="padding-top:0"><div class="lg-wrap"><div class="lg-kenstrips" id="next" data-lg-for="' + esc(forWho) + '">' + strips.join('') + '</div><p class="lg-fine">The message names this development and what this report found, nothing you typed. You can edit it in WhatsApp before you send it. Please leave income, CPF and debt details out.</p></div></section>' +
+      '<section class="lg-band tight" style="padding-top:0"><div class="lg-wrap"><div class="lg-kenstrips" id="next" data-lg-for="' + esc(forWho) + '">' + strips.join('') + '</div><p class="lg-fine">The message names this development and what this report found, nothing you typed. You can edit it in WhatsApp before you send it.</p></div></section>' +
+      '<section class="lg-band gwl-band" id="lgLoc" data-lg-loc="' + esc(M.id) + '" aria-labelledby="lgLocH"><div class="lg-wrap" style="gap:18px"><div class="lg-head"><p class="lg-kicker">Location</p><h2 id="lgLocH">Location &amp; amenities</h2>' +
+        '<p class="lg-sub">MRT stations, schools, food and parks around ' + esc(M.name) + '.</p></div><div class="gwl" data-gwl></div>' +
+        '<p class="lg-fine lg-center"><a href="map/#p=' + encodeURIComponent(M.id) + '" data-gwl-full>Explore the full Map ›</a></p></div></section>' +
     '</div>';
   }
 
