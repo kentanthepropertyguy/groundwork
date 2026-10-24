@@ -11,6 +11,7 @@
   if (typeof module === 'object' && module.exports) module.exports = api; else root.KPTLG = api;
 })(typeof self !== 'undefined' ? self : this, function (root) {
   'use strict';
+  const GLOBAL = root;   // projectHtml's own `root` is the path prefix
 
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const num = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -160,7 +161,7 @@
   }
   // Research home: three ways in, one open at a time. The page script (research/index.html) switches them and fills the workspaces.
   const RESEARCH_OPTS = [
-    ['dev', 'A development', 'Prices, sizes and a comparison', 'Development', 'Research a development', 'A condo, executive condominium or cluster-housing development, or a road.'],
+    ['dev', 'A development', 'Prices, sizes and a comparison', 'Development', 'Research a development', 'How is the market around your home? Recent prices, sales and the trend for a condo, executive condominium or cluster-housing development, or a road.'],
     ['prices', 'Property prices & past sales', 'HDB, condo and landed', 'Prices & sales', 'Property prices & past sales', 'What similar homes sold for, and whether an asking price is reasonable. Search by postal code, or choose the type of home.'],
     ['budget', 'What can this budget buy?', 'By budget, area and must-haves', 'Budget', 'What can this budget buy?', 'Tell us your budget and what matters. We show the developments that fit.']];
   function landingHtml(total, opt) {
@@ -327,12 +328,24 @@
     const chartPts = M.history && M.history.band && M.history.band.points ? M.history.band.points : [];
     const chart = lineChart(chartPts, '#5a55d6', 'Median ' + (words(M)[0]) + ' PSF of ' + (f.label || '') + ' homes at ' + M.name + ' in each 12-month period, oldest to newest');
     const ken = M.ken ? '<div class="lg-tile" style="grid-column:1/-1"><b>Ken’s Take</b><p>“' + esc(M.ken.note) + '”</p><p class="lg-fine">Ken’s judgement, not URA data.</p></div>' : '';
+    // The next step follows the question the visitor came with (tab only, set by the Sell journey; nothing typed): an owner sees the "what could my unit sell for" card first, a buyer the asking-price card.
+    // Without it the order is unchanged: budget, then the asking price, then the owner's. Messages are wired by the page (research/index.html) from the report's own finding.
+    const forWho = ctx && (ctx.forWho === 'sell' || ctx.forWho === 'buy') ? ctx.forWho : '';
+    const ICO = (d) => '<span class="lg-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg></span>';
+    const stripBudget = '<div class="lg-kenstrip" data-lg-budget><div class="who">' + ICO('<path d="M4 19V9M10 19V5M16 19v-7M21 19H3"/>') + '<div><b>Thinking of buying here?</b><span>Work out your maximum budget, then the stamp duty and payments that come with it.</span></div></div>' +
+      '<a class="lg-btn" href="' + esc(root) + 'tools/planner/" data-kpt-nav="research-to-planner">Check my budget</a></div>';
+    const stripAsk = '<div class="lg-kenstrip" data-lg-ask-ken><div class="who"><img src="' + esc(root) + 'assets/img/ken-portrait.jpg" alt="Ken Tan" width="56" height="56"><div><b>Is the asking price reasonable?</b><span>The sales show what homes here sold for. Ken can look at the particular unit, its floor and facing, and the homes competing with it.</span></div></div>' +
+      '<a class="lg-btn wa" id="wa" href="#" target="_blank" rel="noopener">Ask Ken about an asking price</a></div>';
+    const stripOwn = '<div class="lg-kenstrip" data-lg-options><div class="who">' + ICO('<path d="M4 11.5 12 5l8 6.5"/><path d="M6 10.5V19h12v-8.5"/><path d="M10 19v-5h4v5"/>') + '<div><b>What could your unit sell for?</b><span>Floor, facing, size, condition and the homes competing with yours all matter. Ken goes through them with you.</span></div></div>' +
+      '<a class="lg-btn wa" id="waOwn" href="#" target="_blank" rel="noopener">Ask Ken about my unit</a></div>';
+    const strips = forWho === 'sell' ? [stripOwn, stripAsk, stripBudget] : forWho === 'buy' ? [stripAsk, stripBudget, stripOwn] : [stripBudget, stripAsk, stripOwn];
     return '<div class="lg-page" data-lg="project" data-state="' + esc(A.state || '') + '">' +
       '<header class="lg-hero lg-hero--ans"><div class="lg-wrap">' +
         '<button class="kpr-back lg-back" type="button" data-act="home">← Search another development</button>' +
         '<div class="lg-id"><p class="lg-kicker lg-idline"><span class="lg-cls" data-lg-cls="' + clsOf(M) + '">' + esc(CLS[clsOf(M)].label) + '</span>' + [M.street ? esc(titleCase(M.street)) : '', esc(district(M))].filter(Boolean).join(' · ') + '</p>' +
         '<h1 class="lg-name" tabindex="-1">' + esc(M.name) + '</h1></div>' +
         answerBlock(M, mf) +
+        (ctx && ctx.PU && GLOBAL.GW_PULSE ? GLOBAL.GW_PULSE.html(ctx.PU, { forWho }) : '') +
         ((M.bands || []).length ? '<div class="lg-sizes"><span class="lbl">' + sizeLine(M) + '</span><div class="lg-chips" role="group" aria-label="Size">' + sizeChips(M) + '</div>' + sizeForm(S) + '</div>' : '') +
         actions(M) +
         '<p class="lg-fine lg-facts" data-lg-lead>' + projectFacts(M) + '</p>' +
@@ -350,16 +363,7 @@
         '<div class="lg-folds"><details class="lg-fold"><summary>Every size, in a table<small>' + plural((M.bands || []).length, 'size') + '</small></summary><div class="in">' + sizesTable(M) + '</div></details>' + saleTypes(M) + methodHtml(M, IN) +
         '<details class="lg-fold" id="lgSources"><summary>Sources</summary><div class="in" data-lg-sources><p>Prices and sales: ' + esc(dataSpan(mf)) + (M.recent && M.recent.latestLabel ? ' Latest ' + esc(words(M)[0]) + ' here: ' + esc(M.recent.latestLabel) + '.' : '') + esc(newNote(M)) + ' Small numbers next to a fact link to its source.</p></div></details></div>' +
       '</div></section>' +
-      '<section class="lg-band tight" style="padding-top:0"><div class="lg-wrap"><div class="lg-kenstrips">' +
-        // Ecosystem (Ken, 21 Oct 2026): one natural next step from the research into the money side. Same card as the two below; goes to the planner, which leads on to stamp duty and the payment timeline.
-        '<div class="lg-kenstrip" data-lg-budget><div class="who"><span class="lg-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9M10 19V5M16 19v-7M21 19H3"/></svg></span><div><b>Thinking of buying here?</b><span>Work out your maximum budget, then the stamp duty and payments that come with it.</span></div></div>' +
-        '<a class="lg-btn" href="' + esc(root) + 'tools/planner/" data-kpt-nav="research-to-planner">Check my budget</a></div>' +
-        '<div class="lg-kenstrip"><div class="who"><img src="' + esc(root) + 'assets/img/ken-portrait.jpg" alt="Ken Tan" width="56" height="56"><div><b>Looking at a particular unit?</b><span>The sales can’t tell us its facing, layout or whether an asking price is justified. Ken replies personally on WhatsApp.</span></div></div>' +
-        '<a class="lg-btn wa" id="wa" href="#" target="_blank" rel="noopener">Ask Ken on WhatsApp</a></div>' +
-        // R2.5 (Ken, 12 Oct 2026): a second, separate way in for owners thinking about selling or upgrading. It does not assume the
-        // visitor owns this development; the page wires #waOwn with its own message and reference (KPT-RES-OWN).
-        '<div class="lg-kenstrip" data-lg-options><div class="who"><span class="lg-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 5l8 6.5"/><path d="M6 10.5V19h12v-8.5"/><path d="M10 19v-5h4v5"/></svg></span><div><b>Considering selling or upgrading?</b><span>Discuss your property’s resale position and what your next move could look like.</span></div></div>' +
-        '<a class="lg-btn wa" id="waOwn" href="#" target="_blank" rel="noopener">Ask Ken about my options</a></div></div><p class="lg-fine">Only the development’s name goes into the message, nothing you typed. Please leave income, CPF and debt details out of it.</p></div></section>' +
+      '<section class="lg-band tight" style="padding-top:0"><div class="lg-wrap"><div class="lg-kenstrips" id="next" data-lg-for="' + esc(forWho) + '">' + strips.join('') + '</div><p class="lg-fine">The message names this development and what this report found, nothing you typed. You can edit it in WhatsApp before you send it. Please leave income, CPF and debt details out.</p></div></section>' +
     '</div>';
   }
 

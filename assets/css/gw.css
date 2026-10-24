@@ -297,6 +297,10 @@ body[data-view="directory"] .kpe-count{text-align:left}
 .gw-tg h2{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gw-muted);margin-bottom:12px}
 .gw-tg h3{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gw-muted);margin:22px 0 12px}.gw-tg-top>h2{font-size:21px;font-weight:700;letter-spacing:-.01em;text-transform:none;color:var(--gw-ink);margin-bottom:14px}.gw-tg-top>h3:first-of-type{margin-top:0}
 .gw-tls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+/* All Tools (24 Oct 2026): four task sections, one heading weight, a hairline between sections, and one plain line for the HDB upgrading entry */
+.gw-tdir .gw-tg h2,.gw-tdir .gw-tg-top>h2{font-size:17px;font-weight:700;letter-spacing:-.01em;text-transform:none;color:var(--gw-ink);margin-bottom:12px}
+.gw-tdir .gw-tg+.gw-tg{border-top:1px solid var(--gw-line);padding-top:26px}
+.gw-tg-line{margin:14px 0 0;font-size:14.5px;line-height:1.5;color:var(--gw-body)}.gw-tg-line span{color:var(--gw-muted);margin-right:6px}.gw-tg-line a{font-weight:600}
 .gw-tl{display:grid;grid-template-columns:40px minmax(0,1fr);column-gap:12px;row-gap:2px;align-items:start;padding:16px;border:1px solid var(--gw-line);border-radius:16px;background:#fff;color:var(--gw-ink) !important;text-decoration:none !important}
 .gw-tl svg{grid-row:span 2;width:40px;height:40px;padding:8px;border-radius:12px;background:#EEF4FC;color:var(--gw-blue)}
 .gw-tl b{font-size:16px;line-height:1.25}.gw-tl span{font-size:13.5px;color:var(--gw-muted);line-height:1.4}

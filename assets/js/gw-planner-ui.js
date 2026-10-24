@@ -400,9 +400,18 @@
     return withRoles('<h3 class="pl-jr-h" id="pl-fund-h">Your payments, stage by stage</h3><div class="pl-jr-w"><table class="pl-jr pl-jr-f" id="pl-fund-table" aria-labelledby="pl-fund-h"><thead><tr><th scope="col" class="nm">Payment</th><th scope="col" class="n">Amount</th><th scope="col">How it is paid</th><th scope="col" class="n">Est. monthly mortgage after</th></tr></thead><tbody>' + rows + '</tbody><tfoot><tr><th scope="row" class="nm p">Total</th><td class="n a">' + $(r.totals.amount) + '</td><td class="by"></td><td class="n mo none"></td></tr></tfoot></table></div><p class="gw-fine">' + notes + '</p>');
   }
   // the earliest shortfall: how much, which payment, and what its date is (a rule, the developer's, the earliest possible, or an estimate): never an illustrative date called a deadline
+  // The projection pays each month's instalment (and any interim rent) from the cash and CPF entered plus whatever is set aside each month. With NO monthly amount
+  // entered, the pool simply drains, which is not a finding about the buyer's income: the monthly mortgage is then reported as not tested, never as a shortfall
+  // (24 Oct 2026). A gap on a PAYMENT, or an instalment gap after monthly amounts were entered, is still a shortfall.
+  const instalOnly = (sf, v) => sf.any && !sf.first && sf.monthly && !(v.saveMo > 0) && !(v.cpfMo > 0);
+  function instalFrom(r) { const h = r.headline, row = h.firstGap && (r.series || []).filter((x) => x.date === h.firstGap)[0]; return row ? { date: h.firstGap, amount: row.instalment, rent: row.rent || 0 } : null; }
   function verdictHtml(r, v) {
     const S = root.GW_SCHEDULE, sf = S.shortfall(r);
-    if (!sf.any) return '<div class="pl-st ok" role="status"><span class="pl-st-t"><i class="pl-ic" aria-hidden="true">✓</i><span><b>Every payment is covered on the dates shown</b>' + (v.saveMo || v.cpfMo ? ', with ' + [v.saveMo > 0 ? $(v.saveMo) + ' cash' : '', v.cpfMo > 0 ? $(v.cpfMo) + ' CPF' : ''].filter(Boolean).join(' and ') + ' going in each month' : '') + '.<span class="pl-sf-s">Based on the cash and CPF you entered and an estimated loan, not a bank approval.</span></span></span></div>';
+    if (!sf.any || instalOnly(sf, v)) {
+      const g = instalOnly(sf, v) ? instalFrom(r) : null;
+      const note = g ? '<span class="pl-sf-l" data-pl-instal-note>The monthly mortgage' + (g.rent > 0 ? ' and interim rent' : '') + (g.amount > 0 ? ' (about ' + $(g.amount + g.rent) + ' a month from ' + day(g.date) + ')' : '') + ' is not tested here: it is normally paid from income. To test it against your savings, enter what you set aside each month.</span>' : '';
+      return '<div class="pl-st ok" role="status"><span class="pl-st-t"><i class="pl-ic" aria-hidden="true">✓</i><span><b>Every payment is covered on the dates shown</b>' + (v.saveMo || v.cpfMo ? ', with ' + [v.saveMo > 0 ? $(v.saveMo) + ' cash' : '', v.cpfMo > 0 ? $(v.cpfMo) + ' CPF' : ''].filter(Boolean).join(' and ') + ' going in each month' : '') + '.<span class="pl-sf-s">Based on the cash and CPF you entered and an estimated loan, not a bank approval.</span>' + note + '</span></span></div>';
+    }
     let head, sub = '';
     if (sf.first) {
       // the total on the payments is the answer (each payment's own unmet part, added once); the first short payment follows, with its timing
@@ -534,7 +543,7 @@
   function summaryText(r, v, scn) {
     const h = r.headline;
     return ['Payment timeline (Groundwork): ' + $(r.price) + ' ' + kindText(r, v) + ', ' + ORDER_T[r.order] + ', ' + optionText(r.otp) + '.',
-      h.peak > 0 ? (firstMiss(r).amount > 0 ? 'Not covered: ' + $(r.totals.uncovered) + ' in total; the first short payment is ' + firstMiss(r).label + (undatedStage(r, h.firstGap) ? ' (timing depends on construction progress)' : ' ' + onDay(h.firstGap)) + '.' : 'First shortfall: ' + $(h.peak) + ' ' + onDay(h.peakAt) + (h.peakCause ? ', ' + h.peakCause : '') + '.') : 'Every payment covered on its due date at the earliest dates.',
+      h.peak > 0 && !instalOnly(root.GW_SCHEDULE.shortfall(r), v) ? (firstMiss(r).amount > 0 ? 'Not covered: ' + $(r.totals.uncovered) + ' in total; the first short payment is ' + firstMiss(r).label + (undatedStage(r, h.firstGap) ? ' (timing depends on construction progress)' : ' ' + onDay(h.firstGap)) + '.' : 'First shortfall: ' + $(h.peak) + ' ' + onDay(h.peakAt) + (h.peakCause ? ', ' + h.peakCause : '') + '.') : h.peak > 0 ? 'Every payment covered on its date; the monthly mortgage is not tested (no monthly savings entered).' : 'Every payment covered on its due date at the earliest dates.',
       'Loan ' + (r.loan.capped ? 'sized to what the entered income supports (figure not included; rule limit ' + pc(r.loan.ltv) + ')' : pc(r.loan.ltv)) + ' over ' + r.loan.years + ' years at ' + pc(r.loan.ratePct / 100, 2) + ' (' + r.loan.loans + ' housing loan' + (r.loan.loans === 1 ? '' : 's') + ' counted)' + (r.loan.cov > 0 ? '; worked on the bank valuation of ' + $(r.loan.valuation) + ', with ' + $(r.loan.cov) + ' above it paid in cash' : '') + '; estimated instalment ' + $(r.instalment.final) + '/mo once the whole loan is paid out.',
       (v.buyers || []).length > 1 && r.loan.capped ? 'Two buyers: the income-weighted average age basis is not confirmed, so this joint-borrower loan is unverified.' : '',
       scn && scn.cap && scn.view === 'rule' ? 'Note: the income entered supports less than the loan assumed here; the planner shows both cases.' : '',

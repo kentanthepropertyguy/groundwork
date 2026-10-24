@@ -62,7 +62,7 @@
     const d = dir || 'unsure', S = [];
     const msg = 'Hi Ken, I own ' + ownText(type, c) + ' and I’m thinking of moving' + (dir && dir !== 'unsure' ? ' to ' + DIR[dir] : '') + '.';
     const H = type === 'hdb' && c.hdb && c.hdb.block ? c.hdb : null, Ld = type === 'landed' && c.landed && c.landed.street ? c.landed : null;
-    const planner = { href: r + 'tools/hdb-upgrade/', label: 'Work out my budget ›', data: 'data-gw-go="hdb-upgrade"' };
+    const planner = { href: r + 'tools/planner/#sell', label: 'Work out my budget ›', data: 'data-gw-go="planner-sell"' };   // 24 Oct 2026: What can I afford?, set up for the flat being sold (the HDB upgrade planner is folded into it)
     const find = { href: r + 'tools/what-can-i-buy/', label: 'See what it buys ›', data: 'data-gw-go="what-can-i-buy"' };
     // Package 2: for a private home or landed seller, the budget step is the Planner, opened with the sale already in it (tools/planner/#sell; the figures come from Sale proceeds, in this tab only).
     const nextBuy = { href: r + 'tools/planner/#sell', label: 'What can I buy next? ›', data: 'data-gw-go="planner-sell"' };
@@ -92,7 +92,7 @@
       // R2.1: no typed text goes into a link; the development is picked with the search on Research.
       head = d === 'smaller' ? 'Moving from your condo to somewhere smaller' : 'Moving from your condo';
       lead = 'What homes like yours sold for, your sale proceeds, then what you could buy next.';
-      S.push(step(1, 'See what homes in your development sold for', 'Recent sales by size in your development.', { href: r + 'research/', label: 'Look up my development ›', data: 'data-gw-go="research"' }));
+      S.push(step(1, 'See what homes in your development sold for', 'Recent sales by size in your development.', { href: r + 'research/', label: 'Look up my development ›', data: 'data-gw-go="research" data-pulse-for="sell"' }));
       S.push(proceeds(2, 'private'));
       S.push(step(3, 'Work out what you could buy next', 'Your sale proceeds carry over into your maximum budget. Cash and CPF now, and what the sale adds once it completes, stay apart.', nextBuy));
       S.push(step(4, 'See what it buys', 'Sizes and developments at that budget.', find));
@@ -115,7 +115,7 @@
   const UP_STEPS = [
     ['worth', 'What your flat could fetch', 'Recent resales in your block', 'journey/worth/#hdb', 'Start: look up my block'],
     ['sale-proceeds', 'Your sale proceeds', 'Cash and CPF back, after the loan and costs', 'tools/sale-proceeds/#hdb', 'Next: work out my sale proceeds'],
-    ['hdb-upgrade', 'Your budget', 'What you could afford for a private home', 'tools/hdb-upgrade/', 'Next: work out my budget'],
+    ['planner', 'Your budget', 'What you could afford for a private home, in What can I afford?', 'tools/planner/#sell', 'Next: work out my budget'],
     ['what-can-i-buy', 'What it buys', 'Sizes and developments at that budget', 'tools/what-can-i-buy/', 'Next: see what it buys'],
   ];
   function upPanel(r) {
@@ -194,6 +194,8 @@
     // WhatsApp and onward links are tracked with the existing event names.
     document.addEventListener('click', (e) => {
       const a = e.target.closest ? e.target.closest('[data-gw-wa],[data-gw-go]') : null; if (!a) return;
+      // Market pulse: a homeowner who comes to the research from a Sell step gets the owner's question first, a buyer from a Buy step the asking-price one (this tab only; nothing typed, no figures).
+      if (a.dataset.pulseFor === 'sell' || a.dataset.pulseFor === 'buy') { try { sessionStorage.setItem('kpt.pulse.for', a.dataset.pulseFor); } catch (x) { /* no storage: the default order is shown */ } }
       if (a.dataset.gwWa) track('whatsapp_click', { tool_name: a.dataset.gwWa, context: a.dataset.gwWa });
       else track('tool_selected', { tool: a.dataset.gwGo, placement: document.body.dataset.view || 'journey' });
     });

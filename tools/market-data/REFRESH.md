@@ -4,7 +4,7 @@ One command rebuilds every page's data from the same development register (condo
 
     node tools/market-data/refresh-all.js --raw <folder of the URA batch-*.json files> --as-of YYYY-MM-DD
 
-It runs, in order: Research project data, Map data, FIND index, registry rows and their class, "Compare with" suggestions, and the coverage metadata (the names Research leaves out on `research/index.html`, and the registry's different-class wording). Nothing needs a manual edit afterwards.
+It runs, in order: Research project data, Map data, FIND index, registry rows and their class, "Compare with" suggestions, the coverage metadata (the names Research leaves out on `research/index.html`, and the registry's different-class wording), and the market pulse for the Map (`data/map/pulse.json`, written by `build-pulse.js` from the same module and records as the Research report; `node research/tests/pulse-tests.js` checks every development). Nothing needs a manual edit afterwards.
 
 It keeps `data/projects/inventory.json`, the agreed URA attribution wording in the live manifest (the project builder's own text is a PENDING placeholder), curated registry rows and `data/map/amen*.json`.
 

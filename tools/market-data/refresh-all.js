@@ -13,6 +13,7 @@
      4. build-registry-classes.js  Registry rows and their class                                  -> data/registry/index.json
      5. build-suggest.js         Research "Compare with" suggestions                              -> data/research/suggest.json
      6. build-coverage.js        Not-covered names (research/index.html) and the registry's different-class wording
+     7. build-pulse.js           The Map's market snapshot, from the same module and records as the Research report -> data/map/pulse.json
    Kept as they are: data/projects/inventory.json, the live manifest attribution wording (the builder's own text is a PENDING placeholder),
    curated registry rows, data/map/amen*.json.
    After it: run the tests, then bump the asset hashes. Nothing here needs a manual edit.
@@ -42,5 +43,6 @@ run('FIND index', 'build-find-index.js', ['--raw', raw, '--project-data', 'data/
 run('Registry classes', 'build-registry-classes.js', []);
 run('Compare suggestions', 'build-suggest.js', []);
 run('Coverage metadata', 'build-coverage.js', ['--raw', raw]);
+run('Market pulse (Map snapshot)', 'build-pulse.js', []);
 fs.rmSync(tmp, { recursive: true, force: true });
 console.log('Refresh complete. Now run the tests and bump the asset hashes.');

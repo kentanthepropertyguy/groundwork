@@ -27,7 +27,7 @@ def opn(ctx, path):
     pg.goto(BASE + path); pg.wait_for_timeout(700); return pg, errs
 METRICS = """(() => { const h = document.querySelector('h1'), c = getComputedStyle(h), r = h.getBoundingClientRect();
   return { size: parseFloat(c.fontSize), align: c.textAlign, left: Math.round(r.left), scroll: document.documentElement.scrollWidth <= innerWidth + 1 }; })()"""
-PAGES = [('Guide me', '/journey/'), ('Property values', '/journey/worth/'), ('Tools', '/tools/'), ('Budget Search', '/tools/what-can-i-buy/'), ('Mortgage', '/tools/mortgage/'), ('HDB Upgrade', '/tools/hdb-upgrade/'), ('Homepage', '/'), ('Research', '/research/')]
+PAGES = [('Guide me', '/journey/'), ('Property values', '/journey/worth/'), ('Tools', '/tools/'), ('Budget Search', '/tools/what-can-i-buy/'), ('Mortgage', '/tools/mortgage/'), ('Homepage', '/'), ('Research', '/research/')]
 try:
   with sync_playwright() as p:
     br = p.chromium.launch()

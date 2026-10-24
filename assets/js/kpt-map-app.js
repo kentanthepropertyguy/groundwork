@@ -11,6 +11,7 @@
   const base = new URL('../../data/map/', location.href).href;
   const getJson = (f) => fetch(base + f + '?v=' + BUILD).then((r) => { if (!r.ok) throw new Error(f + ' ' + r.status); return r.json(); });
   const LY = window.KPT_MAP_VIEW.layers;
+  let PULSE = null;   // Market pulse (data/map/pulse.json, built from the same module and records as the Research report); no file, no snapshot line
   const S = { proj: null, start: true, place: null, band: null, rc: {}, hl: null, more: false, min: false, am: false, sec: {}, layers: LY.load(), lyrOpen: false, hft: null, hdbEv: null, radius: 2000, pr: 1000, nall: false, q: '', qi: -1, suggOpen: false };
   const PCR = {};   // postal code -> the last OneMap answer
   let M, view;
@@ -128,6 +129,11 @@
     if (!m) return `<div class="lead"><div class="ld-k">Recent prices</div><p class="ld-s">No recorded sales to show.</p></div>`;
     return `<div class="lead"><div class="ld-k">Recent prices${tip}</div><p class="ld-s">Not enough recent sales in any one size to show a typical price. ${m.hist} recorded since ${monthStart()}, latest ${ym(m.last)}.</p></div>`;
   }
+  // The one-line market snapshot under the price: what the Research report concludes, in the words it uses.
+  function pulseHtml(name) {
+    const p = M.BY[name], c = PULSE && p && PULSE[p.id], sn = c && window.GW_PULSE ? window.GW_PULSE.snapshot(c) : null; if (!sn) return '';
+    return `<p class="mpl" data-mp-line="${esc(sn.tone)}"><b>Market pulse</b> ${esc(sn.text)}</p>`;   // the panel's "Open full analysis" is the way into the full report
+  }
   const methBody = () => `<ul class="meth"><li>Prices are past recorded sales from URA, not asking prices or a valuation. A median price per sq ft is shown only for sizes with enough sales; sizes with fewer than 5 sales are not shown.</li><li>Primary (new sale) and secondary (resale and sub-sale) sales are kept apart.</li><li>Nearby homes are chosen in the same market and size, then by tenure, lease age and distance. Each side has 2+ sales in 2 months. ECs and cluster housing are compared only with their own type.</li><li>Distances are in a straight line, not walking time.</li></ul><p class="basis">${SRC}</p>`;
   const recentHtml = (name, mk) => {
     const rows = M.EV[name].rc && M.EV[name].rc[mk] || []; if (!rows.length) return '';
@@ -176,9 +182,10 @@
     const secs = sx('pr', 'Prices by size', pricesBody) + (pos ? sx('cmp', nb.mode === 'compare' ? 'Compare nearby homes' : 'Nearby prices', nearbyHtml(name, nb)) + sx('am', amTitle(), amenBody(name)) + sx('nbr', 'Explore nearby developments', nearHtml(name, mobile)) : '') + sx('meth', 'Data and methodology', methBody());
     const open = `<a class="btn b" href="../#/p/${esc(p.id)}" data-m-full="${esc(p.id)}">Open full analysis ›</a>`;
     const top = leadHtml(name) + (pos ? keyHtml(name) : nopos);
-    if (!mobile) return `<aside class="dp" aria-label="Selected development"><div class="dp-in">${head}${top}<div class="sxs">${secs}</div></div><div class="dp-foot">${open}</div></aside>`;
+    // Market pulse: under the price on a desktop; on a phone it opens first in "More about this home", so the short sheet (and the map framed above it) does not change.
+    if (!mobile) return `<aside class="dp" aria-label="Selected development"><div class="dp-in">${head}${leadHtml(name)}${pulseHtml(name)}${pos ? keyHtml(name) : nopos}<div class="sxs">${secs}</div></div><div class="dp-foot">${open}</div></aside>`;
     const tog = `<button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">More about this home ${S.more ? '⌄' : '⌃'}</button>`;
-    return `<aside class="bs${S.more ? ' open' : ''}" aria-label="Selected development"><div class="bs-hd"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}${pos ? radStrip(name) : ''}</div>${top}${S.more ? `<div class="sxs">${secs}</div>` : ''}<div class="bs-act">${open}${tog}</div></aside>`;
+    return `<aside class="bs${S.more ? ' open' : ''}" aria-label="Selected development"><div class="bs-hd"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}${pos ? radStrip(name) : ''}</div>${top}${S.more ? `${pulseHtml(name)}<div class="sxs">${secs}</div>` : ''}<div class="bs-act">${open}${tog}</div></aside>`;
   }
 
   /* ---------------- explore nearby: the same optional radius on every located selection ----------------
@@ -432,7 +439,8 @@
     // HDB block positions load only when they are wanted: a shared HDB link, or the layer switched on in an earlier visit
     if ((S.place && S.place.t === 'hdb') || S.layers.hdb) loadHdb().then((ok) => { if (!ok && S.layers.hdb) { S.layers.hdb = false; } else if (ok) { notices(); render(); } });
     // Prices load after the first paint; schools and supermarkets only if that file has been cleared for publication (no file, no layer).
-    getJson('ev.json').then((ev) => { M.setEvidence(ev); render(); window.KPT_MAP_APP.evReady = true; }).catch(() => fail('Prices could not be loaded.'));
+    // The market pulse line arrives in the same paint as the prices, so the panel does not grow under a view already framed around it; no file, no line.
+    Promise.all([getJson('ev.json'), getJson('pulse.json').catch(() => null)]).then(([ev, pu]) => { PULSE = pu && pu.rows ? pu.rows : null; M.setEvidence(ev); render(); window.KPT_MAP_APP.evReady = true; window.KPT_MAP_APP.pulseReady = !!PULSE; }).catch(() => fail('Prices could not be loaded.'));
     if (am.extra) getJson(am.extra).then((ex) => { M.setExtra(ex); notices(); render(); }).catch(() => {});
     // Roads (the street positions Property values & prices uses). Without them the search simply has no Roads group.
     const landed = new URL('../../data/value/landed/', location.href).href, getRoad = (f) => fetch(landed + f + '?v=' + BUILD).then((r) => (r.ok ? r.json() : null)).catch(() => null);

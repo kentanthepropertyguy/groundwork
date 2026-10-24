@@ -390,7 +390,7 @@
     const root = $('root'), bey = $('beyond'); if (bey) bey.hidden = S.mode === 'entry';
     if (S.mode === 'entry') {
       root.className = 'kd is-entry';
-      root.innerHTML = `<div class="kd-entry">${EMB ? '' : '<p class="kd-eye">I’m looking to buy</p><h1 class="kd-h1">What are you looking for?</h1><p class="kd-lede">Tell us your maximum and where. Add requirements if you have them, and change any of it later without starting again.</p>'}${srcLine ? `<p class="kd-src">${esc(srcLine)}</p>` : ''}<div id="kdForm" class="kd-form"></div>${srcLine ? '' : '<p class="kd-fine">Not sure of your budget? <a href="' + BASE + 'tools/hdb-upgrade/">Work out your planning position first ›</a></p>'}</div>`;
+      root.innerHTML = `<div class="kd-entry">${EMB ? '' : '<p class="kd-eye">I’m looking to buy</p><h1 class="kd-h1">What are you looking for?</h1><p class="kd-lede">Tell us your maximum and where. Add requirements if you have them, and change any of it later without starting again.</p>'}${srcLine ? `<p class="kd-src">${esc(srcLine)}</p>` : ''}<div id="kdForm" class="kd-form"></div>${srcLine ? '' : '<p class="kd-fine">Not sure of your budget? <a href="' + BASE + 'tools/planner/">Work out what you can afford first ›</a></p>'}</div>`;
       $('kdForm').innerHTML = formHtml(true); bindInputs(); return;
     }
     root.className = 'kd is-results' + (S.edit ? ' is-edit' : '');
@@ -478,7 +478,7 @@
     if (f === 'locate') { selectDev(t.dataset.id, true); const b = document.querySelector('#kdRes [data-f=locate][data-id="' + t.dataset.id + '"]'); if (b) b.focus(); return; }
     if (f === 'zoom') { if (nmView) { if (Number(t.dataset.d) > 0) nmView.zoom(1); else nmView.zoomOut(1); } return; }
     if (f === 'sheet') { S.sheetMin = !S.sheetMin; applySheet(); nmSig = ''; nmBase = ''; syncMap(lastRes); return; }
-    if (f === 'go') { KPT.track('find_research_click', { project_id: t.dataset.id }); return; }
+    if (f === 'go') { try { window.sessionStorage.setItem('kpt.pulse.for', 'buy'); } catch (x) { /* the Research page then shows its default order */ } KPT.track('find_research_click', { project_id: t.dataset.id }); return; }   // Market pulse: a buyer's question comes first on the report
     if (f === 'show') { show(); return; }
     if (f === 'seg') {
       const k = t.dataset.k; let v = t.dataset.v; if (k === 'beds') v = v ? Number(v) : null;

@@ -89,7 +89,7 @@ for (const [kind, price, age] of [['new', 2000000, undefined], ['new', 1800000, 
   ok(/rel="canonical" href="https:\/\/tools\.kentanthepropertyguy\.com\/tools\/payment-planner\/"/.test(rd) && /noindex/.test(rd), 'the old address is not indexed and points to the new one');
   const idx = fs.readFileSync(path.join(H.root, 'tools/index.html'), 'utf8'), nav = fs.readFileSync(path.join(H.root, 'assets/js/gw-nav.js'), 'utf8'), sm = fs.readFileSync(path.join(H.root, 'sitemap.xml'), 'utf8');
   ok(!/progressive-payments/.test(idx + nav + sm), 'it is no longer in Tools, the menu, search or the sitemap');
-  ok(/'payment timeline', 'new launch payments'/.test(nav), 'searching “new launch payments” still finds the Payment timeline');
+  { global.self = global; const GWN = require(path.join(H.root, 'assets/js/gw-nav.js')); const first = (q) => (GWN.matchTools(q, 3)[0] || {}).id; ok(first('new launch payments') === 'payment-planner' && first('full payment planning') === 'payment-planner', 'searching “new launch payments” and “full payment planning” still finds the Payment timeline'); }
   ok(/company buyer/.test(nav) && /uncompleted/.test(nav), 'its other search words (company buyer, uncompleted) now find the Payment timeline');
   ok(!fs.readdirSync(path.join(H.root, 'tools')).includes('progressive-payments') || fs.readdirSync(path.join(H.root, 'tools/progressive-payments')).join() === 'index.html', 'only the redirect page remains at the old address');
 }

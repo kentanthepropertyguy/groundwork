@@ -61,13 +61,14 @@
     { id: 'planner', name: 'What can I afford?', tag: 'Maximum budget', short: 'Your maximum property budget, from your cash, CPF and income', href: 'tools/planner/', icon: 'planner', menu: 1, sec: 'tools',
       t: ['planner', 'what can i afford', 'afford', 'affordability', 'comfortable budget', 'maximum budget', 'maximum property budget', 'budget', 'how much can i afford', 'highest price', 'new launch budget', 'upgrade budget', 'keep my flat', 'sell first'] },
     { id: 'payment-planner', name: 'Payment timeline', tag: 'Payment dates', short: 'See when and how much you need to pay.', href: 'tools/payment-planner/', icon: 'payment-planner', menu: 1, sec: 'tools',
-      t: ['payment timeline', 'new launch payments', 'new launch payment', 'progressive payments', 'progressive payment', 'progressive', 'payment schedule', 'uncompleted', 'temporary occupation permit', 'company buyer', 'company purchase', 'buying through a company', 'entity', 'ec payment schedule', 'hdb payment schedule', 'bto payment schedule', 'booking fee', 'option fee', 'downpayment', 'down payment', 'under construction', 'construction stages', 'cash flow', 'cashflow', 'timeline', 'planner', 'payment planner', 'shortfall', 'funding gap', 'buy first', 'sell first', 'buy first sell later', 'sell first buy later', 'bridging', 'absd refund', 'when to pay', 'payment dates', 'how much cash do i need', 'cash needed', 'cpf needed', 'upgrade timing'] },
+      t: ['payment timeline', 'full payment planning', 'funding check', 'can i fund it', 'new launch payments', 'new launch payment', 'progressive payments', 'progressive payment', 'progressive', 'payment schedule', 'uncompleted', 'temporary occupation permit', 'company buyer', 'company purchase', 'buying through a company', 'entity', 'ec payment schedule', 'hdb payment schedule', 'bto payment schedule', 'booking fee', 'option fee', 'downpayment', 'down payment', 'under construction', 'construction stages', 'cash flow', 'cashflow', 'timeline', 'planner', 'payment planner', 'shortfall', 'funding gap', 'buy first', 'sell first', 'buy first sell later', 'sell first buy later', 'bridging', 'absd refund', 'when to pay', 'payment dates', 'how much cash do i need', 'cash needed', 'cpf needed', 'upgrade timing'] },
     { id: 'sale-proceeds', name: 'Sale proceeds', tag: 'Cash and CPF back', short: 'What you get back when you sell', href: 'tools/sale-proceeds/', icon: 'sale-proceeds', menu: 1, quick: 1, sec: 'tools',
       t: ['sale proceeds', 'proceeds', 'selling', 'sell', 'sell my flat', 'sell my hdb', 'sell my condo', 'cash proceeds', 'net proceeds', 'cpf refund', 'refund cpf', 'accrued interest', 'cpf accrued interest', 'how much will i get', 'cash from sale', 'agent commission', 'selling costs'] },
     { id: 'ssd', name: 'Selling within 4 years?', tag: 'SSD', short: 'Seller’s Stamp Duty', href: 'tools/ssd/', icon: 'ssd', menu: 1, sec: 'tools',
       t: ['ssd', 'sellers stamp duty', 'seller stamp duty', 'selling stamp duty', 'sell within', 'sell early', 'selling early', 'holding period', 'minimum holding', 'stamp duty selling'] },
-    { id: 'hdb-upgrade', name: 'HDB upgrade planner', tag: 'Direct budget calculation', short: 'Your private-home budget if you sell first', href: 'tools/hdb-upgrade/', icon: 'hdb-upgrade', menu: 1, sec: 'tools',
-      t: ['hdb upgrade', 'upgrade', 'upgrading', 'upgrader', 'hdb to condo', 'hdb to private', 'upgrade from hdb', 'can i afford to upgrade', 'afford a condo', 'private property budget', 'sell hdb buy condo', 'next home budget', 'budget'] },
+    // 24 Oct 2026: the HDB upgrade planner is folded into What can I afford? (tools/hdb-upgrade/ redirects to tools/planner/#sell). Its names still find the right place.
+    { id: 'hdb-upgrade', name: 'Upgrading from HDB? Your budget', tag: 'What can I afford?, set up for a flat being sold', short: 'Your budget for a private home once your flat is sold', href: 'tools/planner/#sell', icon: 'hdb-upgrade', search: 1, sec: 'tools',
+      t: ['hdb upgrade', 'hdb upgrade planner', 'upgrade planner', 'upgrade', 'upgrading', 'upgrader', 'hdb to condo', 'hdb to private', 'upgrade from hdb', 'can i afford to upgrade', 'afford a condo', 'private property budget', 'sell hdb buy condo', 'next home budget', 'budget'] },
     { id: 'map', name: 'Map', tag: 'Homes, prices and what is nearby', short: 'See what is around a home, and what nearby homes sold for', href: 'research/map/', icon: 'map', menu: 1, sec: 'research',
       t: ['map', 'maps', 'on a map', 'nearby', 'near me', 'around', 'neighbourhood', 'neighborhood', 'location', 'area', 'schools', 'school', 'mrt', 'near mrt', 'amenities', 'supermarket', 'park', 'explore', 'where'] },
     { id: 'what-can-i-buy', name: 'What can this budget buy?', tag: 'Search by budget, area and must-haves', short: 'Developments with recent sales within your budget', href: 'research/#/budget', icon: 'what-can-i-buy', menu: 1, sec: 'research',
@@ -108,7 +109,7 @@
     guide: { name: 'Guide me', href: 'journey/', nav: 'journey', q: 'Not sure where to start?', say: 'Pick your goal. We take you through the right tools, step by step.', ids: ['guide-buy', 'guide-up', 'guide-sell', 'guide-move'] },
     buy: { name: 'Buy', href: 'journey/#buy', nav: 'buy', q: 'Looking to buy?', say: 'Work out your maximum budget, then explore the homes within it.', ids: ['guide-buy', 'planner', 'what-can-i-buy', 'payment-planner'] },
     sell: { name: 'Sell', href: 'journey/#sell', nav: 'sell', q: 'Planning to sell?', say: 'See what homes like yours sold for, then what you would take home.', ids: ['guide-sell', 'worth', 'sale-proceeds', 'guide-up', 'guide-move'] },
-    tools: { name: 'Tools', href: 'tools/', nav: 'tools', q: 'Know what to work out?', say: 'Calculators for stamp duty, loans, sale proceeds and more.', ids: ['planner', 'stamp-duty', 'tdsr', 'msr', 'mortgage', 'payment-planner', 'sale-proceeds', 'ssd', 'hdb-upgrade'] },
+    tools: { name: 'Tools', href: 'tools/', nav: 'tools', q: 'Know what to work out?', say: 'Calculators for stamp duty, loans, sale proceeds and more.', ids: ['planner', 'stamp-duty', 'tdsr', 'msr', 'mortgage', 'payment-planner', 'sale-proceeds', 'ssd'] },
     map: { name: 'Map', href: 'research/map/', nav: 'map', q: '', say: '', ids: [] },
     research: { name: 'Research', href: 'research/', nav: 'research', q: 'Looking at a property?', say: 'What homes really sold for, from URA and HDB records. The Map is part of Research.', ids: ['research', 'map', 'worth', 'what-can-i-buy', 'directory', 'sample'] },
   };
@@ -116,7 +117,7 @@
   // Main navigation: Buy · Sell · Research · Map · Tools (header, footer and the phone row). The menu keeps its four columns; the Map card stays in Research's column.
   const NAV_ORDER = ['buy', 'sell', 'research', 'map', 'tools'];
   const MENU_TOOLS = SECTIONS.tools.ids;
-  const QUICK = ['stamp-duty', 'tdsr', 'mortgage', 'sale-proceeds', 'hdb-upgrade'];
+  const QUICK = ['stamp-duty', 'tdsr', 'mortgage', 'sale-proceeds', 'planner'];
   const href = (e, r) => (e.ext ? e.href : (r || '') + e.href);
 
   /* ---------------- matching tools ---------------- */
@@ -297,7 +298,7 @@
   /* ---------------- the "Upgrading from HDB" path ---------------- */
   // Four pages that each work on their own; when a visitor follows the path (journey #up, or "HDB flat" when moving),
   // a strip shows where they are and what is next. Kept for this tab only, in the journey context.
-  const UP = [['worth', 'Flat value', 'journey/worth/#hdb'], ['sale-proceeds', 'Sale proceeds', 'tools/sale-proceeds/#hdb'], ['hdb-upgrade', 'Budget', 'tools/hdb-upgrade/'], ['what-can-i-buy', 'What it buys', 'tools/what-can-i-buy/']];
+  const UP = [['worth', 'Flat value', 'journey/worth/#hdb'], ['sale-proceeds', 'Sale proceeds', 'tools/sale-proceeds/#hdb'], ['planner', 'Budget', 'tools/planner/#sell'], ['what-can-i-buy', 'What it buys', 'tools/what-can-i-buy/']];   // step 3 (24 Oct 2026): What can I afford?, set up for the flat being sold; it reads the Sale proceeds figures itself
   // done: which steps this tab has actually finished (a tick only for those); the current step is marked, the next one offered.
   function stripHtml(cur, r, done) {
     const i = UP.findIndex((x) => x[0] === cur); if (i < 0) return '';
@@ -306,7 +307,7 @@
       UP.map((x, k) => { const ok = k !== i && D[x[0]]; return '<li' + (k === i ? ' aria-current="step"' : ok ? ' class="done"' : '') + '><a href="' + r + x[2] + '" data-gw-nav-to="up-' + x[0] + '"><i>' + (ok ? '✓' : k + 1) + '</i>' + x[1] + '</a></li>'; }).join('') + '</ol>' +
       (nx ? '<a class="gw-strip-next" href="' + r + nx[2] + '" data-gw-nav-to="up-' + nx[0] + '">Next: ' + nx[1] + ' ›</a>' : '<a class="gw-strip-next" href="' + r + 'tools/payment-planner/" data-gw-nav-to="up-payment-planner">Next: plan the payments ›</a>') + '</nav>';
   }
-  const UP_GO = { worth: 'Start: look up my block', 'sale-proceeds': 'Next: work out my sale proceeds', 'hdb-upgrade': 'Next: work out my budget', 'what-can-i-buy': 'Next: see what it buys' };
+  const UP_GO = { worth: 'Start: look up my block', 'sale-proceeds': 'Next: work out my sale proceeds', planner: 'Next: work out my budget', 'what-can-i-buy': 'Next: see what it buys' };
   // What this tab has finished on the upgrade path (sessionStorage only; nothing leaves the page).
   // Audit A3-07: the same fingerprint as KPT_MARKET.finStamp (kpt-market.js; a test keeps them equal) of the earlier steps' figures
   // a planner budget used. A budget whose fingerprint no longer matches is out of date, so its step is not ticked.
@@ -321,9 +322,9 @@
   function upDone() {
     const g = (k) => { try { return JSON.parse(root.sessionStorage.getItem(k) || 'null'); } catch (e) { return null; } };
     const C = g('gw.ctx.v1') || {}, F = g('gw.fin.v1') || {}, H = g('kpt.handoff');
-    const stale = !!(H && H.from === 'hdb-upgrade' && typeof H.src === 'string' && H.src !== finStamp(root.sessionStorage));
+    const stale = !!(H && (H.from === 'hdb-upgrade' || H.from === 'planner') && typeof H.src === 'string' && H.src !== finStamp(root.sessionStorage));
     return { worth: !!(C.hdb && C.hdb.block), // looked up, even when the block had few or no resales
-      'sale-proceeds': !!(F.sellPrice && F.homeType === 'hdb'), 'hdb-upgrade': !!g('kpt.hdb.input') && !stale, 'what-can-i-buy': false };
+      'sale-proceeds': !!(F.sellPrice && F.homeType === 'hdb'), planner: !!(g('gw.ans.v1') && g('gw.ans.v1').home === 'sell') && !stale, 'what-can-i-buy': false };
   }
   // Audit A3-07/A5-08/A6-07: "Clear" removes every figure this tab holds for the journey (all gw.* and kpt.* keys). Only which path
   // the visitor is on, and what they own, are kept, so the step strip stays; no figure is kept.
@@ -543,7 +544,7 @@
     document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('[data-clear]')) clearJourney(); });
 
     // ---- the "Upgrading from HDB" step strip ----
-    const path = location.pathname, here = /\/tools\/sale-proceeds\/$/.test(path) ? 'sale-proceeds' : /\/tools\/hdb-upgrade\/$/.test(path) ? 'hdb-upgrade' : /\/tools\/what-can-i-buy\/$/.test(path) ? 'what-can-i-buy' : /\/journey\/worth\/$/.test(path) ? 'worth' : null;
+    const path = location.pathname, here = /\/tools\/sale-proceeds\/$/.test(path) ? 'sale-proceeds' : /\/tools\/planner\/$/.test(path) ? 'planner' : /\/tools\/what-can-i-buy\/$/.test(path) ? 'what-can-i-buy' : /\/journey\/worth\/$/.test(path) ? 'worth' : null;
     if (/\/journey\/$/.test(path) && location.hash === '#up') setCtx({ path: 'upgrade' });
     const showStrip = () => {
       const old = document.querySelector('[data-gw-strip]'); if (old) old.remove();
@@ -585,38 +586,6 @@
     // The moving guide (journey page) tells us when a visitor chooses the HDB upgrade path.
     document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-gw-q]'); if (!b) return; setTimeout(() => { const C = getCtx(), g = b.closest('[data-gw-guide]'); const dir = g && g.querySelector('[data-gw-q="dir"][aria-pressed="true"]'); setCtx({ path: C.type === 'hdb' && !(dir && dir.dataset.gwV === 'smaller') ? 'upgrade' : null }); }, 0); });
 
-    // ---- HDB Upgrade Planner: fill its fields from this tab's other calculations (its calculation is unchanged) ----
-    if (here === 'hdb-upgrade' && !/[?&]resume=/.test(location.search)) prefillPlanner();
-  }
-  function prefillPlanner() {
-    let s = {}; try { s = JSON.parse(root.sessionStorage.getItem('gw.fin.v1') || '{}') || {}; } catch (e) { s = {}; }
-    const $ = (id) => document.getElementById(id), num = (v) => { const n = parseFloat(String(v == null ? '' : v).replace(/[^0-9.]/g, '')); return isFinite(n) && n > 0 ? n : null; };
-    const put = (id, v, age) => { const el = $(id), n = num(v); if (!el || el.value || n === null) return false; el.value = age ? String(Math.round(n)) : Math.round(n).toLocaleString('en-SG'); el.dispatchEvent(new Event('input', { bubbles: true })); return true; };
-    let used = 0;
-    let cpf = 0;
-    if (s.homeType === 'hdb') {   // only a sale worked out for an HDB flat
-      used += put('salePrice', s.sellPrice); used += put('outstandingLoan', s.outstandingLoan);
-      // Audit A3-01: the CPF to refund on the sale (principal plus accrued interest) goes into the planner's refund field.
-      const cp = num(s.cpfPrincipal) || 0, ci = num(s.cpfInterest) || 0;
-      if (cp + ci > 0 && put('cpfRefundIn', cp + ci)) { used++; cpf = 1; const d = $('cpfRefundIn').closest('details'); if (d) d.open = true; }
-    }
-    // V1-05: the planner counts fixed pay plus 70% of variable and rental income (its rule line; the MAS 30% haircut), as TDSR does
-    const R = root.GW_RULES, keep = (k) => 1 - (R && typeof R[k] === 'number' ? R[k] : 0.3);
-    const income = (n) => { const f = num(s['borrowers.' + n + '.fixed']); if (f === null) return null; return f + (num(s['borrowers.' + n + '.variable']) || 0) * keep('variableIncomeHaircut') + (num(s['borrowers.' + n + '.rental']) || 0) * keep('rentalIncomeHaircut'); };
-    used += put('age1', s['borrowers.0.age'], true); used += put('income1', income(0));
-    if (num(s['borrowers.1.age']) && num(s['borrowers.1.fixed']) && !$('age2').value) { const b = document.querySelector('[data-group="buyers"] [data-value="2"]'); if (b) { b.click(); used += put('age2', s['borrowers.1.age'], true); used += put('income2', income(1)); } }
-    if (used) {
-      const f = $('salePrice') || $('age1'), note = document.createElement('p');
-      note.className = 'gw-prefill'; note.setAttribute('data-gw-prefill', '');
-      // Audit A3-13: say exactly what was carried over; selling costs are the planner's own estimate, not Sale proceeds' figures.
-      const A = root.KPT_ASSUMPTIONS, costs = A ? Math.round(A.commissionRate * 1000) / 10 + '% commission plus GST and $' + Number(A.saleLegalFees).toLocaleString('en-SG') + ' legal fees' : 'its own estimate';
-      const vr = [0, 1].some((n) => num(s['borrowers.' + n + '.variable']) || num(s['borrowers.' + n + '.rental']));
-      note.innerHTML = 'Filled in from your other calculations in this tab' + (cpf ? ', including the CPF you’ll refund' : '') + (vr ? '. Income is fixed pay plus 70% of variable and rental income, as banks count it' : '') + '. Selling costs here use this planner’s estimate (' + costs + '), not any changes you made in Sale proceeds. Check each figure before you continue. <button type="button" class="gw-link">Clear them</button>';
-      const host = f && f.closest('.kpt-field') ? f.closest('.kpt-field') : null;
-      if (host && host.parentNode) host.parentNode.insertBefore(note, host);
-      // Audit A5-08: Clear also removes the stored figures, so a reload doesn't fill them in again.
-      note.querySelector('button').addEventListener('click', () => { clearJourney(); ['salePrice', 'outstandingLoan', 'cpfRefundIn', 'age1', 'income1', 'age2', 'income2'].forEach((id) => { const el = $(id); if (el) { el.value = ''; el.dispatchEvent(new Event('input', { bubbles: true })); } }); note.remove(); });
-    }
   }
   if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount(); }
   return { upDone, finStamp, clearJourney, oneEdit, deaccent, ENTRIES, SECTIONS, SEC_ORDER, NAV_ORDER, doorHtml, researchRows, secSwitch, row, MENU_TOOLS, QUICK, UP, MAIN, LAUNCHES, ASK, ICON, svg, norm, matchTools, scoredTools, matchDevs, matchSites, matchRoads, roadList, roadTitle, roadKey, roadLandedHref, roadMapHref, findRoads, roadsNow, displayName, menuHtml, searchHtml, quickHtml, stripHtml, href, esc };
