@@ -148,7 +148,7 @@ try:
     ctx.close()
     # a price arriving from Research (the shared store, never the address)
     ctx, pg, errs = page(br, dict(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True))
-    pg.goto(B + '/tools/planner/'); pg.evaluate("sessionStorage.setItem('gw.fin.v1', JSON.stringify({buyPrice: '2480000', buyFrom: 'typical'}))"); pg.goto(B + '/tools/planner/'); pg.wait_for_selector('[data-pa]'); pg.wait_for_timeout(400)
+    pg.goto(B + '/tools/planner/'); pg.evaluate("sessionStorage.setItem('gw.fin.v1', JSON.stringify({buyPrice: '2480000', buyFrom: 'typical'}))"); pg.goto(B + '/tools/planner/?j=1');   # C1: Research's links arrive marked as a journey pg.wait_for_selector('[data-pa]'); pg.wait_for_timeout(400)
     ih = pg.inner_text('[data-head]')
     check('Research price: before any entries the page names the price and asks only for age and income', 'Can you afford this price?' in ih and 'age and income' in ih and '2,480,000' not in pg.url, ih[:240])
     pg.fill('[data-k="buyers.0.age"]', '35'); pg.fill('[data-k="buyers.0.fixed"]', '21,000'); pg.click('.pa-chips[data-k="owns"] [data-v="none"]'); pg.click('.pa-chips[data-k="kind"] [data-v="completed"]')

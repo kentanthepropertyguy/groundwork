@@ -31,7 +31,8 @@ def keys(pg): return pg.evaluate("()=>Object.keys(sessionStorage)")
 def open_(pg, path, sel):
     pg.goto(B + path); pg.wait_for_selector(sel, state='attached'); pg.wait_for_timeout(450)
 def journey_figures(pg):
-    pg.goto(B + '/tools/planner/'); pg.wait_for_selector('[data-pa]')
+    # C1: the consumer journey's What can I afford? is the one reached from a journey (?j=1); opened from Tools it is a standalone calculation (c1-render.py)
+    pg.goto(B + '/tools/planner/?j=1'); pg.wait_for_selector('[data-pa]')
     pg.fill('[data-k="buyers.0.age"]', '40'); pg.fill('[data-k="buyers.0.fixed"]', '21,000'); pg.fill('[data-k="cash"]', '100,000'); pg.fill('[data-k="cpf"]', '200,000')
     settle(pg)
 AGE, INC = '[data-share="borrowers.0.age"]', '[data-share="borrowers.0.fixed"]'

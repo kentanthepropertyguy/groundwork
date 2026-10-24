@@ -237,7 +237,7 @@ ok(/kpt\.pulse\.for/.test(rs) && /research_pulse_viewed/.test(rs) && /research_p
 ok(/GW_PULSE\.waMessage\(S\.pu, M\.name, reportUrl\(M\.id\), 'buy'\)/.test(rs) && /GW_PULSE\.waMessage\(S\.pu, M\.name, reportUrl\(M\.id\), 'sell'\)/.test(rs), 'both WhatsApp cards are built from the report');
 ok(!/localStorage/.test(src + read('assets/js/gw-journey.js').match(/pulseFor[^\n]*/)), 'the question is kept for this tab only (sessionStorage), never localStorage');
 const lg = read('assets/js/kpt-lg.js');
-ok(/GLOBAL\.GW_PULSE\.html\(ctx\.PU, \{ forWho \}\)/.test(lg) && /class="lg-kenstrips" id="next"/.test(lg), 'the page passes the question to the block and the cards carry the id the link scrolls to');
+ok(/GLOBAL\.GW_PULSE\.html\(ctx\.PU, \{ forWho, mapHref/.test(lg) && /class="lg-kenstrips" id="next"/.test(lg), 'the page passes the question to the block and the cards carry the id the link scrolls to');
 ok(/How is the market around your home\?/.test(lg), 'Research\'s first screen asks how the market is');
 const home = read('index.html'); ok(/How’s the market around you\?/.test(home), 'Home: an entry point in the Research door, no new section');
 ok(!/gw-pulse|data-mp/.test(home), 'Home gains no new block');

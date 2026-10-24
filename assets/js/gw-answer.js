@@ -26,7 +26,7 @@
 })(typeof self !== 'undefined' ? self : this, function (R, C, T) {
   'use strict';
   if (!R || !C || !T || typeof T.timeline !== 'function') throw new Error('GW_ANSWER needs GW_RULES, GW_CALC and GW_TIMELINE');
-  const VERSION = 'S2-2026-10-17';
+  const VERSION = 'C1-2026-10-24';
   const num = (x) => (typeof x === 'number' && isFinite(x) ? x : null);
   const nn = (x) => (num(x) !== null && x > 0 ? x : 0);
   const has = (x) => num(x) !== null;
@@ -61,10 +61,15 @@
   /* ---------------- the entries, read once ---------------- */
   // s: { kind: 'new'|'completed', buyers: [{ res, age, fixed, variable, rental }], debts, ratePct (default 4), years (default: longest keeping the standard limit),
   //      cash, cpf, setAside, saveMo, cpfMo (null/undefined = not given), cushion: { months } | { amount },
-  //      home: null | 'none' | 'keep' | 'sell', order: null | 'sell' | 'buy' | 'unsure', flat: { instalment, price, loan, cpfPrincipal, cpfInterest, years, type: 'hdb'|'private' },
+  //      home: null | 'none' | 'keep' | 'sell', order: null | 'sell' | 'buy' | 'unsure', flat: { instalment, price, loan, cpfPrincipal, cpfInterest, years, type: 'hdb'|'private', cpfRefund55 },
+  //      C1: buyers[k].owned (homes that buyer owns now: 0, 1, 2+) and buyers[k].fta (PR or foreigner who pays as a Citizen under an FTA); homeJoint (both buyers own homes:
+  //      true = the home asked about is owned by both, false = by the first buyer only); couple (true = married, buying in their two names only); cpfBal: [{ oa, sa }] per
+  //      buyer and cover95 (true | false | null) for CPF while a buyer still owns another home. A buyer row with nothing but a residency still counts for stamp duty.
   //      price (the price being tried), valuation (optional, a completed home only: the bank's or HDB's valuation of THAT price; never asked of everyone, never assumed), otp (YYYY-MM-DD) }
   function read(s) {
     s = s || {};
+    // every buyer named counts for stamp duty, even one with no age or income (a non-working spouse); only buyers with entries count for the loan (C1)
+    const duty = (s.buyers || []).filter(Boolean).map((b) => ({ res: b.res || 'SC', fta: b.fta === true ? true : b.fta === false ? false : undefined, owned: has(b.owned) ? Math.max(0, Math.min(2, Math.round(b.owned))) : null, age: has(b.age) ? b.age : null }));
     const buyers = (s.buyers || []).filter((b) => b && (has(b.age) || has(b.fixed) || has(b.variable) || has(b.rental)));
     // rental income is optional and advanced: GW_CALC.borrowers counts it at 70% (the same MAS 30% haircut as variable income), exactly as How much can I borrow? does
     const list = buyers.map((b) => ({ age: b.age, fixed: nn(b.fixed), variable: nn(b.variable), rental: nn(b.rental) }));
@@ -96,8 +101,33 @@
     // Ownership, housing loans, monthly mortgage commitments and the sale are four separate answers (Phase B):
     //   owned (how many properties: 0/1/2), the home's own loan (yes / no / not sure), the loans on any OTHER property and their instalments, and what is done with the home.
     out.homeOwned = s.home === 'keep' || s.home === 'sell';
-    out.ownedNow = out.homeOwned ? (has(s.owned) ? Math.max(1, Math.min(2, Math.round(s.owned))) : 1) : 0;
+    out.duty = duty; out.couple = s.couple === true ? true : s.couple === false ? false : undefined;
+    // C1 (B2): homes owned, per buyer. A caller that gives no per-buyer count (an older one) is read as before: the one count applies to every buyer.
+    const legacy = out.homeOwned ? (has(s.owned) ? Math.max(1, Math.min(2, Math.round(s.owned))) : 1) : 0;
+    const perBuyer = duty.some((b) => b.owned !== null);
+    out.cnt = duty.map((b) => (!out.homeOwned ? 0 : perBuyer ? (b.owned || 0) : legacy));
+    const owners = out.cnt.map((c, k) => (c >= 1 ? k : -1)).filter((k) => k >= 0);
+    // whose is "your home" (the one kept or sold): one owner, or both when they own it together; both owning homes and not said: asked (a blank is not an answer)
+    out.homeJointAsk = perBuyer && owners.length > 1 && s.homeJoint !== true && s.homeJoint !== false;
+    out.homeOwners = !perBuyer ? owners : owners.length <= 1 ? owners : s.homeJoint === true ? owners : [owners[0]];
+    // distinct homes the household owns now (1 or "2 or more"): a home owned together counts once
+    const distinct = !out.homeOwned ? 0 : !perBuyer ? legacy : Math.max(1, out.cnt.reduce((a, c) => a + c, 0) - (owners.length > 1 && s.homeJoint === true ? 1 : 0));
+    out.ownedNow = Math.min(2, distinct);
     out.otherOwned = Math.max(0, out.ownedNow - 1);
+    // homes each buyer owns at the purchase: kept, everything; sold first, the sold home leaves its owners only; no home, none
+    out.ownedAt = (mode) => out.cnt.map((c, k) => (mode === 'none' ? 0 : mode === 'sell' ? Math.max(0, c - (out.homeOwners.indexOf(k) >= 0 ? 1 : 0)) : c));
+    // C1 (B3): CPF while a buyer still owns another home. Only OA above the retirement-sum set-aside can be used (CPF Board); the planned CPF is never counted above that.
+    const bal = Array.isArray(s.cpfBal) ? s.cpfBal : [];
+    out.cpfBal = bal; out.cover95 = s.cover95 === true ? true : s.cover95 === false ? false : null;
+    const year = /^\d{4}/.test(String(s.otp || '')) ? +String(s.otp).slice(0, 4) : +todayIso().slice(0, 4);
+    out.cpfYear = year;
+    out.cpfCheck = (mode) => {
+      const at = out.ownedAt(mode), subject = at.map((c) => c >= 1);
+      if (!subject.some(Boolean) || !(out.cpf > 0)) return { applies: false, usable: out.cpf };
+      const r = C.cpfSecondHome({ year: year, cover95: out.cover95, members: duty.map((b, k) => ({ oa: bal[k] ? bal[k].oa : undefined, sa: bal[k] ? bal[k].sa : undefined, age: b.age, subject: subject[k] })) });
+      if (!r.ok) return { applies: true, missing: r.missing, usable: 0, check: r };
+      return { applies: true, usable: Math.min(out.cpf, r.usable), check: r, capped: r.usable < out.cpf - 0.5 };
+    };
     out.otherLoans = out.otherOwned > 0 ? (has(s.otherLoans) ? Math.max(0, Math.min(2, Math.round(s.otherLoans))) : null) : 0;
     out.otherInstal = out.otherOwned > 0 && out.otherLoans > 0 ? nn(s.otherInstal) : 0;
     out.flatLoan = loanOf(f);                                   // 'yes' | 'no' | 'unsure' | null (not answered)
@@ -120,7 +150,8 @@
   function saleOf(s, n) {
     if (s.home !== 'sell') return null;
     // An owner aged 55 or over: the CPF refund first tops up their Retirement Account to the Full Retirement Sum (their own balance, not held here), so none of the refund is counted.
-    const owner55 = (s.buyers || []).some((b) => b && nn(b.age) >= 55);
+    const ow = n && n.homeOwners && n.homeOwners.length ? n.homeOwners : null;
+    const owner55 = ow ? ow.some((k) => n.duty[k] && nn(n.duty[k].age) >= 55) : (s.buyers || []).some((b) => b && nn(b.age) >= 55);
     return C.saleEstimate(s.flat || {}, { owner55: owner55, today: todayIso() });
   }
 
@@ -132,7 +163,7 @@
     const s = n.s, B = n.B;
     // property ownership (ABSD), housing loans (loan limit) and monthly mortgage commitments (TDSR) are worked out separately:
     //   keep: every property stays owned, the home's loan counts (unless it is fully paid), its instalment counts; sell first: the home is gone, the others stay
-    const owned = mode === 'none' ? 0 : (mode === 'sell' ? n.otherOwned : n.ownedNow);
+    const ownAt = n.ownedAt(mode), owned = Math.max.apply(null, [0].concat(ownAt));
     const flatCounts = mode === 'keep' && n.flatLoan !== 'no' && n.flatLoan !== null;
     const instal = (flatCounts ? n.flatInstal : 0) + n.otherInstal;
     const debts = n.debts + instal;
@@ -140,18 +171,19 @@
     const t = C.tdsr({ kind: 'private', borrowers: n.list, debts: debts, loans: 0, tenure: n.years, quotedRatePct: n.ratePct });
     if (!t.ok || t.noTenure) return { ok: false, why: 'income', t: t };
     const loansForLtv = nn(n.otherLoans) + (flatCounts ? 1 : 0);
-    const buyersP = n.buyers.map((b) => ({ res: b.res || 'SC', owned: owned }));
+    const buyersP = n.duty.map((b, k) => ({ res: b.res, fta: b.fta, owned: ownAt[k] }));
     const V = n.kind === 'completed' && nn(over.valuation) > 0 ? over.valuation : undefined;   // a valuation belongs to ONE price (the buyer's own), never to the search
-    const prelim = C.progressive({ price: P, age: B.iwaaUse, years: n.years, ratePct: n.ratePct, loans: loansForLtv, kind: 'private', buyers: buyersP, valuation: V });
+    const prelim = C.progressive({ price: P, age: B.iwaaUse, years: n.years, ratePct: n.ratePct, loans: loansForLtv, kind: 'private', buyers: buyersP, couple: n.couple, valuation: V });
     if (!prelim.ok) return { ok: false, why: 'rules', prog: prelim };
     // the loan taken is the buyer's preferred loan when it is below what the numbers allow; never above it
     const incomeCap = over.noIncomeCap ? prelim.loanMax : (n.prefLoan === null ? t.maxLoan : Math.min(t.maxLoan, n.prefLoan));   // noIncomeCap: what the cash and CPF support if income were no limit
     const capped = incomeCap < prelim.loanMax - 0.5;
-    const prog = capped ? C.progressive({ price: P, age: B.iwaaUse, years: n.years, ratePct: n.ratePct, loans: loansForLtv, kind: 'private', buyers: buyersP, loanCap: incomeCap, valuation: V }) : prelim;
+    const prog = capped ? C.progressive({ price: P, age: B.iwaaUse, years: n.years, ratePct: n.ratePct, loans: loansForLtv, kind: 'private', buyers: buyersP, couple: n.couple, loanCap: incomeCap, valuation: V }) : prelim;
     if (!prog.ok) return { ok: false, why: 'rules', prog: prog };
     const loan = prog.loanMax, duty = prog.duty.total, absd = prog.duty.absd || 0, bsd = prog.duty.bsd;
     const sale = mode === 'sell' && n.sale && n.sale.counted ? n.sale : null;
-    const cash = Math.max(0, Math.max(0, n.cash - n.setAside) + nn(over.addCash) + (sale ? sale.cash : 0)), cpf = n.cpf + (sale ? sale.cpf : 0);
+    const cc = n.cpfCheck(mode), cpfNow = cc.usable;   // C1 (B3): the CPF that may be used for this purchase while a home is still owned
+    const cash = Math.max(0, Math.max(0, n.cash - n.setAside) + nn(over.addCash) + (sale ? sale.cash : 0)), cpf = cpfNow + (sale ? sale.cpf : 0);
     // cash and CPF are different money: cash-only items first, then cash-or-CPF
     const cov = prog.cov || 0;   // cash over valuation: cash only, on top of the minimum cash and the duties (R.valuation)
     const cashOnly = prog.cashMin + cov + duty, flexNeed = Math.max(0, P - loan - prog.cashMin - cov);
@@ -163,12 +195,13 @@
     const monthly = C.instal(loan, prog.rate, n.years);
     const res = { ok: true, P: P, mode: mode, owned: owned, years: n.years, loan: loan, maxLoan: Math.min(prelim.loanMax, t.maxLoan), ruleLoan: prog.ruleLoanMax, incomeLoan: t.maxLoan, prefLoan: n.prefLoan, assessRate: t.rate, limit: capped ? (n.prefLoan !== null && n.prefLoan < t.maxLoan - 0.5 ? 'choice' : 'income') : 'rule', ltv: prog.ltv, minCash: prog.minCash, cashMin: prog.cashMin, lower: prog.lower, lowerWhy: prog.lowerWhy,
       valuation: V === undefined ? null : V, cov: cov, base: prog.base, dutyBase: prog.dutyBase, bsd: bsd, absd: absd, absdRate: prog.duty.absdRate, duty: duty, dutyNotes: prog.duty.notes, down: P - loan, upfront: P - loan + duty, have: cash + cpf, haveCash: cash, haveCpf: cpf, cashOnly: cashOnly, flexNeed: flexNeed,
-      gap: gap, cashShort: cashShort, flexShort: flexShort, leftCash: leftCash, monthly: monthly, monthlyPct: B.gross > 0 ? monthly / B.gross : null, debts: debts, flatInstal: instal, loans: loansForLtv, prog: prog, t: t, sale: sale };
+      gap: gap, cashShort: cashShort, flexShort: flexShort, leftCash: leftCash, monthly: monthly, monthlyPct: B.gross > 0 ? monthly / B.gross : null, debts: debts, flatInstal: instal, loans: loansForLtv, prog: prog, t: t, sale: sale,
+      ownedAt: ownAt, cpfPlanned: n.cpf, cpfUsable: cpfNow, cpfCheck: cc.applies ? cc : null, coupleApplied: !!(prog.duty && prog.duty.coupleApplied) };
     res.cushion = n.cushion.amount !== undefined ? n.cushion.amount : n.cushion.months * monthly;
     let covered = null, tl = null;
     if (n.checked) {
-      const inp = { kind: n.kind, price: P, otp: n.s.otp || todayIso(), buyers: n.buyers.map((b) => ({ res: b.res || 'SC', owned: mode === 'sell' ? n.ownedNow : owned })), age: B.iwaaUse, ratePct: n.ratePct, years: n.years, cash: cash, cpf: n.cpf, saveMo: n.saveMo, cpfMo: n.cpfMo,
-        order: mode === 'sell' ? 'sell' : 'none', loansOther: loansForLtv, flatLoan: 'none', sale: mode === 'sell' ? { cash: 0, cpf: sale ? sale.cpf : 0, removesOwnership: true } : {}, loanCap: capped ? incomeCap : undefined, valuation: V, dates: { mode: 'grouped' } };
+      const inp = { kind: n.kind, price: P, otp: n.s.otp || todayIso(), buyers: n.duty.map((b, k) => ({ res: b.res, fta: b.fta, owned: mode === 'sell' ? n.cnt[k] : ownAt[k] })), couple: n.couple, age: B.iwaaUse, ratePct: n.ratePct, years: n.years, cash: cash, cpf: cpfNow, saveMo: n.saveMo, cpfMo: n.cpfMo,
+        order: mode === 'sell' ? 'sell' : 'none', loansOther: loansForLtv, flatLoan: 'none', sale: mode === 'sell' ? { cash: 0, cpf: sale ? sale.cpf : 0, removesOwnership: true, owners: n.homeOwners.slice() } : {}, loanCap: capped ? incomeCap : undefined, valuation: V, dates: { mode: 'grouped' } };
       // the sale cash is already in `cash`; the engine adds a sell-first sale's own figures, so it is given only the CPF part
       tl = T.timeline(inp);
       if (!tl.ok) return { ok: false, why: 'timeline', tl: tl };
@@ -238,7 +271,9 @@
     const probe = n.probe;
     if (!probe || !probe.ok) { res.state = 'invalid'; res.errors = (probe && probe.invalid ? probe.invalid.map((x) => ({ key: x.field === 'age' ? 'buyers.0.age' : x.field === 'income' ? 'buyers.0.fixed' : x.field, text: x.text })) : [{ key: 'buyers.0.age', text: 'These figures could not be worked out. Please check them.' }]); return res; }
     if (!(n.years >= 1)) { res.state = 'invalid'; res.errors = [{ key: 'years', text: n.allowed < 1 ? 'Banks usually end a loan by age ' + R.bankLtv.maturityAge + ', so no loan tenure fits at this age.' : 'Any loan would run past age ' + R.bankLtv.endAge + ' for this age. Enter the loan years you want under Adjust assumptions.' }]; return res; }
-    const tb = C.tdsr({ kind: 'private', borrowers: n.list, debts: n.debts + n.otherInstal + (s.home === 'keep' ? n.flatInstal : 0), loans: 0, tenure: n.years, quotedRatePct: n.ratePct });
+    // C1 (B4): the debts behind the borrowing capacity are the budget's own: a home that is counted as kept (kept, buying first, not sure, or a sale not counted yet) brings its instalment
+    const debtsFor = (mode) => n.debts + n.otherInstal + (mode === 'keep' && n.flatLoan !== 'no' && n.flatLoan !== null ? n.flatInstal : 0);
+    const tb = C.tdsr({ kind: 'private', borrowers: n.list, debts: debtsFor(s.home === 'keep' || s.home === 'sell' ? 'keep' : 'none'), loans: 0, tenure: n.years, quotedRatePct: n.ratePct });
     res.borrow = { max: tb.ok && !tb.noTenure ? tb.maxLoan : 0, years: n.years, std: n.std, rate: tb.rate, income: n.B.gross, counted: n.B.assessable, instalment: tb.forNew, monthly: tb.ok && !tb.noTenure ? C.instal(tb.maxLoan, n.ratePct / 100, n.years) : null };
     res.kind = n.kind; res.years = n.years; res.ratePct = n.ratePct; res.B = n.B;
     const moneyGiven = has(s.cash) || has(s.cpf);
@@ -248,6 +283,7 @@
     // "Not sure" is an answer (it is worked out on the cautious side and compared with "fully paid"); a blank is not.
     if (n.homeOwned) {
       const ask = [];
+      if (n.homeJointAsk) ask.push('joint');   // C1 (B2): both buyers own a home: whose home is the one kept or sold
       if (n.flatLoan === null) ask.push('loan');
       else if (n.flatLoan === 'yes' && !has((s.flat || {}).instalment)) ask.push('instalment');
       if (n.otherOwned > 0 && n.otherLoans === null) ask.push('otherLoans');
@@ -258,10 +294,14 @@
     const mode0 = s.home === 'none' ? 'none' : 'keep';
     const cache = {}, solveC = (nx, mode) => { const k = nx.years + '|' + mode; return cache[k] || (cache[k] = solve(nx, mode)); };
     const basisOf = (nx) => (s.home === 'sell' && nx.sale && nx.sale.counted && s.order === 'sell' ? 'sell' : mode0);
+    // C1 (B3): CPF planned while a buyer still owns another home needs the balances behind the set-aside; asked, never assumed (the full OA is not taken as usable)
+    // the bases shown: the headline's (sold first when chosen and counted, else kept), and selling first beside a cautious kept-home headline
+    { const b0 = basisOf(n), modes = [b0].concat(b0 !== 'sell' && s.home === 'sell' && n.sale && n.sale.counted ? ['sell'] : []), miss = modes.some((m) => { const c = n.cpfCheck(m); return c.applies && c.missing; });
+      if (miss) { res.state = 'ask-cpf'; res.ask = ['cpf']; res.cpfNeed = n.cpfCheck(modes.filter((m) => n.cpfCheck(m).missing)[0]); return res; } }
     // 2a. the tenure: used as typed; otherwise the standard tenure (a longer one is only offered)
     const ten = chooseTenure(s, n, basisOf(n), solveC);
     n = ten.n;
-    const tb2 = C.tdsr({ kind: 'private', borrowers: n.list, debts: n.debts + n.otherInstal + (s.home === 'keep' ? n.flatInstal : 0), loans: 0, tenure: n.years, quotedRatePct: n.ratePct });
+    const tb2 = C.tdsr({ kind: 'private', borrowers: n.list, debts: debtsFor(basisOf(n)), loans: 0, tenure: n.years, quotedRatePct: n.ratePct });
     res.borrow = { max: tb2.ok && !tb2.noTenure ? tb2.maxLoan : 0, years: n.years, std: n.std, rate: tb2.rate, income: n.B.gross, counted: n.B.assessable, instalment: tb2.forNew, monthly: tb2.ok && !tb2.noTenure ? C.instal(tb2.maxLoan, n.ratePct / 100, n.years) : null };
     res.years = n.years;
     const base = solveC(n, mode0);
@@ -276,7 +316,8 @@
     }
     res.basis = basis; res.saleCounted = saleCounted; res.saleNote = saleNote; res.beneath = beneath; res.sale = n.sale || null;
     // ownership, loans and the other answers, as worked with
-    res.facts = { owned: n.ownedNow, otherOwned: n.otherOwned, otherLoans: n.otherLoans, otherInstal: n.otherInstal, flatLoan: n.flatLoan, flatInstal: n.flatInstal, prefLoan: n.prefLoan, ageUnverified: !!n.B.ageUnverified };
+    res.facts = { owned: n.ownedNow, otherOwned: n.otherOwned, otherLoans: n.otherLoans, otherInstal: n.otherInstal, flatLoan: n.flatLoan, flatInstal: n.flatInstal, prefLoan: n.prefLoan, ageUnverified: !!n.B.ageUnverified,
+      cnt: n.cnt.slice(), homeOwners: n.homeOwners.slice(), couple: n.couple, ownedAt: n.ownedAt(basis), cpf: n.cpfCheck(basis) };
     // a home loan the buyer is not sure about is counted (the cautious side); the budget if it is fully paid is shown beside it, never instead of it
     if (n.homeOwned && n.flatLoan === 'unsure' && mode0 === 'keep') { const np = Object.assign({}, n, { flatLoan: 'no', flatInstal: 0 }); const ip = solve(np, 'keep'); res.ifPaid = { highest: ip.highest, comfortable: ip.comfortable }; }
     res.kept = base; // the kept-home (or no-home) figures, for the "if you keep it" line

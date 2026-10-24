@@ -366,6 +366,9 @@
   /* ---------------- events ---------------- */
   document.addEventListener('click', (e) => {
     const fl = e.target.closest && e.target.closest('a[data-m-full]');
+    // A size the visitor selected on the Map goes with them (this tab only, as a 100 sq ft band start, never a typed number) so the full analysis opens on the same size.
+    // With none selected, nothing is passed: Research asks which size rather than choosing one.
+    if (fl && S.band && M && S.proj && M.BY[S.proj] && M.BY[S.proj].id === fl.dataset.mFull) { const bp = String(S.band).split(':'); if (/^\d{3,5}$/.test(bp[1] || '')) { try { sessionStorage.setItem('kpt.research.size', bp[1]); } catch (x) { /* storage blocked */ } fl.setAttribute('href', '../#/p/' + fl.dataset.mFull + '/' + (bp[0] === 'new' ? 'new' : 'resale')); } }   // the same market: new sales, or resales (a sale type the development lacks falls back to its own default)
     if (fl) { try { sessionStorage.setItem('kpt.map.out', JSON.stringify({ id: fl.dataset.mFull, h: location.hash, n: history.length })); } catch (x) { /* Back to Map then opens the Map for that development */ } }
     if (SP.open && !(e.target.closest && (e.target.closest('#sources') || e.target.closest('.m-src')))) closeSources(false);
     if (!M) return;

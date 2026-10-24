@@ -321,6 +321,23 @@ body.kpr .lg-pc .big{ font-size:48px; }
 /* the development page header: left aligned, one column, the answer inside the first screen */
 body.kpr .lg-hero--ans{ text-align:left; padding-top:24px; padding-bottom:36px; }
 body.kpr .lg-hero--ans .lg-wrap{ justify-items:stretch; gap:16px; max-width:760px; }
+/* Desktop (24 Oct 2026): the overview takes the same width as the sections below it (--kpt-wrap). From 980px the size question, price answer, actions and
+   facts sit in the left column, and the Market pulse (or, before a size is chosen, the at-a-glance card) beside them in the right column. Paragraphs keep 62ch.
+   Without either block the single 760px column stays. */
+@media (min-width:980px){
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov){ max-width:var(--kpt-wrap); grid-template-columns:minmax(0,1fr) minmax(0,400px); column-gap:56px; row-gap:0; align-items:start; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > *:not(.mp):not(.lg-ov){ margin-bottom:16px; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > *{ grid-column:1; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > .lg-back{ grid-column:1 / -1; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > .mp, body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > .lg-ov{ grid-column:2; grid-row:2 / span 20; margin-top:0; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > .mp{ border-top:0; padding-top:8px; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > .mp .mp-f{ grid-template-columns:1fr; gap:0; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > .mp .mp-f div{ grid-template-columns:minmax(0,1fr) auto; column-gap:14px; align-items:baseline; padding:9px 0; border-bottom:1px solid var(--gw-line,#E3E6EC); }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > .mp .mp-f dt{ grid-column:1; grid-row:1; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > .mp .mp-f .mp-n{ grid-column:1; grid-row:2; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > .mp .mp-f .mp-v{ grid-column:2; grid-row:1 / span 2; font-size:22px; text-align:right; align-self:center; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > .mp .mp-h{ font-size:21px; }
+}
 body.kpr .lg-hero--ans .lg-back{ justify-self:start; }
 body.kpr .lg-hero--ans .lg-id{ display:grid; gap:6px; }
 body.kpr .lg-hero--ans .lg-idline{ font-size:15px; font-weight:500; color:var(--kpt-muted); display:flex; flex-wrap:wrap; align-items:center; gap:4px 0; }
@@ -355,4 +372,42 @@ body.kpr .lg-hero--ans .kpr-onmap{ margin:0; }
   body.kpr .lg-ans{ padding:16px 16px; border-radius:18px; }
   body.kpr .lg-ans-v{ font-size:38px; } body.kpr .lg-ans-v.txt{ font-size:20px; }
   body.kpr .lg-hero--ans .lg-act{ padding:0 14px; min-height:42px; }
+}
+
+/* Size first (25 Oct 2026): "What size home are you looking at?" comes before any size-specific price or reading. */
+body.kpr .lg-pick{ display:grid; gap:10px; justify-items:start; width:100%; min-width:0; }
+body.kpr .lg-pick-h{ font-size:22px; line-height:1.25; letter-spacing:-.02em; margin:0; }
+body.kpr .lg-pick .lbl{ font-size:14.5px; line-height:1.5; color:var(--kpt-muted); margin:0; max-width:62ch; }
+body.kpr .lg-pick-row{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 18px; width:100%; }
+body.kpr .lg-selwrap{ position:relative; display:inline-block; width:min(100%, 360px); }
+body.kpr .lg-select{ appearance:none; -webkit-appearance:none; width:100%; min-height:52px; padding:0 48px 0 20px; border:1.5px solid var(--kpt-ink); border-radius:var(--kpt-pill); background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1.5l6 6 6-6' fill='none' stroke='%2316213E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 20px center; color:var(--kpt-ink); font:600 16.5px/1.2 var(--kpt-font); letter-spacing:-.01em; cursor:pointer; }
+body.kpr .lg-select[data-chosen="true"]{ background-color:var(--kpt-ink); color:#fff; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1.5l6 6 6-6' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+body.kpr .lg-select:focus-visible{ outline:3px solid var(--kpt-gold); outline-offset:2px; }
+body.kpr .lg-select option, body.kpr .lg-select optgroup{ color:#16213E; background:#fff; font-weight:500; }
+body.kpr .lg-typeit{ font:inherit; font-size:14.5px; font-weight:600; color:var(--kpt-blue); background:none; border:0; padding:0; min-height:44px; cursor:pointer; text-decoration:none; }
+body.kpr .lg-typeit:hover{ text-decoration:underline; }
+body.kpr .lg-pick .lg-sizeform{ justify-content:flex-start; gap:8px; }
+body.kpr .lg-pick .lg-sizeform input{ width:190px; }
+body.kpr .lg-pick .lg-sizeform #sizeNote{ width:100%; margin:0; }
+body.kpr .lg-pick .lg-clear{ font:inherit; font-weight:600; color:var(--kpt-blue); background:none; border:0; padding:0 0 0 6px; min-height:0; cursor:pointer; text-decoration:underline; }
+body.kpr .lg-pick .lg-sizeform{ justify-content:flex-start; gap:8px; }
+body.kpr .lg-pick .lg-sizeform input{ width:190px; }
+body.kpr .lg-pick .lg-sizelbl{ width:100%; }
+body.kpr .lg-pick .lg-sizeform #sizeNote{ width:100%; margin:0; }
+body.kpr .lg-ov{ display:grid; gap:10px; align-content:start; min-width:0; background:var(--kpt-grey); border-radius:var(--kpt-radius); padding:22px 24px; text-align:left; }
+body.kpr .lg-ov-k{ margin:0; font-size:12.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--kpt-muted); }
+body.kpr .lg-ov-h{ font-size:24px; line-height:1.2; letter-spacing:-.02em; margin:0; }
+body.kpr .lg-ov-s{ margin:0; font-size:15.5px; line-height:1.5; color:var(--kpt-body); max-width:62ch; }
+body.kpr .lg-ov-n{ margin:0; font-size:14.5px; line-height:1.5; color:var(--kpt-muted); max-width:62ch; }
+body.kpr .lg-ov-a{ margin:2px 0 0; font-size:14.5px; } body.kpr .lg-ov-a a{ font-weight:600; color:var(--kpt-blue); text-decoration:none; display:inline-flex; align-items:center; min-height:40px; }
+body.kpr .lg-pickprompt{ display:grid; gap:10px; align-content:start; justify-items:start; }
+body.kpr .lg-pickprompt p{ margin:0; color:var(--kpt-body); max-width:52ch; }
+body.kpr .mp-near{ margin:0; display:flex; flex-wrap:wrap; gap:8px; }
+body.kpr .mp-near button .lg-n{ margin-left:8px; padding-left:8px; border-left:1px solid var(--kpt-line); font-size:13px; font-weight:600; color:var(--kpt-muted); }
+@media (max-width:640px){
+  body.kpr .lg-pick-h{ font-size:20px; }
+  body.kpr .lg-selwrap{ width:100%; }
+  body.kpr .lg-ov{ padding:18px 16px; border-radius:18px; } body.kpr .lg-ov-h{ font-size:21px; }
+  body.kpr .lg-pick .lg-sizeform input{ width:auto; max-width:none; flex:1 1 140px; min-width:0; }
+  body.kpr .lg-pick .lg-sizeform .lg-btn{ width:auto; flex:0 0 auto; }
 }

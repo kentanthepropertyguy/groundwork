@@ -58,7 +58,7 @@
   function compute(p, m, o) {
     o = o || {};
     const sale = o.sale && p.sale && p.sale[o.sale] > 0 ? o.sale : firstSale(p);
-    const out = { v: VERSION, id: p.id, sale, state: 'nosales', evidence: 'none', dir: null, pct: null, band: null, a: null, b: null, n12: 0, nPrev: 0, latest: null, latestLabel: null, asOf: m.latestMonth, asOfLabel: monthLabel(m.latestMonth), total: 0, first: null, periods: [], head: '', sub: '', figs: [], limited: false };
+    const out = { v: VERSION, id: p.id, sale, state: 'nosales', evidence: 'none', dir: null, pct: null, band: null, a: null, b: null, n12: 0, nPrev: 0, latest: null, latestLabel: null, asOf: m.latestMonth, asOfLabel: monthLabel(m.latestMonth), total: 0, first: null, periods: [], head: '', sub: '', figs: [], limited: false, sized: null };
     if (!sale) { out.head = 'No transactions recorded'; out.sub = 'URA has no transaction for this development in the period we hold.'; return out; }
     const F = fieldIdx(m), code = SALE[sale], lastIdx = mIdx(m.latestMonth);
     const mo = monthly(p, m, sale);
@@ -81,6 +81,8 @@
     const A = bin != null ? at(0) : null, B = bin != null ? at(1) : null, bw = m.bin || 100;
     if (bin != null) out.band = { bin, label: bandLabel(bin, bw), short: num(bin) + 's' };
     out.periods = bin == null ? [] : pc.filter((c) => c.bin === bin && c.win < stub).sort((x, y) => x.win - y.win).map((c) => ({ win: c.win, label: monthLabel(m.periods[c.win].from) + ' – ' + monthLabel(m.periods[c.win].to), n: c.n, med: c.med, q1: c.q1, q3: c.q3 }));
+    // The size on show, in its own words (24 Oct 2026): counts of THIS size, used when the visitor chose a size and the evidence is too thin for a reading.
+    if (bin != null) { const bl = pc.filter((c) => c.bin === bin && c.last).map((c) => asYm(c.last)).sort().pop() || null; out.sized = { n12: A ? A.n : 0, nPrev: B ? B.n : 0, act12: A ? A.act : 0, actPrev: B ? B.act : 0, latest: bl, latestLabel: bl ? monthLabel(bl) : null }; }
     if (A) out.a = { n: A.n, act: A.act, med: A.med, q1: A.q1, q3: A.q3, last: asYm(A.last) };
     if (B) out.b = { n: B.n, act: B.act, med: B.med, q1: B.q1, q3: B.q3, last: asYm(B.last) };
     const since = (ym) => lastIdx - mIdx(ym);
@@ -180,15 +182,44 @@
       '<li>A reading needs at least ' + CFG.strong.n + ' sales over ' + CFG.strong.months + ' months in each period. With ' + CFG.limited.n + ' or more it is shown as a first look; with fewer, only counts are shown.</li>' +
       '<li>A median change of under ' + CFG.stablePct + '%, or one small enough to be down to which units happened to sell (judged from the middle half of prices in each period), is called broadly the same. ' + esc(p.asOfLabel) + ' may be incomplete.</li></ul></div></details>';
   }
+  // The three next steps when a size has too little evidence: the individual sales, similar developments (the page's own comparison rules), and Ken.
+  function sizedActs(o) {
+    return '<p class="mp-acts" data-mp-acts>' + (o.mapHref ? '<a href="' + esc(o.mapHref) + '" data-mp-sales>See the individual sales on the Map ›</a>' : '') +
+      '<a href="#lgCompare" data-lg-scroll="lgCompare" data-mp-similar>Compare with similar developments ›</a>' +
+      '<a href="#next" data-lg-scroll="next" data-mp-next="' + esc(o.forWho || '') + '">Ask Ken about a particular unit ›</a></p>';
+  }
   // o.forWho: 'sell' | 'buy' | '' (the question the visitor came with). The link goes to the next-step cards on the page (id "next"), not straight to WhatsApp.
   function nextLink(forWho) {
     const t = forWho === 'sell' ? 'What could my unit sell for?' : forWho === 'buy' ? 'Is an asking price reasonable?' : 'What this means for buying or selling here';
     return '<a href="#next" data-lg-scroll="next" data-mp-next="' + esc(forWho || '') + '">' + t + ' ›</a>';
   }
+  // A visitor who chose a size and whose size has too little evidence for a reading: say that about THAT size, then three useful next steps.
+  // (p.userSized is set by the Research page; the rules above are untouched.)
+  function sizedView(p) {
+    const s = p.sized, L = p.band.label, w = wordOf(p.sale, 2), n = s.n12, q = s.nPrev, o = {};
+    o.head = n === 0 ? 'No ' + w + ' of ' + L + ' in the last 12 months' : p.sale === 'resale' ? 'Too few sales of this size to show a trend' : n + ' ' + wordOf(p.sale, n) + ' of ' + L + ' in the last 12 months';
+    if (p.sale !== 'resale') o.sub = p.sub;   // new sales and sub-sales: the reason a direction is never shown
+    else if (n === 0) o.sub = (s.latestLabel ? 'The latest was ' + s.latestLabel + '. ' : '') + 'With no recent sales of this size there is no recent price or trend to read.';
+    else if (p.nPrev === 0 && p.first && mIdx(p.first) > mIdx(p.asOf) - 12) o.sub = 'Only ' + n + ' ' + wordOf(p.sale, n) + ' of ' + L + ' in the last 12 months. The first resale on record here was in ' + monthLabel(p.first) + ', so there is no earlier 12 months to compare.';
+    else if (n >= CFG.limited.n && q >= CFG.limited.n) o.sub = n + ' ' + wordOf(p.sale, n) + ' of ' + L + ' in the last 12 months and ' + q + ' the year before, but spread over too few months to compare prices reliably.';
+    else o.sub = 'Only ' + n + ' ' + wordOf(p.sale, n) + ' of ' + L + ' in the last 12 months' + (q ? ' and ' + q + ' the year before' : ', none the year before') + ', so there isn’t enough evidence to establish a reliable price trend for this size.';
+    o.figs = [
+      { id: 'size', label: 'This size, last 12 months', value: num(n), sub: q ? num(q) + ' the year before' : 'None the year before' },
+      { id: 'volume', label: 'All sizes, last 12 months', value: num(p.n12), sub: p.nPrev ? num(p.nPrev) + ' the year before' : 'None the year before' },
+      { id: 'latest', label: 'Latest sale of this size', value: s.latestLabel || '—', sub: 'Data to ' + p.asOfLabel }];
+    return o;
+  }
   function html(p, o) {
     o = o || {};
     if (!p || p.state === 'nosales') return '';
-    const k = [wordCap(wordOf(p.sale, 2)), p.band && p.state === 'trend' ? p.band.label : ''   /* the size is named only where prices are compared */].filter(Boolean).join(' · ');
+    const sv = p.userSized && p.state === 'activity' && p.sized && p.band ? sizedView(p) : null;   // a project with no resale at all in 12 months keeps its own (project-level) wording
+    const k = [wordCap(wordOf(p.sale, 2)), p.band && (p.state === 'trend' || sv) ? p.band.label : ''   /* the size is named only where prices are compared */].filter(Boolean).join(' · ');
+    if (sv) {
+      const f = '<dl class="mp-f">' + sv.figs.map((x) => '<div data-mp-fig="' + x.id + '"><dt>' + esc(x.label) + '</dt><dd class="mp-v">' + esc(x.value) + '</dd><dd class="mp-n">' + esc(x.sub) + '</dd></div>').join('') + '</dl>';
+      return '<section class="mp" data-mp data-mp-state="' + p.state + '" data-mp-sized="1" data-mp-dir="" data-mp-evidence="' + p.evidence + '" aria-label="Market pulse">' +
+        '<p class="mp-k">Market pulse<span> · ' + esc(k) + '</span></p><h2 class="mp-h" data-mp-head>' + esc(sv.head) + '</h2><p class="mp-s" data-mp-sub>' + esc(sv.sub) + '</p>' + f +
+        '<p class="mp-fine" data-mp-fine>Past sales only. Not a valuation or a forecast. Other developments are context, not a price trend for this one.</p>' + sizedActs(o) + detailHtml(p) + '</section>';
+    }
     const figs = '<dl class="mp-f">' + p.figs.map((f) => '<div data-mp-fig="' + f.id + '"><dt>' + esc(f.label) + '</dt><dd class="mp-v">' + esc(f.value) + '</dd><dd class="mp-n">' + esc(f.sub) + '</dd></div>').join('') + '</dl>';
     const fine = p.state === 'trend' ? 'Same size band, past sales only. Not a valuation or a forecast.' : 'Past sales only. Not a valuation or a forecast.';
     return '<section class="mp" data-mp data-mp-state="' + p.state + '" data-mp-dir="' + (p.dir || '') + '" data-mp-evidence="' + p.evidence + '" aria-label="Market pulse">' +
@@ -205,6 +236,7 @@
     const rel = p.dir === 'higher' ? 'higher than' : p.dir === 'lower' ? 'lower than' : 'broadly the same as';
     if (p.state === 'trend' && p.evidence === 'strong') return 'resale prices for ' + p.band.label + ' ' + rel + ' a year earlier';
     if (p.state === 'trend') return 'a first look, on few sales, with resale prices for ' + p.band.label + ' ' + rel + ' a year earlier';
+    if (p.userSized && p.sized && p.band && p.state === 'activity') return (p.sized.n12 === 0 ? 'no ' + wordOf(p.sale, 2) + ' of ' + p.band.label + ' in the last 12 months' : 'only ' + p.sized.n12 + ' ' + wordOf(p.sale, p.sized.n12) + ' of ' + p.band.label + ' in the last 12 months, too few to show a price trend');
     if (p.state === 'stale') return 'no ' + wordOf(p.sale, 2) + ' in the last 12 months';
     return num(p.n12) + ' ' + wordOf(p.sale, p.n12) + ' in the last 12 months';
   }
@@ -220,5 +252,5 @@
     return { trend: p.dir || 'none', evidence: p.evidence, sale_type: p.sale && SALE[p.sale] ? p.sale : undefined };
   }
 
-  return { VERSION, CFG, compute, compact, snapshot, html, detailHtml, finding, waMessage, trackParams, monthLabel, bandLabel };
+  return { VERSION, CFG, compute, compact, snapshot, html, detailHtml, sizedActs, finding, waMessage, trackParams, monthLabel, bandLabel };
 });

@@ -134,7 +134,7 @@
 .pa-foot{margin:0;font-size:12.5px;color:var(--gw-muted);line-height:1.45}
 .pa-ask{display:flex;flex-direction:column;gap:6px;align-items:flex-start}.pa-ask .gw-btn{min-height:46px}
 .pa-ask[hidden]{display:none}
-.pa-startover{padding-top:2px}.pa-startover .pa-link{color:var(--gw-muted);font-weight:500;font-size:13px}
+.pa-startover{padding-top:2px}.pa-startover [data-pa-new]{margin-right:18px}.pa-startover .pa-link{color:var(--gw-muted);font-weight:500;font-size:13px}
 /* phone bar */
 .pa-bar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(255,255,255,.97);border-top:1px solid var(--gw-line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));backdrop-filter:saturate(1.4) blur(8px)}
 .pa-bar[hidden]{display:none}.pa-bar .in{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:720px;margin:0 auto}
