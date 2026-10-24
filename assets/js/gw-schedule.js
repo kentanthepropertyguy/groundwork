@@ -1,6 +1,6 @@
 /* ==========================================================================
    GROUNDWORK — Payment schedule (Layer 1) and plain-words date basis (Oct 2026, Concept B).
-   A READ-ONLY adapter. It lists what has to be paid, when, and on what basis, for a price and an option date alone: no age, income, cash,
+   A READ-ONLY adapter (plus hdb(), the basic HDB resale and new-flat list from GW_RULES.hdbPayments). It lists what has to be paid, when, and on what basis, for a price and an option date alone: no age, income, cash,
    CPF or loan. Every figure it returns is a rule table value (GW_RULES.pps, GW_RULES.plannerConventions) or the stamp duty from
    GW_CALC.stampDuty, exactly the pieces the audited engine (gw-timeline.js) uses. It never calls GW_TIMELINE and adds no rate, band or
    limit of its own. tests/55-schedule-adapter.test.js proves, case by case, that its payments equal the engine's.
@@ -119,7 +119,7 @@
     if (c === 'estimate') return (kind === 'new' || kind === 'ec') && e.id !== 'top' && e.id !== 'csc' ? 'earliest' : 'estimate';
     return 'estimate';
   }
-  const BASIS_TAG = { rule: 'By rule', developer: 'From developer', earliest: 'Earliest', estimate: 'Estimated', illustration: 'Illustration', assumption: 'Your date' };
+  const BASIS_TAG = { rule: 'By rule', developer: 'From developer', earliest: 'Earliest', estimate: 'Estimated', illustration: 'Illustration', assumption: 'Your date', trigger: 'Milestone' };
   // One plain sentence for a payment's date. Only a rule date is "due"; an estimate, an earliest date or an illustration is never called a deadline.
   function dateSentence(e, kind, undated) {
     const b = e.basis || basisOf(e, kind || 'new'), un = undated === true, d = un ? after(e.date) : day(e.date), m = un ? after(e.date) : mon(e.date);
@@ -127,7 +127,7 @@
     if (b === 'rule') {
       if (e.id === 'otp') s = un ? 'Paid on the option date, under the Housing Developers Rules.' : 'Paid on the option date you chose, under the Housing Developers Rules.';
       else if (e.id === 'snp') s = un ? 'Due within 8 weeks of the option, the latest under the Housing Developers Rules.' : 'Due by ' + d + ', the latest date under the Housing Developers Rules (within 8 weeks of the option).';
-      else if (e.id === 'bsd' || e.id === 'absd') s = (un ? 'Due within 14 days of ' : 'Due by ' + d + ' under IRAS’s 14-day rule after ') + (kind === 'completed' ? 'you exercise the option' : 'signing the S&P') + (un ? ' (IRAS), so by ' + d + ' at the latest.' : '.');
+      else if (e.id === 'bsd' || e.id === 'absd') s = (un ? 'Due within 14 days of ' + (kind === 'completed' ? 'exercising the option' : 'signing the S&P') : 'Due by ' + d + ' under IRAS’s 14-day rule after ' + (kind === 'completed' ? 'you exercise the option' : 'signing the S&P')) + (un ? ' (IRAS), so by ' + d + ' at the latest.' : '.');
       else s = 'Due by ' + d + ' under the rules.';
     } else if (b === 'developer') s = 'On the date you entered from the developer’s schedule. Check it against your S&P.';
     else if (b === 'earliest') s = 'From ' + d + ', the earliest this stage can be called. The developer’s notice sets the real date, which may be later.';
@@ -182,5 +182,34 @@
     }
     return { steps, final: steps[steps.length - 1].instalment };
   }
-  return { schedule, basisOf, dateSentence, shortfall, annotate, tenureFromFirstRelease, BASIS_TAG, VERSION, day, mon, after, UNDATED_REF };
+
+  /* ---------------- HDB flats: the basic payment list (resale and new flat). No engine exists for these, and none is built: this lists the payments, their amounts where HDB
+     fixes them and the event each falls on. Every figure is read from GW_RULES.hdbPayments. A date HDB or construction sets is never invented: the trigger is named, or an
+     estimate is worded as a range. Stamp duty, legal fees and small fees are named and never added up. It does not touch eligibility or financing. ---------------- */
+  function hdb(i) {
+    i = i || {}; const H = R.hdbPayments, P = i.price, flat = i.flat === 'bto' ? 'bto' : 'resale';
+    if (!pos(P)) return { ok: false, missing: ['price'], invalid: [] };
+    if (C.LIMITS && C.LIMITS.money && P > C.LIMITS.money.max) return { ok: false, missing: [], invalid: [{ field: 'price', text: 'Enter a price up to ' + C.LIMITS.money.max.toLocaleString('en-US') + '.' }] };
+    const ev = []; const add = (e) => { ev.push(Object.assign({ type: 'pay', amount: null, amountText: '', upTo: false, about: false, note: '' }, e)); };
+    const r0 = (x) => Math.round(x);
+    if (flat === 'resale') {
+      const Z = H.resale, ex = Z.feesMax - Z.optionFeeMax;
+      add({ id: 'option', label: 'Option fee', amount: Z.optionFeeMax, upTo: true, when: 'When the seller grants the option', basis: 'rule', note: 'Agreed with the seller. Part of the price, paid in cash.' });
+      add({ id: 'exercise', label: 'Exercise fee', amount: ex, upTo: true, when: 'Within ' + Z.optionDays + ' days of the option', basis: 'rule', note: 'With the option fee, $' + Z.feesMax.toLocaleString('en-US') + ' at most. Part of the price, paid in cash.' });
+      add({ id: 'appfee', label: 'Resale application fee', amount: Z.applicationFee.standard, when: 'When you submit your part of the application', basis: 'trigger', note: '$' + Z.applicationFee.small + ' for a 1- or 2-room flat.' });
+      add({ id: 'hdbfees', label: 'Legal fees and other HDB fees', amountText: 'As HDB advises', when: 'After you endorse HDB’s documents, by the date HDB sets', basis: 'trigger', note: '' });
+      add({ id: 'completion', label: 'Balance of the price', amount: P - Z.feesMax, about: true, when: 'On or before the completion appointment', basis: 'estimate', note: 'About ' + Z.completionWeeks + ' weeks after HDB accepts your application, so roughly 3 to 4 months after the option. Paid from your loan, CPF and cash.' });
+      add({ id: 'duty', label: 'Stamp duty', amountText: 'Use the stamp duty page', when: 'Settled through HDB by completion', basis: 'trigger', note: '' });
+      return { ok: true, version: VERSION, flat, price: P, events: ev, foot: ['The option and exercise fees are part of the ' + $c(P) + ' price, not extra. If they are lower, the balance is higher by the difference.', 'No dates are shown: HDB’s processing sets them. Stamp duty and the fees HDB sets are not added into the amounts.'] };
+    }
+    const B = H.bto, bank = i.loan === 'bank', pct = bank ? B.downpaymentPct.bankLoan : B.downpaymentPct.hdbLoan, fee = B.bookingFee;
+    add({ id: 'application', label: 'Application fee', amount: B.applicationFee, when: 'When you apply for the launch, for each application', basis: 'rule', note: '' });
+    add({ id: 'booking', label: 'Booking fee', amountText: '$' + fee.flexi2.toLocaleString('en-US') + ' to $' + fee.room4plus.toLocaleString('en-US'), when: 'When you book your flat, after your queue turn', basis: 'rule', note: '2-room Flexi $' + fee.flexi2.toLocaleString('en-US') + ', 3-room $' + fee.room3.toLocaleString('en-US') + ', 4-room and larger $' + fee.room4plus.toLocaleString('en-US') + '. It counts towards the downpayment.' });
+    add({ id: 'downpayment', label: 'Downpayment', pct: pct, amount: r0(P * pct), when: 'When you sign the Agreement for Lease', basis: 'trigger', note: (bank ? 'With a bank loan. ' : 'With an HDB loan. ') + 'HDB invites you within ' + B.signWithinMonths + ' months of booking. Paid by CPF and/or cash; the booking fee is part of it.' });
+    add({ id: 'duty', label: 'Stamp duty and legal fees', amountText: 'As HDB advises', when: 'When you sign the Agreement for Lease', basis: 'trigger', note: '' });
+    add({ id: 'balance', label: 'Balance of the price', pct: 1 - pct, amount: r0(P * (1 - pct)), when: 'Before you collect your keys', basis: 'trigger', note: 'HDB gives the date; it depends on construction. Paid from your loan, CPF and cash. A survey fee, and fire insurance with an HDB loan, may apply.' });
+    return { ok: true, version: VERSION, flat, price: P, loan: bank ? 'bank' : 'hdb', events: ev, foot: ['The booking fee is part of the downpayment, not extra.', 'No dates are shown: HDB and construction set them. Stamp duty and legal fees are not added into the amounts.'] };
+  }
+  const $c = (x) => '$' + Math.round(x).toLocaleString('en-US');
+  return { schedule, hdb, basisOf, dateSentence, shortfall, annotate, tenureFromFirstRelease, BASIS_TAG, VERSION, day, mon, after, UNDATED_REF };
 });

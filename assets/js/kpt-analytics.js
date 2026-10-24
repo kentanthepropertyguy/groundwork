@@ -131,7 +131,7 @@ window.KPT = window.KPT || {};
 
   // The page's reference: KPT- plus a short page code. Research adds whether a project or a comparison is open.
   const PAGE_CODES = [[/\/tools\/stamp-duty$/, "CALC-SD"], [/\/tools\/mortgage$/, "CALC-MORT"], [/\/tools\/tdsr$/, "CALC-TDSR"], [/\/tools\/msr$/, "CALC-MSR"],
-    [/\/tools\/ssd$/, "CALC-SSD"], [/\/tools\/sale-proceeds$/, "CALC-SALE"], [/\/tools\/progressive-payments$/, "CALC-PP"], [/\/tools\/hdb-upgrade$/, "HDB-UP"],
+    [/\/tools\/ssd$/, "CALC-SSD"], [/\/tools\/sale-proceeds$/, "CALC-SALE"], [/\/tools\/hdb-upgrade$/, "HDB-UP"],
     [/\/tools\/what-can-i-buy$/, "FIND"], [/\/tools$/, "TOOLS"], [/\/journey\/worth$/, "VALUE"], [/\/journey$/, "JOURNEY"], [/\/buy$/, "BUY"],
     [/\/research\/reports\/[a-z0-9-]+$/, "RPT"], [/\/research\/sample$/, "SAMPLE"], [/\/research$/, "RES"], [/\/projects$/, "DIR"], [/\/privacy$/, "PRIVACY"], [/^$/, "HOME"]];
   KPT.waRef = function () {

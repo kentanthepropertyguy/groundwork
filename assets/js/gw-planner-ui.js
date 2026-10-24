@@ -785,7 +785,7 @@
     // ---- screen 1: the payment schedule. Only the property is needed: no age, income, cash, CPF or loan. ----
     function schedRegions() { return { sum: q('[data-sched-sum]'), lead: q('[data-sched-lead]'), note: q('[data-sched-note]'), table: q('[data-sched-table]'), quote: q('[data-sched-quote]'), cta: q('[data-sched-cta]'), how: q('[data-how-b]'), ready: q('[data-funds-ready]') }; }
     // empties the schedule screen completely: no figure, table or chart is left behind in the page (used for an HDB flat and for an incomplete property)
-    function clearSched(msg) { const O = schedRegions(); O.lead.textContent = msg || ''; ['sum', 'note', 'table', 'how'].forEach((k) => { O[k].innerHTML = ''; }); O.quote.hidden = true; O.cta.hidden = true; O.ready.hidden = true; box.classList.remove('has-schedule'); lastS = null; return null; }
+    function clearSched(msg) { const O = schedRegions(); O.lead.textContent = msg || ''; ['sum', 'note', 'table', 'how'].forEach((k) => { O[k].innerHTML = ''; }); O.table.__h = null; O.quote.hidden = true; O.cta.hidden = true; O.ready.hidden = true; box.classList.remove('has-schedule'); lastS = null; return null; }
     function paintSchedule(i) {
       const O = schedRegions(), clear = clearSched;
       if (errMap.price || errMap.otp) return clear('Fix the ' + (errMap.price ? 'price' : 'option date') + ' above to see your payment schedule.');
@@ -797,7 +797,13 @@
       O.sum.innerHTML = schedSumHtml(s);
       O.lead.textContent = $(s.totals.amount) + ' in total, starting with ' + $(s.events[0].amount) + ' ' + onDay(s.events[0].date) + '. The timing of each payment is in the list below.';
       O.note.innerHTML = i.uiKind === 'ec' ? '<p class="pl-note">EC eligibility is not checked in this schedule. The funding check tests your income against the new-EC ceiling.</p>' : i.uiKind === 'resaleec' ? '<p class="pl-note">A resale EC is planned like a completed home. Whether you can buy one depends on HDB’s rules for the unit, which are not checked here.</p>' : '';
-      O.table.innerHTML = scheduleTableHtml(s); O.how.innerHTML = howHtml2(s);
+      // New launch and new EC: how each stage is usually paid (the split New launch payments used to give), from the price alone; an age, CPF, rate or tenure already entered refines it
+      const splitOpen = !!q('[data-split-d][open]'), PL = root.GW_PAYLIST;
+      const splitH = PL && (i.uiKind === 'new' || i.uiKind === 'ec') ? PL.splitHtml(PL.split({ kind: i.uiKind, price: i.price, age: has('age') ? i.age : undefined, ratePct: has('ratePct') ? i.ratePct : undefined, years: has('years') ? i.years : undefined, cpf: has('cpf') ? i.cpf : undefined, loans: i.loansOther || 0, entity: i.entity, buyers: i.entity ? undefined : i.buyers.length ? i.buyers : undefined })) : '';
+      // redrawn only when it changed, so a click on the section that has just taken focus away from the price field is not lost to a repaint of identical content
+      const tableH = scheduleTableHtml(s) + splitH;
+      if (O.table.__h !== tableH) { O.table.innerHTML = tableH; O.table.__h = tableH; if (splitOpen) { const sd = q('[data-split-d]'); if (sd) sd.open = true; } }
+      O.how.innerHTML = howHtml2(s);
       O.quote.hidden = false; O.cta.hidden = false;
       const ready = carried && (has('cash') || has('cpf') || has('income')); O.ready.hidden = !ready; if (ready) O.ready.textContent = 'Your funds from What can I afford? are ready.';
       box.classList.add('has-schedule'); lastS = s; lastI = i;

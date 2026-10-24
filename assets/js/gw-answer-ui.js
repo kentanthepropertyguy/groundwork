@@ -100,7 +100,7 @@
       '<small class="pa-err" id="pa-price-err" data-err="price" role="alert" hidden></small>' +
       '<div class="pa-valbox" data-valbox hidden><div class="pa-prow"><label class="pa-l" for="pa-val">Bank valuation <em>optional</em></label><div class="pa-pw"><div class="pa-pin"><i>$</i><input id="pa-val" type="text" inputmode="numeric" autocomplete="off" data-k="valuation" data-t="money" placeholder="If you already have it" aria-describedby="pa-val-hint pa-val-err"></div></div></div>' +
       '<small class="pa-hint" id="pa-val-hint">Banks lend on the lower of price and valuation. Any price above the valuation is paid in cash.</small><small class="pa-err" id="pa-val-err" data-err="valuation" role="alert" hidden></small></div></div>' +
-      '<div data-next></div><div data-tiles></div><div data-how></div>' +
+      '<div data-next></div><div data-tiles></div><div class="pa-sched" data-sched-host></div><div data-how></div>' +
       '<p class="pa-foot" data-foot hidden>Estimates from MAS, IRAS and HDB rules, checked 9 Oct 2026.</p>' +
       '<div class="pa-ask" data-ask hidden><a class="gw-btn sec" data-ask-wa href="https://wa.me/' + PHONE + '" target="_blank" rel="noopener" data-gw-wa="planner-ask">Talk it through with Ken</a><span class="pa-fine">Opens WhatsApp with a short message and none of your figures.</span></div>' +
       '<div class="pa-startover"><button type="button" class="pa-link" data-gw-clear-all aria-expanded="false">Clear all my figures</button></div>' +
@@ -423,8 +423,17 @@
       if (h.textContent !== t) h.textContent = t;
     }
     let tenureFld = null; const yAdj = () => { const y = field('years'); return y && +y.dataset.adjustedFrom > 0 ? +y.dataset.adjustedFrom : 0; };
+    // The payment schedule (gw-paylist.js): the property type and a price are all it needs, so it stands apart from the budget answer above. It follows the type chosen under "The home"
+    // (an HDB flat's payments are on the HDB and EC loan limit page) and takes the price from the Property price box only until a price is typed in it.
+    const SCHED = root.GW_PAYLIST && q('[data-sched-host]') ? root.GW_PAYLIST.mount(q('[data-sched-host]'), { key: 'planner', base: '../', title: 'Payment schedule', em: 'every payment, its amount and when' }) : null;
+    let schedKind = null;
+    function syncSched() {
+      if (!SCHED) return; const k = val('kind') || 'new'; if (k === schedKind) return; schedKind = k;
+      if (k === 'hdb') SCHED.setKinds([], { message: 'An HDB flat has its own payments. The <a href="../msr/">HDB and EC loan limit</a> page lists them for a resale flat and a new flat.' }); else SCHED.setKinds([k]);
+    }
     function recalc() {
       dirty = false; applyWhen(); ctxNow();
+      syncSched();
       const s = readEntries(); stDirty = false;
       const r = A.assess(s);
       // the tenure field shows the tenure the calculation used (gw-money.js): a longer one typed is replaced by it once the field is not being typed in
@@ -440,6 +449,7 @@
       } else if (ok) {
         last = r; lastOk = r;
         const od = openDet(); ctxNow(); out.head.className = 'pa-head'; out.head.innerHTML = headHtml(r);
+        if (SCHED && r.priceIsOwn) SCHED.suggest(r.price);
         setPriceUi(r); setBorrowUi(r); out.status.innerHTML = ''; out.tiles.innerHTML = ''; out.next.innerHTML = nextHtml(r, st); out.how.innerHTML = howHtml(r, st); drawTenure(r); reopen(od);
         out.foot.hidden = false; out.ask.hidden = false; heldHtml = out.head.innerHTML;
         if (!completedOnce) { completedOnce = true; track('tool_completed', {}); }
