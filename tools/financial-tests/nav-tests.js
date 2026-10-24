@@ -6,7 +6,7 @@ let ok = 0, fail = 0;
 const check = (n, c, i) => { if (c) { ok++; } else { fail++; console.log('  FAIL', n, i === undefined ? '' : i); } };
 const walk = (d, o = []) => { for (const f of fs.readdirSync(d, { withFileTypes: true })) { if (/^(\.|node_modules|_)/.test(f.name)) continue; const p = path.join(d, f.name); if (f.isDirectory()) walk(p, o); else if (f.name.endsWith('.html')) o.push(p); } return o; };
 const pages = walk(ROOT).filter((f) => /class="gw-links"/.test(fs.readFileSync(f, 'utf8')));
-check('at least 19 pages carry the site header (the old New launch payments address is a redirect and carries none)', pages.length >= 19, pages.length);
+check('at least 18 pages carry the site header (the old New launch payments and HDB upgrade planner addresses are redirects and carry none)', pages.length >= 18, pages.length);
 const strip = (h) => h.replace(/^(\.\.\/)+/, '').replace(/^\.\//, '').replace(/^\//, '');
 const resolves = (from, href) => {
   if (/^(https?:|mailto:|tel:|#)/.test(href)) return true;
@@ -36,10 +36,11 @@ for (const f of pages) {
   const names = [...t.matchAll(/<section class="gw-ms gw-ms-[a-z]+">(.*?)<\/section>/gs)].flatMap((m) => [...m[1].matchAll(/<a class="gw-mi" href="([^"]*)"/g)].map((x) => x[1]));
   ['research/#/', 'research/#/prices', 'research/#/budget', 'research/#/browse'].forEach((h) => check(rel + ': ' + h + ' is listed once in the menu', names.filter((x) => x.replace(/^(\.\.\/)+|^\//, '') === h).length === 1, names.filter((x) => /research\/#/.test(x))));
   const ts = (t.match(/<section class="gw-ms gw-ms-tools">(.*?)<\/section>/s) || [])[1] || '';
-  ['planner', 'payment-planner', 'hdb-upgrade', 'sale-proceeds', 'ssd', 'stamp-duty', 'tdsr', 'msr', 'mortgage'].forEach((id) => {
+  ['planner', 'payment-planner', 'sale-proceeds', 'ssd', 'stamp-duty', 'tdsr', 'msr', 'mortgage'].forEach((id) => {
     const inMenu = new RegExp('href="((\\.\\./)*|/)tools/' + id + '/"').test(t);
     check(rel + ': tool ' + id + ' still has a direct link in the menu or its sections', inMenu);
   });
+  check(rel + ': the old HDB upgrade planner is no longer linked (it is folded into What can I afford?; its address redirects)', !/href="((\.\.\/)*|\/)tools\/hdb-upgrade\/"/.test(t));
   const foot = (t.match(/<nav aria-label="Footer">(.*?)<\/nav>/s) || [])[1] || '';
   const fl = [...foot.matchAll(/<a\b[^>]*>(.*?)<\/a>/gs)].map((m) => m[1]);
   if (rel !== 'research/map/index.html') check(rel + ': footer repeats Buy · Sell · Research · Tools, then Map', fl.slice(0, 5).join('|') === 'Buy|Sell|Research|Tools|Map', fl);
@@ -54,13 +55,22 @@ for (const f of pages) {
 }
 {
   const t = fs.readFileSync(path.join(ROOT, 'tools/index.html'), 'utf8'), main = t.slice(t.indexOf('<main'), t.indexOf('</main>'));
-  check('All Tools: two types, Guided planning and Quick calculators', [...main.matchAll(/<h2 id="tg-[a-z]+">(.*?)<\/h2>/g)].map((x) => x[1]).join('|') === 'Guided planning|Quick calculators');
-  check('All Tools: Quick calculators are Financing, Purchase costs & payments, Selling', [...main.matchAll(/<h3 id="tg-[a-z]+">(.*?)<\/h3>/g)].map((x) => x[1]).join('|') === 'Financing|Purchase costs &amp; payments|Selling');
-  const guided = (main.match(/aria-labelledby="tg-guided">(.*?)<\/section>/s) || [])[1] || '';
-  check('All Tools: Guided planning holds What can I afford?, HDB upgrade planner, Full payment planning', [...guided.matchAll(/data-tool="([^"]+)"/g)].map((x) => x[1]).join('|') === 'planner|hdb-upgrade|payment-planner-full', guided.length);
-  check('All Tools: Full payment planning opens the existing Payment timeline at its Funding check', /href="payment-planner\/#funding" data-tool="payment-planner-full"/.test(main));
+  // 24 Oct 2026: four task sections, each tool once, no badges; the HDB upgrade planner is folded into What can I afford? and "Full payment planning" is no longer a second card for the Payment timeline
+  check('All Tools: four task sections', [...main.matchAll(/<h2 id="tg-[a-z]+">(.*?)<\/h2>/g)].map((x) => x[1]).join('|') === 'Plan a property move|Financing|Buying costs|Selling');
+  check('All Tools: no sub-headings', !/<h3 id="tg-/.test(main));
+  const secOf = (id) => (main.match(new RegExp('aria-labelledby="tg-' + id + '">(.*?)</section>', 's')) || [])[1] || '';
+  const toolsIn = (id) => [...secOf(id).matchAll(/<a class="gw-tl" href="[^"]*" data-tool="([^"]+)"/g)].map((x) => x[1]).join('|');
+  check('All Tools: Plan a property move holds What can I afford? and the Payment timeline', toolsIn('move') === 'planner|payment-planner', toolsIn('move'));
+  check('All Tools: Financing holds How much can I borrow?, HDB and EC loan limit, Mortgage repayment', toolsIn('fin') === 'tdsr|msr|mortgage', toolsIn('fin'));
+  check('All Tools: Buying costs holds Stamp duty', toolsIn('cost') === 'stamp-duty', toolsIn('cost'));
+  check('All Tools: Selling holds Sale proceeds and Seller’s stamp duty', toolsIn('sell') === 'sale-proceeds|ssd', toolsIn('sell'));
+  check('All Tools: the HDB upgrading entry is one line under Plan a property move, into the four-step journey', /<p class="gw-tg-line">.*Upgrading from HDB\?.*href="\.\.\/journey\/#up"/.test(secOf('move')) && !/gw-tg-line/.test(secOf('fin') + secOf('cost') + secOf('sell')));
+  check('All Tools: no badges on the cards', !/<span class="gw-tl-t"><b>[^<]*<\/b><em>/.test(main));
+  check('All Tools: the Payment timeline card opens the page itself (its funding check is a tab inside), with no second "Full payment planning" card', /href="payment-planner\/" data-tool="payment-planner"/.test(main) && !/payment-planner-full|Full payment planning/.test(main));
+  check('All Tools: the Seller’s stamp duty card says what the 4-year question is', /<b>Seller’s stamp duty<\/b>.*?Selling within 4 years\?/s.test(secOf('sell')));
   const tools = [...main.matchAll(/<a class="gw-tl" href="[^"]*" data-tool="([^"]+)"/g)].map((x) => x[1]);
-  ['planner', 'hdb-upgrade', 'payment-planner-full', 'tdsr', 'msr', 'mortgage', 'stamp-duty', 'payment-planner', 'sale-proceeds', 'ssd'].forEach((k) => check('All Tools lists ' + k + ' once', tools.filter((x) => x === k).length === 1, tools));
+  ['planner', 'tdsr', 'msr', 'mortgage', 'stamp-duty', 'payment-planner', 'sale-proceeds', 'ssd'].forEach((k) => check('All Tools lists ' + k + ' once', tools.filter((x) => x === k).length === 1, tools));
+  check('All Tools lists exactly those eight tools', tools.length === 8, tools);
   check('All Tools: nothing that lives under Research is listed here', !tools.some((x) => /^(worth|what-can-i-buy|research)$/.test(x)), tools);
   check('All Tools: no example result and no HDB-in-four-steps sentence', !/1\.09|Example result|four steps/i.test(main));
   check('All Tools: search is kept', /data-gw-search="tools"/.test(main));
@@ -75,6 +85,6 @@ if (GWN && GWN.SECTIONS) {
   // every tool folder is a registered tool with its own address, so the Tools directory can list it
   const dirs = fs.readdirSync(path.join(ROOT, 'tools'), { withFileTypes: true }).filter((d) => d.isDirectory() && fs.existsSync(path.join(ROOT, 'tools', d.name, 'index.html'))).map((d) => d.name);
   const hrefs = (GWN.ENTRIES || []).map((e) => e.href);
-  dirs.forEach((d) => check('tools/' + d + '/ is a registered destination' + (d === 'what-can-i-buy' ? ' (older address of the Research budget search; kept)' : d === 'progressive-payments' ? ' (older address of New launch payments; now a redirect to the Payment timeline)' : ''), d === 'what-can-i-buy' || d === 'progressive-payments' || hrefs.some((h) => h && h.replace(/\/$/, '') === 'tools/' + d)));
+  dirs.forEach((d) => check('tools/' + d + '/ is a registered destination' + (d === 'what-can-i-buy' ? ' (older address of the Research budget search; kept)' : d === 'progressive-payments' ? ' (older address of New launch payments; now a redirect to the Payment timeline)' : d === 'hdb-upgrade' ? ' (older address of the HDB upgrade planner; now a redirect to What can I afford? set up for a flat being sold)' : ''), d === 'hdb-upgrade' || d === 'what-can-i-buy' || d === 'progressive-payments' || hrefs.some((h) => h && h.replace(/\/$/, '') === 'tools/' + d)));
 }
 console.log('nav-tests: ' + ok + ' passed, ' + fail + ' failed'); process.exit(fail ? 1 : 0);

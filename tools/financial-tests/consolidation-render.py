@@ -1,0 +1,85 @@
+import json, os, pathlib, re, socket, subprocess, sys, time
+from playwright.sync_api import sync_playwright
+"""Calculator consolidation and Tools directory (24 Oct 2026). Run from the site folder:  python3 tools/financial-tests/consolidation-render.py
+1. Every All Tools card opens the tool it names; the HDB upgrading line opens the four-step journey; search still finds HDB upgrade, TDSR, ABSD and Full payment planning.
+2. The old HDB upgrade planner address opens What can I afford? set up for a flat being sold, on step 3 of the upgrade path, with the old figures carried over.
+3. The Payment timeline's monthly-instalment warning: not shown merely because no monthly amount was entered; a payment shortfall, and an instalment gap after
+   monthly amounts were entered, still warn; the estimated monthly mortgage stays visible in every case.
+4. Desktop and phone: no sideways scroll, no script errors."""
+SITE = pathlib.Path(__file__).resolve().parents[2]
+def port():
+    s = socket.socket(); s.bind(('127.0.0.1', 0)); p = s.getsockname()[1]; s.close(); return p
+P = port(); srv = subprocess.Popen(['node', str(SITE / 'tools/serve-local.js')], env={**os.environ, 'PORT': str(P)}, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+for _ in range(100):
+    try: socket.create_connection(('127.0.0.1', P), 0.2).close(); break
+    except OSError: time.sleep(0.05)
+B = f'http://127.0.0.1:{P}'
+ok = fail = 0
+def check(n, c, i=''):
+    global ok, fail
+    if c: ok += 1; print('  ok  ', n)
+    else: fail += 1; print('  FAIL', n, i)
+CARDS = {'planner': '/tools/planner/', 'payment-planner': '/tools/payment-planner/', 'tdsr': '/tools/tdsr/', 'msr': '/tools/msr/', 'mortgage': '/tools/mortgage/', 'stamp-duty': '/tools/stamp-duty/', 'sale-proceeds': '/tools/sale-proceeds/', 'ssd': '/tools/ssd/'}
+def timeline(pg, kind, fills, price='1,500,000'):
+    pg.goto(B + '/tools/payment-planner/'); pg.wait_for_selector('[data-k="cash"]', state='attached'); pg.wait_for_timeout(400)
+    pg.click('.gw-chips[data-k="kind"] [data-v="%s"]' % kind); pg.wait_for_timeout(200)
+    pg.fill('[data-k="price"]', price); pg.fill('[data-k="otp"]', '2026-11-01'); pg.wait_for_timeout(200)
+    pg.click('[data-tab="funding"]'); pg.wait_for_timeout(300)
+    pg.evaluate("document.querySelectorAll('#pl-fund-form details').forEach(d => { d.open = true; })")
+    for k, v in fills: pg.fill('[data-k="%s"]' % k, v)
+    pg.wait_for_timeout(1000)
+    st = pg.query_selector('.pl-st'); mo = pg.query_selector('.pl-sf-w')
+    return (st.get_attribute('class') if st else ''), (st.inner_text() if st else ''), (mo.inner_text() if mo else '')
+try:
+  with sync_playwright() as p:
+    br = p.chromium.launch()
+    for vn, kw in [('desktop', dict(viewport={'width': 1440, 'height': 900})), ('phone', dict(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True))]:
+        ctx = br.new_context(**kw); pg = ctx.new_page(); errs = []
+        pg.on('pageerror', lambda e: errs.append(str(e)))
+        pg.route(re.compile(r'googletagmanager|facebook\.net|onemap'), lambda r: r.fulfill(status=200, body=''))
+        # ---- 1. the directory
+        pg.goto(B + '/tools/'); pg.wait_for_selector('.gw-tdir'); pg.wait_for_timeout(300)
+        heads = pg.eval_on_selector_all('.gw-tdir .gw-tg h2', 'e => e.map(x => x.innerText)')
+        check(vn + ': All Tools has four task sections in order', heads == ['Plan a property move', 'Financing', 'Buying costs', 'Selling'], heads)
+        check(vn + ': eight cards, each tool once, no badges', pg.locator('.gw-tdir a.gw-tl').count() == 8 and pg.locator('.gw-tdir a.gw-tl em').count() == 0)
+        check(vn + ': search is kept', pg.query_selector('[data-gw-search="tools"]') is not None)
+        check(vn + ': no sideways scroll on All Tools', pg.evaluate('document.documentElement.scrollWidth <= innerWidth'))
+        for tool, path in CARDS.items():
+            pg.goto(B + '/tools/'); pg.wait_for_selector('.gw-tdir'); pg.click('a.gw-tl[data-tool="%s"]' % tool); pg.wait_for_load_state(); pg.wait_for_timeout(200)
+            check(vn + ': the ' + tool + ' card opens ' + path + ' as a standalone tool', pg.url.split('#')[0].endswith(path) and 'j=1' not in pg.url, pg.url)
+        pg.goto(B + '/tools/'); pg.wait_for_selector('.gw-tdir'); pg.click('.gw-tg-line a'); pg.wait_for_url('**/journey/#up', timeout=10000); pg.wait_for_timeout(400)
+        check(vn + ': "Upgrading from HDB?" opens the four-step journey, with the budget step on What can I afford?', pg.is_visible('#up') and pg.get_attribute('#up [data-up-step="planner"] a', 'href').endswith('tools/planner/#sell'))
+        # search, by the words people use (the menu's search box)
+        pg.goto(B + '/tools/'); pg.wait_for_selector('.gw-tdir')
+        for q, want in [('HDB upgrade', 'tools/planner/#sell'), ('TDSR', 'tools/tdsr/'), ('ABSD', 'tools/stamp-duty/'), ('Full payment planning', 'tools/payment-planner/')]:
+            hits = pg.evaluate("q => GWN.matchTools(q, 5).map(e => e.href)", q)
+            check(vn + ': search "' + q + '" leads to ' + want, bool(hits) and hits[0] == want, hits)
+        check(vn + ': the Tools menu column no longer lists the HDB upgrade planner', pg.locator('.gw-ms-tools a[href$="tools/hdb-upgrade/"]').count() == 0)
+        # ---- 2. the old planner address
+        pg.goto(B + '/journey/#up'); pg.wait_for_timeout(300)
+        pg.evaluate("""() => { sessionStorage.setItem('kpt.hdb.input', JSON.stringify({salePrice:600000,outstandingLoan:200000,cpfRefund:150000,buyers:[{age:35,income:6000},{age:33,income:5000}],cashSavings:100000,otherCpfOa:50000,residency:'all-sc',timing:'sell-first'})); }""")
+        pg.goto(B + '/tools/hdb-upgrade/'); pg.wait_for_url('**/tools/planner/**', timeout=10000); pg.wait_for_selector('[data-pa]'); pg.wait_for_timeout(900)
+        g = lambda k: pg.evaluate("k => { const e = document.querySelector('[data-k=\"' + k + '\"]'); if (!e) return null; return e.dataset.t === 'chip' ? ((e.querySelector('[aria-pressed=true]') || {}).dataset || {}).v : e.value; }", k)
+        check(vn + ': the old address opens What can I afford? set up for an HDB flat being sold first', g('home') == 'sell' and g('order') == 'sell' and g('flat.type') == 'hdb' and g('owns') == 'one', (g('home'), g('order'), g('flat.type'), g('owns')))
+        check(vn + ': every old figure is carried over (flat, loan, refund, two buyers, cash, CPF)', g('flat.price') == '600,000' and g('flat.loan') == '200,000' and g('flat.cpfRefund') == '150,000' and g('buyers.0.age') == '35' and g('buyers.1.age') == '33' and g('cash') == '100,000' and g('cpf') == '50,000', (g('flat.price'), g('flat.cpfRefund'), g('buyers.1.age'), g('cash'), g('cpf')))
+        check(vn + ': the upgrade path strip shows step 3 of 4 on What can I afford?', pg.is_visible('[data-gw-strip]') and 'Step 3 of 4' in pg.inner_text('[data-gw-strip]') and 'Budget' in pg.inner_text('[data-gw-strip] [aria-current]'), pg.inner_text('[data-gw-strip]') if pg.query_selector('[data-gw-strip]') else None)
+        check(vn + ': nothing personal in the address', '?' not in pg.url.replace('?j=1', '') and 'price' not in pg.url and 'income' not in pg.url, pg.url)
+        check(vn + ': no sideways scroll on the Planner with the strip', pg.evaluate('document.documentElement.scrollWidth <= innerWidth'))
+        # ---- 3. the Timeline's instalment warning
+        base = [('cash', '125,000'), ('cpf', '330,000'), ('income', '21,000'), ('age', '35'), ('ratePct', '3'), ('years', '30')]
+        c, t, m = timeline(pg, 'completed', base)
+        check(vn + ': payments covered and no monthly amount entered: no shortfall warning', 'ok' in c and 'Every payment is covered' in t and 'short on the monthly instalment' not in t, t[:160])
+        check(vn + ': ... the monthly mortgage is named as not tested, with its amount and start, and how to test it', re.search(r'monthly mortgage \(about \$[\d,]+ a month from \d+ \w+ \d{4}\) is not tested here', t) is not None and 'enter what you set aside each month' in t, t[:300])
+        check(vn + ': ... the estimated monthly mortgage figure stays visible', re.search(r'\$[\d,]+\s*/month', m) is not None, m[:80])
+        c, t, m = timeline(pg, 'completed', base + [('saveMo', '500')])
+        check(vn + ': with $500 a month entered and still short, the instalment warning stands', 'warn' in c and 'short on the monthly instalment from' in t, t[:160])
+        c, t, m = timeline(pg, 'completed', base + [('saveMo', '8,000')])
+        check(vn + ': with $8,000 a month entered everything is covered, said with the amount', 'ok' in c and '$8,000 cash going in each month' in t and 'not tested' not in t, t[:160])
+        c, t, m = timeline(pg, 'completed', [('cash', '20,000'), ('cpf', '30,000'), ('income', '21,000'), ('age', '35'), ('ratePct', '3'), ('years', '30')])
+        check(vn + ': a genuine payment shortfall still warns, with the total and the first short payment', 'warn' in c and 'not covered in total' in t and 'Short on' in t, t[:160])
+        c, t, m = timeline(pg, 'new', base)
+        check(vn + ': a new launch with no monthly amount: payments covered, mortgage not tested (no alarm)', 'ok' in c and 'is not tested here' in t, t[:160])
+        check(vn + ': no script errors', not errs, errs[:2]); ctx.close()
+finally: srv.terminate()
+print(ok, 'passed', fail, 'failed')
+sys.exit(1 if fail else 0)

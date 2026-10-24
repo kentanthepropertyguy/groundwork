@@ -101,8 +101,8 @@ try:
         check(vn + ': in a journey How much can I borrow? opens with the same age and income', pg.input_value('[data-share="borrowers.0.age"]') == '40' and pg.input_value('[data-share="borrowers.0.fixed"]') == '21,000', pg.input_value('[data-share="borrowers.0.age"]'))
         pg.goto(B + '/tools/tdsr/'); pg.wait_for_selector('[data-share="borrowers.0.age"]', state='attached'); pg.wait_for_timeout(500)
         check(vn + ': opened from Tools How much can I borrow? starts blank, with an optional reuse line', pg.input_value('[data-share="borrowers.0.age"]') == '' and pg.input_value('[data-share="borrowers.0.fixed"]') == '' and pg.is_visible('[data-reuse]'), pg.input_value('[data-share="borrowers.0.age"]'))
-        pg.goto(B + '/tools/hdb-upgrade/'); pg.wait_for_timeout(400)
-        check(vn + ': the HDB upgrade planner is still reachable and loads', pg.query_selector('main') is not None)
+        pg.goto(B + '/tools/hdb-upgrade/'); pg.wait_for_url('**/tools/planner/**', timeout=10000); pg.wait_for_selector('[data-pa]'); pg.wait_for_timeout(500)
+        check(vn + ': the old HDB upgrade planner address still works: it opens What can I afford? set up for a home being sold, as a journey page', '/tools/planner/' in pg.url and 'j=1' in pg.url)
         ctx.close()
         # ---- 2. custom costs and Seller's Stamp Duty: the Planner takes the tool's own cash and CPF, so the two always agree
         ctx, pg, errs = page(br, kw); sale_page(pg, more={'commissionPct': '1', 'legal': '5,000'})
@@ -147,7 +147,7 @@ try:
         check(vn + ': ... and Buy on the Buy journey', pg.eval_on_selector_all('.gw-links a[aria-current]', 'e=>e.map(x=>x.textContent.trim())') == ['Buy'])
         pg.goto(B + '/tools/'); pg.wait_for_timeout(600)
         hrefs = pg.eval_on_selector_all('main a', 'e=>e.map(x=>x.getAttribute("href"))')
-        miss = [t for t in ['planner', 'payment-planner', 'hdb-upgrade', 'sale-proceeds', 'ssd', 'stamp-duty', 'tdsr', 'msr', 'mortgage'] if not any(h and ('tools/' + t + '/') in (('tools/' + h.split('tools/')[-1]) if 'tools/' in h else 'tools/' + h) for h in hrefs)]
+        miss = [t for t in ['planner', 'payment-planner', 'sale-proceeds', 'ssd', 'stamp-duty', 'tdsr', 'msr', 'mortgage'] if not any(h and ('tools/' + t + '/') in (('tools/' + h.split('tools/')[-1]) if 'tools/' in h else 'tools/' + h) for h in hrefs)]
         check(vn + ': the Tools directory still lists every specialist tool', not miss, miss)
         ctx.close()
         ctx, pg, errs = page(br, kw); pg.goto(B + '/research/map/'); pg.wait_for_timeout(800)

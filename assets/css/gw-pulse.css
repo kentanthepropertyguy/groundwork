@@ -1,0 +1,39 @@
+/* Market pulse (gw-pulse.js): one plain block under the development's price, not a card. Research page only; the Map line has its own rule in kpt-map.css. */
+.mp{display:grid;gap:10px;border-top:1px solid var(--gw-line,#E3E6EC);padding-top:16px;margin-top:2px;min-width:0;text-align:left}
+.mp-k{margin:0;font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gw-muted,#6B7285)}
+.mp-k span{font-weight:500;letter-spacing:.02em;text-transform:none}
+.mp-h{margin:0;font-size:22px;line-height:1.25;font-weight:700;color:var(--gw-ink,#16213E);text-wrap:balance;letter-spacing:-.01em}
+.mp-s{margin:0;font-size:15.5px;line-height:1.5;color:var(--gw-body,#3B4256);max-width:62ch}
+.mp-f{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 22px;margin:6px 0 0}
+.mp-f div{display:grid;gap:2px;align-content:start;min-width:0}
+.mp-f dt{font-size:12.5px;color:var(--gw-muted,#6B7285);line-height:1.35}
+.mp-f dd{margin:0}
+.mp-f .mp-v{font-size:24px;line-height:1.2;font-weight:700;color:var(--gw-ink,#16213E);font-variant-numeric:tabular-nums}
+.mp-f .mp-n{font-size:12.5px;line-height:1.4;color:var(--gw-muted,#6B7285)}
+.mp-fine{margin:0;font-size:13px;line-height:1.5;color:var(--gw-muted,#6B7285)}
+.mp-acts{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;margin:2px 0 0;font-size:14.5px}
+.mp-acts a,.mp-share{font:inherit;font-weight:600;color:var(--gw-blue,#0B63CE);background:none;border:0;padding:0;min-height:40px;display:inline-flex;align-items:center;cursor:pointer;text-decoration:none}
+.mp-acts a:hover,.mp-share:hover{text-decoration:underline}
+.mp-acts a:focus-visible,.mp-share:focus-visible,.mp-d>summary:focus-visible{outline:2px solid var(--gw-blue,#0B63CE);outline-offset:2px;border-radius:4px}
+.mp-copied{font-size:13.5px;color:var(--gw-muted,#6B7285)}
+.mp-copied[hidden]{display:none}
+.mp-d{border-top:1px solid var(--gw-line,#E3E6EC)}
+.mp-d>summary{list-style:none;cursor:pointer;min-height:44px;display:flex;align-items:center;justify-content:space-between;font-weight:600;font-size:15px;color:var(--gw-ink,#16213E)}
+.mp-d>summary::-webkit-details-marker{display:none}
+.mp-d>summary::after{content:"+";font-size:20px;font-weight:400;color:var(--gw-muted,#6B7285)}
+.mp-d[open]>summary::after{content:"–"}
+.mp-in{display:grid;gap:10px;padding:2px 0 8px}
+.mp-scroll{overflow-x:auto}
+.mp-t{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+.mp-t th,.mp-t td{padding:7px 10px 7px 0;border-bottom:1px solid var(--gw-line,#E3E6EC);text-align:left;white-space:nowrap}
+.mp-t thead th{font-size:12px;color:var(--gw-muted,#6B7285);font-weight:600}
+.mp-t tbody th{font-weight:500;color:var(--gw-body,#3B4256)}
+.mp-list{margin:0;padding-left:18px;font-size:13.5px;line-height:1.55;color:var(--gw-body,#3B4256);display:grid;gap:4px}
+@media (max-width:640px){
+  .mp-h{font-size:20px}
+  .mp-f{grid-template-columns:1fr;gap:0}
+  .mp-f div{grid-template-columns:minmax(0,1fr) auto;column-gap:14px;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--gw-line,#E3E6EC)}
+  .mp-f dt{grid-column:1;grid-row:1}
+  .mp-f .mp-n{grid-column:1;grid-row:2}
+  .mp-f .mp-v{grid-column:2;grid-row:1 / span 2;font-size:21px;text-align:right;align-self:center}
+}

@@ -40,8 +40,8 @@
   const PSF_NOTE = 'PSF is approximate: price divided by floor area converted from whole square metres.';
   const FLOOR_NOTE = 'URA floor bands only. This does not show an exact floor.';
   const HEADLINE = { good: 'Good recent overlap for comparison', limited: 'Limited recent overlap', none: 'No like-for-like transaction evidence found' };
-  const ANALYTICS_EVENTS = ['research_search', 'research_project_selected', 'research_size_focus', 'research_compare_started', 'research_comparison_viewed', 'research_whatsapp_clicked', 'research_option_selected', 'research_map_opened'];
-  const ANALYTICS_KEYS = ['results', 'project_id', 'project_a', 'project_b', 'sale_type', 'window', 'overlap', 'has_evidence', 'context', 'sale_types', 'option', 'from'];
+  const ANALYTICS_EVENTS = ['research_search', 'research_project_selected', 'research_size_focus', 'research_compare_started', 'research_comparison_viewed', 'research_whatsapp_clicked', 'research_option_selected', 'research_map_opened', 'research_pulse_viewed', 'research_pulse_shared'];
+  const ANALYTICS_KEYS = ['results', 'project_id', 'project_a', 'project_b', 'sale_type', 'window', 'overlap', 'has_evidence', 'context', 'sale_types', 'option', 'from', 'trend', 'evidence', 'intent'];
 
   /* ---------- small helpers ---------- */
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -549,6 +549,9 @@
     if (['project', 'comparison'].indexOf(d.context) > -1) out.context = d.context;
     if (['dev', 'prices', 'budget'].indexOf(d.option) > -1) out.option = d.option;
     if (['home', 'analysis'].indexOf(d.from) > -1) out.from = d.from;
+    if (['higher', 'lower', 'stable', 'none'].indexOf(d.trend) > -1) out.trend = d.trend;
+    if (['strong', 'limited', 'none'].indexOf(d.evidence) > -1) out.evidence = d.evidence;
+    if (['buy', 'sell'].indexOf(d.intent) > -1) out.intent = d.intent;
     if (Number.isInteger(d.sale_types) && d.sale_types >= 0 && d.sale_types <= 3) out.sale_types = d.sale_types;
     return out;
   }
