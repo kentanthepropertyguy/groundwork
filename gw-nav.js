@@ -1,0 +1,623 @@
+/* ==========================================================================
+   GROUNDWORK — navigation and search (R2.1, Ken 9 Oct 2026).
+   One search box for every tool and every development, the full menu, and the "Upgrading from HDB" step strip.
+   Tools are found by plain words and by the terms people actually type (ABSD, valuation, HDB upgrade, sale proceeds…).
+   Developments come from the same public index Research uses (data/projects/index.json), loaded only when someone searches.
+   Privacy: what is typed in the search box is never put in a page address and never sent to analytics; a chosen result
+   records only which tool or development was opened. Nothing here calculates anything.
+   UMD: window.GWN in the browser; Node uses the same entries and markup to write the pages at build time.
+   ========================================================================== */
+(function (root, factory) {
+  const api = factory(root);
+  if (typeof module === 'object' && module.exports) module.exports = api; else root.GWN = api;
+})(typeof self !== 'undefined' ? self : this, function (root) {
+  'use strict';
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const MAIN = 'https://kentanthepropertyguy.com/', LAUNCHES = 'https://kentanthepropertyguy.com/#developments';
+  const ASK_MSG = 'Hi Ken, I’m on Groundwork and would like to talk through my property plans. My situation is ____. (Ref KPT-HOME)';
+  const ASK = 'https://wa.me/6590908898?text=' + encodeURIComponent(ASK_MSG);
+
+  /* ---------------- icons (line icons, inline, no requests) ---------------- */
+  const ICON = {
+    mortgage: '<path d="M4 11 12 4l8 7v9H4z"/><path d="M9 20v-5h6v5"/>',
+    'stamp-duty': '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/>',
+    ssd: '<circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/>',
+    'sale-proceeds': '<path d="M4 7h16v10H4z"/><circle cx="12" cy="12" r="2.4"/><path d="M7 7v10M17 7v10" opacity=".45"/>',
+    tdsr: '<path d="M4 19h16"/><path d="M6 19V11M10 19V7M14 19v-9M18 19V5"/>',
+    msr: '<path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/><path d="M4 12h16" opacity=".45"/>',
+    'planner': '<path d="M4 19V9M10 19V5M16 19v-7M21 19H3"/>',
+    'payment-planner': '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/><path d="M8 14h3M13 14h3M8 17h3"/>',
+    'hdb-upgrade': '<path d="M3 12 9 7l6 5"/><path d="M5 11v8h8v-8"/><path d="M15 9l3-2 3 2v10h-6"/>',
+    'what-can-i-buy': '<circle cx="11" cy="11" r="6"/><path d="m20 20-4.2-4.2"/>',
+    worth: '<path d="M5 20V12m5 8V7m5 13v-6m5 6V4"/>',
+    research: '<path d="M4 20V8l6-4v16M10 20V10l6 3v7M16 20v-6l4 2v4"/><path d="M3 20h18"/>',
+    map: '<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/>',
+    dev: '<path d="M6 20V5h8v15M14 9h4v11"/><path d="M9 8h2M9 11h2M9 14h2M3 20h18"/>',
+    guide: '<circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>',
+    home: '<path d="M4 11.5 12 5l8 6.5V20h-5v-5h-6v5H4z"/>',
+    list: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
+    all: '<rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/>',
+    ext: '<path d="M14 5h5v5M19 5l-8 8"/><path d="M17 14v5H5V7h5"/>',
+    chat: '<path d="M5 18.5 6 15a7 7 0 1 1 3 3z"/>',
+    doc: '<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>',
+    search: '<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.3-4.3"/>',
+    menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+    close: '<path d="m6 6 12 12M18 6 6 18"/>',
+  };
+  const svg = (k, size) => '<svg viewBox="0 0 24 24" width="' + (size || 22) + '" height="' + (size || 22) + '" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + ICON[k] + '</svg>';
+
+  /* ---------------- everything a visitor can do here ----------------
+     name: plain words · tag: the term people know it by · href: from the site root (or a full address) · t: what people type.
+     menu: shown in the menu's tool grid · search: found by the search only (a more specific way into a page that is already listed). */
+  const ENTRIES = [
+    { id: 'stamp-duty', name: 'Stamp duty', tag: 'BSD · ABSD', short: 'What you pay when you buy', href: 'tools/stamp-duty/', icon: 'stamp-duty', menu: 1, quick: 1, sec: 'tools',
+      t: ['stamp duty', 'absd', 'bsd', 'buyers stamp duty', 'additional buyers stamp duty', 'buyer stamp duty', 'duty', 'stamp', 'remission', 'absd remission', 'absd refund', 'second property', 'second home', 'third property', 'foreigner', 'pr buying', 'permanent resident', 'tax when buying', 'property purchase tax'] },
+    { id: 'mortgage', name: 'Mortgage repayment', quickName: 'Mortgage', tag: 'Monthly instalment', short: 'Instalment and total interest', href: 'tools/mortgage/', icon: 'mortgage', menu: 1, quick: 1, sec: 'tools',
+      t: ['mortgage', 'home loan', 'loan repayment', 'monthly repayment', 'monthly instalment', 'instalment', 'installment', 'monthly payment', 'interest', 'interest rate', 'bank loan', 'hdb loan', 'loan', 'amortisation', 'amortization', 'refinance', 'repricing'] },
+    { id: 'tdsr', name: 'How much can I borrow?', tag: 'TDSR', short: 'Your loan limit from income and debts', href: 'tools/tdsr/', icon: 'tdsr', menu: 1, quick: 1, sec: 'tools',
+      t: ['tdsr', 'total debt servicing ratio', 'how much can i borrow', 'borrow', 'borrowing', 'loan limit', 'loan eligibility', 'max loan', 'maximum loan', 'loan amount', 'affordability', 'afford', 'ltv', 'loan to value', 'income', 'debt', 'stress test', 'medium term rate'] },
+    { id: 'msr', name: 'HDB and EC loan limit', tag: 'MSR', short: 'For HDB flats and new ECs', href: 'tools/msr/', icon: 'msr', menu: 1, sec: 'tools',
+      t: ['msr', 'mortgage servicing ratio', 'hdb loan', 'hdb loan limit', 'ec', 'executive condo', 'executive condominium', 'hfe', 'hdb flat eligibility', 'bto', 'resale flat loan', 'hdb flat loan', 'hdb borrow'] },
+    { id: 'planner', name: 'What can I afford?', tag: 'Maximum budget', short: 'Your maximum property budget, from your cash, CPF and income', href: 'tools/planner/', icon: 'planner', menu: 1, sec: 'tools',
+      t: ['planner', 'what can i afford', 'afford', 'affordability', 'comfortable budget', 'maximum budget', 'maximum property budget', 'budget', 'how much can i afford', 'highest price', 'new launch budget', 'upgrade budget', 'keep my flat', 'sell first'] },
+    { id: 'payment-planner', name: 'Payment timeline', tag: 'Payment dates', short: 'See when and how much you need to pay.', href: 'tools/payment-planner/', icon: 'payment-planner', menu: 1, sec: 'tools',
+      t: ['payment timeline', 'new launch payments', 'new launch payment', 'progressive payments', 'progressive payment', 'progressive', 'payment schedule', 'uncompleted', 'temporary occupation permit', 'company buyer', 'company purchase', 'buying through a company', 'entity', 'ec payment schedule', 'hdb payment schedule', 'bto payment schedule', 'booking fee', 'option fee', 'downpayment', 'down payment', 'under construction', 'construction stages', 'cash flow', 'cashflow', 'timeline', 'planner', 'payment planner', 'shortfall', 'funding gap', 'buy first', 'sell first', 'buy first sell later', 'sell first buy later', 'bridging', 'absd refund', 'when to pay', 'payment dates', 'how much cash do i need', 'cash needed', 'cpf needed', 'upgrade timing'] },
+    { id: 'sale-proceeds', name: 'Sale proceeds', tag: 'Cash and CPF back', short: 'What you get back when you sell', href: 'tools/sale-proceeds/', icon: 'sale-proceeds', menu: 1, quick: 1, sec: 'tools',
+      t: ['sale proceeds', 'proceeds', 'selling', 'sell', 'sell my flat', 'sell my hdb', 'sell my condo', 'cash proceeds', 'net proceeds', 'cpf refund', 'refund cpf', 'accrued interest', 'cpf accrued interest', 'how much will i get', 'cash from sale', 'agent commission', 'selling costs'] },
+    { id: 'ssd', name: 'Selling within 4 years?', tag: 'SSD', short: 'Seller’s Stamp Duty', href: 'tools/ssd/', icon: 'ssd', menu: 1, sec: 'tools',
+      t: ['ssd', 'sellers stamp duty', 'seller stamp duty', 'selling stamp duty', 'sell within', 'sell early', 'selling early', 'holding period', 'minimum holding', 'stamp duty selling'] },
+    { id: 'hdb-upgrade', name: 'HDB upgrade planner', tag: 'Direct budget calculation', short: 'Your private-home budget if you sell first', href: 'tools/hdb-upgrade/', icon: 'hdb-upgrade', menu: 1, sec: 'tools',
+      t: ['hdb upgrade', 'upgrade', 'upgrading', 'upgrader', 'hdb to condo', 'hdb to private', 'upgrade from hdb', 'can i afford to upgrade', 'afford a condo', 'private property budget', 'sell hdb buy condo', 'next home budget', 'budget'] },
+    { id: 'map', name: 'Map', tag: 'Homes, prices and what is nearby', short: 'See what is around a home, and what nearby homes sold for', href: 'research/map/', icon: 'map', menu: 1, sec: 'research',
+      t: ['map', 'maps', 'on a map', 'nearby', 'near me', 'around', 'neighbourhood', 'neighborhood', 'location', 'area', 'schools', 'school', 'mrt', 'near mrt', 'amenities', 'supermarket', 'park', 'explore', 'where'] },
+    { id: 'what-can-i-buy', name: 'What can this budget buy?', tag: 'Search by budget, area and must-haves', short: 'Developments with recent sales within your budget', href: 'research/#/budget', icon: 'what-can-i-buy', menu: 1, sec: 'research',
+      t: ['what can i buy', 'budget', 'my budget', 'price range', 'find a condo', 'find a home', 'which condo', 'shortlist', 'space', 'size', 'sq ft', 'square feet', 'older condo', 'newer condo'] },
+    { id: 'worth', name: 'Property prices & past sales', tag: 'HDB, condo and landed sales · asking price', short: 'What comparable homes sold for', href: 'research/#/prices', icon: 'worth', menu: 1, sec: 'research',
+      t: ['valuation', 'value', 'home value', 'worth', 'whats my home worth', 'how much is my flat worth', 'how much is my home worth', 'hdb price', 'hdb prices', 'hdb resale', 'resale price', 'resale prices', 'hdb valuation', 'asking price', 'fair price', 'overpriced', 'is the price fair', 'my block', 'block resales', 'recent sales', 'landed', 'landed prices', 'terrace', 'semi d', 'bungalow', 'transacted price', 'property value', 'property values', 'market price', 'market prices', 'home prices', 'house prices', 'condo price', 'condo prices', 'condo value', 'landed sales', 'landed value', 'comparable sales', 'hdb and home prices', 'what is my home worth', 'what is my house worth', 'how much is my house worth', 'what is my property worth', 'home worth'] },
+    { id: 'ask-hdb', name: 'Check an HDB asking price', tag: 'Against resales in the block', href: 'journey/worth/#hdb', icon: 'worth', search: 1, sec: 'research',
+      t: ['asking price', 'hdb asking price', 'check asking price', 'is the asking price fair', 'resale flat price', 'buying a resale flat', 'cov', 'cash over valuation', 'overpriced'] },
+    { id: 'ask-condo', name: 'Check a condo asking price', tag: 'Pick the development, then “Check an asking price”', href: 'research/', icon: 'research', search: 1, sec: 'research',
+      t: ['asking price', 'condo asking price', 'check asking price', 'is the asking price fair', 'condo price', 'psf', 'price per square foot', 'overpriced', 'condo valuation'] },
+    { id: 'research', name: 'Research a development', tag: 'Prices by size · compare', short: 'Any of 2,000+ private developments', href: 'research/#/', icon: 'research', start: 1, sec: 'research',
+      t: ['research', 'development', 'condo', 'condominium', 'apartment', 'project', 'transactions', 'transacted', 'psf', 'price per square foot', 'compare', 'comparison', 'compare condos', 'condo prices', 'private property', 'ura', 'caveats', 'valuation', 'condo valuation'] },
+    { id: 'guide', name: 'Guide me', tag: 'Not sure where to start? Step by step', short: 'Tell us your goal; we take you through it', href: 'journey/', icon: 'guide', start: 1, sec: 'guide',
+      t: ['guide', 'guide me', 'help me figure it out', 'figure it out', 'guided', 'guided journey', 'help', 'help me', 'where to start', 'start', 'beginner', 'first time', 'first home', 'first-time buyer', 'steps', 'plan', 'planning', 'what should i do', 'not sure'] },
+    { id: 'guide-up', name: 'Upgrade from HDB', tag: 'The complete four-step process: value, proceeds, budget, homes', href: 'journey/#up', icon: 'hdb-upgrade', search: 1, sec: 'sell',
+      t: ['hdb upgrade', 'upgrade', 'upgrading', 'upgrade from hdb', 'sell hdb', 'moving', 'move', 'right size', 'rightsizing', 'downsizing', 'downgrade'] },
+    { id: 'guide-buy', name: 'I’m looking to buy', tag: 'A first home, or another without selling', href: 'journey/#buy', icon: 'home', search: 1, sec: 'buy',
+      t: ['buy', 'buying', 'looking to buy', 'first home', 'first property', 'buy a condo', 'buy a home', 'purchase'] },
+    { id: 'guide-sell', name: 'I’m planning to sell', tag: 'What homes like yours sold for, then your proceeds', href: 'journey/#sell', icon: 'worth', search: 1, sec: 'sell',
+      t: ['sell', 'selling', 'sell my home', 'sell my flat', 'home value'] },
+    { id: 'guide-move', name: 'Sell and buy again', tag: 'Moving to another home, or downsizing', href: 'journey/#move', icon: 'guide', search: 1, sec: 'sell',
+      t: ['moving', 'move', 'downsize', 'downsizing', 'right size', 'rightsizing', 'sell condo', 'sell landed', 'sell then buy'] },
+    { id: 'directory', name: 'Browse every development', tag: 'A–Z list', href: 'research/#/browse', icon: 'list', start: 1, sec: 'research',
+      t: ['browse', 'all developments', 'directory', 'list', 'a to z', 'every development', 'all condos'] },
+    { id: 'sample', name: 'Sample research report', tag: 'Jadescape or Thomson Three?', href: 'research/sample/', icon: 'doc', search: 1, sec: 'research',
+      t: ['sample', 'report', 'sample report', 'research report', 'detailed research', 'comparison report'] },
+    { id: 'launches', name: 'New launches', tag: 'On Ken’s main site', href: LAUNCHES, icon: 'ext', ext: 1,
+      t: ['new launches', 'new launch', 'launch', 'launches', 'showflat', 'show flat', 'development guides', 'lucerne grand', 'thomson reserve', 'hougang central', 'preview'] },
+    { id: 'main-site', name: 'Ken Tan · The Property Guy', tag: 'Ken’s main site', href: MAIN, icon: 'ext', ext: 1,
+      t: ['ken', 'ken tan', 'the property guy', 'about', 'about ken', 'agent', 'property agent', 'huttons', 'main site', 'contact', 'tiktok'] },
+    { id: 'ask', name: 'Ask Ken on WhatsApp', tag: 'He replies personally', href: ASK, icon: 'chat', ext: 1,
+      t: ['whatsapp', 'ask ken', 'ask', 'contact', 'talk', 'call', 'message', 'speak to agent', 'appointment', 'viewing', 'help me'] },
+  ];
+  const byId = {}; ENTRIES.forEach((e) => { byId[e.id] = e; });
+  // The four ways in, named the same everywhere (header, menu, homepage, footer, search results): Buy · Sell · Research · Tools.
+  // Buy and Sell open the guided path for that goal (journey/#buy, journey/#sell); "guide" is the page itself and stays findable by search and in the menu footer.
+  const SECTIONS = {
+    guide: { name: 'Guide me', href: 'journey/', nav: 'journey', q: 'Not sure where to start?', say: 'Pick your goal. We take you through the right tools, step by step.', ids: ['guide-buy', 'guide-up', 'guide-sell', 'guide-move'] },
+    buy: { name: 'Buy', href: 'journey/#buy', nav: 'buy', q: 'Looking to buy?', say: 'Work out your maximum budget, then explore the homes within it.', ids: ['guide-buy', 'planner', 'what-can-i-buy', 'payment-planner'] },
+    sell: { name: 'Sell', href: 'journey/#sell', nav: 'sell', q: 'Planning to sell?', say: 'See what homes like yours sold for, then what you would take home.', ids: ['guide-sell', 'worth', 'sale-proceeds', 'guide-up', 'guide-move'] },
+    tools: { name: 'Tools', href: 'tools/', nav: 'tools', q: 'Know what to work out?', say: 'Calculators for stamp duty, loans, sale proceeds and more.', ids: ['planner', 'stamp-duty', 'tdsr', 'msr', 'mortgage', 'payment-planner', 'sale-proceeds', 'ssd', 'hdb-upgrade'] },
+    map: { name: 'Map', href: 'research/map/', nav: 'map', q: '', say: '', ids: [] },
+    research: { name: 'Research', href: 'research/', nav: 'research', q: 'Looking at a property?', say: 'What homes really sold for, from URA and HDB records. The Map is part of Research.', ids: ['research', 'map', 'worth', 'what-can-i-buy', 'directory', 'sample'] },
+  };
+  const SEC_ORDER = ['buy', 'sell', 'research', 'tools'];
+  // Main navigation: Buy · Sell · Research · Map · Tools (header, footer and the phone row). The menu keeps its four columns; the Map card stays in Research's column.
+  const NAV_ORDER = ['buy', 'sell', 'research', 'map', 'tools'];
+  const MENU_TOOLS = SECTIONS.tools.ids;
+  const QUICK = ['stamp-duty', 'tdsr', 'mortgage', 'sale-proceeds', 'hdb-upgrade'];
+  const href = (e, r) => (e.ext ? e.href : (r || '') + e.href);
+
+  /* ---------------- matching tools ---------------- */
+  // Audit A5-12: accents are stripped on both sides ("verde" finds Verdé), before anything else is dropped.
+  const deaccent = (s) => { const t = String(s || ''); return t.normalize ? t.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : t; };
+  const norm = (s) => deaccent(s).toLowerCase().replace(/[’'`]/g, '').replace(/[^a-z0-9&]+/g, ' ').trim();
+  // At most one typing slip (one letter missing, extra, or different), used only when nothing matches exactly.
+  function oneEdit(a, b) {
+    if (a === b) return true; const la = a.length, lb = b.length; if (Math.abs(la - lb) > 1) return false;
+    let i = 0, j = 0, d = 0;
+    while (i < la && j < lb) { if (a[i] === b[j]) { i++; j++; continue; } if (++d > 1) return false; if (la > lb) i++; else if (lb > la) j++; else { i++; j++; } }
+    return d + (la - i) + (lb - j) <= 1;
+  }
+  const TYPO_MIN = 5;   // shorter words are too easily confused with other words
+  function scoreText(text, q) {
+    const t = norm(text); if (!t || !q) return 0;
+    if (t === q) return 100;
+    if (q.length >= 2 && t.indexOf(q) === 0) return 72 - Math.min(20, t.length - q.length);
+    if (t.length >= 3 && (' ' + q + ' ').indexOf(' ' + t + ' ') >= 0) return 60 + Math.min(20, t.length); // "absd for a pr" contains "absd"
+    if (q.length >= 3 && (' ' + t).indexOf(' ' + q) >= 0) return 45;
+    if (q.length >= 4 && t.indexOf(q) >= 0) return 30;
+    return 0;
+  }
+  function scoreEntry(e, q) {
+    let s = Math.max(scoreText(e.name, q), scoreText(e.tag, q) * 0.9);
+    e.t.forEach((x) => { s = Math.max(s, scoreText(x, q)); });
+    if (s && e.search) s -= 6; // a specific way into a page: listed after the tool itself
+    if (s && e.ext) s -= 4;
+    return s;
+  }
+  function scoredTools(query, max) {
+    const q = norm(query); if (!q) return [];
+    let hits = ENTRIES.map((e, i) => ({ e, i, s: scoreEntry(e, q) })).filter((x) => x.s > 0);
+    if (!hits.length && q.length >= TYPO_MIN && q.indexOf(' ') < 0) {   // "valuaton" → valuation
+      hits = ENTRIES.map((e, i) => ({ e, i, s: [e.name, e.tag].concat(e.t).some((x) => norm(x).split(' ').some((w) => w.length >= TYPO_MIN && oneEdit(w, q))) ? 20 - (e.search ? 6 : 0) - (e.ext ? 4 : 0) : 0 })).filter((x) => x.s > 0);
+    }
+    return hits.sort((a, b) => b.s - a.s || a.i - b.i).slice(0, max || 5);
+  }
+  const matchTools = (query, max) => scoredTools(query, max).map((x) => x.e);
+
+  /* ---------------- matching developments (the index Research uses) ---------------- */
+  // Display names exactly as Research shows them (same rules as KPT_RESEARCH.displayName; a test keeps them equal).
+  const ROMAN = /^(I|II|III|IV|V|VI|VII|VIII|IX|X)$/;
+  const ACRONYMS = { AMO: 1, RVG: 1, JLB: 1, OUE: 1, PLQ: 1, SCK: 1, SKT: 1, TMW: 1, YGK: 1, MKZ: 1 };
+  const NAME_FIX = { 'VERD� JOO CHIAT': 'Verdé Joo Chiat', 'ENCHANT�': 'Enchanté' };
+  function displayName(name) {
+    if (Object.prototype.hasOwnProperty.call(NAME_FIX, name)) return NAME_FIX[name];
+    const SMALL = { AT: 1, OF: 1, THE: 1, BY: 1, ON: 1 };
+    return String(name || '').split(' ').map((w, i) => {
+      if (w === '@' || /\d/.test(w) || ROMAN.test(w) || ACRONYMS[w]) return w;
+      if (i > 0 && SMALL[w]) return w.toLowerCase();
+      if (w.length <= 2 && /^[A-Z]+$/.test(w)) return w;
+      return w.toLowerCase().replace(/(^|[-'(])([a-z])/g, (_, x, y) => x + y.toUpperCase());
+    }).join(' ');
+  }
+  const title = (s) => String(s || '').toLowerCase().replace(/\b([a-z])/g, (c) => c.toUpperCase());
+  const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const month = (ym) => { const m = /^(\d{4})-(\d{2})$/.exec(ym || ''); return m ? MON[+m[2] - 1] + ' ' + m[1] : ''; };
+  const dnorm = (s) => norm(s).replace(/&/g, ' ').replace(/\s+/g, ' ').trim();
+  // ix: { fields, rows } from data/projects/index.json. Name matches first (start, then a word, then anywhere), then the street.
+  function matchDevs(ix, query, max) {
+    const q = dnorm(query); if (q.length < 2 || !ix || !ix.rows) return [];
+    const F = {}; ix.fields.forEach((f, i) => { F[f] = i; });
+    const qc = q.replace(/ /g, '');
+    const out = [];
+    // Names are matched as Research shows them (displayName), so a stored name with a lost accent ("VERD\uFFFD") and a corrected one both match.
+    const names = ix.rows.map((r) => dnorm(displayName(r[F.name])).replace(/^ +/, ''));
+    ix.rows.forEach((r, k) => {
+      const n = names[k], nc = n.replace(/ /g, '');
+      let s = 0;
+      if (n === q || nc === qc) s = 100; else if (n.indexOf(q) === 0 || nc.indexOf(qc) === 0) s = 80; else if ((' ' + n).indexOf(' ' + q) >= 0) s = 60; else if (q.length >= 3 && nc.indexOf(qc) >= 0) s = 40;
+      else if (q.length >= 4 && (' ' + dnorm(r[F.street])).indexOf(' ' + q) >= 0) s = 15;
+      if (s) out.push({ s, r });
+    });
+    if (!out.length && /^the .{2,}/.test(q)) return matchDevs(ix, q.slice(4), max);   // "The Jadescape" finds Jadescape: a leading "The" is optional
+    if (!out.length && qc.length >= TYPO_MIN) {   // "jadscape" → Jadescape: one slip against the start of a name or one of its words
+      ix.rows.forEach((r, k) => { const n = names[k], nc = n.replace(/ /g, ''); if (oneEdit(nc.slice(0, qc.length), qc) || oneEdit(nc.slice(0, qc.length + 1), qc) || oneEdit(nc.slice(0, Math.max(0, qc.length - 1)), qc) || n.split(' ').some((w) => w.length >= TYPO_MIN && oneEdit(w, qc))) out.push({ s: 20, r }); });
+    }
+    return out.sort((a, b) => b.s - a.s || b.r[F.n] - a.r[F.n]).slice(0, max || 6).map((x) => {
+      const r = x.r;
+      return { id: r[F.id], name: displayName(r[F.name]), street: title(r[F.street]), district: Number(r[F.district]), n: r[F.n], last: r[F.last], byStreet: x.s === 15, score: x.s, cls: F.cls === undefined ? 'condo' : (r[F.cls] || 'condo') };
+    });
+  }
+  // Developments with their own site (data/research/sites.json): the configured ones, by name or alias.
+  function matchSites(sites, query) {
+    const q = dnorm(query); if (q.length < 3 || !sites || !sites.sites) return [];
+    return sites.sites.filter((s) => s.url && [s.name].concat(s.aliases || []).some((a) => (' ' + dnorm(a)).indexOf(' ' + q) >= 0)).map((s) => ({ id: s.id, name: s.name, url: s.url, tagline: s.tagline }));
+  }
+
+  /* ---------------- matching roads (the street positions the nearby landed sales already use) ---------------- */
+  // data/value/landed/geo.json (streets with landed sales) and geo-more.json (other named streets): one approximate point per street. A road found here
+  // leads to what sold around it (Property values & prices) and to its place on the Map. Nothing here knows where any house is.
+  const ROAD_ABBR = { rd: 'road', av: 'avenue', jln: 'jalan', gdns: 'gardens', hts: 'heights', pk: 'park', bt: 'bukit' };   // only the ones that are not already the start of the word
+  const ROAD_GENERIC = { road: 1, street: 1, avenue: 1, drive: 1, crescent: 1, close: 1, terrace: 1, lorong: 1, jalan: 1, garden: 1, gardens: 1, place: 1, lane: 1, heights: 1, park: 1, view: 1, walk: 1, way: 1, hill: 1, rise: 1, grove: 1, north: 1, south: 1, east: 1, west: 1, upper: 1, lower: 1, bukit: 1, the: 1, and: 1 };
+  const roadTitle = (n) => String(n || '').toLowerCase().replace(/(^|[\s\-/(])([a-z])/g, (x, a, b) => a + b.toUpperCase());
+  const roadNorm = (n) => norm(n).replace(/\s+/g, ' ');
+  // One list from the two files. A name kept once per planning area; geo.json (a street with landed sales) wins over geo-more.json.
+  function roadList(geo, more) {
+    const out = [], seen = {};
+    const add = (name, lat, lon, area, landed, district) => {
+      const k = roadNorm(name) + '|' + (area || ''); if (!name || seen[k]) return; seen[k] = 1;
+      out.push({ name, title: roadTitle(name), n: roadNorm(name), area: area || '', lat, lon, landed: !!landed, district: district || '' });
+    };
+    ((geo && geo.streets) || []).forEach((s) => add(s[0], s[2], s[3], s[4], true, s[1]));
+    ((more && more.streets) || []).forEach((s) => add(s[0], s[1], s[2], s[3], false, ''));
+    return out;
+  }
+  // roads that match what was typed: whole name, then the start of the name, then every word typed starting a word of the name. House numbers and
+  // generic words ("road", "street") alone never match, so typing "road" does not list the island.
+  function matchRoads(list, query, max) {
+    if (!list || !list.length) return [];
+    let t = roadNorm(query).split(' ').filter(Boolean); while (t.length && /^\d+[a-z]?$/.test(t[0])) t.shift();
+    t = t.map((w) => ROAD_ABBR[w] || w); const q = t.join(' ');
+    if (q.length < 3 || !t.some((w) => w.length >= 3 && !ROAD_GENERIC[w])) return [];
+    const out = [];
+    list.forEach((r) => {
+      const w = r.n.split(' '); let s = 0;
+      if (r.n === q) s = 100; else if (r.n.indexOf(q) === 0) s = 80;
+      else if (t.every((x) => w.some((y) => y.indexOf(x) === 0))) s = 55;
+      if (s) out.push({ s, r });
+    });
+    return out.sort((a, b) => b.s - a.s || (b.r.landed ? 1 : 0) - (a.r.landed ? 1 : 0) || a.r.n.length - b.r.n.length || (a.r.n < b.r.n ? -1 : 1)).slice(0, max || 3).map((x) => x.r);
+  }
+  // How a road is named on the Map's address and in the landed page's address: "Springwood Crescent (Queenstown)". Chosen from the list, never typed text.
+  const roadKey = (r) => r.title + (r.area ? ' (' + r.area + ')' : '');
+  const roadLandedHref = (base, r) => base + 'journey/worth/#landed:' + encodeURIComponent(r.title);
+  const roadMapHref = (base, r) => base + 'research/map/#pl=' + encodeURIComponent('road:' + roadKey(r));
+  let roadsP = null, roadsBase = null, roadsCache = null;
+  function loadRoads() {
+    if (roadsP) return roadsP;
+    if (!roadsBase || typeof root.fetch !== 'function') return Promise.resolve([]);
+    const get = (f) => root.fetch(roadsBase + 'data/value/landed/' + f).then((x) => (x.ok ? x.json() : null)).catch(() => null);
+    roadsP = Promise.all([get('geo.json'), get('geo-more.json')]).then((a) => { if (!a[0] && !a[1]) { roadsP = null; return []; } return (roadsCache = roadList(a[0], a[1])); });
+    return roadsP;
+  }
+  const roadsNow = (query, max) => (roadsCache ? matchRoads(roadsCache, query, max) : []);   // the same answer, at once, once the files have loaded
+  const findRoads = (query, max) => (roadList.length && String(query || '').trim().length >= 3 ? loadRoads().then((l) => matchRoads(l, query, max)) : Promise.resolve([]));
+
+  /* ---------------- markup ---------------- */
+  const row = (e, r, cls) => '<a class="' + (cls || 'gw-mi') + '" href="' + esc(href(e, r)) + '"' + (e.ext ? ' target="_blank" rel="noopener"' : '') + ' data-gw-nav-to="' + e.id + '">' + svg(e.icon) + '<span><b>' + esc(e.name) + (e.ext ? ' <i aria-hidden="true">↗</i>' : '') + '</b><small>' + esc(e.tag) + '</small></span></a>';
+  // The search box (hidden until the script runs, so there is never a box that does nothing).
+  let sxN = 0;
+  // kind 'devs': developments only (the "Condo or apartment" box on Property values & market prices).
+  function searchHtml(kind, placeholder, after) {
+    const id = 'gwsx-' + kind + '-' + (++sxN);
+    return '<div class="gw-sx gw-sx-' + kind + '" data-gw-search="' + kind + '"' + (kind === 'devs' ? ' data-gw-devs' : '') + ' hidden><label class="gw-sx-box" for="' + id + 'i">' + svg('search', 20) + '<span class="gw-vh">' + (kind === 'devs' ? 'Search developments' : 'Search tools and developments') + '</span>' +
+      '<input id="' + id + 'i" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="' + id + 'l" placeholder="' + esc(placeholder || 'Search a tool, development or postal code') + '"></label>' +
+      '<div class="gw-sx-res" id="' + id + 'r" hidden></div>' + (after || '') + '</div>';
+  }
+  // The full menu: search, then the four ways in (Buy, Sell, Research, Tools) with everything in each, then Ken's other sites.
+  // Side by side on a wide screen, one after another on a phone.
+  function menuHtml(r) {
+    const sec = (k) => { const S = SECTIONS[k]; return '<section class="gw-ms gw-ms-' + k + '"><a class="gw-msh" href="' + r + S.href + '" data-gw-nav-to="' + S.nav + '"><b>' + S.name + '</b><span aria-hidden="true">›</span></a><p class="gw-msq">' + esc(S.q) + '</p>' +
+      '<div class="gw-ml">' + S.ids.filter((id) => k === 'research' || k === 'tools' || k === 'guide' || SECTIONS.research.ids.indexOf(id) < 0).map((id) => row(byId[id], r)).join('') + '</div>' + (k === 'tools' ? '<a class="gw-mall" href="' + r + 'tools/" data-gw-nav-to="tools">All tools, with what each one does ›</a>' : '') + '</section>'; };
+    return '<div class="gw-mx">' + searchHtml('menu', 'Search, e.g. ABSD or Jadescape') +
+      '<div class="gw-mx-body" data-gw-menu-body><div class="gw-mcols">' + SEC_ORDER.map(sec).join('') + '</div>' +
+      '<div class="gw-mfoot"><a class="gw-mhome" href="' + (r || './') + '" data-gw-nav-to="home">' + svg('home', 18) + 'Home</a>' + row(byId.guide, r) + row(byId['main-site'], r) + row(byId.launches, r) +
+      '<a class="gw-mask" href="' + esc(ASK) + '" target="_blank" rel="noopener" data-gw-nav-to="ask">' + svg('chat', 20) + 'Ask Ken on WhatsApp</a>' +
+      // Audit V3-05: one place, on every page, to remove the figures this tab remembers for the tools
+      '<p class="gw-mclear"><button type="button" class="gw-link" data-gw-clear-all>Clear my figures</button> <span>Removes the figures this tab remembers for every tool.</span></p></div></div></div>';
+  }
+  // Homepage: one card for each way in (Guide me is drawn by the page itself; Tools and Research here).
+  function doorHtml(k, r, inner, more) {
+    const S = SECTIONS[k];
+    return '<div class="gw-door gw-door-' + k + '"><p class="gw-lane">' + esc(S.q) + '</p><h2 class="gw-door-t"><a href="' + r + S.href + '" data-gw-nav-to="' + S.nav + '">' + S.name + ' <span aria-hidden="true">›</span></a></h2><p class="gw-door-s">' + esc(S.say) + '</p>' + inner + (more || '') + '</div>';
+  }
+  // On the section pages (phones and tablets): the same four names as one row, the current one marked.
+  function secSwitch(cur, r) {
+    return '<nav class="gw-secs" aria-label="Ways to use Groundwork">' + NAV_ORDER.map((k) => { const S = SECTIONS[k]; return '<a href="' + r + S.href + '" data-gw-nav-to="' + S.nav + '"' + (k === cur ? ' aria-current="page"' : '') + '>' + S.name + '</a>'; }).join('') + '</nav>';
+  }
+  function researchRows(r) { return '<div class="gw-ml gw-rrows"><a class="gw-mi gw-mi-map" href="' + r + 'research/map/" data-gw-nav-to="map"><img src="' + r + 'assets/img/map-thumb.webp" alt="" width="720" height="298" loading="lazy" decoding="async"><span><b>Map</b><small>Search a place, road or development. See what is nearby.</small></span></a>' + SECTIONS.research.ids.filter((id) => id !== 'map').slice(0, 3).map((id) => row(byId[id], r)).join('') + '</div>'; }
+  // Homepage quick tools: five tools and "All tools".
+  function quickHtml(r) {
+    return '<div class="gw-qt">' + QUICK.map((id) => { const e = byId[id]; return '<a href="' + r + e.href + '" data-tool="' + id + '">' + svg(e.icon, 26) + '<b>' + esc(e.quickName || e.name) + '</b><small>' + esc(e.tag) + '</small></a>'; }).join('') +
+      '<a href="' + r + 'tools/" data-tool="all">' + svg('all', 26) + '<b>All tools</b><small>Every calculator</small></a></div>';
+  }
+
+  /* ---------------- the "Upgrading from HDB" path ---------------- */
+  // Four pages that each work on their own; when a visitor follows the path (journey #up, or "HDB flat" when moving),
+  // a strip shows where they are and what is next. Kept for this tab only, in the journey context.
+  const UP = [['worth', 'Flat value', 'journey/worth/#hdb'], ['sale-proceeds', 'Sale proceeds', 'tools/sale-proceeds/#hdb'], ['hdb-upgrade', 'Budget', 'tools/hdb-upgrade/'], ['what-can-i-buy', 'What it buys', 'tools/what-can-i-buy/']];
+  // done: which steps this tab has actually finished (a tick only for those); the current step is marked, the next one offered.
+  function stripHtml(cur, r, done) {
+    const i = UP.findIndex((x) => x[0] === cur); if (i < 0) return '';
+    const nx = UP[i + 1], D = done || {};
+    return '<nav class="gw-strip" aria-label="Upgrading from HDB, step ' + (i + 1) + ' of 4" data-gw-strip><div class="gw-strip-h"><b>Upgrading from HDB <span>· Step ' + (i + 1) + ' of 4</span></b><button type="button" class="gw-link" data-gw-strip-off>Hide</button></div><ol>' +
+      UP.map((x, k) => { const ok = k !== i && D[x[0]]; return '<li' + (k === i ? ' aria-current="step"' : ok ? ' class="done"' : '') + '><a href="' + r + x[2] + '" data-gw-nav-to="up-' + x[0] + '"><i>' + (ok ? '✓' : k + 1) + '</i>' + x[1] + '</a></li>'; }).join('') + '</ol>' +
+      (nx ? '<a class="gw-strip-next" href="' + r + nx[2] + '" data-gw-nav-to="up-' + nx[0] + '">Next: ' + nx[1] + ' ›</a>' : '<a class="gw-strip-next" href="' + r + 'tools/payment-planner/" data-gw-nav-to="up-payment-planner">Next: plan the payments ›</a>') + '</nav>';
+  }
+  const UP_GO = { worth: 'Start: look up my block', 'sale-proceeds': 'Next: work out my sale proceeds', 'hdb-upgrade': 'Next: work out my budget', 'what-can-i-buy': 'Next: see what it buys' };
+  // What this tab has finished on the upgrade path (sessionStorage only; nothing leaves the page).
+  // Audit A3-07: the same fingerprint as KPT_MARKET.finStamp (kpt-market.js; a test keeps them equal) of the earlier steps' figures
+  // a planner budget used. A budget whose fingerprint no longer matches is out of date, so its step is not ticked.
+  const FIN_KEYS = ['homeType', 'sellPrice', 'outstandingLoan', 'cpfPrincipal', 'cpfInterest', 'borrowers.0.age', 'borrowers.0.fixed', 'borrowers.1.age', 'borrowers.1.fixed', 'borrowers.0.variable', 'borrowers.0.rental', 'borrowers.1.variable', 'borrowers.1.rental'];
+  function finStamp(storage) {
+    let s = {}; try { s = JSON.parse(storage.getItem('gw.fin.v1') || '{}') || {}; } catch (e) { s = {}; }
+    const val = (v) => { if (v === undefined || v === null || v === '') return ''; const n = parseFloat(String(v).replace(/[^0-9.]/g, '')); return /^[\d,.\s$]+$/.test(String(v)) && isFinite(n) ? String(n) : String(v); };
+    const str = FIN_KEYS.map((k) => k + '=' + val(s[k])).join('|');
+    let h = 0x811c9dc5; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+    return ('00000000' + h.toString(16)).slice(-8);
+  }
+  function upDone() {
+    const g = (k) => { try { return JSON.parse(root.sessionStorage.getItem(k) || 'null'); } catch (e) { return null; } };
+    const C = g('gw.ctx.v1') || {}, F = g('gw.fin.v1') || {}, H = g('kpt.handoff');
+    const stale = !!(H && H.from === 'hdb-upgrade' && typeof H.src === 'string' && H.src !== finStamp(root.sessionStorage));
+    return { worth: !!(C.hdb && C.hdb.block), // looked up, even when the block had few or no resales
+      'sale-proceeds': !!(F.sellPrice && F.homeType === 'hdb'), 'hdb-upgrade': !!g('kpt.hdb.input') && !stale, 'what-can-i-buy': false };
+  }
+  // Audit A3-07/A5-08/A6-07: "Clear" removes every figure this tab holds for the journey (all gw.* and kpt.* keys). Only which path
+  // the visitor is on, and what they own, are kept, so the step strip stays; no figure is kept.
+  function clearJourney() {
+    const st = root.sessionStorage; if (!st) return;
+    try {
+      let keep = null; try { const c = JSON.parse(st.getItem('gw.ctx.v1') || 'null'); if (c && (c.path || c.type)) keep = { v: 1, path: c.path || null, type: c.type || null }; } catch (e) { keep = null; }
+      const ks = []; for (let i = 0; i < st.length; i++) { const k = st.key(i); if (/^(gw|kpt)\./.test(k)) ks.push(k); }
+      ks.forEach((k) => st.removeItem(k));
+      if (keep) st.setItem('gw.ctx.v1', JSON.stringify(keep));
+    } catch (e) { /* storage blocked */ }
+  }
+
+  /* ---------------- browser behaviour ---------------- */
+  function mount() {
+    if (typeof document === 'undefined') return;
+    const KPT = () => root.KPT || { track: function () {} }, track = (n, p) => { try { KPT().track(n, p || {}); } catch (e) { /* analytics unavailable */ } };
+    const me = document.querySelector('script[src*="assets/js/gw-nav.js"]');
+    const base = me ? me.src.replace(/assets\/js\/gw-nav\.js.*$/, '') : (document.body.dataset.root || './');
+    roadsBase = base;
+    const ctxKey = 'gw.ctx.v1', getCtx = () => { try { return JSON.parse(root.sessionStorage.getItem(ctxKey) || '{}') || {}; } catch (e) { return {}; } };
+    const setCtx = (p) => { try { root.sessionStorage.setItem(ctxKey, JSON.stringify(Object.assign(getCtx(), p, { v: 1 }))); } catch (e) { /* storage blocked */ } };
+
+    // ---- the menu ----
+    const menus = [].slice.call(document.querySelectorAll('details.gw-menu'));
+    const phone = () => root.matchMedia && root.matchMedia('(max-width: 899px)').matches;
+    // Audit A5-10: while the phone menu covers the page, the page behind it is inert, so the keyboard stays in the menu.
+    const lock = (on) => {
+      const L = !!on && phone(); document.documentElement.classList.toggle('gw-lock', L);
+      [].slice.call(document.body.children).forEach((el) => { if (el.tagName === 'SCRIPT' || menus.some((d) => el.contains(d))) return; if (L) el.setAttribute('inert', ''); else el.removeAttribute('inert'); });
+    };
+    menus.forEach((d) => {
+      d.addEventListener('toggle', () => { lock(d.open); const s = d.querySelector('summary'); if (s) s.setAttribute('aria-expanded', String(d.open)); if (d.open) track('nav_menu_opened', {}); });
+      d.addEventListener('click', (e) => { const a = e.target.closest && e.target.closest('a'); if (a) { d.open = false; lock(false); } });
+    });
+    if (root.matchMedia) { const mq = root.matchMedia('(max-width: 899px)'); const re = () => lock(menus.some((d) => d.open)); if (mq.addEventListener) mq.addEventListener('change', re); }
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') menus.forEach((d) => { if (d.open) { d.open = false; lock(false); const s = d.querySelector('summary'); if (s) s.focus(); } }); });
+    // Audit A5-10: Tab and Shift+Tab wrap inside the open phone menu (its Close button, search and links).
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab' || !phone()) return; const d = menus.find((x) => x.open); if (!d) return;
+      const f = [].slice.call(d.querySelectorAll('summary, a[href], button, input, [tabindex]:not([tabindex="-1"])')).filter((x) => !x.disabled && x.getClientRects().length && !x.closest('[hidden]'));
+      if (!f.length) return; const i = f.indexOf(document.activeElement);
+      if (i < 0 || (!e.shiftKey && i === f.length - 1) || (e.shiftKey && i === 0)) { e.preventDefault(); (e.shiftKey ? f[f.length - 1] : f[0]).focus(); }
+    });
+    document.addEventListener('click', (e) => { menus.forEach((d) => { if (d.open && !d.contains(e.target) && !(e.target.closest && e.target.closest('[data-gw-open-search]'))) { d.open = false; lock(false); } }); });
+    [].slice.call(document.querySelectorAll('[data-gw-open-search]')).forEach((b) => {
+      b.hidden = false;
+      b.addEventListener('click', () => { const d = menus[0]; if (!d) return; d.open = true; lock(true); const i = d.querySelector('[data-gw-search] input'); if (i) setTimeout(() => i.focus(), 30); });
+    });
+    // Where a link from the menu or search goes (the tool or page only, never what was typed).
+    document.addEventListener('click', (e) => { const a = e.target.closest && e.target.closest('[data-gw-nav-to]'); if (a) track('nav_select', { target: a.dataset.gwNavTo, placement: a.closest('[data-gw-search]') ? 'search' : a.closest('.gw-menu') ? 'menu' : 'page' }); });
+
+    // ---- postal codes and new launches in the same box ----
+    // A six-digit postal code is looked up with the shared module (gw-postal.js, the one the Map and Property values use) and sent where that address belongs:
+    // an HDB block or a landed home to Property values, a condo, EC or cluster development to its Research page, a launch or any other address to the Map. Only loaded when a code is typed.
+    const POSTAL_JS = 'assets/js/gw-postal.js?v=d497db9fdd';
+    const PC_RE = /^\s*(?:s(?:ingapore)?\s*\(?)?(\d{6})\)?\s*$/i;
+    let postalP = null, pdP = null, upP = null;
+    const loadPostal = () => postalP || (postalP = root.GW_POSTAL ? Promise.resolve(root.GW_POSTAL) : new Promise((ok) => { const s = document.createElement('script'); s.src = base + POSTAL_JS; s.onload = () => ok(root.GW_POSTAL || null); s.onerror = () => { postalP = null; ok(null); }; document.head.appendChild(s); }));
+    const getJ = (f) => fetch(base + f).then((x) => (x.ok ? x.json() : null)).catch(() => null);
+    const loadUp = () => upP || (upP = getJ('data/map/upcoming.json').then((d) => (d && Array.isArray(d.items) ? d : null)));
+    const loadPd = () => pdP || (pdP = loadPostal().then((GP) => (GP ? GP.loadData(base) : {})));
+    // which kind of address: the shared sorting in gw-postal.js (same order Property values uses: development, HDB block, landed home, else a place); names are shown as Research shows them
+    function classifyAddr(GP, a, D) {
+      const c = GP.classify(a, D);
+      return c.name ? Object.assign({}, c, { name: displayName(c.name) }) : c;
+    }
+    const mapPc = (a) => base + 'research/map/#pl=' + encodeURIComponent('postal:' + a.n);
+    // -> option rows for one resolved address: the destination that fits it first, "View on Map" second
+    function postalRows(a, c, opt, kn) {
+      const where = esc(a.title) + (a.building && a.sub ? ' · ' + esc(a.sub.split(' · ')[0]) : '') + ' · ' + a.code;
+      const ico = svg('map'), id = (t) => ' data-gw-nav-to="' + t + '"';
+      let first;
+      if (c.k === 'dev') first = opt(kn(), base + 'research/#/p/' + encodeURIComponent(c.id), svg('dev') + '<span><b>' + esc(c.name) + '</b><small>' + esc(({ ec: 'Executive Condominium', cluster: 'Cluster housing' }[c.cls] || 'Condominium') + ' · ' + a.title + ' · ' + a.code) + '</small></span>', id('postal-development'));
+      else if (c.k === 'up') first = opt(kn(), base + 'research/map/#p=' + encodeURIComponent(c.id), ico + '<span><b>' + esc(c.name) + '</b><small>' + esc('New launch or site · ' + a.code) + '</small></span>', id('postal-launch'));
+      else if (c.k === 'hdb' && c.h && root.GW_POSTAL) first = opt(kn(), base + 'research/' + root.GW_POSTAL.hdbHash(c.h), svg('worth') + '<span><b>Blk ' + esc(c.h.block) + ' ' + esc(root.GW_POSTAL.streetName(c.h.street)) + '</b><small>HDB flat · ' + esc(c.h.townName || '') + ' · ' + a.code + ' · Resale prices</small></span>', id('postal-hdb'));
+      else if (c.k === 'hdb') first = opt(kn(), base + 'journey/worth/#pc=' + a.code, svg('worth') + '<span><b>' + esc(a.title) + '</b><small>HDB flat · ' + a.code + ' · Property values</small></span>', id('postal-hdb'));
+      else if (c.k === 'landed') first = opt(kn(), base + 'journey/worth/#pc=' + a.code, svg('worth') + '<span><b>' + esc(a.title) + '</b><small>Landed home · ' + a.code + ' · Property values</small></span>', id('postal-landed'));
+      else first = opt(kn(), mapPc(a), ico + '<span><b>' + esc(a.title) + '</b><small>' + esc((a.building && a.sub ? a.sub.split(' · ')[0] + ' · ' : '') + a.code + ' · Open on Map') + '</small></span>', id('postal-map'));
+      const second = c.k === 'place' || c.k === 'up' ? '' : opt(kn(), mapPc(a), ico + '<span><b>View on Map</b><small>' + esc(a.title) + ' · what is nearby</small></span>', id('postal-map'));
+      return first + second;
+    }
+    // new launches and awarded sites (data/map/upcoming.json) by name or any name they are known by; the Map holds their panel
+    function matchUps(doc, query, skipNames, skipIds) {
+      const q = dnorm(query); if (q.length < 3 || !doc || !doc.items) return [];
+      const qs = /^the .{2,}/.test(q) ? [q, q.slice(4)] : [q];   // a leading "The" is optional
+      return doc.items.map((it) => { let s = 0; [it.name].concat(it.aliases || []).forEach((a) => { const n = dnorm(a); qs.forEach((qq) => { const v = n === qq ? 3 : n.indexOf(qq) === 0 ? 2 : (' ' + n).indexOf(' ' + qq) >= 0 ? 1 : 0; if (v > s) s = v; }); }); return { s, it }; })
+        .filter((x) => x.s && skipNames.indexOf(dnorm(x.it.name)) < 0 && skipIds.indexOf(x.it.id) < 0).sort((a, b) => b.s - a.s).slice(0, 3).map((x) => x.it);
+    }
+    const upSub = (u) => [u.kind === 'launch' ? 'New launch' : u.unnamed ? 'Awarded ' + (u.agency || 'URA') + ' site, no project name yet' : 'Awarded ' + (u.agency || 'URA') + ' site', u.district ? 'District ' + Number(u.district) : u.area || '', 'On the Map'].filter(Boolean).join(' · ');
+
+    // ---- search ----
+    let ixP = null, sitesP = null;
+    const loadIx = () => ixP || (ixP = fetch(base + 'data/projects/index.json').then((x) => (x.ok ? x.json() : null)).catch(() => { ixP = null; return null; }));
+    const loadSites = () => sitesP || (sitesP = fetch(base + 'data/research/sites.json').then((x) => (x.ok ? x.json() : null)).catch(() => null));
+    [].slice.call(document.querySelectorAll('[data-gw-search]')).forEach((box) => {
+      box.hidden = false;
+      const inp = box.querySelector('input'), res = box.querySelector('.gw-sx-res'), body = box.closest('.gw-mx') ? box.closest('.gw-mx').querySelector('[data-gw-menu-body]') : null;
+      let active = -1, seq = 0; const devsOnly = box.hasAttribute('data-gw-devs');
+      const items = () => [].slice.call(res.querySelectorAll('[role="option"]'));
+      const setActive = (k) => { const it = items(); active = it.length ? (k + it.length) % it.length : -1; it.forEach((a, j) => a.setAttribute('aria-selected', String(j === active))); if (active >= 0) { inp.setAttribute('aria-activedescendant', it[active].id); it[active].scrollIntoView({ block: 'nearest' }); } else inp.removeAttribute('aria-activedescendant'); };
+      const opt = (k, h, inner, extra) => '<a role="option" id="' + res.id + '-' + k + '" class="gw-sx-r" href="' + esc(h) + '"' + (extra || '') + '>' + inner + '</a>';
+      function render(q, devs, sites, loading, failed, roads, ups, pc) {
+        const st = devsOnly ? [] : scoredTools(q, devs && devs.length ? 4 : 6), tools = st.map((x) => x.e);
+        const all = (sites || []).map((s) => ({ site: s })).concat(devs || []);
+        // A development whose name starts with what was typed comes first, unless a tool matches the words exactly (ABSD, mortgage…).
+        const devFirst = all.length && ((sites && sites.length) || (all[0].score || 0) >= 80) && !(st[0] && st[0].s >= 90);
+        let h = '', k = 0, after = '';
+        // Audit A5-27: the listbox holds only options, in labelled groups; the group headings are visual only.
+        const group = (label, inner) => '<div role="group" aria-label="' + label + '" style="display:grid;gap:1px"><p class="gw-sx-h" aria-hidden="true">' + label + '</p>' + inner + '</div>';
+        const toolsHtml = () => (tools.length ? group('Pages', tools.map((e) => opt(k++, href(e, base), svg(e.icon) + '<span><b>' + esc(e.name) + (e.ext ? ' <i aria-hidden="true">↗</i>' : '') + '</b><small>' + (e.sec ? '<em class="gw-sec gw-sec-' + e.sec + '">' + SECTIONS[e.sec].name + '</em> ' : '') + esc(e.tag) + '</small></span>', ' data-gw-nav-to="' + e.id + '"' + (e.ext ? ' target="_blank" rel="noopener"' : ''))).join('')) : '');
+        if (!devFirst) h += toolsHtml();
+        if (all.length) h += group('Developments · Research', all.map((d) => d.site
+          ? opt(k++, d.site.url, svg('ext') + '<span><b>' + esc(d.site.name) + ' <i aria-hidden="true">↗</i></b><small>Ken’s site for this development</small></span>', ' data-gw-nav-to="site-' + esc(d.site.id) + '" target="_blank" rel="noopener"')
+          : opt(k++, base + 'research/#/p/' + encodeURIComponent(d.id), svg('dev') + '<span><b>' + esc(d.name) + '</b><small>' + esc([d.cls === 'ec' ? 'Executive Condominium' : d.cls === 'cluster' ? 'Cluster housing' : '', d.street, 'District ' + d.district, d.n + ' sale' + (d.n === 1 ? '' : 's') + ' in 5 years'].filter(Boolean).join(' · ')) + '</small></span>', ' data-gw-nav-to="development"')).join(''));
+        // Roads and streets: one result per road, leading to what sold around it (landed homes are sold by street, not by development name).
+        if (pc && pc.items && pc.items.length) h += group('Postal code', pc.items.map((x) => postalRows(x.a, x.c, opt, () => k++)).join(''));
+        if (pc && pc.note) after += '<p class="gw-sx-note" data-gw-sx-postal="' + pc.state + '" role="status">' + esc(pc.note) + '</p>';
+        if (ups && ups.length) h += group('New launches and sites · Map', ups.map((u) => opt(k++, base + 'research/map/#p=' + encodeURIComponent(u.id), svg('map') + '<span><b>' + esc(u.name) + '</b><small>' + esc(upSub(u)) + '</small></span>', ' data-gw-nav-to="launch"')).join(''));
+        if (roads && roads.length) h += group('Roads and streets', roads.map((d) => opt(k++, roadLandedHref(base, d), svg('map') + '<span><b>' + esc(d.title) + '</b><small>' + esc((d.area ? d.area + ' · ' : '') + 'What landed homes sold for nearby') + '</small></span>', ' data-gw-nav-to="road"')).join(''));
+        if (devFirst) h += toolsHtml();
+        // Audit A5-11: if the development list couldn't load, say so instead of quietly showing tools only.
+        if (failed) after += '<p class="gw-sx-note" data-gw-sx-failed>Development search didn’t load. Check your connection and try again, or <a href="' + base + 'research/#/browse" data-gw-nav-to="directory">browse every development</a>.</p>';
+        if (loading) after += '<p class="gw-sx-note">Searching developments…</p>';
+        else if (!tools.length && !all.length && !(roads && roads.length) && !(ups && ups.length) && !pc && !failed) after += '<p class="gw-sx-note">Nothing matches “' + esc(q.slice(0, 40)) + '”. ' + (devsOnly ? 'Try part of the development’s name.' : 'Try a development name, or words like stamp duty, ABSD, mortgage, valuation or HDB upgrade.') + '</p>';
+        else if (all.length) after += '<a class="gw-sx-more" href="' + base + 'research/#/browse" data-gw-nav-to="directory">Not listed? Browse every development ›</a>';
+        res.innerHTML = (h ? '<div role="listbox" id="' + inp.getAttribute('aria-controls') + '" aria-label="Search results" style="display:grid;gap:1px">' + h + '</div>' : '') + after;
+        res.hidden = false; inp.setAttribute('aria-expanded', 'true'); if (body) body.hidden = true;
+        setActive(0);
+      }
+      function clear() { res.hidden = true; res.innerHTML = ''; inp.setAttribute('aria-expanded', 'false'); active = -1; if (body) body.hidden = false; }
+      let tmr;
+      // a six-digit postal code: look the address up, then say where it belongs
+      function runPostal(q, code) {
+        const my = ++seq;
+        render(q, [], [], false, false, [], [], { state: 'loading', note: 'Looking up ' + code + '…' });
+        Promise.all([loadPostal(), loadPd()]).then(([GP, D]) => {
+          if (my !== seq) return;
+          if (!GP) { render(q, [], [], false, false, [], [], { state: 'error', note: 'Postal codes could not be looked up just now. Check your connection and try again.' }); return; }
+          return GP.lookup(code).then((r) => {
+            if (my !== seq) return;
+            if (r.state !== 'ok') { render(q, [], [], false, false, [], [], { state: r.state, note: GP.msg(r.state, code) }); track('search_postal', { state: r.state }); return; }
+            const items = r.list.map((a) => ({ a, c: classifyAddr(GP, a, D) }));
+            // an HDB address goes to its block's resale research: find the block and town as the resale records spell them
+            return Promise.all(items.map((x) => (x.c.k === 'hdb' && GP.hdbBlock ? GP.hdbBlock(x.a, x.c.towns, base).then((h) => { x.c = Object.assign({}, x.c, { h }); }).catch(() => null) : null))).then(() => {
+              if (my !== seq) return;
+              render(q, [], [], false, false, [], [], { state: 'ok', items }); track('search_postal', { state: 'ok', kind: items[0] && items[0].c.k });
+            });
+          });
+        });
+      }
+      function run() {
+        const q = inp.value.trim(), my = ++seq;
+        if (!q) { clear(); return; }
+        const pcm = devsOnly ? null : PC_RE.exec(q); if (pcm) { runPostal(q, pcm[1]); return; }
+        const needDevs = dnorm(q).length >= 2;
+        if (!needDevs) { render(q, [], [], false); return; }
+        if (ixP && ixP.__v) {
+          const again = () => { const dv = matchDevs(ixP.__v, q, 6), st = matchSites(sitesP && sitesP.__v, q); render(q, dv, st, false, false, roadsNow(q, 3), devsOnly ? [] : matchUps(upP && upP.__v, q, dv.map((d) => dnorm(d.name)).concat(st.map((x) => dnorm(x.name))), dv.map((d) => d.id).concat(st.map((x) => x.id)))); };
+          again(); if (!roadsCache && q.length >= 3) findRoads(q, 3).then(() => { if (my === seq) again(); });
+          return;
+        }
+        render(q, [], [], true);
+        Promise.all([loadIx(), loadSites(), findRoads(q, 3), devsOnly ? null : loadUp()]).then(([ix, st, rd, up]) => {
+          if (!ix) ixP = null; else if (ixP) ixP.__v = ix;   // a failed load is tried again on the next search
+          if (sitesP) sitesP.__v = st; if (up && upP) upP.__v = up; if (my !== seq) return;
+          const dv = matchDevs(ix, q, 6), ss = matchSites(st, q);
+          render(q, dv, ss, false, !ix, rd, devsOnly ? [] : matchUps(up, q, dv.map((d) => dnorm(d.name)).concat(ss.map((x) => dnorm(x.name))), dv.map((d) => d.id).concat(ss.map((x) => x.id))));
+        });
+      }
+      inp.addEventListener('input', () => { clearTimeout(tmr); tmr = setTimeout(run, 90); });
+      inp.addEventListener('focus', () => { loadIx(); loadSites(); if (!devsOnly) loadUp(); if (inp.value.trim()) run(); });
+      inp.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown') { e.preventDefault(); setActive(active + 1); } else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(active - 1); }
+        else if (e.key === 'Enter') { const it = items(); if (it.length) { e.preventDefault(); (it[active >= 0 ? active : 0]).click(); } else e.preventDefault(); }
+        else if (e.key === 'Escape' && inp.value) { e.stopPropagation(); inp.value = ''; clear(); }
+      });
+      inp.addEventListener('search', () => { if (!inp.value) clear(); });
+      [].slice.call(box.querySelectorAll('[data-gw-try]')).forEach((b) => b.addEventListener('click', () => { inp.value = b.dataset.gwTry; inp.focus(); run(); }));
+    });
+
+    // Audit V3-05 / R1.2.2 (Ken, 16 Oct 2026, Option B): "Clear my figures" (the Menu) and "Clear all my figures" (the Planner) are one action.
+    // It asks first, in the page (no dialog), says what goes and what stays, then removes every figure this tab holds (clearJourney: all gw.* and
+    // kpt.* keys; only which path the visitor is on and what they own stay), empties the boxes on this page and reloads it so no figure is left on screen.
+    const CONFIRM = 'gw-confirm-clear';
+    // the confirmation's look, added when it is first shown (R1.2.2): light, restrained, 44px targets; nothing in the shared stylesheet changes
+    const CONFIRM_CSS = '.gw-confirm{flex-basis:100%;width:100%;box-sizing:border-box;margin:10px 0 0;padding:14px 16px 16px;border:1px solid #E3E3E8;border-left:4px solid #A9822F;border-radius:14px;background:#fff;text-align:left}.gw-confirm-h{margin:0 0 6px;font-size:16px;font-weight:700;color:#16213E}.gw-confirm-p{margin:0 0 8px;font-size:14px;line-height:1.5;color:#3B4256}.gw-confirm-b{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.gw-confirm-b .gw-btn{min-height:44px;padding:10px 18px;font-size:15px;width:auto;max-width:100%}@media (max-width:719px){.gw-confirm-b .gw-btn{flex:1 1 100%}}body.gw-confirming .pl-strip{display:none!important}@media print{.gw-confirm{display:none!important}}';
+    const closeConfirm = (focusBack) => {
+      const p = document.getElementById(CONFIRM); if (!p) return; const from = p.__from; p.remove(); document.body.classList.remove('gw-confirming');
+      if (from) { from.setAttribute('aria-expanded', 'false'); if (focusBack && from.focus) from.focus(); }
+    };
+    document.addEventListener('click', (e) => {
+      const t = e.target; if (!t || !t.closest) return;
+      const b = t.closest('[data-gw-clear-all]');
+      if (b) {
+        if (document.getElementById(CONFIRM)) { closeConfirm(true); return; }
+        if (!document.getElementById(CONFIRM + '-css')) { const st = document.createElement('style'); st.id = CONFIRM + '-css'; st.textContent = CONFIRM_CSS; document.head.appendChild(st); }
+        const p = document.createElement('div'); p.id = CONFIRM; p.className = 'gw-confirm'; p.setAttribute('role', 'group'); p.setAttribute('aria-labelledby', CONFIRM + '-h'); p.__from = b;
+        p.innerHTML = '<p class="gw-confirm-h" id="' + CONFIRM + '-h">Clear all my figures?</p>' +
+          '<p class="gw-confirm-p"><b>This removes</b> every figure Groundwork holds for you in this browser tab: the payment planner, every calculator (prices, CPF, income, debts, loans, sale figures), and the figures carried into the HDB upgrade tool and the What can I buy? tool. Nothing was sent to a server, so nothing else needs deleting.</p>' +
+          '<p class="gw-confirm-p"><b>This keeps</b> which path you are on and the type of home you chose, with no figures. It cannot be undone.</p>' +
+          '<div class="gw-confirm-b"><button type="button" class="gw-btn pri" data-gw-clear-yes>Yes, clear all my figures</button><button type="button" class="gw-btn sec" data-gw-clear-no>Keep my figures</button></div>';
+        const host = b.closest('.pl-startover, .gw-mclear') || b; host.insertAdjacentElement('afterend', p);
+        b.setAttribute('aria-expanded', 'true'); document.body.classList.add('gw-confirming'); // the phone result bar steps aside so nothing covers the buttons
+        const y = p.querySelector('[data-gw-clear-yes]'); if (y) y.focus({ preventScroll: true }); try { p.scrollIntoView({ block: 'center' }); } catch (x) { /* ignore */ }
+        return;
+      }
+      if (t.closest('[data-gw-clear-no]')) { closeConfirm(true); return; }
+      if (t.closest('[data-gw-clear-yes]')) {
+        clearJourney();
+        [].slice.call(document.querySelectorAll('main input, main textarea')).forEach((x) => { if (!/^(search|checkbox|radio|button|submit|hidden|date)$/.test(x.type)) x.value = x.dataset.default !== undefined ? x.dataset.default : ''; });
+        try { root.location.reload(); } catch (x) { /* ignore */ }
+      }
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && document.getElementById(CONFIRM)) { e.stopPropagation(); closeConfirm(true); } }, true);
+    // Every calculator's "Clear them" ([data-clear]) also removes the rest of this tab's journey figures (audit A3-07).
+    document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('[data-clear]')) clearJourney(); });
+
+    // ---- the "Upgrading from HDB" step strip ----
+    const path = location.pathname, here = /\/tools\/sale-proceeds\/$/.test(path) ? 'sale-proceeds' : /\/tools\/hdb-upgrade\/$/.test(path) ? 'hdb-upgrade' : /\/tools\/what-can-i-buy\/$/.test(path) ? 'what-can-i-buy' : /\/journey\/worth\/$/.test(path) ? 'worth' : null;
+    if (/\/journey\/$/.test(path) && location.hash === '#up') setCtx({ path: 'upgrade' });
+    const showStrip = () => {
+      const old = document.querySelector('[data-gw-strip]'); if (old) old.remove();
+      const C = getCtx(); if (!here || C.path !== 'upgrade' || (here === 'worth' && C.type && C.type !== 'hdb')) return;
+      const anchor = document.querySelector('main') || document.body; const host = document.createElement('div'); host.className = 'gw-strip-host'; host.innerHTML = stripHtml(here, base, upDone());
+      anchor.insertBefore(host, anchor.firstChild);
+      document.documentElement.classList.add('gw-onpath'); // the page's own heading and intro step back so the inputs come first
+      const off = host.querySelector('[data-gw-strip-off]'); if (off) off.addEventListener('click', () => { setCtx({ path: null }); host.remove(); document.documentElement.classList.remove('gw-onpath'); });
+    };
+    showStrip();
+    // Journey or standalone (Package 3). A tool opened from a journey (Buy or Sell in the menu, a Journey page, Research, the Planner, the step strip) gets "?j=1" on its address: only that marker, never a figure.
+    // The tool then shares figures with the journey, as before. A tool opened from Tools (the Tools menu column, All tools, search results, a typed address) has no marker and starts a fresh, independent calculation.
+    const TOOL_PAGE = /\/tools\/(?!what-can-i-buy\/?$)[a-z0-9-]+\/?$/;
+    const ALONE = '.gw-ms-tools, .gw-sx, .gw-tdir, .gw-qt, .gw-foot, .gw-secs';
+    const fromJourney = (a) => {
+      if (a.closest(ALONE)) return false;
+      if (a.closest('.gw-ms-buy, .gw-ms-sell, .gw-strip, [data-gw-journey]')) return true;
+      return /\/(journey|research)\//.test(root.location.pathname) || !!document.querySelector('[data-pa]') || /[?&]j=1(&|$)/.test(root.location.search);
+    };
+    const markJourney = (e) => {
+      const a = e.target && e.target.closest ? e.target.closest('a[href]') : null; if (!a) return;
+      let u; try { u = new URL(a.getAttribute('href'), root.location.href); } catch (x) { return; }
+      if (u.origin !== root.location.origin || !TOOL_PAGE.test(u.pathname) || u.searchParams.get('j') === '1' || !fromJourney(a)) return;
+      u.searchParams.set('j', '1'); a.setAttribute('href', u.pathname + u.search + u.hash);
+    };
+    document.addEventListener('click', markJourney, true); document.addEventListener('auxclick', markJourney, true);
+    // Buy · Sell: on the guided-path page the link for the open path is marked (Buy for #buy, Sell for #sell); the other paths mark neither.
+    if (/\/journey\/?$/.test(location.pathname)) {
+      const mark = () => { const h = (location.hash || '').replace('#', ''); [].slice.call(document.querySelectorAll('.gw-nav .gw-links a[data-kpt-nav], .gw-secs a[data-gw-nav-to]')).forEach((a) => { const k = a.getAttribute('data-kpt-nav') || a.getAttribute('data-gw-nav-to'); if (k === 'buy' || k === 'sell') { if (k === h) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); } }); };
+      mark(); window.addEventListener('hashchange', mark);
+    }
+    // The four-step page (journey #up): finished steps ticked, the main button points at the next one.
+    const upBox = document.querySelector('[data-gw-up]');
+    if (upBox) {
+      const D = upDone(), keys = UP.map((x) => x[0]); let ni = keys.findIndex((k) => !D[k]); if (ni < 0) ni = keys.length - 1;
+      [].slice.call(upBox.querySelectorAll('[data-up-step]')).forEach((li, k) => { const ok = !!D[keys[k]] && k !== ni; li.classList.toggle('done', ok); li.classList.toggle('now', k === ni); const i = li.querySelector('i'); if (i) i.textContent = ok ? '✓' : String(k + 1); });
+      const go = upBox.querySelector('[data-gw-up-go]'); if (go) { go.href = base + UP[ni][2]; go.textContent = UP_GO[keys[ni]] + ' ›'; go.dataset.gwGo = 'up-' + keys[ni]; }
+    }
+    // The moving guide (journey page) tells us when a visitor chooses the HDB upgrade path.
+    document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-gw-q]'); if (!b) return; setTimeout(() => { const C = getCtx(), g = b.closest('[data-gw-guide]'); const dir = g && g.querySelector('[data-gw-q="dir"][aria-pressed="true"]'); setCtx({ path: C.type === 'hdb' && !(dir && dir.dataset.gwV === 'smaller') ? 'upgrade' : null }); }, 0); });
+
+    // ---- HDB Upgrade Planner: fill its fields from this tab's other calculations (its calculation is unchanged) ----
+    if (here === 'hdb-upgrade' && !/[?&]resume=/.test(location.search)) prefillPlanner();
+  }
+  function prefillPlanner() {
+    let s = {}; try { s = JSON.parse(root.sessionStorage.getItem('gw.fin.v1') || '{}') || {}; } catch (e) { s = {}; }
+    const $ = (id) => document.getElementById(id), num = (v) => { const n = parseFloat(String(v == null ? '' : v).replace(/[^0-9.]/g, '')); return isFinite(n) && n > 0 ? n : null; };
+    const put = (id, v, age) => { const el = $(id), n = num(v); if (!el || el.value || n === null) return false; el.value = age ? String(Math.round(n)) : Math.round(n).toLocaleString('en-SG'); el.dispatchEvent(new Event('input', { bubbles: true })); return true; };
+    let used = 0;
+    let cpf = 0;
+    if (s.homeType === 'hdb') {   // only a sale worked out for an HDB flat
+      used += put('salePrice', s.sellPrice); used += put('outstandingLoan', s.outstandingLoan);
+      // Audit A3-01: the CPF to refund on the sale (principal plus accrued interest) goes into the planner's refund field.
+      const cp = num(s.cpfPrincipal) || 0, ci = num(s.cpfInterest) || 0;
+      if (cp + ci > 0 && put('cpfRefundIn', cp + ci)) { used++; cpf = 1; const d = $('cpfRefundIn').closest('details'); if (d) d.open = true; }
+    }
+    // V1-05: the planner counts fixed pay plus 70% of variable and rental income (its rule line; the MAS 30% haircut), as TDSR does
+    const R = root.GW_RULES, keep = (k) => 1 - (R && typeof R[k] === 'number' ? R[k] : 0.3);
+    const income = (n) => { const f = num(s['borrowers.' + n + '.fixed']); if (f === null) return null; return f + (num(s['borrowers.' + n + '.variable']) || 0) * keep('variableIncomeHaircut') + (num(s['borrowers.' + n + '.rental']) || 0) * keep('rentalIncomeHaircut'); };
+    used += put('age1', s['borrowers.0.age'], true); used += put('income1', income(0));
+    if (num(s['borrowers.1.age']) && num(s['borrowers.1.fixed']) && !$('age2').value) { const b = document.querySelector('[data-group="buyers"] [data-value="2"]'); if (b) { b.click(); used += put('age2', s['borrowers.1.age'], true); used += put('income2', income(1)); } }
+    if (used) {
+      const f = $('salePrice') || $('age1'), note = document.createElement('p');
+      note.className = 'gw-prefill'; note.setAttribute('data-gw-prefill', '');
+      // Audit A3-13: say exactly what was carried over; selling costs are the planner's own estimate, not Sale proceeds' figures.
+      const A = root.KPT_ASSUMPTIONS, costs = A ? Math.round(A.commissionRate * 1000) / 10 + '% commission plus GST and $' + Number(A.saleLegalFees).toLocaleString('en-SG') + ' legal fees' : 'its own estimate';
+      const vr = [0, 1].some((n) => num(s['borrowers.' + n + '.variable']) || num(s['borrowers.' + n + '.rental']));
+      note.innerHTML = 'Filled in from your other calculations in this tab' + (cpf ? ', including the CPF you’ll refund' : '') + (vr ? '. Income is fixed pay plus 70% of variable and rental income, as banks count it' : '') + '. Selling costs here use this planner’s estimate (' + costs + '), not any changes you made in Sale proceeds. Check each figure before you continue. <button type="button" class="gw-link">Clear them</button>';
+      const host = f && f.closest('.kpt-field') ? f.closest('.kpt-field') : null;
+      if (host && host.parentNode) host.parentNode.insertBefore(note, host);
+      // Audit A5-08: Clear also removes the stored figures, so a reload doesn't fill them in again.
+      note.querySelector('button').addEventListener('click', () => { clearJourney(); ['salePrice', 'outstandingLoan', 'cpfRefundIn', 'age1', 'income1', 'age2', 'income2'].forEach((id) => { const el = $(id); if (el) { el.value = ''; el.dispatchEvent(new Event('input', { bubbles: true })); } }); note.remove(); });
+    }
+  }
+  if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount(); }
+  return { upDone, finStamp, clearJourney, oneEdit, deaccent, ENTRIES, SECTIONS, SEC_ORDER, NAV_ORDER, doorHtml, researchRows, secSwitch, row, MENU_TOOLS, QUICK, UP, MAIN, LAUNCHES, ASK, ICON, svg, norm, matchTools, scoredTools, matchDevs, matchSites, matchRoads, roadList, roadTitle, roadKey, roadLandedHref, roadMapHref, findRoads, roadsNow, displayName, menuHtml, searchHtml, quickHtml, stripHtml, href, esc };
+});

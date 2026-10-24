@@ -1,0 +1,49 @@
+/* The basic payment schedule (gw-paylist.js): one expandable list on What can I afford? and the HDB and EC loan limit page. */
+.ps-d{border-top:1px solid var(--gw-line);margin-top:6px}
+.ps-d>summary{list-style:none;cursor:pointer;display:flex;flex-wrap:wrap;gap:2px 12px;align-items:baseline;min-height:48px;padding:10px 0;font-weight:600;color:var(--gw-ink)}
+.ps-d>summary::-webkit-details-marker{display:none}
+.ps-d>summary::after{content:"+";margin-left:auto;font-size:20px;font-weight:400;color:var(--gw-muted)}
+.ps-d[open]>summary::after{content:"–"}
+.ps-d>summary em{font-style:normal;font-weight:400;font-size:13px;color:var(--gw-muted)}
+.ps-d>summary:focus-visible,.ps-chip:focus-visible,.ps-link a:focus-visible{outline:2px solid var(--gw-blue);outline-offset:2px}
+.ps-in{display:grid;gap:12px;padding:2px 0 14px}
+.ps-msg{margin:0;font-size:14px;line-height:1.5;color:var(--gw-body)}
+.ps-chips{display:flex;flex-wrap:wrap;gap:8px}
+.ps-chip{font:inherit;font-size:14px;min-height:40px;padding:6px 14px;border:1px solid var(--gw-line);border-radius:980px;background:#fff;color:var(--gw-body);cursor:pointer}
+.ps-chip[aria-pressed="true"]{background:var(--gw-ink);border-color:var(--gw-ink);color:#fff}
+.ps-fld{display:grid;gap:6px}
+.ps-fld[hidden],.ps-msg[hidden],.ps-chips[hidden],.ps-err[hidden]{display:none}
+.ps-fld label{font-size:13px;font-weight:600;color:var(--gw-ink)}
+.ps-pin{display:flex;align-items:center;border:1px solid var(--gw-line);border-radius:10px;background:#fff;min-height:46px;padding:0 12px;max-width:340px}
+.ps-pin:focus-within{border-color:var(--gw-blue);box-shadow:0 0 0 3px rgba(11,99,206,.18)}
+.ps-pin input:focus,.ps-pin input:focus-visible{outline:0;box-shadow:none}
+.ps-pin i{font-style:normal;color:var(--gw-muted);margin-right:6px}
+.ps-pin input{border:0;outline:0;background:transparent;font:inherit;font-size:16px;color:var(--gw-ink);width:100%;min-width:0;padding:10px 0}
+.ps-err{color:#8A1C1C;font-size:13px}
+.ps-hint{margin:0;font-size:13px;color:var(--gw-muted)}
+.ps-l{list-style:none;margin:0;padding:0;border-top:1px solid var(--gw-line)}
+.ps-r{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:2px 12px;align-items:start;padding:11px 0;border-bottom:1px solid var(--gw-line)}
+.ps-n{width:22px;height:22px;border:1px solid var(--gw-line);border-radius:50%;font-size:12px;line-height:20px;text-align:center;color:var(--gw-muted);margin-top:1px}
+.ps-m{display:grid;gap:2px;min-width:0}
+.ps-nm b{font-weight:600;color:var(--gw-ink);font-size:15px}
+.ps-nm small{font-size:12px;color:var(--gw-muted)}
+.ps-w{font-size:13px;color:var(--gw-body);line-height:1.45}
+.ps-w small{color:var(--gw-muted);font-size:12px;margin-left:4px}
+.ps-note{font-size:12.5px;line-height:1.45;color:var(--gw-muted)}
+.ps-a{font-size:15px;font-weight:700;color:var(--gw-ink);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ps-r.txt .ps-a{font-weight:500;font-size:13px;color:var(--gw-body);white-space:normal;max-width:130px}
+.ps-t{font-style:normal;display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:1px 7px;border-radius:980px;margin-left:6px;vertical-align:1px;background:var(--gw-grey);color:var(--gw-body)}
+.ps-t.b-rule{background:#E6F3EA;color:#175E2F}
+.ps-t.b-estimate,.ps-t.b-est{background:#FBF1D9;color:#7A5B12}
+.ps-tot{display:flex;justify-content:space-between;gap:12px;margin:0;padding:12px 0;font-weight:600;color:var(--gw-ink)}
+.ps-tot b{font-size:16px;font-variant-numeric:tabular-nums}
+.ps-foot{margin:2px 0 0;padding-left:18px;font-size:12.5px;line-height:1.5;color:var(--gw-muted)}
+.ps-link{margin:10px 0 0;font-size:14px}
+.ps-link a{color:var(--gw-blue);font-weight:600}
+@media (max-width:520px){.ps-r{grid-template-columns:22px minmax(0,1fr) auto;gap:2px 10px}.ps-r.txt .ps-a{max-width:104px}}
+@media (max-width:360px){.ps-r{grid-template-columns:minmax(0,1fr) auto}.ps-n{display:none}}
+
+.ps-sum{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px;margin:0 0 4px}
+.ps-sum div{display:grid;gap:1px;padding:8px 0;border-bottom:1px solid var(--gw-line)}
+.ps-sum dt{font-size:12px;color:var(--gw-muted)}.ps-sum dd{margin:0;font-weight:600;color:var(--gw-ink);font-variant-numeric:tabular-nums}
+@media (max-width:420px){.ps-sum{grid-template-columns:1fr}}
