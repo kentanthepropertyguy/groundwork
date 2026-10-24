@@ -1,4 +1,6 @@
 import json, os, pathlib, re, socket, subprocess, sys, time, urllib.parse
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from sizepick import pick_dominant, forget_size
 from playwright.sync_api import sync_playwright
 """Browser checks for Market pulse (desktop and phone). Run from the site folder:  python3 research/tests/pulse-render.py
 States: established (higher / stable / lower), a first look, too few sales, a new launch, an EC, nothing in 12 months, no earlier year.
@@ -30,6 +32,9 @@ CASES = {
   'ardmore-three': ('activity', '', 'none', 'Too few'),
 }
 BANNED = re.compile(r'apprecia|valuation of|forecast|predict|bargain|undervalu|overpric|guarantee|investment score', re.I)
+def open_dev(pg, base, pid, wait='#wa'):
+    # opens a development as a visitor who then picks the size that sold most (a size chosen earlier in the tab would otherwise carry over)
+    pg.goto(base + '#/p/' + pid); forget_size(pg); pg.reload(); pick_dominant(pg); pg.wait_for_selector(wait, state='attached')
 def expected_line(r):
     return r
 try:
@@ -44,7 +49,9 @@ try:
         pg.route(re.compile(r'googletagmanager|facebook\.net|onemap|google-analytics'), lambda r: r.fulfill(status=200, body=''))
         base = f'http://127.0.0.1:{P}/research/'
         for pid, (state, d, ev, txt) in CASES.items():
-            pg.goto(base + '#/p/' + pid); pg.wait_for_selector('[data-lg-cls]', timeout=15000); pg.wait_for_selector('[data-mp]', timeout=5000)
+            pg.goto(base + '#/p/' + pid); pg.wait_for_selector('[data-lg-cls]', timeout=15000); forget_size(pg); pg.reload(); pg.wait_for_selector('#sizeSel', state='attached', timeout=15000)
+            check(f'{vn}: {pid}: before a size is chosen there is no Market pulse (and no price) for a size', pg.query_selector('[data-mp]') is None and pg.query_selector('.lg-ans-v') is None and pg.query_selector('[data-lg-ov]') is not None)
+            pick_dominant(pg); pg.wait_for_selector('[data-mp]', timeout=5000)
             mp = pg.query_selector('[data-mp]'); h = pg.inner_text('.mp-h'); hs = h + ' ' + pg.inner_text('.mp-s')
             check(f'{vn}: {pid}: pulse state is {state}/{d or "-"}/{ev}', mp.get_attribute('data-mp-state') == state and (mp.get_attribute('data-mp-dir') or '') == d and mp.get_attribute('data-mp-evidence') == ev, [mp.get_attribute('data-mp-state'), mp.get_attribute('data-mp-dir'), mp.get_attribute('data-mp-evidence')])
             check(f'{vn}: {pid}: summary says "{txt}" ({h})', txt.lower() in hs.lower() and len(h) <= 80, hs)
@@ -53,13 +60,13 @@ try:
             check(f'{vn}: {pid}: the limit sits beside the figures and the method is collapsed', 'Not a valuation or a forecast' in pg.inner_text('.mp-fine') and pg.query_selector('.mp-d') is not None and not pg.get_attribute('.mp-d', 'open'))
             body = pg.inner_text('[data-mp]')
             check(f'{vn}: {pid}: no valuation or forecast wording', not BANNED.search(body.replace('Not a valuation or a forecast', '')), body[:200])
-            check(f'{vn}: {pid}: the pulse comes right after the price answer and before the size chips', pg.evaluate("""() => { const a = document.querySelector('.lg-ans'), m = document.querySelector('[data-mp]'), s = document.querySelector('.lg-sizes'); const pos = (x, y) => !!(x.compareDocumentPosition(y) & Node.DOCUMENT_POSITION_FOLLOWING); return pos(a, m) && (!s || pos(m, s)); }"""))
+            check(f'{vn}: {pid}: the pulse comes right after the price answer, and the size question comes first', pg.evaluate("""() => { const a = document.querySelector('.lg-ans'), m = document.querySelector('[data-mp]'), s = document.querySelector('.lg-sizes'); const pos = (x, y) => !!(x.compareDocumentPosition(y) & Node.DOCUMENT_POSITION_FOLLOWING); return pos(a, m) && (!s || (pos(s, a) && pos(s, m))); }"""))
             check(f'{vn}: {pid}: no sideways scroll', pg.evaluate('document.documentElement.scrollWidth <= innerWidth'))
             if state == 'trend' and ev == 'strong':
                 tops = pg.evaluate("[...document.querySelectorAll('.mp-h')].map(e => Math.round(e.getBoundingClientRect().bottom))")
                 check(f'{vn}: {pid}: the pulse headline is on the first screen ({tops[0]}px of {H})', tops[0] <= H, tops)
         # the one claim that matters: the figures on screen are the figures in the data
-        pg.goto(base + '#/p/1-canberra'); pg.wait_for_selector('[data-mp]')
+        pg.goto(base + '#/p/1-canberra'); pick_dominant(pg); pg.wait_for_selector('[data-mp]')
         r = PULSE['1-canberra']; txt = pg.inner_text('[data-mp]')
         check(f'{vn}: 1-canberra shows the change, the count and the latest sale from the data', f"+{r['c']:g}%" in txt.replace('.0%', '%') or f"{r['c']:g}%" in txt, txt[:300])
         check(f'{vn}: 1-canberra counts agree with the Map file', str(r['a']) in txt and str(r['b']) in txt)
@@ -76,7 +83,7 @@ try:
             return pg.evaluate("[...document.querySelectorAll('[data-lg-for] > *')].map(e => e.id || (e.querySelector('a[id]') && e.querySelector('a[id]').id) || (e.querySelector('a') && e.querySelector('a').getAttribute('href') || '').slice(0, 20))")
         for who, first in [('', 'budget'), ('buy', 'wa'), ('sell', 'waOwn')]:
             pg.evaluate("w => { try { w ? sessionStorage.setItem('kpt.pulse.for', w) : sessionStorage.removeItem('kpt.pulse.for'); } catch (e) {} }", who)
-            pg.goto(base + '#/p/parc-clematis'); pg.reload(); pg.wait_for_selector('#wa')
+            open_dev(pg, base, 'parc-clematis')
             ids = pg.evaluate("[...document.querySelectorAll('[data-lg-for] > *')].map(e => { const a = e.querySelector('a'); return a ? (a.id || a.getAttribute('href') || '') : ''; })")
             lead = ids[0]
             check(f'{vn}: next steps ({who or "no question asked"}): {first} comes first', (first == 'budget' and lead not in ('wa', 'waOwn')) or lead == first, ids)
@@ -91,10 +98,10 @@ try:
             check(f'{vn}: {sel} opens WhatsApp with an editable message naming the development, the finding, the report and {ref}', 'wa.me' in href and all(w in msg for w in words) and ref in msg and '/research/#/p/parc-clematis' in msg and 'broadly the same as a year earlier' in msg, msg)
             check(f'{vn}: {sel} message holds no money, income or CPF', not re.search(r'budget|income|cpf|loan|\$', msg.split('/research/')[0], re.I), msg)
         # a first-look reading is described as such in the message
-        pg.goto(base + '#/p/1-moulmein-rise'); pg.reload(); pg.wait_for_selector('#wa')
+        open_dev(pg, base, '1-moulmein-rise')
         m1 = urllib.parse.unquote(pg.get_attribute('#wa', 'href').split('text=', 1)[1])
         check(f'{vn}: a first-look reading goes into the message as a first look', 'first look' in m1.lower(), m1)
-        pg.goto(base + '#/p/24-one-residences'); pg.reload(); pg.wait_for_selector('#waOwn')
+        open_dev(pg, base, '24-one-residences', '#waOwn')
         m2 = urllib.parse.unquote(pg.get_attribute('#waOwn', 'href').split('text=', 1)[1])
         check(f'{vn}: a development with no recent resales says so in the message', 'no resales in the last 12 months' in m2.lower(), m2)
         # Sell: the moving guide's development step sets the owner's question
@@ -108,7 +115,7 @@ try:
         pg.goto(f'http://127.0.0.1:{P}/journey/#buy'); pg.wait_for_selector('a[data-pulse-for="buy"]', state='attached', timeout=10000)
         pg.evaluate("document.querySelector('a[data-pulse-for=buy]').click()"); pg.wait_for_timeout(300)
         check(f'{vn}: following Buy\'s research step keeps the buyer\'s question for this tab', pg.evaluate("sessionStorage.getItem('kpt.pulse.for')") == 'buy')
-        pg.goto(base + '#/p/parc-clematis'); pg.wait_for_selector('#wa')
+        open_dev(pg, base, 'parc-clematis')
         check(f'{vn}: and the report then leads with the asking-price question', pg.evaluate("document.querySelector('[data-lg-for] > *').querySelector('a').id") == 'wa')
         # Home entry
         pg.goto(f'http://127.0.0.1:{P}/'); pg.wait_for_selector('.gw-door-research', state='attached', timeout=10000)
@@ -131,7 +138,7 @@ try:
             if vn == 'phone': check(f'{vn}: Map: it is the first thing in the opened sheet', pg.evaluate("(() => { const l = document.querySelector('[data-mp-line]'), x = document.querySelector('.bs .sxs'); return !!(l && x && (l.compareDocumentPosition(x) & Node.DOCUMENT_POSITION_FOLLOWING)); })()"))
             check(f'{vn}: Map: no sideways scroll', pg.evaluate('document.documentElement.scrollWidth <= innerWidth'))
             check(f'{vn}: the line itself has no second link to the report', line.query_selector('a') is None)
-            pg.click('a.btn[data-m-full]'); pg.wait_for_url('**/research/#/p/parc-clematis', timeout=10000); pg.wait_for_selector('[data-mp]', timeout=10000)
+            pg.click('a.btn[data-m-full]'); pg.wait_for_url('**/research/#/p/parc-clematis**', timeout=10000); pick_dominant(pg); pg.wait_for_selector('[data-mp]', timeout=10000)
             check(f'{vn}: "Full market report" opens the same development\'s report in Research', 'broadly the same as a year earlier' in pg.inner_text('.mp-h'))
             back = pg.query_selector('.lg-back'); check(f'{vn}: and the way back to the Map is kept', back is not None and 'Map' in back.inner_text(), back and back.inner_text())
             if back:

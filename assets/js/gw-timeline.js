@@ -17,7 +17,7 @@
 })(typeof self !== 'undefined' ? self : this, function (R, C) {
   'use strict';
   if (!R || !C || typeof C.progressive !== 'function' || typeof C.stampDuty !== 'function') throw new Error('GW_TIMELINE needs GW_RULES and GW_CALC');
-  const VERSION = 'R2.7-2026-10-21';
+  const VERSION = 'C1-2026-10-24';
   // No option date: the timeline runs from a fixed reference day that stands for "the option date" (the same one the schedule adapter uses). It is never shown as a date.
   const UNDATED_REF = '2000-01-01';
   const num = (x) => (typeof x === 'number' && isFinite(x) ? x : null);
@@ -94,6 +94,8 @@
     if (order === 'buy') { if (!pos(sale.month) && !D(sale.date)) bad.push({ field: 'sale', text: 'Buy-first needs the month (after the option) or the date when the flat sale completes.' }); }
     ['cash', 'cpf'].forEach((k) => { if (num(sale[k]) !== null && sale[k] < 0) bad.push({ field: 'sale.' + k, text: 'Amounts can’t be negative.' }); });
     if (i.rent && num(i.rent.monthly) !== null && i.rent.monthly < 0) bad.push({ field: 'rent', text: 'Rent can’t be negative.' });
+    if (num(i.flatInstal) !== null && (i.flatInstal < 0 || i.flatInstal > C.LIMITS.money.max)) bad.push({ field: 'flatInstal', text: i.flatInstal < 0 ? 'Amounts can’t be negative.' : C.LIMITS.money.text });
+    if (Array.isArray(sale.owners) && sale.owners.some((k) => !Number.isInteger(k) || k < 0 || k >= (i.buyers || []).filter(Boolean).length)) bad.push({ field: 'sale.owners', text: 'The owners of the home being sold must be among the buyers.' });
     if (bad.length) return invalid(bad);
     const need = [];
     if (!pos(i.price)) need.push('price'); if (!entity && !pos(i.age)) need.push('age'); if (!entity && !(i.buyers || []).filter(Boolean).length) need.push('buyers');
@@ -105,7 +107,9 @@
   // i: { kind: 'new'|'ec'|'completed', price, otp: 'YYYY-MM-DD', buyers: [{ res, owned }], age (income-weighted average), years, ratePct,
   //      loansOther (housing loans other than the flat's, default 0), flatLoan: none|discharged|contracted|undertaking|outstanding,
   //      cash, cpf (CPF OA usable now), saveMo, cpfMo, payInstalmentFromCpf (default true),
-  //      order: 'buy'|'sell'|'none', sale: { month | date, cash, cpf, removesOwnership (default true) },
+  //      order: 'buy'|'sell'|'none', sale: { month | date, cash, cpf, removesOwnership (default true), owners (C1: indexes of the buyers who own the home being sold) },
+  //      couple (C1: true = a married couple buying in their two names only; passed to the stamp duty), flatInstal (C1: buy first, the monthly instalment on the home being sold,
+  //      paid until its sale completes),
   //      refund: { assume: bool, monthsAfterSale (default 2) | date }, rent: { monthly, untilKeys (default true) | until: date },
   //      dutyFromCpf: { amount, monthsAfter } (optional CPF reimbursement of stamp duty; off by default),
   //      stages: [{ id, name, pct, date?, months? }] (optional; default R.pps), dates: { mode: 'grouped'|'spread', top, csc, stages: { id: date } },
@@ -131,17 +135,30 @@
     const capPref = num(i.prefLoan) === null ? undefined : Math.max(0, i.prefLoan);
     const loanCapIn = num(i.loanCap) === null ? capPref : (capPref === undefined ? i.loanCap : Math.min(i.loanCap, capPref));
 
-    // --- buyers for duty: sell-first completes the flat sale before the purchase, so each buyer who owned it owns one fewer ---
+    // --- buyers for duty: sell-first completes the flat sale before the purchase, so each buyer who owned IT owns one fewer (C1, B2: never another buyer who owns a different home) ---
     const removes = !(i.sale && i.sale.removesOwnership === false);
-    const buyers = entity ? [] : (i.buyers || []).filter(Boolean).map((b) => ({ res: b.res, owned: order === 'sell' && removes ? Math.max(0, Math.min(2, +b.owned) - 1) : +b.owned }));
-    if (order === 'sell' && removes) assumptions.push({ id: 'sold-ownership', text: 'Sold first: the flat is no longer owned when the new home is bought, so it is not counted for ABSD.' });
+    const rows = entity ? [] : (i.buyers || []).filter(Boolean);
+    let sellers = null, sellersCautious = false;
+    if (order === 'sell' && removes) {
+      const owners = rows.map((b, k) => (+b.owned >= 1 ? k : -1)).filter((k) => k >= 0);
+      if (Array.isArray(i.sale.owners)) sellers = i.sale.owners.filter((k) => owners.indexOf(k) >= 0);
+      else if (owners.length <= 1) sellers = owners;   // only one buyer owns a home: the home sold is theirs
+      else {
+        // two buyers both own a home and the caller did not say whose home is sold: the cautious side, the choice that leaves the higher ABSD (a home owned by one of them only)
+        const cand = [owners].concat(owners.map((k) => [k]));
+        const rateFor = (set) => { const d = C.stampDuty({ price: P, kind: kind === 'ec' ? 'ec' : 'private', buyers: rows.map((b, k) => ({ res: b.res, fta: b.fta, owned: set.indexOf(k) >= 0 ? Math.max(0, Math.min(2, +b.owned) - 1) : +b.owned })), couple: i.couple }); return d.ok ? d.absd : 0; };
+        sellers = cand.reduce((a, c) => (rateFor(c) > rateFor(a) ? c : a), cand[0]); sellersCautious = true;
+      }
+    }
+    const buyers = rows.map((b, k) => ({ res: b.res, fta: b.fta, owned: sellers && sellers.indexOf(k) >= 0 ? Math.max(0, Math.min(2, +b.owned) - 1) : +b.owned }));
+    if (order === 'sell' && removes) assumptions.push({ id: 'sold-ownership', text: sellersCautious ? 'Sold first: not said whose home is being sold, so it is counted as one buyer’s only, the choice with the higher ABSD (the cautious view). Say who owns it to be exact.' : 'Sold first: the home being sold is no longer owned by ' + (rows.length > 1 && sellers.length === 1 ? 'its owner' : 'its owners') + ' when the new home is bought, so it is not counted for their ABSD' + (rows.length > 1 && sellers.length < rows.filter((b) => +b.owned >= 1).length ? '; a buyer’s other home still counts' : '') + '.' });
 
     // --- the stage split and duty come from the live engine, unchanged ---
-    const prog = C.progressive({ price: P, age: entity ? undefined : i.age, years: years0, ratePct: num(i.ratePct) === null ? undefined : i.ratePct, loans, cpf: undefined, kind: kind === 'ec' ? 'ec' : 'private', buyers, loanCap: loanCapIn, entity, valuation: kind === 'completed' && pos(i.valuation) ? i.valuation : undefined });
+    const prog = C.progressive({ price: P, age: entity ? undefined : i.age, years: years0, ratePct: num(i.ratePct) === null ? undefined : i.ratePct, loans, cpf: undefined, kind: kind === 'ec' ? 'ec' : 'private', buyers, couple: entity ? undefined : i.couple, loanCap: loanCapIn, entity, valuation: kind === 'completed' && pos(i.valuation) ? i.valuation : undefined });
     if (!prog.ok) return prog;
     const years = prog.years;
     const duty = prog.duty; if (!duty.ok) return duty;
-    const rate = prog.rate, ltvRow = { ltv: prog.ltv, minCash: prog.minCash, lower: prog.lower, lowerWhy: prog.lowerWhy, loans, flatLoan, basis: loanBasis, endAge: R.bankLtv.endAge, special: unverifiedExcl ? { state: flatLoan, accepted: accepted, ifAccepted: (function () { const a = C.progressive({ price: P, age: i.age, years: years0, ratePct: num(i.ratePct) === null ? undefined : i.ratePct, loans: Math.max(0, loans - (accepted ? 0 : 1)), kind: kind === 'ec' ? 'ec' : 'private', buyers, loanCap: loanCapIn }); return a.ok ? { ltv: a.ltv, minCash: a.minCash, loanMax: a.loanMax, lower: a.lower } : null; })() } : null, capped: prog.loanCapped, ruleLoanMax: prog.ruleLoanMax };
+    const rate = prog.rate, ltvRow = { ltv: prog.ltv, minCash: prog.minCash, lower: prog.lower, lowerWhy: prog.lowerWhy, loans, flatLoan, basis: loanBasis, endAge: R.bankLtv.endAge, special: unverifiedExcl ? { state: flatLoan, accepted: accepted, ifAccepted: (function () { const a = C.progressive({ price: P, age: i.age, years: years0, ratePct: num(i.ratePct) === null ? undefined : i.ratePct, loans: Math.max(0, loans - (accepted ? 0 : 1)), kind: kind === 'ec' ? 'ec' : 'private', buyers, couple: i.couple, loanCap: loanCapIn }); return a.ok ? { ltv: a.ltv, minCash: a.minCash, loanMax: a.loanMax, lower: a.lower } : null; })() } : null, capped: prog.loanCapped, ruleLoanMax: prog.ruleLoanMax };
     const loanMax = prog.loanMax, cashMin = prog.cashMin, cov = prog.cov || 0;
     // A valuation below the price (a completed home): the loan, the minimum cash and the CPF are on the valuation; the part above it is cash, due at completion (R.valuation).
     if (prog.valuation !== null && prog.valuation !== undefined) {
@@ -218,6 +235,10 @@
     }
     if (i.dutyFromCpf && pos(i.dutyFromCpf.amount)) { const rd = addMonths(dutyDate, pos(i.dutyFromCpf.monthsAfter) ? i.dutyFromCpf.monthsAfter : 1); inflow({ id: 'duty-cpf', date: rd, label: 'CPF reimbursement of stamp duty', cashIn: Math.min(i.dutyFromCpf.amount, duty.total), confidence: 'assumption', source: 'CPF Board: stamp duty is paid in cash and may be reimbursed from CPF after the S&P is lodged. Date assumed.' }); }
 
+    // --- buy first (C1, B4): the home being sold keeps its own instalment until its sale completes (CPF first when instalments are paid from CPF, then cash) ---
+    const flatMo = order === 'buy' && flatLoan !== 'none' && flatLoan !== 'discharged' && pos(i.flatInstal) ? i.flatInstal : 0;
+    if (flatMo) assumptions.push({ id: 'flat-instalment', text: 'Buying first: the ' + Math.round(flatMo) + ' monthly instalment on the home being sold is paid until its sale completes on ' + iso(saleDate) + '.' });
+
     // --- interim rent (sell-first): cash only, from the option until the keys ---
     const rentMo = i.rent && pos(i.rent.monthly) && order === 'sell' ? i.rent.monthly : 0;
     const rentUntil = rentMo ? (D(i.rent.until) || keysDate) : null;
@@ -250,12 +271,13 @@
       } else {
         cash += nn(i.saveMo); if (!entity) cpf += nn(i.cpfMo);
         const rent = rentMo && e.date < rentUntil ? rentMo : 0; // rent for the months before the keys
-        const a = cpfForInstal ? Math.min(cpf, instalNow) : 0; cpf -= a; const b = Math.min(cash, instalNow - a); cash -= b;
+        const oldMo = flatMo && e.date <= saleDate ? flatMo : 0, due = instalNow + oldMo;   // the home being sold, until its sale completes
+        const a = cpfForInstal ? Math.min(cpf, due) : 0; cpf -= a; const b = Math.min(cash, due - a); cash -= b;
         const rc = Math.min(cash, rent); cash -= rc;
-        const short = (instalNow - a - b) + (rent - rc);
-        if (short > 1e-6) { owedCash += short; if (!firstGap) firstGap = e.date; coveredOn = null; coveredBy = null; bump(e.date, 'Monthly instalment' + (rent ? ' and rent' : '')); }
+        const short = (due - a - b) + (rent - rc);
+        if (short > 1e-6) { owedCash += short; if (!firstGap) firstGap = e.date; coveredOn = null; coveredBy = null; bump(e.date, 'Monthly instalment' + (oldMo ? 's on both homes' : '') + (rent ? ' and rent' : '')); }
         if (owedCash + owedFlex > 0) settle('your monthly savings', e.date);
-        series.push({ date: iso(e.date), cash: round2(cash), cpf: round2(cpf), uncovered: round2(owedCash + owedFlex), drawn, instalment: round2(instalNow), rent });
+        series.push({ date: iso(e.date), cash: round2(cash), cpf: round2(cpf), uncovered: round2(owedCash + owedFlex), drawn, instalment: round2(instalNow), rent, oldInstalment: oldMo || undefined });
       }
     }
     const events = ev.filter((e) => e.type !== 'month').map((e) => { const o = Object.assign({}, e); o.date = iso(e.date); delete o.k; return o; });
@@ -265,7 +287,7 @@
     if (uncoveredEnd > 0) warnings.push({ id: 'uncovered-end', text: 'Payments totalling ' + Math.round(uncoveredEnd) + ' are not covered by any inflow within the horizon.' });
     const headline = { peak: round2(peak), peakAt: peakAt && iso(peakAt), peakCause, firstGap: firstGap && iso(firstGap), coveredOn: uncoveredEnd > 0 ? null : (coveredOn && iso(coveredOn)), coveredBy: uncoveredEnd > 0 ? null : coveredBy, uncoveredEnd };
     const out = {
-      ok: true, version: VERSION, kind, order, entity, undated, price: P, otp: iso(otp), saleDate: saleDate && iso(saleDate), keysDate: iso(keysDate), horizonMonths: horizon,
+      ok: true, version: VERSION, kind, order, entity, undated, price: P, otp: iso(otp), saleDate: saleDate && iso(saleDate), keysDate: iso(keysDate), horizonMonths: horizon, ...(order === 'sell' ? { sellers, sellersCautious } : {}), ...(flatMo ? { flatInstal: flatMo } : {}),
       loan: Object.assign({}, ltvRow, { loanMax, cashMin, cpfOrCash: prog.cpfOrCash, valuation: prog.valuation === undefined ? null : prog.valuation, base: prog.base, cov, years, ratePct: rate * 100, stressRatePct: R.stressRate * 100, tenureCapped: prog.tenureCapped, tenureCappedBy: prog.tenureCappedBy, tenureAsked: prog.tenureAsked, tenureAllowed: prog.tenureAllowed }),
       instalment: { final: round2(prog.finalMonthly), finalStress: round2(C.instal(loanMax, Math.max(R.stressRate, rate), years)), basis: 'Instalment at the quoted rate once the loan is fully drawn; the stress figure uses the higher of ' + (R.stressRate * 100) + '% and the quoted rate (MAS Notice 645), for TDSR only.' },
       duty: { bsd: duty.bsd, absd: duty.absd, absdRate: duty.absdRate, total: duty.total, notes: duty.notes, remissions: duty.remissions, date: iso(dutyDate) },

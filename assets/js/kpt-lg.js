@@ -236,30 +236,71 @@
   }
 
   /* ---------- a development's page ---------- */
-  function sizeChips(M) {
-    const f = M.focus || {}, rec = (M.bands || []).filter((b) => b.recent || b.bin === f.bin);
-    const list = (rec.length ? rec : M.bands || []).slice().sort((x, y) => x.bin - y.bin);
-    return list.map((b) => '<button type="button" class="kpr-link" data-bin="' + b.bin + '" aria-pressed="' + (b.bin === f.bin) + '">' + esc(b.label.replace(/\s*sqft$/, '')) + '</button>').join('') +
-      '<button type="button" data-lg-size aria-expanded="false" aria-controls="lgSize">Enter a size</button>';
+  // A size is "chosen" only when the visitor picked one (a chip, a typed size, or one carried from the Map). Without one, no size's price or reading is shown.
+  const chosen = (M) => !!(M && M.focus && M.focus.userChosen);
+  // One compact drop-down instead of a row of options: the sizes (with how many sold in the last 12 months) appear only when it is opened.
+  function sizeSelect(M) {
+    const f = M.focus || {}, ch = chosen(M), rec = (M.bands || []).filter((b) => b.recent || b.bin === f.bin);
+    const list = (rec.length ? rec : M.bands || []).slice().sort((x, y) => x.bin - y.bin), w = words(M);
+    const opt = (b) => '<option value="' + b.bin + '"' + (ch && b.bin === f.bin ? ' selected' : '') + '>' + esc(sqft(b.label)) + ' · ' + (b.recent ? b.recent.n : 0) + ' sold</option>';
+    const missing = ch && f.bin == null && f.requestedBin != null ? '<option value="' + f.requestedBin + '" selected>' + esc(sqft(f.requestedLabel)) + ' · none recorded</option>' : '';
+    return '<select id="sizeSel" class="lg-select" data-lg-sel aria-labelledby="lgPickH" data-chosen="' + ch + '">' + (ch ? '' : '<option value="" selected>Choose a size</option>') + missing + '<optgroup label="' + esc('Sold in the last 12 months (' + w[1] + ')') + '">' + list.map(opt).join('') + '</optgroup></select>';
   }
   function sizeLine(M) {
     const f = M.focus || {}, A = M.answer || {};
     if (f.requested && f.bin == null) return 'No sales recorded around ' + esc(sqft(f.requestedLabel)) + '.' + (A.nearest && A.nearest.length ? ' Closest sizes with sales: ' + A.nearest.map((x) => esc(sqft(x.label)) + ' (' + x.n + ')').join(', ') + '.' : '');
     if (f.userChosen) return 'Showing ' + esc(sqft(f.label)) + ', the size you chose.';
-    if (f.bin != null) return 'Showing ' + esc(sqft(f.label)) + (A.sizeNote ? ', the size that sold most in the last 12 months' : ', the size with the most sales on record') + '. Looking at a different size?';
-    return '';
+    return 'Prices differ a lot between sizes. Choose yours to see its price and market reading.';
   }
-  function sizeForm(S) {
-    return '<div class="lg-sizeform" id="lgSize"' + (S && S.size ? '' : ' hidden') + '><label class="lg-vh" for="sizeIn">Size in square feet</label><input id="sizeIn" inputmode="numeric" autocomplete="off" placeholder="Size in sq ft, e.g. 1,000" value="' + esc(S && S.size) + '" aria-describedby="sizeNote">' +
-      '<button class="lg-btn" type="button" id="sizeGo" style="min-height:44px;padding:9px 18px">Show this size</button>' + (S && S.size ? '<button class="lg-btn" type="button" id="sizeClear" style="min-height:44px;padding:9px 18px;border-color:transparent">Back to the most-sold size</button>' : '') +
-      '<p class="lg-fine" id="sizeNote" style="width:100%;text-align:center">Square feet only. Kept on this device, never sent to analytics or WhatsApp.</p><p class="err" id="sizeErr" role="alert"></p></div>';
+  function sizeForm(S, M) {
+    return '<div class="lg-sizeform" id="lgSize" hidden><label class="lg-vh" for="sizeIn">Size in square feet</label><input id="sizeIn" inputmode="numeric" autocomplete="off" placeholder="e.g. 1,000" value="' + esc(S && S.size) + '" aria-describedby="sizeNote">' +
+      '<button class="lg-btn" type="button" id="sizeGo" style="min-height:44px;padding:9px 18px">Show this size</button>' +
+      '<p class="lg-fine" id="sizeNote">Square feet only. The number you type stays on this device.</p><p class="err" id="sizeErr" role="alert"></p></div>';
+  }
+  // What a visitor sees first: the question, the sizes (with how many sold at each, so it is also the neutral picture of the mix), and the way to type an exact size.
+  function sizePicker(M, S) {
+    if (!(M.bands || []).length) return '';
+    const ch = chosen(M);
+    return '<div class="lg-sizes lg-pick" id="lgPick" data-lg-pick="' + (ch ? 'chosen' : 'none') + '"><h2 class="lg-pick-h" id="lgPickH">What size home are you looking at?</h2>' +
+      '<div class="lg-pick-row"><span class="lg-selwrap">' + sizeSelect(M) + '</span>' +
+      '<button type="button" class="kpr-link lg-typeit" data-lg-size aria-expanded="false" aria-controls="lgSize">Type an exact size</button></div>' +
+      '<p class="lbl lg-pick-s">' + sizeLine(M) + (ch ? ' <button type="button" class="kpr-link lg-clear" id="sizeClear">Clear size</button>' : '') + '</p>' +
+      sizeForm(S, M) + '</div>';
+  }
+  // No size chosen: the development's recent activity, in counts only, with no price or direction. Nothing here is one size standing in for the whole development.
+  function overviewHtml(M, mf) {
+    const w = words(M), R = M.recent || {}, rec = (M.bands || []).filter((b) => b.recent && b.recent.n), nb = rec.length;
+    let head, sub;
+    if (R.n > 0) {
+      const lo = Math.min.apply(null, rec.map((b) => b.bin)), hi = Math.max.apply(null, rec.map((b) => b.bin)) + 99;
+      head = plural(R.n, w[0], w[1]) + ' in the last 12 months';
+      sub = (nb > 1 ? 'Across ' + nb + ' sizes, from ' + num(lo) + ' to ' + num(hi) + ' sq ft. ' : nb === 1 ? 'All of them ' + esc(sqft(rec[0].label)) + '. ' : '') + 'Latest sale ' + (R.latestLabel || '') + '.';
+    } else if (R.latest) {
+      head = 'No ' + w[1] + ' in the last 12 months';
+      sub = 'The latest was ' + R.latestLabel + ', and there ' + (R.since ? 'are ' + ((M.evidenceBase && M.evidenceBase.total) || 0) + ' on record since ' + R.since + '.' : 'are older ones on record.');
+    } else { head = 'No sales recorded'; sub = 'URA records no sale of this type here in the period we hold.'; }
+    return '<section class="lg-ov" data-lg-ov aria-label="Recent sales at a glance"><p class="lg-ov-k">At a glance · ' + esc(M.sale && M.sale.label ? M.sale.label.charAt(0).toUpperCase() + M.sale.label.slice(1) + 's' : 'Sales') + '</p>' +
+      '<h2 class="lg-ov-h" data-lg-ov-head>' + esc(head) + '</h2><p class="lg-ov-s">' + sub + '</p>' +
+      '<p class="lg-ov-n">Price per sq ft is different for every size, so there is no single price for the whole development. Choose a size to see its price, how it has moved and what is behind it.</p>' +
+      freshLine(mf, undefined, 'lg-fine') +
+      '<p class="lg-ov-a"><a href="#next" data-lg-scroll="next">Ask Ken about a particular unit ›</a></p></section>';
+  }
+  // A size was chosen but URA records no sale around it: say so, offer the closest sizes, and the same three next steps as a thin-evidence size.
+  function noSizeHtml(M, forWho) {
+    const f = M.focus || {}, A = M.answer || {}, w = words(M), near = (A.nearest || []).slice(0, 3);
+    return '<section class="mp" data-mp data-mp-state="nosize" data-mp-sized="1" aria-label="Market pulse"><p class="mp-k">Market pulse<span> · ' + esc(sqft(f.requestedLabel)) + '</span></p>' +
+      '<h2 class="mp-h" data-mp-head>No ' + esc(w[1]) + ' of ' + esc(sqft(f.requestedLabel)) + ' recorded here</h2>' +
+      '<p class="mp-s" data-mp-sub>URA records no ' + esc(w[0]) + ' of this size at ' + esc(M.name) + ' in the period we hold, so there is no price or trend to show for it.' + (near.length ? ' The closest sizes with sales:' : '') + '</p>' +
+      (near.length ? '<p class="mp-near lg-chips">' + near.map((x) => '<button type="button" class="kpr-link" data-bin="' + x.bin + '" aria-pressed="false">' + esc(x.label.replace(/\s*sqft$/, '')) + '<small class="lg-n">' + x.n + '</small></button>').join('') + '</p>' : '') +
+      '<p class="mp-fine" data-mp-fine>Past sales only. Other developments are context, not a price trend for this one.</p>' +
+      (GLOBAL.GW_PULSE ? GLOBAL.GW_PULSE.sizedActs({ mapHref: 'map/#p=' + encodeURIComponent(M.id), forWho: forWho }) : '') + '</section>';
   }
   function sizesTable(M) {
     if (!M.bands || !M.bands.length) return '<p>No sales with a recorded size for this sale type.</p>';
     const w = words(M);
     return '<div class="lg-scroll"><table class="lg-table"><thead><tr><th scope="col">Size</th><th scope="col">Last 12 months</th><th scope="col">Median PSF, last 12 months</th><th scope="col">All ' + esc(w[1]) + ' on record</th><th scope="col">Middle half, all ' + esc(w[1]) + '</th></tr></thead><tbody>' +
       M.bands.slice().sort((x, y) => x.bin - y.bin).map((b) => '<tr><th scope="row">' + esc(sqft(b.label)) + '</th><td>' + (b.recent ? b.recent.n : 0) + '</td><td>' + (b.recent ? money(b.recent.psf.med) : '—') + '</td><td>' + b.n + '</td><td>' + money(b.psf.q1) + '–' + money(b.psf.q3) + '</td></tr>').join('') +
-      '</tbody></table></div><p class="lg-fine">' + esc(M.notes && M.notes.psf) + ' Tap a size above to make it the headline.</p>';
+      '</tbody></table></div><p class="lg-fine">' + esc(M.notes && M.notes.psf) + ' Choose a size at the top of the page to see its price.</p>';
   }
   function saleTypes(M) {
     if (!M.sale || M.sale.options.length < 2) return '';
@@ -306,11 +347,11 @@
   }
   const runWhat = (T, M) => 'Run the numbers at about ' + money(T.price) + ', the median price of the ' + plural(T.n, words(M)[0], words(M)[1]) + ' of ' + T.label + ' homes here in the last 12 months (past sales, not a valuation):';
   function actions(M) {
-    const K = ASKM(), canAsk = !!K && (M.bands || []).some((b) => b.recent && b.recent.n), T = strong(M);
+    const K = ASKM(), canAsk = !!K && (M.bands || []).some((b) => b.recent && b.recent.n), T = chosen(M) && strong(M);
     const act = (attrs, icon, t) => '<button type="button" class="lg-act" ' + attrs + '>' + icon + '<span>' + t + '</span></button>';
     const I = (d) => '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>';
     return '<div class="lg-acts" role="group" aria-label="What you can do here">' +
-      act('data-lg-scroll="numbers"', I('<path d="M5 20V12m5 8V7m5 13v-6m5 6V4"/>'), 'Recent sales') +
+      (chosen(M) ? act('data-lg-scroll="numbers"', I('<path d="M5 20V12m5 8V7m5 13v-6m5 6V4"/>'), 'Recent sales') : '') +
       (canAsk ? act('data-lg-ask aria-expanded="false" aria-controls="lgAsk"', I('<path d="M4 7h16v10H4z"/><path d="M8 12h8"/><path d="M12 9v6"/>'), 'Check an asking price') : '') +
       '<a class="lg-act" id="cmp" href="#/compare/' + esc(M.id) + '">' + I('<path d="M8 4v16M16 4v16M4 8h4M16 16h4"/>') + '<span>Compare</span></a></div>' +
       (canAsk ? K.panelHtml('condo', askData(M), { id: 'lgAsk', hidden: true }) : '') +
@@ -326,7 +367,7 @@
     if (S.rawP && S.rawP.id === M.id && Array.isArray(S.rawP.districts)) M.districtsAll = S.rawP.districts;
     const kick = [clsOf(M) === 'condo' ? '' : CLS[clsOf(M)].label, M.street ? titleCase(M.street) : '', district(M)].filter(Boolean).join(' · ');
     const chartPts = M.history && M.history.band && M.history.band.points ? M.history.band.points : [];
-    const chart = lineChart(chartPts, '#5a55d6', 'Median ' + (words(M)[0]) + ' PSF of ' + (f.label || '') + ' homes at ' + M.name + ' in each 12-month period, oldest to newest');
+    const chart = chosen(M) ? lineChart(chartPts, '#5a55d6', 'Median ' + (words(M)[0]) + ' PSF of ' + (f.label || '') + ' homes at ' + M.name + ' in each 12-month period, oldest to newest') : '';
     const ken = M.ken ? '<div class="lg-tile" style="grid-column:1/-1"><b>Ken’s Take</b><p>“' + esc(M.ken.note) + '”</p><p class="lg-fine">Ken’s judgement, not URA data.</p></div>' : '';
     // The next step follows the question the visitor came with (tab only, set by the Sell journey; nothing typed): an owner sees the "what could my unit sell for" card first, a buyer the asking-price card.
     // Without it the order is unchanged: budget, then the asking price, then the owner's. Messages are wired by the page (research/index.html) from the report's own finding.
@@ -344,9 +385,9 @@
         '<button class="kpr-back lg-back" type="button" data-act="home">← Search another development</button>' +
         '<div class="lg-id"><p class="lg-kicker lg-idline"><span class="lg-cls" data-lg-cls="' + clsOf(M) + '">' + esc(CLS[clsOf(M)].label) + '</span>' + [M.street ? esc(titleCase(M.street)) : '', esc(district(M))].filter(Boolean).join(' · ') + '</p>' +
         '<h1 class="lg-name" tabindex="-1">' + esc(M.name) + '</h1></div>' +
-        answerBlock(M, mf) +
-        (ctx && ctx.PU && GLOBAL.GW_PULSE ? GLOBAL.GW_PULSE.html(ctx.PU, { forWho }) : '') +
-        ((M.bands || []).length ? '<div class="lg-sizes"><span class="lbl">' + sizeLine(M) + '</span><div class="lg-chips" role="group" aria-label="Size">' + sizeChips(M) + '</div>' + sizeForm(S) + '</div>' : '') +
+        sizePicker(M, S) +
+        (chosen(M) ? answerBlock(M, mf) : overviewHtml(M, mf)) +
+        (chosen(M) ? (f.bin == null ? noSizeHtml(M, forWho) : ctx && ctx.PU && GLOBAL.GW_PULSE ? GLOBAL.GW_PULSE.html(ctx.PU, { forWho, mapHref: 'map/#p=' + encodeURIComponent(M.id) }) : '') : '') +
         actions(M) +
         '<p class="lg-fine lg-facts" data-lg-lead>' + projectFacts(M) + '</p>' +
         (clsOf(M) !== 'condo' ? '<p class="lg-fine lg-facts" data-lg-class="' + clsOf(M) + '">' + esc(CLS[clsOf(M)].short) + '</p>' : '') + (alsoLine(M) ? '<p class="lg-fine lg-facts" data-lg-also>' + esc(alsoLine(M)) + '</p>' : '') +
@@ -354,9 +395,9 @@
       '<section class="lg-band grey" id="lgCompare"><div class="lg-wrap" style="gap:22px"><div class="lg-head"><p class="lg-kicker">Compare</p><h2>Often compared with ' + esc(M.name) + '</h2><p class="lg-sub" data-lg-sugg-sub>Developments that share enough recent sales in the same sizes for a fair comparison.</p></div>' +
         '<div class="lg-sugg" data-lg-sugg></div><p class="lg-fine lg-center">Or <a href="#/compare/' + esc(M.id) + '" data-lg-pick>search for any other development</a>.</p></div></section>' +
       '<section class="lg-band" id="numbers"><div class="lg-wrap" style="gap:26px"><div class="lg-head"><p class="lg-kicker">The numbers</p><h2>How the price has moved.</h2>' +
-        '<p class="lg-sub">' + (chart ? 'Median ' + esc(words(M)[0]) + ' PSF of ' + esc(sqft(f.label)) + ' homes in each 12-month period, however many sold. Past sales, not a forecast.' : esc((M.history && M.history.note) || 'Historical transactions only.')) + '</p></div>' +
+        '<p class="lg-sub">' + (!chosen(M) ? 'Price per sq ft is different for every size, so how it has moved is shown for one size at a time. Past sales, not a forecast.' : chart ? 'Median ' + esc(words(M)[0]) + ' PSF of ' + esc(sqft(f.label)) + ' homes in each 12-month period, however many sold. Past sales, not a forecast.' : esc((M.history && M.history.note) || 'Historical transactions only.')) + '</p></div>' +
         '<div class="lg-g2 lg-numgrid">' +
-          (chart ? '<div class="lg-tile" style="padding:26px 28px">' + chart + '<span class="lg-fine">Hollow dot: fewer than 3 sales. ' + esc(M.history.band.text || '') + '</span></div>' : '<div class="lg-tile">' + (M.read || []).map((r) => '<p>' + esc(r.text) + '</p>').join('') + '</div>') +
+          (!chosen(M) ? '<div class="lg-tile lg-pickprompt" data-lg-pickprompt><b>Choose a size to see how its price has moved</b><p>Homes of different sizes can sell at very different prices per sq ft, so there is no one chart for the whole development.</p><button type="button" class="lg-btn" data-lg-scroll="lgPick">Choose a size</button></div>' : chart ? '<div class="lg-tile" style="padding:26px 28px">' + chart + '<span class="lg-fine">Hollow dot: fewer than 3 sales. ' + esc(M.history.band.text || '') + '</span></div>' : '<div class="lg-tile">' + (M.read || []).map((r) => '<p>' + esc(r.text) + '</p>').join('') + '</div>') +
           '<div style="display:grid;gap:14px"><div class="lg-tile"><span class="lg-fine">What we know for sure</span><div data-lg-facts><span style="font-size:15.5px;line-height:1.5">' + factsFallback(M) + '</span></div></div>' +
           '<div class="lg-tile"><span class="lg-fine">Before you decide, check</span><span style="font-size:15.5px;line-height:1.5">' + (M.notMeasured || []).slice(0, 4).map(esc).join(' · ') + '</span></div>' + ken + '</div>' +
         '</div>' +
@@ -389,7 +430,7 @@
     // A4-07: "Run the numbers" at the median price of the same sales.
     const run = app.querySelector('[data-lg-run-line]');
     if (run && typeof fetch === 'function') findData(base).then((F) => {
-      const T = typicalPrice(M, F && F[M.id], h.manifest), what = run.querySelector('[data-lg-run-what]');
+      const T = chosen(M) ? typicalPrice(M, F && F[M.id], h.manifest) : null, what = run.querySelector('[data-lg-run-what]');
       if (!T || !what || !run.isConnected) { if (run.isConnected && !app.querySelector('#lgAsk')) run.remove(); return; } // V2-01: kept for an asking price
       run.dataset.typical = String(T.price); what.textContent = runWhat(T, M); run.hidden = false;
     });

@@ -26,8 +26,9 @@ def page(br, kw):
     return ctx, pg, errs
 def store(pg, k):
     v = pg.evaluate("k=>sessionStorage.getItem(k)", k); return json.loads(v) if v else None
+# C1: Sale proceeds is opened inside the Sell journey (?j=1), so the figures flow on to What can I afford?
 def sale_page(pg, kind='hdb', price='800,000', loan='200,000', cpfp='150,000', cpfi='20,000', more=None, dates=None):
-    pg.goto(B + '/tools/sale-proceeds/'); pg.wait_for_selector('[data-out]')
+    pg.goto(B + '/tools/sale-proceeds/?j=1'); pg.wait_for_selector('[data-out]')
     pg.click(f'.gw-chips[data-k="type"] [data-v="{kind}"]')
     pg.fill('[data-k="price"]', price); pg.fill('[data-k="loan"]', loan); pg.fill('[data-k="cpfPrincipal"]', cpfp); pg.fill('[data-k="cpfInterest"]', cpfi)
     if dates:
@@ -67,7 +68,7 @@ try:
         check(vn + ': nothing is left waiting in the tab until the button is tapped', store(pg, 'gw.sell.v1') is None)
         arrive(pg); h = sell_h(pg)
         check(vn + ': hand-over is made when the button is tapped, with the entered figures and no override when the Planner would agree', h and h['type'] == 'hdb' and h['price'] == 800000 and h['loan'] == 200000 and h['cpfRefund'] == 170000 and 'overrideCash' not in h, h)
-        check(vn + ': arrival address carries no figures (hash cleared)', pg.url.rstrip('/').endswith('/tools/planner') and '#' not in pg.url, pg.url)
+        check(vn + ': arrival address carries no figures (hash cleared)', pg.url.split('?')[0].rstrip('/').endswith('/tools/planner') and '#' not in pg.url and (pg.url.split('?') + [''])[1] in ('', 'j=1'), pg.url)   # C1: only the journey mark
         check(vn + ': hand-over is used once and removed', store(pg, 'gw.sell.v1') is None)
         check(vn + ': "Do you own" = Yes, one; "Sell it"; "Sell first" are set by the button', pg.get_attribute('.pa-chips[data-k="owns"] [data-v="one"]', 'aria-pressed') == 'true' and pg.get_attribute('.pa-chips[data-k="home"] [data-v="sell"]', 'aria-pressed') == 'true' and pg.get_attribute('.pa-chips[data-k="order"] [data-v="sell"]', 'aria-pressed') == 'true')
         vals = {k: pg.input_value(f'[data-k="{k}"]') for k in ['flat.price', 'flat.loan', 'flat.cpfRefund']}
@@ -83,6 +84,8 @@ try:
         # no duplicate counting: keeping the home removes the sale and nothing else changes
         mx_sell = num(pg.inner_text('[data-max]')) if pg.query_selector('[data-max]') else 0
         pg.click('.pa-chips[data-k="home"] [data-v="keep"]'); settle(pg)
+        # C1 (B3): keeping the home with CPF planned asks the balances behind CPF's retirement-sum set-aside; given, the kept-home answer is drawn
+        if pg.is_visible('[data-cpf2]'): pg.fill('[data-k="cpfBal.0.oa"]', '300,000'); pg.fill('[data-k="cpfBal.0.sa"]', '120,000'); pg.click('.pa-chips[data-k="cover95"] [data-v="yes"]'); settle(pg)
         check(vn + ': "Keep it" removes the sale and its note (not left counted)', planner_sale_numbers(pg) is None and not pg.is_visible('.pa-now'))
         pg.click('.pa-chips[data-k="home"] [data-v="sell"]'); settle(pg)
         check(vn + ': choosing "Sell it" again brings back the same sale figures, once', planner_sale_numbers(pg) == (cash, 170000))
@@ -119,8 +122,8 @@ try:
         check(vn + ': Planner tie-out for a private sale with SSD', planner_sale_numbers(pg) == (cash3, 360000), (planner_sale_numbers(pg), cash3))
         ctx.close()
         # ---- 3. never overwrite what the buyer typed; only the sale figures change
-        ctx, pg, errs = page(br, kw); pg.goto(B + '/tools/planner/'); pg.wait_for_selector('[data-pa]'); fill_person(pg, income='18,500', cash='250,000', cpf='90,000')
-        pg.goto(B + '/tools/sale-proceeds/'); pg.wait_for_selector('[data-out]'); pg.fill('[data-k="price"]', '700,000'); pg.fill('[data-k="loan"]', '0'); pg.fill('[data-k="cpfPrincipal"]', '100,000'); pg.fill('[data-k="cpfInterest"]', '10,000'); pg.wait_for_timeout(500)
+        ctx, pg, errs = page(br, kw); pg.goto(B + '/tools/planner/?j=1'); pg.wait_for_selector('[data-pa]'); fill_person(pg, income='18,500', cash='250,000', cpf='90,000')
+        pg.goto(B + '/tools/sale-proceeds/?j=1'); pg.wait_for_selector('[data-out]'); pg.fill('[data-k="price"]', '700,000'); pg.fill('[data-k="loan"]', '0'); pg.fill('[data-k="cpfPrincipal"]', '100,000'); pg.fill('[data-k="cpfInterest"]', '10,000'); pg.wait_for_timeout(500)
         arrive(pg)
         check(vn + ': coming back for the sale keeps income, cash, CPF, age and the rates as typed', [pg.input_value(f'[data-k="{k}"]') for k in ['buyers.0.fixed', 'cash', 'cpf', 'buyers.0.age', 'ratePct', 'years']] == ['18,500', '250,000', '90,000', '40', '2', '28'], [pg.input_value(f'[data-k="{k}"]') for k in ['buyers.0.fixed', 'cash', 'cpf']])
         check(vn + ': the sale price follows the sale just worked out', pg.input_value('[data-k="flat.price"]') == '700,000' and pg.input_value('[data-k="flat.cpfRefund"]') == '110,000')

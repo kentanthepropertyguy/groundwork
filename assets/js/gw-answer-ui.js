@@ -3,9 +3,14 @@
    "Strict internally, effortless externally." The few entries on the left; the answer on the right: the comfortable budget, the highest the numbers allow,
    a price to try, what it costs, and the simplest fix when a price does not fit. Every figure comes from GW_ANSWER (which calls GW_TIMELINE, GW_CALC and
    GW_RULES); this file draws the entries and the answer and does no arithmetic beyond formatting.
-   Privacy: entries never enter the page address, analytics or advertising events; the WhatsApp message carries no figures. The tab-only store (gw.ans.v1) holds the
-   entries for this tab; price, age, residency and CPF OA are also shared with the other calculators (gw.fin.v1), as the other tools do. "Clear all my figures"
-   (gw-nav.js) removes every gw.* key.
+   Privacy: entries never enter the page address, analytics or advertising events; the WhatsApp message carries no figures.
+   Journey or standalone (C1, 24 Oct 2026, the same rule as every other calculator since Package 3; the entry point decides, there is no mode switch):
+     - opened from a guided journey or Research (the address carries ?j=1): the entries for this tab are kept (gw.ans.v1) and price, age, residency, homes owned and CPF OA
+       are shared with the journey's other steps (gw.fin.v1);
+     - opened from Tools, search or a typed address: a standalone calculation. It starts blank, keeps its own entries only over a refresh in this tab (gw.pro.planner.v1),
+       and neither reads nor writes the shared figures, so one client's figures never appear in the next calculation. An explicit hand-over the buyer asks for (Sale proceeds'
+       "What can I buy next?", the Payment timeline and Budget Search buttons) still carries its figures.
+   "Clear all my figures" (gw-nav.js) removes every gw.* key.
    UMD: window.GW_ANSWER_UI in the browser; Node uses pageHtml() to write the page at build time.
    ========================================================================== */
 (function (root, factory) {
@@ -29,8 +34,12 @@
   const RES = [['SC', 'Citizen'], ['PR', 'PR'], ['FR', 'Foreigner']];
   const RESW = { SC: 'citizens', PR: 'a PR', FR: 'a foreigner' };
   const WHYWAIT = { age: 'your age', income: 'your income', cash: 'your cash', cpf: 'your CPF', home: 'your property answers', flat: 'your home loan answers' };
-  const WHYASK = { loan: 'whether you still owe a loan on your home', instalment: 'the monthly instalment on its loan', otherLoans: 'the loans on your other property', otherInstal: 'the instalment on your other property’s loan' };
-  const PROMPTASK = { loan: 'Do you still owe a housing loan on your home? Answer on the left.', instalment: 'Add the monthly instalment on its loan.', otherLoans: 'How many housing loans does your other property have? Answer on the left.', otherInstal: 'Add the monthly instalment on your other property’s loan.' };
+  const WHYASK = { joint: 'whether you own your home together', loan: 'whether you still owe a loan on your home', instalment: 'the monthly instalment on its loan', otherLoans: 'the loans on your other property', otherInstal: 'the instalment on your other property’s loan', cpf: 'your CPF balances' };
+  const PROMPTASK = { joint: 'Do you both own your home together? Answer on the left.', loan: 'Do you still owe a housing loan on your home? Answer on the left.', instalment: 'Add the monthly instalment on its loan.', otherLoans: 'How many housing loans does your other property have? Answer on the left.', otherInstal: 'Add the monthly instalment on your other property’s loan.', cpf: 'Add your CPF balances on the left: while you still own a home, CPF lets you use only the OA above the retirement sum it sets aside.' };
+  const OWNS = [['none', 'No'], ['one', 'Yes, one'], ['two', 'Yes, two or more']];
+  const FTA_Q = 'A national of the US, Iceland, Liechtenstein, Norway or Switzerland?', FTA_HINT = 'Or a permanent resident of Iceland, Liechtenstein, Norway or Switzerland. They pay ABSD as Singapore Citizens under free trade agreements.';
+  // C1 (B3): what CPF allows while a buyer still owns another home (CPF Board, GW_RULES.cpfSecondHome), said once beside the balances it needs
+  const CPF2_TXT = 'You will still own a home when you buy, so CPF lets each buyer use only the Ordinary Account savings above a set-aside: the Basic Retirement Sum if one of your homes lasts until you are 95, or the Full Retirement Sum if none does. Your OA, SA and RA all count towards it.';
 
   // An HDB flat is not a private home: it has its own loan rules, so this planner works out no figure for it and points to the calculator built for it.
   function hdbRoute(compact) {
@@ -40,7 +49,15 @@
   }
   // What the CPF figure is, and is not. The planner uses the amount the buyer entered; whether CPF allows that much for this home is not checked.
   const CPF_HINT = 'The CPF you can use for this home, not your whole balance. We don’t check CPF’s limits.';
-  const cpfNote = (res) => { const a = res.at || res.atComfortable || res.atHighest; return a && a.haveCpf > 0 ? '<p class="pa-cpfnote"><b>CPF is as you entered it.</b> We have not checked it against CPF’s valuation limit, withdrawal limit, the home’s lease or your age, so it is not confirmed as usable. Whatever CPF does not allow has to be paid in cash.</p>' : ''; };
+  const cpfNote = (res) => {
+    const a = res.at || res.atComfortable || res.atHighest; if (!a) return '';
+    const c = a.cpfCheck && a.cpfCheck.check, sums = root.GW_RULES && root.GW_RULES.cpfRetirementSums;
+    // C1 (B3): the second-home set-aside, worked out from the balances entered (CPF Board)
+    const second = c && c.ok ? '<p class="pa-cpfnote"><b>CPF counted: ' + $(a.cpfUsable) + '</b>' + (a.cpfPlanned > a.cpfUsable + 0.5 ? ' of the ' + $(a.cpfPlanned) + ' you plan to use' : '') + '. You still own a home, so CPF lets each buyer use only the OA above the ' + (c.sumName === 'BRS' ? 'Basic' : 'Full') + ' Retirement Sum (' + $(c.setAside) + ' for ' + c.year + '), which your OA, SA and RA count towards (CPF Board).' +
+      (c.cover !== 'yes' ? ' The Full Retirement Sum is used because ' + (c.cover === 'no' ? 'none of your homes lasts until you are 95.' : 'you are not sure a home lasts until you are 95; if one does, the lower Basic Retirement Sum applies.') : '') +
+      (c.older ? ' A buyer aged 55 or over keeps the sum of the year they turned 55, which is lower, so CPF may allow a little more.' : '') + (c.outdated && sums ? ' The ' + c.year + ' sums are used: the rules file has no later year yet.' : '') + '</p>' : '';
+    return second + (a.haveCpf > 0 ? '<p class="pa-cpfnote"><b>' + (second ? 'Other CPF limits' : 'CPF is as you entered it.') + '</b> We have not checked it against CPF’s valuation limit, withdrawal limit, the home’s lease or your age, so it is not confirmed as usable. Whatever CPF does not allow has to be paid in cash.</p>' : '');
+  };
 
   /* ---------------- fields ---------------- */
   const err = (k) => '<small class="pa-err" data-err="' + k + '" role="alert" hidden></small>';
@@ -59,25 +76,34 @@
   function formHtml() {
     return '<section class="pa-sec" aria-labelledby="pa-h-you"><h2 class="pa-h" id="pa-h-you">You</h2>' +
       chips('who', 'Buying', [['alone', 'Buying alone'], ['two', 'With someone']], { value: 'alone', cls: 'pa-who' }) + buyerRow(0) + buyerRow(1) +
-      chips('buyers.0.res', 'Residency, you', RES, { value: 'SC', share: 'buyers.0.res' }) + chips('buyers.1.res', 'Residency, second buyer', RES, { value: 'SC', share: 'buyers.1.res', when: 'who:two' }) + '</section>' +
+      chips('buyers.0.res', 'Residency, you', RES, { value: 'SC', share: 'buyers.0.res' }) + chips('buyers.0.fta', FTA_Q, [['no', 'No'], ['yes', 'Yes']], { value: 'no', when: 'buyers.0.res:PR,FR', cls: 'pa-sub' }) +
+      chips('buyers.1.res', 'Residency, second buyer', RES, { value: 'SC', share: 'buyers.1.res', when: 'who:two' }) + '<div data-when="who:two">' + chips('buyers.1.fta', FTA_Q.replace('A national', 'Second buyer: a national'), [['no', 'No'], ['yes', 'Yes']], { value: 'no', when: 'buyers.1.res:PR,FR', cls: 'pa-sub' }) + '</div>' +
+      '<p class="pa-hint" data-when="fta:1" hidden>' + FTA_HINT + '</p>' +
+      chips('couple', 'Are you married, buying in your two names only?', [['yes', 'Yes'], ['no', 'No']], { value: '', when: 'mixed:1' }) + '<p class="pa-hint" data-when="mixed:1" hidden>A married couple with a Singapore Citizen, neither owning a home, pays no ABSD: IRAS remits it at stamping.</p></section>' +
       '<section class="pa-sec" aria-labelledby="pa-h-own"><h2 class="pa-h" id="pa-h-own">Your property now</h2>' +
-      chips('owns', 'Do you own a property now?', [['none', 'No'], ['one', 'Yes, one'], ['two', 'Yes, two or more']], { value: '', share: 'buyers.0.owned' }) +
-      '<div class="pa-own" data-when="owns:one,two" hidden>' +
+      chips('owns', 'Do you own a property now?', OWNS, { value: '', share: 'buyers.0.owned' }) +
+      chips('owns2', 'Does the second buyer own a property now?', OWNS, { value: '', share: 'buyers.1.owned', when: 'who:two' }) +
+      '<div class="pa-own" data-when="anyown:1" hidden>' +
+      chips('homeJoint', 'Do you own that home together?', [['yes', 'Yes, together'], ['no', 'No, separately']], { value: '', when: 'bothown:1' }) + '<p class="pa-hint" data-when="homeJoint:no" hidden>The questions below are about your home. The second buyer’s home counts as your other property.</p>' +
       chips('home', 'What will you do with your home?', [['keep', 'Keep it'], ['sell', 'Sell it']], { value: '' }) +
       chips('flat.hasLoan', 'Do you still owe a housing loan on it?', [['yes', 'Yes'], ['no', 'No, fully paid'], ['unsure', 'Not sure']], { value: '' }) +
       '<div data-when="flat.hasLoan:yes,unsure" hidden>' + money('flat.instalment', 'Monthly instalment on that loan', { ph: 'e.g. 1,500', hint: 'It counts towards what you can borrow while you still own it.' }) + '</div>' +
       '<p class="pa-note" data-when="flat.hasLoan:unsure" hidden>Not sure? We count it as a loan, the cautious view, and show what changes if it is fully paid.</p>' +
-      '<div data-when="owns:two" hidden>' + chips('otherLoans', 'Housing loans on your other property', [['0', 'None'], ['1', 'One'], ['2', 'Two']], { value: '' }) +
+      '<div data-when="others:1" hidden>' + chips('otherLoans', 'Housing loans on your other property', [['0', 'None'], ['1', 'One'], ['2', 'Two']], { value: '' }) +
       '<div data-when="otherLoans:1,2" hidden>' + money('otherInstal', 'Their monthly instalments, together', { ph: 'e.g. 2,000' }) + '</div></div></div>' +
       '<div class="pa-sale" data-when="home:sell" hidden><h3 class="pa-h3">Sale of your home</h3><p class="pa-note pa-from-sale" data-sale-from role="status" hidden></p>' + chips('flat.type', 'What are you selling?', [['hdb', 'HDB flat'], ['private', 'Private home']], { value: 'hdb', share: 'homeType' }) +
       '<div data-when="flat.type:private" hidden>' + chips('flat.held', 'Have you owned it for more than 4 years?', [['yes', 'Yes'], ['no', 'No']], { value: '' }) + '<p class="pa-note" data-when="flat.held:no" hidden>Selling within 4 years brings Seller’s Stamp Duty, which depends on when you bought. Use “Enter your own figures” below.</p></div>' +
       '<div class="pa-pair">' + money('flat.price', 'Expected sale price', { share: 'sellPrice' }) + money('flat.loan', 'Loan left on it', { ph: 'type 0 if none', share: 'outstandingLoan' }) + '</div>' +
       money('flat.cpfRefund', 'CPF to be refunded, including accrued interest', { ph: 'from your CPF statement', hint: 'Leave it blank if you do not know yet. We do not estimate the interest, so the sale is not counted until you add it.' }) +
+      money('flat.cpfRefund55', 'Of that, the refund to an owner aged 55 or over', { opt: true, when: 'own55:1', hint: 'It goes to their Retirement Account first, so it is left out. Leave it blank and none of the refund is counted.' }) +
       '<details class="pa-adv" data-ovr><summary>Enter your own figures instead</summary><div class="pa-adv-b"><div class="pa-pair">' + money('flat.overrideCash', 'Cash you expect from the sale') + money('flat.overrideCpf', 'CPF you expect back') + '</div>' + money('flat.costs', 'Selling costs, agent fee and legal', { opt: true, hint: 'Replaces the usual estimate.' }) + '<p class="pa-fine">When you enter the cash and CPF yourself, we use those figures as they are.</p></div></details>' +
       '<p class="pa-sale-r" data-sale-r aria-live="polite"></p>' + chips('order', 'What happens first?', [['sell', 'Sell first'], ['buy', 'Buy first'], ['unsure', 'Not sure yet']], { value: '' }) + '</div>' +
-      money('debts', 'Other monthly debts (car, cards, personal loans)', { opt: true, ph: '0', cls: 'pa-gap', hint: 'Leave out home loan instalments. They are asked above.', hintWhen: 'owns:one,two' }) + '</section>' +
+      money('debts', 'Other monthly debts (car, cards, personal loans)', { opt: true, ph: '0', cls: 'pa-gap', hint: 'Leave out home loan instalments. They are asked above.', hintWhen: 'anyown:1' }) + '</section>' +
       '<section class="pa-sec" aria-labelledby="pa-h-money"><h2 class="pa-h" id="pa-h-money">Your money</h2><div class="pa-pair">' + money('cash', 'Cash', { share: 'cash', ph: 'e.g. 300,000' }) + money('cpf', 'CPF OA you plan to use', { share: 'cpfOa', ph: 'e.g. 150,000', hint: CPF_HINT }) + '</div>' +
       '<p class="pa-note pa-now" data-when="home:sell" hidden>Cash and CPF you have now. Your sale proceeds are counted separately, so leave them out here.</p>' +
+      '<div class="pa-cpf2" data-cpf2 hidden><p class="pa-note">' + CPF2_TXT + '</p>' + chips('cover95', 'Will one of your homes last until you are 95?', [['yes', 'Yes'], ['no', 'No'], ['unsure', 'Not sure']], { value: '', hint: 'Compare each home’s remaining lease with 95 less your age. Not sure: the Full Retirement Sum is used.' }) +
+      '<div class="pa-pair">' + money('cpfBal.0.oa', 'Your OA balance', { ph: 'from your CPF statement' }) + money('cpfBal.0.sa', 'Your SA or RA balance', { ph: 'type 0 if none' }) + '</div>' +
+      '<div class="pa-pair" data-when="who:two">' + money('cpfBal.1.oa', 'Second buyer’s OA balance') + money('cpfBal.1.sa', 'Second buyer’s SA or RA', { ph: 'type 0 if none' }) + '</div></div>' +
       '<div data-when="kind:new"><p class="pa-l pa-l2">Each month towards the home</p><div class="pa-pair">' + money('saveMo', 'Cash', { ph: 'e.g. 3,000' }) + money('cpfMo', 'CPF', { ph: 'e.g. 2,000' }) + '</div><p class="pa-note">Used to check each payment date.</p></div>' +
       '<p class="pa-fine">Stays on this device.</p></section>' +
       '<section class="pa-sec" aria-labelledby="pa-h-home"><h2 class="pa-h" id="pa-h-home">The home</h2>' + chips('kind', 'What are you buying?', [['new', 'New launch'], ['completed', 'Completed private home'], ['hdb', 'HDB flat']], { value: 'new' }) +
@@ -136,6 +162,7 @@
     if (sl.counted) {
       const src = sl.source === 'entered' ? 'Using your figures: ' : 'Estimated: ';
       if (sl.cash < 0) return src + 'the sale would not cover the loan and costs. You would need to add about <b>' + $(-sl.cash) + '</b> of your own cash.';
+      if (sl.owner55 && sl.cpf > 0) return src + 'about <b>' + $(sl.cash) + '</b> in cash and <b>' + $(sl.cpf) + '</b> back into the CPF of the younger owner. The refund to the owner aged 55 or over goes first to their Retirement Account, so it is not counted.';
       if (sl.owner55) return src + 'about <b>' + $(sl.cash) + '</b> in cash. At 55 or over, the <b>' + $(sl.cpfRefund || 0) + '</b> CPF refund goes first to your Retirement Account up to the Full Retirement Sum, so none of it is counted. If some of it is free to use, add that to “CPF OA you plan to use”.';
       return src + 'about <b>' + $(sl.cash) + '</b> in cash and <b>' + $(sl.cpf) + '</b> back into your CPF' + (sl.source === 'estimated' ? ', after the loan, selling costs and your CPF refund' : '') + '.';
     }
@@ -163,7 +190,7 @@
     if ((!res || res.state === 'empty') && VIEW_CTX.priceTxt) return '<div class="pa-intro">' + '<p class="pa-kick">A price from Research</p><h2 class="pa-lead">Can you afford this price?</h2><p class="pa-p">' + esc(VIEW_CTX.priceTxt) + ' Add your age and income to find out. The answer updates as you type, and nothing leaves this device.</p></div>';
     if (!res || res.state === 'empty') return '<div class="pa-intro">' + kick + '<h2 class="pa-lead">What is your maximum budget?</h2><p class="pa-p">Add your age and income to start. The answer updates as you type, and nothing leaves this device.</p></div>';
     if (res.state === 'no-income') return '<div class="pa-intro">' + kick + '<h2 class="pa-lead">No bank loan to work out</h2><p class="pa-p">Your income is entered as $0, so there is no income to lend against. Add income, including a co-borrower’s, to see what a bank could lend. Leave it blank if you have not decided yet.</p></div>';
-    if (res.state === 'income' || res.state === 'ask-home' || res.state === 'ask-flat') {
+    if (res.state === 'income' || res.state === 'ask-home' || res.state === 'ask-flat' || res.state === 'ask-cpf') {
       const prompt = res.state === 'income' ? 'Add your cash and CPF to see what that buys.' : res.state === 'ask-home' ? 'Answer the property questions on the left to see your budget.' : (PROMPTASK[(res.ask || [])[0]] || 'Answer the property questions on the left.');
       return '<div class="pa-intro">' + kick + '<h2 class="pa-lead">The bank may lend about <b>' + $s(Math.floor(res.borrow.max / 1e4) * 1e4) + '</b></h2><p class="pa-p">' + (res.borrow.monthly > 0 ? 'About <b>' + $(round100(res.borrow.monthly)) + '</b> a month, over ' + plural(res.borrow.years) + ' at your expected ' + rateTxt(res) + '. An estimate from your income alone. ' : 'An estimate from your income alone, over ' + plural(res.borrow.years) + '. ') + prompt + '</p></div>';
     }
@@ -286,9 +313,15 @@
     const tt = res.tenure;
     if (tt) L.push(row('Your tenure', (tt.manual ? 'You chose ' + plural(tt.years) + ', so that is what is used. ' : (tt.std < 1 ? plural(tt.years) + ' is used: no tenure keeps the standard loan limit at your age, so it is the longest a bank usually lends. ' : plural(tt.years) + ' is used: the longest loan that keeps the standard loan limit at your age. ')) + (tt.cappedFrom ? 'You entered ' + plural(tt.cappedFrom) + ', but ' + plural(tt.years) + ' is the longest a bank usually lends at your age, so that is what is used. ' : '') + 'A longer one, up to ' + plural(tt.cap) + ' and ending by about age ' + R_MAT + ', is only offered when it adds 5% or more to your budget, and it takes the lower loan limit. ' + plural(Math.min(maxTenure(), tt.allowed || maxTenure())) + ' is the longest a loan can run at your age. Banks usually end a loan by age ' + R_MAT + ' (lender policy, not a MAS rule) but set their own age limits, so check with yours.' + cmpTable(rows, tt, false)));
     // duty
-    L.push(row('Stamp duty', 'Buyer’s stamp duty <b>' + $(a.bsd) + '</b>' + (a.absd > 0 ? ' and additional buyer’s stamp duty (' + pc(a.absdRate) + ') <b>' + $(a.absd) + '</b>' : ', with no additional buyer’s stamp duty') + '. Paid in cash within 14 days of signing.' + (a.dutyBase > a.P + 0.5 ? ' Worked on the valuation of ' + $(a.dutyBase) + ', because stamp duty is charged on the higher of the price and the market value (IRAS).' : '')));
+    // C1: the remissions applied (a married couple with a Citizen, neither owning a home; an FTA national), and the joint-purchase rule, in IRAS's words
+    const dn = (id) => (a.dutyNotes || []).some((x) => x.id === id);
+    L.push(row('Stamp duty', 'Buyer’s stamp duty <b>' + $(a.bsd) + '</b>' + (a.absd > 0 ? ' and additional buyer’s stamp duty (' + pc(a.absdRate) + ') <b>' + $(a.absd) + '</b>' : ', with no additional buyer’s stamp duty') + '. Paid in cash within 14 days of signing.' + (a.dutyBase > a.P + 0.5 ? ' Worked on the valuation of ' + $(a.dutyBase) + ', because stamp duty is charged on the higher of the price and the market value (IRAS).' : '') +
+      (a.coupleApplied ? ' No ABSD: a married couple with a Singapore Citizen, buying in your two names and neither owning another home, has it remitted in full at stamping (IRAS).' : '') +
+      (dn('fta-applied') ? ' A buyer who qualifies under a free trade agreement pays ABSD at the Singapore Citizen rate (IRAS).' : '') +
+      (dn('joint') && a.absd > 0 ? ' Buying together, you pay the highest of your rates, each worked on the homes that buyer owns.' : '') +
+      (dn('refund') && a.absd > 0 ? ' As a married couple, you can claim this ABSD back if you sell your home within 6 months (of completion, or of TOP for a home under construction).' : '')));
     // cash and CPF
-    L.push(row('Cash and CPF', 'Cash alone pays the booking fee, the ' + pc(a.minCash) + ' minimum cash (' + $(a.cashMin) + ')' + (a.cov > 0.5 ? ', the ' + $(a.cov) + ' by which the price is above the valuation' : '') + ' and stamp duty: <b>' + $(a.cashOnly) + '</b>. The other <b>' + $(a.flexNeed) + '</b> can be cash or CPF. CPF is counted as you entered it, for this price only: ' + (a.valuation !== null && a.valuation !== undefined ? 'the loan, the minimum cash and the CPF part are worked on the valuation you entered (the lower of price and valuation), and CPF’s own limits and the home’s lease are not applied' : 'no valuation or lease limit is applied, and the home is taken to be worth its price') + '. What stays in hand is cash, not CPF. Not included: legal and valuation fees, renovation and furnishing. To hold money back for them, use “Set aside” under More options.'));
+    L.push(row('Cash and CPF', 'Cash alone pays the booking fee, the ' + pc(a.minCash) + ' minimum cash (' + $(a.cashMin) + ')' + (a.cov > 0.5 ? ', the ' + $(a.cov) + ' by which the price is above the valuation' : '') + ' and stamp duty: <b>' + $(a.cashOnly) + '</b>. The other <b>' + $(a.flexNeed) + '</b> can be cash or CPF. ' + (a.cpfCheck && a.cpfCheck.check && a.cpfCheck.check.ok ? 'CPF is counted at ' + $(a.cpfUsable) + ', what CPF allows above its retirement-sum set-aside while you still own a home (see Assumptions), for this price only: ' : 'CPF is counted as you entered it, for this price only: ') + (a.valuation !== null && a.valuation !== undefined ? 'the loan, the minimum cash and the CPF part are worked on the valuation you entered (the lower of price and valuation), and CPF’s own limits and the home’s lease are not applied' : 'no valuation or lease limit is applied, and the home is taken to be worth its price') + '. What stays in hand is cash, not CPF. Not included: legal and valuation fees, renovation and furnishing. To hold money back for them, use “Set aside” under More options.'));
     // sale
     if (res.basis === 'sell' && res.sale) L.push(row('Your sale', saleLine(res.sale) + (res.sale.source === 'estimated' ? ' This is the price, less the loan, your CPF refund as you entered it (it includes the accrued interest, which we do not estimate), the agent’s fee and legal costs. Cash and CPF are kept apart, and nothing is counted until the sale completes and the CPF is released.' : '')));
     else if (res.sale && !res.sale.counted) L.push(row('Your sale', saleLine(res.sale)));
@@ -306,13 +339,17 @@
     const track = (n, p) => { try { KPT.track(n, Object.assign({ tool_name: 'planner' }, p || {})); } catch (e) { /* analytics unavailable */ } };
     const $$ = (s, el) => [].slice.call((el || box).querySelectorAll(s)), q = (s) => box.querySelector(s);
     const out = { head: q('[data-head]'), tenure: q('[data-tenure]'), pricebox: q('[data-pricebox]'), status: q('[data-status]'), tiles: q('[data-tiles]'), next: q('[data-next]'), how: q('[data-how]'), foot: q('[data-foot]'), ask: q('[data-ask]'), bar: q('[data-bar]') };
-    const SHARE = 'gw.fin.v1', OWN = 'gw.ans.v1', HAND = 'gw.hand.v1', SELL = 'gw.sell.v1';
+    // C1: the entry point decides. From a journey or Research (?j=1) the Planner shares with the journey; from Tools it is a standalone calculation (see the file header).
+    const journey = /[?&]j=1(&|$)/.test(root.location.search);
+    const again = (() => { try { const nv = root.performance.getEntriesByType('navigation')[0]; return !!nv && (nv.type === 'reload' || nv.type === 'back_forward'); } catch (e) { return false; } })();
+    const SHARE = 'gw.fin.v1', OWN = journey ? 'gw.ans.v1' : 'gw.pro.planner.v1', HAND = 'gw.hand.v1', SELL = 'gw.sell.v1';
     // How this page's answers read in the shared figures. "Do you own a property?" is the calculators' count (0, 1, 2); a "0" there is their pre-set choice, not an answer, so it is not carried here.
     // A home that is an EC is sold like a private home here.
-    const SHARE_MAP = { owns: { to: { none: '0', one: '1', two: '2' }, from: { '1': 'one', '2': 'two' } }, 'flat.type': { to: { hdb: 'hdb', private: 'private' }, from: { hdb: 'hdb', private: 'private', ec: 'private' } } };
+    const SHARE_MAP = { owns: { to: { none: '0', one: '1', two: '2' }, from: { '1': 'one', '2': 'two' } }, owns2: { to: { none: '0', one: '1', two: '2' }, from: { '1': 'one', '2': 'two' } }, 'flat.type': { to: { hdb: 'hdb', private: 'private' }, from: { hdb: 'hdb', private: 'private', ec: 'private' } } };
     const FROM = { typical: 'Price from Research: the typical recent price in past sales, not a valuation or a listing.', asking: 'Price from Research: the asking price you entered there.' };
     const store = (k) => ({ get() { try { return JSON.parse(root.sessionStorage.getItem(k) || '{}') || {}; } catch (e) { return {}; } }, remove() { try { root.sessionStorage.removeItem(k); } catch (e) { /* storage blocked */ } }, set(o) { try { root.sessionStorage.setItem(k, JSON.stringify(o)); } catch (e) { /* storage blocked */ } } });
     const shared = store(SHARE), own = store(OWN), hand = store(HAND);
+    if (!journey && !again) own.remove();   // standalone: a new visit starts blank
     const parseMoney = (s) => { const p = C.parseMoney(String(s).replace(/\.$/, '')); return p; };
     const fmtMoney = (v) => v.toLocaleString('en-US', { maximumFractionDigits: 2 });
     const today = new Date(), todayIso = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
@@ -326,11 +363,24 @@
     const bonusOn = { 0: false, 1: false }, rentOn = { 0: false, 1: false };
     function showBonus(n, on) { bonusOn[n] = on; const b = q('[data-bonusbox="' + n + '"]'), l = q('[data-bonus="' + n + '"]'); if (b) b.hidden = !on; if (l) l.hidden = on; if (!on) { const f = field('buyers.' + n + '.variable'); if (f) f.value = ''; } }
     function showRent(n, on) { rentOn[n] = on; const b = q('[data-rentbox="' + n + '"]'), l = q('[data-rent="' + n + '"]'); if (b) b.hidden = !on; if (l) l.hidden = on; if (!on) { const f = field('buyers.' + n + '.rental'); if (f) f.value = ''; } }
+    // C1: flags worked out from several answers, read by data-when like any field
+    const CNT = { none: 0, one: 1, two: 2 };
+    function flags() {
+      const two = val('who') === 'two', o1 = val('owns'), o2 = two ? val('owns2') : 'none', r0 = val('buyers.0.res') || 'SC', r1 = two ? (val('buyers.1.res') || 'SC') : null;
+      const own1 = o1 === 'one' || o1 === 'two', own2 = two && (o2 === 'one' || o2 === 'two'), both = own1 && own2;
+      const distinct = (CNT[o1] || 0) + (two ? (CNT[o2] || 0) : 0) - (both && val('homeJoint') === 'yes' ? 1 : 0);
+      const ages = [0, 1].filter((n) => n === 0 || two).map((n) => { const p = C.parseNum(String((field('buyers.' + n + '.age') || {}).value || '')); return p.value || 0; });
+      return { anyown: own1 || own2 ? '1' : '0', bothown: both ? '1' : '0', others: distinct >= 2 ? '1' : '0', mixed: two && ((r0 === 'SC') !== (r1 === 'SC')) && (r0 === 'SC' || r1 === 'SC') ? '1' : '0',
+        fta: r0 !== 'SC' || (two && r1 !== 'SC') ? '1' : '0', own55: ages.some((a) => a >= 55) ? '1' : '0', bothNone: o1 === 'none' && (!two || o2 === 'none') };
+    }
+    let cpfOn = false;   // C1 (B3): the CPF balances are asked when the answer needs them (set from the last result)
     function applyWhen() {
-      if (val('owns') === 'none') { const hg = field('home'); if (hg && chipVal(hg)) setChip(hg, ''); }
-      $$('[data-when]').forEach((el) => { const parts = el.dataset.when.split(':'), k = parts[0], vs = parts[1].split(','); const v = val(k); el.hidden = vs.indexOf('*') >= 0 ? !(v !== '' && v !== undefined) : vs.indexOf(v) < 0; });
+      const F = flags();
+      if (F.bothNone) { const hg = field('home'); if (hg && chipVal(hg)) setChip(hg, ''); }
+      $$('[data-when]').forEach((el) => { const parts = el.dataset.when.split(':'), k = parts[0], vs = parts[1].split(','); const v = F[k] !== undefined ? F[k] : val(k); el.hidden = vs.indexOf('*') >= 0 ? !(v !== '' && v !== undefined) : vs.indexOf(v) < 0; });
+      { const cb = q('[data-cpf2]'); if (cb) cb.hidden = !cpfOn; }
       // selling first: rental income from the property being sold stops at the sale, so the buyer is asked to enter only what continues
-      const sellFirst = val('owns') !== 'none' && val('home') === 'sell' && val('order') === 'sell'; $$('[data-rentsell]').forEach((el) => { el.hidden = !sellFirst; });
+      const sellFirst = F.anyown === '1' && val('home') === 'sell' && val('order') === 'sell'; $$('[data-rentsell]').forEach((el) => { el.hidden = !sellFirst; });
       const two = val('who') === 'two'; const r = q('[data-row="b1"]'); if (r) r.hidden = !two;
       if (!two) { ['age', 'fixed', 'variable', 'rental'].forEach((f) => { const x = field('buyers.1.' + f); if (x) x.value = ''; }); showBonus(1, false); showRent(1, false); }
     }
@@ -346,14 +396,21 @@
       [0, 1].forEach((n) => {
         if (n === 1 && !two) return;
         const age = readNum('buyers.' + n + '.age', n ? '33' : '35'), fixed = readMoney('buyers.' + n + '.fixed'), variable = readMoney('buyers.' + n + '.variable'), rental = readMoney('buyers.' + n + '.rental');
-        buyers.push({ res: val('buyers.' + n + '.res') || 'SC', age: age, fixed: fixed, variable: variable, rental: rental });
+        // C1: homes owned and FTA nationality, per buyer (B1, B2)
+        const ow = val(n ? 'owns2' : 'owns'), fe = field('buyers.' + n + '.fta');
+        buyers.push({ res: val('buyers.' + n + '.res') || 'SC', age: age, fixed: fixed, variable: variable, rental: rental, owned: CNT[ow], fta: fe && live(fe) ? val('buyers.' + n + '.fta') === 'yes' : undefined });
       });
-      const owns = val('owns'), home = owns === 'none' ? 'none' : (owns ? (val('home') || null) : null), order = val('order') || null;
+      const F = flags(), owns = val('owns'), answered = owns !== '' && (!two || val('owns2') !== ''), home = !answered ? null : F.anyown !== '1' ? 'none' : (val('home') || null), order = val('order') || null;
+      const yn = (k) => { const g = field(k); if (!g || !live(g)) return undefined; const v = val(k); return v === 'yes' ? true : v === 'no' ? false : undefined; };
+      const cb = q('[data-cpf2]'), cpfLive = !!(cb && !cb.hidden);
       const s = { kind: val('kind') || 'new', buyers: buyers, debts: readMoney('debts'), ratePct: readNum('ratePct', '4'), years: readNum('years', '30'), cash: readMoney('cash'), cpf: readMoney('cpf'), setAside: readMoney('setAside'),
         saveMo: readMoney('saveMo'), cpfMo: readMoney('cpfMo'), home: home, order: order, price: ptouched ? readMoney('price') : undefined, valuation: ptouched ? readMoney('valuation') : undefined, otp: val('otp') || undefined,
-        owned: owns === 'two' ? 2 : owns === 'one' ? 1 : undefined, otherLoans: owns === 'two' && val('otherLoans') !== '' ? +val('otherLoans') : undefined, otherInstal: readMoney('otherInstal'), prefLoan: readMoney('prefLoan'),
+        owned: owns === 'two' ? 2 : owns === 'one' ? 1 : undefined, otherLoans: F.others === '1' && val('otherLoans') !== '' ? +val('otherLoans') : undefined, otherInstal: readMoney('otherInstal'), prefLoan: readMoney('prefLoan'),
+        homeJoint: yn('homeJoint'), couple: yn('couple'),
+        cpfBal: cpfLive ? [0, 1].filter((n) => n === 0 || two).map((n) => ({ oa: readMoney('cpfBal.' + n + '.oa'), sa: readMoney('cpfBal.' + n + '.sa') })) : undefined,
+        cover95: cpfLive ? (val('cover95') === 'yes' ? true : val('cover95') === 'no' ? false : null) : null,
         flat: { type: val('flat.type') || 'hdb', hasLoan: val('flat.hasLoan') || undefined, instalment: readMoney('flat.instalment'), price: readMoney('flat.price'), loan: readMoney('flat.loan'), cpfRefund: readMoney('flat.cpfRefund'),
-          overrideCash: readMoney('flat.overrideCash'), overrideCpf: readMoney('flat.overrideCpf'), costs: readMoney('flat.costs'), heldOver4: val('flat.held') === 'yes' ? true : undefined } };
+          overrideCash: readMoney('flat.overrideCash'), overrideCpf: readMoney('flat.overrideCpf'), costs: readMoney('flat.costs'), heldOver4: val('flat.held') === 'yes' ? true : undefined, cpfRefund55: readMoney('flat.cpfRefund55') } };
       if (home === 'none') s.flat = {};
       return s;
     }
@@ -363,7 +420,7 @@
       if (r.state === 'no-income') return 'Income is $0: no loan to work out.';
       if (r.state === 'empty') return 'Waiting for ' + (r.need && r.need.length ? r.need.map((x) => WHYWAIT[x]).join(' and ') : 'your age and income') + '.';
       if (r.state === 'income') return 'Waiting for ' + (typeof s.cash === 'undefined' && typeof s.cpf === 'undefined' ? 'your cash and CPF' : 'your cash and CPF') + '.';
-      if (r.state === 'ask-home') return 'Waiting for ' + WHYWAIT.home + '.'; if (r.state === 'ask-flat') return 'Waiting for ' + (WHYASK[(r.ask || [])[0]] || WHYWAIT.flat) + '.'; return ''; };
+      if (r.state === 'ask-home') return 'Waiting for ' + WHYWAIT.home + '.'; if (r.state === 'ask-flat' || r.state === 'ask-cpf') return 'Waiting for ' + (WHYASK[(r.ask || [])[0]] || WHYWAIT.flat) + '.'; return ''; };
     function paintErrors(list) {
       const map = {}; (list || []).forEach((e) => { if (!map[e.key]) map[e.key] = e.text; }); Object.keys(errs).forEach((k) => { map[k] = errs[k]; });
       $$('[data-err]').forEach((m) => { const k = m.dataset.err, msg = map[k], f = field(k); if (msg) { m.textContent = msg; m.hidden = false; if (f) { f.setAttribute('aria-invalid', 'true'); const w = f.closest('.pa-in, .pa-pin'); if (w) w.classList.add('bad'); } } else { m.hidden = true; m.textContent = ''; if (f) { f.setAttribute('aria-invalid', 'false'); const w = f.closest('.pa-in, .pa-pin'); if (w) w.classList.remove('bad'); } } });
@@ -436,6 +493,8 @@
       syncSched();
       const s = readEntries(); stDirty = false;
       const r = A.assess(s);
+      // C1 (B3): the balances block follows the answer: shown while a buyer will still own a home and CPF is planned; the answer is worked again once it appears or goes
+      { const need = r.state === 'ask-cpf' || !!(r.at && r.at.cpfCheck) || !!(r.facts && r.facts.cpf && r.facts.cpf.applies); if (need !== cpfOn) { cpfOn = need; recalc(); return; } }
       // the tenure field shows the tenure the calculation used (gw-money.js): a longer one typed is replaced by it once the field is not being typed in
       if (tenureFld) { const applied = r.state === 'ok' ? r.years : 0; if (tenureFld.settle(applied)) { recalc(); return; } tenureFld.hint(applied); }
       res = r; const st = { monthly: s.saveMo === undefined ? 0 : (s.saveMo || 0) + (s.cpfMo || 0), twoBuyers: s.buyers.length > 1 };
@@ -453,7 +512,7 @@
         setPriceUi(r); setBorrowUi(r); out.status.innerHTML = ''; out.tiles.innerHTML = ''; out.next.innerHTML = nextHtml(r, st); out.how.innerHTML = howHtml(r, st); drawTenure(r); reopen(od);
         out.foot.hidden = false; out.ask.hidden = false; heldHtml = out.head.innerHTML;
         if (!completedOnce) { completedOnce = true; track('tool_completed', {}); }
-      } else if (lastOk && (bad || r.state === 'empty' || r.state === 'no-income' || r.state === 'income' || r.state === 'ask-home' || r.state === 'ask-flat')) {
+      } else if (lastOk && (bad || r.state === 'empty' || r.state === 'no-income' || r.state === 'income' || r.state === 'ask-home' || r.state === 'ask-flat' || r.state === 'ask-cpf')) {
         // an entry is being fixed or cleared: the last good figure stays, dimmed, with the plain reason; nothing below it is shown as current
         out.head.className = 'pa-head held'; out.head.innerHTML = headHtml(lastOk, true, WAIT(r, s)) ; out.tenure.innerHTML = ''; out.pricebox.hidden = true; setBorrowUi(null); out.status.innerHTML = ''; out.tiles.innerHTML = ''; out.next.innerHTML = ''; out.how.innerHTML = ''; last = null;
         out.head.querySelectorAll('.pa-badge').forEach((b) => b.remove());
@@ -506,7 +565,9 @@
       const sum = (k) => s.buyers.reduce((a, b) => a + (b[k] > 0 ? b[k] : 0), 0), pos = (x) => (x > 0 ? x : 0), keep = r.basis === 'keep', sell = r.basis === 'sell';
       const h = { v: 1, fresh: true, kind: r.kind, price: r.price, years: r.tenure && r.tenure.manual ? r.years : '', ratePct: r.ratePct, age: Math.round(r.B.iwaaUse * 100) / 100, cash: Math.max(0, pos(s.cash) - pos(s.setAside)), cpf: pos(s.cpf),
         income: sum('fixed'), varIncome: sum('variable') + sum('rental'), debts: pos(s.debts) + (r.at ? r.at.flatInstal : 0), otp: s.otp || '', order: sell ? 'sell' : 'none',
-        buyers: s.buyers.map((b) => ({ res: b.res, owned: keep || sell ? (r.facts ? r.facts.owned : 1) : 0 })), loansOther: r.at ? r.at.loans : 0, prefLoan: r.at && r.at.limit === 'choice' ? r.at.loan : '' };
+        // C1: homes owned per buyer (sold first: as owned now, with the owners of the home being sold named; kept: as owned at the purchase), the couple and FTA answers, the CPF balances
+        buyers: s.buyers.map((b, k) => { const fc = r.facts || {}; return { res: b.res, fta: b.fta, owned: sell ? (fc.cnt ? fc.cnt[k] : 1) : keep ? (fc.ownedAt ? fc.ownedAt[k] : 1) : 0 }; }), couple: s.couple, saleOwners: sell && r.facts ? r.facts.homeOwners : undefined,
+        cpfBal: s.cpfBal, cover95: s.cover95, loansOther: r.at ? r.at.loans : 0, prefLoan: r.at && r.at.limit === 'choice' ? r.at.loan : '' };
       if (r.kind === 'new') { h.saveMo = pos(s.saveMo); h.cpfMo = pos(s.cpfMo); }
       if (r.kind === 'completed' && r.priceIsOwn && s.valuation > 0) h.valuation = s.valuation;   // the valuation belongs to this price only
       if (sell && r.sale && r.sale.counted) { const f = s.flat || {}; h.sale = { type: f.type || 'hdb', heldOver4: f.heldOver4 === true, price: f.price, loan: f.loan, cpfRefund: f.cpfRefund, overrideCash: f.overrideCash, overrideCpf: f.overrideCpf, costs: f.costs }; }
@@ -515,6 +576,7 @@
     let saveT = null;
     function save() {
       const o = snapshot(); if (Object.keys(o).length) own.set(o); else own.remove();
+      if (journey) {   // standalone: the shared figures are neither read nor written (C1)
       const s = shared.get(); $$('[data-share]').forEach((x) => {
         // a second buyer who has been taken away is removed from the shared figures too, as the calculators do
         if (!live(x)) { if (/^(borrowers|buyers)\.1\./.test(x.dataset.share) && !live(field('buyers.1.age'))) delete s[x.dataset.share]; return; }
@@ -523,6 +585,7 @@
         if (v !== null && v !== undefined && v !== '' && !(x.dataset.t === 'chip' && x.dataset.k !== 'owns' && v === (x.dataset.default || ''))) s[x.dataset.share] = v; else delete s[x.dataset.share]; });
       const p = field('price'); if (p && p.value !== '' && res && res.priceIsOwn) s.buyPrice = p.value; else if (p && p.value === '') delete s.buyPrice; if (!priceFrom) delete s.buyFrom;
       if (Object.keys(s).length) shared.set(s); else shared.remove();
+      }
       if (last && res && res.state === 'ok' && !Object.keys(errs).length) { const en = readEntries(); hand.set(handoffOf(en, res)); planHandoff(en, res); } else { hand.remove(); planHandoff(null, null); }
     }
     // The maximum budget goes on to Budget Search ("What can this budget buy?", in Research too) in this tab only (kpt.handoff), as the hdb planner does: the search opens with it filled in,
@@ -597,7 +660,7 @@
     function wa() { const a = q('[data-ask-wa]'); if (!a) return; const m = 'Hi Ken, I’m using the Planner on Groundwork and would like to talk through what I can afford. (Ref ' + REF + ')'; const u = waUrl(m); if (root.GW_WA) root.GW_WA.set(a, u); else a.setAttribute('href', u); }
 
     // ---- restore: the other calculators' shared details, then this tab's own entries ----
-    const sv = shared.get(), ov = own.get();
+    const sv = journey ? shared.get() : {}, ov = own.get();
     const start = Object.assign({}, ov);
     // a figure typed in another tool is the latest entry of that figure (every tool writes the shared figures as it is edited), so it is shown here; this page's own entries fill the rest
     $$('[data-share]').forEach((x) => { let v = sv[x.dataset.share]; const k = x.dataset.k; const m = SHARE_MAP[k]; if (m && v !== undefined) v = m.from[v]; if (v !== undefined && v !== '') start[k] = v; });
@@ -631,6 +694,7 @@
       const n = q('[data-sale-from]');
       if (n) { n.textContent = (saleFrom.sale ? 'Carried over from Sale proceeds. Change anything here and only this page changes.' : 'Using the sale figures you entered earlier in this tab.') + (saleFrom.estimated ? ' Its CPF interest was an estimate, so check the refund against your CPF statement.' : ''); n.hidden = false; }
     }
+    if (!journey) { const so = q('.pa-startover'); if (so) { const nb = document.createElement('button'); nb.type = 'button'; nb.className = 'pa-link'; nb.setAttribute('data-pa-new', ''); nb.textContent = 'New calculation'; so.insertBefore(nb, so.firstChild); nb.addEventListener('click', () => { own.remove(); try { root.location.replace(root.location.pathname + root.location.search); } catch (e) { root.location.reload(); } }); } }
     recalc();
     if (saleFrom) save();
   }

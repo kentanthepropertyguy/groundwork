@@ -97,7 +97,10 @@
     for (const b of R.bsdBands) { const slice = Math.min(left, b.width); if (slice <= 0) break; lines.push({ from, to: from + slice, rate: b.rate, duty: slice * b.rate }); left -= slice; from += slice; }
     return lines;
   }
-  // i: { price, kind: 'private'|'ec'|'hdb', buyers: [{ res, owned }], entity }   kind 'ec' = a new EC bought from the developer
+  // i: { price, kind: 'private'|'ec'|'hdb', buyers: [{ res, owned, fta }], entity, couple }   kind 'ec' = a new EC bought from the developer
+  //   fta (C1, optional, per buyer): true = a national of the United States, or a national or permanent resident of Iceland, Liechtenstein, Norway or Switzerland, who
+  //     pays stamp duty as a Singapore Citizen (IRAS, by remission); false = not; absent = not asked (the remitted total is then shown beside the headline, as before).
+  //   couple (C1, optional): true = the two buyers are a married couple buying in their two names only; false = not; absent = not asked (shown beside the headline).
   const KINDS = ['private', 'ec', 'hdb'];
   function stampDuty(i) {
     const bad = moneyBad(i, ['price']); if (bad.length) return invalid(bad);
@@ -106,16 +109,20 @@
     const rowsIn = (i.buyers || []).filter(Boolean);
     const okRow = (b) => R.absd[b.res] && b.res !== 'ENTITY' && Number.isInteger(+b.owned) && +b.owned >= 0;
     if (!i.entity && rowsIn.some((b) => !okRow(b))) return invalid([{ field: 'buyers', text: 'Check the buyer details: residency and the number of homes already owned.' }]);
-    const buyers = rowsIn.map((b) => ({ res: b.res, owned: Math.min(2, +b.owned) }));
+    // a Singapore Citizen has no FTA question: the flag only means something for a PR or a foreigner
+    const buyers = rowsIn.map((b) => ({ res: b.res, owned: Math.min(2, +b.owned), fta: b.res === 'SC' ? undefined : (b.fta === true ? true : b.fta === false ? false : undefined) }));
     if (!i.entity && !buyers.length) need.push('buyers');
     if (need.length) return missing(need);
     const kind = KINDS.indexOf(i.kind) >= 0 ? i.kind : 'private', RM = R.absdRemissions;
     const bsd = Math.max(R.bsdMinimum, ENG.bsd(i.price)); // the planner's own BSD (same bands, rounded down), at least $1 (IRAS)
     const rateOf = (list) => list.reduce((a, b) => (b.rate > a.rate ? b : a));
-    const rates = i.entity ? [{ res: 'ENTITY', owned: 0, rate: R.absd.ENTITY[0] }] : buyers.map((b) => ({ res: b.res, owned: b.owned, rate: R.absd[b.res][b.owned] }));
+    // C1: a buyer who qualifies under an FTA pays at the Singapore Citizen rate for their own count (IRAS "Foreigners eligible for ABSD remission under FTAs")
+    const rates = i.entity ? [{ res: 'ENTITY', owned: 0, rate: R.absd.ENTITY[0] }] : buyers.map((b) => Object.assign({ res: b.res, owned: b.owned }, b.fta === true ? { fta: true } : {}, { rate: R.absd[b.fta === true ? 'SC' : b.res][b.owned] }));
     const top = rateOf(rates);
     const notes = [];
     const joint = buyers.length > 1, allFirst = buyers.every((b) => b.owned === 0), anySC = buyers.some((b) => b.res === 'SC');
+    const coupleAsked = i.couple === true || i.couple === false, ftaAsked = buyers.some((b) => b.fta !== undefined);
+    if (buyers.some((b) => b.fta === true)) notes.push({ id: 'fta-applied', text: 'A buyer who is a national of the United States, or a national or permanent resident of Iceland, Liechtenstein, Norway or Switzerland, pays ABSD at the Singapore Citizen rate under a free trade agreement (IRAS remission). IRAS decides.' });
     // HDB flat or new EC: IRAS remits ABSD in full if any buyer is a Singapore Citizen; PR buyers of an HDB flat pay 5% (A1-04).
     // HDB grants it automatically on approving the purchase, so this is the amount payable, not a refund.
     let rate = top.rate, hdbEc = null;
@@ -123,6 +130,13 @@
       if (anySC) { rate = RM.hdbEc.anyCitizenRate; hdbEc = 'citizen'; }
       else if (kind === 'hdb' && buyers.every((b) => b.res === 'PR')) { rate = Math.min(rate, RM.hdbEc.hdbPrOnlyRate); hdbEc = 'pr'; }
       else hdbEc = 'none';
+    }
+    // C1: a married couple with at least one Singapore Citizen, buying in their two names only, neither owning a residential property: IRAS remits the ABSD in full at
+    // stamping (R.absdRemissions.coupleRule). Applied only when the buyer says so (couple === true); in every other case the joint-purchase rule above stands.
+    let coupleApplied = false;
+    if (!i.entity && i.couple === true && kind === 'private' && buyers.length === RM.coupleRule.spouses && anySC && allFirst && rate > 0) {
+      notes.push({ id: 'couple-applied', text: 'A married couple with at least one Singapore Citizen, buying in their two names only and neither owning another residential property: IRAS remits the ' + pc(rate) + ' ABSD in full at stamping (' + $(dutyAt(i.price, rate)) + ' otherwise). If either of you owns a home at the purchase, the full rate applies.' });
+      rate = 0; coupleApplied = true;
     }
     const what = kind === 'hdb' ? 'an HDB flat' : 'a new EC from the developer';
     if (hdbEc === 'citizen' && top.rate > 0) notes.push({ id: 'hdb-ec', text: 'Buying ' + what + ' with a Singapore Citizen buyer: IRAS remits the ABSD in full (' + pc(top.rate) + ' = ' + $(dutyAt(i.price, top.rate)) + ' otherwise). HDB grants this automatically when it approves the purchase.' });
@@ -134,11 +148,12 @@
     // each remitted total is shown beside it with IRAS's conditions (A1-02, A1-09, A1-10, A1-14).
     const remissions = [];
     const alt = (list) => { const t = rateOf(list.map((b) => ({ rate: R.absd[b.res][b.owned] }))).rate; return { absdRate: t, absd: dutyAt(i.price, t), total: bsd + dutyAt(i.price, t) }; };
-    if (!i.entity && rate > 0 && joint && allFirst && anySC && buyers.some((b) => b.res !== 'SC')) {
+    // C1: shown beside the headline only when the question was not asked (the Stamp duty calculator); the planners ask it and apply the answer above.
+    if (!coupleAsked && !i.entity && rate > 0 && joint && allFirst && anySC && buyers.some((b) => b.res !== 'SC')) {
       remissions.push(Object.assign({ id: 'couple', label: 'Total if you’re a married couple buying in your two names only' }, { absdRate: 0, absd: 0, total: bsd }));
       notes.push({ id: 'couple-remission', text: 'A married couple with at least one Singapore Citizen pays no ABSD if they buy in their two names only and neither spouse owns any other residential property: IRAS remits it at stamping. Otherwise the full ABSD applies.' });
     }
-    if (!i.entity && rate > 0 && buyers.some((b) => b.res !== 'SC')) {
+    if (!ftaAsked && !i.entity && rate > 0 && buyers.some((b) => b.res !== 'SC')) {
       const all = alt(buyers.map((b) => ({ res: 'SC', owned: b.owned })));
       if (all.absd < absd) remissions.push(Object.assign({ id: 'fta', label: 'Total if ' + (buyers.filter((b) => b.res !== 'SC').length > 1 ? 'every buyer who isn’t a Singapore Citizen qualifies' : (buyers.some((b) => b.res === 'FR') ? 'the foreign buyer qualifies' : 'the Permanent Resident buyer qualifies')) + ' under a free trade agreement' }, all));
       if (buyers.some((b) => b.res === 'FR') && buyers.some((b) => b.res === 'PR')) {
@@ -148,13 +163,15 @@
       if (remissions.some((x) => x.id.indexOf('fta') === 0)) notes.push({ id: 'fta', text: 'Under free trade agreements, nationals of the United States, and nationals and permanent residents of Iceland, Liechtenstein, Norway and Switzerland, pay stamp duty as Singapore Citizens (by remission). This applies to Singapore Permanent Residents with that nationality too. IRAS decides.' });
     }
     // Refunds: the ABSD is paid upfront and refunded later if conditions are met, so the headline is unchanged.
-    if (!i.entity && kind === 'private' && joint && buyers.every((b) => b.owned <= 1) && buyers.some((b) => b.owned === 1) && anySC && rate > 0) notes.push({ id: 'refund', text: 'A married couple with at least one Singapore Citizen buying a second home together in their two names only can apply for an ABSD refund if they sell their first home within ' + R.absdRefundMonths + ' months (of buying a completed home, or of TOP or CSC for one under construction), and neither owned more than one home when buying. The ABSD is still paid upfront.' });
+    if (!i.entity && kind === 'private' && joint && i.couple !== false && buyers.every((b) => b.owned <= 1) && buyers.some((b) => b.owned === 1) && anySC && rate > 0) notes.push({ id: 'refund', text: 'A married couple with at least one Singapore Citizen buying a second home together in their two names only can apply for an ABSD refund if they sell their first home within ' + R.absdRefundMonths + ' months (of buying a completed home, or of TOP or CSC for one under construction), and neither owned more than one home when buying. The ABSD is still paid upfront.' });
     if (!i.entity && kind === 'private' && buyers.length === 1 && buyers[0].res === 'SC' && buyers[0].owned === 1) notes.push({ id: 'single-senior', text: 'A single Singapore Citizen aged ' + RM.singleSeniorAge + ' or older can apply for a refund of this ABSD if they sell their first home within ' + R.absdRefundMonths + ' months (of buying a completed home, or of TOP or CSC for one under construction) and the new home is worth less than the one they sell. Other conditions apply; the ABSD is paid upfront first.' });
     if (i.entity) notes.push({ id: 'entity', text: 'Housing developers and trustees have their own rules: developers pay 40%, of which 35% can be remitted upfront on conditions; property held on trust for identifiable individuals can get a refund. IRAS decides.' });
     return {
       ok: true, price: i.price, kind, bsd, bsdLines: bsdLines(i.price), absdRate: rate, absdRateFull: top.rate, absd, total: bsd + absd, profile: top, perBuyer: rates, notes,
       remissions, hdbEc,
       basis: 'Duty is on the higher of the price or market value, rounded down to the dollar (at least $1), and payable within 14 days of signing.',
+      // C1: present only when the couple question was answered yes and the remission applied (an unaffected result keeps its old shape)
+      ...(coupleApplied ? { coupleApplied: true } : {}),
     };
   }
 
@@ -234,7 +251,10 @@
 
   /* ---------------- 4b. The sale estimate used by the Planner and the Payment Timeline ---------------- */
   // f: { type: 'hdb'|'private'|'ec', price, loan, cpfRefund (the CPF to be refunded INCLUDING accrued interest), cpfPrincipal + cpfInterest (the same, in two parts), costs (selling costs, replaces the usual estimate),
-  //      overrideCash, overrideCpf (the buyer's own figures; used as entered), heldOver4 (private/EC: owned for more than 4 years, so no Seller's Stamp Duty) }; o: { owner55, today }.
+  //      overrideCash, overrideCpf (the buyer's own figures; used as entered), heldOver4 (private/EC: owned for more than 4 years, so no Seller's Stamp Duty),
+  //      cpfRefund55 (C1, optional: the part of the CPF refund that goes back to owners aged 55 or over) }; o: { owner55, today }.
+  // An owner aged 55 or over has their refund applied first to their Retirement Account (up to the Full Retirement Sum), so none of THEIR refund is counted. Each owner's refund
+  // goes back to their own CPF, so a younger co-owner's part is counted (C1): the 55+ part is taken out when it is entered; when it is not, none of the refund is counted, as before.
   // Nothing is invented. The CPF interest is never estimated from an assumed holding period: the refund is what the buyer enters, or the sale is NOT counted (counted: false) and the
   // part that is already known (the price less selling costs and the loan, before any CPF refund) is returned as beforeCpf, with the list of what is missing.
   // Cash and CPF returned are kept apart. Cash may be negative (the sale would not cover the loan and costs).
@@ -243,7 +263,7 @@
     const type = f.type === 'private' || f.type === 'ec' ? f.type : 'hdb', owner55 = !!o.owner55;
     const out = { type, counted: false, source: null, missing: [], reason: null, owner55, price: pos(f.price) ? f.price : null, loan: num(f.loan) !== null ? f.loan : null, refund: null, cash: 0, cpf: 0, beforeCpf: null, costs: null, net: null, cpfRefund: null, ownCashNeeded: 0 };
     if (num(f.overrideCash) !== null || num(f.overrideCpf) !== null) {
-      out.counted = true; out.source = 'entered'; out.cash = num(f.overrideCash) !== null ? f.overrideCash : 0; out.cpf = owner55 ? 0 : (num(f.overrideCpf) !== null ? f.overrideCpf : 0);
+      out.counted = true; out.source = 'entered'; out.cash = num(f.overrideCash) !== null ? f.overrideCash : 0; out.cpf = cpfAfter55(num(f.overrideCpf) !== null ? f.overrideCpf : 0, owner55, f.cpfRefund55);
       out.net = out.cash; out.cpfRefund = num(f.overrideCpf) !== null ? f.overrideCpf : 0;
       if (num(f.overrideCash) === null) out.missing.push('cash');
       if (num(f.overrideCpf) === null) out.missing.push('cpf');
@@ -266,9 +286,37 @@
     if (!r.ok) { out.reason = 'invalid'; return out; }
     if (r.ssdMissing) { out.missing.push('held'); out.reason = 'missing'; return out; }
     out.counted = true; out.source = 'estimated';
-    out.cash = r.netCash; out.cpf = owner55 ? 0 : r.cpfRefund; out.net = r.netCash; out.cpfRefund = r.cpfRefund; out.costs = r.costs.total; out.commission = r.costs.commission + r.costs.gst; out.legal = r.costs.legal; out.ssd = r.costs.ssd;
+    out.cash = r.netCash; out.cpf = cpfAfter55(r.cpfRefund, owner55, f.cpfRefund55); out.net = r.netCash; out.cpfRefund = r.cpfRefund; out.costs = r.costs.total; out.commission = r.costs.commission + r.costs.gst; out.legal = r.costs.legal; out.ssd = r.costs.ssd;
     out.ownCashNeeded = r.ownCashNeeded; out.shortfall = r.loanShortfall; out.cpfShortfall = r.cpfShortfall;
     return out;
+  }
+
+  // the CPF refund counted for the next purchase when an owner is 55 or over (C1): what is left after the 55+ owners' own part, or nothing when that part is not known
+  function cpfAfter55(refund, owner55, part55) {
+    if (!owner55) return refund;
+    return num(part55) !== null && part55 >= 0 ? Math.max(0, refund - part55) : 0;
+  }
+
+  /* ---------------- CPF for a second (or later) property (C1, B3) ---------------- */
+  // CPF Board (R.cpfSecondHome): a member who owns another property when buying can use only the OA left after setting aside the Basic Retirement Sum (if a property they
+  // own lasts to age 95) or the Full Retirement Sum (if none does). OA, SA and RA all count towards the set-aside. Per member.
+  // o: { year (the year of purchase; the latest year in the rules file is used beyond it), cover95: true | false | null (not known: the Full Retirement Sum, the cautious side),
+  //      members: [{ oa, sa, ra, age, subject }] }  subject false = this member owns no other property at the purchase, so their OA is not held back.
+  // Returns { ok, usable (total), members: [{ oa, other, need, usable, subject }], sumName, setAside, year, cover, cautious, older, missing }.
+  function cpfSecondHome(o) {
+    o = o || {}; const T = R.cpfRetirementSums, years = Object.keys(T).filter((k) => /^\d{4}$/.test(k)).map(Number).sort((a, b) => a - b);
+    const asked = num(o.year) !== null ? Math.floor(o.year) : years[0], year = years.indexOf(asked) >= 0 ? asked : (asked > years[years.length - 1] ? years[years.length - 1] : years[0]);
+    const S = T[year], cover = o.cover95 === true ? 'yes' : o.cover95 === false ? 'no' : 'unknown';
+    const sumName = cover === 'yes' ? 'BRS' : 'FRS', setAside = cover === 'yes' ? S.brs : S.frs;
+    const missing = [];
+    const members = (o.members || []).map((m, k) => {
+      m = m || {}; const subject = m.subject !== false;
+      if (num(m.oa) === null) missing.push('oa.' + k); if (subject && num(m.sa) === null && num(m.ra) === null) missing.push('sa.' + k);
+      const oa = nn(m.oa), other = nn(m.sa) + nn(m.ra), need = subject ? Math.max(0, setAside - other) : 0;
+      return { oa, other, need, usable: subject ? Math.max(0, oa - need) : oa, subject, older: pos(m.age) && m.age >= 55 };
+    });
+    if (missing.length) return { ok: false, missing, sumName, setAside, year, cover };
+    return { ok: true, usable: members.reduce((a, m) => a + m.usable, 0), members, sumName, setAside, year, yearAsked: asked, outdated: asked > years[years.length - 1], cover, cautious: cover !== 'yes', older: members.some((m) => m.older && m.subject) };
   }
 
   /* ---------------- shared: borrowers, ages and tenure ---------------- */
@@ -480,7 +528,7 @@
     const ruleLoanMax = base * row.ltv, loanCapped = num(i.loanCap) !== null && i.loanCap >= 0 && i.loanCap < ruleLoanMax;
     const loanMax = loanCapped ? i.loanCap : ruleLoanMax, cashMin = base * row.minCash, cpfOrCash = base - loanMax - cashMin;
     const rate = num(i.ratePct) === null ? R.stressRate : i.ratePct / 100;
-    const duty = stampDuty({ price: dutyBase, kind: i.kind === 'ec' ? 'ec' : 'private', buyers: i.buyers, entity: i.entity });
+    const duty = stampDuty({ price: dutyBase, kind: i.kind === 'ec' ? 'ec' : 'private', buyers: i.buyers, entity: i.entity, couple: i.couple });
     let cashLeft = cashMin + cov, flexLeft = cpfOrCash, cpfLeft = num(i.cpf) === null ? null : Math.max(0, i.cpf), drawn = 0;
     const stages = R.pps.map((s) => {
       let amt = P * s.pct; const o = { id: s.id, name: s.name, pct: s.pct, amount: amt, cash: 0, cpf: 0, flex: 0, loan: 0 };
@@ -589,5 +637,5 @@
   };
   const ASK = (tool) => 'Hi Ken, I’m using the ' + tool + ' on Groundwork and have a question.';
 
-  return { mortgage, stampDuty, bsdLines, ssd, saleProceeds, saleEstimate, cpfInterestEstimate, tdsr, msr, progressive, borrowers, bankTenure, tenureNote, tenureMaxText, tenureTierText, tenureLimit, messages, ASK, instal, parseDate: D, parseMoney, parseNum, LIMITS, dutyAt };
+  return { mortgage, stampDuty, bsdLines, ssd, saleProceeds, saleEstimate, cpfInterestEstimate, cpfSecondHome, tdsr, msr, progressive, borrowers, bankTenure, tenureNote, tenureMaxText, tenureTierText, tenureLimit, messages, ASK, instal, parseDate: D, parseMoney, parseNum, LIMITS, dutyAt };
 });

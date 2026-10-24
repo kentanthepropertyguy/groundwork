@@ -44,7 +44,9 @@
 
   /* ---------------- the schedule ---------------- */
   // i: { kind: 'new'|'ec'|'completed', price, otp: 'YYYY-MM-DD', buyers?: [{ res, owned }] (default: one Singapore Citizen who owns no home, said in `assumedBuyer`),
-  //      order?: 'sell' with removesOwnership !== false (the flat is gone before the purchase, so each buyer owns one fewer: the engine's own rule),
+  //      order?: 'sell' with removesOwnership !== false (the home sold is gone before the purchase, so ITS owners own one fewer: the engine's own rule),
+  //      saleOwners?: indexes of the buyers who own the home being sold (C1, B2; not given and both own homes: the cautious choice, the higher ABSD, as the engine does),
+  //      couple?: true = a married couple buying in their two names only (C1, B1); buyers[k].fta: an FTA national (C1, B1),
   //      dates?: { mode: 'grouped'|'spread', snp, top, csc, completion, stages: { id: date } } }
   function schedule(i) {
     i = i || {};
@@ -60,9 +62,18 @@
     const need = []; if (!pos(i.price)) need.push('price'); if (!entity && !given.length) need.push('buyers');
     if (need.length) return { ok: false, missing: need, invalid: [] };
     const removes = !(i.removesOwnership === false);
-    const buyers = given.map((b) => ({ res: b.res, owned: i.order === 'sell' && removes ? Math.max(0, Math.min(2, +b.owned) - 1) : +b.owned }));
-    const P = i.price;
-    const duty = C.stampDuty({ price: P, kind: kind === 'ec' ? 'ec' : 'private', buyers, entity });
+    const P = i.price, couple = entity ? undefined : i.couple;
+    // C1 (B2): the same rule as GW_TIMELINE: a sold home leaves its owners only; whose it is, when not said and both own homes, is the cautious choice (the higher ABSD)
+    const after = (set) => given.map((b, k) => ({ res: b.res, fta: b.fta, owned: set && set.indexOf(k) >= 0 ? Math.max(0, Math.min(2, +b.owned) - 1) : +b.owned }));
+    let sellers = null;
+    if (i.order === 'sell' && removes) {
+      const owners = given.map((b, k) => (+b.owned >= 1 ? k : -1)).filter((k) => k >= 0);
+      if (Array.isArray(i.saleOwners)) sellers = i.saleOwners.filter((k) => owners.indexOf(k) >= 0);
+      else if (owners.length <= 1) sellers = owners;
+      else { const absdOf = (set) => { const d = C.stampDuty({ price: P, kind: kind === 'ec' ? 'ec' : 'private', buyers: after(set), couple: couple }); return d.ok ? d.absd : 0; }; sellers = [owners].concat(owners.map((k) => [k])).reduce((a, c) => (absdOf(c) > absdOf(a) ? c : a)); }
+    }
+    const buyers = after(sellers);
+    const duty = C.stampDuty({ price: P, kind: kind === 'ec' ? 'ec' : 'private', buyers, entity, couple: couple });
     if (!duty.ok) return duty;
     const dates = i.dates || {}, mode = dates.mode === 'spread' ? 'spread' : 'grouped';
     const ev = [], assumptions = [];

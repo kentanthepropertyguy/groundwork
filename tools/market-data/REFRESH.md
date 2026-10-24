@@ -19,6 +19,18 @@ After it:
 
 then bump the asset version hashes for any changed script. Adding or removing a property type from a class is done in `tools/market-data/config.json` (`classes`) only; `propertyTypes` must stay equal to the condo class (the build stops with a clear message if they differ).
 
+## Bedroom types (manual; not part of `refresh-all.js`)
+
+The Research bedroom row is not released (held until bedroom Research is approved), so `refresh-all.js` has no bedroom step and nothing writes `data/projects/bedroom.json`. Do not run `build-bedroom.js --public` into the site without Ken's approval. `build-bedroom.js --layouts <private folder>` builds the private report. The folder holds `layouts.csv` (one row per developer layout: project, code, bedrooms, variant, sqm, sqft, source, status, note) and `sources.csv`; it must be outside the site folder and is never committed. The full diagnostic report is written to `<folder>/reports/<as-of>/`. Only developments whose layout rows are `developer` or `approved` are published; `draft` rows are ignored and `secondary` rows are used for the private report only.
+
+To add a development: `pdftotext -layout brochure.pdf b.txt`, then `node tools/market-data/extract-layouts.js --text b.txt --project "URA NAME" --source <id> >> layouts.csv`, check every draft row against the brochure, set its status, and add the source to `sources.csv`. The report shows whether every area URA records matched a layout, which areas did not, and whether URA rental contracts' declared bedrooms agree.
+
+URA-first classification for every development (rental contracts first, checked layout tables where they add coverage) and the repeatable, ranked brochure pass are described in `BEDROOM.md`. Neither is part of `refresh-all.js` yet.
+
+**Manual bedroom step after each URA refresh.** Run `fetch-ura-rental.js`, then `bedroom-hybrid.js --previous` and `bedroom-metrics.js`; the commands are in `BEDROOM.md`, "Refresh".
+- The classification uses only the latest 12 quarters of URA rental contracts. This is enforced in code, so extra files can never widen it.
+- Older quarters are moved to a separate private `rental-archive` folder and never deleted.
+
 ## Also keep current (not part of `refresh-all.js`)
 
 - Launches, sites and development positions are one pass (section 0 of `UPCOMING.md`): `fetch-onemap-uc.js`, `fetch-onemap-names.js`, this refresh, then `build-upcoming.js`.

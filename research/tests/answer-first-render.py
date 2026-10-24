@@ -1,4 +1,6 @@
 import os, pathlib, re, socket, subprocess, sys, time
+sys_path_dir = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, sys_path_dir)
+from sizepick import pick_dominant, forget_size
 from playwright.sync_api import sync_playwright
 """Browser checks for the answer-first Research pages (desktop and phone). Run from the site folder:  python3 research/tests/answer-first-render.py
 Class, name, price and the sample-size limit must sit on the first screen; the limits stay next to the number but in few words."""
@@ -27,7 +29,9 @@ try:
         pg.wait_for_selector('#res [role=option], #res button, #res a', timeout=10000)
         pg.click('#res >> text=Horizon Green >> nth=0'); pg.wait_for_url('**/research/map/#p=*', timeout=10000)   # a positioned development opens the Map first; its analysis is one tap away
         check(vn+': search -> a positioned development opens the Map on it', '#p=horizon-green' in pg.url, pg.url)
-        pg.goto(base + '#/p/horizon-green'); pg.wait_for_selector('[data-lg-ans]', timeout=10000)
+        pg.goto(base + '#/p/horizon-green'); forget_size(pg); pg.reload(); pg.wait_for_selector('#sizeSel', state='attached', timeout=10000)
+        check(vn+': with no size chosen, no price is shown for the development, only the question and an at-a-glance summary', pg.query_selector('.lg-ans-v') is None and pg.query_selector('[data-lg-ov]') is not None and 'What size home are you looking at?' in pg.inner_text('#lgPick'))
+        pick_dominant(pg); pg.wait_for_selector('[data-lg-ans]', timeout=10000)
         check(vn+': search -> Horizon Green page shows class chip, name and answer', pg.inner_text('[data-lg-cls]') != '' and 'Horizon Green' in pg.inner_text('h1') and pg.query_selector('.lg-ans-v'))
         top = pg.evaluate("[...document.querySelectorAll('.lg-cls,.lg-name,.lg-ans-v,.lg-pill,[data-lg-basis]')].map(e => Math.round(e.getBoundingClientRect().bottom))")
         check(vn+': class, name, price and sample-size line all sit inside the first screen ('+str(max(top))+'px)', max(top) <= (844 if vn == 'phone' else 900), top)
@@ -41,9 +45,10 @@ try:
         check(vn+': heading size '+str(h), h <= 46)
         check(vn+': no sideways scroll', pg.evaluate("document.documentElement.scrollWidth <= innerWidth"))
         # size chip changes the answer in place
-        before = pg.inner_text('.lg-ans-v'); chips = pg.query_selector_all('.lg-sizes button'); 
-        if len(chips) > 1: chips[1].click(); pg.wait_for_timeout(300)
-        check(vn+': choosing another size updates the answer in place', len(chips) < 2 or pg.inner_text('.lg-ans-v') != before)
+        before = pg.inner_text('.lg-ans-v'); opts = pg.eval_on_selector_all('#sizeSel option', 'e => e.map(x => x.value)')
+        other = [o for o in opts if o and o != pg.input_value('#sizeSel')]
+        if other: pg.select_option('#sizeSel', other[0]); pg.wait_for_timeout(300)
+        check(vn+': choosing another size updates the answer in place', not other or pg.inner_text('.lg-ans-v') != before)
         # method disclosure present and collapsed by default
         d = pg.query_selector('details:has-text("How we worked this out")'); check(vn+': method sits in a disclosure', d is not None and not d.get_attribute('open'))
         # compare journey

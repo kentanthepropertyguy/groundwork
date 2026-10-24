@@ -58,6 +58,12 @@
       // refund if the first home is sold within 6 months and the new home is worth less. ABSD is paid upfront first.
       // https://www.iras.gov.sg/taxes/stamp-duty/for-property/appeals-refunds-reliefs-and-remissions/common-stamp-duty-remissions-and-reliefs-for-property/absd-concession-for-single-singapore-citizen-(sc)-seniors
       singleSeniorAge: 55, singleSeniorFrom: '2024-02-16',
+      // C1 (24 Oct 2026). IRAS "ABSD rates or remission for joint purchase by a married couple" (tables for SC+SC, SC+SPR, SC+FR, rates from 27 Apr 2023):
+      // when NEITHER spouse owns a residential property the couple pays 0% (the PR's 5% or the foreigner's 60% is remitted in full at stamping); in every other row
+      // the joint-purchase rule applies unchanged: the highest rate of the two spouses, each on their own count (e.g. SC owns 1 + PR owns 0 = 20%; PR owns 1 = 30%).
+      // IRAS remission page: buying "under both names of the couple only", at least one spouse a Singapore Citizen. An SPR + FR couple has no remission.
+      // https://www.iras.gov.sg/docs/default-source/stamp-duty/absd-rates-or-remission-for-joint-purchase-by-a-married-couple_2021.pdf
+      coupleRule: { spouses: 2, needsCitizen: true, neitherOwns: true, bothNamesOnly: true, checked: '2026-10-24' },
     },
 
     // IRAS / MOF — Seller's Stamp Duty on residential property, by the date the seller acquired it.
@@ -234,6 +240,18 @@
     // https://www.cpf.gov.sg/member/infohub/educational-resources/selling-your-flat-age-55-cpf-refund
     cpfGrantSplitAbove: 30000,
 
+    // C1 (24 Oct 2026). CPF Board, "How much CPF savings can I use for my property purchase?" (updated 18 Sep 2026), section "Purchasing your second or subsequent
+    // property": "You can only use your OA savings after setting aside the BRS or FRS": the Basic Retirement Sum if at least one property the member owns can last
+    // them to age 95, otherwise the Full Retirement Sum; "Savings from your Retirement Account or Special Account and OA can be used to meet the requirement."
+    // Also "How much CPF OA savings can you use when buying your next home?" (21 Aug 2026, updated 1 Sep 2026). The sums are per member.
+    // https://www.cpf.gov.sg/service/article/how-much-cpf-savings-can-i-use-for-my-property-purchase
+    // Retirement sums for members turning 55 in each year, CPF "What is the CPF retirement sum" (updated 7 Jan 2026): 2026 BRS $110,200, FRS $220,400; 2027 BRS
+    // $114,100, FRS $228,200. A member already 55 or over keeps the sums of the year they turned 55, which are lower: using the current year's sums for them is
+    // the cautious side (it can only understate usable CPF), and the screens say so.
+    // https://cpf.gov.sg/member/infohub/educational-resources/what-is-the-cpf-retirement-sum
+    cpfSecondHome: { accountsCount: ['OA', 'SA', 'RA'], sumIfLeaseTo95: 'BRS', sumOtherwise: 'FRS', checked: '2026-10-24' },
+    cpfRetirementSums: { 2026: { brs: 110200, frs: 220400 }, 2027: { brs: 114100, frs: 228200 }, checked: '2026-10-24' },
+
     sources: {
       bsd: 'IRAS, Buyer’s Stamp Duty (rates for properties acquired on or after 15 Feb 2023)',
       absd: 'IRAS, ABSD (rates from 27 Apr 2023) and its remission pages (married couples, HDB flats and new ECs, FTAs, single SC seniors)',
@@ -242,6 +260,8 @@
       msr: 'MAS Notice 645 (MSR 30%); HDB, Housing loan from HDB (3% floor, 75% LTV pro-rated by lease, 25 years, income ceilings)',
       ltv: 'MAS Notice 632 (rev. 21 Aug 2025): loan tenure and loan-to-value limits',
       cpf: 'CPF Board: refund of CPF principal plus accrued interest on sale; no cash top-up if sold at market value; OA rate 2.5%',
+      cpfSecondHome: 'CPF Board (18 Sep 2026): owning another property, only the OA left after setting aside the Basic Retirement Sum (a property lasting to 95) or the Full Retirement Sum can be used; OA, SA and RA count towards the set-aside; 2026 BRS $110,200, FRS $220,400',
+      couple: 'IRAS: ABSD rates or remission for joint purchase by a married couple (at least one Citizen, neither owning a home, both names only: 0%)',
       valuation: 'CPF Board (down payment of a property; 3 differences between an HDB loan and a bank loan; CPF Housing Scheme terms), HDB (resale acceptance and approval), IRAS: loan and CPF on the lower of price and valuation; cash over valuation in cash; an HDB loan needs no minimum cash, a bank loan does; the option fee and exercise payment are paid in cash; stamp duty on the higher',
       pps: 'Housing Developers Rules: standard progressive payment schedule',
       hdbPayments: 'HDB: Option to Purchase, resale application and completion pages; new flat booking, Agreement for Lease and key collection pages (checked 24 Oct 2026)',

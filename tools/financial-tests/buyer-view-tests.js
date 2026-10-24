@@ -99,7 +99,8 @@ function judged(s, price) { const r = A.assess(s); if (price) { const q = r.quot
   const lo = judged(sell, 1200000), vl = V.build(lo, {});
   ok(vl.sale.warning === null, 'sale: no projection when the early payments fit the cash in hand ($92,600 against $100,000)', vl.sale.warning);
   // not counted: nothing is invented
-  const miss = judged(base({ home: 'sell', order: 'sell', owned: 1, flat: { type: 'hdb', price: 900000, hasLoan: 'yes', instalment: 1200 } })), vm = V.build(miss, {});
+  // C1 (B3): the kept-home figure needs the CPF balances behind the set-aside (the home is still owned): given here, so the test keeps to what it checks (no sale line)
+  const miss = judged(base({ home: 'sell', order: 'sell', owned: 1, cpfBal: [{ oa: 300000, sa: 150000 }], cover95: true, flat: { type: 'hdb', price: 900000, hasLoan: 'yes', instalment: 1200 } })), vm = V.build(miss, {});
   ok(vm && vm.sale === null && miss.saleNote === 'missing', 'sale: with figures missing, no sale is counted and no sale line is drawn', [vm && vm.sale, miss.saleNote]);
 }
 
