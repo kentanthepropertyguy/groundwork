@@ -258,17 +258,32 @@
       '<p class="lg-fine" id="sizeNote">Square feet only. The number you type stays on this device.</p><p class="err" id="sizeErr" role="alert"></p></div>';
   }
   // What a visitor sees first: the question, the sizes (with how many sold at each, so it is also the neutral picture of the mix), and the way to type an exact size.
-  function sizePicker(M, S) {
+  // Bedroom-first where reliable (V1, 25 Oct 2026): where data/projects/bedroom has types for this development and sale type (BV, from GW_BED.view),
+  // the question is the home type, with the sizes one line below for anyone who prefers them. Nothing is pre-selected; a type kept from another
+  // development that this one cannot show is said plainly, never swapped for another.
+  function sizePicker(M, S, BV) {
     if (!(M.bands || []).length) return '';
-    const ch = chosen(M);
-    return '<div class="lg-sizes lg-pick" id="lgPick" data-lg-pick="' + (ch ? 'chosen' : 'none') + '"><h2 class="lg-pick-h" id="lgPickH">What size home are you looking at?</h2>' +
+    const ch = chosen(M), B = GLOBAL.GW_BED, bed = !!(B && BV && BV.types && BV.types.length);
+    // A size the visitor chose keeps the size question as it was (the price and the Market Pulse stay on a phone's first screen), with one link back to the types.
+    if (bed && !ch) {
+      const line = B.lineHtml(BV) + (BV.g ? ' <button type="button" class="kpr-link lg-clear" id="bedClear">Clear</button>' : '');
+      return '<div class="lg-sizes lg-pick gwb-pick" id="lgPick" data-lg-pick="' + (BV.g ? 'bed' : 'none') + '"><h2 class="lg-pick-h" id="lgPickH">How many bedrooms?</h2>' +
+        B.chipsHtml(BV) +
+        '<div class="lg-pick-row gwb-or"><span class="gwb-or-l">Or by size</span><span class="lg-selwrap">' + sizeSelect(M) + '</span>' +
+        '<button type="button" class="kpr-link lg-typeit" data-lg-size aria-expanded="false" aria-controls="lgSize">Type an exact size</button></div>' +
+        '<p class="lbl lg-pick-s" data-gwb-line>' + line + '</p>' +
+        (BV.few && BV.few.length ? '<p class="lg-fine gwb-few" data-gwb-few>Too few recent sales to show by type: ' + BV.few.map((g) => esc(B.label(g))).join(', ') + '. Choose a size for those.</p>' : '') +
+        sizeForm(S, M) + '</div>';
+    }
+    const gone = B && BV && BV.missing && !ch ? '<p class="lg-fine gwb-few" data-gwb-none>Bedroom types aren’t shown for ' + esc(words(M)[1]) + ' here: too few of them could be matched to a bedroom count. Choose a size instead.</p>' : '';
+    return '<div class="lg-sizes lg-pick" id="lgPick" data-lg-pick="' + (ch ? 'chosen' : 'none') + '"><h2 class="lg-pick-h" id="lgPickH">What size home are you looking at?</h2>' + gone +
       '<div class="lg-pick-row"><span class="lg-selwrap">' + sizeSelect(M) + '</span>' +
       '<button type="button" class="kpr-link lg-typeit" data-lg-size aria-expanded="false" aria-controls="lgSize">Type an exact size</button></div>' +
-      '<p class="lbl lg-pick-s">' + sizeLine(M) + (ch ? ' <button type="button" class="kpr-link lg-clear" id="sizeClear">Clear size</button>' : '') + '</p>' +
+      '<p class="lbl lg-pick-s">' + sizeLine(M) + (ch ? ' <button type="button" class="kpr-link lg-clear" id="sizeClear">Clear size</button>' : '') + (ch && bed ? ' <button type="button" class="kpr-link lg-clear" id="bedSwitch" data-gwb-switch>Choose by bedrooms</button>' : '') + '</p>' +
       sizeForm(S, M) + '</div>';
   }
   // No size chosen: the development's recent activity, in counts only, with no price or direction. Nothing here is one size standing in for the whole development.
-  function overviewHtml(M, mf) {
+  function overviewHtml(M, mf, bed) {
     const w = words(M), R = M.recent || {}, rec = (M.bands || []).filter((b) => b.recent && b.recent.n), nb = rec.length;
     let head, sub;
     if (R.n > 0) {
@@ -281,7 +296,7 @@
     } else { head = 'No sales recorded'; sub = 'URA records no sale of this type here in the period we hold.'; }
     return '<section class="lg-ov" data-lg-ov aria-label="Recent sales at a glance"><p class="lg-ov-k">At a glance · ' + esc(M.sale && M.sale.label ? M.sale.label.charAt(0).toUpperCase() + M.sale.label.slice(1) + 's' : 'Sales') + '</p>' +
       '<h2 class="lg-ov-h" data-lg-ov-head>' + esc(head) + '</h2><p class="lg-ov-s">' + sub + '</p>' +
-      '<p class="lg-ov-n">Price per sq ft is different for every size, so there is no single price for the whole development. Choose a size to see its price, how it has moved and what is behind it.</p>' +
+      '<p class="lg-ov-n">' + (bed ? 'Prices are different for every home type and size, so there is no single price for the whole development. Choose a type or a size to see what it sold for and how prices have moved.' : 'Price per sq ft is different for every size, so there is no single price for the whole development. Choose a size to see its price, how it has moved and what is behind it.') + '</p>' +
       freshLine(mf, undefined, 'lg-fine') +
       '<p class="lg-ov-a"><a href="#next" data-lg-scroll="next">Ask Ken about a particular unit ›</a></p></section>';
   }
@@ -346,8 +361,8 @@
     return { price: Math.round(row[5] / 1000) * 1000, median: row[5], n: row[1], label: sqft(A.size && A.size.label), psf: f.recentMedian };
   }
   const runWhat = (T, M) => 'Run the numbers at about ' + money(T.price) + ', the median price of the ' + plural(T.n, words(M)[0], words(M)[1]) + ' of ' + T.label + ' homes here in the last 12 months (past sales, not a valuation):';
-  function actions(M) {
-    const K = ASKM(), canAsk = !!K && (M.bands || []).some((b) => b.recent && b.recent.n), T = chosen(M) && strong(M);
+  function actions(M, bedOn) {
+    const K = ASKM(), canAsk = !!K && (M.bands || []).some((b) => b.recent && b.recent.n), T = (chosen(M) && strong(M)) || !!bedOn;
     const act = (attrs, icon, t) => '<button type="button" class="lg-act" ' + attrs + '>' + icon + '<span>' + t + '</span></button>';
     const I = (d) => '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>';
     return '<div class="lg-acts" role="group" aria-label="What you can do here">' +
@@ -364,6 +379,7 @@
   // ctx: { S, IN, root }
   function projectHtml(M, ctx) {
     const S = (ctx && ctx.S) || {}, IN = ctx && ctx.IN, root = (ctx && ctx.root) || '../', f = M.focus || {}, A = M.answer || {}, mf = S.rawM || null;
+    const BV = ctx && ctx.BED && GLOBAL.GW_BED ? ctx.BED : null, bedOn = !!(BV && BV.t) && !chosen(M), bedAny = !!(BV && BV.types && BV.types.length);
     if (S.rawP && S.rawP.id === M.id && Array.isArray(S.rawP.districts)) M.districtsAll = S.rawP.districts;
     const kick = [clsOf(M) === 'condo' ? '' : CLS[clsOf(M)].label, M.street ? titleCase(M.street) : '', district(M)].filter(Boolean).join(' · ');
     const chartPts = M.history && M.history.band && M.history.band.points ? M.history.band.points : [];
@@ -385,10 +401,10 @@
         '<button class="kpr-back lg-back" type="button" data-act="home">← Search another development</button>' +
         '<div class="lg-id"><p class="lg-kicker lg-idline"><span class="lg-cls" data-lg-cls="' + clsOf(M) + '">' + esc(CLS[clsOf(M)].label) + '</span>' + [M.street ? esc(titleCase(M.street)) : '', esc(district(M))].filter(Boolean).join(' · ') + '</p>' +
         '<h1 class="lg-name" tabindex="-1">' + esc(M.name) + '</h1></div>' +
-        sizePicker(M, S) +
-        (chosen(M) ? answerBlock(M, mf) : overviewHtml(M, mf)) +
-        (chosen(M) ? (f.bin == null ? noSizeHtml(M, forWho) : ctx && ctx.PU && GLOBAL.GW_PULSE ? GLOBAL.GW_PULSE.html(ctx.PU, { forWho, mapHref: 'map/#p=' + encodeURIComponent(M.id) }) : '') : '') +
-        actions(M) +
+        sizePicker(M, S, BV) +
+        (bedOn ? GLOBAL.GW_BED.answerHtml(BV, { budget: ctx.budget, fresh: freshLine(mf, undefined, 'lg-fine') }) : chosen(M) ? answerBlock(M, mf) : overviewHtml(M, mf, bedAny)) +
+        (bedOn ? GLOBAL.GW_BED.trendHtml(BV, { forWho, mapHref: 'map/#p=' + encodeURIComponent(M.id) }) : chosen(M) ? (f.bin == null ? noSizeHtml(M, forWho) : ctx && ctx.PU && GLOBAL.GW_PULSE ? GLOBAL.GW_PULSE.html(ctx.PU, { forWho, mapHref: 'map/#p=' + encodeURIComponent(M.id) }) : '') : '') +
+        actions(M, bedOn) +
         '<p class="lg-fine lg-facts" data-lg-lead>' + projectFacts(M) + '</p>' +
         (clsOf(M) !== 'condo' ? '<p class="lg-fine lg-facts" data-lg-class="' + clsOf(M) + '">' + esc(CLS[clsOf(M)].short) + '</p>' : '') + (alsoLine(M) ? '<p class="lg-fine lg-facts" data-lg-also>' + esc(alsoLine(M)) + '</p>' : '') +
       '</div></header>' +
@@ -397,12 +413,12 @@
       '<section class="lg-band" id="numbers"><div class="lg-wrap" style="gap:26px"><div class="lg-head"><p class="lg-kicker">The numbers</p><h2>How the price has moved.</h2>' +
         '<p class="lg-sub">' + (!chosen(M) ? 'Price per sq ft is different for every size, so how it has moved is shown for one size at a time. Past sales, not a forecast.' : chart ? 'Median ' + esc(words(M)[0]) + ' PSF of ' + esc(sqft(f.label)) + ' homes in each 12-month period, however many sold. Past sales, not a forecast.' : esc((M.history && M.history.note) || 'Historical transactions only.')) + '</p></div>' +
         '<div class="lg-g2 lg-numgrid">' +
-          (!chosen(M) ? '<div class="lg-tile lg-pickprompt" data-lg-pickprompt><b>Choose a size to see how its price has moved</b><p>Homes of different sizes can sell at very different prices per sq ft, so there is no one chart for the whole development.</p><button type="button" class="lg-btn" data-lg-scroll="lgPick">Choose a size</button></div>' : chart ? '<div class="lg-tile" style="padding:26px 28px">' + chart + '<span class="lg-fine">Hollow dot: fewer than 3 sales. ' + esc(M.history.band.text || '') + '</span></div>' : '<div class="lg-tile">' + (M.read || []).map((r) => '<p>' + esc(r.text) + '</p>').join('') + '</div>') +
+          (bedOn ? GLOBAL.GW_BED.numbersHtml(BV) : !chosen(M) ? '<div class="lg-tile lg-pickprompt" data-lg-pickprompt><b>Choose a size to see how its price has moved</b><p>Homes of different sizes can sell at very different prices per sq ft, so there is no one chart for the whole development.</p><button type="button" class="lg-btn" data-lg-scroll="lgPick">Choose a size</button></div>' : chart ? '<div class="lg-tile" style="padding:26px 28px">' + chart + '<span class="lg-fine">Hollow dot: fewer than 3 sales. ' + esc(M.history.band.text || '') + '</span></div>' : '<div class="lg-tile">' + (M.read || []).map((r) => '<p>' + esc(r.text) + '</p>').join('') + '</div>') +
           '<div style="display:grid;gap:14px"><div class="lg-tile"><span class="lg-fine">What we know for sure</span><div data-lg-facts><span style="font-size:15.5px;line-height:1.5">' + factsFallback(M) + '</span></div></div>' +
           '<div class="lg-tile"><span class="lg-fine">Before you decide, check</span><span style="font-size:15.5px;line-height:1.5">' + (M.notMeasured || []).slice(0, 4).map(esc).join(' · ') + '</span></div>' + ken + '</div>' +
         '</div>' +
         '<div class="lg-folds"><details class="lg-fold"><summary>Every size, in a table<small>' + plural((M.bands || []).length, 'size') + '</small></summary><div class="in">' + sizesTable(M) + '</div></details>' + saleTypes(M) + methodHtml(M, IN) +
-        '<details class="lg-fold" id="lgSources"><summary>Sources</summary><div class="in" data-lg-sources><p>Prices and sales: ' + esc(dataSpan(mf)) + (M.recent && M.recent.latestLabel ? ' Latest ' + esc(words(M)[0]) + ' here: ' + esc(M.recent.latestLabel) + '.' : '') + esc(newNote(M)) + ' Small numbers next to a fact link to its source.</p></div></details></div>' +
+        '<details class="lg-fold" id="lgSources"><summary>Sources</summary><div class="in" data-lg-sources><p>Prices and sales: ' + esc(dataSpan(mf)) + (M.recent && M.recent.latestLabel ? ' Latest ' + esc(words(M)[0]) + ' here: ' + esc(M.recent.latestLabel) + '.' : '') + esc(newNote(M)) + ' Small numbers next to a fact link to its source.</p>' + (bedAny ? '<p data-gwb-source>' + esc(GLOBAL.GW_BED.sourceText(BV)) + '</p>' : '') + '</div></details></div>' +
       '</div></section>' +
       '<section class="lg-band tight" style="padding-top:0"><div class="lg-wrap"><div class="lg-kenstrips" id="next" data-lg-for="' + esc(forWho) + '">' + strips.join('') + '</div><p class="lg-fine">The message names this development and what this report found, nothing you typed. You can edit it in WhatsApp before you send it. Please leave income, CPF and debt details out.</p></div></section>' +
     '</div>';
@@ -430,9 +446,9 @@
     // A4-07: "Run the numbers" at the median price of the same sales.
     const run = app.querySelector('[data-lg-run-line]');
     if (run && typeof fetch === 'function') findData(base).then((F) => {
-      const T = chosen(M) ? typicalPrice(M, F && F[M.id], h.manifest) : null, what = run.querySelector('[data-lg-run-what]');
+      const T = h.bedTypical ? h.bedTypical : chosen(M) ? typicalPrice(M, F && F[M.id], h.manifest) : null, what = run.querySelector('[data-lg-run-what]');
       if (!T || !what || !run.isConnected) { if (run.isConnected && !app.querySelector('#lgAsk')) run.remove(); return; } // V2-01: kept for an asking price
-      run.dataset.typical = String(T.price); what.textContent = runWhat(T, M); run.hidden = false;
+      run.dataset.typical = String(T.price); what.textContent = T.text || runWhat(T, M); run.hidden = false;
     });
   }
   // data/projects/find.json, fetched once per page: project id -> { new: [[bin, n, months, last, q1, med, q3]], resale: [...] }.

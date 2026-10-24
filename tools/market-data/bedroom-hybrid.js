@@ -23,6 +23,25 @@ const E = require('./bedroom-engine.js'), RW = require('./rental-window.js'), RE
 const P_ = require('../../assets/js/kpt-project.js');
 
 const TRUSTED = ['developer', 'approved'];
+const uniq = (a) => Array.from(new Set(a));
+// The bedroom counts an UNCLASSIFIED size could be, for the completeness gate: every count declared by at least 10% of the rental contracts
+// touching it (the minority that blocks the 90% rule), or every declared count when fewer than 5 contracts touch it.
+function rentalPossible(ren) { const c = ren.counts || {}, n = Object.values(c).reduce((s, x) => s + x, 0); return n ? Object.keys(c).filter((b) => n < 5 || c[b] / n >= 0.1).map(String) : []; }
+// Completeness gate for one development (S: classifyDevelopment summary with mapping; rows: its sales). Over resales in the latest `months`:
+// the development's coverage, and per bedroom type its classified resales and the unclassified ones that could be it. A type is shown only
+// when coverage >= minCoverage, it has at least minSales classified resales, and ambiguous / (classified + ambiguous) <= maxAmbiguousShare.
+function completeness(S, rows, latestYm, opt) {
+  opt = Object.assign({ months: 24, minCoverage: 0.7, maxAmbiguousShare: 0.2, minSales: 5 }, opt || {});
+  const map = new Map(S.mapping.map((m) => [m.sqm, m])), recent = rows.filter((t) => t.sale === 3 && t.ym <= latestYm && t.ym > latestYm - opt.months);
+  const of = (t) => map.get(String(t.areaRaw != null ? t.areaRaw : t.sqm)), open = recent.filter((t) => { const m = of(t); return !m || m.group == null; });
+  const coverage = recent.length ? 1 - open.length / recent.length : null, types = {};
+  uniq(S.mapping.filter((m) => m.group != null).map((m) => m.group)).forEach((g) => {
+    const kept = recent.filter((t) => (of(t) || {}).group === g).length, ambiguous = open.filter((t) => ((of(t) || {}).possible || []).indexOf(g) > -1).length;
+    const share = kept + ambiguous ? ambiguous / (kept + ambiguous) : null;
+    types[g] = { kept, ambiguous, share, ok: coverage != null && coverage >= opt.minCoverage && kept >= opt.minSales && share != null && share <= opt.maxAmbiguousShare };
+  });
+  return { recent: recent.length, unclassified: open.length, coverage, types };
+}
 function classifyDevelopment(rows, P, rentals, ctx, rule) {
   const cs = RE.contracts(rentals), cl = RE.cells(cs), sctx = RE.salesContext(rows, cl);
   const lq = P && P.layouts.length ? Q.check(P.layouts, rows, rentals) : null;
@@ -36,24 +55,28 @@ function classifyDevelopment(rows, P, rentals, ctx, rule) {
     if (lay && (lay.cls === 'A' || lay.cls === 'B')) {
       const beds = Array.from(new Set(P.layouts.filter((l) => lay.codes.indexOf(l.code) > -1).map((l) => l.bedrooms)));
       if (ren.cls === 'inferred' && beds.length === 1 && ren.beds !== beds[0]) {
-        d = { cls: 'C', group: null, groups: [], codes: lay.codes, tier: 'unclassified', reason: 'contradiction' };
+        d = { cls: 'C', group: null, groups: [], codes: lay.codes, tier: 'unclassified', reason: 'contradiction', possible: uniq([String(beds[0]), String(ren.beds)]) };
         contradictions.push({ sqm: a, layouts: beds[0], rental: ren.beds, contracts: ren.n, purity: Math.round(ren.purity * 1000) / 1000, codes: lay.codes });
       } else d = Object.assign({}, lay, { tier: 'verified', rental: ren.cls === 'inferred' ? 'agrees' : ren.cls });
     } else if (ren.cls === 'inferred') {
       d = { cls: 'B', group: String(ren.beds), codes: [], tier: 'inferred', evidence: { contracts: ren.n, purity: Math.round(ren.purity * 1000) / 1000, strength: ren.tier } };
     } else {
       d = { cls: lay && lay.cls === 'C' ? 'C' : 'D', group: null, groups: lay && lay.groups ? lay.groups : [], codes: lay ? lay.codes : [], near: lay ? lay.near : null, tier: 'unclassified',
-        reason: lay ? (lay.cls === 'C' ? 'layouts with different bedroom counts' : 'no layout fits') + '; rental ' + ren.cls : 'rental ' + ren.cls };
+        reason: lay ? (lay.cls === 'C' ? 'layouts with different bedroom counts' : 'no layout fits') + '; rental ' + ren.cls : 'rental ' + ren.cls,
+        possible: lay && lay.cls === 'C' && lay.groups && lay.groups.length ? lay.groups.map(String) : rentalPossible(ren) };
     }
     memo.set(a, d); return d;
   };
   const Pany = P || { project: rows.length ? rows[0].project : '', layouts: [], status: 'none', publishable: false };
   const res = E.analyse(rows, Pany, ctx, { decide });
   const S = res.summary;
+  // sizes with no rental evidence at all: the bedroom counts of the nearest classified sizes below and above
+  const decided = Array.from(memo.entries()).filter(([, d]) => d.group != null).map(([a, d]) => ({ a: Number(a), g: d.group })).sort((x, y) => x.a - y.a);
+  memo.forEach((d, a) => { if (d.group != null || (d.possible && d.possible.length)) return; const lo = decided.filter((x) => x.a < Number(a)).pop(), hi = decided.find((x) => x.a > Number(a)); d.possible = uniq([lo && lo.g, hi && hi.g].filter(Boolean)); });
   S.layoutQuality = lq; S.layoutsTrusted = trusted;
   S.rental = { contracts: cs.length, dropped: cs.dropped, bandConflicts: cs.bandConflicts };
   S.contradictions = contradictions;
-  S.mapping = Array.from(memo.entries()).map(([a, d]) => ({ sqm: a, tier: d.tier, group: d.group, reason: d.reason || null })).sort((x, y) => Number(x.sqm) - Number(y.sqm));
+  S.mapping = Array.from(memo.entries()).map(([a, d]) => Object.assign({ sqm: a, tier: d.tier, group: d.group, reason: d.reason || null }, d.group == null ? { possible: d.possible || [] } : {})).sort((x, y) => Number(x.sqm) - Number(y.sqm));
   return S;
 }
 
@@ -141,7 +164,7 @@ function publicView(report, opt) {
   return pub;
 }
 
-module.exports = { RULES, publicView, classifyDevelopment, snapshot, changes, run, loadDb, preferCurated };
+module.exports = { RULES, publicView, classifyDevelopment, completeness, rentalPossible, snapshot, changes, run, loadDb, preferCurated };
 
 if (require.main === module) {
   const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > -1 ? process.argv[i + 1] : d; };

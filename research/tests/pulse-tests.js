@@ -234,7 +234,7 @@ const rs = read('research/index.html');
 ok(rs.indexOf('gw-pulse.js') > -1 && rs.indexOf('gw-pulse.js') < rs.indexOf('kpt-lg.js') && /gw-pulse\.css/.test(rs), 'Research loads the module before the page renderer, and its stylesheet');
 ok(/GW_PULSE\.compute\(S\.rawP, S\.rawM/.test(rs) && /PU: S\.pu/.test(rs) && /forWho: forWho\(\)/.test(rs), 'Research passes the pulse and the visitor\'s question to the page');
 ok(/kpt\.pulse\.for/.test(rs) && /research_pulse_viewed/.test(rs) && /research_pulse_shared/.test(rs), 'Research reads the question (tab only) and sends the two events');
-ok(/GW_PULSE\.waMessage\(S\.pu, M\.name, reportUrl\(M\.id\), 'buy'\)/.test(rs) && /GW_PULSE\.waMessage\(S\.pu, M\.name, reportUrl\(M\.id\), 'sell'\)/.test(rs), 'both WhatsApp cards are built from the report');
+ok(/GW_PULSE\.waMessage\(S\.pu( \|\| S\.bedWa)?, M\.name, reportUrl\(M\.id\), 'buy'\)/.test(rs) && /GW_PULSE\.waMessage\(S\.pu( \|\| S\.bedWa)?, M\.name, reportUrl\(M\.id\), 'sell'\)/.test(rs), 'both WhatsApp cards are built from the report (the chosen size\'s reading, or the chosen bedroom type\'s finding)');
 ok(!/localStorage/.test(src + read('assets/js/gw-journey.js').match(/pulseFor[^\n]*/)), 'the question is kept for this tab only (sessionStorage), never localStorage');
 const lg = read('assets/js/kpt-lg.js');
 ok(/GLOBAL\.GW_PULSE\.html\(ctx\.PU, \{ forWho, mapHref/.test(lg) && /class="lg-kenstrips" id="next"/.test(lg), 'the page passes the question to the block and the cards carry the id the link scrolls to');
