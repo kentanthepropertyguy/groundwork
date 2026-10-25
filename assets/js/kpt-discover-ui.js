@@ -576,6 +576,13 @@
   // Ken: a quiet, generic WhatsApp link (no budget, place or search in it)
   const BEYOND_WA = 'Hi Ken, I was using Groundwork and have a question.';
   const kb = $('kenBeyond'); if (kb) kb.href = KPT.waLink({ message: BEYOND_WA });
-  window.__kd = { S, state: () => S, res: () => lastRes, parseBudget, embed: EMB };
+  // Research (26 Oct 2026): choosing "What can this budget buy?" again starts a fresh entry. What was typed and not yet searched is cleared; a budget handed over by a
+  // calculator, and a search the visitor saved by pressing Show developments, are still what the form starts from (embedStart reads them again).
+  function resetEmbed() {
+    if (!EMB) return;
+    S.req = Object.assign({}, BLANK); S.near = null; S.pendingWhere = ''; S.draftBudget = ''; S.errBudget = ''; S.moreOpen = false; S.edit = false; S.sel = null; S.helps = {}; srcLine = '';
+    embedStart();
+  }
+  window.__kd = { S, state: () => S, res: () => lastRes, parseBudget, embed: EMB, reset: resetEmbed };
   start();
 })();

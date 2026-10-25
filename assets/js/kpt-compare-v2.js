@@ -309,7 +309,7 @@
     return '<section class="lg-band grey lg-ask" id="ask"><div class="lg-wrap"><p class="lg-kicker">Your shortlist</p><h2>Want a deeper comparison for your shortlisted properties?</h2>' +
       '<p class="lg-sub">Tell Ken what you’re considering and what matters most to you. He replies personally on WhatsApp. The project names you compared are already in the message, and you can edit it before sending.</p>' +
       '<a class="lg-btn wa" id="wa" href="#" target="_blank" rel="noopener">Message Ken on WhatsApp</a>' +
-      '<div class="lg-ken"><img src="' + esc(root) + 'assets/img/ken-portrait.jpg" alt="Ken Tan" width="72" height="72"><div><b>Ken Tan</b><span>The Property Guy · Group District Director, Huttons Asia · Property agent since 2007 · CEA R007903D</span><span>Live on TikTok most nights, 8–9.30pm</span></div></div>' +
+      // V2.1: no portrait or biography here; the footer carries Ken's credentials
       '<p class="lg-fine">Or <a id="cmp" href="#/compare/' + esc(M.a.id) + '">compare ' + esc(M.a.name) + ' with a different development</a>.</p></div></section>';
   }
   function kenTake(M, root) {

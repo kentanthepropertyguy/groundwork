@@ -106,9 +106,9 @@
   }
 
   // Phase 2 (answer first): what the development is, in one short line. The price is not repeated here; the answer block above it carries it.
-  function projectFacts(M) {
+  function projectFacts(M, noActivity) {   // noActivity (CX V2): the "at a glance" card above already gives the same 12-month count
     const where = [M.street ? 'on ' + titleCase(M.street) : '', district(M) ? 'in ' + district(M) : ''].filter(Boolean).join(' '), ten = M.tenure && M.tenure.mixed ? 'with mixed tenure in these records' : tenurePhrase(M.tenure);
-    return [esc(M.name) + ' is <span data-lg-what>' + CLS[clsOf(M)].what + '</span>' + (where ? ' ' + esc(where) : '') + (ten ? ', ' + esc(ten) : '') + '.', esc(activitySentence(M))].filter(Boolean).join(' ');
+    return [esc(M.name) + ' is <span data-lg-what>' + CLS[clsOf(M)].what + '</span>' + (where ? ' ' + esc(where) : '') + (ten ? ', ' + esc(ten) : '') + '.', noActivity ? '' : esc(activitySentence(M))].filter(Boolean).join(' ');
   }
   // The answer: the median price for the size on show, with its sample size and price basis right beside it (never further down the page).
   function answerBlock(M, mf, rent) {
@@ -159,21 +159,22 @@
       '<p class="gw-fine">' + esc(String(S.band).replace('sqft', 'sq ft')) + ' resales, ' + esc(S.period) + ', median price per square foot</p>' + row(S.a, S.psf[0], 'var(--gw-a)') + row(S.b, S.psf[1], 'var(--gw-b)') +
       '<a class="gw-rex-go" href="sample/" data-gw-nav-to="sample">Open the free sample report ›</a></div>';
   }
-  // Research home: three ways in, one open at a time. The page script (research/index.html) switches them and fills the workspaces.
+  // Research home: two ways in, one open at a time (26 Oct 2026). "Research a property" is ONE search for a development, a postal code, an HDB block or a road: what it
+  // recognises opens a short overview with a clear way into the full report. The page script (research/index.html) switches them and fills the workspaces.
   const RESEARCH_OPTS = [
-    ['dev', 'A development', 'Prices, sizes and a comparison', 'Development', 'Research a development', 'How is the market around your home? Recent prices, sales and the trend for a condo, executive condominium or cluster-housing development, or a road.'],
-    ['prices', 'Property prices & past sales', 'HDB, condo and landed', 'Prices & sales', 'Property prices & past sales', 'What similar homes sold for, and whether an asking price is reasonable. Search by postal code, or choose the type of home.'],
+    ['dev', 'Research a property', 'HDB, condo or landed — prices, past sales, rents and comparisons.', 'Property', 'Research a property', 'Search a development, a postal code, an HDB block or a road.'],
     ['budget', 'What can this budget buy?', 'By budget, area and must-haves', 'Budget', 'What can this budget buy?', 'Tell us your budget and what matters. We show the developments that fit.']];
   function landingHtml(total, opt) {
     const cur = opt || 'dev', n = total ? num(total) : '';
     const tabs = RESEARCH_OPTS.map((o) => '<button type="button" class="gw-ropt" data-opt="' + o[0] + '" id="opt-' + o[0] + '" aria-expanded="' + (o[0] === cur) + '" aria-controls="ws-' + o[0] + '"><b><span class="l">' + esc(o[1]) + '</span><span class="s">' + esc(o[3]) + '</span></b><small>' + esc(o[2]) + '</small></button>').join('');
     const ws = (o, inner) => '<section class="gw-rws" id="ws-' + o[0] + '" aria-labelledby="ws-' + o[0] + '-h"' + (o[0] === cur ? '' : ' hidden') + '><h2 id="ws-' + o[0] + '-h">' + esc(o[4]) + '</h2><p class="gw-rws-sub">' + esc(o[5]) + '</p>' + inner + '</section>';
-    const dev = '<div class="lg-sb" id="sb"></div><p class="lg-fine" id="lgCount">Type part of a name. If several match, check the street and district.</p>' +
+    const dev = '<div class="lg-sb" id="sb"></div><div id="rwOver" class="gw-rover" aria-live="polite"></div><div id="rwLanded" class="gw-rhost gw-rprop" hidden></div>' +
+      '<p class="lg-fine" id="lgCount">If several match, check the street and district.</p>' +
       '<div id="rwOwn"></div><div class="gw-raz"><button type="button" class="gw-razb" id="azBtn" aria-expanded="false" aria-controls="rwAz">Or browse all ' + (n ? n + ' ' : '') + 'developments A–Z</button><div id="rwAz" hidden></div></div>' + sampleExample() +
-      '<p class="lg-fine" data-lg-scope>Can’t see it? Research covers private condos and apartments, executive condominiums (ECs) and strata cluster houses with sales in the last five years, each kept to its own type. A launch with no sales yet is listed without prices and opens on the Map, and landed homes on their own land are found by road.</p>';
-    return '<div class="lg-page gw-rhome"><header class="gw-rhead"><h1 tabindex="-1">What would you like to research?</h1><p class="gw-rlede">Free, from URA and HDB records. Your entries stay when you switch.</p></header>' +
+      '<p class="lg-fine" data-lg-scope>Can’t see it? Research covers private condos and apartments, executive condominiums (ECs) and strata cluster houses with sales in the last five years, each kept to its own type. A launch with no sales yet is listed without prices and opens on the Map, and landed homes on their own land are found by road or postal code.</p>';
+    return '<div class="lg-page gw-rhome"><header class="gw-rhead"><h1 tabindex="-1">What would you like to research?</h1><p class="gw-rlede">Free, from URA and HDB records.</p></header>' +
       '<div class="gw-ropts" role="group" aria-label="What to research">' + tabs + '</div>' +
-      ws(RESEARCH_OPTS[0], dev) + ws(RESEARCH_OPTS[1], '<div id="rwPrices" class="gw-rhost"><p class="lg-fine">Loading…</p></div>') + ws(RESEARCH_OPTS[2], '<div id="rwBudget" class="gw-rhost"><p class="lg-fine">Loading…</p></div>') + '</div>';
+      ws(RESEARCH_OPTS[0], dev) + ws(RESEARCH_OPTS[1], '<div id="rwBudget" class="gw-rhost"><p class="lg-fine">Loading…</p></div>') + '</div>';
   }
   // One search result row (the page's searchBox keeps its own events and keyboard handling).
   function resultRow(r, i, max, R) {
@@ -285,7 +286,7 @@
       sizeForm(S, M) + '</div>';
   }
   // No size chosen: the development's recent activity, in counts only, with no price or direction. Nothing here is one size standing in for the whole development.
-  function overviewHtml(M, mf, bed) {
+  function overviewHtml(M, mf, bed, rows) {   // rows (CX V2): the "What each home type / size sells for" section is on the page
     const w = words(M), R = M.recent || {}, rec = (M.bands || []).filter((b) => b.recent && b.recent.n), nb = rec.length;
     let head, sub;
     if (R.n > 0) {
@@ -298,9 +299,9 @@
     } else { head = 'No sales recorded'; sub = 'URA records no sale of this type here in the period we hold.'; }
     return '<section class="lg-ov" data-lg-ov aria-label="Recent sales at a glance"><p class="lg-ov-k">At a glance · ' + esc(M.sale && M.sale.label ? M.sale.label.charAt(0).toUpperCase() + M.sale.label.slice(1) + 's' : 'Sales') + '</p>' +
       '<h2 class="lg-ov-h" data-lg-ov-head>' + esc(head) + '</h2><p class="lg-ov-s">' + sub + '</p>' +
-      '<p class="lg-ov-n">' + (bed ? 'Prices are different for every home type and size, so there is no single price for the whole development. Choose a type or a size to see what it sold for and how prices have moved.' : 'Price per sq ft is different for every size, so there is no single price for the whole development. Choose a size to see its price, how it has moved and what is behind it.') + '</p>' +
+      (rows ? '<p class="lg-ov-n" data-lg-ov-rows>No single price fits the whole development. <button type="button" class="kpr-link" data-lg-scroll="lgTypes">See what each ' + (bed ? 'home type' : 'size') + ' sells for ›</button></p>' : '<p class="lg-ov-n">' + (bed ? 'Prices are different for every home type and size, so there is no single price for the whole development. Choose a type or a size to see what it sold for and how prices have moved.' : 'Price per sq ft is different for every size, so there is no single price for the whole development. Choose a size to see its price, how it has moved and what is behind it.') + '</p>') +
       freshLine(mf, undefined, 'lg-fine') +
-      '<p class="lg-ov-a"><a href="#next" data-lg-scroll="next">Ask Ken about a particular unit ›</a></p></section>';
+      '</section>';
   }
   // A size was chosen but URA records no sale around it: say so, offer the closest sizes, and the same three next steps as a thin-evidence size.
   function noSizeHtml(M, forWho) {
@@ -396,6 +397,16 @@
     if (RENT && ctx && ctx.RENT) h += RENT.sectionHtml(ctx.RENT, { bed: BV && BV.g ? BV.g : '', bin: chosen(M) ? f.bin : null, ask: ASKM() });
     return h;
   }
+  // CX V2 (26 Oct 2026): one row of shortcuts under the answer, kept in view while scrolling. It names the development and the home type or size on
+  // show (tapping it goes back to the chooser) and jumps to the parts of the report that exist here. Buttons, never "#section" links (the page routes
+  // on the hash), so Back and Forward are untouched. Not tabs: every section stays on the page.
+  function jumpHtml(M, ctxLabel, bedAny, items) {
+    const list = items.filter((x) => x[2]); if (list.length < 2) return '';
+    return '<nav class="lg-jump" aria-label="Parts of this report" data-lg-jump-bar><div class="lg-wrap lg-jump-in">' +
+      '<button type="button" class="lg-jctx" data-lg-scroll="lgPick" aria-label="' + esc(M.name) + ', ' + esc(ctxLabel || (bedAny ? 'all home types' : 'all sizes')) + '. Change"><span class="lg-jn">' + esc(M.name) + '</span>' +
+      '<b data-lg-jctx>' + esc(ctxLabel || (bedAny ? 'All home types' : 'All sizes')) + '</b><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>' +
+      '<div class="lg-jlinks">' + list.map((x) => '<button type="button" class="lg-jl" ' + (x[0] === 'ask' ? 'data-lg-jump="ask"' : 'data-lg-scroll="' + x[0] + '"') + '>' + esc(x[1]) + '</button>').join('') + '</div></div></nav>';
+  }
   // Rental Research V1: beside the chosen type's (or size's) resale price, its typical monthly rent, each with its own count and period.
   function rentLine(ctx, g, bin) { const RT = GLOBAL.GW_RENT, R0 = ctx && ctx.RENT; if (!RT || !R0) return ''; return g ? RT.typeLine(R0, g) : bin != null ? RT.sizeLine(R0, bin) : ''; }
   // ctx: { S, IN, root, TX (transactions), txSt (their filters), RENT (rents) }
@@ -413,24 +424,32 @@
     const ICO = (d) => '<span class="lg-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg></span>';
     const stripBudget = '<div class="lg-kenstrip" data-lg-budget><div class="who">' + ICO('<path d="M4 19V9M10 19V5M16 19v-7M21 19H3"/>') + '<div><b>Thinking of buying here?</b><span>Work out your maximum budget, then the stamp duty and payments that come with it.</span></div></div>' +
       '<a class="lg-btn" href="' + esc(root) + 'tools/planner/" data-kpt-nav="research-to-planner">Check my budget</a></div>';
-    const stripAsk = '<div class="lg-kenstrip" data-lg-ask-ken><div class="who"><img src="' + esc(root) + 'assets/img/ken-portrait.jpg" alt="Ken Tan" width="56" height="56"><div><b>Is the asking price reasonable?</b><span>The sales show what homes here sold for. Ken can look at the particular unit, its floor and facing, and the homes competing with it.</span></div></div>' +
-      '<a class="lg-btn wa" id="wa" href="#" target="_blank" rel="noopener">Ask Ken about an asking price</a></div>';
-    const stripOwn = '<div class="lg-kenstrip" data-lg-options><div class="who">' + ICO('<path d="M4 11.5 12 5l8 6.5"/><path d="M6 10.5V19h12v-8.5"/><path d="M10 19v-5h4v5"/>') + '<div><b>What could your unit sell for?</b><span>Floor, facing, size, condition and the homes competing with yours all matter. Ken goes through them with you.</span></div></div>' +
-      '<a class="lg-btn wa" id="waOwn" href="#" target="_blank" rel="noopener">Ask Ken about my unit</a></div>';
-    const strips = forWho === 'sell' ? [stripOwn, stripAsk, stripBudget] : forWho === 'buy' ? [stripAsk, stripBudget, stripOwn] : [stripBudget, stripAsk, stripOwn];
+    // V2.1: ONE quiet card to ask Ken (no portrait): the visitor's question leads (asking price for a buyer, the unit's value for an owner), the other
+    // message is a plain link beside it. The WhatsApp messages (ids wa, waOwn) are wired by the page from the report's own finding, as before.
+    const own = forWho === 'sell', lnk = (id, t, main) => '<a class="' + (main ? 'lg-btn' : 'lg-klink') + '" id="' + id + '" href="#" target="_blank" rel="noopener">' + t + '</a>';
+    const stripKen = '<div class="lg-kenstrip" data-lg-ask-ken><div class="who">' + ICO('<path d="M20 12a8 8 0 0 1-11.8 7L4 20l1-4.2A8 8 0 1 1 20 12z"/><path d="M9 11h6M9 14h4"/>') + '<div><b>Want a second opinion?</b><span>Ken can look at a particular unit, its floor and facing, and the homes competing with it.</span></div></div>' +
+      '<div class="lg-kacts">' + (own ? lnk('waOwn', 'Ask Ken about my unit', true) + lnk('wa', 'or about an asking price') : lnk('wa', 'Ask Ken about an asking price', true) + lnk('waOwn', 'or about my unit')) + '</div></div>';
+    const strips = forWho ? [stripKen, stripBudget] : [stripBudget, stripKen];
+    const ev = evidenceHtml(M, ctx, BV, bedAny), ovOn = !bedOn && !chosen(M);
+    // Market Pulse (gw-pulse.js, or the bedroom view's own) gets an id so the shortcut row can reach it; its markup and wording are unchanged.
+    let pulse = bedOn ? GLOBAL.GW_BED.trendHtml(BV, { forWho, mapHref: 'map/#p=' + encodeURIComponent(M.id) }) : chosen(M) ? (f.bin == null ? noSizeHtml(M, forWho) : ctx && ctx.PU && GLOBAL.GW_PULSE ? GLOBAL.GW_PULSE.html(ctx.PU, { forWho, mapHref: 'map/#p=' + encodeURIComponent(M.id) }) : '') : '';
+    if (/^<section class="mp\b/.test(pulse) && pulse.indexOf('id="lgPulse"') < 0) pulse = pulse.replace(/^<section /, '<section id="lgPulse" ');
+    const ctxLabel = bedOn && BV.g ? GLOBAL.GW_BED.label(BV.g) : chosen(M) && f.label ? sqft(f.label) : '';
+    const canAsk = !!ASKM() && (M.bands || []).some((b) => b.recent && b.recent.n);
+    const jump = jumpHtml(M, ctxLabel, bedAny, [['lgTypes', 'Prices', ev.indexOf('id="lgTypes"') > -1], ['lgTx', 'Sales history', ev.indexOf('id="lgTx"') > -1], ['lgRent', 'Rents', ev.indexOf('id="lgRent"') > -1],
+      ['lgPulse', 'Market Pulse', pulse.indexOf('id="lgPulse"') > -1], ['ask', 'Price check', canAsk], ['lgCompare', 'Compare', true]]);
     return '<div class="lg-page" data-lg="project" data-state="' + esc(A.state || '') + '">' +
       '<header class="lg-hero lg-hero--ans"><div class="lg-wrap">' +
         '<button class="kpr-back lg-back" type="button" data-act="home">← Search another development</button>' +
         '<div class="lg-id"><p class="lg-kicker lg-idline"><span class="lg-cls" data-lg-cls="' + clsOf(M) + '">' + esc(CLS[clsOf(M)].label) + '</span>' + [M.street ? esc(titleCase(M.street)) : '', esc(district(M))].filter(Boolean).join(' · ') + '</p>' +
         '<h1 class="lg-name" tabindex="-1">' + esc(M.name) + '</h1></div>' +
         sizePicker(M, S, BV) +
-        (bedOn ? GLOBAL.GW_BED.answerHtml(BV, { budget: ctx.budget, fresh: freshLine(mf, undefined, 'lg-fine'), rent: rentLine(ctx, BV.g, null) }) : chosen(M) ? answerBlock(M, mf, rentLine(ctx, null, f.bin)) : overviewHtml(M, mf, bedAny)) +
-        (bedOn ? GLOBAL.GW_BED.trendHtml(BV, { forWho, mapHref: 'map/#p=' + encodeURIComponent(M.id) }) : chosen(M) ? (f.bin == null ? noSizeHtml(M, forWho) : ctx && ctx.PU && GLOBAL.GW_PULSE ? GLOBAL.GW_PULSE.html(ctx.PU, { forWho, mapHref: 'map/#p=' + encodeURIComponent(M.id) }) : '') : '') +
+        (bedOn ? GLOBAL.GW_BED.answerHtml(BV, { budget: ctx.budget, fresh: freshLine(mf, undefined, 'lg-fine'), rent: rentLine(ctx, BV.g, null) }) : chosen(M) ? answerBlock(M, mf, rentLine(ctx, null, f.bin)) : overviewHtml(M, mf, bedAny, ev.indexOf('id="lgTypes"') > -1)) +
+        pulse +
         actions(M, bedOn, ctx && ctx.TX) +
-        '<p class="lg-fine lg-facts" data-lg-lead>' + projectFacts(M) + '</p>' +
+        '<p class="lg-fine lg-facts" data-lg-lead>' + projectFacts(M, ovOn) + '</p>' +
         (clsOf(M) !== 'condo' ? '<p class="lg-fine lg-facts" data-lg-class="' + clsOf(M) + '">' + esc(CLS[clsOf(M)].short) + '</p>' : '') + (alsoLine(M) ? '<p class="lg-fine lg-facts" data-lg-also>' + esc(alsoLine(M)) + '</p>' : '') +
-      '</div></header>' +
-      evidenceHtml(M, ctx, BV, bedAny) +
+      '</div></header>' + jump + ev +
       '<section class="lg-band grey" id="lgCompare"><div class="lg-wrap" style="gap:22px"><div class="lg-head"><p class="lg-kicker">Compare</p><h2>Often compared with ' + esc(M.name) + '</h2><p class="lg-sub" data-lg-sugg-sub>Developments that share enough recent sales in the same sizes for a fair comparison.</p></div>' +
         '<div class="lg-sugg" data-lg-sugg></div><p class="lg-fine lg-center">Or <a href="#/compare/' + esc(M.id) + '" data-lg-pick>search for any other development</a>.</p></div></section>' +
       '<section class="lg-band" id="numbers"><div class="lg-wrap" style="gap:26px"><div class="lg-head"><p class="lg-kicker">The numbers</p><h2>How the price has moved.</h2>' +
@@ -456,6 +475,7 @@
   // hooks: { root, onCompare(otherId), track }
   function afterProject(M, app, hooks) {
     const h = hooks || {}, base = h.root || '../';
+    try { const nv = document.querySelector('.gw-nav'); if (nv) document.documentElement.style.setProperty('--gw-navh', nv.offsetHeight + 'px'); } catch (e) { /* the CSS default stands */ }
     // "Enter a size" opens the size box (the page wires #sizeGo / #sizeIn).
     const tg = app.querySelector('[data-lg-size]'), box = app.querySelector('#lgSize');
     if (tg && box) tg.addEventListener('click', () => { box.hidden = !box.hidden; tg.setAttribute('aria-expanded', String(!box.hidden)); if (!box.hidden) { const i = box.querySelector('input'); if (i) i.focus(); } });
@@ -524,6 +544,8 @@
   if (typeof document !== 'undefined') document.addEventListener('click', (e) => {
     const ak = e.target.closest ? e.target.closest('[data-lg-ask]') : null;
     if (ak) { const p = document.getElementById('lgAsk'); if (p) { p.hidden = !p.hidden; ak.setAttribute('aria-expanded', String(!p.hidden)); if (!p.hidden) { const i = p.querySelector('input'); if (i) i.focus({ preventScroll: true }); p.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } } return; }
+    const jp = e.target.closest ? e.target.closest('[data-lg-jump="ask"]') : null;
+    if (jp) { const p = document.getElementById('lgAsk'), b = document.querySelector('[data-lg-ask]'); if (p) { p.hidden = false; if (b) b.setAttribute('aria-expanded', 'true'); p.scrollIntoView({ behavior: 'smooth', block: 'start' }); const i = p.querySelector('input'); if (i) setTimeout(() => i.focus({ preventScroll: true }), 400); } return; }
     const rn = e.target.closest ? e.target.closest('[data-lg-run]') : null;
     if (rn) { runNumbers(rn); return; }
     const t = e.target.closest ? e.target.closest('[data-lg-scroll],[data-lg-src],[data-lg-tab]') : null; if (!t) return;

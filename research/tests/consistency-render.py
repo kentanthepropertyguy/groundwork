@@ -43,11 +43,11 @@ try:
         for nm, path, sel in (('Guide me', '/journey/', '.gw-paths a'), ('Property values', '/journey/worth/', '[data-vx-pc] input, .gw-vx-pc input'), ('Tools', '/tools/', '.gw-tl'), ('Research', '/research/', '#q')):
             pg, errs = opn(ctx, path); l = pg.evaluate("(s) => { const e = [...document.querySelectorAll(s)].find(x => x.getBoundingClientRect().width > 0); return e ? Math.round(e.getBoundingClientRect().left) : null }", sel)
             check(f'{vn}: {nm}: the content lines up with the heading', l is not None and abs(l - left_edges[nm]) <= 2, (l, left_edges[nm])); pg.close()
-        # the Ken band is a compact strip, not a section of its own
+        # V2.1: no Ken band on these pages (one understated introduction, on the homepage); the footer keeps the credentials, without a portrait
         for nm, path in (('Guide me', '/journey/'), ('Property values', '/journey/worth/'), ('Tools', '/tools/')):
-            pg, errs = opn(ctx, path); h = pg.evaluate("document.querySelector('.gw-ken').getBoundingClientRect().height")
-            check(f'{vn}: {nm}: the Ken band is compact ({round(h)}px)', h <= (230 if vn == 'desktop' else 330), h)
-            check(f'{vn}: {nm}: it does not repeat the licence and LIVE lines the footer already carries', pg.locator('.gw-ken .gw-onlive').count() == 0 and pg.locator('.gw-ken .gw-live').count() == 0 and pg.locator('.gw-foot .gw-live, .gw-foot .live, .gw-foot [class*=live]').count() >= 1)
+            pg, errs = opn(ctx, path)
+            check(f'{vn}: {nm}: no Ken band and no portrait on the page', pg.locator('.gw-ken').count() == 0 and pg.locator('img[src*="ken-portrait"]').count() == 0)
+            check(f'{vn}: {nm}: the footer keeps the agent credentials, once, without a TikTok badge', 'CEA R007903D' in pg.inner_text('.gw-foot') and pg.inner_text('body').count('Ken Tan') == 1 and pg.locator('.gw-foot .gw-live').count() == 0)
             pg.close()
         # Property values & market prices: a compact heading and the search straight away, nothing lost
         pg, errs = opn(ctx, '/journey/worth/')

@@ -688,12 +688,12 @@ body[data-view="worth"] .gw-vx{border:0;border-radius:0;padding:0;background:non
   body[data-view="worth"] .gw-jsec{padding:4px 0 32px}
 }
 
-/* ---- Unified Research: one page, three ways in (a development, prices & past sales, a budget) ---- */
+/* ---- Unified Research: one page, two ways in (research a property, or what a budget buys) ---- */
 .gw-rhome{max-width:1040px;margin:0 auto;padding:28px 0 56px;font-family:var(--gw-font);text-align:left}
 .gw-rhead{display:grid;gap:10px;margin:0 0 26px}
 .gw-rhead h1{font-size:44px;line-height:1.08;letter-spacing:-.03em;margin:0;color:var(--gw-ink);font-family:var(--gw-font);font-weight:700}
 .gw-rlede{font-size:18px;line-height:1.45;color:var(--gw-muted);margin:0}
-.gw-ropts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.gw-ropts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .gw-ropt{appearance:none;text-align:left;display:grid;gap:4px;align-content:start;padding:16px 18px;min-height:76px;border:1px solid var(--gw-line);border-radius:16px;background:#fff;color:var(--gw-ink);font:inherit;cursor:pointer;position:relative}
 .gw-ropt b{font-size:17px;font-weight:700;letter-spacing:-.01em}.gw-ropt .s{display:none}
 .gw-ropt small{font-size:14px;color:var(--gw-muted)}
@@ -795,3 +795,50 @@ body.lg .gw-rws .lg-sb .kpr-results{margin-top:12px}
 .gw-ask-tx .kpr-link{font:inherit;font-weight:600;color:var(--gw-blue);background:none;border:0;padding:0;min-height:40px;cursor:pointer}
 .gw-hr{margin-top:10px}
 @media (max-width:719px){.gw-ask-f3{grid-template-columns:repeat(2,minmax(0,1fr))}.gw-ask-f3 .gw-fld:last-child{grid-column:1/-1}}
+
+/* ---- Research a property: the overview a recognised property opens (gw-overview.js) ---- */
+.gw-rover{display:grid;gap:0;min-width:0;margin-top:18px}.gw-rover:empty{display:none}
+.gw-ov{display:grid;gap:18px;min-width:0;text-align:left;font-family:var(--gw-font);padding-top:6px}
+.gw-ov-h{display:grid;gap:4px}.gw-ov-k{margin:0;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--gw-muted)}
+.gw-ov-n{margin:0;font-size:30px;line-height:1.12;letter-spacing:-.02em;color:var(--gw-ink);font-weight:700;outline:0}
+.gw-ov-m{margin:0;font-size:16px;color:var(--gw-muted)}
+.gw-ov-body{display:grid;gap:14px;min-width:0}
+.gw-ov-body .gwr-band,body.kpr .gw-ov-body .gwr-band{padding:0;border:0;background:none}
+.gw-ov-body .gwr-wrap{gap:12px !important;max-width:none;margin:0;padding:0}
+.gw-ov-none{margin:0;font-size:16px;color:var(--gw-muted);line-height:1.5;padding:16px 18px;border:1px solid var(--gw-line);border-radius:14px;background:var(--gw-grey)}
+.gw-ov-sh{margin:0;font-size:20px;letter-spacing:-.01em;color:var(--gw-ink)}.gw-ov-ss{margin:4px 0 0;font-size:15px;color:var(--gw-muted)}
+.gw-ov-rows{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px}
+.gw-ov-row{display:grid;grid-template-columns:minmax(110px,150px) minmax(150px,230px) minmax(0,1fr);gap:4px 16px;align-items:baseline;padding:14px 18px;border:1px solid var(--gw-line);border-radius:14px;background:#fff}
+.gw-ov-t{font-weight:700;color:var(--gw-ink)}.gw-ov-p{display:grid;gap:1px}.gw-ov-p b{font-size:19px;letter-spacing:-.01em;color:var(--gw-ink)}.gw-ov-p small,.gw-ov-c{font-size:14px;color:var(--gw-muted)}
+.gw-ov-fine{margin:10px 0 0;font-size:13px;color:var(--gw-muted)}
+.gw-ov-full{display:grid;gap:14px;padding:22px 24px;border-radius:18px;background:var(--gw-grey);border:1px solid var(--gw-line)}
+.gw-ov-fh{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px}
+.gw-ov-fk{margin:0;font-size:17px;font-weight:600;color:var(--gw-ink);flex:1 1 220px}
+.gw-ov-go{flex:0 0 auto;min-height:52px;padding:14px 30px;font-size:17px;font-weight:600}
+.gw-ov-ft{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px 20px}
+.gw-ov-ft li{position:relative;padding-left:22px;font-size:15px;color:var(--gw-ink)}
+.gw-ov-ft li::before{content:"";position:absolute;left:2px;top:.5em;width:6px;height:10px;border:solid var(--gw-blue);border-width:0 2px 2px 0;transform:translateY(-50%) rotate(40deg)}
+/* a landed home: the existing sales panel, with its own chooser hidden (the search above is the way in) */
+.gw-rprop{margin-top:18px}.gw-rprop .gw-vx{border:0;border-radius:0;padding:0;background:none;box-shadow:none;max-width:none}
+.gw-rprop .gw-vx-pc .gw-fld{display:none}.gw-rprop .gw-vx>.gw-q:not(.gw-vx-pc){display:none}
+@media (max-width:719px){
+  .gw-ropts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .gw-ov-n{font-size:25px}
+  .gw-ov-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"t p" "c c";padding:12px 14px}
+  .gw-ov-row .gw-ov-t{grid-area:t}.gw-ov-row .gw-ov-p{grid-area:p;text-align:right}.gw-ov-row .gw-ov-c{grid-area:c}
+  .gw-ov-full{padding:18px}.gw-ov-go{width:100%}.gw-ov-ft{grid-template-columns:1fr}
+}
+/* once a property is showing, the browse-and-explain blocks under the search step aside */
+#ws-dev:has(.gw-ov, .gw-rprop:not([hidden])) :is(#lgCount,#rwOwn,.gw-raz,.gw-rex,[data-lg-scope],.lg-fine:not([data-ov-busy]):not([data-ov-fail])){display:none}
+/* V2.1: a calculator's result panel before the first result: its own lines, a dash for each figure, and what to enter */
+.gw-ready{display:grid;gap:10px}
+.gw-ready-k{margin:0;font-size:15px;font-weight:600;color:var(--gw-ink)}
+.gw-ready-v{margin:-4px 0 0;font-size:34px;line-height:1.1;font-weight:700;letter-spacing:-.02em;color:#B4B9C4}
+.gw-ready-rows{list-style:none;margin:2px 0 0;padding:0;display:grid;border-top:1px solid var(--gw-line)}
+.gw-ready-rows li{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--gw-line);font-size:15px;color:var(--gw-body)}
+.gw-ready-rows b{color:#B4B9C4;font-weight:600;white-space:nowrap}
+.gw-ready-n{margin:2px 0 0;font-size:14px;color:var(--gw-muted)}
+/* V2.1: Ken's current projects as one quiet line under the search */
+.gw-rown{display:block;padding:0;background:none;border-radius:0}
+.gw-rown-h{margin:0;font-size:14px;font-weight:400;color:var(--gw-muted)}
+.gw-rown-h a{color:var(--gw-body);text-decoration:underline;text-decoration-color:var(--gw-line);text-underline-offset:3px}

@@ -144,6 +144,8 @@ try:
     pg.click('.pa-chips[data-k="kind"] [data-v="new"]'); pg.fill('#pa-price', '1,000,000'); settle(pg)
     dl = pg.inner_text('[data-dateline]')
     check('new launch: dates read "Not checked" and offer the monthly amounts, never "covered"', 'Not checked' in dl and 'Add monthly amounts' in dl and 'Covered' not in dl, dl)
+    pg.click('[data-dateline] [data-focus="saveMo"]'); pg.wait_for_timeout(300)   # CX V2: "Add monthly amounts" opens the monthly fields
+    check('new launch: "Add monthly amounts" opens the monthly fields', pg.is_visible('[data-k="saveMo"]'))
     pg.fill('[data-k="saveMo"]', '2,000'); pg.fill('[data-k="cpfMo"]', '1,500'); settle(pg)
     dl = pg.inner_text('[data-dateline]')
     check('new launch: with monthly amounts the check is labelled as using them', 'Your monthly amounts' in dl, dl)

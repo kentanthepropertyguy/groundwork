@@ -508,3 +508,54 @@ body.kpr .gwb-ans .gwr-rentline, body.kpr .lg-ans .gwr-rentline{ margin:2px 0 0;
   /* a chosen size keeps its price and the Market Pulse on a phone's first screen (approved layout); its band rent is in "Rents" below */
   body.kpr .lg-ans:not(.gwb-ans) .gwr-rentline{ display:none; }
 }
+/* ---------- CX V2 (26 Oct 2026): a shortcut row under the answer, quieter fine print, less scrolling ---------- */
+.lg-jump{ position:sticky; top:var(--gw-navh,58px); z-index:30; background:rgba(255,255,255,.96); -webkit-backdrop-filter:saturate(180%) blur(16px); backdrop-filter:saturate(180%) blur(16px); border-top:1px solid var(--kpt-line); border-bottom:1px solid var(--kpt-line); padding:0 22px; }
+.lg-jump-in{ display:flex !important; align-items:center; gap:18px; min-height:54px; grid-template-columns:none !important; }
+.lg-jctx{ flex:0 0 auto; display:inline-flex; align-items:center; gap:8px; font:inherit; font-size:15px; color:var(--kpt-ink); background:none; border:0; padding:6px 0; cursor:pointer; min-height:44px; max-width:46%; }
+.lg-jn{ font-weight:700; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.lg-jctx b{ font-weight:600; background:var(--kpt-grey); border-radius:var(--kpt-pill); padding:4px 12px; white-space:nowrap; }
+.lg-jctx svg{ color:var(--kpt-muted); flex:0 0 auto; }
+.lg-jlinks{ display:flex; gap:4px; margin-left:auto; overflow-x:auto; scrollbar-width:none; min-width:0; }
+.lg-jlinks::-webkit-scrollbar{ display:none; }
+.lg-jl{ flex:0 0 auto; font:inherit; font-size:14.5px; font-weight:500; color:var(--kpt-body); background:none; border:0; border-radius:var(--kpt-pill); padding:8px 12px; min-height:40px; cursor:pointer; white-space:nowrap; }
+.lg-jl:hover{ background:var(--kpt-grey); color:var(--kpt-ink); }
+.lg-jctx:focus-visible, .lg-jl:focus-visible{ outline:3px solid rgba(11,99,206,.35); outline-offset:2px; }
+/* what a shortcut lands on clears the header and the row */
+.lg-page .lg-band, .lg-page #lgPick, .lg-page #lgPulse, .lg-page #lgAsk, .lg-page #next{ scroll-margin-top:calc(var(--gw-navh,58px) + 66px); }
+/* fine print: the first sentence stays visible, the method opens on request */
+.lg-finedet{ font-size:13px; color:var(--kpt-muted); line-height:1.5; max-width:min(80ch,100%); min-width:0; overflow-wrap:anywhere; }
+.lg-finedet > summary{ cursor:pointer; list-style:none; }
+.lg-finedet > summary::-webkit-details-marker{ display:none; }
+.lg-finedet > summary span{ color:var(--kpt-blue, #0B63CE); white-space:nowrap; margin-left:2px; }
+.lg-finedet > summary span::after{ content:" ›"; }
+.lg-finedet[open] > summary span::after{ content:" ‹"; }
+.lg-finedet > p{ margin:6px 0 0; }
+details.gwr-sizes > summary{ cursor:pointer; list-style:none; display:flex; align-items:baseline; gap:10px; padding:10px 0; min-height:44px; box-sizing:border-box; }
+details.gwr-sizes > summary::-webkit-details-marker{ display:none; }
+details.gwr-sizes > summary span{ font-size:14px; font-weight:500; color:var(--kpt-muted); }
+details.gwr-sizes > summary::after{ content:"+"; margin-left:auto; font-weight:400; color:var(--kpt-muted); font-size:20px; line-height:1; }
+details.gwr-sizes[open] > summary::after{ content:"–"; }
+details.gwr-sizes:not([open]){ border-top:1px solid var(--kpt-line); border-bottom:1px solid var(--kpt-line); }
+/* a little less air between the evidence sections, and denser sale rows on a wide screen */
+body.kpr .gwr-band{ padding-top:36px; padding-bottom:36px; }
+@media (min-width:720px){ .gwr-table td{ padding:9px 10px; } }
+@media (max-width:719px){
+  .lg-jump{ padding:0 0 0 16px; }
+  .lg-jump-in{ gap:6px; min-height:50px; }
+  .lg-jctx{ max-width:none; font-size:14px; gap:4px; }
+  .lg-jctx .lg-jn{ display:none; }
+  .lg-jctx b{ padding:5px 10px; }
+  .lg-jlinks{ margin-left:0; padding-right:16px; }
+  .lg-jl{ font-size:14px; padding:8px 10px; }
+  .lg-page .lg-band, .lg-page #lgPick, .lg-page #lgPulse, .lg-page #lgAsk, .lg-page #next{ scroll-margin-top:calc(var(--gw-navh,52px) + 58px); }
+  body.kpr .gwr-band{ padding-top:28px; padding-bottom:28px; }
+  .gwr-table tr{ padding-top:9px; padding-bottom:9px; }
+}
+.gwr-wrap{ grid-template-columns:minmax(0,1fr); }
+.lg-hero .lg-run + .lg-facts, .lg-hero .lg-run[hidden] + .lg-facts{ margin-top:10px; }
+.lg-ov-n [data-lg-ov-rows], .lg-ov-n button[data-lg-scroll]{ display:inline; font:inherit; font-weight:600; color:var(--kpt-blue); background:none; border:0; padding:0; cursor:pointer; text-align:left; }
+/* V2.1: one quiet Ask Ken card on the report */
+.lg-kacts{ display:flex; align-items:center; gap:6px 16px; flex-wrap:wrap; }
+.lg-klink{ font-size:15px; color:var(--kpt-blue); text-decoration:none; font-weight:500; }
+.lg-klink:hover{ text-decoration:underline; }
+@media (max-width:719px){ .lg-kacts{ width:100%; } .lg-kacts .lg-btn{ width:100%; } }

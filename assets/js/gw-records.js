@@ -21,7 +21,7 @@
   const SQFT = 10.7639, MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const CODE = { new: 1, sub: 2, resale: 3 }, SALE = { 1: 'New sale', 2: 'Sub-sale', 3: 'Resale' };
   const WORD = { 1: ['new sale', 'new sales'], 2: ['sub-sale', 'sub-sales'], 3: ['resale', 'resales'], all: ['sale', 'sales'] };
-  const TYPICAL = { n: 5, months: 3 }, PAGE = 15;
+  const TYPICAL = { n: 5, months: 3 }, PAGE = 15, PHONE_PAGE = 5;   // CX V2: a phone starts with the 5 most recent sales; "Show more" adds 15 at a time
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const num = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   const money = (n) => '$' + num(n);
@@ -163,7 +163,7 @@
     return '<section class="lg-band gwr-band gwr-tx" id="lgTx" aria-labelledby="lgTxH"><div class="lg-wrap gwr-wrap"><div class="gwr-head"><p class="lg-kicker">Transactions</p><h2 id="lgTxH">What homes here actually sold for</h2>' +
       '<p class="lg-sub">Every sale URA records here since ' + ymLabel(rec.start) + ', newest first. Total price, then price per sq ft.</p></div>' +
       filtersHtml(rec, f) + '<div data-gwr-list aria-live="polite">' + listHtml(rec, f, o.shown) + '</div>' +
-      '<p class="lg-fine gwr-notes">URA gives the contract month (not the day), a floor band (not the floor) and the area in whole square metres, so sq ft is approximate. There are no unit numbers. Home type is shown only where Groundwork could match the size to a bedroom count, from floor plans or URA rental records; otherwise it is “unknown”, never guessed. Past sales, not a valuation.</p></div></section>';
+      '<details class="lg-finedet gwr-notes"><summary>Past sales, not a valuation. <span>How URA records these</span></summary><p class="lg-fine">URA gives the contract month (not the day), a floor band (not the floor) and the area in whole square metres, so sq ft is approximate. There are no unit numbers. Home type is shown only where Groundwork could match the size to a bedroom count, from floor plans or URA rental records; otherwise it is “unknown”, never guessed.</p></details></div></section>';
   }
   // The filters a visitor starts with: the type or size chosen at the top of the report, and the sale type on show.
   function startFilter(o) { return { bed: o.bed != null && o.bed !== '' && /^\d+$/.test(String(o.bed)) ? String(o.bed) : 'all', bin: o.bin != null ? String(o.bin) : 'all', sale: o.sale ? String(CODE[o.sale] || 'all') : 'all', period: 'all', sort: 'new' }; }
@@ -175,10 +175,10 @@
     const sec = app.querySelector('#lgTx'); if (!sec || !st || !st.rec) return;
     const list = sec.querySelector('[data-gwr-list]');
     const draw = () => { list.innerHTML = listHtml(st.rec, st.f, st.shown); sec.querySelectorAll('[data-gwr-f]').forEach((s) => { s.value = String(st.f[s.dataset.gwrF]); }); };
-    sec.addEventListener('change', (e) => { const s = e.target.closest && e.target.closest('[data-gwr-f]'); if (!s) return; st.f[s.dataset.gwrF] = s.value; st.shown = PAGE; draw(); if (o.track) o.track(s.dataset.gwrF); });
+    sec.addEventListener('change', (e) => { const s = e.target.closest && e.target.closest('[data-gwr-f]'); if (!s) return; st.f[s.dataset.gwrF] = s.value; st.shown = st.page || PAGE; draw(); if (o.track) o.track(s.dataset.gwrF); });
     sec.addEventListener('click', (e) => {
       if (e.target.closest('[data-gwr-more]')) { st.shown = (st.shown || PAGE) + PAGE; draw(); }
-      if (e.target.closest('[data-gwr-reset]')) { st.f = { bed: 'all', bin: 'all', sale: 'all', period: 'all', sort: 'new' }; st.shown = PAGE; draw(); }
+      if (e.target.closest('[data-gwr-reset]')) { st.f = { bed: 'all', bin: 'all', sale: 'all', period: 'all', sort: 'new' }; st.shown = st.page || PAGE; draw(); }
     });
     sec.__gwrDraw = draw;
     // "See these sales" in the asking-price result: the exact sales its dots are. One listener per report element, whatever the redraws.
@@ -187,11 +187,11 @@
       app.__gwrShow = true;
       app.addEventListener('click', (e) => {
         const b = e.target.closest && e.target.closest('[data-gwr-show]'), s = app.querySelector('#lgTx'), cur = app.__gwrSt; if (!b || !s || !cur || !s.__gwrDraw) return;
-        const p = b.dataset.gwrShow.split('|'); cur.f = { bed: 'all', bin: p[0], sale: p[1], period: '12', sort: 'new' }; cur.shown = PAGE; s.__gwrDraw();
+        const p = b.dataset.gwrShow.split('|'); cur.f = { bed: 'all', bin: p[0], sale: p[1], period: '12', sort: 'new' }; cur.shown = cur.page || PAGE; s.__gwrDraw();
         s.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     }
   }
 
-  return { SQFT, CODE, SALE, PAGE, pick, filter, options, bandPsf, sizeRows, quantile, typesHtml, sizesHtml, txHtml, listHtml, filtersHtml, startFilter, wire, binOf, psfOf, ymAdd, ymLabel, short, bedLabel, bandLabel };
+  return { SQFT, CODE, SALE, PAGE, PHONE_PAGE, pick, filter, options, bandPsf, sizeRows, quantile, typesHtml, sizesHtml, txHtml, listHtml, filtersHtml, startFilter, wire, binOf, psfOf, ymAdd, ymLabel, short, bedLabel, bandLabel };
 });

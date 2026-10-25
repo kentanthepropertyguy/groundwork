@@ -83,6 +83,11 @@
     return !typ.length || t.some((x) => x.evidence !== 'typical') || (sel != null && !typ.some((x) => x.beds === sel));
   }
   // o: { bed: the bedroom count chosen at the top of the report ('' none), bin: the size chosen there, ask: GWASK or null }
+  function sizesOpen(rec, sel, bin) {
+    if (bin != null) return true;
+    const ts = rec.types || [], t = sel != null ? ts.find((x) => x.beds === sel) : null;
+    return (sel != null && (!t || t.evidence !== 'typical')) || !ts.some((x) => x.evidence === 'typical');
+  }
   function sectionHtml(rec, o) {
     o = o || {};
     if (!rec || ((!rec.types || !rec.types.length) && !sizeList(rec).length)) return '';
@@ -91,10 +96,13 @@
       '<p class="lg-sub">Monthly rents in rental contracts filed with IRAS, for leases that began ' + ymLabel(rec.window.from) + ' – ' + ymLabel(rec.window.to) + '. These are contracted rents, not asking rents.</p></div>' +
       (rec.types && rec.types.length ? '<div class="gwr-rows" aria-label="Rents by bedrooms">' + rec.types.map((t) => typeRow(t, rec, t.beds === sel)).join('') + '</div>' : '') +
       (rec.unknownBeds ? '<p class="lg-fine" data-gwrent-unknown>' + num(rec.unknownBeds) + ' of the ' + num(rec.n) + ' contracts don’t state the bedrooms, so they aren’t in the bedroom figures.</p>' : '') +
-      (showSizes ? '<div class="gwr-sizes" data-gwrent-sizes><h3 class="gwr-h3">Rents by size</h3><p class="lg-fine">' + (rec.types && rec.types.some((x) => x.evidence === 'typical') ? 'Where a bedroom count has too few contracts, ' : '') + 'homes of the same 100 sq ft band, whatever their bedrooms.</p><div class="gwr-rows" aria-label="Rents by size">' + sizes.map((s) => sizeRow(s, o.bin != null && s.sqft[0] === Number(o.bin))).join('') + '</div></div>' : '') +
+      // CX V2: rents by size fold away under their heading, and open by themselves when they are the answer: a size is chosen, the chosen bedroom count
+      // has too few contracts, or no bedroom count has a typical rent. Nothing in them changes.
+      (showSizes ? '<details class="gwr-sizes" data-gwrent-sizes' + (sizesOpen(rec, sel, o.bin) ? ' open' : '') + '><summary class="gwr-h3">Rents by size <span>' + sizes.length + ' size band' + (sizes.length === 1 ? '' : 's') + '</span></summary><p class="lg-fine">' + (rec.types && rec.types.some((x) => x.evidence === 'typical') ? 'Where a bedroom count has too few contracts, ' : '') + 'homes of the same 100 sq ft band, whatever their bedrooms.</p><div class="gwr-rows" aria-label="Rents by size">' + sizes.map((s) => sizeRow(s, o.bin != null && s.sqft[0] === Number(o.bin))).join('') + '</div></details>' : '') +
       (CD ? '<div class="lg-acts gwr-acts"><button type="button" class="lg-act" data-gwrent-ask aria-expanded="false" aria-controls="lgRentAsk"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v10H4z"/><path d="M8 12h8"/></svg><span>Check an asking rent</span></button></div>' +
         o.ask.panelHtml('rent', CD, { id: 'lgRentAsk', hidden: true, title: 'Check an asking rent', sub: 'Compared with contracts for the same bedrooms and size band here in the last 12 months. Only where there are at least 10.' }) : '') +
-      '<p class="lg-fine">Summaries only: each figure covers 5 or more contracts. Bedrooms as declared in each contract; sizes are URA’s 100 sq ft bands, never an exact area; the month is when the lease began. A rent movement is shown only for one bedroom count in one size band with at least 10 contracts in each year. ' + esc(M.attribution || '') + '</p></div></section>';
+      '<details class="lg-finedet"><summary>Summaries only: each figure covers 5 or more contracts. <span>How these rents are counted</span></summary><p class="lg-fine">Bedrooms as declared in each contract; sizes are URA’s 100 sq ft bands, never an exact area; the month is when the lease began. A rent movement is shown only for one bedroom count in one size band with at least 10 contracts in each year.</p></details>' +
+      (M.attribution ? '<p class="lg-fine" data-gwrent-attr>' + esc(M.attribution) + '</p>' : '') + '</div></section>';
   }
   // One line for the answer at the top of the report: the chosen type's rent beside its resale price, each with its own count and period.
   function typeLine(rec, beds) {

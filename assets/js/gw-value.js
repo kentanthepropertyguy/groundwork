@@ -341,8 +341,9 @@
 
   /* ---------------- browser behaviour ---------------- */
   // el: a box to bring to life (Research mounts the same page body in its own workspace); without it, the page's own [data-gw-value]
-  function mount(el) {
+  function mount(el, opts) {
     if (typeof document === 'undefined') return;
+    opts = opts || {};   // opts.fresh (26 Oct 2026, Research): start blank and offer postal() / street() to the page; nothing is restored from an earlier visit's choices
     const hosted = !!(el && el.nodeType === 1), box = hosted ? el : document.querySelector('[data-gw-value]'); if (!box || box.__gwv) return; box.__gwv = true;
     const KPT = root.KPT || { track: function () {} }, track = (n, p) => { try { KPT.track(n, p || {}); } catch (e) { /* analytics unavailable */ } };
     const ctx = (root.GWJ && root.GWJ.ctx) || { get: () => ({}), set: () => {} };
@@ -649,8 +650,9 @@
     let pt; if (GP && PCB) PCB.addEventListener('input', () => { clearTimeout(pt); pseq++; const c = GP.code(PCB.value); if (!c) { PCO.innerHTML = /\d{6,}/.test(PCB.value) ? '<p class="gw-vx-why">A postal code has six digits.</p>' : ''; return; } pt = setTimeout(() => postalGo(c, false), 150); });
     if (GP && PCB) PCB.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); clearTimeout(pt); const c = GP.code(PCB.value); if (c) postalGo(c, true); } });
 
-    // Start: the address (#hdb, #condo, #landed, #landed:<road>), else what this tab already told us.
-    if (!fromHash() && ctx.get().type) pickType(ctx.get().type, false);
+    // Start: the address (#hdb, #condo, #landed, #landed:<road>), else what this tab already told us (not when Research hosts it fresh: it then only answers what its search hands it).
+    if (opts.fresh) box.__gwvApi = { postal: (c) => postalGo(c, true), street: (n) => { pickType('landed', false); return openStreet(n); } };
+    else if (!fromHash() && ctx.get().type) pickType(ctx.get().type, false);
     // the Research page keeps this box while its address changes between options; only an address meant for this box (#hdb, #condo, #landed…, #pc=) is read
     window.addEventListener('hashchange', () => { if (box.isConnected && box.offsetParent !== null) fromHash(); });
   }

@@ -238,7 +238,7 @@ ok(/GW_PULSE\.waMessage\(S\.pu( \|\| S\.bedWa)?, M\.name, reportUrl\(M\.id\), 'b
 ok(!/localStorage/.test(src + read('assets/js/gw-journey.js').match(/pulseFor[^\n]*/)), 'the question is kept for this tab only (sessionStorage), never localStorage');
 const lg = read('assets/js/kpt-lg.js');
 ok(/GLOBAL\.GW_PULSE\.html\(ctx\.PU, \{ forWho, mapHref/.test(lg) && /class="lg-kenstrips" id="next"/.test(lg), 'the page passes the question to the block and the cards carry the id the link scrolls to');
-ok(/How is the market around your home\?/.test(lg), 'Research\'s first screen asks how the market is');
+ok(/HDB, condo or landed — prices, past sales, rents and comparisons\./.test(lg), 'Research\'s first screen asks what to research, in one property search');
 const home = read('index.html'); // 25 Oct 2026: the homepage's Research door is one card (its list of tool links was removed); Market Pulse is reached in every development's Research report
 ok(/<a class="gw-door gw-door3" href="research\/"/.test(home) && !/data-mp[ >]/.test(home), 'Home: the Research door leads to Research (where Market Pulse lives), no new section');
 ok(!/gw-pulse|data-mp/.test(home), 'Home gains no new block');

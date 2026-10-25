@@ -34,7 +34,7 @@ def shot(pg, name, full=False, el=None):
         pg.add_style_tag(content='.gw-nav{position:static !important}'); pg.locator(el).first.screenshot(path=str(SHOTS / (name + '.png')))
     else: pg.screenshot(path=str(SHOTS / (name + '.png')), full_page=full)
 GONE = ['AI-assisted, not reviewed by Ken', 'not reviewed by Ken', 'Please leave income, CPF and debt figures out of the first message']
-NAV = ['Plan My Move', 'Research', 'Map', 'Calculators', 'New Launches']
+NAV = ['Plan My Move', 'Research', 'Map', 'Calculators']   # V2.1: the external New Launches link is gone (launches are on the Map)
 
 try:
     with sync_playwright() as p:
@@ -44,7 +44,7 @@ try:
             print('\n== 1. Homepage and Plan My Move,', vn)
             ctx, pg, errs = fresh(br, kw); pg.goto(B + '/'); pg.wait_for_selector('.gw-doors3')
             links = pg.eval_on_selector_all('.gw-nav .gw-links a', 'as => as.map(a => a.textContent.replace("↗", "").trim())')
-            check(vn + ': main navigation reads Plan My Move · Research · Map · Calculators · New Launches', links == NAV, links)
+            check(vn + ': main navigation reads Plan My Move · Research · Map · Calculators', links == NAV, links)
             doors = pg.eval_on_selector_all('.gw-door3', 'as => as.map(a => [a.getAttribute("href"), a.innerText.split("\\n")[0]])')
             check(vn + ': three entry points: buy, sell, research', [d[0] for d in doors] == ['journey/#buy', 'journey/#sell', 'research/'], doors)
             mf = pg.locator('a.gw-mapf'); check(vn + ': the Map is a visible feature with "Explore on Map"', mf.count() == 1 and mf.is_visible() and 'Explore on Map' in mf.inner_text() and mf.get_attribute('href') == 'research/map/')

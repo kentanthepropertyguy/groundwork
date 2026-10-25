@@ -19,7 +19,8 @@ for (const f of pages) {
   const rel = path.relative(ROOT, f), t = fs.readFileSync(f, 'utf8');
   const hdr = (t.match(/<nav class="gw-links"[^>]*>(.*?)<\/nav>/s) || [])[1] || '';
   const links = [...hdr.matchAll(/<a\b([^>]*)>(.*?)<\/a>/gs)].map((m) => ({ attrs: m[1], text: m[2].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim(), href: (m[1].match(/href="([^"]*)"/) || [])[1] }));
-  check(rel + ': header reads Plan My Move · Research · Map · Calculators · New Launches', links.map((l) => l.text).join('|') === 'Plan My Move|Research|Map|Calculators|New Launches ↗', links.map((l) => l.text));
+  check(rel + ': header reads Plan My Move · Research · Map · Calculators (V2.1: no external New Launches link; launches are on the Map)', links.map((l) => l.text).join('|') === 'Plan My Move|Research|Map|Calculators' && !/kentanthepropertyguy\.com\/#developments/.test(t), links.map((l) => l.text));
+  check(rel + ': no portrait in the footer (V2.1: credentials only)', !/<footer[\s\S]*ken-portrait[\s\S]*<\/footer>/.test(t));
   const pm = links.find((l) => l.text === 'Plan My Move'), cl = links.find((l) => l.text === 'Calculators');
   check(rel + ': Plan My Move opens Guide Me at its start (journey/, no path chosen); Calculators keeps the /tools/ address', pm && /(^|\/)journey\/$/.test(pm.href) && cl && /(^|\/)tools\/$/.test(cl.href), [pm, cl]);
   check(rel + ': Map is a top-level header item and opens the one Map', links.filter((l) => /^Map$/.test(l.text)).length === 1 && /(^|\/)research\/map\/$/.test((links.find((l) => /^Map$/.test(l.text)) || {}).href || ''));
@@ -39,7 +40,8 @@ for (const f of pages) {
   const rs = (t.match(/<section class="gw-ms gw-ms-research">(.*?)<\/section>/s) || [])[1] || '';
   check(rel + ': Map stays reachable under Research in the menu', /href="((\.\.\/)*|\/)research\/map\/"/.test(rs));
   const names = [...t.matchAll(/<section class="gw-ms gw-ms-[a-z]+">(.*?)<\/section>/gs)].flatMap((m) => [...m[1].matchAll(/<a class="gw-mi" href="([^"]*)"/g)].map((x) => x[1]));
-  ['research/#/', 'research/#/prices', 'research/#/budget', 'research/#/browse'].forEach((h) => check(rel + ': ' + h + ' is listed once in the menu', names.filter((x) => x.replace(/^(\.\.\/)+|^\//, '') === h).length === 1, names.filter((x) => /research\/#/.test(x))));
+  check(rel + ': the old prices address is no longer a second menu entry', !names.some((x) => /research\/#\/prices$/.test(x)), names);
+  ['research/#/', 'research/#/budget', 'research/#/browse'].forEach((h) => check(rel + ': ' + h + ' is listed once in the menu', names.filter((x) => x.replace(/^(\.\.\/)+|^\//, '') === h).length === 1, names.filter((x) => /research\/#/.test(x))));
   const ts = (t.match(/<section class="gw-ms gw-ms-tools">(.*?)<\/section>/s) || [])[1] || '';
   ['planner', 'payment-planner', 'sale-proceeds', 'ssd', 'stamp-duty', 'tdsr', 'msr', 'mortgage'].forEach((id) => {
     const inMenu = new RegExp('href="((\\.\\./)*|/)tools/' + id + '/"').test(t);
