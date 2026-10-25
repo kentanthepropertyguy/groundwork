@@ -434,3 +434,77 @@ body.kpr .mp-near button .lg-n{ margin-left:8px; padding-left:8px; border-left:1
   .gwl-sw button{ flex:none; }
   .gwl-near{ grid-template-columns:1fr; gap:0; }
 }
+/* ---------- 25 Oct 2026: what homes here sold and rent for (assets/js/gw-records.js, gw-rent.js). Answer rows, then the evidence. ---------- */
+body.kpr .gwr-band{ padding:44px 22px; border-top:1px solid var(--kpt-line); }
+.gwr-wrap{ gap:16px !important; }
+.gwr-head{ display:grid; gap:6px; }
+.gwr-head h2{ font-size:30px; line-height:1.15; letter-spacing:-.02em; margin:0; }
+.gwr-head .lg-sub{ font-size:16px; max-width:70ch; margin:0; }
+.gwr-rows{ display:grid; gap:8px; }
+.gwr-row{ font:inherit; text-align:left; width:100%; display:grid; grid-template-columns:minmax(110px,150px) minmax(120px,170px) minmax(150px,210px) minmax(0,1fr); align-items:center; gap:4px 18px;
+  background:#fff; border:1px solid var(--kpt-line); border-radius:16px; padding:14px 18px; color:var(--kpt-ink); box-sizing:border-box; }
+button.gwr-row{ cursor:pointer; }
+button.gwr-row:hover{ border-color:#B9BDC9; }
+.gwr-row[aria-pressed="true"], .gwr-row[aria-current="true"]{ border-color:var(--kpt-ink); box-shadow:inset 0 0 0 1px var(--kpt-ink); background:#FAFAFB; }
+.gwr-t{ font-weight:650; font-size:16.5px; }
+.gwr-p b{ font-size:24px; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+.gwr-p small, .gwr-r small{ display:block; font-size:12.5px; color:var(--kpt-muted); font-weight:400; }
+.gwr-lim b{ font-size:19px; color:var(--kpt-body); }
+.gwr-r{ font-size:15.5px; font-variant-numeric:tabular-nums; }
+.gwr-m{ font-size:14px; color:var(--kpt-muted); line-height:1.45; }
+.gwr-mv{ grid-column:1 / -1; font-size:13.5px; color:var(--kpt-body); border-top:1px dashed var(--kpt-line); padding-top:8px; margin-top:4px; }
+.gwr-fs{ display:flex; flex-wrap:wrap; gap:10px 12px; align-items:end; }
+.gwr-f{ display:grid; gap:4px; font-size:12.5px; color:var(--kpt-muted); font-weight:600; min-width:0; }
+.gwr-f select{ font:inherit; font-size:15px; font-weight:400; color:var(--kpt-ink); min-height:42px; padding:8px 34px 8px 12px; border:1px solid #CFD2DA; border-radius:12px; background:#fff; -webkit-appearance:none; appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--kpt-muted) 50%),linear-gradient(135deg,var(--kpt-muted) 50%,transparent 50%); background-position:calc(100% - 18px) 18px,calc(100% - 13px) 18px; background-size:5px 5px; background-repeat:no-repeat; max-width:100%; }
+.gwr-f select:focus{ outline:none; border-color:var(--kpt-ink); box-shadow:0 0 0 3px rgba(22,33,62,.1); }
+.gwr-count{ margin:4px 0 0; font-size:14.5px; color:var(--kpt-body); }
+.gwr-none{ font-size:15px; color:var(--kpt-body); }
+.gwr-scroll{ overflow-x:auto; }
+.gwr-table{ width:100%; border-collapse:collapse; font-size:15px; font-variant-numeric:tabular-nums; }
+.gwr-table th{ text-align:left; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--kpt-muted); font-weight:600; padding:8px 10px; border-bottom:1px solid var(--kpt-line); }
+.gwr-table th:last-child, .gwr-table .gwr-pr{ text-align:right; }
+.gwr-table td{ padding:11px 10px; border-top:1px solid var(--kpt-line); vertical-align:top; color:var(--kpt-ink); }
+.gwr-table td small{ display:block; font-size:12.5px; color:var(--kpt-muted); }
+.gwr-table .gwr-pr b{ font-size:16.5px; }
+.gwr-table .gwr-flag{ color:#8A5A00; }
+.gwr-unk{ color:var(--kpt-muted); }
+.gwr-mo, .gwr-fl, .gwr-sz{ white-space:nowrap; }
+.gwr-more{ justify-self:start; min-height:44px; padding:9px 18px; font-size:15px; }
+.gwr-notes{ max-width:80ch; }
+.gwr-acts{ display:flex !important; flex-wrap:wrap; gap:8px; margin:0 !important; justify-content:flex-start; justify-self:start; max-width:none !important; width:auto !important; }
+.gwr-acts .lg-act{ display:inline-flex; align-items:center; padding:0 16px; min-height:44px; border-radius:var(--kpt-pill); gap:8px; font-size:14px; }
+.gwr-fold{ margin:0; }
+.gwr-fold .in{ display:grid; gap:10px; }
+.gwr-rent .gw-apc{ max-width:720px; justify-self:start; margin:0; width:100%; box-sizing:border-box; }
+@media (max-width:719px){
+  body.kpr .gwr-band{ padding:32px 16px; }
+  .gwr-head h2{ font-size:24px; }
+  .gwr-head .lg-sub{ font-size:15px; }
+  .gwr-row{ grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"t p" "r r" "m m"; gap:2px 12px; padding:12px 14px; }
+  .gwr-row .gwr-t{ grid-area:t; } .gwr-row .gwr-p{ grid-area:p; text-align:right; } .gwr-row .gwr-r{ grid-area:r; } .gwr-row .gwr-m{ grid-area:m; }
+  .gwr-row .gwr-r small{ display:inline; margin-left:6px; }
+  .gwr-p b{ font-size:21px; }
+  .gwr-fs{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .gwr-f select{ width:100%; }
+  .gwr-table thead{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+  .gwr-table, .gwr-table tbody{ display:block; }
+  .gwr-table tr{ display:block; position:relative; padding:11px 116px 11px 0; border-top:1px solid var(--kpt-line); min-height:44px; }
+  .gwr-table td{ display:inline; padding:0; border:0; font-size:14px; color:var(--kpt-body); }
+  .gwr-table td small{ display:none; }
+  .gwr-table td.gwr-mo{ display:block; font-weight:600; color:var(--kpt-ink); font-size:14.5px; margin-bottom:2px; }
+  .gwr-table td.gwr-ty::after, .gwr-table td.gwr-sz::after, .gwr-table td.gwr-fl::after{ content:" · "; color:var(--kpt-muted); }
+  .gwr-rt td.gwr-sz::after{ content:""; }
+  .gwr-table td.gwr-pr{ position:absolute; right:0; top:11px; text-align:right; }
+  .gwr-table td.gwr-pr small{ display:block; }
+  .gwr-table td small.gwr-flag{ display:block; font-size:12px; }
+  .gwr-more{ width:100%; justify-self:stretch; }
+}
+/* Rental Research V1: rents by size where a bedroom count has too few contracts; the chosen type's rent beside its price */
+.gwr-sizes{ display:grid; gap:8px; }
+.gwr-h3{ font-size:18px; margin:6px 0 0; letter-spacing:-.01em; }
+body.kpr .gwb-ans .gwr-rentline, body.kpr .lg-ans .gwr-rentline{ margin:2px 0 0; font-size:15px; line-height:1.5; color:var(--kpt-ink); max-width:62ch; border-top:1px solid #E1E3EA; padding-top:10px; }
+@media (max-width:640px){
+  /* a chosen size keeps its price and the Market Pulse on a phone's first screen (approved layout); its band rent is in "Rents" below */
+  body.kpr .lg-ans:not(.gwb-ans) .gwr-rentline{ display:none; }
+}

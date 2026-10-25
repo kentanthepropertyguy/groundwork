@@ -302,3 +302,12 @@ body.kpm > .gw-nav{flex:none}
 @media (max-width:760px){.kpm .bs .hdbs{margin-top:6px;padding-top:8px}.kpm .bs .hdbs .sh{display:none}.kpm .bs .hfts{margin-top:2px}.kpm .bs .hev-p{font-size:18px}.kpm .bs .hact{margin-top:10px}}
 .kpm .lyr-r em{display:block;font-style:normal;font-weight:500;font-size:12px;color:var(--m-mut);margin-top:1px}
 .kpm .lyr-r span{min-width:0}
+/* 25 Oct 2026: typical total prices by bedroom type (or size) lead the card; psf is secondary */
+.kpm .ldb{display:grid;gap:8px;margin-top:8px}
+.kpm .ldb-r{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:0 10px}
+.kpm .ldb-t{font-size:14px;font-weight:700;color:var(--m-ink)}
+.kpm .ldb-r b{font-size:20px;font-weight:800;color:var(--m-ink);letter-spacing:-.02em;text-align:right}
+.kpm .ldb-m{grid-column:1/-1;font-size:12.5px;color:var(--m-mut);line-height:1.35}
+.kpm .ldb-st{color:var(--m-mut)}
+.kpm .ld-w{margin-top:2px}
+@media (max-width:760px){.kpm .ldb{gap:3px;margin-top:4px}.kpm .ldb-r b{font-size:17px}.kpm .ldb-1 .ldb-t{font-size:13.5px}.kpm .ldb-1 small{font-weight:500;color:var(--m-mut);font-size:12px;margin-left:4px}}

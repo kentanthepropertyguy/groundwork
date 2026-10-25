@@ -81,7 +81,7 @@ try:
         check(vn + ': the Map shows the development with its summary', '#p=jadescape' in pg.url and 'Jadescape' in t and re.search(r'\$\s?[\d,]+', t) is not None, (pg.url, t[:120]))
         shot(pg, f'map-selected-{vn}')
         full = pg.query_selector('[data-m-full]')
-        check(vn + ': “Open full analysis” is obvious', full is not None and 'Open full analysis' in full.inner_text() and full.is_visible())
+        check(vn + ': “View Full Research” is obvious', full is not None and 'View Full Research' in full.inner_text() and full.is_visible())
         if not mob and not pg.is_visible('.dp .rad button[data-pr="2000"]'): pg.click('.dp summary:has-text("Explore nearby developments")'); pg.wait_for_timeout(300)
         pg.click('.bs .rad button[data-pr="2000"]' if mob else '.dp .rad button[data-pr="2000"]')
         pg.wait_for_timeout(600); hmap = pg.evaluate('location.hash')

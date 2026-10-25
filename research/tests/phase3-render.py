@@ -91,6 +91,8 @@ try:
         # compact around + badges
         opn(pg, '#p=jadescape'); pg.wait_for_timeout(700)
         if mob and pg.query_selector('[data-dpmore]'): pg.click('[data-dpmore]'); pg.wait_for_timeout(500)
+        # 25 Oct 2026: on a phone the card's lead is one line per type (no counts), so the badges are read in the "Prices by size" section itself
+        if pg.query_selector('details[data-sx="pr"]:not([open]) summary'): pg.click('details[data-sx="pr"] summary'); pg.wait_for_selector('details[data-sx="pr"][open]')
         t = card(pg)
         check(vn + ': "Prices by size" rows carry a small "N sales" badge, not "units"', re.search(r'\d+ sales?', t) is not None and not re.search(r'available units|units available', t, re.I), t)
         check(vn + ': the summary marks the two amenities that matter and the full list opens on demand', pg.query_selector('.around.key') is not None and pg.query_selector('details[data-sx=am]') is not None)

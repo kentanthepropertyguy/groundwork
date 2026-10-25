@@ -155,19 +155,22 @@
           '<div data-hv-out aria-live="polite"></div>';
         if (o.onTitle) o.onTitle('Blk ' + block + ' ' + v.streetName(streetName) + ' · HDB resale prices');
         const out = sec.querySelector('[data-hv-out]'), chips = Array.from(sec.querySelectorAll('[data-hv-ft]')); let seq = 0;
+        // 25 Oct 2026: HDB-approved rents for this town (data/value/hdb/rent), matched on the exact town, block and street; no file, no section
+        const RT = root.GW_RENT, rentP = RT ? getJson(dv + 'hdb/rent/index.json').then((RI) => getJson(dv + 'hdb/rent/t/' + ti.id + '.json?v=' + encodeURIComponent(RI.latestMonth)).then((RF) => [RI, RF])).catch(() => null) : Promise.resolve(null);
+        const rentHtml = (R, t) => { if (!R || !RT) return ''; try { const L = RT.hdbLevels(R[1], R[0], { block, street: streetName, type: I.types[t] }); return RT.hdbHtml(L, R[0], { flat: v.flatLabel(I.types[t]), block, streetLabel: v.streetName(streetName), townLabel: title(T.town), ask: root.GWASK }); } catch (e) { return ''; } };
         function show(t, user) {
           const my = ++seq; typeIx = t;
           chips.forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.hvFt === t)));
           const d = v.hdbComps(T, block, s, t), c = Object.assign({ flatType: I.types[t] }, c0), here = { town: T.id, street: streetName, block };
           if (user) nav(hashFor(c), true);
-          const finish = (nearRes) => {
+          const finish = (nearRes) => rentP.then((RR) => {
             if (my !== seq) return;
             const mid = nearbyHtml(nearRes, { flatType: I.types[t], block, street: streetName }) + nextHtml({ root: root_, onMap: !!pos, mapHref: (o.mapHref ? o.mapHref(c0) : root_ + 'research/map/#pl=' + encodeURIComponent('hdb:' + T.id + '/' + String(block).toLowerCase() + '/' + slug(streetName)) + '&ft=' + typeSlug(I.types[t])) });
-            out.innerHTML = v.hdbResult(d, c, T, I, root_, { view: true, mid });
+            out.innerHTML = v.hdbResult(d, c, T, I, root_, { view: true, mid, after: rentHtml(RR, t) });
             const a = out.querySelector('a[data-gw-wa]'); if (a && root.GW_WA) root.GW_WA.set(a, 'https://wa.me/6590908898?text=' + encodeURIComponent(v.hdbViewMsg(c)));
             if (o.onShown) o.onShown({ d, c, near: nearRes });
             if (user) { try { out.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { /* ignore */ } }
-          };
+          });
           out.innerHTML = BUSY;
           if (!pos) { finish({ kind: 'street', rows: streetComps(T, s, t, block) }); return; }
           const cands = candidates(HM, pos, RADII[RADII.length - 1], T.id + '|' + streetName + '|' + block);

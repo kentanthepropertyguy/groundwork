@@ -13,7 +13,7 @@
      - Historical PSF movement is described as historical transaction evidence: never appreciation, never a forecast.
      - Overlapping transaction cells do not mean two developments are substitutes.
      - Market context (district / region) is labelled context, never "comparables".
-     - No bedrooms. Size is sqft bands. Floors are URA bands, never an exact floor.
+     - Size is sqft bands here; bedroom types (an inference, never a URA field) live in gw-bedroom.js. Floors are URA bands, never an exact floor.
      - Ken's Take only from an Active, in-date authored note. Otherwise nothing.
    ========================================================================== */
 (function (root, factory) {

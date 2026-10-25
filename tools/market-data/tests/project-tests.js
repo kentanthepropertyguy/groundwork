@@ -131,7 +131,7 @@ t('no generated field name mentions bedrooms, appreciation, yield, forecast, pre
   const all = keysOf(R.manifest).concat(R.index.fields, Object.values(R.details).flatMap((d) => keysOf(d)), Object.values(R.peers).flatMap((d) => d.fields));
   assert.ok(all.length > 50); all.forEach((k) => assert.ok(!/bed|apprec|yield|forecast|predict|school/i.test(k), 'field: ' + k));
 });
-t('policy statements are shipped in the manifest', () => assert.ok(M.policy.some((p) => /No bedrooms/.test(p)) && M.policy.some((p) => /appreciation/.test(p))));
+t('policy statements are shipped in the manifest', () => assert.ok(M.policy.some((p) => /Bedroom types are inferred by Groundwork/.test(p) && /never recorded by URA/.test(p)) && !M.policy.some((p) => /No bedrooms or bedroom inference/.test(p)) && M.policy.some((p) => /appreciation/.test(p))));   // 25 Oct 2026: the bedroom line says what the site now does
 
 console.log('Phase 1: shared development register (condo / EC / cluster)');
 {

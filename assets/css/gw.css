@@ -789,3 +789,9 @@ body.lg .gw-rws .lg-sb .kpr-results{margin-top:12px}
 .gw-ask-nums dd{margin:0;font-size:15px;color:var(--gw-ink);font-variant-numeric:tabular-nums;line-height:1.35}
 .gw-ask-nums dd small{font-size:12.5px;color:var(--gw-muted)}
 @media (max-width:719px){.gw-ask-vh{font-size:17.5px}.gw-ask-nums{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* 25 Oct 2026: the asking-rent check (bedrooms, size, rent) and the link to the exact sales behind the asking-price dots */
+.gw-ask-f3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.gw-ask-tx{margin:0;font-size:14.5px}
+.gw-ask-tx .kpr-link{font:inherit;font-weight:600;color:var(--gw-blue);background:none;border:0;padding:0;min-height:40px;cursor:pointer}
+.gw-hr{margin-top:10px}
+@media (max-width:719px){.gw-ask-f3{grid-template-columns:repeat(2,minmax(0,1fr))}.gw-ask-f3 .gw-fld:last-child{grid-column:1/-1}}

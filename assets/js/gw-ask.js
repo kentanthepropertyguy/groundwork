@@ -64,11 +64,13 @@
   // The headline groups place() into three: below | within | above (lower, middle and upper quarters are all within the range).
   const verdict = (p) => (p === 'below' || p === 'above' ? p : p ? 'within' : null);
   const VTEXT = { below: 'Below recent comparable sale range', within: 'Within recent comparable sale range', above: 'Above recent comparable sale range' };
+  // 25 Oct 2026: the same three answers for an asking rent, against contracted (private) or HDB-approved rents
+  const VRENT = { below: 'Below recent rents', within: 'Within recent rents', above: 'Above recent rents' };
   // How far outside the range, against its nearest end: "6% above the highest sale". '' when within.
-  function gapText(x, d, v) {
+  function gapText(x, d, v, unit) {
     if (v !== 'above' && v !== 'below') return '';
     const pc = v === 'above' ? (x / d.hi - 1) * 100 : (1 - x / d.lo) * 100, r = Math.round(pc);
-    return (r < 1 ? 'Just ' + v : r + '% ' + v) + ' the ' + (v === 'above' ? 'highest' : 'lowest') + ' sale';
+    return (r < 1 ? 'Just ' + v : r + '% ' + v) + ' the ' + (v === 'above' ? 'highest' : 'lowest') + ' ' + (unit || 'sale');
   }
   const showMed = (d) => d.med !== undefined && d.n >= MID_MIN;
   const showMid = (d) => d.q1 !== undefined && d.q3 !== undefined && d.n >= MID_MIN;
@@ -107,11 +109,11 @@
     } else { const mid = (lx + hx) / 2; g += lab(mid, f(d.lo).replace(/ psf$/, '') + ' – ' + f(d.hi), 'lowest – highest', anc(mid, 70)); }
     return '<svg class="gw-ask-svg" viewBox="-4 0 ' + (W + 8) + ' ' + (cy + 6) + '" role="img" aria-label="' + esc(label) + '">' + g + '</svg>';
   }
-  const legend = (d, ps) => '<p class="gw-ask-leg"><span><i class="a"></i>Recent range</span>' + (showMid(d) ? '<span><i class="m"></i>' + (d.midN ? 'Middle ' + d.midN + ' sales' : 'Middle half (about)') + '</span>' : '') + (showMed(d) ? '<span><i class="t"></i>Median</span>' : '') + (ps && ps.length ? '<span><i class="s"></i>Each dot is one sale</span>' : '') + '<span><i class="x"></i>Asking price</span></p>';
+  const legend = (d, ps, dot, ask) => '<p class="gw-ask-leg"><span><i class="a"></i>Recent range</span>' + (showMid(d) ? '<span><i class="m"></i>' + (d.midN ? 'Middle ' + d.midN + ' sales' : 'Middle half' + (d.exact ? '' : ' (about)')) + '</span>' : '') + (showMed(d) ? '<span><i class="t"></i>Median</span>' : '') + (ps && ps.length ? '<span><i class="s"></i>Each dot is one ' + (dot || 'sale') + '</span>' : '') + '<span><i class="x"></i>' + (ask || 'Asking price') + '</span></p>';
   // The answer, then the evidence in plain figures (so nobody has to read the chart to get it).
-  function verdictHtml(x, d, f, p, what) {
-    const v = verdict(p), gt = gapText(x, d, v);
-    return '<div class="gw-ask-v" data-ask-pos="' + v + '"><p class="gw-ask-vh">' + VTEXT[v] + (gt ? ' <span>' + esc(gt) + '</span>' : '') + '</p><p class="gw-ask-say">' + esc(sentence(x, d, f, what)) + '</p></div>';
+  function verdictHtml(x, d, f, p, what, vt, unit) {
+    const v = verdict(p), gt = gapText(x, d, v, unit);
+    return '<div class="gw-ask-v" data-ask-pos="' + v + '"><p class="gw-ask-vh">' + (vt || VTEXT)[v] + (gt ? ' <span>' + esc(gt) + '</span>' : '') + '</p><p class="gw-ask-say">' + esc(sentence(x, d, f, what)) + '</p></div>';
   }
   const noneHtml = (t) => '<div class="gw-ask-v" data-ask-pos="none"><p class="gw-ask-vh">' + esc(t) + '</p></div>';
   const nums = (rows) => '<dl class="gw-ask-nums">' + rows.filter(Boolean).map((r) => '<div><dt>' + esc(r[0]) + '</dt><dd>' + r[1] + '</dd></div>').join('') + '</dl>';
@@ -142,9 +144,12 @@
       return { state: 'thin', psf, html: noneHtml('Too few recent sales to compare') + head + '<p class="gw-ask-say">Only ' + b.n + ' ' + (b.n === 1 ? words[0] : words[1]) + ' of ' + esc(b.label) + ' homes here in the last 12 months' + (b.n === 1 ? ', at ' + f(b.med) : ', all in ' + esc(b.latest)) + '. That is too few to judge an asking price against.</p>' };
     }
     const d = { lo: b.lo, q1: b.q1, med: b.med, q3: b.q3, hi: b.hi, n: b.n }, what = b.n + ' ' + words[1] + ' of ' + b.label + ' homes here in the last 12 months';
+    // 25 Oct 2026: each of those sales as a dot, from the development's transactions (data/projects/tx), only when they are exactly these b.n sales
+    const ps = Array.isArray(b.ps) && b.ps.length === b.n ? b.ps : null;
     const pos = place(psf, d);
-    return { state: 'ok', psf, pos, verdict: verdict(pos), html: verdictHtml(psf, d, f, pos, what) + rangeSvg(psf, d, f, 'Asking ' + f(psf) + ' against ' + what) + legend(d) +
-      nums([['Asking', money(x) + ' · <b>' + money(psf) + ' psf</b>'], ['Recent range', span(d, money) + ' psf'], showMed(d) ? ['Median', esc(f(d.med))] : null, ['Size band', esc(b.label)], ['Sales', b.n + ' ' + esc(b.n === 1 ? words[0] : words[1]) + ' · last 12 months']]) + edgeNote(A, c, words) };
+    return { state: 'ok', psf, pos, verdict: verdict(pos), dots: ps ? ps.length : 0, html: verdictHtml(psf, d, f, pos, what) + rangeSvg(psf, d, f, 'Asking ' + f(psf) + ' against ' + what, ps) + legend(d, ps) +
+      nums([['Asking', money(x) + ' · <b>' + money(psf) + ' psf</b>'], ['Recent range', span(d, money) + ' psf'], showMed(d) ? ['Median', esc(f(d.med))] : null, ['Size band', esc(b.label)], ['Sales', b.n + ' ' + esc(b.n === 1 ? words[0] : words[1]) + ' · last 12 months']]) +
+      (ps && A.saleCode ? '<p class="gw-ask-tx"><button type="button" class="kpr-link" data-gwr-show="' + b.bin + '|' + A.saleCode + '">See these ' + b.n + ' ' + esc(b.n === 1 ? words[0] : words[1]) + ' ›</button></p>' : '') + edgeNote(A, c, words) };
   }
   // A4-18: a listing's round size can sit just above a band edge while URA records the same home just below it (65 sq m is
   // 699.65 sq ft, in the 600–699 band, but is usually listed as 700 sq ft). Name the band below too, with its own count and range.
@@ -173,6 +178,44 @@
     return { state: 'ok', pos, verdict: verdict(pos), html: verdictHtml(x, d, money, pos, what) + rangeSvg(x, d, money, 'Asking ' + money(x) + ' against ' + what, ps) + legend(d, ps) +
       nums([['Asking', '<b>' + money(x) + '</b>'], ['Recent range', span(d, money)], showMed(d) ? ['Median', money(d.med)] : null, ['Flat type', esc(H.ft) + ' <small>(' + where + ')</small>'], ['Sales', H.n + ' resales · last 2 years']]) };
   }
+  // ---- rents (25 Oct 2026): an asking monthly rent against the actual rents of the same kind of home, each one a dot ----
+  const RENT_MIN = 300, RENT_MAX = 100000;
+  function rentIssue(v) {
+    const t = String(v == null ? '' : v).trim(); if (!t) return '';
+    const x = amount(t);
+    if (isNaN(x)) return 'Type the monthly rent in dollars, e.g. 3,500.';
+    if (x < RENT_MIN) return 'That looks too low for a monthly rent: type the full amount in dollars, e.g. 3,500.';
+    if (x > RENT_MAX) return 'That’s more than $100,000 a month: check the asking rent.';
+    return '';
+  }
+  const qq = (s, p) => { const i = (s.length - 1) * p, lo = Math.floor(i), hi = Math.ceil(i); return s[lo] + (s[hi] - s[lo]) * (i - lo); };
+  // a summary [min, q1, median, q3, max] of n rentals (Rental Research V1 publishes summaries only, so there are no dots)
+  const rentD = (r, n) => ({ lo: r[0], q1: r[1], med: r[2], q3: r[3], hi: r[4], n, exact: true });
+  const bandText = (b) => num(b.lo) + '–' + num(b.hi) + ' sq ft';
+  const bedText = (n) => (Number(n) === 0 ? 'studio' : n + '-bedroom');
+  // R: { name, types: [{ beds, bands: [{ lo, hi, n, r: [min, q1, median, q3, max] }] }] } (gw-rent.js checkData); only bands of 10+ contracts are ever offered
+  function rentBand(R, beds, band) { const t = (R.types || []).find((x) => String(x.beds) === String(beds)); return t ? t.bands.find((b) => String(b.lo) === String(band)) || null : null; }
+  function rentResult(R, beds, band, price) {
+    const b = rentBand(R, beds, band), x = amount(price), ri = rentIssue(price);
+    if (!b) return { state: 'input', html: '<p class="gw-fine">Choose the bedrooms and size, then type the asking rent.</p>' };
+    if (ri) return { state: 'input', html: warn(ri) };
+    if (!(x >= RENT_MIN)) return { state: 'input', html: '<p class="gw-fine">Now type the asking monthly rent.</p>' };
+    const d = rentD(b.r, b.n), what = d.n + ' rental contracts for ' + bedText(beds) + ' homes of ' + bandText(b) + ' here in the last 12 months', pos = place(x, d);
+    return { state: 'ok', pos, verdict: verdict(pos), dots: 0, html: verdictHtml(x, d, money, pos, what, VRENT, 'rent') + rangeSvg(x, d, money, 'Asking ' + money(x) + ' a month against ' + what) + legend(d, null, '', 'Asking rent') +
+      nums([['Asking', '<b>' + money(x) + '</b> a month'], ['Recent range', span(d, money)], ['Median', money(d.med)], ['Home', esc(bedText(beds)) + ', ' + esc(bandText(b))], ['Contracts', d.n + ' · last 12 months']]) };
+  }
+  // H: { r: [min, q1, median, q3, max], n, level, ft, whereLv } (gw-rent.js hdbLevels: the first level with 10+ rentals)
+  function hdbRentResult(H, price) {
+    const x = amount(price), ri = rentIssue(price);
+    if (ri) return { state: 'input', html: warn(ri) };
+    if (!(x >= RENT_MIN)) return { state: 'input', html: '<p class="gw-fine">Type the asking monthly rent.</p>' };
+    if (!H || !Array.isArray(H.r) || !(H.n >= 10)) return { state: 'thin', html: '<p class="gw-ask-say">Too few rentals here to judge an asking rent against.</p>' };
+    const d = rentD(H.r, H.n), what = d.n + ' HDB-approved ' + H.ft + ' rentals ' + H.whereLv + ' in the last 12 months', pos = place(x, d);
+    return { state: 'ok', pos, verdict: verdict(pos), dots: 0, html: verdictHtml(x, d, money, pos, what, VRENT, 'rent') + rangeSvg(x, d, money, 'Asking ' + money(x) + ' a month against ' + what) + legend(d, null, '', 'Asking rent') +
+      nums([['Asking', '<b>' + money(x) + '</b> a month'], ['Recent range', span(d, money)], ['Median', money(d.med)], ['Flat type', esc(H.ft) + ' <small>(' + esc(H.whereLv) + ')</small>'], ['Rentals', d.n + ' · last 12 months']]) };
+  }
+  const rentMsg = (R, beds, band, price) => { const b = rentBand(R, beds, band); return 'Hi Ken, I’m looking at renting a ' + bedText(beds) + ' home' + (b ? ' of about ' + bandText(b) : '') + ' at ' + R.name + ' with an asking rent of ' + money(amount(price)) + ' a month. I’ve checked it against recent rental contracts on Groundwork. Could I get your view on it?'; };
+  const hdbRentMsg = (H, price) => 'Hi Ken, I’m looking at renting a ' + H.ft + ' HDB flat' + (H.where ? ' at ' + H.where : '') + ' with an asking rent of ' + money(amount(price)) + ' a month. I’ve checked it against recent HDB rentals on Groundwork. Could I get your view on it?';
   const hdbMsg = (H, price) => 'Hi Ken, I’m looking at a ' + H.ft + ' HDB flat at ' + H.where + ' with an asking price of ' + money(amount(price)) + '. I’ve checked it against recent resales on Groundwork. Could I get your view on it?';
 
   /* ---------------- markup ---------------- */
@@ -181,28 +224,38 @@
   // Audit V3-12: the block or street (data.where) is needed only for the optional WhatsApp message, so it stays inside this script
   // and is not written into the page's markup; the attribute holds only what the price check uses.
   const KEEP = {}; let refN = 0;
+  const RENT_NOTE = { rent: 'Contracted rents are a guide, not a valuation. Floor, facing, furnishing and condition may affect rent.', hdbrent: 'Declared rents are a guide, not a valuation. Floor, condition and furnishing may affect rent.' };
+  const opts = (list, v) => list.map((o) => '<option value="' + esc(o[0]) + '"' + (String(o[0]) === String(v) ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('');
+  // the size offered first is the one most of these homes were let at (the visitor can change it)
+  const sizeOpts = (R, beds) => { const t = (R.types || []).find((x) => String(x.beds) === String(beds)); if (!t) return ''; const top = t.bands.reduce((a, b) => (b.n > a.n ? b : a)); return opts(t.bands.map((b) => [b.lo, bandText(b) + ' · ' + b.n + ' contracts']), top.lo); };
   function panelHtml(kind, data, o) {
     o = o || {};
-    const pub = Object.assign({}, data), ref = 'a' + (++refN);
+    const pub = Object.assign({}, data), ref = 'a' + (++refN), rent = kind === 'rent' || kind === 'hdbrent';
     if (pub.where !== undefined) { KEEP[ref] = { where: pub.where }; delete pub.where; }
-    return '<section class="gw-apc" data-gw-ask="' + kind + '"' + (o.id ? ' id="' + o.id + '"' : '') + (o.hidden ? ' hidden' : '') + ' aria-label="Check an asking price" data-ask="' + esc(JSON.stringify(pub)) + '" data-ask-ref="' + ref + '">' +
+    const first = kind === 'rent' && pub.types && pub.types[0] ? pub.types[0].beds : '';
+    const inputs = kind === 'condo' ? field('size', 'Size', '', 'sq ft', 'e.g. 753') + field('price', 'Asking price', '$', '', 'e.g. 1,780,000')
+      : kind === 'rent' ? '<label class="gw-fld"><span>Bedrooms</span><select data-ask-beds>' + opts(pub.types.map((t) => [t.beds, Number(t.beds) === 0 ? 'Studio' : t.beds + '-bedroom']), first) + '</select></label>' +
+        '<label class="gw-fld"><span>Size</span><select data-ask-band>' + sizeOpts(pub, first) + '</select></label>' + field('price', 'Asking rent', '$', 'a month', 'e.g. 3,500')
+      : kind === 'hdbrent' ? field('price', 'Asking rent', '$', 'a month', 'e.g. 3,200') : field('price', 'Asking price', '$', '', 'e.g. 680,000');
+    return '<section class="gw-apc" data-gw-ask="' + kind + '"' + (o.id ? ' id="' + o.id + '"' : '') + (o.hidden ? ' hidden' : '') + ' aria-label="' + (rent ? 'Check an asking rent' : 'Check an asking price') + '" data-ask="' + esc(JSON.stringify(pub)) + '" data-ask-ref="' + ref + '">' +
       '<div class="gw-ask-top"><h2 class="gw-ask-t">' + esc(o.title || 'Check an asking price') + '</h2>' + (o.sub ? '<p class="gw-fine">' + esc(o.sub) + '</p>' : '') + '</div>' +
-      '<div class="gw-ask-f">' + (kind === 'condo' ? field('size', 'Size', '', 'sq ft', 'e.g. 753') : '') + field('price', 'Asking price', '$', '', kind === 'condo' ? 'e.g. 1,780,000' : 'e.g. 680,000') + '</div>' +
-      '<div class="gw-ask-out" data-ask-out aria-live="polite"><p class="gw-fine">' + (kind === 'condo' ? 'Type the size and price from the listing.' : 'Type the asking price.') + '</p></div>' +
-      '<p class="gw-ask-q">' + NOTE + '</p>' +
-      '<div class="gw-ask-ken" data-ask-ken hidden><button type="button" class="gw-btn wa" data-ask-wa>Ask Ken about this price</button><p class="gw-fine">Opens WhatsApp with the ' + (kind === 'condo' ? 'development, size' : 'flat') + ' and price, to edit before sending. Your figures never go into the page address or analytics.</p></div></section>';
+      '<div class="gw-ask-f' + (kind === 'rent' ? ' gw-ask-f3' : '') + '">' + inputs + '</div>' +
+      '<div class="gw-ask-out" data-ask-out aria-live="polite"><p class="gw-fine">' + (kind === 'condo' ? 'Type the size and price from the listing.' : rent ? 'Type the asking monthly rent.' : 'Type the asking price.') + '</p></div>' +
+      '<p class="gw-ask-q">' + (RENT_NOTE[kind] || NOTE) + '</p>' +
+      '<div class="gw-ask-ken" data-ask-ken hidden><button type="button" class="gw-btn wa" data-ask-wa>Ask Ken about this ' + (rent ? 'rent' : 'price') + '</button><p class="gw-fine">Opens WhatsApp with the ' + (kind === 'condo' ? 'development, size' : kind === 'rent' ? 'development, home' : 'flat') + ' and ' + (rent ? 'rent' : 'price') + ', to edit before sending. Your figures never go into the page address or analytics.</p></div></section>';
   }
 
   /* ---------------- browser behaviour (delegated, so it works on pages that redraw) ---------------- */
   function compute(sec) {
     let A = {}; try { A = JSON.parse(sec.dataset.ask || '{}'); } catch (e) { A = {}; }
     A = Object.assign(A, KEEP[sec.dataset.askRef] || {});
-    const kind = sec.dataset.gwAsk, size = sec.querySelector('[data-ask-size]'), price = sec.querySelector('[data-ask-price]');
-    const r = kind === 'condo' ? condoResult(A, size && size.value, price && price.value) : hdbResult(A, price && price.value);
+    const kind = sec.dataset.gwAsk, size = sec.querySelector('[data-ask-size]'), price = sec.querySelector('[data-ask-price]'), beds = sec.querySelector('[data-ask-beds]'), band = sec.querySelector('[data-ask-band]');
+    const r = kind === 'condo' ? condoResult(A, size && size.value, price && price.value) : kind === 'rent' ? rentResult(A, beds && beds.value, band && band.value, price && price.value)
+      : kind === 'hdbrent' ? hdbRentResult(A, price && price.value) : hdbResult(A, price && price.value);
     sec.querySelector('[data-ask-out]').innerHTML = r.html;
     const k = sec.querySelector('[data-ask-ken]'); if (k) k.hidden = r.state === 'input';
     if (r.state !== 'input' && !sec.__tracked) { sec.__tracked = true; const K = root.KPT; try { if (K && K.track) K.track('tool_completed', { tool_name: 'asking-price-' + kind }); } catch (e) { /* analytics unavailable */ } }
-    return { A, kind, size, price };
+    return { A, kind, size, price, beds, band };
   }
   if (typeof document !== 'undefined') {
     // 25 Oct 2026: the asking price takes its thousands commas as it is typed (1,780,000), keeping the cursor where it was.
@@ -217,15 +270,21 @@
       try { t.setSelectionRange(i, i); } catch (x) { /* not focusable */ }
     }
     document.addEventListener('input', (e) => { const t = e.target; if (!t.matches || !t.matches('[data-ask-size],[data-ask-price]')) return; if (t.matches('[data-ask-price]')) commas(t); const sec = t.closest('[data-gw-ask]'); if (sec) compute(sec); });
+    // the rent check's bedrooms choose which size bands are offered (only bands of 10+ contracts for those bedrooms)
+    document.addEventListener('change', (e) => {
+      const t = e.target; if (!t.matches || !t.matches('[data-ask-beds],[data-ask-band]')) return; const sec = t.closest('[data-gw-ask]'); if (!sec) return;
+      if (t.matches('[data-ask-beds]')) { let A = {}; try { A = JSON.parse(sec.dataset.ask || '{}'); } catch (x) { A = {}; } const b = sec.querySelector('[data-ask-band]'); if (b) b.innerHTML = sizeOpts(A, t.value); }
+      compute(sec);
+    });
     document.addEventListener('focusout', (e) => { const t = e.target; if (!t.matches || !t.matches('[data-ask-price]')) return; const v = amount(t.value); if (v > 0) t.value = num(v); });
     document.addEventListener('click', (e) => {
       const b = e.target.closest && e.target.closest('[data-ask-wa]'); if (!b) return;
-      const sec = b.closest('[data-gw-ask]'), c = compute(sec), msg = c.kind === 'condo' ? condoMsg(c.A, c.size.value, c.price.value) : hdbMsg(c.A, c.price.value);
+      const sec = b.closest('[data-gw-ask]'), c = compute(sec), msg = c.kind === 'condo' ? condoMsg(c.A, c.size.value, c.price.value) : c.kind === 'rent' ? rentMsg(c.A, c.beds.value, c.band.value, c.price.value) : c.kind === 'hdbrent' ? hdbRentMsg(c.A, c.price.value) : hdbMsg(c.A, c.price.value);
       try { if (root.KPT && root.KPT.track) root.KPT.track('whatsapp_click', { tool_name: 'asking-price-' + c.kind, context: 'asking-price' }); } catch (x) { /* analytics unavailable */ }
       const tagged = root.KPT && root.KPT.waTag ? root.KPT.waTag(msg) : msg; // R2.4: the page's reference at the end (no figures)
       let w = null; try { w = root.open(waUrl(tagged), '_blank'); } catch (x) { w = null; }
       if (w) { try { w.opener = null; } catch (x) { /* ignore */ } } else root.location.href = 'https://wa.me/6590908898'; // blocked pop-up: the chat opens without the prepared figures
     });
   }
-  return { edgeNote, amount, place, verdict, VTEXT, gapText, median, sentence, rangeSvg, condoBand, condoResult, hdbResult, condoMsg, hdbMsg, panelHtml, NOTE, MID_MIN, MIN_SALES, MIN_MONTHS };
+  return { edgeNote, amount, place, verdict, VTEXT, VRENT, gapText, median, sentence, rangeSvg, condoBand, condoResult, hdbResult, rentResult, hdbRentResult, rentMsg, hdbRentMsg, condoMsg, hdbMsg, panelHtml, NOTE, RENT_NOTE, MID_MIN, MIN_SALES, MIN_MONTHS };
 });

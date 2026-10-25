@@ -127,7 +127,7 @@ try:
 
         print('\n== 5. Sparse and no-sales cases,', vn)
         for kind in ('street', 'thin'):
-            c = SP[kind]; ctx, pg, errs = fresh(br, kw); hdbpage(pg, hashof(c)); result(pg); o = pg.inner_text('[data-hv-out]')
+            c = SP[kind]; ctx, pg, errs = fresh(br, kw); hdbpage(pg, hashof(c)); result(pg); o = pg.evaluate("(() => { const r = document.querySelector('[data-hv-out] .gw-vx-res'), h = Array.from(r.querySelectorAll('.gw-hr')); h.forEach((x) => { x.style.display = 'none'; }); const t = r.innerText; h.forEach((x) => { x.style.display = ''; }); return t; })()")   # the resale part (25 Oct 2026: the rents block sits inside it, after the asking-price check)
             if kind == 'street': check(vn + ': a block with a single resale uses the street, and says so (' + c['street'] + ' ' + c['block'] + ')', re.search(r'Only 1 in this block|None in this block', o) is not None and 'on ' in o, o[:300])
             else: check(vn + ': too few resales: no range and no summary (' + c['street'] + ' ' + c['block'] + ')', 'The middle' not in o and re.search(r'too few|few', o) is not None, o[:300])
             check(vn + ': no price appears that is not a recorded sale', len(money(o)) <= 40); ctx.close()
@@ -215,7 +215,7 @@ try:
         print('\n== 10. Existing Jadescape and Serra journeys,', vn)
         ctx, pg, errs = fresh(br, kw); pg.goto(B + '/research/#/p/jadescape'); pg.wait_for_function("document.querySelector('h1') && document.querySelector('h1').innerText.includes('Jadescape')", timeout=20000)
         check(vn + ': Jadescape research opens as before', 'Jadescape' in pg.inner_text('h1') and not errs, errs[:2]); ctx.close()
-        ctx, pg, errs = fresh(br, kw); open_map(pg, '#p=jadescape&r=1000'); pg.wait_for_selector('.dp h2, .bs h2'); check(vn + ': Jadescape on the Map keeps its panel and nearby comparison', 'Jadescape' in pg.inner_text('.dp, .bs') and 'Open full analysis' in pg.inner_text('.dp, .bs'));
+        ctx, pg, errs = fresh(br, kw); open_map(pg, '#p=jadescape&r=1000'); pg.wait_for_selector('.dp h2, .bs h2'); check(vn + ': Jadescape on the Map keeps its panel and nearby comparison', 'Jadescape' in pg.inner_text('.dp, .bs') and 'View Full Research' in pg.inner_text('.dp, .bs'));
         layer(pg, 'hdb', True); pg.wait_for_function("document.querySelectorAll('path.leaflet-interactive[fill=\"#D9822B\"]').length > 0"); check(vn + ': the HDB layer can be added around a private development without losing its panel', 'Jadescape' in pg.inner_text('.dp, .bs')); ctx.close()
         ctx, pg, errs = fresh(br, kw); open_map(pg, '#p=the-serra-residences'); pg.wait_for_selector('.dp h2, .bs h2'); check(vn + ': Serra (a new launch) keeps its panel, with no price', 'Serra' in pg.inner_text('.dp, .bs') and not re.search(r'\$\d', pg.inner_text('.dp, .bs'))); ctx.close()
         ctx, pg, errs = fresh(br, kw); home(pg); pg.fill('#q', 'Serra'); pg.wait_for_selector('#res button'); check(vn + ': Serra is found from Research\'s first search', 'Serra' in pg.inner_text('#res')); ctx.close()
