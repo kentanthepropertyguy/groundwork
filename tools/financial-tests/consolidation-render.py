@@ -66,7 +66,7 @@ try:
         check(vn + ': nothing personal in the address', '?' not in pg.url.replace('?j=1', '') and 'price' not in pg.url and 'income' not in pg.url, pg.url)
         check(vn + ': no sideways scroll on the Planner with the strip', pg.evaluate('document.documentElement.scrollWidth <= innerWidth'))
         # ---- 3. the Timeline's instalment warning
-        base = [('cash', '125,000'), ('cpf', '330,000'), ('income', '21,000'), ('age', '35'), ('ratePct', '3'), ('years', '30')]
+        base = [('cash', '125,000'), ('cpf', '330,000'), ('borrowers.0.fixed', '21,000'), ('borrowers.0.age', '35'), ('ratePct', '3'), ('years', '30')]
         c, t, m = timeline(pg, 'completed', base)
         check(vn + ': payments covered and no monthly amount entered: no shortfall warning', 'ok' in c and 'Every payment is covered' in t and 'short on the monthly instalment' not in t, t[:160])
         check(vn + ': ... the monthly mortgage is named as not tested, with its amount and start, and how to test it', re.search(r'monthly mortgage \(about \$[\d,]+ a month from \d+ \w+ \d{4}\) is not tested here', t) is not None and 'enter what you set aside each month' in t, t[:300])
@@ -75,7 +75,7 @@ try:
         check(vn + ': with $500 a month entered and still short, the instalment warning stands', 'warn' in c and 'short on the monthly instalment from' in t, t[:160])
         c, t, m = timeline(pg, 'completed', base + [('saveMo', '8,000')])
         check(vn + ': with $8,000 a month entered everything is covered, said with the amount', 'ok' in c and '$8,000 cash going in each month' in t and 'not tested' not in t, t[:160])
-        c, t, m = timeline(pg, 'completed', [('cash', '20,000'), ('cpf', '30,000'), ('income', '21,000'), ('age', '35'), ('ratePct', '3'), ('years', '30')])
+        c, t, m = timeline(pg, 'completed', [('cash', '20,000'), ('cpf', '30,000'), ('borrowers.0.fixed', '21,000'), ('borrowers.0.age', '35'), ('ratePct', '3'), ('years', '30')])
         check(vn + ': a genuine payment shortfall still warns, with the total and the first short payment', 'warn' in c and 'not covered in total' in t and 'Short on' in t, t[:160])
         c, t, m = timeline(pg, 'new', base)
         check(vn + ': a new launch with no monthly amount: payments covered, mortgage not tested (no alarm)', 'ok' in c and 'is not tested here' in t, t[:160])

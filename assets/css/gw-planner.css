@@ -614,3 +614,54 @@ table.pl-evs{display:table;width:100%;border-collapse:collapse;font-size:14px;fo
 .pl-sf .pl-adj{display:block;margin-top:10px;padding:9px 11px;border:1px solid #E5C77A;border-left-width:4px;border-radius:6px;background:#FFF8E6;color:#5C3A00;font-size:14px;line-height:1.45}
 .pl-sf .pl-adj b{color:#3F2800;font-variant-numeric:tabular-nums}
 .pl-sumtop-1 .pl-sf-w .v small{display:inline;margin:0 0 0 2px}
+/* ---- FE V2 (25 Oct 2026): borrower profiles, grouped payments, what to prepare, scenario comparison ---- */
+.pl-bors{display:grid;gap:12px}
+.pl-bor{border:1px solid var(--gw-line);border-radius:12px;padding:12px 14px 4px;background:#FBFCFD}.pl-bor[hidden]{display:none}
+.pl-bor-h{margin:0 0 6px;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--gw-muted)}
+.pl-bor-g{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:1099px){.pl-bor-g{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.pl-bor-g>:first-child{grid-column:1/-1;max-width:220px}}
+@media (max-width:520px){.pl-bor-g{grid-template-columns:minmax(0,1fr)}.pl-bor-g>:first-child{max-width:none}}
+.pl-joint{margin:2px 0 0;font-size:13.5px;line-height:1.5;color:var(--gw-body)}.pl-joint:empty{display:none}.pl-joint b{color:var(--gw-ink)}
+.pl-joint .pl-unv{display:block;margin-top:4px;color:#6B4400}
+.pl-add2{font-weight:600}
+.pl-sale-undec{margin:6px 0 0}
+/* grouped payment lists: a quiet header row per part (upfront, construction, completion) */
+.pl-jr tr.pl-jsec>*{padding:16px 10px 6px;border-top:0;background:none;text-align:left}
+.pl-jr tbody tr.pl-jsec:first-child>*{padding-top:8px}
+.pl-jr tr.pl-jsec b{display:block;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gw-ink)}
+.pl-jr tr.pl-jsec small{display:block;font-size:12.5px;font-weight:400;color:var(--gw-muted);margin-top:1px}
+.pl-jr tr.pl-jsec td.pl-jsec-a{vertical-align:bottom;text-align:right;font-size:14px;font-weight:700;color:var(--gw-ink);white-space:nowrap}
+.pl-jr tr.pl-jsec+tr>*{border-top:0}
+@media (max-width:759px){
+  .pl-jr tr.pl-jsec{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;padding:16px 6px 4px;border-top:0}
+  .pl-jr tr.pl-jsec>*{display:block;padding:0}
+  .pl-jr tbody tr.pl-jsec:first-child{padding-top:4px}
+  .pl-jr td.mo::before{content:"Mortgage after"}
+}
+.pl-sumbox>.pl-sf-next{padding-top:0;border-top:0}
+/* what you need to prepare */
+.pl-prep{margin:22px 0 0}
+.pl-prep .pl-jr-h{margin-top:0}
+.pl-prep-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));border:1px solid var(--gw-line);border-radius:14px;overflow:hidden;background:#fff}
+.pl-prep-g .pl-sf{border-left:1px solid var(--gw-line);margin-left:-1px}
+.pl-prep-g .pl-sf .v{font-size:21px}
+.pl-prep-g .pl-sf.bad{background:#FFF8E8}.pl-prep-g .pl-sf.bad .v{color:#8A5200}
+.pl-prep>.gw-fine{margin:6px 0 0}
+@media (max-width:520px){.pl-prep-g{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.pl-prep-g .pl-sf{border-top:1px solid var(--gw-line);margin-top:-1px}.pl-prep-g .pl-sf .v{font-size:19px}}
+/* an informational status line (neither a pass nor a warning) */
+.pl-st.info{background:#F3F6FA;border-color:#D9E1EC;color:var(--gw-ink)}.pl-st.info .pl-ic{background:#5B6B80}
+/* compare another scenario */
+.pl-scn{margin-top:14px}.pl-scn[hidden]{display:none}
+.pl-scn-f{grid-template-columns:repeat(2,minmax(0,1fr));max-width:460px}
+.pl-scn .gw-chips{flex-wrap:wrap}
+.pl-scn-out:empty{display:none}
+.pl-scn-t{margin-top:10px}
+.pl-scn-t .pl-crow.chg b:last-child{color:#0B5CAD}
+.pl-scn-t .pl-crow.bad b:last-child{color:#8A5200}
+#pl-scn-n:empty{display:none}#pl-scn-n{color:#8A5200}
+@media print{.pl-scn{display:none}}
+.pl-prep+.pl-jr-h{margin-top:26px}
+.pl-note.pl-keep.pl-keep-in{background:#F3F6FA;border-color:#D9E1EC;color:var(--gw-ink)}
+@media (max-width:520px){.pl-prep-g .pl-sf.bad{grid-column:1/-1}}
+.pl-grp[data-sheet="sale"] [data-when="order:buy,sell"],.pl-grp[data-sheet="sale"] [data-when="order:buy"],.pl-grp[data-sheet="sale"] [data-when="saleCount:1"]{display:flex;flex-direction:column;gap:14px}
+.pl-grp[data-sheet="sale"] [data-when][hidden]{display:none}

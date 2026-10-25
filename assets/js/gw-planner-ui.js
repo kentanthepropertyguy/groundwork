@@ -135,45 +135,57 @@
       '<div class="pl-cpf2" data-when="cpf2:1"><p class="gw-fine">' + CPF2_TXT + '</p>' + chips('cover95', 'Will one of your homes last until you are 95?', [['yes', 'Yes'], ['no', 'No'], ['unsure', 'Not sure']], { value: '', hint: 'Compare each home’s remaining lease with 95 less your age. Not sure: the Full Retirement Sum is used.' }) +
       grid(money('cpfBal.0.oa', 'First buyer’s OA balance', { ph: 'from the CPF statement' }) + money('cpfBal.0.sa', 'First buyer’s SA or RA balance', { ph: 'type 0 if none' })) +
       '<div data-when="two:1">' + grid(money('cpfBal.1.oa', 'Second buyer’s OA balance') + money('cpfBal.1.sa', 'Second buyer’s SA or RA balance', { ph: 'type 0 if none' })) + '</div><p class="gw-fine" data-cpf2-out aria-live="polite"></p></div>');
-    const loanG = grp('buyers', 'You and your loan',
-      '<div data-when="entity:0">' + money('income', 'Monthly fixed income, both borrowers', { ph: 'salary, gross, before CPF', hint: 'Fixed pay before CPF, for everyone buying. Type 0 if none: no bank loan is assumed.', help: 'It sets the loan a bank could lend, and checks a new EC against the household income ceiling. Stays on this device.' }) +
-      grid(numf('age', 'Borrower’s age', 'years', { share: 'borrowers.0.age', ph: 'e.g. 35', hint: 'Two borrowers: use their income-weighted average age.', help: 'How much can I borrow? works it out and shows both ways of weighting it. The age sets the loan limit together with the tenure. Which income MAS weights by is not confirmed, so results for two borrowers are unverified.' })) + '</div>' +
+    // FE V2 (25 Oct 2026): one profile per borrower (age, fixed and variable income), the same fields and shared keys as What can I afford? and the TDSR calculator.
+    // With two buyers, who takes the loan is asked: only the borrowers' income, age and debts size it; every buyer still counts for stamp duty.
+    const person = (n) => '<div class="pl-bor" data-when="bor' + n + ':1"><p class="pl-bor-h"><span data-when="two:0">Borrower</span><span data-when="two:1">' + (n ? 'Second buyer' : 'First buyer') + '</span></p>' +
+      '<div class="gw-grid pl-bor-g">' + numf('borrowers.' + n + '.age', 'Age', 'years', { share: 'borrowers.' + n + '.age', ph: 'e.g. 35' }) +
+      money('borrowers.' + n + '.fixed', 'Fixed monthly income', { share: 'borrowers.' + n + '.fixed', ph: 'gross, before CPF', hint: 'Salary before CPF. Type 0 if none.' }) +
+      money('borrowers.' + n + '.variable', 'Variable monthly income', { opt: true, share: 'borrowers.' + n + '.variable', ph: 'bonus, commission', hint: 'Yearly total ÷ 12. Banks count 70% of it.' }) + '</div></div>';
+    const loanG = grp('buyers', 'Borrowers and loan',
+      '<div data-when="entity:0">' +
+      '<div data-when="two:1">' + chips('loanWho', 'Who will take the bank loan?', [['both', 'Both buyers'], ['0', 'First buyer only'], ['1', 'Second buyer only']], { value: 'both', hint: 'Only the borrowers’ income, age and debts count for the loan. Every buyer still counts for stamp duty.', help: 'Banks usually need every owner to sign the loan, as a borrower or a guarantor. Check with your bank before planning on one borrower.' }) + '</div>' +
+      '<div class="pl-bors">' + person(0) + person(1) + '</div>' +
+      '<p class="pl-joint" data-joint aria-live="polite"></p>' +
+      '<div data-when="two:0"><button type="button" class="gw-link gw-add pl-add2" data-add-buyer>+ Buying with someone? Add a second buyer</button></div>' +
+      money('debts', 'Other monthly loan repayments', { opt: true, ph: 'car, cards, other loans', hint: 'All borrowers together. Leave out the home you are selling: buying first, its instalment is asked with the sale.' }) + '</div>' +
       grid(numf('ratePct', 'Interest rate you expect', '% a year', { value: '4', hint: 'Sets your monthly mortgage. Banks test eligibility at 4% or higher.' }) + numf('years', 'Loan tenure', 'years', { opt: true, ph: 'longest standard', hint: '<span data-tenure-note>Banks can lend for up to 35 years and usually end a loan by age 75 (lender policy, not a MAS rule). Over 30 years, or past age 65, the lower loan limit applies. Enter your age to see where that line falls.</span>' })) +
       money('prefLoan', 'How much would you like to borrow?', { opt: true, ph: 'blank = maximum estimated loan', hint: 'Leave blank to use the maximum estimated loan.', help: 'Type an amount to borrow less. A smaller loan means more cash and CPF now and a smaller instalment. An amount above the estimated limit is not used: the result shows the limit that applies.' }) +
       '<div data-when="kind:ec">' + chips('tender', 'When did the EC site’s land tender close?', [['unsure', 'Not sure'], ['before', 'Before 24 Aug 2026'], ['after', 'On or after 24 Aug 2026']], { value: 'unsure', hint: 'It sets the household income ceiling for a new EC. A balance unit in an older EC project keeps the lower ceiling, so choose “Before 24 Aug 2026” for it.', help: 'The ceiling is $16,000 a month if the tender closed before 24 Aug 2026, $18,000 if on or after. The developer or HDB can tell you.' }) +
         '<div class="gw-chips" data-k="ecIllus" data-t="chip" data-default="" hidden style="display:none" aria-hidden="true"><button type="button" class="gw-chip" data-v="yes" aria-pressed="false" tabindex="-1">yes</button></div></div>' +
       '<div data-when="kind:resaleec">' + chips('mop', 'Has the EC’s minimum occupation period (MOP) ended?', [['unsure', 'Not sure'], ['ended', 'Yes, it has ended'], ['within', 'No, still within it']], { value: 'unsure', hint: 'If you are not sure, the planner marks the financing as incomplete rather than guessing.', help: 'It decides which income limits the bank applies to the loan. The owner’s agent or HDB can tell you.' }) + '</div>' +
-      '<div data-when="own:1">' + chips('loansOther', 'Housing loans on the homes you will keep', [['0', 'None'], ['1', 'One'], ['2', 'Two or more']], { value: '', hint: 'Besides the home you are selling. HDB loans count.', help: 'A home you own outright has no loan, so choose None.' }) + '</div>' +
+      '<div data-when="own:1">' + chips('loansOther', 'Housing loans the borrowers still owe on homes they keep', [['0', 'None'], ['1', 'One'], ['2', 'Two or more']], { value: '', hint: 'Besides the home you are selling. HDB loans count. Borrowing together: count the borrower with the most loans.', help: 'A home owned outright has no loan, so choose None. With two borrowers the bank applies the loan limit of the more restricted borrower, the one with more housing loans.' }) + '</div>' +
       '<div data-when="msr:1">' + money('propertyLoans', 'Monthly housing-loan instalments', { opt: true, ph: 'loans you will still have', hint: 'For a new EC, the bank counts every housing-loan instalment you will still have.', help: 'Leave out the home you are selling first: buying first, its instalment is asked with the sale and counted from there.' }) + '</div>');
     const moreG =
-      '<details class="pl-adv pl-loanmore pl-moreopts" data-loanmore><summary>More options <em data-loan-em>monthly savings, CPF top-ups, other income and debts</em></summary><div class="pl-adv-b">' +
+      '<details class="pl-adv pl-loanmore pl-moreopts" data-loanmore><summary>More options <em data-loan-em>monthly savings and CPF top-ups</em></summary><div class="pl-adv-b">' +
         grid(money('saveMo', 'Cash set aside each month', { opt: true, ph: 'e.g. 3,000' }) + '<div data-when="entity:0">' + money('cpfMo', 'CPF OA added each month', { opt: true, ph: 'all buyers', hint: 'Your monthly OA contributions. Not worked out from your income.' }) + '</div>') +
         '<div data-when="entity:0">' + check('payInstalmentFromCpf', 'Pay monthly instalments from CPF OA first, then cash', { checked: true }) + '</div>' +
-        '<div data-when="entity:0">' + money('varIncome', 'Monthly variable income, both borrowers', { opt: true, ph: 'bonus, commission, allowances', hint: 'Bonus, commission and allowances, as a monthly average over the last 12 months (a yearly total ÷ 12). Banks count only 70% of it. Type 0 if none; leave it blank and all the income above is treated as fixed salary.' }) +
-        money('debts', 'Other monthly debt repayments', { opt: true, ph: 'car, cards, other loans', hint: 'Car, card and other loan repayments, and the instalment on any housing loan you will still have, reduce the loan your income supports. Leave out the home you are selling: buying first, its instalment is asked with the sale.' }) + '</div>' +
       '</div></details>';
     const sale = grp('sale', 'A home to sell',
       chips('order', 'Do you have a home to sell?', [['buy', 'Buy first, then sell'], ['sell', 'Sell first, then buy'], ['none', 'Nothing to sell']], { value: '', hint: 'Choose one. Nothing is assumed.' }) +
       '<div data-when="order:buy,sell">' +
+      // FE V2: when the sale completes (buy first). Sale money is counted only from that date; "not decided" needs no sale figures at all.
+      '<div data-when="order:buy">' + chips('saleWhen', 'When do you expect the sale to complete?', [['date', '<span data-when="kind:new,ec">During construction</span><span data-when="kind:completed,resaleec,hdb">Around completion</span>'], ['afterKeys', '<span data-when="kind:new,ec">After TOP</span><span data-when="kind:completed,resaleec,hdb">After completion</span>'], ['unsure', 'Not decided yet']], { value: 'unsure', hint: 'Sale money is counted only from the date it arrives. Not decided: none is counted.', help: 'Not decided: no sale money is counted, and the home you are selling stays in the plan with its loan and instalment. Its ABSD refund is not counted either.' }) +
+      '<div data-when="saleWhen:date">' + grid(numf('saleMonth', 'Sale completes', 'months after the option', { value: '5', hint: 'Or enter the completion date.' }) + datef('saleDate', 'Completion date', { opt: true })) + '</div>' +
+      '<div data-when="saleWhen:afterKeys">' + grid(numf('saleAfterKeys', 'Sale completes', 'months after the keys', { value: '3', hint: 'Counted from TOP (a new launch or EC) or completion. Without the developer’s date, the planning estimate is used.' })) + '</div>' +
+      '<p class="gw-fine pl-sale-undec" data-when="saleWhen:unsure">No sale price is needed. No sale money is counted in this plan.</p></div>' +
       '<div data-when="twoown:1">' + chips('saleOwners', 'Who owns the home you are selling?', [['both', 'Both of you'], ['0', 'First buyer'], ['1', 'Second buyer']], { value: '', hint: 'It decides whose other homes still count for ABSD. Not answered: the cautious view (the higher ABSD).' }) + '</div>' +
-      chips('saleType', 'What are you selling?', [['hdb', 'HDB flat'], ['private', 'Private home']], { value: 'hdb' }) +
+      '<div data-when="saleCount:1">' + chips('saleType', 'What are you selling?', [['hdb', 'HDB flat'], ['private', 'Private home']], { value: 'hdb' }) +
       '<div data-when="saleType:private">' + chips('saleHeld', 'Have you owned it for more than 4 years?', [['yes', 'Yes'], ['no', 'No']], { value: '', hint: 'Selling within 4 years brings Seller’s Stamp Duty.', help: 'It depends on when you bought. If you have owned it for 4 years or less, use “Enter your own figures” below.' }) + '</div>' +
       grid(money('salePrice', 'Expected sale price', { ph: 'e.g. 600,000' }) + money('saleLoan', 'Loan left on it', { ph: 'type 0 if none' })) +
       money('saleRefund', 'CPF to be refunded, including accrued interest', { ph: 'from your CPF statement', hint: 'Leave it blank if you do not know yet. We do not estimate the interest, so the sale is not counted until you add it.' }) +
       check('saleOwner55', 'One of the owners is 55 or over (the CPF refund first goes to the Retirement Account)') +
       '<div data-when="saleOwner55:1">' + money('saleRefund55', 'Of the refund, the part for the owner aged 55 or over', { opt: true, hint: 'Their part goes to their Retirement Account first, so it is left out; the younger owner’s part is counted. Leave it blank and none of the refund is counted.' }) + '</div>' +
       '<details class="pl-adv" data-ovr><summary>Enter your own figures instead</summary><div class="pl-adv-b">' + grid(money('saleCash', 'Cash you expect from the sale') + money('saleCpf', 'CPF you expect back', { opt: true })) + money('saleCosts', 'Selling costs, agent fee and legal', { opt: true, hint: 'Replaces the usual estimate.' }) + '<p class="gw-fine">When you enter the cash and CPF yourself, we use those figures as they are.</p></div></details>' +
-      '<p class="gw-fine pl-sale-est" data-sale-est aria-live="polite"></p>' +
-      grid(numf('saleMonth', 'Sale completes', 'months after the option', { value: '5', hint: 'For buy-first: when the sale money arrives. Or enter the completion date below.' }) + datef('saleDate', 'Completion date', { opt: true })) +
+      '<p class="gw-fine pl-sale-est" data-sale-est aria-live="polite"></p></div>' +
       '<div data-when="order:buy">' + chips('flatLoan', 'Do you still owe a housing loan on the home you are selling?', FLAT, { value: '', hint: '“Not sure” is counted as owed, the cautious view.', help: 'A buy-first plan is tested by the bank while the loan is still owed.' }) +
       '<div data-when="flatowed:1">' + money('flatInstal', 'Monthly instalment on that loan', { ph: 'e.g. 1,500', hint: 'Paid every month until the sale completes, and counted by the bank while the loan is owed.' }) + '</div>' +
       '<details class="pl-adv" data-ovr><summary>Special cases (not confirmed)</summary><div class="pl-adv-b"><p class="gw-fine">MAS may leave the loan out when the sale is already contracted, or when you have signed an undertaking to HDB to sell. We have not confirmed these exclusions against the Notice, so we still count the loan as owed unless your bank confirms in writing.</p>' + chips('flatLoanSpecial', 'Special case', FLAT_SPECIAL, { value: '' }) + check('flatLoanAccepted', 'My bank has confirmed in writing that it will leave this loan out', {}) + '</div></details></div>' +
       check('removesOwnership', 'The sale removes a home I own (counts for ABSD)', { checked: true }) + '</div>', { when: 'ownany:1', sr: true });
     const refund = grp('refund', 'ABSD refund and interim housing',
-      '<div data-when="order:buy"><div class="gw-q gw-fld"><span class="l">ABSD refund</span>' + check('refundAssume', 'Assume the ABSD is refunded after the sale', {}) + '<small data-refund-elig></small></div>' +
+      '<div data-when="saleCount:1"><div data-when="order:buy"><div class="gw-q gw-fld"><span class="l">ABSD refund</span>' + check('refundAssume', 'Assume the ABSD is refunded after the sale', {}) + '<small data-refund-elig></small></div>' +
       grid(numf('refundMonths', 'Refund arrives', 'months after the sale', { value: '2', hint: 'An assumption: IRAS processes the refund after you apply; the planner never counts it before this date.' })) + '</div>' +
-      '<div data-when="order:sell">' + grid(money('rent', 'Interim rent per month', { opt: true, ph: 'while you wait for the keys', hint: 'Paid in cash from the option until the keys (TOP or completion).' })) + '</div>' +
-      '', { when: 'order:buy,sell' });
+      '</div><div data-when="order:sell">' + grid(money('rent', 'Interim rent per month', { opt: true, ph: 'while you wait for the keys', hint: 'Paid in cash from the option until the keys (TOP or completion).' })) + '</div>' +
+      '', { when: 'saleCount:1' });
     return { purchase, dates, money: moneyG, loan: loanG, more: moreG, sale, refund };
   }
   // every field, for callers (and tests) that want the whole set in one string
@@ -213,6 +225,13 @@
       '<div class="pl-sum" data-sum></div>' +
       '<div class="pl-journey" data-timeline></div>' +
       '<div class="pl-result" data-result aria-live="polite"></div>' +
+      // FE V2: an optional what-if, closed by default; it never changes the plan above
+      '<details class="pl-det pl-scn" data-scn hidden><summary><span>Compare another scenario</span><em>interest rate, tenure or when you sell</em></summary><div class="pl-more-in">' +
+      '<p class="gw-fine">Change one or more of these. Your plan above stays as it is.</p><div class="gw-grid pl-scn-f">' +
+      '<label class="gw-fld"><span>Interest rate</span><div class="gw-in"><input type="text" inputmode="decimal" autocomplete="off" data-sk="rate" aria-describedby="pl-scn-n"><i class="u">% a year</i></div></label>' +
+      '<label class="gw-fld"><span>Loan tenure</span><div class="gw-in"><input type="text" inputmode="decimal" autocomplete="off" data-sk="years" aria-describedby="pl-scn-n"><i class="u">years</i></div></label></div>' +
+      '<div class="gw-q gw-fld" data-scn-sale hidden><span class="l">When you sell</span><div class="gw-chips" role="group" aria-label="When you sell" data-sk="sale">' + [['', 'As in my plan'], ['sell', 'Sell first instead'], ['afterKeys', 'After the keys'], ['unsure', 'Not decided']].map((x) => '<button type="button" class="gw-chip" data-v="' + x[0] + '" aria-pressed="' + (x[0] === '') + '">' + x[1] + '</button>').join('') + '</div></div>' +
+      '<p class="gw-fine" id="pl-scn-n" data-scn-n aria-live="polite"></p><div class="pl-scn-out" data-scn-out aria-live="polite"></div></div></details>' +
       '<div class="pl-instal" data-instal></div>' +
       '<details class="pl-more" data-more data-tech hidden><summary><span>Show details</span><em data-more-em>your estimated bank loan</em></summary><div class="pl-more-in">' +
       '<div class="pl-detail" data-detail></div>' +
@@ -247,6 +266,7 @@
   }
   // above the result: the sale is not counted until its figures are in (the timeline then shows no sale money), or the sale does not cover the loan
   function saleNoteHtml(i) {
+    if (i && i.order === 'buy' && i.sale && i.sale.undecided) return '<div class="pl-st info pl-salenote" role="status"><span class="pl-st-t"><i class="pl-ic" aria-hidden="true">i</i><span><b>Sale date not decided.</b> No money from the sale is counted. The home you are selling stays in the plan: it still counts for the loan limit, and its instalment, if entered, carries on.</span></span></div>';
     if (!i || (i.order !== 'buy' && i.order !== 'sell') || !i.saleEst) return '';
     const e = i.saleEst;
     if (e.counted && e.cash >= 0) return '';
@@ -290,7 +310,7 @@
     const ltvWords = pc(L.ltv) + (L.cov > 0 ? ' of the bank valuation' : ' of the purchase price') + (L.lowerWhy === 'tenure' ? ' (tenure over 30 years)' : L.lowerWhy === 'age' ? ' (the loan would run past age 65)' : '');
     const limitWords = why === 'income' ? 'limited by your income' : why === 'mop' ? 'limited by the lower of two income limits' : why === 'zero' ? 'no income entered' : ltvWords;
     const t = (cls, k, val, sub) => '<div class="pl-sf' + (cls ? ' ' + cls : '') + '"><span class="k">' + k + '</span><span class="v">' + val + '</span><span class="s">' + sub + '</span></div>';
-    const joint = (v.buyers || []).length > 1 && grossOf(v) > 0 ? '<p class="pl-note">Two buyers: banks may use a different age. Check which one yours uses.</p>' : '';
+    const joint = v.bors && v.bors.length > 1 && v.joint && v.joint.ageUnverified && grossOf(v) > 0 ? '<p class="pl-note">Two borrowers with variable income: banks may weight your ages differently. The older age is used here; check which one your bank uses.</p>' : '';
     // three states, kept apart: the default maximum assumption, the buyer's own amount, and an amount held down by the lending limits (never swapped without saying so)
     let basis, adj = '';
     if (req === null) basis = why === 'zero' ? 'No bank loan assumed: no income entered' : used < 0.5 ? (limit < 0.5 ? 'No bank loan: the estimated limit is $0 on these figures' : 'No bank loan needed: your cash and CPF cover the payments') : 'Assumes maximum estimated loan · ' + limitWords;
@@ -315,15 +335,18 @@
     const parts = [d.bsd > 0 ? 'BSD <b>' + $(d.bsd) + '</b>' : '', d.absd > 0 ? 'ABSD <b>' + $(d.absd) + '</b>' + (d.absdRate > 0 ? ' (' + Math.round(d.absdRate * 100) + '%)' : '') : ''].filter(Boolean);
     return '<p class="pl-sf-then pl-sf-duty">Stamp duty ' + esc(onDay(s.duty.date)) + ': ' + parts.join(' and ') + (parts.length > 1 ? ', ' + $(d.total) + ' in all' : '') + '.</p>';
   }
+  // FE V2 (25 Oct 2026): the payments in three parts a buyer recognises: the upfront payments (option or booking fee, S&P or exercise, stamp duty),
+  // the construction stages, and the payments at TOP and completion. No grand total is shown anywhere (Ken, FE V2 brief).
+  const UP_IDS = ['otp', 'option', 'snp', 'exercise', 'bsd', 'absd'];
+  const secOf = (e) => (e.id === 'top' || e.id === 'csc' || e.id === 'completion' ? 'end' : UP_IDS.indexOf(e.id) >= 0 ? 'up' : 'build');
+  const SEC_T = (k, kind) => ({ up: 'Upfront payments', build: 'During construction', end: kind === 'completed' ? 'At completion' : 'At TOP and completion' }[k]);
+  const SEC_S = (k, kind) => ({ up: kind === 'completed' ? 'Option, exercise and stamp duty' : 'Booking fee, S&P and stamp duty', build: 'Called by the developer as building progresses', end: kind === 'completed' ? 'The balance, mostly from the bank loan if you take one' : 'Due at TOP and at the final certificate (CSC)' }[k]);
+  const upOf = (events) => events.filter((e) => e.type !== 'in' && secOf(e) === 'up');
   function schedSumHtml(s) {
-    const lastE = s.events[s.events.length - 1], f0 = s.events[0];
-    // the first scheduled payment, then the others that fall due by the stamp duty date, each with its own date (the calculator does not know what has already been paid)
-    const NM = { snp: 'S&P', bsd: 'stamp duty', absd: 'stamp duty', exercise: 'option exercise' }, then = [];
-    s.events.filter((e, k) => k > 0 && e.date <= s.duty.date && e.id !== 'bsd' && e.id !== 'absd').forEach((e) => { const nm = esc(NM[e.id] || lcFirst(SHORT_NAME[e.id] || e.label)), key = nm + '|' + e.date, g = then.filter((x) => x.key === key)[0]; if (g) g.amount += e.amount; else then.push({ key: key, nm: nm, date: e.date, amount: e.amount }); });
-    const thenItems = then.map((x) => $(x.amount) + ' ' + esc(onDay(x.date)) + ' (' + x.nm + ')'), thenTxt = thenItems.length > 1 ? thenItems.slice(0, -1).join(', ') + ' and ' + thenItems[thenItems.length - 1] : (thenItems[0] || '');
-    const firstSub = esc(SHORT_NAME[f0.id] || f0.label) + ', due ' + esc(UND ? 'on the option date' : day(f0.date)) + '';
+    const f0 = s.events[0], ups = upOf(s.events), upAmt = ups.reduce((a, e) => a + e.amount, 0), upEnd = ups.length ? ups[ups.length - 1].date : f0.date;
+    const firstSub = esc(SHORT_NAME[f0.id] || f0.label) + ', due ' + esc(UND ? 'on the option date' : day(f0.date));
     const t = (k, val, sub) => '<div class="pl-sf"><span class="k">' + k + '</span><span class="v">' + val + '</span><span class="s">' + sub + '</span></div>';
-    return '<div class="pl-sumbox"><div class="pl-sumtop pl-sumtop-2">' + t('First scheduled payment', $(f0.amount), firstSub) + t('Total to pay', $(s.totals.amount), 'Last payment ' + esc(dateLabel(lastE.date, lastE.basis, lastE.id)) + (lastE.basis === 'estimate' ? ', estimated' : '')) + '</div>' + (thenTxt ? '<p class="pl-sf-then">Then ' + thenTxt + '.</p>' : '') + dutyLine(s) + '</div>';
+    return '<div class="pl-sumbox"><div class="pl-sumtop pl-sumtop-2">' + t('First payment', $(f0.amount), firstSub) + t('Upfront payments', $(upAmt), 'All due ' + esc(UND ? 'within ' + (s.kind === 'completed' ? '4 weeks' : '10 weeks') + ' of the option' : 'by ' + day(upEnd)) + '. ' + esc(SEC_S('up', s.kind)) + ', each listed below.') + '</div>' + dutyLine(s) + '</div>';
   }
   // One plain sentence about the loan (replaces the loan-comparison panel). Skipped when a note above already says the loan is only an illustration.
   let lastPref = null;
@@ -358,8 +381,8 @@
       ['purchase', 'Purchase', $(r.price) + ' · ' + kindText(r, v) + ' · ' + optionText(r.otp)],
       datesRow(r, v),
       ['money', 'Money now', r.entity ? 'cash ' + $(v.cash || 0) + (v.saveMo ? ' · +' + $(v.saveMo) + ' a month' : ' · no monthly savings added') : 'cash ' + $(v.cash || 0) + ' · CPF OA ' + $(v.cpf || 0) + (v.saveMo || v.cpfMo ? ' · +' + $(v.saveMo || 0) + ' / +' + $(v.cpfMo || 0) + ' a month' : ' · no monthly savings added')],
-      ['buyers', 'Loan', 'Estimated bank loan: ' + $(r.loan.loanMax) + ' over ' + r.loan.years + ' years · interest ' + pc(r.loan.ratePct / 100, 2) + (r.entity ? ' · company or other entity' : ' · borrower age ' + (Number.isInteger(+v.age) ? v.age : (+v.age).toFixed(1)))],
-      ['sale', r.order === 'none' ? 'Sale' : 'Home you are selling', r.order === 'none' ? 'nothing to sell' : (r.order === 'sell' ? 'sold before the option · ' : 'completes ' + day(r.saleDate) + ' · ') + (v.saleEst && !v.saleEst.counted ? 'not counted yet · ' : '') + $(v.sale.cash || 0) + ' cash · ' + $(v.sale.cpf || 0) + ' to CPF · loan ' + (r.loan.flatLoan === 'sold' ? 'discharged on sale' : r.loan.flatLoan === 'outstanding' ? (v.flatUnsure ? 'counted as owed (not sure)' : 'still owed') : r.loan.flatLoan)],
+      ['buyers', 'Loan', 'Estimated bank loan: ' + $(r.loan.loanMax) + ' over ' + r.loan.years + ' years · interest ' + pc(r.loan.ratePct / 100, 2) + (r.entity ? ' · company or other entity' : (v.bors && v.bors.length > 1 ? ' · two borrowers, income-weighted age ' + (+v.age).toFixed(1) : ' · borrower age ' + (Number.isInteger(+v.age) ? v.age : (+v.age).toFixed(1))))],
+      ['sale', r.order === 'none' ? 'Sale' : 'Home you are selling', r.order === 'none' ? 'nothing to sell' : (r.order === 'sell' ? 'sold before the option · ' : r.saleUndecided ? 'sale date not decided · no sale money counted · ' : 'completes ' + day(r.saleDate) + ' · ') + (v.saleEst && !v.saleEst.counted ? 'not counted yet · ' : '') + $(v.sale.cash || 0) + ' cash · ' + $(v.sale.cpf || 0) + ' to CPF · loan ' + (r.loan.flatLoan === 'sold' ? 'discharged on sale' : r.loan.flatLoan === 'outstanding' ? (v.flatUnsure ? 'counted as owed (not sure)' : 'still owed') : r.loan.flatLoan)],
       ['refund', r.order === 'sell' ? 'Interim rent' : 'ABSD refund', r.order === 'sell' ? (v.rent && v.rent.monthly ? $(v.rent.monthly) + ' a month until the keys' : 'none entered') : r.order === 'none' ? '—' : (r.duty.absd > 0 ? (v.refund && v.refund.assume ? 'assumed ' + (v.refund.monthsAfterSale || 2) + ' months after the sale · never guaranteed' : 'not assumed') : 'no ABSD on this purchase')],
     ];
     return '<p class="pl-kick">Your details</p><div class="pl-arows">' + rows.map((x) => '<button type="button" class="pl-arow" data-open="' + x[0] + '"><span><b>' + x[1] + '</b><em>' + esc(x[2]) + '</em></span><i aria-hidden="true">Edit</i></button>').join('') + '</div>';
@@ -395,21 +418,37 @@
   // a table drawn as stacked cards on a phone keeps its table meaning for screen readers: the roles say it outright
   const withRoles = (h) => h.replace(/<table /g, '<table role="table" ').replace(/<(thead|tbody|tfoot)>/g, '<$1 role="rowgroup">').replace(/<tr( |>)/g, '<tr role="row"$1').replace(/<td( |>)/g, '<td role="cell"$1').replace(/<th scope="col"/g, '<th role="columnheader" scope="col"').replace(/<th scope="row"/g, '<th role="rowheader" scope="row"').replace(/<th colspan/g, '<th role="columnheader" colspan');
   // screen 1: every payment with its timing and amount; nothing about cash, CPF or the loan
+  const secRow = (k, kind, cols, amt) => '<tr class="pl-jsec"><th colspan="' + (amt === undefined ? cols : cols - 1) + '" scope="colgroup"><b>' + SEC_T(k, kind) + '</b><small>' + SEC_S(k, kind) + '</small></th>' + (amt === undefined ? '' : '<td class="n a pl-jsec-a">' + $(amt) + '</td>') + '</tr>';
   function scheduleTableHtml(s) {
-    const rows = stageMark(s.events).map((e) => '<tr class="pl-jrow pay"><th scope="row" class="nm p">' + nameCell(e) + '</th><td class="n a">' + $(e.amount) + '</td></tr>').join('');
-    return withRoles('<h3 class="pl-sr" id="pl-sched-h">All payments</h3><div class="pl-jr-w"><table class="pl-jr" id="pl-sched-table" aria-labelledby="pl-sched-h"><thead><tr><th scope="col" class="nm">Payment</th><th scope="col" class="n">Amount</th></tr></thead><tbody>' + rows + '</tbody><tfoot><tr><th scope="row" class="nm p">Total to pay</th><td class="n a">' + $(s.totals.amount) + '</td></tr></tfoot></table></div>');
+    let cur = null; const upAmt = upOf(s.events).reduce((a, e) => a + e.amount, 0);
+    const rows = stageMark(s.events).map((e) => { const k = secOf(e), h = k !== cur ? secRow(k, s.kind, 2, k === 'up' ? upAmt : undefined) : ''; cur = k; return h + '<tr class="pl-jrow pay"><th scope="row" class="nm p">' + nameCell(e) + '</th><td class="n a">' + $(e.amount) + '</td></tr>'; }).join('');
+    return withRoles('<h3 class="pl-sr" id="pl-sched-h">All payments, in order</h3><div class="pl-jr-w"><table class="pl-jr" id="pl-sched-table" aria-labelledby="pl-sched-h"><thead><tr><th scope="col" class="nm">Payment</th><th scope="col" class="n">Amount</th></tr></thead><tbody>' + rows + '</tbody></table></div>');
   }
   // screen 2: the same list with how each payment is paid (your cash and CPF as entered, the estimated loan, what is not covered) and the monthly mortgage after it
   function fundTableHtml(r) {
     const ev = stageMark(root.GW_SCHEDULE.annotate(r)), newL = r.kind === 'new' || r.kind === 'ec';
-    const rows = ev.map((e) => {
-      if (e.type === 'in') return '<tr class="pl-jrow in"><th scope="row" class="nm p"><div class="pl-nw"><span class="pl-no in" aria-hidden="true"></span><span class="pl-nt"><span class="pl-nb">' + esc(e.label) + '</span>' + (e.eligible === false ? ' <span class="pl-chip warn">profile not eligible</span>' : '') + '<span class="pl-wh">' + day(e.date) + '</span></span></div></th><td class="n a">+' + $(e.cashIn + (e.cpfIn || 0)) + '</td><td class="by" data-l="How it is paid">' + payPart('cash', 'Cash ' + $(e.cashIn), e.cashIn) + payPart('cpf', 'CPF ' + $(e.cpfIn || 0), e.cpfIn || 0) + '</td><td class="n mo none" data-l="Est. monthly mortgage after">–</td></tr>';
-      return '<tr class="pl-jrow pay' + (e.uncovered > 0 ? ' short' : '') + '"><th scope="row" class="nm p">' + nameCell(e) + '</th><td class="n a">' + $(e.amount) + '</td><td class="by" data-l="How it is paid">' + paidBy(e) + '</td>' + (e.bank > 0 && e.instalment ? '<td class="n mo" data-l="Est. monthly mortgage after">' + $(e.instalment) + '/mo</td>' : '<td class="n mo none" data-l="Est. monthly mortgage after">–</td>') + '</tr>';
-    }).join('');
+    let cur = null;
+    const rows = ev.map((e) => { const k = e.type === 'in' ? cur : secOf(e), h = k && k !== cur ? secRow(k, r.kind, 4) : ''; cur = k; return h + rowOf(e); }).join('');
+    function rowOf(e) {
+      if (e.type === 'in') return '<tr class="pl-jrow in"><th scope="row" class="nm p"><div class="pl-nw"><span class="pl-no in" aria-hidden="true"></span><span class="pl-nt"><span class="pl-nb">' + esc(e.label) + '</span>' + (e.eligible === false ? ' <span class="pl-chip warn">profile not eligible</span>' : '') + '<span class="pl-wh">' + day(e.date) + '</span></span></div></th><td class="n a">+' + $(e.cashIn + (e.cpfIn || 0)) + '</td><td class="by" data-l="Paid from">' + payPart('cash', 'Cash ' + $(e.cashIn), e.cashIn) + payPart('cpf', 'CPF ' + $(e.cpfIn || 0), e.cpfIn || 0) + '</td><td class="n mo none" data-l="Monthly mortgage after">–</td></tr>';
+      return '<tr class="pl-jrow pay' + (e.uncovered > 0 ? ' short' : '') + '"><th scope="row" class="nm p">' + nameCell(e) + '</th><td class="n a">' + $(e.amount) + '</td><td class="by" data-l="Paid from">' + paidBy(e) + '</td>' + (e.bank > 0 && e.instalment ? '<td class="n mo" data-l="Monthly mortgage after">' + $(e.instalment) + '/mo</td>' : '<td class="n mo none" data-l="Monthly mortgage after">–</td>') + '</tr>';
+    }
     const est = newL && ev.some((e) => e.type === 'pay' && estConf(e.confidence)), prov = ev.filter((e) => e.provisional)[0];
     const notes = (UND ? 'Timings count from your option date, which you have not entered.' : 'Dates count from your option on ' + day(r.otp) + '.') + (est ? ' Construction stages are shown in order with no dates: when each falls due depends on construction progress. For this check they are tested one after another from the earliest date a stage could be called' + (prov ? '. The final 15% is provisional.' : '.') : prov ? ' The final 15% is provisional until the developer’s schedule is confirmed.' : '');
-    return withRoles('<h3 class="pl-jr-h" id="pl-fund-h">Your payments, stage by stage</h3><div class="pl-jr-w"><table class="pl-jr pl-jr-f" id="pl-fund-table" aria-labelledby="pl-fund-h"><thead><tr><th scope="col" class="nm">Payment</th><th scope="col" class="n">Amount</th><th scope="col">How it is paid</th><th scope="col" class="n">Est. monthly mortgage after</th></tr></thead><tbody>' + rows + '</tbody><tfoot><tr><th scope="row" class="nm p">Total</th><td class="n a">' + $(r.totals.amount) + '</td><td class="by"></td><td class="n mo none"></td></tr></tfoot></table></div><p class="gw-fine">' + notes + '</p>');
+    return withRoles(prepHtml(r, ev) + '<h3 class="pl-jr-h" id="pl-fund-h">Each payment, and what pays it</h3><div class="pl-jr-w"><table class="pl-jr pl-jr-f" id="pl-fund-table" aria-labelledby="pl-fund-h"><thead><tr><th scope="col" class="nm">Payment</th><th scope="col" class="n">Amount due</th><th scope="col">Paid from</th><th scope="col" class="n">Monthly mortgage after</th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="gw-fine">' + notes + '</p>');
   }
+  // FE V2: what the buyer has to prepare, kept apart from the payments themselves: the cash and the CPF the payments take (as the engine allocates them),
+  // with the part needed up front. Monthly instalments are separate (they are paid from income or savings, below).
+  function prepHtml(r, ev) {
+    const pays = ev.filter((e) => e.type === 'pay'), ups = pays.filter((e) => secOf(e) === 'up'), add = (l, k) => l.reduce((a, e) => a + (e[k] || 0), 0);
+    const upEnd = ups.length ? ups[ups.length - 1].date : r.otp, by = UND ? 'within ' + (r.kind === 'completed' ? '4 weeks' : '10 weeks') + ' of the option' : 'by ' + day(upEnd);
+    const cashUp = add(ups, 'cashUsed'), cpfUp = add(ups, 'cpfUsed'), short = add(pays, 'uncovered');
+    const t = (cls, k, val, sub) => '<div class="pl-sf' + (cls ? ' ' + cls : '') + '"><span class="k">' + k + '</span><span class="v">' + val + '</span><span class="s">' + sub + '</span></div>';
+    const tiles = [t('', 'Your cash', $(add(pays, 'cashUsed')), $(cashUp) + ' of it up front, ' + esc(by) + '.'), r.entity ? '' : t('', 'Your CPF OA', $(add(pays, 'cpfUsed')), $(cpfUp) + ' of it up front.')];
+    if (short > 0.5) tiles.push(t('bad', 'Not covered', $(short), 'Payments your cash, CPF and loan do not meet on their dates.'));
+    return '<section class="pl-prep" aria-labelledby="pl-prep-h"><h3 class="pl-jr-h" id="pl-prep-h">What you need to prepare</h3><div class="pl-prep-g">' + tiles.filter(Boolean).join('') + '</div><p class="gw-fine">From the payments below, as your cash, CPF and the estimated loan meet them. Monthly instalments are separate.</p></section>';
+  }
+  const newLaunch = (r) => r.kind === 'new' || r.kind === 'ec';
   // the earliest shortfall: how much, which payment, and what its date is (a rule, the developer's, the earliest possible, or an estimate): never an illustrative date called a deadline
   // The projection pays each month's instalment (and any interim rent) from the cash and CPF entered plus whatever is set aside each month. With NO monthly amount
   // entered, the pool simply drains, which is not a finding about the buyer's income: the monthly mortgage is then reported as not tested, never as a shortfall
@@ -449,7 +488,9 @@
   }
   // what the funding check does not cover, in plain words (the Huttons-style fees and an existing home's loan are not in the engine); the buy-first line is shown, not folded away
   function leavesOutHtml(i, r) {
-    const keep = i && i.order === 'buy' ? '<p class="pl-note pl-keep"><b>You chose to buy first.</b> The monthly instalments on the home you still own are not included in this check, although they carry on while the new payments fall due. Allow for them separately.</p>' : '';
+    // FE V2: say what is actually in the check. An instalment entered for the home being sold IS paid in the projection (C1, B4), until the sale or, with no sale date, to the end.
+    const fi = i && i.order === 'buy' && r && r.flatInstal > 0 ? r.flatInstal : 0;
+    const keep = i && i.order === 'buy' ? (fi ? '<p class="pl-note pl-keep pl-keep-in"><b>You chose to buy first.</b> The ' + $(fi) + ' monthly instalment on the home you are selling is paid in this check ' + (r.saleUndecided ? 'every month to the end of the plan, as the sale date is not decided.' : 'until the sale completes.') + '</p>' : '<p class="pl-note pl-keep"><b>You chose to buy first.</b> The monthly instalments on the home you still own are not included in this check, although they carry on while the new payments fall due. Allow for them separately.</p>') : '';
     const items = [
       'Costs other than stamp duty: legal and conveyancing fees, valuation and caveat fees, any buyer’s agent fee, renovation and furnishing.',
       'The monthly instalments on any home you keep or are still paying for.',
@@ -468,7 +509,6 @@
     const S = root.GW_SCHEDULE;
     return ['Payment schedule (Groundwork): ' + $(s.price) + ' ' + (KIND[(v && v.uiKind) || s.kind] || s.kind) + ', ' + optionText(s.otp) + '.',
       stageMark(s.events).map((e) => '- ' + (e.undated ? PROGRESS.toLowerCase() + (e.firstUndated ? ', earliest ' + day(e.date) : '') : day(e.date)) + ' ' + e.label + ' ' + $(e.amount) + (e.undated ? (e.provisional ? ' (provisional)' : '') : ' (' + S.BASIS_TAG[e.basis].toLowerCase() + (e.provisional ? ', provisional' : '') + ')')).join('\n'),
-      'Total ' + $(s.totals.amount) + '.',
       'An illustrative schedule: it does not confirm a loan or that funds are enough. Dates marked estimated or provisional are planning dates, and construction stages have no dates because they depend on construction progress; none is the developer’s confirmed schedule. Estimates from my own assumptions, not advice. tools.kentanthepropertyguy.com/tools/payment-planner/'].join('\n');
   }
   /* ---------------- R1.2: new-EC household income ceiling, and the loan the timeline assumes ---------------- */
@@ -506,7 +546,7 @@
     const S = { meets: ['ok', 'Meets the assessed income condition'], exceeds: ['bad', 'Exceeds the income ceiling'], unknown: ['warn', 'Cannot determine eligibility without additional information'] }[c.outcome];
     let why;
     let act = '';
-    if (c.outcome === 'unknown' && c.need === 'income') { why = o.incomeBad ? 'The income entry needs fixing before it can be checked against the ceiling.' : 'Add the household’s gross monthly income (fixed and variable, the combined income of everyone buying) to check it against the ceiling.'; act = '<div class="pl-ec-l">' + edit('buyers:income', o.incomeBad ? 'Fix income' : 'Add income') + '</div>'; }
+    if (c.outcome === 'unknown' && c.need === 'income') { why = o.incomeBad ? 'The income entry needs fixing before it can be checked against the ceiling.' : 'Add the household’s gross monthly income (fixed and variable, the combined income of everyone buying) to check it against the ceiling.'; act = '<div class="pl-ec-l">' + edit('buyers:borrowers.0.fixed', o.incomeBad ? 'Fix income' : 'Add income') + '</div>'; }
     else if (c.outcome === 'unknown') why = 'The ' + m(grossOf(i)) + ' a month you entered is above ' + m(c.lo) + ' but within ' + m(c.hi) + '. Whether it meets the condition depends on when the EC site’s land tender closed: before 24 Aug 2026 the ceiling is ' + m(c.lo) + ' (so it would exceed it); on or after that date it is ' + m(c.hi) + ' (so it would meet it). A balance unit in an older EC project keeps the lower ceiling.';
     else if (c.outcome === 'meets') why = c.tender === 'any' ? 'The ' + m(grossOf(i)) + ' a month you entered is within ' + m(c.lo) + ', the lower of the two ceilings, so it meets the income condition whichever tender date applies.' : 'The ' + m(grossOf(i)) + ' a month you entered is within the ' + m(c.ceiling) + ' ceiling for EC sites whose land tender closed ' + TENDER_T[c.tender] + '.';
     else why = c.tender === 'any' ? 'The ' + m(grossOf(i)) + ' a month you entered is above ' + m(c.hi) + ', the higher of the two ceilings, so it exceeds the income ceiling whichever tender date applies.' : 'The ' + m(grossOf(i)) + ' a month you entered is above the ' + m(c.ceiling) + ' ceiling for EC sites whose land tender closed ' + TENDER_T[c.tender] + '.';
@@ -523,7 +563,7 @@
       '<p class="pl-tp">' + why + ' On this figure the household does not meet the assessed income condition to buy a new EC from the developer. HDB assesses household income by its own method, so check with HDB if you think this is wrong.</p>' +
       (c.tender === 'before' ? setRow('tender', 'Land tender closed', TENDER_BTN, i.tender) : '') +
       '<p class="pl-tp">You can change the income, plan a private condominium instead, or see illustrative figures. Illustrative figures do not mean the household can buy this EC.</p>' +
-      '<div class="pl-ec-b">' + sw + '<button type="button" class="gw-btn sec" data-ec-illus="yes">Continue with illustrative calculations</button></div><div class="pl-ec-l">' + edit('buyers:income', 'Change the income') + '</div>' + nc + det + '</div>';
+      '<div class="pl-ec-b">' + sw + '<button type="button" class="gw-btn sec" data-ec-illus="yes">Continue with illustrative calculations</button></div><div class="pl-ec-l">' + edit('buyers:borrowers.0.fixed', 'Change the income') + '</div>' + nc + det + '</div>';
     if (c.outcome === 'unknown') return '<div class="pl-ec warn">' + kick + tag + '<p class="pl-tp">' + why + '</p>' + act + (c.need === 'tender' ? setRow('tender', 'When did the land tender close?', TENDER_BTN, i.tender) : '') +
       (c.need === 'income' ? '<p class="pl-tp">No payment timeline is worked out until the income is entered, because the loan depends on it. Nothing here means the household can buy a new EC.</p>' : '<p class="pl-tp">Illustrative calculations stay available below. They do not mean the household can buy a new EC.</p>') + nc + det + '</div>';
     return '<div class="pl-ec ok">' + kick + tag + '<p class="pl-tp">' + why + ' <b>This is only an income check.</b></p>' + nc + det + '</div>';
@@ -532,7 +572,7 @@
   function illusHtml(o) {
     if (!o) return '';
     if (o.why === 'mop') return '<div class="pl-illus" role="note"><p class="pl-kick">Financing estimate incomplete</p><p class="pl-tp">Whether MSR applies depends on whether this resale EC is still within its minimum occupation period, which is not known. This timeline uses the lower of the two income-supported loans, <b>' + $(o.used) + '</b>, so the loan is not overstated. On your income the loan would be about ' + (o.a ? '<b>' + $(o.a.maxLoan) + '</b> if MSR applies (MSR with TDSR)' : 'not worked out if MSR applies') + (o.b ? ', or about <b>' + $(o.b.maxLoan) + '</b> if it does not (TDSR only)' : '') + '. Neither is a bank approval.</p><div class="pl-ec-l">' + edit('purchase:mop', 'Choose the MOP status') + '</div></div>';
-    return '<div class="pl-illus" role="note"><p class="pl-kick">No bank loan assumed</p><p class="pl-tp">Your income is entered as $0, so there is no income to lend against and this timeline assumes no bank loan: every payment is met from cash and CPF. Add income, including a co-buyer’s, to see what a bank could lend.</p><div class="pl-ec-l">' + edit('buyers:income', 'Add your income') + '</div></div>';
+    return '<div class="pl-illus" role="note"><p class="pl-kick">No bank loan assumed</p><p class="pl-tp">Your income is entered as $0, so there is no income to lend against and this timeline assumes no bank loan: every payment is met from cash and CPF. Add income, including a co-buyer’s, to see what a bank could lend.</p><div class="pl-ec-l">' + edit('buyers:borrowers.0.fixed', 'Add your income') + '</div></div>';
   }
   // S: { rule, cap (both timelines), view: 'rule' | 'income', limit: 'MSR' | 'TDSR' }. Shown whenever income supports less than the loan the rule ceiling allows;
   // the income-supported timeline is the one drawn by default, the rule-ceiling one stays a click away.
@@ -546,7 +586,7 @@
   function entriesHtml(raw) {
     const m = (k) => (raw[k] == null ? 'not entered' : $(raw[k]));
     const rows = [['purchase', 'Purchase', m('price') + (raw.otp ? ' · option ' + day(raw.otp) : '')], ['money', 'Money now', 'cash ' + m('cash') + ' · CPF OA ' + m('cpf')],
-      ['buyers', 'Buyers and loan', (raw.entity === '1' ? 'company or other entity' : 'age ' + (raw.age == null ? 'not entered' : raw.age)) + ' · ' + (raw.years == null ? 'tenure not entered' : raw.years + ' years') + (raw.ratePct == null ? '' : ' at ' + raw.ratePct + '%')], ['sale', 'Home you are selling', raw.order ? ORDER_T[raw.order] : 'not chosen']];
+      ['buyers', 'Buyers and loan', (raw.entity === '1' ? 'company or other entity' : 'age ' + (raw.age == null ? 'not entered' : Math.round(raw.age * 10) / 10)) + ' · ' + (raw.years == null ? 'tenure not entered' : raw.years + ' years') + (raw.ratePct == null ? '' : ' at ' + raw.ratePct + '%')], ['sale', 'Home you are selling', raw.order ? ORDER_T[raw.order] : 'not chosen']];
     return '<p class="pl-kick">Your entries</p><div class="pl-arows">' + rows.map((x) => '<button type="button" class="pl-arow" data-open="' + x[0] + '"><span><b>' + x[1] + '</b><em>' + esc(x[2]) + '</em></span><i aria-hidden="true">Edit</i></button>').join('') + '</div>';
   }
   // the first short payment is a construction stage with no developer date (the same test the schedule adapter uses for its "earliest" basis)
@@ -556,7 +596,7 @@
     return ['Payment timeline (Groundwork): ' + $(r.price) + ' ' + kindText(r, v) + ', ' + ORDER_T[r.order] + ', ' + optionText(r.otp) + '.',
       h.peak > 0 && !instalOnly(root.GW_SCHEDULE.shortfall(r), v) ? (firstMiss(r).amount > 0 ? 'Not covered: ' + $(r.totals.uncovered) + ' in total; the first short payment is ' + firstMiss(r).label + (undatedStage(r, h.firstGap) ? ' (timing depends on construction progress)' : ' ' + onDay(h.firstGap)) + '.' : 'First shortfall: ' + $(h.peak) + ' ' + onDay(h.peakAt) + (h.peakCause ? ', ' + h.peakCause : '') + '.') : h.peak > 0 ? 'Every payment covered on its date; the monthly mortgage is not tested (no monthly savings entered).' : 'Every payment covered on its due date at the earliest dates.',
       'Loan ' + (r.loan.capped ? 'sized to what the entered income supports (figure not included; rule limit ' + pc(r.loan.ltv) + ')' : pc(r.loan.ltv)) + ' over ' + r.loan.years + ' years at ' + pc(r.loan.ratePct / 100, 2) + ' (' + r.loan.loans + ' housing loan' + (r.loan.loans === 1 ? '' : 's') + ' counted)' + (r.loan.cov > 0 ? '; worked on the bank valuation of ' + $(r.loan.valuation) + ', with ' + $(r.loan.cov) + ' above it paid in cash' : '') + '; estimated instalment ' + $(r.instalment.final) + '/mo once the whole loan is paid out.',
-      (v.buyers || []).length > 1 && r.loan.capped ? 'Two buyers: the income-weighted average age basis is not confirmed, so this joint-borrower loan is unverified.' : '',
+      v.joint && v.joint.ageUnverified && r.loan.capped ? 'Two borrowers with variable income: which income weights the average age is not confirmed, so the older of the two ages is used.' : '',
       scn && scn.cap && scn.view === 'rule' ? 'Note: the income entered supports less than the loan assumed here; the planner shows both cases.' : '',
       scn && scn.cap && scn.view === 'income' ? 'Note: this timeline uses the loan the income entered supports, not the full rule limit; the planner also shows the rule-limit case.' : '',
       scn && scn.illus && scn.illus.length ? scn.illus.map((x) => ({ 'ec-income': 'Illustrative only: the household income entered is above the new-EC income ceiling, so this is not a purchase the household can make as a new EC buyer.', 'ec-unknown': 'The new-EC income condition has not been established; these figures are illustrative.', zero: 'Income entered as $0: no bank loan is assumed, so every payment is met from cash and CPF.', mop: 'Financing estimate incomplete: whether MSR applies to this resale EC is not known, so the lower income-supported loan is used.' }[x] || '')).filter(Boolean).join(' ') : '',
@@ -572,9 +612,9 @@
   // need: [{ id, label, hint, done, shown }]; i: the form read as engine input; raw: only what the buyer actually entered.
   // The questions are on the page above; this lists the ones still open and takes the buyer to each. It asks nothing a second time.
   function needHtml(need) {
-    const ORDERK = ['price', 'otp', 'cash', 'cpf', 'income', 'age', 'years', 'order', 'loansOther', 'propertyLoans', 'debts', 'flatLoan'];
+    const ORDERK = ['price', 'otp', 'cash', 'cpf', 'income', 'age', 'years', 'order', 'loansOther', 'propertyLoans', 'debts', 'flatLoan'], ok_ = (id) => ORDERK.indexOf(id.replace(/^borrowers\.(\d)\.age$/, 'age').replace(/^borrowers\.\d\.fixed$/, 'income'));
     const NAME = { 'cpfBal.0.oa': 'your CPF balances', 'cpfBal.0.sa': 'your CPF balances', 'cpfBal.1.oa': 'your CPF balances', 'cpfBal.1.sa': 'your CPF balances', flatInstal: 'the instalment on the home you are selling', price: 'the purchase price', otp: 'the option date', cash: 'your cash', cpf: 'your CPF OA', income: 'your monthly income', age: 'the borrower’s age', years: 'the loan tenure', order: 'whether you have a home to sell', loansOther: 'the housing loans on the homes you keep', propertyLoans: 'the housing-loan instalments', debts: 'the housing-loan instalments', flatLoan: 'whether the home you are selling still has a loan' };
-    const list = need.filter((n) => !n.done).sort((a, b) => ORDERK.indexOf(a.id) - ORDERK.indexOf(b.id)).map((n) => NAME[n.id] || n.label.toLowerCase()).join(', ').replace(/, ([^,]*)$/, ' and $1');
+    const list = need.filter((n) => !n.done).sort((a, b) => ok_(a.id) - ok_(b.id) || (a.id < b.id ? -1 : 1)).map((n) => NAME[n.id] || n.label.toLowerCase()).join(', ').replace(/, ([^,]*)$/, ' and $1');
     return '<div class="pl-need0"><p class="pl-needline">Add ' + list + ' to see your result.</p>' + howHtml() + '</div>';
   }
   function howHtml() {
@@ -628,6 +668,10 @@
     const subjectsNow = () => { const o = effOrder(), sl = o === 'sell' ? sellersNow() : []; return rowsNow().map((b, k) => b.owned - (sl.indexOf(k) >= 0 ? 1 : 0) >= 1); };
     const cflag = (k) => {
       if (k === 'two') return live(rowOf('buyers.1')) ? '1' : '0';
+      // FE V2: which borrower profiles are asked (one buyer: one borrower; two buyers: both, or the one taking the loan)
+      if (k === 'bor0' || k === 'bor1') { const two = live(rowOf('buyers.1')), w = two ? (kv('loanWho') || 'both') : '0'; return (k === 'bor0' ? (w === 'both' || w === '0') : (two && (w === 'both' || w === '1'))) ? '1' : '0'; }
+      // the sale figures are asked only when sale money can be counted: selling first, or buying first with a sale date
+      if (k === 'saleCount') { const o = effOrder(); return o === 'sell' || (o === 'buy' && kv('saleWhen') !== 'unsure') ? '1' : '0'; }
       if (k === 'mixed') { const rs = rowsNow(); return rs.length === 2 && (rs[0].res === 'SC') !== (rs[1].res === 'SC') ? '1' : '0'; }
       if (k === 'twoown') { const rs = rowsNow(); return rs.length === 2 && rs[0].owned >= 1 && rs[1].owned >= 1 ? '1' : '0'; }
       if (k === 'flatowed') return effOrder() === 'buy' && (['outstanding', 'unsure'].indexOf(kv('flatLoan')) >= 0 || !!kv('flatLoanSpecial')) ? '1' : '0';
@@ -663,18 +707,29 @@
           const p = t === 'money' ? C.parseMoney(el.value.replace(/\.$/, '')) : C.parseNum(el.value, el.dataset.default);
           if (p.error) note(el, k, p.error);
           val = p.value === undefined ? null : p.value;
-          if (!p.error && val !== null) { const m = rangeMsg(k, val, fieldName(el)); if (m) { if (m.under && el === act) pendingUnder = true; else note(el, k, m.text, m.short); } }
+          if (!p.error && val !== null) { const m = rangeMsg(k.replace(/^borrowers\.\d\.age$/, 'age').replace(/^borrowers\.\d\.(fixed|variable)$/, 'income'), val, fieldName(el)); if (m) { if (m.under && el === act) pendingUnder = true; else note(el, k, m.text, m.short); } }
         } else if (t === 'date') val = el.value || null; else if (t === 'check') val = el.checked; else if (t === 'chip') val = chipVal(el);
         if (val !== null && val !== undefined) v[k] = val;
       });
+      // FE V2: the borrowers' profiles. The age the loan uses is GW_CALC.borrowers' (one borrower: their own age; two: the income-weighted average age, MAS);
+      // the income is the borrowers' together. Nothing is averaged by hand.
+      const two = live(rowOf('buyers.1')), who = two ? (v.loanWho || 'both') : '0', bIdx = v.entity === '1' ? [] : who === 'both' ? [0, 1] : [+who];
+      const bors = bIdx.map((n) => ({ n: n, age: v['borrowers.' + n + '.age'], fixed: v['borrowers.' + n + '.fixed'], variable: v['borrowers.' + n + '.variable'] }));
+      let Bj = null;
+      if (bors.length && bors.every((b) => typeof b.age === 'number')) {
+        if (bors.length === 1) v.age = bors[0].age;
+        else { Bj = C.borrowers(bors.map((b) => ({ age: b.age, fixed: b.fixed, variable: b.variable }))); v.age = Bj.iwaaUse !== null && !Bj.bad.length ? Bj.iwaaUse : Math.max(bors[0].age, bors[1].age); }
+      }
+      if (bors.some((b) => typeof b.fixed === 'number')) v.income = bors.reduce((a, b) => a + (b.fixed || 0), 0);
+      if (bors.some((b) => typeof b.variable === 'number')) v.varIncome = bors.reduce((a, b) => a + (b.variable || 0), 0);
       raw = v;
       const buyers = []; [0, 1].forEach((n) => { if (v['buyers.' + n + '.res'] !== undefined && live(rowOf('buyers.' + n))) buyers.push({ res: v['buyers.' + n + '.res'], owned: +v['buyers.' + n + '.owned'], fta: v['buyers.' + n + '.fta'] === undefined ? undefined : v['buyers.' + n + '.fta'] === '1' }); });
-      const entity = v.entity === '1', undated = v.noOtp === true;
+      const entity = v.entity === '1', undated = v.noOtp === true, sw = v.saleWhen || 'unsure';   // Ken, 25 Oct: buying first assumes no sale date until one is chosen
       const i = { entity, undated, kind: v.kind === 'resaleec' ? 'completed' : v.kind, uiKind: v.kind, tender: v.tender || 'unsure', mop: v.mop || 'unsure', propertyLoans: v.propertyLoans || 0, price: v.price, valuation: v.valuation > 0 && (v.kind === 'completed' || v.kind === 'resaleec') ? v.valuation : undefined, otp: undated ? undefined : v.otp, buyers, age: entity ? undefined : v.age, ratePct: v.ratePct, years: v.years, loansOther: +(v.loansOther || 0), cash: v.cash || 0, cpf: v.cpf || 0, saveMo: v.saveMo || 0, cpfMo: v.cpfMo || 0, payInstalmentFromCpf: v.payInstalmentFromCpf !== false, order: entity || (buyers.length && !buyers.some((b) => b.owned >= 1)) ? 'none' : (v.order || ''),
-        sale: { month: v.saleDate ? undefined : v.saleMonth, date: v.saleDate || undefined, cash: 0, cpf: 0, removesOwnership: v.removesOwnership !== false },
+        sale: { month: sw === 'date' && !v.saleDate ? v.saleMonth : undefined, date: sw === 'date' ? v.saleDate || undefined : undefined, afterKeys: sw === 'afterKeys' ? (typeof v.saleAfterKeys === 'number' ? v.saleAfterKeys : 3) : undefined, undecided: sw === 'unsure' ? true : undefined, cash: 0, cpf: 0, removesOwnership: v.removesOwnership !== false },
         // 'unsure' is counted as owed; a special case (contracted, undertaking) is counted as owed unless the bank has confirmed it
         flatLoan: v.flatLoanSpecial || (v.flatLoan === 'unsure' ? 'outstanding' : v.flatLoan) || 'outstanding', flatUnsure: v.flatLoan === 'unsure' && !v.flatLoanSpecial, flatAnswered: !!(v.flatLoan || v.flatLoanSpecial), flatLoanAccepted: v.flatLoanAccepted === true, prefLoan: v.prefLoan,
-        refund: { assume: !!v.refundAssume, monthsAfterSale: v.refundMonths || 2 }, rent: { monthly: v.rent || 0 }, dates: { mode: 'grouped', top: v.top || undefined, csc: v.csc || undefined, completion: v.completion || undefined }, income: v.income || 0, varIncome: v.varIncome || 0, varStated: v.varIncome !== undefined && v.varIncome !== null, gross: (v.income || 0) + (v.varIncome || 0), debts: v.debts || 0 };
+        refund: { assume: !!v.refundAssume && sw !== 'unsure', monthsAfterSale: v.refundMonths || 2 }, rent: { monthly: v.rent || 0 }, dates: { mode: 'grouped', top: v.top || undefined, csc: v.csc || undefined, completion: v.completion || undefined }, income: v.income || 0, varIncome: v.varIncome || 0, varStated: v.varIncome !== undefined && v.varIncome !== null, gross: (v.income || 0) + (v.varIncome || 0), debts: v.debts || 0, bors: bors, who: who, joint: Bj };
       // C1: the married-couple answer (B1), whose home is sold (B2), the buy-first instalment on the home being sold (B4)
       i.couple = v.couple === 'yes' ? true : v.couple === 'no' ? false : undefined;
       if (i.order === 'sell' && v.saleOwners) i.sale.owners = v.saleOwners === 'both' ? buyers.map((b, k) => k).filter((k) => buyers[k].owned >= 1) : [+v.saleOwners];
@@ -687,7 +742,7 @@
       }
       // The sale: the expected price, the loan left and the CPF refund INCLUDING its accrued interest, or the buyer's own cash and CPF. Nothing is estimated from an assumed holding period;
       // until the figures are in, the sale is not counted (cash and CPF are 0), and the known part is shown beside it.
-      if (i.order === 'buy' || i.order === 'sell') {
+      if (i.order === 'sell' || (i.order === 'buy' && !i.sale.undecided)) {
         const est = C.saleEstimate({ type: v.saleType === 'private' ? 'private' : 'hdb', price: v.salePrice, loan: v.saleLoan, cpfRefund: v.saleRefund, overrideCash: v.saleCash, overrideCpf: v.saleCpf, costs: v.saleCosts, heldOver4: v.saleHeld === 'yes' ? true : undefined, cpfRefund55: v.saleRefund55 },
           { owner55: v.saleOwner55 === true || (v.age >= 55), today: new Date().toISOString().slice(0, 10) });
         i.saleEst = est;
@@ -709,11 +764,12 @@
       }
       const L = [{ id: 'order', label: 'Do you have a home to sell?', hint: 'Choose one above. Nothing is assumed.', done: !!i.order, shown: i.order ? ORDER_T[i.order] : '' }, { id: 'price', label: 'Purchase price', hint: 'What you will pay for the home.', done: has('price'), shown: has('price') ? $(raw.price) : '' }];
       if (!has('otp') && !i.undated) L.push({ id: 'otp', label: 'Option date', hint: 'The day you pay the booking or option fee.', done: false, shown: '' });
-      L.push({ id: 'age', label: 'Borrower’s age', hint: 'Sets how much the bank can lend. Two borrowers: use the average.', done: has('age'), shown: has('age') ? raw.age + ' years' : '' },
-        { id: 'cash', label: 'Cash you have now', hint: 'Savings you can use. Type 0 if none.', done: has('cash'), shown: has('cash') ? $(raw.cash) : '' },
+      const pre = (n) => (i.bors.length > 1 || i.who !== '0' || cflag('two') === '1' ? (n ? 'Second buyer’s ' : 'First buyer’s ') : 'Your ');
+      i.bors.forEach((b) => L.push({ id: 'borrowers.' + b.n + '.age', label: pre(b.n) + 'age', hint: 'Sets how much the bank can lend, and for how long.', done: typeof b.age === 'number', shown: typeof b.age === 'number' ? b.age + ' years' : '' }));
+      L.push({ id: 'cash', label: 'Cash you have now', hint: 'Savings you can use. Type 0 if none.', done: has('cash'), shown: has('cash') ? $(raw.cash) : '' },
         { id: 'cpf', label: 'CPF OA you plan to use', hint: 'Type 0 if none.', done: has('cpf'), shown: has('cpf') ? $(raw.cpf) : '' });
       // income decides the bank loan, so it is asked, never assumed: $0 is an answer (no bank loan), a blank is not
-      L.push({ id: 'income', label: 'Monthly income', hint: 'Sets what a bank could lend. Type 0 if none: no bank loan is then assumed.', done: has('income') || has('varIncome'), shown: $(i.gross || 0) + ' a month' });
+      i.bors.forEach((b) => L.push({ id: 'borrowers.' + b.n + '.fixed', label: pre(b.n) + 'monthly income', hint: 'Sets what a bank could lend. Type 0 if none.', done: typeof b.fixed === 'number' || typeof b.variable === 'number', shown: $((b.fixed || 0) + (b.variable || 0)) + ' a month' }));
       // at an age where any loan runs past 65 there is no standard tenure to start from
       { const sy = has('age') ? stdYearsOf(raw.age) : null; if (sy === 0 && !has('years')) L.push({ id: 'years', label: 'Loan tenure', hint: 'At this age any loan runs past age 65. Enter the years you want.', done: false, shown: '' }); }
       // a home that is kept and still has a loan: how many loans, and what they cost each month (both count in the bank's income test)
@@ -736,15 +792,17 @@
       else n.hidden = true;
     }
     // ---- compute ----
-    let last = null, startedT = false, doneT = false, issues = [], dirty = false;
+    let curI = null, last = null, startedT = false, doneT = false, issues = [], dirty = false;
     const RL = root.GW_RULES.bankLtv;
     const ECR = (root.GW_RULES && root.GW_RULES.ecIncomeCeiling) || { before: 16000, onOrAfter: 18000 };
     const run = (inp) => { if (inp.order === 'none') return { r: T.timeline(inp), c: null }; const c = T.compare(inp); return { r: c.ok ? c[inp.order] : (c.buy && !c.buy.ok ? c.buy : c.sell), c }; };
     // the buy-first instalment on the home being sold, while its loan is owed at the bank's assessment (a loan repaid before it, or none, adds nothing)
+    // FE V2: each borrower as entered (GW_CALC.borrowers weights the age and applies the 30% haircut per borrower); a caller with only the totals gets one borrower
+    const borList = (inp) => (inp.bors && inp.bors.length ? inp.bors.map((b) => ({ age: b.age, fixed: b.fixed || 0, variable: b.variable || 0 })) : [{ age: inp.age, fixed: inp.income, variable: inp.varIncome }]);
     const flatDebt = (inp) => (inp.order === 'buy' && inp.flatLoan !== 'none' && inp.flatLoan !== 'discharged' && inp.flatInstal > 0 ? inp.flatInstal : 0);
     // What the entered income supports, from the engine: TDSR for a private home, MSR with TDSR for a new EC from the developer (GW_CALC.msr, 'ec').
     const supportRes = (inp, loans, years) => {
-      if (!(inp.gross > 0)) return null; const b = [{ age: inp.age, fixed: inp.income, variable: inp.varIncome }], mc = msrCase(inp.uiKind, inp.mop);
+      if (!(inp.gross > 0)) return null; const b = borList(inp), mc = msrCase(inp.uiKind, inp.mop);
       if (mc === 'unknown') return null; // whether MSR applies is not known: no single income-supported loan
       const fi = flatDebt(inp);   // C1 (B4): buying first, the home being sold still has its instalment when the bank assesses the new loan
       try { return mc === 'applies' ? C.msr({ scenario: 'ec', borrowers: b, propertyLoans: inp.propertyLoans + fi, otherDebts: inp.debts, tenure: years, loans: loans, quotedRatePct: inp.ratePct }) : C.tdsr({ kind: 'private', borrowers: b, debts: inp.debts + fi, loans: loans, tenure: years, quotedRatePct: inp.ratePct }); } catch (e) { return null; }
@@ -752,7 +810,7 @@
     const good = (t) => (t && t.ok && !t.noTenure ? t : null);
     // resale EC, MOP not known: both cases, each labelled by the card; neither is used to size the timeline
     const supportBoth = (inp, loans, years) => {
-      if (!(inp.gross > 0)) return null; const b = [{ age: inp.age, fixed: inp.income, variable: inp.varIncome }], fi = flatDebt(inp);
+      if (!(inp.gross > 0)) return null; const b = borList(inp), fi = flatDebt(inp);
       try { return { msr: good(C.msr({ scenario: 'ec', borrowers: b, propertyLoans: inp.propertyLoans + fi, otherDebts: inp.debts, tenure: years, loans: loans, quotedRatePct: inp.ratePct })), tdsr: good(C.tdsr({ kind: 'private', borrowers: b, debts: inp.debts + fi, loans: loans, tenure: years, quotedRatePct: inp.ratePct })) }; } catch (e) { return null; }
     };
     // The timeline at the rule-ceiling loan, and, when the income supports less, again with the loan capped at that amount (never silently swapped).
@@ -772,10 +830,48 @@
       const ruleMax = rule.r.loan.ruleLoanMax, limit = lim !== null ? Math.min(ruleMax, lim) : ruleMax;   // the estimated limit shown beside any loan the buyer asks for
       return { rule: rule, cap: cap, sp: sp, spRaw: raw, mopLoan: mopLoan, limit: limit, limitWhy: lim !== null && lim < ruleMax - 0.5 ? (mopLoan !== null ? 'mop' : 'income') : 'rule' };
     }
+    // ---- FE V2: compare another scenario (rate, tenure, sale timing) with the plan, through the same sized() and engine; nothing else is worked out here ----
+    const scnBox = q('[data-scn]'), scnOut = q('[data-scn-out]'), scnNote = q('[data-scn-n]'), scnSale = q('[data-sk="sale"]');
+    const skVal = (k) => { const el = q('input[data-sk="' + k + '"]'); if (!el || !el.value.trim()) return null; const p = C.parseNum(el.value); return p.error || p.value === undefined ? NaN : p.value; };
+    if (scnSale) $$('button', scnSale).forEach((b) => b.addEventListener('click', () => { setChip(scnSale, b.dataset.v); track('planner_scenario', { change: 'sale' }); paintScenario(); }));
+    $$('input[data-sk]').forEach((x) => x.addEventListener('input', () => { clearTimeout(x.__t); x.__t = setTimeout(paintScenario, 250); }));
+    function paintScenario() {
+      if (!scnBox) return;
+      if (!last || !last.r || !last.r.ok || last.i.entity) { scnBox.hidden = true; return; }
+      const i = last.i, r = last.r; scnBox.hidden = false;
+      const rIn = q('input[data-sk="rate"]'), yIn = q('input[data-sk="years"]');
+      if (rIn) rIn.placeholder = String(r.loan.ratePct); if (yIn) yIn.placeholder = String(r.loan.years);
+      const saleRow = q('[data-scn-sale]'); if (saleRow) saleRow.hidden = i.order !== 'buy';
+      const rate = skVal('rate'), years = skVal('years'), saleC = i.order === 'buy' && scnSale ? (chipVal(scnSale) || '') : '';
+      const L = C.LIMITS; let msg = '';
+      if (rate !== null && !(rate >= L.ratePct.min && rate <= L.ratePct.max)) msg = 'Enter a rate between ' + L.ratePct.min + '% and ' + L.ratePct.max + '% a year.';
+      else if (years !== null && !(years >= L.years.min && years <= L.years.max)) msg = 'Enter a tenure between ' + L.years.min + ' and ' + L.years.max + ' years.';
+      if (scnNote.textContent !== msg) scnNote.textContent = msg;
+      if (msg || (rate === null && years === null && !saleC)) { scnOut.innerHTML = ''; return; }
+      const alt = Object.assign({}, i, { ratePct: rate !== null ? rate : i.ratePct, years: years !== null ? years : i.years, sale: Object.assign({}, i.sale) });
+      if (saleC === 'sell') alt.order = 'sell';
+      else if (saleC === 'afterKeys') Object.assign(alt.sale, { month: undefined, date: undefined, undecided: undefined, afterKeys: 3 });
+      else if (saleC === 'unsure') Object.assign(alt.sale, { month: undefined, date: undefined, afterKeys: undefined, undecided: true, cash: 0, cpf: 0 });
+      let r2 = null; try { const z = sized(alt); r2 = (z.cap || z.rule).r; } catch (e) { r2 = null; }
+      if (!r2 || !r2.ok) { scnOut.innerHTML = '<p class="gw-fine">This scenario cannot be worked out with these figures.</p>'; return; }
+      const fin = (x) => { const st = instalSteps(x); return st.length ? st[st.length - 1].instalment : 0; }, short = (x) => x.totals.uncovered;
+      const SALE_T = { sell: 'sell first', afterKeys: 'sale 3 months after the keys', unsure: 'sale date not decided' }, saleNow = r.order === 'sell' ? 'sell first' : r.saleUndecided ? 'sale date not decided' : r.saleDate ? 'sale ' + onDay(r.saleDate) : '';
+      const row = (k, a, b, cls) => '<div class="pl-crow' + (cls ? ' ' + cls : '') + '"><span>' + k + '</span><b>' + a + '</b><b>' + b + '</b></div>';
+      const diff = (a, b) => (Math.abs(a - b) < 0.5 ? '' : ' chg');
+      scnOut.innerHTML = '<div class="pl-cmp pl-scn-t"><div class="pl-crow h"><span></span><b>Your plan</b><b>Scenario</b></div>' +
+        row('Interest rate', pc(r.loan.ratePct / 100, 2), pc(r2.loan.ratePct / 100, 2), diff(r.loan.ratePct, r2.loan.ratePct)) + row('Loan tenure', r.loan.years + ' years', r2.loan.years + ' years', diff(r.loan.years, r2.loan.years)) +
+        (saleC ? row('Your sale', esc(saleNow), esc(SALE_T[saleC]), ' chg') : '') +
+        row('Estimated bank loan', $(r.loan.loanMax), $(r2.loan.loanMax), diff(r.loan.loanMax, r2.loan.loanMax)) +
+        row('Monthly mortgage, fully released', $(fin(r)), $(fin(r2)), diff(fin(r), fin(r2))) +
+        (r.duty.absd || r2.duty.absd ? row('ABSD paid up front', $(r.duty.absd), $(r2.duty.absd), diff(r.duty.absd, r2.duty.absd)) : '') +
+        row('Cash for the payments', $(r.totals.cash), $(r2.totals.cash), diff(r.totals.cash, r2.totals.cash)) + row('CPF for the payments', $(r.totals.cpf), $(r2.totals.cpf), diff(r.totals.cpf, r2.totals.cpf)) +
+        row('Not covered', short(r) > 0.5 ? $(short(r)) : 'None', short(r2) > 0.5 ? $(short(r2)) : 'None', diff(short(r), short(r2)) + (short(r2) > 0.5 ? ' bad' : '')) + '</div>' +
+        '<p class="gw-fine">Worked out the same way as your plan: the loan the rules and your income allow at that rate and tenure (banks test at 4% or the rate, whichever is higher). ' + (saleC === 'sell' ? 'Selling first, the sale money you entered is counted at the option and the home is no longer owned for ABSD. ' : saleC === 'unsure' ? 'With the sale date not decided, no sale money is counted. ' : saleC === 'afterKeys' ? 'The sale money you entered is counted only once the sale completes. ' : '') + 'An estimate, not a bank offer.</p>';
+    }
     // the longest tenure that keeps the standard limit at this age: the engine's own figure (GW_CALC.progressive → stdYears)
     const stdYearsFor = stdYearsOf;
     // where the engine names a field, the planner's input for it
-    const ENGKEY = { price: 'price', cash: 'cash', cpf: 'cpf', saveMo: 'saveMo', cpfMo: 'cpfMo', age: 'age', ratePct: 'ratePct', years: 'years', otp: 'otp', sale: 'saleMonth', 'sale.cash': 'saleCash', 'sale.cpf': 'saleCpf', rent: 'rent', income: 'income', varIncome: 'varIncome' };
+    const ENGKEY = { price: 'price', cash: 'cash', cpf: 'cpf', saveMo: 'saveMo', cpfMo: 'cpfMo', age: 'borrowers.0.age', ratePct: 'ratePct', years: 'years', otp: 'otp', sale: 'saleMonth', 'sale.afterKeys': 'saleAfterKeys', 'sale.cash': 'saleCash', 'sale.cpf': 'saleCpf', rent: 'rent', income: 'borrowers.0.fixed', varIncome: 'borrowers.0.variable' };
     const fieldFor = (key) => (key ? (box.querySelector('input[data-k="' + key.replace(/"/g, '') + '"]') || box.querySelector('[data-k="' + key.replace(/"/g, '') + '"][data-t="chip"] button')) : null);
     function paintErrors() {
       $$('input[data-k]').forEach((el) => {
@@ -812,12 +908,25 @@
       if (vals.entity === '1') { const t0 = C.tenureNote({ entity: true }); if (el.textContent !== t0) el.textContent = t0; return; }
       const age = vals.age, L = C.LIMITS.age, chosen = typeof vals.years === 'number' && vals.years > 0 ? vals.years : 0;
       let o = {};
-      if (typeof age === 'number' && age >= L.min && age <= L.max) { const t = C.bankTenure('private', age); o = { age: age, std: t.std, allowed: t.allowed, chosen: chosen }; }
+      if (typeof age === 'number' && age >= L.min && age <= L.max) { const t = C.bankTenure('private', age), jt = !!(curI && curI.bors && curI.bors.length > 1); o = { age: jt ? Math.round(age * 10) / 10 : age, joint: jt, std: t.std, allowed: t.allowed, chosen: chosen }; }
       const yEl = q('[data-k="years"]'), adj = yEl && +yEl.dataset.adjustedFrom > 0 ? +yEl.dataset.adjustedFrom : 0; if (adj && o.chosen) o.adjustedFrom = adj;
       if (last && last.r && last.r.loan && typeof last.r.loan.loans === 'number') o.loans = last.r.loan.loans;
       const t = C.tenureNote(o); if (el.textContent !== t) el.textContent = t;
     }
     box.addEventListener('focusout', (e) => { if (waitBlur && e.target.matches && e.target.matches('input[data-k]')) setTimeout(recalc, 0); });
+    // FE V2: the borrowers, said in one line under their profiles: whose figures size the loan, and the age the loan uses (GW_CALC.borrowers, never a hand average)
+    function paintJoint(i) {
+      const el = q('[data-joint]'); if (!el) return; let h = '';
+      const two = cflag('two') === '1', ag = (x) => (Math.round(x * 10) / 10).toString();
+      if (!i.entity && two && i.bors.length === 1) h = 'Only the ' + (i.bors[0].n ? 'second' : 'first') + ' buyer borrows: the loan is sized on their income, age and debts. Both buyers still count for stamp duty, and the bank may ask the other owner to sign as a guarantor.';
+      else if (!i.entity && i.bors.length === 2 && i.joint && i.joint.iwaaUse !== null) {
+        const t = C.bankTenure('private', i.joint.iwaaUse);
+        h = 'Borrowing together: the bank uses your <b>income-weighted average age, ' + ag(i.joint.iwaaUse) + '</b>, each age weighted by that borrower’s gross monthly income (MAS). ' + (t.std >= 1 ? 'At that age the longest tenure that keeps the standard loan limit is ' + t.std + ' years.' : 'At that age every tenure takes the lower loan limit.') +
+          (i.joint.ageUnverified ? ' <span class="pl-unv">With variable income the two ways of weighting differ (' + ag(i.joint.iwaa) + ' or ' + ag(i.joint.iwaaGross) + '), so the older age is used, the cautious view. Ask your bank which it uses.</span>' : '');
+      } else if (!i.entity && i.bors.length === 2) h = 'Borrowing together: enter both ages and incomes. The bank uses your income-weighted average age.';
+      if (el.innerHTML !== h) el.innerHTML = h;
+    }
+    { const ab = q('[data-add-buyer]'); if (ab) ab.addEventListener('click', () => { showRow('buyers.1', true); setProp(true); recalc(); const r1 = rowOf('buyers.1'); if (r1) { try { r1.scrollIntoView({ block: 'center' }); } catch (e) { /* ignore */ } const f = r1.querySelector('button[aria-pressed="true"]'); if (f) f.focus({ preventScroll: true }); } track('planner_add_buyer', {}); }); }
     // ---- your property: the summary line, and whether the three details are in ----
     const prop = q('[data-prop]'), propEdit = q('[data-prop-edit]'), propSum = q('[data-prop-sum]'), buyerLine = q('[data-buyer-line]');
     let propOpen = true, propOk = false, ptr = false, buyerTouched = false, lastS = null, lastI = null, screen = 'schedule';
@@ -845,7 +954,7 @@
       const s = SCH.schedule({ kind: i.kind, price: i.price, otp: i.otp, undated: i.undated, entity: i.entity, buyers: i.entity ? undefined : i.buyers.length ? i.buyers : undefined, couple: i.couple, saleOwners: i.sale.owners, order: i.order === 'sell' ? 'sell' : undefined, removesOwnership: i.sale.removesOwnership, dates: i.dates });
       if (!s.ok) return clear((s.invalid && s.invalid[0] && s.invalid[0].text) || 'Check the property details above to see your payment schedule.');
       O.sum.innerHTML = schedSumHtml(s);
-      O.lead.textContent = $(s.totals.amount) + ' in total, starting with ' + $(s.events[0].amount) + ' ' + onDay(s.events[0].date) + '. The timing of each payment is in the list below.';
+      { const ups = upOf(s.events); O.lead.textContent = 'First payment ' + $(s.events[0].amount) + ' ' + onDay(s.events[0].date) + '. Upfront payments of ' + $(ups.reduce((a, e) => a + e.amount, 0)) + ' fall due ' + (UND ? 'soon after the option' : 'by ' + day(ups[ups.length - 1].date)) + '. Construction and completion payments follow in the list below.'; }
       O.note.innerHTML = i.uiKind === 'ec' ? '<p class="pl-note">EC eligibility is not checked in this schedule. The funding check tests your income against the new-EC ceiling.</p>' : i.uiKind === 'resaleec' ? '<p class="pl-note">A resale EC is planned like a completed home. Whether you can buy one depends on HDB’s rules for the unit, which are not checked here.</p>' : '';
       // New launch and new EC: how each stage is usually paid (the split New launch payments used to give), from the price alone; an age, CPF, rate or tenure already entered refines it
       const splitOpen = !!q('[data-split-d][open]'), PL = root.GW_PAYLIST;
@@ -864,8 +973,9 @@
     let tenureFld = null;
     function recalc() {
       syncEntity(); applyWhen();
-      const i = values();
+      const i = values(); curI = i;
       UND = !!i.undated; KIND_NOW = i.kind;
+      paintJoint(i);
       // C1 (B3): what the set-aside leaves, said beside the balances
       { const el = q('[data-cpf2-out]'), c = i.cpfCheck; if (el) el.innerHTML = c && c.ok ? '<b>CPF counted: ' + $(i.cpf) + '</b>' + (i.cpfPlanned > i.cpf + 0.5 ? ' of the ' + $(i.cpfPlanned) + ' you plan to use' : '') + ': the OA above the ' + (c.sumName === 'BRS' ? 'Basic' : 'Full') + ' Retirement Sum (' + $(c.setAside) + ' for ' + c.year + ') for each buyer who still owns a home.' + (c.cover !== 'yes' ? ' The Full Retirement Sum is used because ' + (c.cover === 'no' ? 'none of the homes lasts until 95.' : 'you are not sure a home lasts until 95.') : '') + (c.older ? ' A buyer aged 55 or over keeps the lower sum of the year they turned 55, so CPF may allow a little more.' : '') : ''; }
       if (pendingUnder) { waitBlur = true; return; } // a number is still being typed: keep the screen steady until it is complete or the field is left
@@ -883,7 +993,7 @@
       let ack = !!(ackGroup && chipVal(ackGroup) === 'yes');
       if (ack && ecOut !== 'exceeds') { setChip(ackGroup, ''); ack = false; save(); } // the choice to see illustrative figures belongs to this outcome only
       const gate = ecGate(i, ECR, ack);
-      const top = hdb ? '' : ecHtml(i, ECR, { ack: ack, incomeBad: !!(errMap.income || errMap.varIncome) });
+      const top = hdb ? '' : ecHtml(i, ECR, { ack: ack, incomeBad: Object.keys(errMap).some((k) => /^borrowers\.\d\.(fixed|variable)$/.test(k)) });
       if (gate || hdb) r = { ok: false, missing: [], gated: true };
       else if (issues.length) r = { ok: false, missing: [], invalid: issues };
       else if (todo.length) r = { ok: false, missing: [], incomplete: true };
@@ -896,7 +1006,7 @@
       if (!r.ok && !r.incomplete && !r.gated && !issues.length && r.invalid) r.invalid.forEach((x) => { const key = ENGKEY[x.field] || '', f = fieldFor(key); issues.push({ field: key, key: key, label: f ? fieldName(f) : '', bare: x.text, text: x.text }); if (key && !errMap[key]) errMap[key] = x.text; });
       if (r.ok) {
         const t0 = sc.spRaw;
-        if (t0 && !t0.ok && t0.invalid && t0.invalid.length) errMap.income = t0.invalid[0].text;
+        if (t0 && !t0.ok && t0.invalid && t0.invalid.length) errMap['borrowers.' + ((i.bors[0] || {}).n || 0) + '.fixed'] = t0.invalid[0].text;
         const both = mc === 'unknown' && i.gross > 0 ? supportBoth(i, sc.rule.r.loan.loans, i.years) : null;
         // 2. which loan the timeline uses: the income-supported one by default, and a plain label whenever the loan is only an illustration
         const ill = [];
@@ -918,10 +1028,10 @@
         out.instal.innerHTML = instalHtml(r, i) + leavesOutHtml(i, r);
         restoreDets(detRegions, detOpen);
         out.more.hidden = !(out.detail.innerHTML || out.compare.innerHTML); out.more_em.textContent = out.detail.innerHTML && out.compare.innerHTML ? 'your estimated bank loan, and buying first or selling first' : out.compare.innerHTML ? 'buying first or selling first' : 'your estimated bank loan';
-        box.classList.add('has-result'); last = { i, r, c, scn: { view: view, cap: !!sc.cap, illus: ill } };
+        box.classList.add('has-result'); last = { i, r, c, scn: { view: view, cap: !!sc.cap, illus: ill } }; paintScenario();
         const el = q('[data-refund-elig]'); if (el) el.textContent = r.duty.absd > 0 ? (r.duty.notes.some((n) => n.id === 'refund' || n.id === 'single-senior') ? 'IRAS’s refund conditions may apply to this profile (sell within 6 months of the purchase, or of TOP/CSC for an uncompleted home; bought jointly in two names; no other home acquired). IRAS decides.' : 'This buyer profile does not match IRAS’s refund conditions; a refund assumed here would be shown as not eligible.') : 'No ABSD on this purchase, so there is nothing to refund.';
       } else {
-        last = null; box.classList.remove('has-result'); ['sum', 'verdict', 'detail', 'assume', 'compare', 'timeline', 'instal'].forEach((k) => { out[k].innerHTML = ''; }); out.more.hidden = true;
+        last = null; if (scnBox) scnBox.hidden = true; box.classList.remove('has-result'); ['sum', 'verdict', 'detail', 'assume', 'compare', 'timeline', 'instal'].forEach((k) => { out[k].innerHTML = ''; }); out.more.hidden = true;
         if (r.gated) { out.result.innerHTML = top; out.assume.innerHTML = hdb ? '' : entriesHtml(raw); }
         else if (todo.length) out.result.innerHTML = top + (issues.length ? fixHtml(issues) : '') + needHtml(need, i, raw);
         else if (issues.length) { out.result.innerHTML = top + fixHtml(issues); out.assume.innerHTML = entriesHtml(raw); }
@@ -949,12 +1059,12 @@
     if (MONEY) $$('input[data-t="num"]').forEach((x) => MONEY.selectOnFocus(x));
     { const yEl = q('[data-k="years"]'); if (MONEY && MONEY.tenureField && yEl) tenureFld = MONEY.tenureField(yEl, { read: () => C.parseNum(yEl.value).value || null, max: () => C.LIMITS.years.max, limit: () => {
         // the most the age allows, from the age alone (no income or cash needed): the same limit the calculation applies (C.tenureLimit)
-        const eEl = q('[data-k="entity"]'), aEl = q('[data-k="age"]'); if (eEl && chipVal(eEl) === '1') return 0;
-        const a = aEl ? C.parseNum(aEl.value).value : undefined; const L = C.tenureLimit({ kind: 'private', age: typeof a === 'number' ? a : undefined }); return L ? L.allowed : 0;
+        const eEl = q('[data-k="entity"]'); if (eEl && chipVal(eEl) === '1') return 0;
+        const a = raw.age; const L = C.tenureLimit({ kind: 'private', age: typeof a === 'number' ? a : undefined }); return L ? L.allowed : 0;
       }, recalc: () => { clearTimeout(tmr); recalc(); }, changed: () => save() }); }
     // ---- restore: shared details from the other calculators, then the planner's own ----
     const sv = journey ? shared.get() : {};
-    $$('[data-share]').forEach((x) => { const val = sv[x.dataset.share]; if (val === undefined || val === null || val === '') return; const m = /^buyers\.1\./.exec(x.dataset.share); if (m) showRow('buyers.1', true); if (x.dataset.t === 'chip') setChip(x, val); else x.value = x.dataset.t === 'money' && parseMoney(val) !== null ? fmtMoney(parseMoney(val)) : val; });
+    $$('[data-share]').forEach((x) => { const val = sv[x.dataset.share]; if (val === undefined || val === null || val === '') return; const m = /^(buyers|borrowers)\.1\./.exec(x.dataset.share); if (m) showRow('buyers.1', true); /* FE V2: a second borrower in What can I afford? is a second buyer */ if (x.dataset.t === 'chip') setChip(x, val); else x.value = x.dataset.t === 'money' && parseMoney(val) !== null ? fmtMoney(parseMoney(val)) : val; });
     if (sv.housingLoans === '1' || sv.housingLoans === '2') { /* a counted loan elsewhere: keep the safe default "still outstanding" */ }
     const ov = own.get();
     $$('[data-k]').forEach((x) => { if (x.dataset.share && journey) return; const val = ov[x.dataset.k]; if (val === undefined) return; if (x.dataset.t === 'chip') setChip(x, val); else if (x.dataset.t === 'check') x.checked = val === '1'; else x.value = x.dataset.t === 'money' && parseMoney(val) !== null ? fmtMoney(parseMoney(val)) : val; });
@@ -971,8 +1081,11 @@
       if (Array.isArray(h.saleOwners) && h.saleOwners.length) put('saleOwners', h.saleOwners.length > 1 ? 'both' : String(h.saleOwners[0]));
       if (Array.isArray(h.cpfBal)) h.cpfBal.forEach((x, k) => { if (x && x.oa !== undefined) put('cpfBal.' + k + '.oa', x.oa); if (x && x.sa !== undefined) put('cpfBal.' + k + '.sa', x.sa); });
       if (h.cover95 === true || h.cover95 === false) put('cover95', h.cover95 ? 'yes' : 'no');
-      put('kind', h.kind); put('price', h.price); put('valuation', h.valuation > 0 ? h.valuation : ''); if (h.otp) put('otp', h.otp); put('years', h.years); put('ratePct', h.ratePct); put('age', h.age); put('cash', h.cash); put('cpf', h.cpf);
-      put('income', h.income > 0 ? h.income : ''); put('varIncome', h.income > 0 ? h.varIncome || 0 : ''); put('debts', h.debts > 0 ? h.debts : ''); put('loansOther', h.loansOther || 0); put('order', h.order);
+      put('kind', h.kind); put('price', h.price); put('valuation', h.valuation > 0 ? h.valuation : ''); if (h.otp) put('otp', h.otp); put('years', h.years); put('ratePct', h.ratePct); put('cash', h.cash); put('cpf', h.cpf);
+      // FE V2: each borrower's own age and income (What can I afford? treats every buyer as a borrower); an older handoff with only the totals fills the first borrower
+      if (Array.isArray(h.borrowers) && h.borrowers.length) { put('loanWho', 'both'); h.borrowers.forEach((b, k) => { put('borrowers.' + k + '.age', b.age); put('borrowers.' + k + '.fixed', b.fixed > 0 ? b.fixed : (b.fixed === 0 ? 0 : '')); put('borrowers.' + k + '.variable', b.variable > 0 ? b.variable : ''); }); }
+      else { put('borrowers.0.age', h.age); put('borrowers.0.fixed', h.income > 0 ? h.income : ''); put('borrowers.0.variable', h.income > 0 && h.varIncome > 0 ? h.varIncome : ''); }
+      put('debts', h.debts > 0 ? h.debts : ''); put('loansOther', h.loansOther || 0); put('order', h.order);
       put('saveMo', h.saveMo > 0 ? h.saveMo : ''); put('cpfMo', h.cpfMo > 0 ? h.cpfMo : ''); put('prefLoan', h.prefLoan > 0 ? h.prefLoan : '');
       if (h.order === 'sell' && h.sale) { const sl = h.sale; put('saleType', sl.type === 'private' ? 'private' : 'hdb'); put('saleHeld', sl.heldOver4 ? 'yes' : ''); put('salePrice', sl.price > 0 ? sl.price : ''); put('saleLoan', sl.loan === undefined || sl.loan === null ? '' : sl.loan); put('saleRefund', sl.cpfRefund === undefined || sl.cpfRefund === null ? '' : sl.cpfRefund); put('saleCash', sl.overrideCash === undefined || sl.overrideCash === null ? '' : sl.overrideCash); put('saleCpf', sl.overrideCpf === undefined || sl.overrideCpf === null ? '' : sl.overrideCpf); put('saleCosts', sl.costs === undefined || sl.costs === null ? '' : sl.costs); }
       h.fresh = false; hand.set(h);
@@ -1015,7 +1128,7 @@
     function setFund(open) { fundOpen = open; fund.classList.toggle('is-collapsed', !open); fundEdit.setAttribute('aria-expanded', String(open)); }
     function paintFund() {
       const bits = []; const m = (k) => (has(k) ? $(raw[k]) : '');
-      if (has('cash')) bits.push('Cash ' + m('cash')); if (has('cpf')) bits.push('CPF ' + m('cpf')); if (has('income') || has('varIncome')) bits.push('Income ' + $((raw.income || 0) + (raw.varIncome || 0)) + ' a month'); if (has('age')) bits.push('Age ' + raw.age);
+      if (has('cash')) bits.push('Cash ' + m('cash')); if (has('cpf')) bits.push('CPF ' + m('cpf')); if (has('income') || has('varIncome')) bits.push('Income ' + $((raw.income || 0) + (raw.varIncome || 0)) + ' a month'); if (has('age')) bits.push(curI && curI.bors && curI.bors.length > 1 ? 'Ages ' + curI.bors.map((b) => b.age).join(' and ') : 'Age ' + raw.age);
       fundSum.innerHTML = bits.map((x) => '<span>' + esc(x) + '</span>').join('');
     }
     const fundBad = () => Object.keys(errMap).some((k) => { const f = fieldFor(k); return f && fund.contains(f); });

@@ -851,3 +851,6 @@ body.lg .gw-rws .lg-sb .kpr-results{margin-top:12px}
 /* Footer, final (26 Oct 2026): one compact footer on every page: Ken's photo, name, credentials and the LIVE line, then the disclosures. No footer navigation (the header and menu carry it); the privacy notice is linked at the end of the disclosures. */
 .gw-foot .top{justify-content:flex-start}
 .gw-foot .dis a[href$="privacy/"]{white-space:nowrap}
+/* FE V2: one or two borrowers, chosen up front (calculators with borrowers) */
+.gw-add.gw-add-x{display:none!important}
+.gw-bn small{display:block;margin-top:6px;font-size:13px;color:var(--gw-muted)}
