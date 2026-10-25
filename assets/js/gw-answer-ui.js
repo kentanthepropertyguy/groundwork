@@ -590,16 +590,22 @@
     }
     // The maximum budget goes on to Budget Search ("What can this budget buy?", in Research too) in this tab only (kpt.handoff), as the hdb planner does: the search opens with it filled in,
     // the buyer chooses where and what, and the requirements chosen there come back with it. Never in an address, an analytics event or the WhatsApp message.
+    // M1 (25 Oct 2026): a STANDALONE calculation never writes kpt.handoff by itself: Budget Search must not pick up a budget the visitor only worked out here. It is written only when the
+    // visitor presses "Explore properties within my budget" (pendingHand, below). From a journey or Research (?j=1) it is written as the calculation changes, as before.
+    let pendingHand = null;
     function planHandoff(en, r) {
+      pendingHand = null;
       try {
         const st = root.sessionStorage, old = (() => { try { return JSON.parse(st.getItem('kpt.handoff')); } catch (e) { return null; } })();
-        if (!en || !r || r.state !== 'ok' || !(r.budget > 0)) { if (old && old.from === 'planner') st.removeItem('kpt.handoff'); return; }
+        if (!en || !r || r.state !== 'ok' || !(r.budget > 0)) { if (journey && old && old.from === 'planner') st.removeItem('kpt.handoff'); return; }
         if (old && old.from !== 'planner' && !firstEdit) return;
         const ages = en.buyers.map((b) => b.age).filter(Boolean), h = { v: 1, from: 'planner', state: 'ok', budget: { low: r.budget, high: r.budget, single: true }, maxAge: ages.length ? Math.max.apply(null, ages) : null, src: null, j: journey ? 1 : 0 };   // j: worked out on the journey (Research compares its prices with it only then)
         if (old && old.from === 'planner' && !old.edited && old.budget && old.budget.high === h.budget.high) { if (old.find) h.find = old.find; if (old.find2) h.find2 = old.find2; }
-        st.setItem('kpt.handoff', JSON.stringify(h));
+        if (journey) st.setItem('kpt.handoff', JSON.stringify(h)); else pendingHand = h;
       } catch (e) { /* storage unavailable: Budget Search then asks for a budget */ }
     }
+    // Standalone: the explicit choice to explore is what hands the budget on (a click, Enter, or a middle click on the button).
+    function sendHand() { if (!pendingHand) return; try { root.sessionStorage.setItem('kpt.handoff', JSON.stringify(pendingHand)); } catch (e) { /* storage unavailable */ } }
     let dirty = false; root.__paSettled = () => !dirty;
     const changed = () => { dirty = true; if (!firstEdit) { firstEdit = true; track('tool_started', {}); } clearTimeout(tmr); tmr = setTimeout(recalc, 100); };
 
@@ -626,8 +632,9 @@
       if (t('[data-cancel]')) { $$('[data-prev-box]').forEach((x) => { x.hidden = true; }); $$('[data-prev]').forEach((x) => x.setAttribute('aria-expanded', 'false')); return; }
       const ap = t('[data-apply]'); if (ap && res && res.fixes) { applyFix(ap.dataset.apply); return; }
       if (t('[data-undo]')) { undoFix(); return; }
-      if (t('[data-pa-explore]')) { track('planner_explore', {}); return; }
+      if (t('[data-pa-explore]')) { sendHand(); track('planner_explore', {}); return; }
     });
+    box.addEventListener('auxclick', (e) => { if (e.target.closest && e.target.closest('[data-pa-explore]')) sendHand(); });
     // ---- price: typed (or arriving from Research); no slider ----
     let rafT = null;
     function changedPrice(fromRange) { if (!res || res.state !== 'ok') { changed(); return; } dirty = true; clearTimeout(rafT); rafT = setTimeout(() => quoteNow(fromRange), fromRange ? 0 : 140); if (!firstEdit) { firstEdit = true; track('tool_started', {}); } }
