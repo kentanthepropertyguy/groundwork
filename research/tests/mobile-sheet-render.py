@@ -112,7 +112,7 @@ try:
         # everything is still reachable
         if kind == 'dev':
             if pg.query_selector('.bs-act [data-dpmore][aria-expanded=false]'): pg.click('.bs-act [data-dpmore]'); pg.wait_for_timeout(450)
-            t = card(pg); check(f'{nm}: prices by size, the neighbourhood and the Research link are still there', 'Prices by size' in t and 'amenities' in t.lower() and 'Explore nearby developments' in t and 'RECENT PRICES' in t.upper() and pg.query_selector('.bs a[href*="#/p/"]') is not None, t[:200])
+            t = card(pg); check(f'{nm}: prices by size, the neighbourhood and the Research link are still there', 'Prices by size' in t and 'amenities' in t.lower() and 'Explore nearby developments' in t and ('RECENT PRICES' in t.upper() or 'TYPICAL PRICES' in t.upper()) and pg.query_selector('.bs a[href*="#/p/"]') is not None, t[:200])   # 25 Oct 2026: the lead is "Typical prices" (total), by type or size
         elif kind == 'launch':
             check(f'{nm}: no price and no marketing link, sources on demand', re.search(r'\$\s?\d', t) is None and pg.query_selector('.bs a[href*="kentanthepropertyguy"]') is None and 'Far East' in t)
         # close is different from minimise

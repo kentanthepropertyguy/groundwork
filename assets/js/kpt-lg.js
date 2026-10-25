@@ -111,7 +111,7 @@
     return [esc(M.name) + ' is <span data-lg-what>' + CLS[clsOf(M)].what + '</span>' + (where ? ' ' + esc(where) : '') + (ten ? ', ' + esc(ten) : '') + '.', esc(activitySentence(M))].filter(Boolean).join(' ');
   }
   // The answer: the median price for the size on show, with its sample size and price basis right beside it (never further down the page).
-  function answerBlock(M, mf) {
+  function answerBlock(M, mf, rent) {
     const A = M.answer || {}, f = A.facts || {}, w = words(M), sz = A.size && A.size.label ? sqft(A.size.label) : '';
     const priced = (A.state === 'recent' || A.state === 'recent-thin') && f.recentMedian != null;
     const k = priced ? 'Median price per sq ft (PSF)' + (sz ? ' · ' + sz : '') + ' · ' + w[1] + ', last 12 months' : (A.price && A.price.label ? A.price.label : 'Recent sales') + (sz ? ' · ' + sz : '');
@@ -120,7 +120,7 @@
     const basis = ((strong(M) ? '' : 'Past sales, not a valuation.') + newNote(M) + (lines ? ' ' + lines : '')).trim();
     return '<div class="lg-ans" data-lg-ans="' + esc(A.state || '') + '"><p class="lg-ans-k">' + k + '</p><p class="lg-ans-main">' + v + '</p>' + projectPill(M) +
       (basis ? '<p class="lg-fine lg-ans-basis" data-lg-basis>' + esc(basis) + '</p>' : '') +
-      (M.tenure && M.tenure.mixed ? '<p class="lg-fine" data-lg-mixed>' + esc(mixedLine(M.tenure)) + '</p>' : '') + freshLine(mf, undefined, 'lg-fine') + '</div>';
+      (M.tenure && M.tenure.mixed ? '<p class="lg-fine" data-lg-mixed>' + esc(mixedLine(M.tenure)) + '</p>' : '') + (rent || '') + freshLine(mf, undefined, 'lg-fine') + '</div>';
   }
 
   /* ---------- the five-year line (handoff §6.1) ---------- */
@@ -344,11 +344,16 @@
   /* ---------- R2.1: what you can do with this development (each backed by figures this page already has) ---------- */
   const ASKM = () => root.GWASK || (typeof require === 'function' ? (() => { try { return require('./gw-ask.js'); } catch (e) { return null; } })() : null);
   // The 12-month figures of each size band, for the asking-price check (the same cells the size chips and table use).
-  function askData(M) {
-    const w = words(M);
-    return { id: M.id, name: M.name, words: [w[0], w[1]], bands: (M.bands || []).slice().sort((x, y) => x.bin - y.bin).map((b) => (b.recent
-      ? { bin: b.bin, label: sqft(b.label), n: b.recent.n, months: b.recent.evidence.months, latest: b.recent.evidence.latestLabel, lo: b.recent.psf.min, q1: b.recent.psf.q1, med: b.recent.psf.med, q3: b.recent.psf.q3, hi: b.recent.psf.max }
-      : { bin: b.bin, label: sqft(b.label), n: 0 })) };
+  // 25 Oct 2026: with the development's transactions (TX, GW_REC.pick), each band also carries the psf of exactly the sales it counts (ps), for
+  // the chart's dots; a band whose sales don't match its own count and range gets none.
+  function askData(M, TX) {
+    const w = words(M), REC = GLOBAL.GW_REC, code = REC && M.sale ? REC.CODE[M.sale.selected] : null;
+    return { id: M.id, name: M.name, words: [w[0], w[1]], saleCode: code || undefined, bands: (M.bands || []).slice().sort((x, y) => x.bin - y.bin).map((b) => {
+      if (!b.recent) return { bin: b.bin, label: sqft(b.label), n: 0 };
+      const o = { bin: b.bin, label: sqft(b.label), n: b.recent.n, months: b.recent.evidence.months, latest: b.recent.evidence.latestLabel, lo: b.recent.psf.min, q1: b.recent.psf.q1, med: b.recent.psf.med, q3: b.recent.psf.q3, hi: b.recent.psf.max };
+      const ps = TX && REC && code ? REC.bandPsf(TX, code, b.bin, o) : null; if (ps) o.ps = ps;
+      return o;
+    }) };
   }
   // A4-07: the price for "Run the numbers" is the median sale PRICE of the same sales (same sale type, size band and last 12 months),
   // read from data/projects/find.json, which holds those medians. Median PSF times the middle of the band could describe a size
@@ -363,7 +368,7 @@
     return { price: Math.round(row[5] / 1000) * 1000, median: row[5], n: row[1], label: sqft(A.size && A.size.label), psf: f.recentMedian };
   }
   const runWhat = (T, M) => 'Run the numbers at about ' + money(T.price) + ', the median price of the ' + plural(T.n, words(M)[0], words(M)[1]) + ' of ' + T.label + ' homes here in the last 12 months (past sales, not a valuation):';
-  function actions(M, bedOn) {
+  function actions(M, bedOn, TX) {
     const K = ASKM(), canAsk = !!K && (M.bands || []).some((b) => b.recent && b.recent.n), T = (chosen(M) && strong(M)) || !!bedOn;
     const act = (attrs, icon, t) => '<button type="button" class="lg-act" ' + attrs + '>' + icon + '<span>' + t + '</span></button>';
     const I = (d) => '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>';
@@ -371,14 +376,29 @@
       (chosen(M) ? act('data-lg-scroll="numbers"', I('<path d="M5 20V12m5 8V7m5 13v-6m5 6V4"/>'), 'Recent sales') : '') +
       (canAsk ? act('data-lg-ask aria-expanded="false" aria-controls="lgAsk"', I('<path d="M4 7h16v10H4z"/><path d="M8 12h8"/><path d="M12 9v6"/>'), 'Check an asking price') : '') +
       '<a class="lg-act" id="cmp" href="#/compare/' + esc(M.id) + '">' + I('<path d="M8 4v16M16 4v16M4 8h4M16 16h4"/>') + '<span>Compare</span></a></div>' +
-      (canAsk ? K.panelHtml('condo', askData(M), { id: 'lgAsk', hidden: true }) : '') +
+      (canAsk ? K.panelHtml('condo', askData(M, TX), { id: 'lgAsk', hidden: true }) : '') +
       // Progressive payments only where the sales on show are new sales (a home still under construction); resales are paid on completion.
       // The line is filled after the page is drawn, once find.json has given the median price (afterProject); until then it is hidden.
       // V2-01: on a first-look page (no typical price) the line is still there, hidden, so an asking price typed above can be sent on.
       (T || canAsk ? '<p class="lg-run" data-lg-run-line data-typical="" hidden><span data-lg-run-what></span> ' +
         '<a href="../tools/planner/" data-lg-run="planner"><b>Can I afford this?</b></a> · <a href="../tools/payment-planner/" data-lg-run="payment-planner">Plan the payments</a> · <a href="../tools/stamp-duty/" data-lg-run="stamp-duty">Stamp duty</a> · <a href="../tools/mortgage/" data-lg-run="mortgage">Mortgage (75% loan)</a>' + (M.sale && M.sale.selected === 'new' ? ' · <a href="../tools/progressive-payments/" data-lg-run="progressive">New launch payments</a>' : '') + '</p>' : '');
   }
-  // ctx: { S, IN, root }
+  // 25 Oct 2026: under the answer, the evidence a visitor asked for, in order: what each home type (or, without reliable types, each size) sells
+  // for; every transaction, filterable; and what homes here rent for (gw-records.js, gw-rent.js). Each part is left out when its data is missing.
+  function evidenceHtml(M, ctx, BV, bedAny) {
+    const REC = GLOBAL.GW_REC, RENT = GLOBAL.GW_RENT, TX = ctx && ctx.TX, f = M.focus || {}, sale = M.sale && M.sale.selected;
+    let h = '';
+    if (REC) {
+      if (bedAny && BV.sale === 'resale') h += REC.typesHtml(BV, { label: GLOBAL.GW_BED.label });
+      else if (TX) h += REC.sizesHtml(TX, sale, { bin: chosen(M) ? f.bin : null });
+      if (TX) h += REC.txHtml(TX, (ctx.txSt && ctx.txSt.f) || REC.startFilter({ sale }), { shown: ctx.txSt && ctx.txSt.shown });
+    }
+    if (RENT && ctx && ctx.RENT) h += RENT.sectionHtml(ctx.RENT, { bed: BV && BV.g ? BV.g : '', bin: chosen(M) ? f.bin : null, ask: ASKM() });
+    return h;
+  }
+  // Rental Research V1: beside the chosen type's (or size's) resale price, its typical monthly rent, each with its own count and period.
+  function rentLine(ctx, g, bin) { const RT = GLOBAL.GW_RENT, R0 = ctx && ctx.RENT; if (!RT || !R0) return ''; return g ? RT.typeLine(R0, g) : bin != null ? RT.sizeLine(R0, bin) : ''; }
+  // ctx: { S, IN, root, TX (transactions), txSt (their filters), RENT (rents) }
   function projectHtml(M, ctx) {
     const S = (ctx && ctx.S) || {}, IN = ctx && ctx.IN, root = (ctx && ctx.root) || '../', f = M.focus || {}, A = M.answer || {}, mf = S.rawM || null;
     const BV = ctx && ctx.BED && GLOBAL.GW_BED ? ctx.BED : null, bedOn = !!(BV && BV.t) && !chosen(M), bedAny = !!(BV && BV.types && BV.types.length);
@@ -404,12 +424,13 @@
         '<div class="lg-id"><p class="lg-kicker lg-idline"><span class="lg-cls" data-lg-cls="' + clsOf(M) + '">' + esc(CLS[clsOf(M)].label) + '</span>' + [M.street ? esc(titleCase(M.street)) : '', esc(district(M))].filter(Boolean).join(' · ') + '</p>' +
         '<h1 class="lg-name" tabindex="-1">' + esc(M.name) + '</h1></div>' +
         sizePicker(M, S, BV) +
-        (bedOn ? GLOBAL.GW_BED.answerHtml(BV, { budget: ctx.budget, fresh: freshLine(mf, undefined, 'lg-fine') }) : chosen(M) ? answerBlock(M, mf) : overviewHtml(M, mf, bedAny)) +
+        (bedOn ? GLOBAL.GW_BED.answerHtml(BV, { budget: ctx.budget, fresh: freshLine(mf, undefined, 'lg-fine'), rent: rentLine(ctx, BV.g, null) }) : chosen(M) ? answerBlock(M, mf, rentLine(ctx, null, f.bin)) : overviewHtml(M, mf, bedAny)) +
         (bedOn ? GLOBAL.GW_BED.trendHtml(BV, { forWho, mapHref: 'map/#p=' + encodeURIComponent(M.id) }) : chosen(M) ? (f.bin == null ? noSizeHtml(M, forWho) : ctx && ctx.PU && GLOBAL.GW_PULSE ? GLOBAL.GW_PULSE.html(ctx.PU, { forWho, mapHref: 'map/#p=' + encodeURIComponent(M.id) }) : '') : '') +
-        actions(M, bedOn) +
+        actions(M, bedOn, ctx && ctx.TX) +
         '<p class="lg-fine lg-facts" data-lg-lead>' + projectFacts(M) + '</p>' +
         (clsOf(M) !== 'condo' ? '<p class="lg-fine lg-facts" data-lg-class="' + clsOf(M) + '">' + esc(CLS[clsOf(M)].short) + '</p>' : '') + (alsoLine(M) ? '<p class="lg-fine lg-facts" data-lg-also>' + esc(alsoLine(M)) + '</p>' : '') +
       '</div></header>' +
+      evidenceHtml(M, ctx, BV, bedAny) +
       '<section class="lg-band grey" id="lgCompare"><div class="lg-wrap" style="gap:22px"><div class="lg-head"><p class="lg-kicker">Compare</p><h2>Often compared with ' + esc(M.name) + '</h2><p class="lg-sub" data-lg-sugg-sub>Developments that share enough recent sales in the same sizes for a fair comparison.</p></div>' +
         '<div class="lg-sugg" data-lg-sugg></div><p class="lg-fine lg-center">Or <a href="#/compare/' + esc(M.id) + '" data-lg-pick>search for any other development</a>.</p></div></section>' +
       '<section class="lg-band" id="numbers"><div class="lg-wrap" style="gap:26px"><div class="lg-head"><p class="lg-kicker">The numbers</p><h2>How the price has moved.</h2>' +

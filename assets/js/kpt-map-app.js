@@ -10,6 +10,23 @@
   const BUILD = (document.currentScript && /[?&]v=([^&]+)/.exec(document.currentScript.src) || [])[1] || '1';
   const base = new URL('../../data/map/', location.href).href;
   const getJson = (f) => fetch(base + f + '?v=' + BUILD).then((r) => { if (!r.ok) throw new Error(f + ' ' + r.status); return r.json(); });
+  /* 25 Oct 2026: the card leads with total prices. Where Research shows bedroom types (data/projects/bedroom, the approved aggregates), each
+     type's typical price; otherwise each supported size's typical price; psf is secondary. Loaded for the development selected, once. */
+  const bedBase = new URL('../../data/projects/bedroom/', location.href).href, BEDS = {}, bedShards = {}; let bedMeta = null;
+  function bedsFor(name) {
+    const p = M.BY[name], P = window.KPT_PROJECT; if (!p || !P) return null;
+    if (BEDS[p.id] !== undefined) return BEDS[p.id];
+    BEDS[p.id] = null;   // asked once; the card shows the size prices until (and unless) types arrive
+    (bedMeta || (bedMeta = fetch(bedBase + 'manifest.json?v=' + BUILD).then((r) => (r.ok ? r.json() : null)).catch(() => null))).then((bm) => {
+      if (!bm || bm.latestMonth !== M.latestMonth) return null;   // never beside prices from another data month
+      const k = P.shardName(P.shardOf(p.id, bm.shards));
+      return (bedShards[k] || (bedShards[k] = fetch(bedBase + k + '.json?v=' + BUILD).then((r) => (r.ok ? r.json() : null)).catch(() => null)));
+    }).then((sh) => {
+      const r = sh && sh.projects && sh.projects[p.id], t = r && r.resale && r.resale.types ? r.resale.types.filter((x) => x.price && x.n) : [];
+      if (t.length) { BEDS[p.id] = { types: t, basis: t.reduce((a, x) => ({ v: a.v + (x.basis ? x.basis.verified : 0), i: a.i + (x.basis ? x.basis.inferred : 0) }), { v: 0, i: 0 }) }; if (S.proj === name) refreshCard(); }
+    });
+    return null;
+  }
   const LY = window.KPT_MAP_VIEW.layers;
   let PULSE = null;   // Market pulse (data/map/pulse.json, built from the same module and records as the Research report); no file, no snapshot line
   const S = { proj: null, start: true, place: null, band: null, rc: {}, hl: null, more: false, min: false, am: false, sec: {}, layers: LY.load(), lyrOpen: false, hft: null, hdbEv: null, radius: 2000, pr: 1000, nall: false, q: '', qi: -1, suggOpen: false };
@@ -119,8 +136,36 @@
   const sx = (id, title, body) => `<details class="sx" data-sx="${id}"${S.sec[id] ? ' open' : ''}><summary><span>${title}</span></summary><div class="sxb">${body}</div></details>`;
   const PRICE_TIP = 'Median price per sq ft for the size with the most recent sales. Sizes with fewer than 5 sales are not shown. These are past recorded sales from URA, not asking prices or a valuation. Primary (new sale) and secondary (resale and sub-sale) prices are never combined.';
   /* The first fact: the most meaningful recent price, with its market, size, sample and period. Too few sales in any size means no price, only what exists. */
-  function leadHtml(name) {
+  const BED_TIP = 'The typical (median) total price of each bedroom type’s resales here, in the last 12 months (2 years where marked). Bedroom types are inferred by Groundwork from developer floor plans or URA rental records for the same size, never recorded by URA, and are shown only where enough sales could be matched. Price per sq ft is the median of the same sales. Past sales, not a valuation.';
+  const SIZE_TIP = 'The typical (median) total price of each size’s recent sales here. Sizes with fewer than 5 sales are not shown. Price per sq ft is the median of the same sales. Past sales from URA, not asking prices or a valuation. Primary (new sale) and secondary (resale and sub-sale) sales are never combined.';
+  const bedName = (g) => (g === 'PH' ? 'Penthouse' : g === '0' ? 'Studio' : g + '-bedroom');
+  const stepK = (v) => (v >= 1e6 ? fmtM(v) : '$' + Math.round(v / 1e4) * 10 + 'K');
+  const priceM = (v) => (v >= 1e6 ? fmtM(v) : '$' + Math.round(v / 1000) + 'K');   // $810K, $1.15M: prices as people say them
+  /* Bedroom types: up to 4 (3 on a phone), each its typical total price, psf secondary. The difference to the type before is shown only where both
+     are from the same 12 months (an observed difference in typical prices, nothing more). */
+  function bedLead(name, mobile) {
+    const B = bedsFor(name); if (!B) return '';
+    const max = mobile ? 3 : 4, list = B.types.slice(0, max), more = B.types.length - list.length;
+    const rows = list.map((t, i) => {
+      const prev = list[i - 1], step = prev && prev.win === 12 && t.win === 12 && t.price[2] > prev.price[2] ? `<span class="ldb-st">+${stepK(t.price[2] - prev.price[2])} vs ${esc(bedName(prev.g))}</span>` : '';
+      // a phone's short sheet keeps one line per type (the map above it stays framed); the counts and steps are in "More about this home" and the report
+      if (mobile) return `<div class="ldb-r ldb-1"><span class="ldb-t">${esc(bedName(t.g))} <small>${fmt(t.psf[2])} psf${t.win === 12 ? '' : ', 2 yrs'}</small></span><b class="num" title="${esc(fmt(t.price[2]))}">${priceM(t.price[2])}</b></div>`;
+      return `<div class="ldb-r"><span class="ldb-t">${esc(bedName(t.g))}</span><b class="num" title="${esc(fmt(t.price[2]))}">${priceM(t.price[2])}</b><span class="ldb-m">${fmt(t.psf[2])} psf · ${t.n} sale${t.n === 1 ? '' : 's'}${t.win === 12 ? '' : ', 2 yrs'}${step ? ' · ' : ''}${step}</span></div>`;
+    }).join('');
+    return `<div class="lead lead-b" data-lead="beds"><div class="ld-k">Typical prices · resales, last 12 months${help(BED_TIP, 'About these prices')}</div><div class="ldb">${rows}</div>${more > 0 ? `<p class="ld-s">And ${more} more type${more === 1 ? '' : 's'} in the full research.</p>` : ''}<p class="basis">Past sales, not a valuation.${mobile ? '' : ' Sizes and counts in the full research.'}</p></div>`;
+  }
+  /* Sizes: the supported sizes of the lead market (up to 3), each its typical total price; psf secondary. Only psf where no price is held. */
+  function sizeLead(name, l, mobile) {
+    const rows = l.mm.rows.filter((c) => c.pmed > 0); if (!rows.length) return '';
+    const sub = l.mk === 'sec' && M.mainlySub(name) ? ' · mainly sub-sales' : '';
+    const row = (c) => (mobile ? `<div class="ldb-r ldb-1"><span class="ldb-t">${band(c.bin)} <small>${fmt(c.med)} psf</small></span><b class="num" title="${esc(fmt(c.pmed))}">${priceM(c.pmed)}</b></div>`
+      : `<div class="ldb-r"><span class="ldb-t">${band(c.bin)}</span><b class="num" title="${esc(fmt(c.pmed))}">${priceM(c.pmed)}</b><span class="ldb-m">${fmt(c.med)} psf · ${c.n} sale${c.n === 1 ? '' : 's'}</span></div>`);
+    return `<div class="lead lead-b" data-lead="sizes"><div class="ld-k">Typical prices by size${help(SIZE_TIP, 'About these prices')}</div><p class="ld-s ld-w">${MKT[l.mk][0]}${sub} · ${WINL[l.mm.win]}</p><div class="ldb">${rows.map(row).join('')}</div><p class="basis">Past sales, not a valuation.</p></div>`;
+  }
+  function leadHtml(name, mobile) {
     const l = M.lead(name), tip = help(PRICE_TIP, 'About this price');
+    const bl = bedLead(name, mobile); if (bl) return bl;
+    if (l) { const sl = sizeLead(name, l, mobile); if (sl) return sl; }
     if (l) {
       const c = l.row, sub = l.mk === 'sec' && M.mainlySub(name) ? ' · mainly sub-sales' : '';
       return `<div class="lead"><div class="ld-k">Recent prices${tip}</div><div class="ld-p"><b class="num">${fmt(c.med)}</b><small>psf</small></div><p class="ld-s">${MKT[l.mk][0]}${sub} · ${band(c.bin)} · ${c.n} sale${c.n === 1 ? '' : 's'}, ${WINL[l.mm.win]} · typical ${fmtM(c.pmed)}</p><p class="basis">Past sales, not a valuation.</p></div>`;
@@ -180,8 +225,8 @@
     const pricesBody = `<div class="mkts">${marketHtml(name, 'sec', nb.ref)}${marketHtml(name, 'new', nb.ref)}${pos ? '<p class="basis" style="margin:2px 0 0">Select a size to compare nearby.</p>' : ''}${classNote(name)}</div>`;
     const nopos = `<p class="basis nopos">Not on the map yet, so neighbourhood and nearby prices are not shown.${help('URA’s data has no verified location for this development, so it cannot be placed on the map or measured against anything nearby. Its own prices by size are still shown.', 'Why there is no map position')}</p>`;
     const secs = sx('pr', 'Prices by size', pricesBody) + (pos ? sx('cmp', nb.mode === 'compare' ? 'Compare nearby homes' : 'Nearby prices', nearbyHtml(name, nb)) + sx('am', amTitle(), amenBody(name)) + sx('nbr', 'Explore nearby developments', nearHtml(name, mobile)) : '') + sx('meth', 'Data and methodology', methBody());
-    const open = `<a class="btn b" href="../#/p/${esc(p.id)}" data-m-full="${esc(p.id)}">Open full analysis ›</a>`;
-    const top = leadHtml(name) + (pos ? keyHtml(name) : nopos);
+    const open = `<a class="btn b" href="../#/p/${esc(p.id)}" data-m-full="${esc(p.id)}">View Full Research ›</a>`;
+    const top = leadHtml(name, true) + (pos ? keyHtml(name) : nopos);
     // Market pulse: under the price on a desktop; on a phone it opens first in "More about this home", so the short sheet (and the map framed above it) does not change.
     if (!mobile) return `<aside class="dp" aria-label="Selected development"><div class="dp-in">${head}${leadHtml(name)}${pulseHtml(name)}${pos ? keyHtml(name) : nopos}<div class="sxs">${secs}</div></div><div class="dp-foot">${open}</div></aside>`;
     const tog = `<button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">More about this home ${S.more ? '⌄' : '⌃'}</button>`;

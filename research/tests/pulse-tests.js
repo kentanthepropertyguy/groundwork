@@ -247,7 +247,7 @@ ok(/data-pulse-for="sell"/.test(read('assets/js/gw-journey.js')) && /pulseFor ==
 ok(/data-pulse-for="buy">See them on the map/.test(jr), 'Buy: the research step carries the buyer\'s question');
 ok(/f === 'go'\) \{ try \{ window\.sessionStorage\.setItem\('kpt\.pulse\.for', 'buy'\)/.test(read('assets/js/kpt-discover-ui.js')), 'Budget Search: opening a development\'s research sets the buyer\'s question');
 const mp = read('research/map/index.html'); ok(/gw-pulse\.js/.test(mp) && mp.indexOf('gw-pulse.js') < mp.indexOf('kpt-map-app.js'), 'the Map loads the module before the app');
-const ma = read('assets/js/kpt-map-app.js'); ok(/getJson\('pulse\.json'\)/.test(ma) && /pulseHtml\(name\)/.test(ma) && !/Full market report/.test(ma) && /data-m-full="\$\{esc\(p\.id\)\}">Open full analysis/.test(ma), 'the Map panel shows the snapshot; its existing Open full analysis is the one way into the report (no second link)');
+const ma = read('assets/js/kpt-map-app.js'); ok(/getJson\('pulse\.json'\)/.test(ma) && /pulseHtml\(name\)/.test(ma) && !/Full market report/.test(ma) && /data-m-full="\$\{esc\(p\.id\)\}">View Full Research/.test(ma), 'the Map panel shows the snapshot; its existing View Full Research (25 Oct 2026, was "Open full analysis") is the one way into the report (no second link)');
 ok(read('tools/market-data/refresh-all.js').indexOf('build-pulse.js') > -1, 'a data refresh rebuilds the Map snapshot');
 ok(/Market pulse/.test(read('CLAUDE.md')), 'CLAUDE.md records the rules');
 // HDB: left out of V1 on purpose; the HDB research files are untouched by this release

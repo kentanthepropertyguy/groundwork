@@ -27,6 +27,8 @@ To add a development: `pdftotext -layout brochure.pdf b.txt`, then `node tools/m
 
 URA-first classification for every development (rental contracts first, checked layout tables where they add coverage) and the repeatable, ranked brochure pass are described in `BEDROOM.md`. Neither is part of `refresh-all.js` yet.
 
+**Transactions and rents (25 Oct 2026).** Run `refresh-all.js` with `--snapshot <private accepted snapshot.json> --report <private folder>` once the bedroom step below is done, with the 12 `rental-*.json` quarter files in the same raw folder. It rebuilds bedroom research, the individual transactions (`data/projects/tx/`) and private rents (`data/projects/rent/`) from the SAME URA fetch as every other figure. Never pass `--yield` to `build-rent-research.js` for the site: gross yield is not published.
+
 **Manual bedroom step after each URA refresh.** Run `fetch-ura-rental.js`, then `bedroom-hybrid.js --previous` and `bedroom-metrics.js`; the commands are in `BEDROOM.md`, "Refresh".
 - The classification uses only the latest 12 quarters of URA rental contracts. This is enforced in code, so extra files can never widen it.
 - Older quarters are moved to a separate private `rental-archive` folder and never deleted.
@@ -35,6 +37,7 @@ URA-first classification for every development (rental contracts first, checked 
 
 - Launches, sites and development positions are one pass (section 0 of `UPCOMING.md`): `fetch-onemap-uc.js`, `fetch-onemap-names.js`, this refresh, then `build-upcoming.js`.
 - `node tools/market-data/build-upcoming.js --as-of YYYY-MM-DD` after editing `upcoming-register.json` or when URA publishes new Sale Sites; commit `data/map/upcoming.json`. See `UPCOMING.md`.
+- HDB rents, monthly (data.gov.sg "Renting Out of Flats from Jan 2021"): `node tools/market-data/build-hdb-rent.js --site . --out data/value/hdb/rent --report <private folder> --save <private folder>` (it downloads the file; or pass `--csv` and `--meta` from a saved copy). Run it after the HDB resale refresh so blocks match the same resale files and Map positions. Commit `data/value/hdb/rent/`.
 - `node tools/market-data/build-hdb-streets.js` after any HDB resale data refresh (HDB road to town, used by postal-code search on Property values).
 - HDB block positions for the Map layer, after any HDB resale data refresh: `node tools/market-data/fetch-onemap-hdb.js` (live OneMap, only blocks not already saved; add `--retry` for the ones it could not place, and run it again if it reports blocks "not answered"), then `node tools/market-data/build-hdb-map.js`. Commit `sources/onemap-hdb.json` and `data/map/hdb.json`, report the coverage line, and run `node research/tests/hdb-tests.js`. Blocks OneMap cannot place stay out of the file; never fill them in by hand.
 - `node tools/market-data/tests/upcoming-tests.js`, `node research/tests/postal-tests.js` and `node research/tests/hdb-tests.js`.

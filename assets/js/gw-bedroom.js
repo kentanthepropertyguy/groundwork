@@ -91,7 +91,7 @@
       '<p class="lg-ans-main"><span class="lg-ans-v" title="' + esc(full(t.price[2])) + '">' + short(t.price[2]) + '<small> typical price</small></span></p>' +
       '<p class="gwb-l" data-gwb-range>' + range + '</p>' +
       '<p class="gwb-l" data-gwb-size>' + esc(sizeText(t)) + ' Median ' + full(t.psf[2]) + ' psf.</p>' + win +
-      (bud ? '<p class="gwb-l gwb-bud" data-gwb-budget>' + esc(bud) + '</p>' : '') +
+      (bud ? '<p class="gwb-l gwb-bud" data-gwb-budget>' + esc(bud) + '</p>' : '') + (opt.rent || '') +
       '<p class="lg-fine lg-ans-basis" data-gwb-basis>Past sales, not a valuation. ' + esc(basisText(t.basis)) + '</p>' + (opt.fresh || '') + '</div>';
   }
   // Price movement: the Market Pulse reading for the type's most-sold size; with no reading, why, and the way to the size trend.
