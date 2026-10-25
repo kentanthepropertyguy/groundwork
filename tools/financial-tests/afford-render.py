@@ -90,12 +90,13 @@ try:
         asm = pg.inner_text('[data-asm-d]')
         check(vn + ': assumptions state eligibility is not confirmed and CPF is as entered, and hold the tenure', 'Eligibility is not confirmed' in asm and 'CPF is as you entered it' in asm and 'Loan tenure' in asm, asm[:300])
         # explore
-        h = pg.evaluate("sessionStorage.getItem('kpt.handoff')")
-        hd = json.loads(h) if h else {}
-        check(vn + ': the plan is handed on with a budget range, from the planner', hd.get('from') == 'planner' and hd.get('budget', {}).get('low', 0) > 0, h)
+        # M1 (25 Oct 2026): a standalone calculation hands nothing to Budget Search until the visitor presses Explore
+        check(vn + ': standalone: nothing is handed to Budget Search while the figures are only being worked out', pg.evaluate("sessionStorage.getItem('kpt.handoff')") is None, pg.evaluate("sessionStorage.getItem('kpt.handoff')"))
         check(vn + ': no budget in the Explore link\'s URL', '?' not in (pg.get_attribute('[data-pa-explore]', 'href') or ''), pg.get_attribute('[data-pa-explore]', 'href'))
         pg.click('[data-pa-explore]'); pg.wait_for_url('**/what-can-i-buy/**', timeout=10000); pg.wait_for_selector('#kdBudget', timeout=10000)
         body = pg.inner_text('body')
+        h = pg.evaluate("sessionStorage.getItem('kpt.handoff')"); hd = json.loads(h) if h else {}
+        check(vn + ': pressing Explore hands the plan on with a budget range, from the planner', hd.get('from') == 'planner' and hd.get('budget', {}).get('low', 0) > 0 and hd.get('j') == 0, h)
         check(vn + ': Budget Search opens prefilled "From your plan"', 'From your plan' in body, body[:200])
         check(vn + ': the budget field carries the planner figure', money(pg.input_value('#kdBudget')) == 1_087_000, pg.input_value('#kdBudget'))
         check(vn + ': no budget or typed text in the page URL', not re.search(r'[?&#](budget|b|q)=', pg.url), pg.url)
@@ -110,6 +111,13 @@ try:
         check(vn + ': Research "What can this budget buy?" picks up the same plan', 'From your plan' in bt or pg.query_selector('#kdH') is not None or bv == 1_087_000, bt[:300])
         check(vn + ': no script errors', not errs, errs)
         ctx.close()
+    # M1: a budget worked out in a standalone calculation is not inherited by Budget Search when it is opened another way (menu, search, typed address)
+    ctx, pg, errs = page(br, dict(viewport={'width': 1440, 'height': 900})); fill(pg)
+    check('standalone then Budget Search by another route: a maximum was calculated', money(pg.inner_text('[data-max]')) == 1_087_000)
+    pg.goto(B + '/tools/what-can-i-buy/'); pg.wait_for_function("document.querySelector('#kdH')||document.querySelector('#kdBudget')", timeout=10000); pg.wait_for_timeout(500)
+    inh = pg.inner_text('body'); bv2 = money(pg.input_value('#kdBudget')) if pg.query_selector('#kdBudget') and pg.is_visible('#kdBudget') else 0
+    check('standalone then Budget Search by another route: no "From your plan" and no inherited budget', 'From your plan' not in inh and bv2 != 1_087_000 and pg.evaluate("sessionStorage.getItem('kpt.handoff')") is None, [bv2, inh[:160]])
+    ctx.close()
     # selling first: what is in hand now is kept apart from what the sale adds only once it completes
     ctx, pg, errs = page(br, dict(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True)); fill(pg, cash='100,000', cpf='200,000')
     pg.click('.pa-chips[data-k="owns"] [data-v="one"]'); pg.click('.pa-chips[data-k="home"] [data-v="sell"]')
@@ -153,6 +161,8 @@ try:
     check('Research price: before any entries the page names the price and asks only for age and income', 'Can you afford this price?' in ih and 'age and income' in ih and '2,480,000' not in pg.url, ih[:240])
     pg.fill('[data-k="buyers.0.age"]', '35'); pg.fill('[data-k="buyers.0.fixed"]', '21,000'); pg.click('.pa-chips[data-k="owns"] [data-v="none"]'); pg.click('.pa-chips[data-k="kind"] [data-v="completed"]')
     pg.fill('[data-k="cash"]', '100,000'); pg.fill('[data-k="cpf"]', '200,000'); settle(pg)
+    hj = pg.evaluate("sessionStorage.getItem('kpt.handoff')"); hjd = json.loads(hj) if hj else {}
+    check('journey (?j=1): the budget goes on to Budget Search as the figures change, marked as a journey', hjd.get('from') == 'planner' and hjd.get('j') == 1 and hjd.get('budget', {}).get('low', 0) > 0, hj)
     check('Research price: the answer is for that price ($413,600 short at $2.48m), with no slider to move', pg.inner_text('[data-answer]').strip() == '$413,600 short' and '$2.48m' in pg.inner_text('[data-head]').lower(), pg.inner_text('[data-head]')[:160])
     check('Research price: the source is named as a past-sales price, not a valuation or listing', 'typical recent price in past sales' in pg.inner_text('[data-price-from]') and 'not a valuation' in pg.inner_text('[data-price-from]'), pg.inner_text('[data-price-from]'))
     pg.fill('#pa-price', '2,000,000'); settle(pg)
