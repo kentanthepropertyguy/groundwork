@@ -12,7 +12,7 @@ def chk(name, cond, info=None):
     global ok, bad
     if cond: ok += 1; print('  ok  ', name)
     else: bad += 1; print('  FAIL', name, info)
-PORTRAIT = "[...document.querySelectorAll('img')].filter(i => /ken-(portrait|circle)/.test(i.src) && i.offsetParent).length"
+PORTRAIT = "[...document.querySelectorAll('img')].filter(i => /ken-(portrait|circle)/.test(i.src) && i.offsetParent && !i.closest('footer')).length"   # outside the footer (the footer keeps Ken's photo)
 CALCS = {'stamp-duty': 'Total stamp duty', 'tdsr': 'Indicative maximum loan', 'msr': 'Indicative maximum loan', 'mortgage': 'Monthly instalment', 'sale-proceeds': 'Cash in hand after costs', 'ssd': 'Seller’s Stamp Duty'}
 with sync_playwright() as p:
     br = p.chromium.launch()
@@ -20,11 +20,11 @@ with sync_playwright() as p:
         print('\n==', vn); c = br.new_context(viewport=vp, has_touch=vn == 'phone'); pg = c.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
         for path, n in (('/', 0), ('/journey/', 0), ('/journey/worth/', 0), ('/tools/', 0), ('/tools/planner/', 0), ('/tools/payment-planner/', 0), ('/tools/stamp-duty/', 0), ('/research/', 0), ('/privacy/', 0)):
             pg.goto(B + path); pg.wait_for_timeout(900)
-            chk(f'{vn}: {path}: {n} portrait(s)', pg.evaluate(PORTRAIT) == n, pg.evaluate(PORTRAIT))
+            chk(f'{vn}: {path}: no portrait outside the footer, one in it', pg.evaluate(PORTRAIT) == n and pg.locator('footer.gw-foot img[src*="ken-portrait"]').count() == 1, pg.evaluate(PORTRAIT))
             chk(f'{vn}: {path}: no external New Launches link anywhere on the page', pg.locator('a[href*="kentanthepropertyguy.com/#developments"]').count() == 0)
             chk(f'{vn}: {path}: the footer keeps the credentials', 'CEA R007903D' in pg.inner_text('.gw-foot') and 'L3008899K' in pg.inner_text('.gw-foot'))
             names = pg.inner_text('body').count('Ken Tan'); want = 2 if path == '/privacy/' else 1   # the privacy notice names Ken as the one who handles enquiries
-            chk(f'{vn}: {path}: the name appears {want}x (footer credentials), no TikTok badge, no other-sites line', names == want and pg.locator('.gw-live').count() == 0 and pg.locator('.gw-fo').count() == 0, names)
+            chk(f'{vn}: {path}: the name appears {want}x (footer credentials), the LIVE line only in the footer, no other-sites line', names == want and pg.locator('.gw-live').count() == 1 and pg.locator('footer .gw-live').count() == 1 and pg.locator('.gw-fo').count() == 0, names)
         pg.goto(B + '/'); pg.wait_for_timeout(600)
         chk(vn + ': homepage: no biography band; the data line has no photo or name', pg.locator('.gw-ken').count() == 0 and 'Ken' not in pg.inner_text('.gw-sig'))
         chk(vn + ': the header keeps a small Ask Ken action', pg.locator('.gw-nav a:has-text("Ask Ken"), .gw-nav button:has-text("Ask Ken")').count() >= 1)

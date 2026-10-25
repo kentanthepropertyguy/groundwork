@@ -20,7 +20,8 @@ for (const f of pages) {
   const hdr = (t.match(/<nav class="gw-links"[^>]*>(.*?)<\/nav>/s) || [])[1] || '';
   const links = [...hdr.matchAll(/<a\b([^>]*)>(.*?)<\/a>/gs)].map((m) => ({ attrs: m[1], text: m[2].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim(), href: (m[1].match(/href="([^"]*)"/) || [])[1] }));
   check(rel + ': header reads Plan My Move · Research · Map · Calculators (V2.1: no external New Launches link; launches are on the Map)', links.map((l) => l.text).join('|') === 'Plan My Move|Research|Map|Calculators' && !/kentanthepropertyguy\.com\/#developments/.test(t), links.map((l) => l.text));
-  check(rel + ': no portrait in the footer (V2.1: credentials only)', !/<footer[\s\S]*ken-portrait[\s\S]*<\/footer>/.test(t));
+  { const ft = (t.match(/<footer class="gw-foot">[\s\S]*?<\/footer>/) || [''])[0];
+    check(rel + ': the footer is the one place with Ken’s photo and the LIVE line (footer follow-up)', !ft || (/ken-portrait\.jpg/.test(ft) && /class="gw-live"/.test(ft) && (t.replace(ft, '').replace(/<script[\s\S]*?<\/script>/g, '').match(/ken-portrait\.jpg/g) || []).length === 0)); }
   const pm = links.find((l) => l.text === 'Plan My Move'), cl = links.find((l) => l.text === 'Calculators');
   check(rel + ': Plan My Move opens Guide Me at its start (journey/, no path chosen); Calculators keeps the /tools/ address', pm && /(^|\/)journey\/$/.test(pm.href) && cl && /(^|\/)tools\/$/.test(cl.href), [pm, cl]);
   check(rel + ': Map is a top-level header item and opens the one Map', links.filter((l) => /^Map$/.test(l.text)).length === 1 && /(^|\/)research\/map\/$/.test((links.find((l) => /^Map$/.test(l.text)) || {}).href || ''));
