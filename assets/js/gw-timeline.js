@@ -17,7 +17,7 @@
 })(typeof self !== 'undefined' ? self : this, function (R, C) {
   'use strict';
   if (!R || !C || typeof C.progressive !== 'function' || typeof C.stampDuty !== 'function') throw new Error('GW_TIMELINE needs GW_RULES and GW_CALC');
-  const VERSION = 'C1-2026-10-24';
+  const VERSION = 'FE2-2026-10-25';
   // No option date: the timeline runs from a fixed reference day that stands for "the option date" (the same one the schedule adapter uses). It is never shown as a date.
   const UNDATED_REF = '2000-01-01';
   const num = (x) => (typeof x === 'number' && isFinite(x) ? x : null);
@@ -91,7 +91,8 @@
     const order = entity ? 'none' : (i.order || 'buy'); if (['buy', 'sell', 'none'].indexOf(order) < 0) bad.push({ field: 'order', text: 'order must be buy (buy first), sell (sell first) or none (no sale).' });
     if (order !== 'none' && i.flatLoan !== undefined && FLAT_LOAN_STATES.indexOf(i.flatLoan) < 0) bad.push({ field: 'flatLoan', text: 'flatLoan must be one of: ' + FLAT_LOAN_STATES.join(', ') + '.' });
     const sale = i.sale || {};
-    if (order === 'buy') { if (!pos(sale.month) && !D(sale.date)) bad.push({ field: 'sale', text: 'Buy-first needs the month (after the option) or the date when the flat sale completes.' }); }
+    if (order === 'buy') { if (sale.undecided !== true && !pos(sale.month) && !D(sale.date) && !(num(sale.afterKeys) !== null && sale.afterKeys >= 0)) bad.push({ field: 'sale', text: 'Buy-first needs the month (after the option), the date, the months after the keys, or undecided: when the flat sale completes.' }); }
+    if (num(sale.afterKeys) !== null && (sale.afterKeys < 0 || sale.afterKeys > 120)) bad.push({ field: 'sale.afterKeys', text: 'Months after the keys must be between 0 and 120.' });
     ['cash', 'cpf'].forEach((k) => { if (num(sale[k]) !== null && sale[k] < 0) bad.push({ field: 'sale.' + k, text: 'Amounts can’t be negative.' }); });
     if (i.rent && num(i.rent.monthly) !== null && i.rent.monthly < 0) bad.push({ field: 'rent', text: 'Rent can’t be negative.' });
     if (num(i.flatInstal) !== null && (i.flatInstal < 0 || i.flatInstal > C.LIMITS.money.max)) bad.push({ field: 'flatInstal', text: i.flatInstal < 0 ? 'Amounts can’t be negative.' : C.LIMITS.money.text });
@@ -216,8 +217,15 @@
 
     // --- the sale and what follows it ---
     let saleDate = null;
-    if (order === 'buy') {
-      saleDate = D(i.sale.date) || addMonths(otp, i.sale.month);
+    const saleUndecided = order === 'buy' && i.sale.undecided === true;
+    if (saleUndecided) {
+      // FE V2 (25 Oct 2026): buying first with the sale date not decided. Nothing is invented: no sale money arrives within the plan, the home being sold keeps counting
+      // for the loan limit (flatLoan, above) and its instalment, if entered, runs to the end of the plan. An ABSD refund depends on the sale date, so it is not counted.
+      assumptions.push({ id: 'sale-undecided', text: 'Buying first, sale date not decided: no sale money is counted in this plan. The home you are selling still counts for the loan limit, and its instalment (if entered) carries on to the end of the plan.' });
+      if (i.refund && i.refund.assume && duty.absd > 0) assumptions.push({ id: 'refund-undecided', text: 'ABSD refund not counted: it can only follow a sale, and the sale date is not decided.' });
+    } else if (order === 'buy') {
+      // FE V2: the sale can be dated from the keys (TOP or completion), e.g. selling after TOP; otherwise from the option (months) or an exact date
+      saleDate = D(i.sale.date) || (num(i.sale.afterKeys) !== null && i.sale.afterKeys >= 0 ? addMonths(keysDate, i.sale.afterKeys) : addMonths(otp, i.sale.month));
       inflow({ id: 'sale', date: saleDate, label: 'Sale of your flat completes', cashIn: nn(i.sale.cash), cpfIn: nn(i.sale.cpf), confidence: 'assumption', source: 'Your sale date and proceeds (cash, and the amount returned to CPF).' });
       if (saleDate > lastDate) lastDate = saleDate;
       const ref = i.refund || {};
@@ -228,6 +236,9 @@
         if (!eligible) warnings.push({ id: 'refund-ineligible', text: 'An ABSD refund was assumed, but the buyer profile does not match IRAS’s married-couple or single-senior refund conditions.' });
         assumptions.push({ id: 'refund-month', text: 'ABSD refund assumed to arrive ' + (ref.date ? 'on ' + iso(rd) : (pos(ref.monthsAfterSale) ? ref.monthsAfterSale : CONVENTIONS.refund.monthsAfterSale) + ' months after the sale') + '. Never counted before that date; never guaranteed.' });
         const deadline = kind === 'completed' ? addMonths(otp, R.absdRefundMonths) : null;
+        // FE V2: an uncompleted home's refund needs the sale within 6 months of TOP or CSC, whichever is earlier (IRAS); the keys date here is TOP
+        const deadlineU = kind !== 'completed' ? addMonths(keysDate, R.absdRefundMonths) : null;
+        if (deadlineU && saleDate > deadlineU) warnings.push({ id: 'refund-deadline', text: 'The flat sale completes after ' + iso(deadlineU) + ', ' + R.absdRefundMonths + ' months after TOP: IRAS’s refund deadline for an uncompleted home (within ' + R.absdRefundMonths + ' months of TOP or CSC, whichever is earlier) would be missed.' });
         if (deadline && saleDate > deadline) warnings.push({ id: 'refund-deadline', text: 'The flat sale completes after ' + iso(deadline) + ', six months from the purchase: IRAS’s refund deadline for a completed home would be missed.' });
       }
     } else if (order === 'sell') {
@@ -237,7 +248,7 @@
 
     // --- buy first (C1, B4): the home being sold keeps its own instalment until its sale completes (CPF first when instalments are paid from CPF, then cash) ---
     const flatMo = order === 'buy' && flatLoan !== 'none' && flatLoan !== 'discharged' && pos(i.flatInstal) ? i.flatInstal : 0;
-    if (flatMo) assumptions.push({ id: 'flat-instalment', text: 'Buying first: the ' + Math.round(flatMo) + ' monthly instalment on the home being sold is paid until its sale completes on ' + iso(saleDate) + '.' });
+    if (flatMo) assumptions.push({ id: 'flat-instalment', text: 'Buying first: the ' + Math.round(flatMo) + ' monthly instalment on the home being sold is paid ' + (saleDate ? 'until its sale completes on ' + iso(saleDate) : 'every month to the end of the plan (sale date not decided)') + '.' });
 
     // --- interim rent (sell-first): cash only, from the option until the keys ---
     const rentMo = i.rent && pos(i.rent.monthly) && order === 'sell' ? i.rent.monthly : 0;
@@ -271,7 +282,7 @@
       } else {
         cash += nn(i.saveMo); if (!entity) cpf += nn(i.cpfMo);
         const rent = rentMo && e.date < rentUntil ? rentMo : 0; // rent for the months before the keys
-        const oldMo = flatMo && e.date <= saleDate ? flatMo : 0, due = instalNow + oldMo;   // the home being sold, until its sale completes
+        const oldMo = flatMo && (!saleDate || e.date <= saleDate) ? flatMo : 0, due = instalNow + oldMo;   // the home being sold, until its sale completes
         const a = cpfForInstal ? Math.min(cpf, due) : 0; cpf -= a; const b = Math.min(cash, due - a); cash -= b;
         const rc = Math.min(cash, rent); cash -= rc;
         const short = (due - a - b) + (rent - rc);
@@ -287,7 +298,7 @@
     if (uncoveredEnd > 0) warnings.push({ id: 'uncovered-end', text: 'Payments totalling ' + Math.round(uncoveredEnd) + ' are not covered by any inflow within the horizon.' });
     const headline = { peak: round2(peak), peakAt: peakAt && iso(peakAt), peakCause, firstGap: firstGap && iso(firstGap), coveredOn: uncoveredEnd > 0 ? null : (coveredOn && iso(coveredOn)), coveredBy: uncoveredEnd > 0 ? null : coveredBy, uncoveredEnd };
     const out = {
-      ok: true, version: VERSION, kind, order, entity, undated, price: P, otp: iso(otp), saleDate: saleDate && iso(saleDate), keysDate: iso(keysDate), horizonMonths: horizon, ...(order === 'sell' ? { sellers, sellersCautious } : {}), ...(flatMo ? { flatInstal: flatMo } : {}),
+      ok: true, version: VERSION, kind, order, entity, undated, price: P, otp: iso(otp), saleDate: saleDate && iso(saleDate), ...(saleUndecided ? { saleUndecided: true } : {}), keysDate: iso(keysDate), horizonMonths: horizon, ...(order === 'sell' ? { sellers, sellersCautious } : {}), ...(flatMo ? { flatInstal: flatMo } : {}),
       loan: Object.assign({}, ltvRow, { loanMax, cashMin, cpfOrCash: prog.cpfOrCash, valuation: prog.valuation === undefined ? null : prog.valuation, base: prog.base, cov, years, ratePct: rate * 100, stressRatePct: R.stressRate * 100, tenureCapped: prog.tenureCapped, tenureCappedBy: prog.tenureCappedBy, tenureAsked: prog.tenureAsked, tenureAllowed: prog.tenureAllowed }),
       instalment: { final: round2(prog.finalMonthly), finalStress: round2(C.instal(loanMax, Math.max(R.stressRate, rate), years)), basis: 'Instalment at the quoted rate once the loan is fully drawn; the stress figure uses the higher of ' + (R.stressRate * 100) + '% and the quoted rate (MAS Notice 645), for TDSR only.' },
       duty: { bsd: duty.bsd, absd: duty.absd, absdRate: duty.absdRate, total: duty.total, notes: duty.notes, remissions: duty.remissions, date: iso(dutyDate) },

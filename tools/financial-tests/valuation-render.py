@@ -111,13 +111,13 @@ try:
         check(vn + ': a completed home offers an optional Bank valuation', pg.is_visible('[data-k="valuation"]'))
         pg.fill('[data-k="price"]', '1,500,000'); pg.fill('[data-k="valuation"]', '1,400,000'); pg.fill('[data-k="otp"]', '2026-11-01'); pg.wait_for_timeout(300)
         pg.click('[data-tab="funding"]'); pg.wait_for_timeout(400)
-        for k, v in [('cash', '400,000'), ('cpf', '300,000'), ('income', '21,000'), ('age', '35'), ('ratePct', '3'), ('years', '30')]: pg.fill('[data-k="%s"]' % k, v)
+        for k, v in [('cash', '400,000'), ('cpf', '300,000'), ('borrowers.0.fixed', '21,000'), ('borrowers.0.age', '35'), ('ratePct', '3'), ('years', '30')]: pg.fill('[data-k="%s"]' % k, v)
         pg.wait_for_timeout(900)
         body = pg.inner_text('body')
         check(vn + ': the loan is 75% of the valuation and says so', '$1,050,000' in body and '75% of the bank valuation' in body, '')
         check(vn + ': the cash above the valuation is explained', pg.is_visible('[data-valnote]') and '$100,000' in pg.inner_text('[data-valnote]') and 'cash at completion' in pg.inner_text('[data-valnote]'))
         rows = pg.inner_text('body')
-        ex = rows[rows.index('Exercise the option'):rows.index('Buyer’s stamp duty (BSD)')]; co = rows[rows.index('Completion', rows.index('Buyer’s stamp duty (BSD)')):rows.index('Total', rows.index('Buyer’s stamp duty (BSD)'))]
+        ex = rows[rows.index('Exercise the option'):rows.index('Buyer’s stamp duty (BSD)')]; co = rows[rows.index('Completion', rows.index('Buyer’s stamp duty (BSD)')):rows.index('Dates count from', rows.index('Buyer’s stamp duty (BSD)'))]
         check(vn + ': the 4% exercise payment is all cash, none from CPF', 'Cash $60,000' in ex and 'CPF' not in ex, ex)
         check(vn + ': CPF is used at completion: cash $95,000 (cash already paid is credited), CPF $280,000, loan $1,050,000', 'Cash $95,000' in co and 'CPF $280,000' in co and 'Bank loan $1,050,000' in co, co)
         shot(pg, 'timeline-valuation-' + vn)

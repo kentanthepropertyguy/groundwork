@@ -315,3 +315,13 @@ body.gw-confirming .pa-bar{display:none !important}
 /* CX V2 (26 Oct 2026): the monthly amounts open on request */
 .pa-addmo{ margin-top:2px; }
 .pa-month{ display:grid; gap:10px; }
+/* FE V2: the preview before the first figure: the result's categories with no number, and the entries that unlock them */
+.pa-ready{margin-top:4px}
+.pa-need-h{margin:10px 0 0;font-size:13px;font-weight:600;color:var(--gw-muted)}
+.pa-need{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px 8px}
+.pa-need li{display:inline-flex;align-items:center;gap:6px;padding:5px 10px 5px 6px;border:1px solid var(--gw-line);border-radius:999px;font-size:13.5px;color:var(--gw-ink);background:#fff}
+.pa-need li i{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1.5px solid #B4B9C4;font-style:normal;font-size:11px;line-height:1}
+.pa-need li.done{color:var(--gw-muted)}.pa-need li.done i{background:#1F7A45;border-color:#1F7A45;color:#fff}
+.pa-intro .pa-fine{margin:6px 0 0}
+@media (min-width:900px){.pa-prev-m{display:none}}
+@media (max-width:899px){.pa-ready,.pa-need-h,.pa-need,.pa-prev-d{display:none}}

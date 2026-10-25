@@ -185,11 +185,21 @@
 
   // The next step, straight under the answer: the Budget Search form, already holding this budget (Groundwork keeps it in this tab only).
   const goHtml = () => '<div class="pa-go"><a class="gw-btn pri" href="../what-can-i-buy/" data-pa-explore data-gw-go="what-can-i-buy">Explore properties within my budget</a></div>';
+  // FE V2 (25 Oct 2026): before the first figure, the panel shows what the answer will hold (the same categories, with no number) and which entries unlock it.
+  let NEED_NOW = null;
+  function previewHtml(priced) {
+    const rows = priced ? [['Cash and CPF needed', '$'], ['Estimated bank loan', '$'], ['Monthly mortgage', '$']] : [['Estimated bank loan', '$'], ['Monthly mortgage', '$'], ['Loan tenure', ''], ['Borrowing capacity', '$']];
+    const need = (NEED_NOW || []).map((x) => '<li class="' + (x[1] ? 'done' : '') + '"><i aria-hidden="true">' + (x[1] ? '✓' : '') + '</i><span>' + esc(x[0]) + (x[1] ? '<span class="sr"> (entered)</span>' : '') + '</span></li>').join('');
+    // on a phone the answer sits above the form, so it stays one line there and the form keeps the first screen (CX V2)
+    return '<p class="pa-p pa-prev-m">Add your age and income to start. The answer updates as you type, and nothing leaves this device.</p><div class="gw-ready pa-ready" aria-label="Your result will appear here"><p class="gw-ready-k">' + (priced ? 'Within your budget, or the shortfall' : 'Maximum property budget') + '</p><p class="gw-ready-v" aria-hidden="true">$ —</p>' +
+      '<ul class="gw-ready-rows">' + rows.map((r) => '<li><span>' + r[0] + '</span><b aria-hidden="true">' + (r[1] ? r[1] + ' ' : '') + '—</b></li>').join('') + '</ul></div>' +
+      (need ? '<p class="pa-need-h">To see your figures, add</p><ul class="pa-need">' + need + '</ul>' : '') + '<p class="pa-fine pa-prev-d">The answer updates as you type. Nothing leaves this device.</p>';
+  }
   function headHtml(res, held, waitText) {
     const kick = '<p class="pa-kick">Your maximum property budget</p>';
     if (res && res.state === 'hdb') return '<div class="pa-intro pa-hdb">' + '<p class="pa-kick">HDB flat</p><h2 class="pa-lead">An HDB flat needs the HDB calculator</h2>' + hdbRoute(false) + '</div>';
-    if ((!res || res.state === 'empty') && VIEW_CTX.priceTxt) return '<div class="pa-intro">' + '<p class="pa-kick">A price from Research</p><h2 class="pa-lead">Can you afford this price?</h2><p class="pa-p">' + esc(VIEW_CTX.priceTxt) + ' Add your age and income to find out. The answer updates as you type, and nothing leaves this device.</p></div>';
-    if (!res || res.state === 'empty') return '<div class="pa-intro">' + kick + '<h2 class="pa-lead">What is your maximum budget?</h2><p class="pa-p">Add your age and income to start. The answer updates as you type, and nothing leaves this device.</p></div>';
+    if ((!res || res.state === 'empty') && VIEW_CTX.priceTxt) return '<div class="pa-intro">' + '<p class="pa-kick">A price from Research</p><h2 class="pa-lead">Can you afford this price?</h2><p class="pa-p">' + esc(VIEW_CTX.priceTxt) + '</p>' + previewHtml(true) + '</div>';
+    if (!res || res.state === 'empty') return '<div class="pa-intro">' + kick + '<h2 class="pa-lead">What is your maximum budget?</h2>' + previewHtml(false) + '</div>';
     if (res.state === 'no-income') return '<div class="pa-intro">' + kick + '<h2 class="pa-lead">No bank loan to work out</h2><p class="pa-p">Your income is entered as $0, so there is no income to lend against. Add income, including a co-borrower’s, to see what a bank could lend. Leave it blank if you have not decided yet.</p></div>';
     if (res.state === 'income' || res.state === 'ask-home' || res.state === 'ask-flat' || res.state === 'ask-cpf') {
       const prompt = res.state === 'income' ? 'Add your cash and CPF to see what that buys.' : res.state === 'ask-home' ? 'Answer the property questions on the left to see your budget.' : (PROMPTASK[(res.ask || [])[0]] || 'Answer the property questions on the left.');
@@ -499,6 +509,8 @@
       { const need = r.state === 'ask-cpf' || !!(r.at && r.at.cpfCheck) || !!(r.facts && r.facts.cpf && r.facts.cpf.applies); if (need !== cpfOn) { cpfOn = need; recalc(); return; } }
       // the tenure field shows the tenure the calculation used (gw-money.js): a longer one typed is replaced by it once the field is not being typed in
       if (tenureFld) { const applied = r.state === 'ok' ? r.years : 0; if (tenureFld.settle(applied)) { recalc(); return; } tenureFld.hint(applied); }
+      { const fv = (k) => { const f = field(k); return !!(f && live(f) && String(f.value || '').trim() !== ''); }, two = s.buyers.length > 1;
+        NEED_NOW = [[two ? 'Both ages' : 'Your age', fv('buyers.0.age') && (!two || fv('buyers.1.age'))], [two ? 'Monthly income, each of you' : 'Your monthly income', fv('buyers.0.fixed') || fv('buyers.0.variable')], ['Cash', fv('cash')], ['CPF OA you plan to use', fv('cpf')]]; }
       res = r; const st = { monthly: s.saveMo === undefined ? 0 : (s.saveMo || 0) + (s.cpfMo || 0), twoBuyers: s.buyers.length > 1 };
       const hasErr = Object.keys(errs).length > 0, bad = r.state === 'invalid' || hasErr;
       paintErrors(r.errors); sale(A.read(s)); adjSummary(s);
@@ -570,7 +582,9 @@
         income: sum('fixed'), varIncome: sum('variable') + sum('rental'), debts: pos(s.debts) + (r.at ? r.at.flatInstal : 0), otp: s.otp || '', order: sell ? 'sell' : 'none',
         // C1: homes owned per buyer (sold first: as owned now, with the owners of the home being sold named; kept: as owned at the purchase), the couple and FTA answers, the CPF balances
         buyers: s.buyers.map((b, k) => { const fc = r.facts || {}; return { res: b.res, fta: b.fta, owned: sell ? (fc.cnt ? fc.cnt[k] : 1) : keep ? (fc.ownedAt ? fc.ownedAt[k] : 1) : 0 }; }), couple: s.couple, saleOwners: sell && r.facts ? r.facts.homeOwners : undefined,
-        cpfBal: s.cpfBal, cover95: s.cover95, loansOther: r.at ? r.at.loans : 0, prefLoan: r.at && r.at.limit === 'choice' ? r.at.loan : '' };
+        cpfBal: s.cpfBal, cover95: s.cover95, loansOther: r.at ? r.at.loans : 0, prefLoan: r.at && r.at.limit === 'choice' ? r.at.loan : '',
+        // FE V2: each buyer is a borrower here; the Timeline asks for each borrower's own age and income, and weights the age itself (GW_CALC.borrowers)
+        borrowers: s.buyers.map((b) => ({ age: b.age, fixed: pos(b.fixed), variable: pos(b.variable) + pos(b.rental) })) };
       if (r.kind === 'new') { h.saveMo = pos(s.saveMo); h.cpfMo = pos(s.cpfMo); }
       if (r.kind === 'completed' && r.priceIsOwn && s.valuation > 0) h.valuation = s.valuation;   // the valuation belongs to this price only
       if (sell && r.sale && r.sale.counted) { const f = s.flat || {}; h.sale = { type: f.type || 'hdb', heldOver4: f.heldOver4 === true, price: f.price, loan: f.loan, cpfRefund: f.cpfRefund, overrideCash: f.overrideCash, overrideCpf: f.overrideCpf, costs: f.costs }; }

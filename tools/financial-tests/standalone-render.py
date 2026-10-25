@@ -108,7 +108,7 @@ try:
         ctx, pg, errs = page(br, kw)
         journey_figures(pg)
         open_(pg, '/tools/', '.gw-tdir'); pg.click('a.gw-tl[data-tool="payment-planner"]'); pg.wait_for_selector('[data-k="cash"]', state='attached'); pg.wait_for_timeout(500)
-        check(vn + ': the Payment Timeline opened from Tools starts blank (no Planner figures)', pg.input_value('[data-k="cash"]') == '' and pg.input_value('[data-k="cpf"]') == '' and pg.input_value('[data-k="income"]') == '')
+        check(vn + ': the Payment Timeline opened from Tools starts blank (no Planner figures)', pg.input_value('[data-k="cash"]') == '' and pg.input_value('[data-k="cpf"]') == '' and pg.input_value('[data-k="borrowers.0.fixed"]') == '')
         setv(pg, '[data-k="cash"]', '77,000'); pg.wait_for_timeout(600)
         check(vn + ': it writes only its own key (the journey\'s figures stay as they were)', (ss(pg, 'gw.fin.v1') or {}).get('cash') == '100,000' and (ss(pg, 'gw.pro.payment-planner.v1') or {}).get('cash') == '77,000', (ss(pg, 'gw.fin.v1'), ss(pg, 'gw.pro.payment-planner.v1')))
         pg.reload(); pg.wait_for_selector('[data-k="cash"]', state='attached'); pg.wait_for_timeout(500)

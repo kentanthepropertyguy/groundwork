@@ -111,7 +111,9 @@
       money('borrowers.' + n + '.fixed', 'Fixed monthly income', { share: 'borrowers.' + n + '.fixed', ph: 'gross, before CPF', hint: n ? '' : 'Gross salary before CPF deductions.' }) +
       money('borrowers.' + n + '.variable', 'Variable monthly income', { opt: true, share: 'borrowers.' + n + '.variable', ph: 'average', hint: n ? '' : 'Bonus, commission or allowances, averaged per month.' }) +
       (o.rental ? money('borrowers.' + n + '.rental', 'Rental income', { opt: true, share: 'borrowers.' + n + '.rental', ph: 'per month', hint: n ? '' : 'Only with a stamped tenancy that has at least 6 months left.' }) : '') + '</div></div>';
-    return row(0) + row(1) + '<button type="button" class="gw-link gw-add" data-add="borrowers.1">+ Add a second borrower</button>';
+    // FE V2: one or two borrowers is the first choice, as visible as "Buying alone / With someone" in What can I afford? (the add link stays for scripts, not shown)
+    const seg = '<div class="gw-q gw-fld gw-bn"><span class="l">Borrowing</span><div class="gw-chips" role="group" aria-label="Borrowing" data-bn><button type="button" class="gw-chip" data-bn-v="1" aria-pressed="true">On my own</button><button type="button" class="gw-chip" data-bn-v="2" aria-pressed="false">With a co-borrower</button></div><small>A co-borrower’s income adds to what the bank can lend. The bank then uses your income-weighted average age.</small></div>';
+    return seg + row(0) + row(1) + '<button type="button" class="gw-link gw-add gw-add-x" data-add="borrowers.1" tabindex="-1" aria-hidden="true">+ Add a second borrower</button>';
   }
   const LOANS = [['0', 'None'], ['1', 'One'], ['2', 'Two or more']];
   // A2-14: MAS counts HDB loans, and applies the limits to each joint borrower
@@ -397,9 +399,10 @@
     $$('[data-t="chip"]').forEach((g) => $$('button', g).forEach((b) => b.addEventListener('click', () => { setChip(g, b.dataset.v); changed(g); })));
     // second buyer / borrower
     const rowOf = (k) => box.querySelector('[data-row="' + k + '"]');
-    const showRow = (k, on) => { const r = rowOf(k); if (!r) return; r.hidden = !on; const add = box.querySelector('[data-add="' + k + '"]'); if (add) add.hidden = on; if (!on) { $$('input', r).forEach((x) => { x.value = ''; }); if (journey) { const s = store.get(); Object.keys(s).forEach((key) => { if (key.indexOf(k + '.') === 0) delete s[key]; }); store.set(s); } } };
+    const showRow = (k, on) => { const r = rowOf(k); if (!r) return; r.hidden = !on; const add = box.querySelector('[data-add="' + k + '"]'); if (add) add.hidden = on; if (k === 'borrowers.1') { const g = box.querySelector('[data-bn]'); if (g) $$('button', g).forEach((x) => x.setAttribute('aria-pressed', String((x.dataset.bnV === '2') === on))); } if (!on) { $$('input', r).forEach((x) => { x.value = ''; }); if (journey) { const s = store.get(); Object.keys(s).forEach((key) => { if (key.indexOf(k + '.') === 0) delete s[key]; }); store.set(s); } } };
     $$('[data-add]').forEach((b) => b.addEventListener('click', () => { showRow(b.dataset.add, true); const f = rowOf(b.dataset.add).querySelector('input,button'); if (f) f.focus(); recalc(); }));
     $$('[data-remove]').forEach((b) => b.addEventListener('click', () => { showRow(b.dataset.remove, false); recalc(); }));
+    { const g = box.querySelector('[data-bn]'); if (g) $$('button', g).forEach((b) => b.addEventListener('click', () => { const two = b.dataset.bnV === '2', r1 = rowOf('borrowers.1'); if (!r1 || two === !r1.hidden) return; showRow('borrowers.1', two); if (two) { const f = r1.querySelector('input'); if (f) f.focus(); } recalc(); })); }
     // conditional fields: data-when="key:v1,v2"
     const applyWhen = () => { $$('[data-when]').forEach((el) => { const [k, vs] = el.dataset.when.split(':'); const g = box.querySelector('[data-k="' + k + '"]'); const v = g ? (g.dataset.t === 'chip' ? chipVal(g) : g.value) : null; el.hidden = vs.split(',').indexOf(v) < 0; }); };
     // ---- read the form ----
