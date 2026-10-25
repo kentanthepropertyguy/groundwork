@@ -46,8 +46,8 @@ try:
         # V2.1: no Ken band on these pages (one understated introduction, on the homepage); the footer keeps the credentials, without a portrait
         for nm, path in (('Guide me', '/journey/'), ('Property values', '/journey/worth/'), ('Tools', '/tools/')):
             pg, errs = opn(ctx, path)
-            check(f'{vn}: {nm}: no Ken band and no portrait on the page', pg.locator('.gw-ken').count() == 0 and pg.locator('img[src*="ken-portrait"]').count() == 0)
-            check(f'{vn}: {nm}: the footer keeps the agent credentials, once, without a TikTok badge', 'CEA R007903D' in pg.inner_text('.gw-foot') and pg.inner_text('body').count('Ken Tan') == 1 and pg.locator('.gw-foot .gw-live').count() == 0)
+            check(f'{vn}: {nm}: no Ken band, and the photo only in the footer', pg.locator('.gw-ken').count() == 0 and pg.locator('img[src*="ken-portrait"]').count() == 1 and pg.locator('footer img[src*="ken-portrait"]').count() == 1)
+            check(f'{vn}: {nm}: the footer keeps the agent credentials (name once) and the LIVE line', 'CEA R007903D' in pg.inner_text('.gw-foot') and pg.inner_text('body').count('Ken Tan') == 1 and pg.locator('.gw-foot .gw-live').count() == 1 and pg.locator('.gw-live').count() == 1)
             pg.close()
         # Property values & market prices: a compact heading and the search straight away, nothing lost
         pg, errs = opn(ctx, '/journey/worth/')

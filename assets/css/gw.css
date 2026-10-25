@@ -842,3 +842,9 @@ body.lg .gw-rws .lg-sb .kpr-results{margin-top:12px}
 .gw-rown{display:block;padding:0;background:none;border-radius:0}
 .gw-rown-h{margin:0;font-size:14px;font-weight:400;color:var(--gw-muted)}
 .gw-rown-h a{color:var(--gw-body);text-decoration:underline;text-decoration-color:var(--gw-line);text-underline-offset:3px}
+/* Footer follow-up (26 Oct 2026): Ken's photo and the LIVE line are back in the footer only; on a phone the LIVE badge and its link share one line */
+@media (max-width:719px){
+  .gw-foot .who{align-items:flex-start}
+  .gw-foot .who img{width:48px;height:48px;margin-top:2px}
+  .gw-foot .who a{font-size:12.5px;min-height:36px;white-space:nowrap}
+}
