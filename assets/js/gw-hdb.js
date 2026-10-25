@@ -183,7 +183,7 @@
         if (typeIx >= 0) show(typeIx, false);
         const h = sec.querySelector('h1'); if (h) h.focus({ preventScroll: true });
       });
-    }).catch((e) => { if (host.contains(sec)) bad('The resale records didn’t load', 'Please refresh the page, or <a href="#/prices">search property prices &amp; past sales</a>.'); });
+    }).catch((e) => { if (host.contains(sec)) bad('The resale records didn’t load', 'Please refresh the page, or <a href="#/prices">search for a property</a>.'); });
   }
 
   return { RADII, slug, typeSlug, hashFor, findStreet, findType, validParts, index, locate, metres, candidates, townsOf, nearComps, pickRadius, streetComps, evidence, nearbyHtml, nextHtml, evidenceHtml, mount };

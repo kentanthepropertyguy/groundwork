@@ -25,8 +25,8 @@ t('the hosted Budget form leaves the results to the Budget page and carries no t
   assert.ok(/sessionStorage\.setItem\('kpt\.find\.from', 'research'\)/.test(u)); assert.ok(/EMB\) return/.test(u) || /if \(EMB\)/.test(u));
   assert.ok(!/location\.href = BASE \+ 'tools\/what-can-i-buy\/' \+/.test(u), 'no query string on the hand-off');
 });
-t('the Research option addresses are #/, #/prices and #/budget, and the old Browse address leads in', () => {
-  const l = rd('assets/js/kpt-lg.js'); ['dev', 'prices', 'budget'].forEach((o) => assert.ok(l.indexOf("['" + o + "',") > -1, o));
+t('the two Research choices are #/ and #/budget (the old #/prices still opens the property search), and the old Browse address leads in', () => {
+  const l = rd('assets/js/kpt-lg.js'); ['dev', 'budget'].forEach((o) => assert.ok(l.indexOf("['" + o + "',") > -1, o)); assert.ok(l.indexOf("['prices',") === -1, 'only two choices'); assert.ok(/HDB, condo or landed — prices, past sales, rents and comparisons\./.test(l)); assert.ok(!/Your entries stay when you switch/.test(l));
   assert.ok(/research\/#\/browse/.test(rd('projects/index.html')));
   const n = rd('assets/js/gw-nav.js'); assert.ok(/research\/#\/prices/.test(n) && /research\/#\/budget/.test(n) && /research\/#\/browse/.test(n));
 });

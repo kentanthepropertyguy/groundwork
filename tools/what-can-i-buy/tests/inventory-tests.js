@@ -383,12 +383,12 @@ t('the only WhatsApp link is a generic message: no budget, place or search in it
   assert.ok(/const BEYOND_WA = 'Hi Ken, I was using Groundwork and have a question\.'/.test(ui));
 });
 t('V10.2: the Beyond the numbers WhatsApp opener is one fixed sentence with no search, budget, project or Huttons detail', () => { const m = /const BEYOND_WA = '([^']*)';/.exec(page); assert.ok(m && m[1] === 'Hi Ken, I was using Ken Property Tools and have a question.', m && m[1]); });
-t('V10.2: Beyond the numbers has the approved text, the TikTok link is plain, and no TikTok mention sits inside the cards or the list code', () => {
+t('V2.1: Beyond the numbers is one quiet line with a single WhatsApp link (no portrait or biography), and no TikTok mention sits inside the cards or the list code', () => {
   const sec = /<section class="kd-ken"[\s\S]*?<\/section>/.exec(page)[0];
-  ['Beyond the numbers', "I'm Ken.", 'Property agent since 2007.', 'I discuss property questions and market decisions live on TikTok most nights.', 'Watch Ken on TikTok @kennx8898 →', 'Message Ken on WhatsApp →'].forEach((x) => assert.ok(sec.indexOf(x) > -1, x));
-  assert.ok(/href="https:\/\/www\.tiktok\.com\/@kennx8898" target="_blank" rel="noopener"/.test(sec)); assert.ok(!/<svg|follower|embed|iframe/i.test(sec));
+  ['Beyond the numbers', 'Want a second opinion on your shortlist?', 'Message Ken on WhatsApp →'].forEach((x) => assert.ok(sec.indexOf(x) > -1, x));
+  assert.ok(!/<img|I'm Ken\.|tiktok/i.test(sec), 'no portrait, biography or TikTok link here'); assert.ok(!/<svg|follower|embed|iframe/i.test(sec));
   const findJs = fs.readFileSync(path.join(root, 'assets/js/kpt-find.js'), 'utf8'); assert.ok(!/tiktok/i.test(findJs)); assert.ok(!/tiktok/i.test(ui), 'no TikTok mention in the list code');
-  assert.ok(!/tiktok/i.test(page.replace(sec, '').replace(/<footer[\s\S]*?<\/footer>/, '')), 'TikTok appears only in Beyond the numbers and the footer');
+  assert.ok(!/tiktok/i.test(page.replace(/<footer[\s\S]*?<\/footer>/, '')), 'TikTok appears only in the footer');
 });
 t('V10.2: the page has no Ken\'s Take block, and old Buy links land in Budget Search', () => { assert.ok(!/res-ken|Ken's Take/.test(page + ui)); assert.ok(/what-can-i-buy\//.test(fs.readFileSync(path.join(root, 'buy/index.html'), 'utf8'))); });
 t('a size is applied only when the buyer typed a minimum: never worked out from bedrooms or anything else', () => { assert.ok(/function applyMin\(inp\)/.test(ui)); assert.ok(!/minSize = [^;\n]*(beds|SIZE_BEDS)/.test(ui)); const d = fs.readFileSync(path.join(root, 'assets/js/kpt-discover.js'), 'utf8'); assert.ok(!/inferSize|sizeFor|SIZE_BEDS/.test(d)); });

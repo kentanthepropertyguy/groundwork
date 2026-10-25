@@ -87,7 +87,8 @@ try:
             ids = pg.evaluate("[...document.querySelectorAll('[data-lg-for] > *')].map(e => { const a = e.querySelector('a'); return a ? (a.id || a.getAttribute('href') || '') : ''; })")
             lead = ids[0]
             check(f'{vn}: next steps ({who or "no question asked"}): {first} comes first', (first == 'budget' and lead not in ('wa', 'waOwn')) or lead == first, ids)
-            check(f'{vn}: next steps ({who or "none"}): all three stay available', len(ids) == 3 and 'wa' in ids and 'waOwn' in ids, ids)
+            allids = pg.evaluate("[...document.querySelectorAll('[data-lg-for] a[id]')].map(a => a.id)")
+            check(f'{vn}: next steps ({who or "none"}): budget and one Ask Ken card holding both messages (V2.1)', len(ids) == 2 and 'wa' in allids and 'waOwn' in allids, (ids, allids))
             nl = pg.query_selector('[data-mp-next]'); want = {'sell': 'What could my unit sell for?', 'buy': 'Is an asking price reasonable?', '': 'What this means for buying or selling here'}[who]
             check(f'{vn}: the block offers the visitor\'s own next step ({who or "none"}): "{want}"', nl is not None and nl.inner_text().startswith(want), nl and nl.inner_text())
             before = pg.evaluate('scrollY'); nl.click(); pg.wait_for_timeout(900)

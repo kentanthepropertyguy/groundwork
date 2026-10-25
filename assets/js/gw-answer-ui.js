@@ -104,7 +104,8 @@
       '<div class="pa-cpf2" data-cpf2 hidden><p class="pa-note">' + CPF2_TXT + '</p>' + chips('cover95', 'Will one of your homes last until you are 95?', [['yes', 'Yes'], ['no', 'No'], ['unsure', 'Not sure']], { value: '', hint: 'Compare each home’s remaining lease with 95 less your age. Not sure: the Full Retirement Sum is used.' }) +
       '<div class="pa-pair">' + money('cpfBal.0.oa', 'Your OA balance', { ph: 'from your CPF statement' }) + money('cpfBal.0.sa', 'Your SA or RA balance', { ph: 'type 0 if none' }) + '</div>' +
       '<div class="pa-pair" data-when="who:two">' + money('cpfBal.1.oa', 'Second buyer’s OA balance') + money('cpfBal.1.sa', 'Second buyer’s SA or RA', { ph: 'type 0 if none' }) + '</div></div>' +
-      '<div data-when="kind:new"><p class="pa-l pa-l2">Each month towards the home</p><div class="pa-pair">' + money('saveMo', 'Cash', { ph: 'e.g. 3,000' }) + money('cpfMo', 'CPF', { ph: 'e.g. 2,000' }) + '</div><p class="pa-note">Used to check each payment date.</p></div>' +
+      // CX V2: the monthly amounts only check the payment dates, so they open on request (like "+ Add bonus"); they show by themselves once they hold a figure
+      '<div data-when="kind:new"><button type="button" class="pa-link pa-addmo" data-month-add>+ Add what you can put in each month</button><div class="pa-month" data-monthbox hidden><p class="pa-l pa-l2">Each month towards the home <em>optional</em></p><div class="pa-pair">' + money('saveMo', 'Cash', { ph: 'e.g. 3,000' }) + money('cpfMo', 'CPF', { ph: 'e.g. 2,000' }) + '</div><p class="pa-note">Used to check each payment date.</p></div></div>' +
       '<p class="pa-fine">Stays on this device.</p></section>' +
       '<section class="pa-sec" aria-labelledby="pa-h-home"><h2 class="pa-h" id="pa-h-home">The home</h2>' + chips('kind', 'What are you buying?', [['new', 'New launch'], ['completed', 'Completed private home'], ['hdb', 'HDB flat']], { value: 'new' }) +
       '<div class="pa-route" data-when="kind:hdb" hidden>' + hdbRoute(true) + '</div>' +
@@ -361,6 +362,7 @@
 
     // ---- showing and hiding what is not yet relevant ----
     const bonusOn = { 0: false, 1: false }, rentOn = { 0: false, 1: false };
+    function showMonth(on) { const b = q('[data-monthbox]'), l = q('[data-month-add]'); if (b) b.hidden = !on; if (l) l.hidden = on; }
     function showBonus(n, on) { bonusOn[n] = on; const b = q('[data-bonusbox="' + n + '"]'), l = q('[data-bonus="' + n + '"]'); if (b) b.hidden = !on; if (l) l.hidden = on; if (!on) { const f = field('buyers.' + n + '.variable'); if (f) f.value = ''; } }
     function showRent(n, on) { rentOn[n] = on; const b = q('[data-rentbox="' + n + '"]'), l = q('[data-rent="' + n + '"]'); if (b) b.hidden = !on; if (l) l.hidden = on; if (!on) { const f = field('buyers.' + n + '.rental'); if (f) f.value = ''; } }
     // C1: flags worked out from several answers, read by data-when like any field
@@ -439,7 +441,7 @@
       const typed = f.value.trim() !== '' ? parseMoney(f.value) : null;
       q('[data-borrow-note]').textContent = choice ? 'You would borrow ' + $(r.at.loan) + ' of the ' + $(mx) + ' the bank may lend at this price. Borrowing less means more cash and CPF now and a smaller instalment.' : typed && !typed.error && typed.value > mx ? 'That is more than the ' + $(mx) + ' the numbers allow at this price, so ' + $(mx) + ' is used.' : 'Up to ' + $(mx) + ', the most the numbers allow at this price. Borrowing less means more cash and CPF now and a smaller instalment.';
     }
-    function adjSummary(s) { const e = q('[data-adj-sum]'); if (!e) return; e.textContent = [s.otp ? 'option ' + day(s.otp) : '', s.setAside > 0 ? '$' + fmtMoney(s.setAside) + ' set aside' : ''].filter(Boolean).join(' · '); }
+    function adjSummary(s) { const e = q('[data-adj-sum]'); if (!e) return; e.textContent = [s.otp ? 'Option date ' + day(s.otp) : '', s.setAside > 0 ? '$' + fmtMoney(s.setAside) + ' set aside' : ''].filter(Boolean).join(' · '); }
     function setPriceUi(r) {
       const pf = field('price'), box2 = out.pricebox;
       if (!r || r.state !== 'ok') { box2.hidden = true; return; }
@@ -554,6 +556,7 @@
       if (!o['flat.hasLoan'] && o['flat.instalment'] !== undefined && o['flat.instalment'] !== '') { const iv = parseMoney(String(o['flat.instalment'])); if (!iv.error && iv.value !== undefined) o['flat.hasLoan'] = iv.value > 0 ? 'yes' : 'no'; }
       ptouched = !!(o._pt || (o.price && o._pt === undefined));
       $$('[data-k]').forEach((x) => { const k = x.dataset.k; const v = o[k]; if (x.dataset.t === 'chip') setChip(x, v === undefined ? (x.dataset.default || '') : v); else x.value = v === undefined ? (k === 'otp' ? todayIso : '') : v; });
+      showMonth(!!(o.saveMo || o.cpfMo));
       showBonus(0, !!(o._bonus && o._bonus[0] || o['buyers.0.variable'])); showBonus(1, !!(o._bonus && o._bonus[1] || o['buyers.1.variable']));
       showRent(0, !!(o._rent && o._rent[0] || o['buyers.0.rental'])); showRent(1, !!(o._rent && o._rent[1] || o['buyers.1.rental']));
       if (o['buyers.0.rental']) field('buyers.0.rental').value = o['buyers.0.rental']; if (o['buyers.1.rental']) field('buyers.1.rental').value = o['buyers.1.rental'];
@@ -620,10 +623,11 @@
       const chip = t('.pa-chips[data-k] .pa-chip');
       if (chip) { const g = chip.parentElement, was = chipVal(g); setChip(g, chip.dataset.v); if (g.dataset.k === 'order' && was === chip.dataset.v) { /* stays chosen */ } if (g.dataset.k === 'home' || g.dataset.k === 'order' || g.dataset.k === 'kind' || g.dataset.k === 'who') track('planner_choice', { field: g.dataset.k, value: chip.dataset.v }); if (g.dataset.k === 'who' && chip.dataset.v === 'two') { /* second buyer row appears */ } clearTimeout(tmr); recalc(); return; }
       const rn = t('[data-rent]'); if (rn) { showRent(+rn.dataset.rent, true); const f = field('buyers.' + rn.dataset.rent + '.rental'); if (f) f.focus(); changed(); return; }
+      const mo = t('[data-month-add]'); if (mo) { showMonth(true); const f = field('saveMo'); if (f) f.focus(); return; }
       const bn = t('[data-bonus]'); if (bn) { showBonus(+bn.dataset.bonus, true); const f = field('buyers.' + bn.dataset.bonus + '.variable'); if (f) f.focus(); changed(); return; }
       const cm = t('[data-cmp]'); if (cm) { cmpOpen = !cmpOpen; const bx = q('[data-cmp-box]'); if (bx) bx.hidden = !cmpOpen; $$('[data-cmp]').forEach((x) => { x.setAttribute('aria-expanded', String(cmpOpen)); const ar = x.querySelector('[aria-hidden]'); if (ar) ar.textContent = cmpOpen ? '▴' : '▾'; }); if (cmpOpen) track('planner_tenure_compare', {}); fitSticky(); return; }
       const us = t('[data-use]'); if (us) { const f = field('years'); if (f) { f.value = us.dataset.use === 'auto' ? '' : us.dataset.use; delete f.dataset.adjustedFrom; } track('planner_tenure_use', { choice: us.dataset.use === 'auto' ? 'suggested' : 'own' }); clearTimeout(tmr); recalc(); return; }
-      const fo = t('[data-focus]'); if (fo) { const f = field(fo.dataset.focus); if (f) { f.scrollIntoView({ block: 'center', behavior: 'smooth' }); f.focus({ preventScroll: true }); } return; }
+      const fo = t('[data-focus]'); if (fo) { const f = field(fo.dataset.focus); if (f && f.closest('[data-monthbox]')) showMonth(true); if (f) { f.scrollIntoView({ block: 'center', behavior: 'smooth' }); f.focus({ preventScroll: true }); } return; }
       const odt = t('[data-open-dates]'); if (odt) { const d = q('[data-dates-d]'); if (d) { d.open = true; d.scrollIntoView({ block: 'start', behavior: 'smooth' }); } track('planner_dates_open', {}); return; }
       const oh = t('[data-open-how]'); if (oh) { const d = q('[data-how-d]'); if (d) { d.open = true; d.scrollIntoView({ block: 'start', behavior: 'smooth' }); } return; }
       const bm = t('[data-borrow-max]'); if (bm) { field('prefLoan').value = ''; track('planner_borrow', { choice: 'most' }); clearTimeout(tmr); recalc(); return; }

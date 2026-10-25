@@ -73,14 +73,14 @@
       t: ['map', 'maps', 'on a map', 'nearby', 'near me', 'around', 'neighbourhood', 'neighborhood', 'location', 'area', 'schools', 'school', 'mrt', 'near mrt', 'amenities', 'supermarket', 'park', 'explore', 'where'] },
     { id: 'what-can-i-buy', name: 'What can this budget buy?', tag: 'Search by budget, area and must-haves', short: 'Developments with recent sales within your budget', href: 'research/#/budget', icon: 'what-can-i-buy', menu: 1, sec: 'research',
       t: ['what can i buy', 'budget', 'my budget', 'price range', 'find a condo', 'find a home', 'which condo', 'shortlist', 'space', 'size', 'sq ft', 'square feet', 'older condo', 'newer condo'] },
-    { id: 'worth', name: 'Property prices & past sales', tag: 'HDB, condo and landed sales · asking price', short: 'What comparable homes sold for', href: 'research/#/prices', icon: 'worth', menu: 1, sec: 'research',
+    { id: 'worth', name: 'Property prices & past sales', tag: 'HDB, condo and landed sales · asking price', short: 'What comparable homes sold for', href: 'research/#/prices', icon: 'worth', search: 1, sec: 'research',
       t: ['valuation', 'value', 'home value', 'worth', 'whats my home worth', 'how much is my flat worth', 'how much is my home worth', 'hdb price', 'hdb prices', 'hdb resale', 'resale price', 'resale prices', 'hdb valuation', 'asking price', 'fair price', 'overpriced', 'is the price fair', 'my block', 'block resales', 'recent sales', 'landed', 'landed prices', 'terrace', 'semi d', 'bungalow', 'transacted price', 'property value', 'property values', 'market price', 'market prices', 'home prices', 'house prices', 'condo price', 'condo prices', 'condo value', 'landed sales', 'landed value', 'comparable sales', 'hdb and home prices', 'what is my home worth', 'what is my house worth', 'how much is my house worth', 'what is my property worth', 'home worth'] },
     { id: 'ask-hdb', name: 'Check an HDB asking price', tag: 'Against resales in the block', href: 'journey/worth/#hdb', icon: 'worth', search: 1, sec: 'research',
       t: ['asking price', 'hdb asking price', 'check asking price', 'is the asking price fair', 'resale flat price', 'buying a resale flat', 'cov', 'cash over valuation', 'overpriced'] },
     { id: 'ask-condo', name: 'Check a condo asking price', tag: 'Pick the development, then “Check an asking price”', href: 'research/', icon: 'research', search: 1, sec: 'research',
       t: ['asking price', 'condo asking price', 'check asking price', 'is the asking price fair', 'condo price', 'psf', 'price per square foot', 'overpriced', 'condo valuation'] },
-    { id: 'research', name: 'Research a development', tag: 'Prices by size · compare', short: 'Any of 2,000+ private developments', href: 'research/#/', icon: 'research', start: 1, sec: 'research',
-      t: ['research', 'development', 'condo', 'condominium', 'apartment', 'project', 'transactions', 'transacted', 'psf', 'price per square foot', 'compare', 'comparison', 'compare condos', 'condo prices', 'private property', 'ura', 'caveats', 'valuation', 'condo valuation'] },
+    { id: 'research', name: 'Research a property', tag: 'HDB, condo and landed · prices, past sales, rents', short: 'Search a development, postal code, HDB block or road', href: 'research/#/', icon: 'research', start: 1, sec: 'research',
+      t: ['research', 'development', 'condo', 'condominium', 'apartment', 'project', 'transactions', 'transacted', 'psf', 'price per square foot', 'compare', 'comparison', 'compare condos', 'condo prices', 'private property', 'ura', 'caveats', 'valuation', 'condo valuation', 'valuation', 'value', 'home value', 'worth', 'whats my home worth', 'how much is my flat worth', 'how much is my home worth', 'hdb price', 'hdb prices', 'hdb resale', 'resale price', 'resale prices', 'hdb valuation', 'asking price', 'fair price', 'overpriced', 'is the price fair', 'my block', 'block resales', 'recent sales', 'landed', 'landed prices', 'terrace', 'semi d', 'bungalow', 'transacted price', 'property value', 'property values', 'market price', 'market prices', 'home prices', 'house prices', 'condo price', 'condo prices', 'condo value', 'landed sales', 'landed value', 'comparable sales', 'hdb and home prices', 'what is my home worth', 'what is my house worth', 'how much is my house worth', 'what is my property worth', 'home worth'] },
     { id: 'guide', name: 'Plan My Move', tag: 'Buy, sell or upgrade, step by step', short: 'Tell us your goal; we take you through it', href: 'journey/', icon: 'guide', start: 1, sec: 'guide',
       t: ['plan my move', 'my move', 'guide', 'guide me', 'help me figure it out', 'figure it out', 'guided', 'guided journey', 'help', 'help me', 'where to start', 'start', 'beginner', 'first time', 'first home', 'first-time buyer', 'steps', 'plan', 'planning', 'what should i do', 'not sure'] },
     { id: 'guide-up', name: 'Upgrade from HDB', tag: 'The complete four-step process: value, proceeds, budget, homes', href: 'journey/#up', icon: 'hdb-upgrade', search: 1, sec: 'sell',
@@ -95,7 +95,8 @@
       t: ['browse', 'all developments', 'directory', 'list', 'a to z', 'every development', 'all condos'] },
     { id: 'sample', name: 'Sample research report', tag: 'Jadescape or Thomson Three?', href: 'research/sample/', icon: 'doc', search: 1, sec: 'research',
       t: ['sample', 'report', 'sample report', 'research report', 'detailed research', 'comparison report'] },
-    { id: 'launches', name: 'New Launches', tag: 'On Ken’s main site', href: LAUNCHES, icon: 'ext', ext: 1,
+    // V2.1: new launches are on the Groundwork Map (under-construction launches and awarded GLS sites, data/map/upcoming.json); no link leaves the site for them
+    { id: 'launches', name: 'New launches on the Map', tag: 'Launches and awarded sites, with confirmed facts', href: 'research/map/', icon: 'map', search: 1, sec: 'research',
       t: ['new launches', 'new launch', 'launch', 'launches', 'showflat', 'show flat', 'development guides', 'lucerne grand', 'thomson reserve', 'hougang central', 'preview'] },
     { id: 'main-site', name: 'Ken Tan · The Property Guy', tag: 'Ken’s main site', href: MAIN, icon: 'ext', ext: 1,
       t: ['ken', 'ken tan', 'the property guy', 'about', 'about ken', 'agent', 'property agent', 'huttons', 'main site', 'contact', 'tiktok'] },
@@ -113,11 +114,11 @@
     map: { name: 'Map', href: 'research/map/', nav: 'map', q: '', say: '', ids: [] },
     // The header's one way into buying and selling (25 Oct 2026): "Plan My Move", the Guide me page at its start, showing all four choices (Buy, Sell, Upgrade from HDB, Sell and buy again).
     move: { name: 'Plan My Move', href: 'journey/', nav: 'journey', q: '', say: '', ids: [] },
-    research: { name: 'Research', href: 'research/', nav: 'research', q: 'Looking at a property?', say: 'What homes really sold for, from URA and HDB records. The Map is part of Research.', ids: ['research', 'map', 'worth', 'what-can-i-buy', 'directory', 'sample'] },
+    research: { name: 'Research', href: 'research/', nav: 'research', q: 'Looking at a property?', say: 'What homes really sold for, from URA and HDB records. The Map is part of Research.', ids: ['research', 'map', 'what-can-i-buy', 'directory', 'sample'] },
   };
   // The menu's columns (25 Oct 2026) follow the main navigation: Plan My Move (the four journeys), Research (with the Map), Calculators.
   const SEC_ORDER = ['guide', 'research', 'tools'];
-  // Main navigation (25 Oct 2026): Plan My Move · Research · Map · Calculators · New Launches (header; footer and phone row without New Launches). "Plan My Move" opens the Guide me page at its start.
+  // Main navigation (25 Oct 2026; V2.1 drops the external New Launches link, whose launches are on the Map): Plan My Move · Research · Map · Calculators. "Plan My Move" opens the Guide me page at its start.
   // The full menu keeps its four columns (Buy, Sell, Research, Tools), whose links go straight to a chosen path.
   const NAV_ORDER = ['move', 'research', 'map', 'tools'];
   const MENU_TOOLS = SECTIONS.tools.ids;
@@ -278,7 +279,7 @@
       '<div class="gw-ml">' + S.ids.filter((id) => k === 'research' || k === 'tools' || k === 'guide' || SECTIONS.research.ids.indexOf(id) < 0).map((id) => row(byId[id], r)).join('') + '</div>' + (k === 'tools' ? '<a class="gw-mall" href="' + r + 'tools/" data-gw-nav-to="tools">All calculators, with what each one does ›</a>' : '') + '</section>'; };
     return '<div class="gw-mx">' + searchHtml('menu', 'Search, e.g. ABSD or Jadescape') +
       '<div class="gw-mx-body" data-gw-menu-body><div class="gw-mcols">' + SEC_ORDER.map(sec).join('') + '</div>' +
-      '<div class="gw-mfoot"><a class="gw-mhome" href="' + (r || './') + '" data-gw-nav-to="home">' + svg('home', 18) + 'Home</a>' + row(byId['main-site'], r) + row(byId.launches, r) +
+      '<div class="gw-mfoot"><a class="gw-mhome" href="' + (r || './') + '" data-gw-nav-to="home">' + svg('home', 18) + 'Home</a>' + 
       '<a class="gw-mask" href="' + esc(ASK) + '" target="_blank" rel="noopener" data-gw-nav-to="ask">' + svg('chat', 20) + 'Ask Ken on WhatsApp</a>' +
       // Audit V3-05: one place, on every page, to remove the figures this tab remembers for the tools
       '<p class="gw-mclear"><button type="button" class="gw-link" data-gw-clear-all>Clear my figures</button> <span>Removes the figures this tab remembers for every tool.</span></p></div></div></div>';

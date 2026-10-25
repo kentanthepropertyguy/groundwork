@@ -75,18 +75,18 @@ try:
         row = pg.inner_text('#res')
         check(vn + ': the search names the block, town and the way in', 'Blk 155 Bishan Street 13' in row and 'HDB flat' in row and 'See resale prices' in row, row)
         shot(pg, f'1-first-search-{vn}')
-        pg.keyboard.press('Enter'); pg.wait_for_selector('[data-gw-hdbview] h1')
-        check(vn + ': it opens that block\'s research, with no postal code or anything typed in the address', hash_(pg) == '#/hdb/bishan/155/bishan-st-13' and not re.search(r'\d{6}', pg.url), pg.url)
+        pg.keyboard.press('Enter'); pg.wait_for_selector('#rwOver [data-ov="hdb"]', timeout=20000); pg.click('#rwOver [data-ov-full]'); pg.wait_for_selector('[data-gw-hdbview] h1')
+        check(vn + ': the overview offers the full report, which opens that block\'s research, with no postal code or anything typed in the address', hash_(pg) == '#/hdb/bishan/155/bishan-st-13' and not re.search(r'\d{6}', pg.url), pg.url)
         check(vn + ': the buyer picks nothing else first: block, town and flat types are on the page', pg.inner_text('[data-gw-hdbview] h1') == 'Blk 155 Bishan Street 13' and 'Bishan' in pg.inner_text('[data-hv-lead]') and pg.locator('[data-hv-ft]').count() == 4)
         ctx.close()
-        ctx, pg, errs = fresh(br, kw); home(pg); check(vn + ': still three in-page options, none for HDB', pg.locator('.gw-ropt').count() == 3 and pg.inner_text('.gw-ropts').count('HDB') <= 1); ctx.close()
+        ctx, pg, errs = fresh(br, kw); home(pg); check(vn + ': still two in-page options, none just for HDB', pg.locator('.gw-ropt').count() == 2 and pg.inner_text('.gw-ropts').count('HDB') <= 1); ctx.close()
 
-        print('\n== 2. HDB postal code from Property prices & past sales,', vn)
-        ctx, pg, errs = fresh(br, kw); home(pg, '#/prices'); pg.wait_for_selector('[data-vx-pc]')
-        pg.fill('[data-vx-pc]', '570155'); pg.wait_for_selector('[data-vx-pc-out] , [data-vx-pcout]'); pg.wait_for_selector('.gw-vx-res', timeout=20000)
-        t2 = pg.inner_text('main'); a2 = money(t2)
-        check(vn + ': the same block answers there, with its own range', 'Blk 155 Bishan St 13' in t2 and len(a2) >= 2, t2[:200])
-        check(vn + ': a link leads on to the full HDB research', pg.locator('a[data-gw-go=hdb-research]').count() >= 1)
+        print('\n== 2. HDB postal code on the one property search (the old #/prices address opens it too),', vn)
+        ctx, pg, errs = fresh(br, kw); home(pg, '#/prices'); pg.wait_for_selector('#q')
+        pg.fill('#q', '570155'); pg.wait_for_selector('#res [data-hdb]', timeout=15000); pg.click('#res [data-hdb]'); pg.wait_for_selector('#rwOver [data-ov="hdb"]', timeout=20000)
+        t2 = pg.inner_text('#rwOver'); a2 = money(pg.inner_text('#rwOver [data-ov-flat="5-room"]'))
+        check(vn + ': the same block answers there, with its own range', 'Blk 155 Bishan Street 13' in t2 and len(a2) >= 2, t2[:200])
+        check(vn + ': View Full Research leads on to the full HDB research', pg.locator('#rwOver a[data-ov-full=hdb]').count() == 1)
         ref[vn + '-prices'] = a2[:2]
         shot(pg, f'2-prices-postal-{vn}')
         ctx.close()
@@ -179,12 +179,12 @@ try:
 
         print('\n== 8. Condo, EC, cluster, landed and new-launch postal codes,', vn)
         for code, want, label in (('575749', 'jadescape', 'condo'), ('579819', 'bishan-loft', 'EC'), ('359419', 'dunsfold-18', 'cluster')):
-            ctx, pg, errs = fresh(br, kw); home(pg); pg.fill('#q', code); pg.wait_for_selector('#res button'); pg.keyboard.press('Enter'); pg.wait_for_url('**/research/#/p/' + want + '*', timeout=20000)
-            pg.wait_for_selector('.lg-back', timeout=20000)
+            ctx, pg, errs = fresh(br, kw); home(pg); pg.fill('#q', code); pg.wait_for_selector('#res button'); pg.keyboard.press('Enter'); pg.wait_for_selector('#rwOver [data-ov-id="' + want + '"]', timeout=20000)
+            pg.click('#rwOver [data-ov-full]'); pg.wait_for_url('**/research/#/p/' + want + '*', timeout=20000); pg.wait_for_selector('.lg-back', timeout=20000)
             # 25 Oct 2026: Research opens the development's full analysis directly (the Map is one link away, in its Location section)
-            check(vn + ': ' + label + ' postal code opens that development\'s full Research', hash_(pg).startswith('#/p/' + want) and '/research/map/' not in pg.url and not re.search(r'\d{6}', pg.url), hash_(pg)); ctx.close()
-        ctx, pg, errs = fresh(br, kw); home(pg); pg.fill('#q', '459919'); pg.wait_for_selector('#res button'); rows = pg.inner_text('#res'); pg.keyboard.press('Enter'); pg.wait_for_function("location.hash === '#/prices'", timeout=20000)
-        check(vn + ': a landed postal code goes to the landed research, with the code typed into its box (not the address)', 'Landed' in rows and pg.input_value('[data-vx-pc]') == '459919' and '459919' not in pg.url, rows); ctx.close()
+            check(vn + ': ' + label + ' postal code shows that development, and View Full Research opens its full Research', hash_(pg).startswith('#/p/' + want) and '/research/map/' not in pg.url and not re.search(r'\d{6}', pg.url), hash_(pg)); ctx.close()
+        ctx, pg, errs = fresh(br, kw); home(pg); pg.fill('#q', '459919'); pg.wait_for_selector('#res button'); rows = pg.inner_text('#res'); pg.keyboard.press('Enter'); pg.wait_for_selector('#rwLanded:not([hidden]) .gw-vx-pcout', timeout=20000)
+        check(vn + ': a landed postal code shows the landed sales panel in place (the code is not in the address)', 'Landed' in rows and '459919' not in pg.url and pg.locator('#rwLanded .gw-vx-pcout').count() == 1, rows); ctx.close()
         ctx, pg, errs = fresh(br, kw); home(pg); pg.fill('#q', '579600'); pg.wait_for_selector('#res button'); check(vn + ': a project not yet on sale (Thomson Reserve) is found by postal code', 'Thomson Reserve' in pg.inner_text('#res')); ctx.close()
         ctx, pg, errs = fresh(br, kw); home(pg); pg.fill('#q', '999999'); pg.wait_for_function("document.querySelector('#res') && document.querySelector('#res').innerText.trim() && !document.querySelector('#res').innerText.includes('Looking up')")
         check(vn + ': a code with no result says what was found and what to do next', len(pg.inner_text('#res').strip()) > 20, pg.inner_text('#res')); ctx.close()
@@ -200,16 +200,16 @@ try:
             pg.click('.gw-nav >> text=Menu'); pg.wait_for_selector('.gw-mcols .gw-mi')
             hs = pg.evaluate("[...document.querySelectorAll('.gw-mcols .gw-mi')].map(a=>[a.querySelector('b')?.textContent||'', a.getAttribute('href')])"); d = dict(hs)
             pre = '' if path == '/' else '../'
-            check(vn + ': ' + path + ' menu: the four Research links open Unified Research', d.get('Research a development') == pre + 'research/#/' and d.get('Property prices & past sales') == pre + 'research/#/prices' and d.get('What can this budget buy?') == pre + 'research/#/budget' and d.get('Browse every development') == pre + 'research/#/browse', d)
-            check(vn + ': ' + path + ' menu: none of the four links is listed twice', all([h[1] for h in hs].count(pre + x) == 1 for x in ('research/#/', 'research/#/prices', 'research/#/budget', 'research/#/browse')), [h[1] for h in hs])
-            names = [h[0] for h in hs if h[0]]; check(vn + ': ' + path + ' menu: each Research name appears once', all(names.count(n) == 1 for n in ('Research a development', 'Property prices & past sales', 'What can this budget buy?', 'Browse every development')), names)
+            check(vn + ': ' + path + ' menu: the Research links open Unified Research', d.get('Research a property') == pre + 'research/#/' and 'Property prices & past sales' not in d and 'Research a development' not in d and d.get('What can this budget buy?') == pre + 'research/#/budget' and d.get('Browse every development') == pre + 'research/#/browse', d)
+            check(vn + ': ' + path + ' menu: none of the Research links is listed twice, and the old prices address is not a second entry', all([h[1] for h in hs].count(pre + x) == 1 for x in ('research/#/', 'research/#/budget', 'research/#/browse')) and [h[1] for h in hs].count(pre + 'research/#/prices') == 0, [h[1] for h in hs])
+            names = [h[0] for h in hs if h[0]]; check(vn + ': ' + path + ' menu: each Research name appears once', all(names.count(n) == 1 for n in ('Research a property', 'What can this budget buy?', 'Browse every development')), names)
             ctx.close()
-        ctx, pg, errs = fresh(br, kw); home(pg); pg.click('.gw-nav >> text=Menu'); pg.wait_for_selector('.gw-mi'); pg.locator('.gw-mi', has_text='Property prices & past sales').first.click()
-        pg.wait_for_function("location.hash === '#/prices'", timeout=20000); pg.wait_for_selector('[data-vx-pc]'); check(vn + ': from Research, the menu opens Property prices & past sales in place', hash_(pg) == '#/prices')
+        ctx, pg, errs = fresh(br, kw); home(pg, '#/budget'); pg.click('.gw-nav >> text=Menu'); pg.wait_for_selector('.gw-mi'); pg.locator('.gw-mi', has_text='Research a property').first.click()
+        pg.wait_for_selector('#ws-dev:not([hidden]) #q', timeout=20000); check(vn + ': from Research, the menu\'s one Research a property entry opens the property search', pg.locator('#ws-dev:not([hidden]) #q').count() == 1)
         pg.click('.gw-nav >> text=Menu'); pg.wait_for_selector('.gw-mi'); pg.locator('.gw-mi', has_text='What can this budget buy?').first.click(); pg.wait_for_function("location.hash === '#/budget'", timeout=20000); check(vn + ': and What can this budget buy? likewise', hash_(pg) == '#/budget'); ctx.close()
         for old in ('/journey/worth/', '/tools/what-can-i-buy/', '/buy/'):
             ctx, pg, errs = fresh(br, kw); r = pg.goto(B + old); check(vn + ': the standalone page ' + old + ' still opens', r.status == 200 and pg.locator('h1').count() >= 1); ctx.close()
-        ctx, pg, errs = fresh(br, kw); r = pg.goto(B + '/research/'); t = pg.title(); check(vn + ': the browser title says HDB and private property', 'HDB' in t and 'private' in t.lower() and 'prices' in t.lower(), t)
+        ctx, pg, errs = fresh(br, kw); r = pg.goto(B + '/research/'); t = pg.title(); check(vn + ': the browser title says HDB and private or condo property prices', 'HDB' in t and ('condo' in t.lower() or 'private' in t.lower()) and 'prices' in t.lower(), t)
         d = pg.evaluate("document.querySelector('meta[name=description]').content"); check(vn + ': so does the description', 'HDB' in d and 'condo' in d and 'transaction' in d, d); ctx.close()
 
         print('\n== 10. Existing Jadescape and Serra journeys,', vn)
@@ -239,7 +239,8 @@ try:
 
         print('\n== Consistency: the same block and flat type read the same everywhere,', vn)
         r_, p_, m_ = ref[vn + '-research'], ref[vn + '-prices'], ref[vn + '-map']
-        check(vn + ': Research, Property prices and the Map give the same range for Blk 155 5-room', r_ == p_ == m_ and len(r_) == 2, (r_, p_, m_))
+        n_ = lambda l: [int(x.replace('$', '').replace(',', '')) for x in l]
+        check(vn + ': the report and the Map give the same range for Blk 155 5-room, and the overview\'s middle range sits inside it', r_ == m_ and len(r_) == 2 and len(p_) == 2 and n_(r_)[0] <= n_(p_)[0] <= n_(p_)[1] <= n_(r_)[1], (r_, p_, m_))
 
     br.close()
 finally:

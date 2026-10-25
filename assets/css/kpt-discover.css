@@ -196,3 +196,5 @@ body.kd-hasmap .kd-mapbox .lyr-p{top:46px}
 }
 @media (prefers-reduced-motion:no-preference){.kd-card{transition:box-shadow .2s}}
 .kd-seg[data-k=tenure] button{white-space:normal;line-height:1.2;padding:8px 6px}.kd-seg[data-k=tenure] button[data-v=free]{flex:1.7}
+/* V2.1: Beyond the numbers is one quiet line */
+.kd-ken-l{margin:4px 0 0;color:var(--muted)}.kd-ken-l a{color:var(--blue);font-weight:600;text-decoration:none;white-space:nowrap}

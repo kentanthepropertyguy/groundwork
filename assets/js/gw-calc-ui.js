@@ -54,7 +54,7 @@
     'hdb-upgrade': { path: 'planner/#sell', title: 'Upgrading from HDB?', name: 'Upgrading from HDB?', tag: 'What can I afford?, set up for a flat being sold', short: 'Your budget for a private home once your flat is sold', group: 'upgrade' },   // folded into What can I afford? (24 Oct 2026); tools/hdb-upgrade/ redirects
     'what-can-i-buy': { path: 'what-can-i-buy/', title: 'What can this budget buy?', name: 'What can this budget buy?', tag: 'Search by budget, area and must-haves', short: 'Developments with recent sales within your budget', group: 'research' },
     worth: { path: '../journey/worth/', title: 'Property values & prices', name: 'Property prices & past sales', tag: 'HDB, condo and landed sales · asking price', short: 'What comparable homes sold for. Check an asking price', group: 'research', icon: 'worth' },
-    research: { path: '../research/', title: 'Research a development', name: 'Research a development', tag: 'Prices by size · compare', short: 'Recent sales by size, an asking-price check, and comparisons', group: 'research', icon: 'research' },
+    research: { path: '../research/', title: 'Research a property', name: 'Research a property', tag: 'HDB, condo and landed · prices, past sales, rents', short: 'Recent sales, an asking-price check, and comparisons', group: 'research', icon: 'research' },
   };
   // Tools work out a number from your own figures. Looking up what homes sold for (Property values & prices, Research, What can this
   // budget buy?) is listed under Research in the menu and on the homepage, so each feature has one home.
@@ -203,6 +203,19 @@
   };
   const span = (n) => { const y = Math.floor(n / 12), m = n % 12; return (y ? y + ' year' + (y === 1 ? '' : 's') : '') + (y && m ? ' ' : '') + (m ? m + ' month' + (m === 1 ? '' : 's') : ''); }; // A5-26
   const remitRows = (d) => (d.remissions && d.remissions.length ? rows(d.remissions.map((x) => [esc(x.label) + ' (see the conditions below)', $(x.total), 'w'])) : '');
+  // V2.1: before the first result, the panel shows the result's own lines with a dash where each figure will go (never an example figure)
+  const PREVIEW = {
+    'stamp-duty': ['Total stamp duty', [['Buyer’s Stamp Duty (BSD)', '$'], ['ABSD, for the buyers you choose', '$']]],
+    mortgage: ['Monthly instalment', [['Loan repaid', '$'], ['Total interest', '$'], ['Income a bank looks for', '$']]],
+    tdsr: ['Indicative maximum loan', [['Left for the new loan each month', '$'], ['Price this loan supports', '$']]],
+    msr: ['Indicative maximum loan', [['Left for the new loan each month', '$'], ['Price this loan supports', '$']]],
+    'sale-proceeds': ['Cash in hand after costs', [['CPF back to your account', '$'], ['Selling costs', '$']]],
+    ssd: ['Seller’s Stamp Duty', [['Held for', ''], ['No SSD if you sell on or after', '']]],
+  };
+  const previewHtml = (id, need) => { const P = PREVIEW[id]; if (!P) return '<p class="gw-fine">' + (need ? 'Enter ' + esc(need) + ' to see the result.' : 'Enter your details to see the result.') + '</p>';
+    return '<div class="gw-ready" data-ready aria-label="Your result will appear here"><p class="gw-ready-k">' + esc(P[0]) + '</p><p class="gw-ready-v" aria-hidden="true">$ —</p>' +
+      '<ul class="gw-ready-rows">' + P[1].map((r) => '<li><span>' + esc(r[0]) + '</span><b aria-hidden="true">' + (r[1] ? r[1] + ' ' : '') + '—</b></li>').join('') + '</ul>' +
+      '<p class="gw-ready-n">' + (need ? 'Enter ' + esc(need) + ' to see your figures.' : 'Enter your details to see your figures.') + '</p></div>'; };
   const LABEL = { loan: 'loan amount', ratePct: 'interest rate', years: 'loan tenure', price: 'price', buyers: 'buyer details', bought: 'date you bought', sold: 'date you sell', income: 'income', age: 'age' };
 
   // SSD: the years after purchase on one line, the rate in each, and where the sale date falls.
@@ -494,7 +507,11 @@
         // a value we can't use: say which and why, and show no result (A5-02, A5-06, A5-07, A5-22)
         const named = (x) => { const el = box.querySelector('[data-k="' + x.field + '"]'); const n = el && !/^(age|income|buyers)$/.test(x.field) ? fieldName(el) : ''; return n && x.text.indexOf(n + ':') !== 0 ? n + ': ' + x.text : x.text; };
         out.innerHTML = '<p class="gw-warn" role="alert">' + r.invalid.map((x) => esc(named(x))).join('<br>') + '</p>';
-      } else { out.innerHTML = '<p class="gw-fine">Enter ' + (r.missing || []).map((m) => LABEL[m] || m).join(', ').replace(/, ([^,]*)$/, ' and $1') + ' to see the result.</p>'; }
+      } else {
+        // V2.1: before a result, the panel previews the result's lines (a dash for each figure) and says what is still needed
+        const need = (r.missing || []).map((m) => LABEL[m] || m).join(', ').replace(/, ([^,]*)$/, ' and $1');
+        out.innerHTML = previewHtml(id, need);
+      }
       paintTenure(v, r);
       last = r.ok && !r.noTenure ? { v, r } : null; send.hidden = !last; pinRefresh(); // nothing to send when there is no loan to show (A2-08)
       afterCalc();

@@ -312,3 +312,6 @@ body.gw-confirming .pa-bar{display:none !important}
 /* Package 4: an optional valuation under the price (a completed home only); a second quiet link beside "Add bonus" */
 .pa-valbox{display:flex;flex-direction:column;gap:6px}.pa-valbox[hidden]{display:none}
 .pa-adds{display:flex;flex-wrap:wrap;gap:0 18px}.pa-adds .pa-link[hidden]{display:none}.pa-bonus{margin-top:2px}.pa-rentsell{margin:6px 0 0}.pa-rentsell[hidden]{display:none}
+/* CX V2 (26 Oct 2026): the monthly amounts open on request */
+.pa-addmo{ margin-top:2px; }
+.pa-month{ display:grid; gap:10px; }

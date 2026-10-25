@@ -27,8 +27,8 @@ try:
         pg.goto(base); pg.wait_for_selector('#q', timeout=15000)
         pg.type('#q', 'horizon green', delay=5)
         pg.wait_for_selector('#res [role=option], #res button, #res a', timeout=10000)
-        pg.click('#res >> text=Horizon Green >> nth=0'); pg.wait_for_url('**/research/#/p/horizon-green*', timeout=10000)   # 25 Oct 2026: Research opens the full analysis, never the Map first
-        check(vn+': search -> a development opens its full analysis (not the Map)', '/research/#/p/horizon-green' in pg.url and '/map/' not in pg.url, pg.url)
+        pg.click('#res >> text=Horizon Green >> nth=0'); pg.wait_for_selector('#rwOver [data-ov-full]', timeout=15000); pg.click('#rwOver [data-ov-full]'); pg.wait_for_url('**/research/#/p/horizon-green*', timeout=10000)   # 25 Oct 2026: Research opens the full analysis, never the Map first
+        check(vn+': search -> overview -> View Full Research opens the full analysis (not the Map)', '/research/#/p/horizon-green' in pg.url and '/map/' not in pg.url, pg.url)
         pg.goto(base + '#/p/horizon-green'); forget_size(pg); pg.reload(); pg.wait_for_selector('#sizeSel', state='attached', timeout=10000)
         check(vn+': with no size chosen, no price is shown for the development, only the question and an at-a-glance summary', pg.query_selector('.lg-ans-v') is None and pg.query_selector('[data-lg-ov]') is not None and 'What size home are you looking at?' in pg.inner_text('#lgPick'))
         pick_dominant(pg); pg.wait_for_selector('[data-lg-ans]', timeout=10000)

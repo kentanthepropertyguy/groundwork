@@ -115,10 +115,13 @@ try:
             shot(pg, f'04b-answer-rent-{vn}', '[data-gwb-ans]')
             check(vn + ': no sideways scroll, no page errors', flat(pg) and not errs, errs[:2]); ctx.close()
             ctx, pg, errs = fresh(br, kw); pg.goto(B + '/research/#/p/the-m'); pg.wait_for_selector('#lgRent', timeout=20000)
+            # CX V2: rents by size are offered under their own heading, folded until opened or until they are the answer
+            pg.click('#lgRent [data-gwrent-sizes] > summary'); pg.wait_for_timeout(200)
             check(vn + ': a bedroom count with too few contracts: rents by size are offered (same band, any bedrooms)', pg.locator('#lgRent [data-gwrent-sizes] [data-gwrent-size]').count() >= 1 and 'whatever their bedrooms' in pg.inner_text('#lgRent'))
             if pg.locator('#lgPick [data-bed="3"]').count():
                 pg.click('#lgPick [data-bed="3"]'); pg.wait_for_selector('[data-gwb-ans] [data-gwrent-line]')
                 check(vn + ': ... and the chosen type says it has too few, never borrowing another type', 'Too few 3-bedroom rental contracts' in pg.inner_text('[data-gwb-ans] [data-gwrent-line]'))
+                check(vn + ': ... and the rents by size it points to are open', pg.locator('#lgRent details[data-gwrent-sizes][open]').count() == 1)
             check(vn + ': no page errors', not errs, errs[:2]); ctx.close()
 
             print('\n== 5. No reliable bedroom types: prices by size,', vn)

@@ -52,7 +52,7 @@ try:
         counts = [int(re.search(r'· (\d+) sold', t).group(1)) for v, t in o if v]
         mm = re.search(r'(\d+) resales in the last 12 months', ov)
         check(f'{vn}: the at-a-glance card gives counts only: {mm and mm.group(0)}, across the sizes in the drop-down', mm and int(mm.group(1)) == sum(counts) == PULSE['1-canberra']['a'] and f'Across {len(counts)} sizes' in ov, (ov[:200], counts))
-        check(f'{vn}: it says plainly there is no single price for the whole development', 'no single price for the whole development' in ov)
+        check(f'{vn}: it says plainly there is no single price for the whole development', 'no single price' in ov.lower() and 'whole development' in ov)
         check(f'{vn}: the drop-down lists each size with how many sold ({len(counts)} sizes)', len(counts) >= 5 and all('sq ft' in t for v, t in o if v), o[:3])
         # ---------- 1 and 2. choose a size: price, pulse, chart and text follow it together
         pg.select_option('#sizeSel', '900'); pg.wait_for_selector('[data-mp]'); pg.wait_for_timeout(300)
