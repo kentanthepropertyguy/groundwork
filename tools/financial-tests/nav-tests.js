@@ -51,8 +51,10 @@ for (const f of pages) {
   check(rel + ': the old HDB upgrade planner is no longer linked (it is folded into What can I afford?; its address redirects)', !/href="((\.\.\/)*|\/)tools\/hdb-upgrade\/"/.test(t));
   const foot = (t.match(/<nav aria-label="Footer">(.*?)<\/nav>/s) || [])[1] || '';
   const fl = [...foot.matchAll(/<a\b[^>]*>(.*?)<\/a>/gs)].map((m) => m[1]);
-  if (rel !== 'research/map/index.html') check(rel + ': footer repeats Plan My Move · Research · Calculators, then Map', fl.slice(0, 4).join('|') === 'Plan My Move|Research|Calculators|Map', fl);
-  const all = [...(hdr + rs + ts + foot).matchAll(/href="([^"]*)"/g)].map((m) => m[1]);
+  // Footer, final (26 Oct 2026): no footer navigation (the header and menu carry it); the privacy notice is linked at the end of the disclosures
+  { const ft = (t.match(/<footer class="gw-foot">[\s\S]*?<\/footer>/) || [''])[0];
+    if (ft) check(rel + ': the footer has no navigation list, and links the privacy notice', fl.length === 0 && (rel === 'privacy/index.html' || /href="[^"]*privacy\/">Privacy<\/a>/.test(ft)), fl); }
+  const all = [...(hdr + rs + ts + foot + ((t.match(/<footer class="gw-foot">[\s\S]*?<\/footer>/) || [''])[0])).matchAll(/href="([^"]*)"/g)].map((m) => m[1]);
   check(rel + ': no dead local link in header, menu or footer', all.every((h) => resolves(f, h)), all.filter((h) => !resolves(f, h)));
 }
 // stray copies at the root ("index (19).html" and the like) are old duplicates, not pages of the site; they keep whatever header they were saved with
