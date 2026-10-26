@@ -486,3 +486,10 @@ body:has(.f3-frame) .gw-nav .in,body:has(.f3-frame) .gw-foot .in{max-width:1360p
 .f3-o55>.f3-fine{margin:0}
 .f3-upchips{margin:4px 0 0 56px}
 @media (max-width:899px){.f3-upchips{margin-left:48px}}
+/* V3.6 (Ken's audit): "When you pay it": the buyer's money stage by stage, the stamp duty, the total, then the bank */
+.f3-stages .f3-nr{padding:8px 0}
+.f3-stages .f3-ntot .f3-nw:empty{display:none}
+.f3-stages .f3-ntot{border-top:1.5px solid var(--f3-ink)}
+.f3-stages .f3-ntot .f3-nn{font-weight:700}
+.f3-stages .f3-nbank .f3-nn{font-weight:500;color:var(--f3-body)}
+.f3-stages .f3-nbank b{font-weight:500;color:var(--f3-body)}
