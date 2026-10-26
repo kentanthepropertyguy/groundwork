@@ -77,7 +77,8 @@ try:
             # ---------------- 2. a couple with their own incomes and loans ----------------
             ctx, pg, errs = page(br, kw); pg.goto(B + '/tools/tdsr/?j=1'); pg.wait_for_selector('[data-out]')   # V3.7: J2-J3 are a Plan My Move journey (standalone calculators share nothing: v37-render.py)
             pick(pg, 'n', 'Two of us')
-            check(vn + ' J2: “Two of us” opens the second person’s income and age, right in the list', until(pg, "()=>{const f=document.querySelector('[data-chp=\"n\"] [data-k=\"p.1.fixed\"]');return f&&f.offsetParent}"))
+            # V3.7 (Ken): the second person's income sits beside the first at the top, not inside the sheet; their age stays under Age
+            check(vn + ' J2: “Two of us” puts the second person’s income at the top, beside the first, and closes the sheet', until(pg, "()=>{const f=document.querySelector('.f3-inc [data-k=\"p.1.fixed\"]');return f&&f.offsetParent&&!document.querySelector('[data-chp=\"n\"] [data-k=\"p.1.fixed\"]')}") and pg.is_hidden('[data-chp="n"]'))
             close_chip(pg)
             typ(pg, 'p.0.age', '36'); typ(pg, 'p.0.fixed', '8,000'); typ(pg, 'p.0.bonusYr', '12,000'); typ(pg, 'p.1.age', '33'); typ(pg, 'p.1.fixed', '6,000')
             pick(pg, 'loans', 'repaying loans')
@@ -220,7 +221,8 @@ try:
             check(vn + ' (Plan My Move): carried figures are visible and can be cleared in one step', pg.is_visible('[data-carry]'))
             pg.click('[data-fresh]'); pg.wait_for_selector('[data-f3="borrow"]')
             check(vn + ': after “Start fresh” nothing is carried', until(pg, "()=>document.querySelector('[data-k=\"p.0.age\"]').value===''") and not pg.is_visible('[data-carry]'))
-            check(vn + ': no address carries a figure', '35' not in pg.url and '8000' not in pg.url and '8,000' not in pg.url)
+            addr = pg.url.split('/', 3)[-1]   # the path and query only: the test server's random port can contain any digits
+            check(vn + ': no address carries a figure', '35' not in addr and '8000' not in addr and '8,000' not in addr, addr)
             ctx.close()
         br.close()
 finally:

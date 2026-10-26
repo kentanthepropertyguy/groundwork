@@ -148,11 +148,12 @@
     if (page === 'sell') return sellHtml();
     if (page === 'upgrade') return upgradeHtml();
     if (page === 'borrow') return '<section class="f3 f3-frame f3-borrowpage" data-f3="borrow"><div class="f3-grid f3-grid-pay"><form class="f3-form" novalidate>' + carryHtml +
-      money('p.0.fixed', 'Your income, each month before CPF', { ph: 'e.g. 8,000', cls: 'f3-big' }) +
+      '<div class="f3-inc" data-inc>' + money('p.0.fixed', '<span data-when="n:1">Your income, each month before CPF</span><span data-when="n:2">First person’s income, a month</span>', { ph: 'e.g. 8,000', cls: 'f3-big' }) +
+      '<div data-when="n:2">' + money('p.1.fixed', 'Second person’s income, a month', { ph: 'before CPF', cls: 'f3-big' }) + '</div></div><p class="f3-incneed" data-inc-need hidden></p>' +
       '<div class="f3-chips" role="group" aria-label="Assumptions">' + chip('age', 'Age 35') + chip('n', 'Buying alone') + chip('bkind', 'Private home') + chip('loans', 'No other loans') + chip('rate', '4% · longest tenure') + '</div>' +
       '<p class="f3-fine f3-chipnote">Usual assumptions. Tap any to change it.</p><div class="f3-scrim" data-scrim hidden></div>' +
       panel('age', 'Age', '<div class="f3-g2">' + numf('p.0.age', '<span data-when="n:1">Your age</span><span data-when="n:2">First person</span>', 'years', { ph: '35' }) + '<div data-when="n:2">' + numf('p.1.age', 'Second person', 'years', { ph: '35' }) + '</div></div><p class="f3-fine">Banks end a loan by about 65, so age sets how long it can run.</p>', { open: true }) +
-      panel('n', 'Who is borrowing', '<div class="f3-hold">' + seg('n', '', [['1', 'Just me'], ['2', 'Two of us']], '1', { aria: 'Who is borrowing' }) + '</div><div class="f3-g2" data-when="n:2">' + money('p.1.fixed', 'Second person’s income', { ph: 'a month, before CPF' }) + numf('p.1.age', 'Their age', 'years', { ph: '35' }) + '</div>') +
+      panel('n', 'Who is borrowing', '<div class="f3-hold">' + seg('n', '', [['1', 'Just me'], ['2', 'Two of us']], '1', { aria: 'Who is borrowing' }) + '</div><div class="f3-g2" data-when="n:2">' + numf('p.1.age', 'Second person’s age', 'years', { ph: '35' }) + '</div>') +
       // the home: its choices are the options list (holders kept hidden); an HDB loan adds the household (as options) and the remaining lease (typed, behind "Custom")
       panel('bkind', 'The home', '<div class="f3-hold">' + seg('bkind', '', [['private', 'Private home'], ['hdb', 'HDB flat'], ['ec', 'New EC']], 'private', { aria: 'Buying' }) + seg('hdbLoan', 'Loan from', [['hdb', 'HDB'], ['bank', 'A bank']], 'hdb', {}) +
         seg('household', 'Applying as', [['family', 'Family'], ['extended', 'Extended family'], ['single', 'Single']], 'family', {}) + '</div>' +
@@ -424,7 +425,9 @@
       changed(true);
       if (o.act === 'cust') { showCust(k); setTimeout(() => paintSheet(k), 10); return; }
       if (o.act === 'stay') { setTimeout(() => paintSheet(k), 10); return; }
-      openChip(null); const c0 = q('[data-chip="' + k + '"]'); if (c0) c0.focus();
+      openChip(null); const c0 = q('[data-chip="' + k + '"]');
+      const inc2 = page === 'borrow' && o.set && o.set.n === '2' ? q('.f3-inc [data-k="p.1.fixed"]') : null;
+      if (inc2 && !inc2.value) setTimeout(() => { try { inc2.focus(); } catch (e) { /* ignore */ } }, 0); else if (c0) c0.focus();
     }
     box.addEventListener('click', (e) => { const ob = e.target.closest('[data-opt]'); if (ob) { applyOpt(ob); return; } if (e.target.closest('[data-scrim]')) openChip(null); });
     box.addEventListener('keydown', (e) => { if (e.key === 'Enter' && openK && e.target.closest('[data-chp]') && e.target.matches('input')) { e.preventDefault(); const k = openK; changed(true); openChip(null); const c0 = q('[data-chip="' + k + '"]'); if (c0) c0.focus(); return; } if (e.key === 'Escape' && openK) { const k = openK; openChip(null); const c0 = q('[data-chip="' + k + '"]'); if (c0) c0.focus(); } });
@@ -492,7 +495,7 @@
     function optsBorrow(k, st) {
       const b0 = F.borrow(st, { assumeAge: true }), ok = b0.state === 'ok', lend = (s2) => { const b = F.borrow(s2, { assumeAge: true }); return b.state === 'ok' ? b : null; };
       const cust = (label) => ({ label: label, act: 'cust' });
-      if (k === 'n') return [{ opts: [{ label: 'Just me', set: { n: '1' }, sel: st.n === 1 }, { label: 'Two of us', sub: 'Add the second person’s income and age', act: 'cust', set: { n: '2' }, sel: st.n === 2 }] }];
+      if (k === 'n') return [{ opts: [{ label: 'Just me', set: { n: '1' }, sel: st.n === 1 }, { label: 'Two of us', sub: page === 'borrow' ? 'Both incomes go at the top; ages under Age' : 'Add the second person’s income and age', act: page === 'borrow' ? '' : 'cust', set: { n: '2' }, sel: st.n === 2 }] }];
       if (k === 'loans') { const L0 = F.loansOf(st); const g = [{ opts: [{ label: 'No other loans', set: { __loans: 'clear' }, sel: !loans.length }, { label: 'I’m repaying loans', sub: L0.total > 0 ? $(L0.total) + ' a month now' : 'Home, car, study or personal, each a month', act: 'cust', set: { __loans: 'add' }, sel: loans.length > 0 }] }]; return g; }
       if (k === 'bkind') { const g0 = [{ opts: [['private', 'hdb', 'Private home'], ['hdb', 'hdb', 'HDB flat, HDB loan'], ['hdb', 'bank', 'HDB flat, bank loan'], ['ec', 'hdb', 'New EC']].map((x) => { const b = ok ? lend(Object.assign({}, st, { bkind: x[0], hdbLoan: x[1] })) : null; return { label: x[2], sub: b ? 'Lends about ' + $r(b.maxLoan) + (b.binding === 'msr' ? ' · 30% of income cap' : '') : '', set: { bkind: x[0], hdbLoan: x[1] }, sel: st.bkind === x[0] && (x[0] !== 'hdb' || (st.hdbLoan || 'hdb') === x[1]) }; }) }];
         if (st.bkind === 'hdb' && st.hdbLoan !== 'bank') {
@@ -530,6 +533,9 @@
     const KN = { new: 'new launch', ec: 'new EC', completed: 'completed home', resaleec: 'resale EC', hdb: 'HDB resale flat', bto: 'new HDB flat' };
     const isHdb = (st) => st.pkind === 'hdb' || st.pkind === 'bto';
     const costOf = (st, ov) => (isHdb(Object.assign({}, st, ov || {})) ? F.costHdb(Object.assign({}, st, ov || {})) : F.cost(st, ov));
+    // V3.7 (Ken): one quiet line beneath a loan estimate, once per card
+    const INDIC = '<span class="f3-indic" data-indic>Indicative only. Actual loan approval, rates and tenure vary by bank and borrower profile.</span>';
+    const INDIC_HDB = '<span class="f3-indic" data-indic>Indicative only. Actual loan approval, rate and tenure vary by lender and borrower profile.</span>';
     const RN = { SC: 'Singapore Citizen', PR: 'Permanent Resident', FR: 'Foreigner', FTA: 'FTA national' };
     const r100 = (n) => '$' + (Math.round(n / 100) * 100).toLocaleString('en-US');
     // what each chip says: the assumption in use, in a few words
@@ -703,7 +709,8 @@
     function paintBorrow(st) {
       const b = F.borrow(st, { assumeAge: true }); lastB = b; paintChips(st, null); paintPS(st, b);
       const why = q('[data-why]'), toc = q('[data-to-cost]'), quietB = () => { if (why) why.hidden = true; if (toc) toc.hidden = true; { const th = q('[data-to-homes]'); if (th) th.hidden = true; } lastBudget = null; setBar(''); view = null; pdfBtn(false); };
-      if (b.state === 'need') { out.innerHTML = '<p class="f3-eb">Type your income to begin</p>' + row('The bank may lend about', '<span class="f3-dash">—</span>', 'Over the longest tenure your age allows') + row('Monthly instalment', '<span class="f3-dash">—</span>', 'The most banks allow') + row('Home price this loan supports', '<span class="f3-dash">—</span>', 'A loan-based estimate, not your full budget'); quietB(); return; }
+      { const ni = q('[data-inc-need]'); if (ni) { const two = st.n === 2 && b.state === 'need' && (b.need || []).indexOf('p.1.fixed') >= 0; ni.hidden = !two; ni.textContent = two ? (st.p[0].fixed > 0 ? 'Add the second person’s income to see what you can borrow together.' : 'Add both incomes to see what you can borrow together.') : ''; } }
+      if (b.state === 'need') { out.innerHTML = '<p class="f3-eb">' + (st.n === 2 && (b.need || []).indexOf('p.1.fixed') >= 0 && (b.need || []).indexOf('p.0.fixed') < 0 ? 'Add the second person’s income' : st.n === 2 ? 'Type both incomes to begin' : 'Type your income to begin') + '</p>' + row('The bank may lend about', '<span class="f3-dash">—</span>', 'Over the longest tenure your age allows') + row('Monthly instalment', '<span class="f3-dash">—</span>', 'The most banks allow') + row('Home price this loan supports', '<span class="f3-dash">—</span>', 'A loan-based estimate, not your full budget'); quietB(); return; }
       if (b.state === 'invalid') { out.innerHTML = '<p class="f3-eb">Check the figures</p><p class="f3-note">' + esc((b.errors[0] || {}).text || 'Check the figures marked.') + '</p>'; quietB(); return; }
       if (b.state === 'zero') { out.innerHTML = '<p class="f3-eb">No income entered</p>' + row('The bank may lend about', '$0', 'There is no income to lend against. Add a salary, including a co-borrower’s.'); quietB(); return; }
       if (b.state === 'notenure') { out.innerHTML = '<p class="f3-eb">At this age</p><p class="f3-note">' + (b.kind === 'hdb-loan' ? 'No HDB loan tenure fits: HDB loans end by age 65.' : 'No bank loan tenure fits: banks usually end a loan by age ' + root.GW_RULES.bankLtv.maturityAge + '.') + '</p>'; quietB(); return; }
@@ -728,7 +735,7 @@
       const elig = b.elig === 'age' ? 'Singles must be ' + (root.GW_RULES.hdbSingleMinAge || 35) + ' or older to buy a flat with an HDB loan under the Single Singapore Citizen scheme, and the age entered is ' + b.youngest + '. Other schemes may apply: confirm with an HFE letter.'
         : b.elig === 'ceiling' ? 'Household income of ' + $(b.income) + ' a month is above HDB’s loan ceiling of ' + $(b.ceiling) + ' for ' + ({ family: 'families', extended: 'extended families', single: 'singles' }[b.household] || 'your household') + '. You may need a bank loan instead.' : '';
       const lendL = b.kind === 'hdb-loan' ? (elig ? 'HDB could lend, if eligible' : 'HDB may lend about') : 'The bank may lend about';
-      const lendRow = (cls) => row(lendL, '<span data-answer' + (a && a.state === 'ok' ? '' : '') + ' data-cap>' + $r(b.maxLoan) + '</span>', 'Over ' + yrs(b.years) + ', ending at age ' + endAge + (b.ageAssumed ? ' (age 35 assumed)' : '') + (st.years && b.years < st.years ? '. You chose ' + yrs(st.years) + '; ' + (b.kind === 'hdb-loan' ? 'HDB loans end by 65' : 'most banks end a loan by ' + root.GW_RULES.bankLtv.maturityAge) : '') + (st.years && b.ltv < 0.75 && b.kind === 'private' ? '. Loan limit ' + pc(b.ltv) + ' of the price at this tenure' : ''), cls);
+      const lendRow = (cls) => row(lendL, '<span data-answer' + (a && a.state === 'ok' ? '' : '') + ' data-cap>' + $r(b.maxLoan) + '</span>', 'Over ' + yrs(b.years) + ', ending at age ' + endAge + (b.ageAssumed ? ' (age 35 assumed)' : '') + (st.years && b.years < st.years ? '. You chose ' + yrs(st.years) + '; ' + (b.kind === 'hdb-loan' ? 'HDB loans end by 65' : 'most banks end a loan by ' + root.GW_RULES.bankLtv.maturityAge) : '') + (st.years && b.ltv < 0.75 && b.kind === 'private' ? '. Loan limit ' + pc(b.ltv) + ' of the price at this tenure' : '') + INDIC, cls);
       // a price brought from What will this home cost me?: what that home needs from the loan
       const askP = st.price > 0 && b.kind !== 'hdb-loan' ? F.priceLoan(b, st.price) : null;
       const bNote = brought && brought.k === 'price' && String(raw.price || '').replace(/\D/g, '') === String(brought.v).replace(/\D/g, '') ? '<span data-brought>' + brought.text + '</span> ' : '';
@@ -1163,7 +1170,7 @@
       out.innerHTML = '<p class="f3-eb">For a ' + $(c.price) + ' ' + KN[st.pkind] + '</p>' + upRow +
         row('Cash you’ll need', bucUp ? $(c.cash) : '<span data-answer>' + $(c.cash) + '</span>', bucUp ? 'In all, with stamp duty. ' + cashSub : cashSub + '<br>' + dutyTxt, bucUp ? 'f3-ar2' : 'f3-ar1') +
         row('CPF used', $(c.cpfUsed), cpfSub, 'f3-ar2') +
-        row('Monthly instalment', $(c.monthly), 'On a ' + $(c.loan) + ' loan · ' + yrs(c.years) + ' at ' + c.ratePct + '%' + (F.engineKind(st.pkind) !== 'completed' ? ', once fully drawn' : '')) + incRow + judgeCost(st, c, inc, mine, up) +
+        row('Monthly instalment', $(c.monthly), 'On a ' + $(c.loan) + ' loan · ' + yrs(c.years) + ' at ' + c.ratePct + '%' + (F.engineKind(st.pkind) !== 'completed' ? ', once fully drawn' : '') + INDIC) + incRow + judgeCost(st, c, inc, mine, up) +
         (alerts.length ? '<ul class="f3-alert">' + alerts.map((x) => '<li>' + x + '</li>').join('') + '</ul>' : '') + stagesHtml(st, c);
       $$('[data-open-fund]', out).forEach((x) => x.addEventListener('click', () => { allPay(true); fundD.open = true; try { fundD.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { /* ignore */ } }));
       $$('[data-to-sched]', out).forEach((x) => { x.textContent = allOpen() ? 'Hide payments' : 'All payments'; x.classList.toggle('up', allOpen()); x.setAttribute('aria-expanded', String(allOpen())); x.addEventListener('click', (e) => { e.preventDefault(); const o = !allOpen(); allPay(o); if (o) { try { q('[data-allpay]').scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (er) { /* ignore */ } } }); });
@@ -1232,7 +1239,7 @@
       out.innerHTML = '<p class="f3-eb">For a ' + $(c.price) + ' ' + KN[st.pkind] + '</p>' + signRow +
         row('Cash you’ll need', signRow ? $(c.cash) : '<span data-answer>' + $(c.cash) + '</span>', cashSub, signRow ? 'f3-ar2' : 'f3-ar1') +
         row('CPF used', $(c.cpfUsed), cpfSub, 'f3-ar2') +
-        (c.loan > 0.5 ? row('Monthly instalment', $(c.monthly), 'On a ' + $(c.loan) + ' ' + lname + ' · ' + yrs(c.years) + ' at ' + c.ratePct + '%' + (bto ? ', from key collection' : '')) : row('Monthly instalment', '$0', 'No loan')) + incRow +
+        (c.loan > 0.5 ? row('Monthly instalment', $(c.monthly), 'On a ' + $(c.loan) + ' ' + lname + ' · ' + yrs(c.years) + ' at ' + c.ratePct + '%' + (bto ? ', from key collection' : '') + INDIC_HDB) : row('Monthly instalment', '$0', 'No loan')) + incRow +
         (alerts.length ? '<ul class="f3-alert">' + alerts.map((x) => '<li>' + x + '</li>').join('') + '</ul>' : '') + (pl && pl.ok ? hdbStagesHtml(pl, c) : '') + fineHtml;
       setBar(signRow ? '<span class="f3-bm"><span class="k">Needed by signing</span><b>' + $(pl.signing) + '</b><span class="s">' + $(pl.atSigning) + ' at signing · then ' + $(pl.keys) + '</span></span>' : '<span class="f3-bm"><span class="k">Cash you’ll need</span><b>' + $(c.cash) + '</b><span class="s">' + $(c.monthly) + '/mo · CPF ' + $(c.cpfUsed) + '</span></span>');
       view = { tool: 'costhdb', st: st, c: c, pl: pl };
