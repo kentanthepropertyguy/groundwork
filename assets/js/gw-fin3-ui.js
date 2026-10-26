@@ -436,15 +436,15 @@
       if (k === 'rate') {
         const r0 = st.ratePct !== null ? st.ratePct : 4;
         return [{ title: 'Interest rate', opts: [2.5, 3, 3.5, 4].map((r) => { const c = alt({ ratePct: r }); return { label: r + '% a year', sub: c ? $(c.monthly) + '/mo' : '', set: { ratePct: String(r) }, sel: r0 === r }; }) },
-          { title: 'Loan tenure', opts: [30, 25, 20].map((y) => { const c = alt({ years: y }); return { label: y + ' years', sub: c ? $(c.monthly) + '/mo' + (c.lower ? ' · lower loan limit' : '') : '', set: { years: String(y) }, sel: c0.years === y }; }) },
-          { opts: [cust('Another rate or tenure')] }];
+          { title: 'Loan tenure', opts: [35, 30, 25, 20].map((y) => { const c = alt({ years: y }); return { label: y + ' years', sub: c ? $(c.monthly) + '/mo' + (c.years < y ? ' · ' + yrs(c.years) + ' to age ' + root.GW_RULES.bankLtv.maturityAge : '') + (c.lower ? ' · loan limit ' + pc(c.ltv) + ', ' + $(c.down + c.duty) + ' upfront' : '') : '', set: { years: String(y) }, sel: (st.years || c0.years) === y }; }) },
+          { opts: [cust('Another tenure or rate')] }];
       }
       if (k === 'cpf') {
         const most = c0.flex, list = [{ label: 'No CPF', sub: 'All ' + $(up(c0)) + ' in cash', set: { cpf: '' }, sel: !(st.cpf > 0) }];
         [100000, 200000, 300000].filter((x) => x < most - 1).forEach((x) => { const c = alt({ cpf: x }); list.push({ label: $(x), sub: 'Cash ' + $(c.cash), set: { cpf: fmt(x) }, sel: st.cpf === x }); });
         if (most > 0.5) { const c = alt({ cpf: most }); list.push({ label: 'As much as it can cover', sub: $(most) + ' · cash ' + $(c.cash), set: { cpf: fmt(most) }, sel: Math.abs((st.cpf || 0) - most) < 1 }); }
         list.push(cust('Another amount'));
-        const g = [{ opts: list }]; g.note = 'At least ' + pc(c0.minCash) + ' of the price must be cash (MAS rule). Stamp duty is usually paid in cash first; CPF may reimburse eligible duty, or pay it directly for some purchases under construction.'; return g;
+        const g = [{ opts: list }]; g.note = 'CPF Ordinary Account savings you have and can use. At least ' + pc(c0.minCash) + ' of the price must be cash (MAS rule). Stamp duty is usually paid in cash first; CPF may reimburse eligible duty, or pay it directly for some purchases under construction.' + (st.homes >= 1 ? ' Owning another home, CPF can be used only above a set-aside (the Basic or Full Retirement Sum), so check the amount with CPF.' : ''); return g;
       }
       return [];
     }
@@ -466,8 +466,8 @@
         const hdbL = st.bkind === 'hdb' && st.hdbLoan !== 'bank', r0 = st.ratePct !== null ? st.ratePct : (hdbL ? Math.round(root.GW_RULES.hdbLoanRate * 1000) / 10 : 4);
         const g = [];
         if (!hdbL) g.push({ title: 'Interest rate', opts: [3, 3.5, 4, 4.5, 5].map((r) => { const b = ok ? lend(Object.assign({}, st, { ratePct: r })) : null; return { label: r + '% a year', sub: b ? 'Lends about ' + $r(b.maxLoan) + ' · ' + $(b.monthly) + '/mo' : '', set: { ratePct: String(r) }, sel: r0 === r }; }) });
-        g.push({ title: 'Loan tenure', opts: [[null, 'The longest my age allows'], [25, '25 years'], [20, '20 years']].map((x) => { const b = ok ? lend(Object.assign({}, st, { years: x[0] })) : null; return { label: x[1], sub: b ? 'Lends about ' + $r(b.maxLoan) + ' over ' + yrs(b.years) : '', set: { years: x[0] === null ? '' : String(x[0]) }, sel: (st.years || null) === x[0] }; }) });
-        g.push({ opts: [cust('Another rate or tenure')] });
+        g.push({ title: 'Loan tenure', opts: [[null, 'Standard: to age 65, at most ' + (hdbL ? 25 : st.bkind === 'hdb' ? 25 : 30) + ' years']].concat(hdbL ? [[25, '25 years'], [20, '20 years']] : st.bkind === 'hdb' ? [[30, '30 years'], [25, '25 years'], [20, '20 years']] : [[35, '35 years'], [30, '30 years'], [25, '25 years'], [20, '20 years']]).map((x) => { const b = ok ? lend(Object.assign({}, st, { years: x[0] })) : null; return { label: x[1], sub: b ? 'Lends about ' + $r(b.maxLoan) + ' over ' + yrs(b.years) + (x[0] && b.years < x[0] ? ' (to age ' + (b.kind === 'hdb-loan' ? 65 : root.GW_RULES.bankLtv.maturityAge) + ')' : '') + (b.ltv < 0.75 && x[0] ? ' · loan limit ' + pc(b.ltv) : '') : '', set: { years: x[0] === null ? '' : String(x[0]) }, sel: (st.years || null) === x[0] }; }) });
+        g.push({ opts: [cust('Another tenure or rate')] });
         if (!hdbL) g.note = 'Banks test what you can borrow at 4% or your rate, whichever is higher, so a lower rate lowers the instalment but not the loan.';
         return g;
       }
@@ -580,9 +580,10 @@
       };
       const groups = [['up', 'Upfront'], ['build', 'During construction · as the developer calls'], ['end', F.engineKind(st.pkind) === 'completed' ? 'At completion' : 'Completion']].map((g) => ({ title: g[1], rows: ev.filter((e) => GROUP_OF(e.id) === g[0]).map((e) => ({ label: (SHORT_S[e.id] || e.label) + (e.pct ? ' ' + Math.round(e.pct * 100) + '%' : ''), muted: e.provisional ? 'provisional' : '', when: when(e), value: SG($(e.amount)) })) })).filter((g) => g.rows.length);
       const note = F.engineKind(st.pkind) === 'completed' ? 'Option terms can differ; your option sets the actual amounts and dates.' + (dated ? '' : ' Add an option date on Groundwork for exact dates.') : 'Construction stages fall due as building progresses; the developer’s notice sets each date.' + (dated ? '' : ' Add an option date on Groundwork for exact dates.');
+      const whoPays = ' You pay the first ' + SG($(c.down)) + ' (your down payment) and the stamp duty; the bank pays the remaining ' + SG($(c.loan)) + ' as payments fall due.';
       return { tool: 'COST', checked: checkedOn(), question: 'What will this home cost me?', basis: basisWords(st, c), figures: figures, judge: SG(v.judge),
         left: [{ title: 'Where the ' + SG($(v.up)) + ' goes', rows: receipt, note: 'Legal and valuation fees are not included.' }, { title: 'Monthly', rows: monthly }],
-        right: [{ title: 'When each payment is due', groups: groups, note: note }] };
+        right: [{ title: 'When each payment is due', groups: groups, note: note + whoPays }] };
     }
     function sheetBorrow() {
       const v = view, b = v.b, st = v.st, ck = v.ck, a = v.a;
@@ -681,7 +682,7 @@
       const elig = b.elig === 'age' ? 'Singles must be ' + (root.GW_RULES.hdbSingleMinAge || 35) + ' or older to buy a flat with an HDB loan under the Single Singapore Citizen scheme, and the age entered is ' + b.youngest + '. Other schemes may apply: confirm with an HFE letter.'
         : b.elig === 'ceiling' ? 'Household income of ' + $(b.income) + ' a month is above HDB’s loan ceiling of ' + $(b.ceiling) + ' for ' + ({ family: 'families', extended: 'extended families', single: 'singles' }[b.household] || 'your household') + '. You may need a bank loan instead.' : '';
       const lendL = b.kind === 'hdb-loan' ? (elig ? 'HDB could lend, if eligible' : 'HDB may lend about') : 'The bank may lend about';
-      const lendRow = (cls) => row(lendL, '<span data-answer' + (a && a.state === 'ok' ? '' : '') + ' data-cap>' + $r(b.maxLoan) + '</span>', 'Over ' + yrs(b.years) + ', ending at age ' + endAge + (b.ageAssumed ? ' (age 35 assumed)' : ''), cls);
+      const lendRow = (cls) => row(lendL, '<span data-answer' + (a && a.state === 'ok' ? '' : '') + ' data-cap>' + $r(b.maxLoan) + '</span>', 'Over ' + yrs(b.years) + ', ending at age ' + endAge + (b.ageAssumed ? ' (age 35 assumed)' : '') + (st.years && b.years < st.years ? '. You chose ' + yrs(st.years) + '; ' + (b.kind === 'hdb-loan' ? 'HDB loans end by 65' : 'most banks end a loan by ' + root.GW_RULES.bankLtv.maturityAge) : '') + (st.years && b.ltv < 0.75 && b.kind === 'private' ? '. Loan limit ' + pc(b.ltv) + ' of the price at this tenure' : ''), cls);
       // a price brought from What will this home cost me?: what that home needs from the loan
       const askP = st.price > 0 && b.kind !== 'hdb-loan' ? F.priceLoan(b, st.price) : null;
       const priceRow = askP ? row('For the ' + $(askP.price) + ' home', $(askP.limit), (askP.limit > b.maxLoan + 999 ? 'The loan it allows; ' + $r(askP.limit - b.maxLoan) + ' more than you may borrow' : 'The loan it allows, within what you may borrow'), 'f3-arp') : '';
@@ -971,6 +972,52 @@
 
     // the first two payments and when they fall due: the schedule's own events (with no date yet, counted from the option)
     const SHORT = { otp: 'Booking fee', snp: 'S&P signing', option: 'Option fee', exercise: 'Exercising the option', bsd: 'Stamp duty', absd: 'ABSD', completion: 'Completion' };
+    // V3.6 (Ken's audit, 26 Oct): what the buyer prepares at each stage, from the schedule's own events. The buyer's down payment (price less the loan)
+    // is paid first, stage by stage; the stamp duty falls within 14 days of the S&P (or the exercise); the bank pays the rest. Nothing is recalculated:
+    // the amounts are the schedule's, split at the point the down payment runs out, and they must add up to the card's own totals (else the old list shows).
+    function stagesOf(st, c) {
+      const dated = !st.noDate && !!st.otp, s = F.schedule(dated ? st : Object.assign({}, st, { noDate: true }));
+      if (!s.ok || !s.events || !s.events.length) return null;
+      const ev = s.events.filter((e) => e.type === 'pay'), d0 = Date.parse(ev[0].date), buc = F.engineKind(st.pkind) !== 'completed';
+      const when = (e) => { if (dated) return day(e.date); const w = Math.round((Date.parse(e.date) - d0) / 6048e5); return w <= 0 ? 'On the option' : w + ' weeks after'; };
+      let left = c.down, cashLeft = c.cashMin + (c.cov || 0), bank = 0, bankFrom = null; const rows = [], duty = [];
+      ev.forEach((e) => {
+        if (e.id === 'bsd' || e.id === 'absd') { duty.push(e); return; }
+        const mine = Math.min(e.amount, Math.max(0, left)); left -= mine;
+        if (mine > 0.5) { const cash = Math.min(mine, Math.max(0, cashLeft)); cashLeft -= cash; rows.push({ e: e, amt: mine, part: mine < e.amount - 0.5, cash: cash }); }
+        if (e.amount - mine > 0.5) { bank += e.amount - mine; if (!bankFrom) bankFrom = e; }
+      });
+      const dutyAmt = duty.reduce((a, e) => a + e.amount, 0), mineTot = rows.reduce((a, r) => a + r.amt, 0);
+      return { rows: rows, duty: duty, dutyAmt: dutyAmt, bank: bank, bankFrom: bankFrom, buc: buc, when: when, dated: dated, total: mineTot + dutyAmt, ok: Math.abs(mineTot - c.down) < 1 && Math.abs(bank - c.loan) < 1 && Math.abs(dutyAmt - c.duty) < 1 };
+    }
+    root.__f3Stages = () => (view && view.tool === 'cost' ? stagesOf(view.st, view.c) : null);
+    const STAGE = { otp: 'Booking fee', snp: 'At the S&P', option: 'Option fee', exercise: 'Exercising the option', foundation: 'At the foundation stage', frame: 'At the framework stage', walls: 'At the walls stage', roof: 'At the roofing stage', fittings: 'At the fittings stage', roads: 'At the roads stage', top: 'At TOP', csc: 'At CSC', completion: 'At completion' };
+    function stagesHtml(st, c) {
+      const g = stagesOf(st, c); if (!g || !g.ok) return nextHtml(st);
+      const src = (r) => (r.cash >= r.amt - 0.5 ? 'cash' : r.cash > 0.5 ? $(r.cash) + ' cash, the rest cash or CPF' : 'cash or CPF');
+      // one line under each label: when, then where the money comes from
+      const row = (lab, line, v, cls) => '<div class="f3-nr' + (cls ? ' ' + cls : '') + '"><span class="f3-nn">' + lab + '</span><span class="f3-nw">' + line + '</span><b>' + v + '</b></div>';
+      const dutyWhen = g.dated ? day(g.duty.length ? g.duty[0].date : '') : 'Within 14 days of the ' + (g.buc ? 'S&P' : 'exercise');
+      const dutyRow = () => row('Stamp duty', (c.absd > 0 ? 'BSD ' + $(c.bsd) + ' + ABSD ' + $(c.absd) : 'BSD') + ' · ' + dutyWhen.charAt(0).toLowerCase() + dutyWhen.slice(1), $(g.dutyAmt), 'f3-nduty');
+      // the buyer's share during construction, when it runs over more than one stage, is one row naming the stages (a lower loan limit can take it to several)
+      const BUILD = { foundation: 'foundation', frame: 'framework', walls: 'walls', roof: 'roofing', fittings: 'fittings', roads: 'roads', top: 'TOP', csc: 'CSC' };
+      const built = g.rows.filter((r) => BUILD[r.e.id]);
+      if (built.length > 1) {
+        const names = built.map((r) => BUILD[r.e.id]);
+        g.rows = g.rows.filter((r) => !BUILD[r.e.id]).concat([{ e: Object.assign({}, built[0].e, { id: '_built', pct: 0 }), amt: built.reduce((a, r) => a + r.amt, 0), cash: built.reduce((a, r) => a + r.cash, 0), part: false, names: names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] }]);
+      }
+      let h = '', dutyDone = false;
+      g.rows.forEach((r) => {
+        if (!dutyDone && g.duty.length && Date.parse(g.duty[0].date) < Date.parse(r.e.date)) { h += dutyRow(); dutyDone = true; }
+        const lab = r.names ? 'As it is built' : (STAGE[r.e.id] || r.e.label) + (r.e.pct && !r.part ? ' <em>' + Math.round(r.e.pct * 100) + '%</em>' : '');
+        const when = r.names ? 'Your share at the ' + r.names + ' stages' : r.part ? 'Your share; the bank pays the rest' + (g.dated ? ', ' + day(r.e.date) : '') : g.when(r.e);
+        h += row(lab, when + ' · ' + src(r), $(r.amt));
+      });
+      if (!dutyDone && g.duty.length) h += dutyRow();
+      h += row('From you, in all', '', $(g.total), 'f3-ntot');
+      if (g.bank > 0.5) h += row('Then the bank pays', g.buc ? 'As it is built; your instalment rises to ' + $(c.monthly) + '/mo' : 'At completion; then ' + $(c.monthly) + '/mo', $(g.bank), 'f3-nbank');
+      return '<div class="f3-next f3-stages" data-stages><div class="f3-nh2"><span>When you pay it</span><a href="#" data-to-sched>All payments</a></div>' + h + '</div>';
+    }
     function nextHtml(st) {
       const dated = !st.noDate && !!st.otp, s = F.schedule(dated ? st : Object.assign({}, st, { noDate: true }));
       if (!s.ok || !s.events || !s.events.length) return '';
@@ -1013,7 +1060,7 @@
       // ---- the three answers ----
       const up = c.down + c.duty, minCash = c.cashMin + c.cov + c.duty, withCpf = st.cpf > 0;
       const cashSub = 'Includes the <b>' + $(c.cashMin) + '</b> minimum cash down payment <span class="f3-tag">MAS rule</span>';
-      const cpfSub = withCpf ? (c.cpfLeft > 0.5 ? $(c.cpfLeft) + ' of it stays in CPF' : '') : (c.flex > 0.5 ? 'Up to ' + $(c.flex) + ' can come from CPF' : '');
+      const cpfSub = withCpf ? (c.cpfLeft > 0.5 ? $(c.cpfLeft) + ' of it stays in CPF' : '') : (c.flex > 0.5 ? 'If you have it, CPF can pay up to ' + $(c.flex) + ' of this' + (st.homes >= 1 ? '; owning another home, only CPF above a set-aside can be used' : '') : '');
       const dutyTxt = '<span data-duty-line>' + (c.absd > 0 ? 'and ' + $(c.bsd) + ' BSD + ' + $(c.absd) + ' ABSD ' + Math.round(c.absdRate * 100) + '%' : 'and ' + $(c.duty) + ' stamp duty') + ', usually cash first; CPF may reimburse eligible duty</span>';
       const inc = F.incomeNeeded(st, c), mine = st.p.slice(0, st.n).some((x) => x.fixed > 0 || x.variable > 0);
       let incRow = '', incBasis = '';
@@ -1024,13 +1071,15 @@
       } else if (inc && inc.state === 'out') incRow = row('Income needed', '<span class="f3-dash">—</span>', 'More than an income can support at this age and tenure');
       const alerts = [];
       if (c.overLimit) alerts.push('Above the loan limit: banks lend up to ' + $(c.ruleLoan) + ' here (' + pc(c.ltv) + ' of the price), so that is used.');
-      if (c.lower) alerts.push('The lower loan limit applies: ' + (c.lowerWhy === 'age' ? 'the loan runs past age 65.' : 'the tenure is over 30 years.'));
+      if (st.years && c.years < st.years) alerts.push('You chose ' + yrs(st.years) + '. Most banks end a loan by age ' + root.GW_RULES.bankLtv.maturityAge + ', so ' + yrs(c.years) + ' is used here. MAS allows up to ' + root.GW_RULES.bankLtv.maxTenure.private + ' years for a private home; a bank may decide differently.');
+      if (c.lower) { const c0 = F.cost(Object.assign({}, st, { years: null })), more = c0.state === 'ok' && !c0.lower ? (c.down + c.duty) - (c0.down + c0.duty) : 0;
+        alerts.push('A lower loan limit applies because ' + (c.lowerWhy === 'age' ? 'the loan runs past age 65' : 'the tenure is over 30 years') + ': banks may lend ' + pc(c.ltv) + ' of the price instead of ' + pc(c0.state === 'ok' ? c0.ltv : 0.75) + ', and at least ' + pc(c.minCash) + ' must be cash' + (more > 0.5 ? '. That is ' + $(more) + ' more upfront than with ' + yrs(c0.years) + '.' : '.')); }
       if (st.homes >= 1 && st.cpf > 0) alerts.push('While you own another home, only CPF above a set-aside can be used. <button type="button" class="f3-lnk" data-open-fund>Check it</button>');
       out.innerHTML = '<p class="f3-eb">For a ' + $(c.price) + ' ' + KN[st.pkind] + '</p>' +
         row('Cash you’ll need', '<span data-answer>' + $(c.cash) + '</span>', cashSub + '<br>' + dutyTxt, 'f3-ar1') +
         row('CPF used', $(c.cpfUsed), cpfSub, 'f3-ar2') +
-        row('Monthly instalment', $(c.monthly), 'On a ' + $(c.loan) + ' loan · ' + yrs(c.years) + ' at ' + c.ratePct + '%') + incRow + judgeCost(st, c, inc, mine, up) +
-        (alerts.length ? '<ul class="f3-alert">' + alerts.map((x) => '<li>' + x + '</li>').join('') + '</ul>' : '') + nextHtml(st);
+        row('Monthly instalment', $(c.monthly), 'On a ' + $(c.loan) + ' loan · ' + yrs(c.years) + ' at ' + c.ratePct + '%' + (F.engineKind(st.pkind) !== 'completed' ? ', once fully drawn' : '')) + incRow + judgeCost(st, c, inc, mine, up) +
+        (alerts.length ? '<ul class="f3-alert">' + alerts.map((x) => '<li>' + x + '</li>').join('') + '</ul>' : '') + stagesHtml(st, c);
       $$('[data-open-fund]', out).forEach((x) => x.addEventListener('click', () => { allPay(true); fundD.open = true; try { fundD.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { /* ignore */ } }));
       $$('[data-to-sched]', out).forEach((x) => { x.textContent = allOpen() ? 'Hide payments' : 'All payments'; x.classList.toggle('up', allOpen()); x.setAttribute('aria-expanded', String(allOpen())); x.addEventListener('click', (e) => { e.preventDefault(); const o = !allOpen(); allPay(o); if (o) { try { q('[data-allpay]').scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (er) { /* ignore */ } } }); });
       bd.hidden = false; cmp.hidden = false; if (ob) ob.hidden = false;
@@ -1043,7 +1092,7 @@
       setBar('<span class="f3-bm"><span class="k">Cash you’ll need</span><b>' + $(c.cash) + '</b><span class="s">' + $(c.monthly) + '/mo · CPF ' + $(c.cpfUsed) + '</span></span>');
       // ---- the payment schedule: every payment and when it is due (counted from the option until a date is given) ----
       const s = F.schedule(Object.assign({}, st, { noDate: und }));
-      const sec = q('[data-schsec]'); if (sec) sec.hidden = !s.ok; const sn = q('[data-sch-note]'); if (sn) sn.textContent = und ? 'Add the option date for exact dates' : 'From the option on ' + day(st.otp);
+      const sec = q('[data-schsec]'); if (sec) sec.hidden = !s.ok; const sn = q('[data-sch-note]'); if (sn) sn.textContent = (und ? 'Add the option date for exact dates.' : 'From the option on ' + day(st.otp) + '.') + ' You pay the first ' + $(c.down) + ' of these (your down payment) and the stamp duty; the bank pays the remaining ' + $(c.loan) + ' as each stage falls due.';
       sched.innerHTML = s.ok ? (P ? P.scheduleTableHtml(s) : '') + '<p class="f3-fine">' + (F.engineKind(st.pkind) === 'completed' ? 'Option terms can differ; your option sets the actual amounts and dates.' : 'Construction stages fall due as building progresses; the developer’s notice sets each date.') + '</p>' : '';
       view = { tool: 'cost', st: st, c: c, inc: inc, mine: mine, up: up, judge: judgeCostText(st, c, inc, mine, up), s: s, und: und, incBasis: incBasis };
       pdfBtn(true);

@@ -115,10 +115,10 @@ try:
             # ---------------- 4. a new-launch buyer: what will it cost, and when is each payment due? ----------------
             ctx, pg, errs = page(br, kw); pg.goto(B + '/tools/payment-planner/'); pg.wait_for_selector('[data-out]')
             typ(pg, 'price', '1,800,000')
-            good, ms = answer_after(pg, "()=>/Cash you’ll need/.test(document.querySelector('[data-out]').textContent)&&/Next payments/i.test(document.querySelector('[data-out]').textContent)&&/upfront payments/i.test(document.querySelector('[data-sched]').textContent)")
+            good, ms = answer_after(pg, "()=>/Cash you’ll need/.test(document.querySelector('[data-out]').textContent)&&/When you pay it/i.test(document.querySelector('[data-out]').textContent)&&/upfront payments/i.test(document.querySelector('[data-sched]').textContent)")
             check(vn + ' J4: after the price, only the card and closed rows: the schedule, option date, funding check and Ask Ken wait behind All payments', pg.is_hidden('[data-allpay]') and pg.is_hidden('[data-k="otp"]') and pg.is_hidden('[data-fund]') and pg.locator('main a:has-text("Ask Ken")').evaluate_all('l=>l.filter(a=>a.offsetParent).length') == 0)
             o = out(pg)
-            check(vn + ' J4: one entry (the price) gives the cash needed first, CPF used, the instalment and the income needed', good and o.index('Cash you’ll need') < o.index('CPF used') < o.index('Monthly instalment') < o.index('Income needed') and '$509,600' in o and 'Up to $360,000 can come from CPF' in o, o[:400])
+            check(vn + ' J4: one entry (the price) gives the cash needed first, CPF used, the instalment and the income needed', good and o.index('Cash you’ll need') < o.index('CPF used') < o.index('Monthly instalment') < o.index('Income needed') and '$509,600' in o and 'If you have it, CPF can pay up to $360,000 of this' in o, o[:400])
             check(vn + ' J4: the headline is the cash to prepare; the MAS minimum is named as part of it; stamp duty is qualified (usually cash first; CPF may reimburse eligible duty)', 'Includes the $90,000 minimum cash down payment' in o and 'MAS rule' in o and 'and $59,600 stamp duty, usually cash first; CPF may reimburse eligible duty' in o, o[:400])
             check(vn + ' J4: the judgement names the hurdle and says stamp duty is included', 'At this price the upfront sum is the usual hurdle, not the instalment. Stamp duty is included.' in o, o[-400:])
             check(vn + ' J4: the phone bar never covers the card', until(pg, '()=>window.__f3Settled()') and bar_ok(pg, vn))
@@ -126,7 +126,7 @@ try:
             pg.click('[data-to-sched]'); pg.fill('[data-k="otp"]', '2026-11-02')
             check(vn + ' J4: All payments opens the option date, the schedule and the funding check; with a date, the next payments and when they are due', until(pg, "()=>/2 Nov 2026/.test(document.querySelector('[data-out]').textContent)"), out(pg)[:400])
             o = out(pg); sc = pg.inner_text('[data-sched]')
-            check(vn + ' J4: … booking fee $90,000 on 2 Nov 2026, S&P $270,000', 'Booking fee' in o and '$90,000' in o and 'S&P signing' in o and '$270,000' in o, o[:400])
+            check(vn + ' J4: … booking fee $90,000 on 2 Nov 2026, S&P $270,000, stamp duty $59,600, then the bank (V3.6: every stage, stamp duty included)', 'Booking fee' in o and '$90,000' in o and 'At the S&P' in o and '$270,000' in o and 'Stamp duty' in o and '$59,600' in o and 'Then the bank pays' in o, o[:900])
             check(vn + ' J4: then the schedule: upfront payments first, with their total', '$90,000' in sc and 'upfront payments' in sc.lower() and '$419,600' in sc, sc[:200])
             check(vn + ' J4: then the later milestones, in order, with no grand total', sc.upper().index('UPFRONT PAYMENTS') < sc.upper().index('DURING CONSTRUCTION') and 'Total to pay' not in pg.inner_text('body'))
             check(vn + ' J4: the funding check and comparisons stay closed and optional', not pg.locator('[data-fund]').evaluate('d=>d.open') and not pg.locator('[data-cmp]').evaluate('d=>d.open') and (pg.is_hidden('[data-scn]') or not pg.locator('[data-scn]').evaluate('d=>d.open')))
@@ -153,7 +153,7 @@ try:
             check(vn + ' J4: a loan above 75% is flagged, not refused', until(pg, "()=>/Above the loan limit/.test(document.querySelector('[data-out]').textContent)"), out(pg)[:300])
             pg.locator('[data-out]').scroll_into_view_if_needed(); shot(pg, vn + '-J4-cost-typed')
             pg.check('[data-k="noDate"]')
-            check(vn + ' J4: no date yet: timings read from the option', until(pg, "()=>/option/.test(document.querySelector('[data-schsec]').textContent)&&/on the option/.test(document.querySelector('[data-out]').textContent)"), pg.inner_text('[data-schsec]')[:200])
+            check(vn + ' J4: no date yet: timings read from the option', until(pg, "()=>/option/.test(document.querySelector('[data-schsec]').textContent)&&/on the option/i.test(document.querySelector('[data-out]').textContent)"), pg.inner_text('[data-schsec]')[:200])
             REPORT.append((vn, 'J4 new launch: cost and schedule', 1, ms))
             check(vn + ' J4: no sideways scroll; no script errors', wide(pg) and not errs, errs)
             ctx.close()
@@ -194,7 +194,10 @@ try:
                 ctx, pg, errs = page(br, kw); pg.goto(B + '/tools/payment-planner/'); pg.wait_for_selector('[data-out]')
                 typ(pg, 'price', '2,000,000'); until(pg, "()=>/2,000,000/.test(document.querySelector('[data-out]').textContent)&&window.__f3Settled()"); pg.evaluate("document.activeElement.blur();window.scrollTo(0,0)")
                 m = pg.evaluate("()=>({h:document.documentElement.scrollHeight,w:document.querySelector('main').innerText.split(/\\s+/).filter(x=>/[A-Za-z0-9$]/.test(x)).length,ask:[...document.querySelectorAll('a,button')].filter(a=>/Ask Ken/i.test(a.textContent)&&a.offsetParent&&getComputedStyle(a).visibility!=='hidden').length})")
-                check('phone V3.3: $2,000,000 and nothing tapped: under 1,600px tall, under 150 words in main, one Ask Ken', m['h'] < 1600 and m['w'] < 150 and m['ask'] == 1, m)
+                # V3.6 (Ken's audit, 26 Oct 2026): the main answer now says what to prepare at each stage ("When you pay it": booking fee, S&P,
+                # stamp duty, the buyer's share in construction, the total, then the bank). That adds about 264px and 53 words at $2M on a phone,
+                # so the V3.3 limits of 1,600px and 150 words are raised to 1,900px and 210 words. Tighten them again if the stage list is trimmed.
+                check('phone V3.3/V3.6: $2,000,000 and nothing tapped: under 1,900px tall, under 210 words in main, one Ask Ken', m['h'] < 1900 and m['w'] < 210 and m['ask'] == 1, m)
                 REPORT.append(('phone', 'V3.3 cost page at $2M: height px / words', m['h'], m['w']))
                 ctx.close()
             ctx, pg, errs = page(br, kw); pg.goto(B + '/tools/tdsr/'); pg.wait_for_selector('[data-out]')
