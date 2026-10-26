@@ -37,8 +37,9 @@ def fresh(pg, path): pg.goto(B + path); pg.wait_for_selector('[data-out]'); pg.e
 def opt(pg, chip, text): pg.evaluate("k=>window.__f3OpenChip(k)", chip); pg.wait_for_timeout(150); pg.locator(f'[data-optl="{chip}"] .f3-opt', has_text=text).first.click(); settle(pg)
 def close(pg): pg.evaluate("()=>window.__f3OpenChip&&window.__f3OpenChip(null)"); settle(pg)
 def rows(pg):   # the "When you pay it" rows: [label, line, amount]
-    return pg.evaluate("()=>[...document.querySelectorAll('[data-stages] .f3-nr')].map(r=>[r.querySelector('.f3-nn').textContent.trim(),r.querySelector('.f3-nw').textContent.trim(),r.querySelector('b').textContent.trim()])")
-amt = lambda s: int(re.sub(r'[^0-9]', '', s))
+    # V3.7: one row per payment (.f3-sr): its heading, when and how it is paid, and the amount
+    return pg.evaluate("()=>[...document.querySelectorAll('[data-stages] .f3-sr')].map(r=>[r.querySelector('.f3-sl').textContent.trim(),((r.querySelector('.f3-sw')||{}).textContent||'').trim(),r.querySelector('.f3-sr1>b').textContent.trim()])")
+amt = lambda s: int(re.sub(r'[^0-9]', '', s.split('/')[0]))
 try:
   with sync_playwright() as p:
     br = p.chromium.launch()
@@ -53,20 +54,20 @@ try:
         opt(pg, 'who', 'Permanent Resident'); opt(pg, 'who', 'Second home'); close(pg)
         o = pg.inner_text('[data-out]'); r = rows(pg)
         check(f'{tag} A: the card: cash $1,559,600 with BSD and ABSD named, $9,489 a month once fully drawn', D(P0 * .25 + b + ab) in o and D(b) + ' BSD + ' + D(ab) + ' ABSD' in o and D(ab) in o and '$9,489' in o and 'once fully drawn' in o, o[:600])
-        want = [('Booking fee', P0 * .05, 'cash'), ('At the S&P', P0 * .15, 'cash or CPF'), ('Stamp duty', b + ab, 'within 14 days of the S&P'), ('At the foundation stage', P0 * .05, 'the bank pays the rest'), ('From you, in all', P0 * .25 + b + ab, ''), ('Then the bank pays', loan, '$9,489/mo')]
-        check(f'{tag} A: "When you pay it" lists booking fee, S&P, stamp duty, the buyer\'s last share at the foundation stage, the total and then the bank, each amount as worked out',
+        want = [('Booking fee', P0 * .05, 'cash'), ('At the S&P', P0 * .15, 'cash or CPF'), ('Buyer’s stamp duty', b, 'Within 14 days of signing the S&P'), ('ABSD', ab, 'Within 14 days of signing the S&P'), ('Upfront, in all', P0 * .20 + b + ab, ''), ('Foundation stage, your share', P0 * .05, 'the bank pays the rest'), ('From you, in all', P0 * .25 + b + ab, ''), ('The bank pays', loan, ''), ('Then each month', 9489, '')]
+        check(f'{tag} A: "When you pay it" (V3.7): booking fee, S&P, BSD and ABSD apart, the upfront subtotal, the buyer\'s last share at the foundation stage, the total, then the bank; each amount as worked out',
               len(r) == len(want) and all(x[0].startswith(w[0]) and amt(x[2]) == w[1] and w[2] in x[1] for x, w in zip(r, want)), r)
-        check(f'{tag} A: the stamp duty row names BSD $102,100 + ABSD $795,000 and comes before construction', len(r) > 2 and 'BSD $102,100 + ABSD $795,000' in r[2][1])
-        check(f'{tag} A: the stages reconcile: buyer rows add to the total, which equals the headline; booking + S&P + duty = $1,427,100', sum(amt(x[2]) for x in r[:4]) == amt(r[4][2]) == 1559600 and sum(amt(x[2]) for x in r[:3]) == 1427100)
+        check(f'{tag} A: BSD $102,100 and ABSD $795,000 are separate rows, before construction', len(r) > 5 and amt(r[2][2]) == 102100 and amt(r[3][2]) == 795000 and r[5][0].startswith('Foundation'))
+        check(f'{tag} A: the stages reconcile: booking + S&P + BSD + ABSD = $1,427,100 (the headline); with the foundation share, $1,559,600 in all', len(r) > 6 and sum(amt(x[2]) for x in r[:4]) == amt(r[4][2]) == 1427100 == amt(pg.inner_text('[data-answer]')) and amt(r[4][2]) + amt(r[5][2]) == amt(r[6][2]) == 1559600)
         check(f'{tag} A: the booking fee is said to be cash (the 5% minimum)', 'cash' == r[0][1].split('· ')[-1])
         check(f'{tag} A: the page\'s own reconciliation check agrees', pg.evaluate("()=>{const g=window.__f3Stages();return !!(g&&g.ok)}"))
         sh = pg.evaluate("()=>JSON.stringify(window.__f3Sheet())")
-        check(f'{tag} A: the PDF sheet says who pays which part', 'You pay the first S$662,500 (your down payment) and the stamp duty; the bank pays the remaining S$1,987,500' in sh, sh[-600:])
+        check(f'{tag} A: the PDF sheet has the same stages: upfront S$1,427,100, then the foundation share, S$1,559,600 in all, the bank S$1,987,500', all(x in sh for x in ['Upfront, in all', 'S$1,427,100', 'From you, in all', 'S$1,559,600', 'The bank pays', 'S$1,987,500']), sh[-900:])
         # ---------- B. $1.2M completed, SC first home, $200k CPF ----------
         P1 = 1200000; b1 = bsd(P1)
         fresh(pg, '/tools/payment-planner/'); pg.fill('[data-k="price"]', '1,200,000'); settle(pg); opt(pg, 'pkind', 'Completed private'); opt(pg, 'cpf', '$200,000'); close(pg)
         r = rows(pg)
-        want = [('Option fee', P1 * .01, 'cash'), ('Exercising the option', P1 * .04, 'cash'), ('Stamp duty', b1, 'within 14 days of the exercise'), ('At completion', P1 * .20, 'cash or CPF'), ('From you, in all', P1 * .25 + b1, ''), ('Then the bank pays', P1 * .75, 'At completion')]
+        want = [('Option fee', P1 * .01, 'cash'), ('Exercising the option', P1 * .04, 'cash'), ('Buyer’s stamp duty', b1, 'Within 14 days of exercising the option'), ('Balance at completion', P1 * .20, 'cash or CPF'), ('From you, in all', P1 * .25 + b1, ''), ('The bank pays', P1 * .75, 'At completion'), ('Then each month', 4297, '')]
         check(f'{tag} B: completed home: 1% option, 4% exercise (the 5% cash minimum), stamp duty, 20% at completion, then the bank; amounts as worked out',
               len(r) == len(want) and all(x[0].startswith(w[0]) and amt(x[2]) == w[1] and w[2] in x[1] for x, w in zip(r, want)), r)
         o = pg.inner_text('[data-out]'); check(f'{tag} B: with CPF entered, the card shows the $200,000 used and the cash after it ({D(P1 * .25 + b1 - 200000)}); no "up to" line', bool(re.search(r'CPF used\s+\$200,000', o)) and D(P1 * .25 + b1 - 200000) in o and 'can pay up to' not in o, o[:600])
@@ -79,7 +80,7 @@ try:
         o = pg.inner_text('[data-out]')
         check(f'{tag} C: age 45 asking for 35 years: the shorter 30 years is said, with MAS and the bank told apart', 'You chose 35 years' in o and 'by age 75' in o and 'MAS allows up to 35 years' in o and 'a bank may decide differently' in o, o[-900:])
         check(f'{tag} C: the loan runs past 65, so 55% of the price and at least 10% cash, and the extra upfront in dollars ($400,000 at $2M)',
-              '55% of the price instead of 75%' in o and 'at least 10% must be cash' in o and '$400,000 more upfront' in o and '$1,100,000 loan' in o, o[-900:])
+              '55% of the price instead of 75%' in o and 'at least 10% must be cash' in o and '$400,000 more from you' in o and '$1,100,000 loan' in o, o[-900:])
         fresh(pg, '/tools/tdsr/'); pg.fill('[data-k="p.0.fixed"]', '15,000'); settle(pg)
         pg.evaluate("window.__f3OpenChip('rate')"); pg.wait_for_timeout(150); t = pg.inner_text('[data-optl="rate"]')
         check(f'{tag} C: Borrow offers the standard tenure and 35, 30, 25 and 20 years for a private home', 'Standard' in t and all(f'{y} years' in t for y in (35, 30, 25, 20)), t)

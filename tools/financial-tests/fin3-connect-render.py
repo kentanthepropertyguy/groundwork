@@ -49,7 +49,7 @@ def sale_page(pg, kind='hdb', price='800,000', loan='200,000', cpf='170,000', da
     until(pg, "()=>window.__f3Settled()&&!!document.querySelector('[data-cash]')")
 def sale_cash(pg): return num(pg.inner_text('[data-cash]'))
 def arrive(pg):
-    pg.click('[data-to-borrow]'); pg.wait_for_selector('[data-f3="borrow"]')
+    pg.click('[data-to-borrow]'); pg.wait_for_selector('[data-f3="borrow"]'); pg.wait_for_function("()=>!!window.__f3OpenChip&&window.__f3Settled&&window.__f3Settled()")   # the page's script has run
 DW = "()=>{const d=document.querySelector('[data-dutywho]');if(d)d.open=true}"
 def counted(pg):
     m = re.search(r'Counts your home’s sale: about \$([\d,]+) cash and \$([\d,]+) back to CPF', out(pg)); return (int(m.group(1).replace(',', '')), int(m.group(2).replace(',', ''))) if m else None

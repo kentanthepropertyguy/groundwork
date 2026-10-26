@@ -75,7 +75,7 @@ try:
             check(vn + ' J1: no sideways scroll; no script errors', wide(pg) and not errs, errs)
             ctx.close()
             # ---------------- 2. a couple with their own incomes and loans ----------------
-            ctx, pg, errs = page(br, kw); pg.goto(B + '/tools/tdsr/'); pg.wait_for_selector('[data-out]')
+            ctx, pg, errs = page(br, kw); pg.goto(B + '/tools/tdsr/?j=1'); pg.wait_for_selector('[data-out]')   # V3.7: J2-J3 are a Plan My Move journey (standalone calculators share nothing: v37-render.py)
             pick(pg, 'n', 'Two of us')
             check(vn + ' J2: “Two of us” opens the second person’s income and age, right in the list', until(pg, "()=>{const f=document.querySelector('[data-chp=\"n\"] [data-k=\"p.1.fixed\"]');return f&&f.offsetParent}"))
             close_chip(pg)
@@ -95,8 +95,8 @@ try:
             REPORT.append((vn, 'J2 borrow, couple with loans', 9, ms))
             check(vn + ' J2: no sideways scroll; no script errors', wide(pg) and not errs, errs)
             # ---------------- 3. affordability (V3.4: "What can I afford?" is the "Add my cash and CPF" row of How much can I borrow?; its old address opens it) ----------------
-            pg.goto(B + '/tools/planner/'); pg.wait_for_selector('[data-f3="borrow"]')
-            check(vn + ' J3: the people and loans carry over from How much can I borrow?, and the page says so', until(pg, "()=>document.querySelector('[data-k=\"p.1.age\"]').value==='33'") and pg.is_visible('[data-carry]') and pg.locator('[data-loan]').count() == 1)
+            pg.goto(B + '/tools/planner/?j=1'); pg.wait_for_selector('[data-f3="borrow"]')
+            check(vn + ' J3 (Plan My Move, ?j=1): the people and loans carry over from How much can I borrow?, and the page says so', until(pg, "()=>document.querySelector('[data-k=\"p.1.age\"]').value==='33'") and pg.is_visible('[data-carry]') and pg.locator('[data-loan]').count() == 1)
             check(vn + ' J3: before cash and CPF it already shows what can be borrowed, with the row open', until(pg, "()=>/The bank may lend about/.test(document.querySelector('[data-out]').textContent)") and pg.evaluate("document.querySelector('[data-cashrow]').open"), out(pg)[:200])
             typ(pg, 'cash', '150,000'); typ(pg, 'cpf', '100,000')
             good, ms = answer_after(pg, "()=>/Your budget, about/.test(document.querySelector('[data-out]').textContent)&&document.querySelector('[data-max]')")
@@ -106,8 +106,9 @@ try:
             b1 = pg.inner_text('[data-max]'); typ(pg, 'cash', '250,000')
             check(vn + ' J3: more cash raises the budget', until(pg, "(b)=>document.querySelector('[data-max]')&&document.querySelector('[data-max]').textContent!==b", b1))
             # a price above it: What will this home cost me? hands the price back ("Check my own borrowing limit"), and the borrowing card says what that home needs
-            pg.goto(B + '/tools/payment-planner/'); pg.wait_for_selector('[data-out]'); typ(pg, 'price', '3,000,000'); until(pg, settled)
-            pg.click('.f3-opts [data-open-borrow]'); pg.wait_for_selector('[data-f3="borrow"]')
+            pg.goto(B + '/tools/payment-planner/?j=1'); pg.wait_for_selector('[data-out]'); typ(pg, 'price', '3,000,000'); until(pg, settled)
+            with pg.expect_navigation(): pg.click('.f3-opts [data-open-borrow]')
+            pg.wait_for_selector('[data-f3="borrow"]')
             check(vn + ' J3: a price above it says how much more it needs than you may borrow', until(pg, "()=>/For the \\$3,000,000 home/.test(document.querySelector('[data-out]').textContent)&&/short/.test(document.querySelector('[data-out] [data-quote=\"over\"]')?document.querySelector('[data-out] [data-quote=\"over\"]').textContent:'')"), out(pg)[-300:])
             REPORT.append((vn, 'J3 afford (after J2, figures carried)', 2, ms))
             check(vn + ' J3: no sideways scroll; no script errors', wide(pg) and not errs, errs)
@@ -119,30 +120,30 @@ try:
             check(vn + ' J4: after the price, only the card and closed rows: the schedule, option date, funding check and Ask Ken wait behind All payments', pg.is_hidden('[data-allpay]') and pg.is_hidden('[data-k="otp"]') and pg.is_hidden('[data-fund]') and pg.locator('main a:has-text("Ask Ken")').evaluate_all('l=>l.filter(a=>a.offsetParent).length') == 0)
             o = out(pg)
             check(vn + ' J4: one entry (the price) gives the cash needed first, CPF used, the instalment and the income needed', good and o.index('Cash you’ll need') < o.index('CPF used') < o.index('Monthly instalment') < o.index('Income needed') and '$509,600' in o and 'If you have it, CPF can pay up to $360,000 of this' in o, o[:400])
-            check(vn + ' J4: the headline is the cash to prepare; the MAS minimum is named as part of it; stamp duty is qualified (usually cash first; CPF may reimburse eligible duty)', 'Includes the $90,000 minimum cash down payment' in o and 'MAS rule' in o and 'and $59,600 stamp duty, usually cash first; CPF may reimburse eligible duty' in o, o[:400])
+            check(vn + ' J4: the cash in all names the MAS minimum; stamp duty is qualified on its own row (usually cash first; CPF may reimburse eligible duty) (V3.7)', 'Includes the $90,000 minimum cash down payment' in o and 'MAS rule' in o and re.search(r'Buyer’s stamp duty\s+\$59,600\s+Within 14 days of signing the S&P · usually cash first; CPF may reimburse eligible duty', o) is not None, o[:1400])
             check(vn + ' J4: the judgement names the hurdle and says stamp duty is included', 'At this price the upfront sum is the usual hurdle, not the instalment. Stamp duty is included.' in o, o[-400:])
             check(vn + ' J4: the phone bar never covers the card', until(pg, '()=>window.__f3Settled()') and bar_ok(pg, vn))
             shot(pg, vn + '-J4-cost')
             pg.click('[data-to-sched]'); pg.fill('[data-k="otp"]', '2026-11-02')
             check(vn + ' J4: All payments opens the option date, the schedule and the funding check; with a date, the next payments and when they are due', until(pg, "()=>/2 Nov 2026/.test(document.querySelector('[data-out]').textContent)"), out(pg)[:400])
             o = out(pg); sc = pg.inner_text('[data-sched]')
-            check(vn + ' J4: … booking fee $90,000 on 2 Nov 2026, S&P $270,000, stamp duty $59,600, then the bank (V3.6: every stage, stamp duty included)', 'Booking fee' in o and '$90,000' in o and 'At the S&P' in o and '$270,000' in o and 'Stamp duty' in o and '$59,600' in o and 'Then the bank pays' in o, o[:900])
+            check(vn + ' J4: … booking fee $90,000 on 2 Nov 2026, S&P $270,000, BSD $59,600, upfront $419,600, then the bank (V3.7: stages, stamp duty included)', 'Booking fee' in o and 'On 2 Nov 2026' in o and '$90,000' in o and 'At the S&P' in o and '$270,000' in o and 'Buyer’s stamp duty' in o and '$59,600' in o and 'Upfront, in all' in o and '$419,600' in o and 'The bank pays' in o, o[:900])
             check(vn + ' J4: then the schedule: upfront payments first, with their total', '$90,000' in sc and 'upfront payments' in sc.lower() and '$419,600' in sc, sc[:200])
             check(vn + ' J4: then the later milestones, in order, with no grand total', sc.upper().index('UPFRONT PAYMENTS') < sc.upper().index('DURING CONSTRUCTION') and 'Total to pay' not in pg.inner_text('body'))
             check(vn + ' J4: the funding check and comparisons stay closed and optional', not pg.locator('[data-fund]').evaluate('d=>d.open') and not pg.locator('[data-cmp]').evaluate('d=>d.open') and (pg.is_hidden('[data-scn]') or not pg.locator('[data-scn]').evaluate('d=>d.open')))
             typ(pg, 'price', '2,000,000'); typ(pg, 'loanAmt', '1,500,000'); typ(pg, 'ratePct', '3'); typ(pg, 'years', '30'); typ(pg, 'cpf', '300,000')
-            check(vn + ' J4: $2M, $1.5M loan, 3% over 30 years, $300k CPF: the headline drops to $269,600 cash, CPF used $300,000, $6,324 a month, about $13,000 of income', until(pg, "()=>{const a=document.querySelector('[data-answer]');const t=document.querySelector('[data-out]').textContent;return a&&a.textContent==='$269,600'&&/CPFused\\$300,000/.test(t.replace(/\\s/g,''))&&/\\$6,324/.test(t)&&/\\$13,000/.test(t)}"), out(pg)[:400])
+            check(vn + ' J4: $2M, $1.5M loan, 3% over 30 years, $300k CPF: $469,600 upfront first (V3.7), then $269,600 cash in all, CPF used $300,000, $6,324 a month, about $13,000 of income', until(pg, "()=>{const a=document.querySelector('[data-answer]');const t=document.querySelector('[data-out]').textContent;return a&&a.textContent==='$469,600'&&/Cash you’ll need[\\s\\S]{0,400}?\\$269,600/.test(t)&&/CPFused\\$300,000/.test(t.replace(/\\s/g,''))&&/\\$6,324/.test(t)&&/\\$13,000/.test(t)}"), out(pg)[:400])
             check(vn + ' J4: the chips show what is assumed', pg.inner_text('[data-chip="rate"]') == '3% · 30 years' and pg.inner_text('[data-chip="cpf"]') == 'CPF $300k' and pg.inner_text('[data-chip="loan"]') == 'Loan $1.5m', [pg.inner_text('[data-chip="rate"]'), pg.inner_text('[data-chip="cpf"]'), pg.inner_text('[data-chip="loan"]')])
             check(vn + ' J4: the age assumption is said, not hidden; below 4% the income is said to be tested at 4%', 'loan to 65' in out(pg) and 'tested at 4%' in out(pg), out(pg)[:500])
             if vn == 'phone':
                 pg.evaluate("document.querySelector('[data-schsec]').scrollIntoView()")
-                check(vn + ' J4: once the card has scrolled away, the bar shows the cash needed, the monthly and the CPF', until(pg, "()=>document.querySelector('[data-bar]').classList.contains('f3-bar-on')&&/\\$269,600/.test(document.querySelector('[data-bar]').textContent)"))
+                check(vn + ' J4: once the card has scrolled away, the bar shows the upfront sum, what follows and the monthly', until(pg, "()=>document.querySelector('[data-bar]').classList.contains('f3-bar-on')&&/\\$469,600/.test(document.querySelector('[data-bar]').textContent)&&/\\$6,324/.test(document.querySelector('[data-bar]').textContent)"))
                 pg.evaluate('window.scrollTo(0,0)')
             check(vn + ' J4: the schedule reads “As construction progresses · earliest …”', '· earliest' in pg.inner_text('[data-sched]'))
             check(vn + ' J4: the schedule follows the new price', until(pg, "()=>/\\$100,000/.test(document.querySelector('[data-sched]').textContent)"))
             pg.click('[data-bd] summary')
             rc = pg.inner_text('[data-bd-out]')
-            check(vn + ' J4: “Where the $569,600 goes” is a receipt with the combined upfront total: 5% cash, cash or CPF, stamp duty, upfront = cash + CPF, the loan', all(x in rc for x in ['Cash, at least', '$100,000', 'Cash or CPF', '$400,000', '$69,600', 'Upfront, cash and CPF', 'Cash $269,600 + CPF $300,000', '$569,600', '$1,500,000']), rc[:300])
+            check(vn + ' J4: “Where the $569,600 goes” is a receipt with the combined upfront total: 5% cash, cash or CPF, stamp duty, upfront = cash + CPF, the loan', all(x in rc for x in ['Cash, at least', '$100,000', 'Cash or CPF', '$400,000', '$69,600', 'From you, cash and CPF', 'Cash $269,600 + CPF $300,000', '$569,600', '$1,500,000']), rc[:300])
             pg.click('[data-bd] summary')
             pg.click('[data-cmp] summary'); typ(pg, 'price2', '1,800,000')
             check(vn + ' J4: compare another price side by side (cash $209,600, $5,692 a month at $1.8M)', until(pg, "()=>/\\$209,600/.test((document.querySelector('[data-cmp-out]')||{}).textContent||'')&&/\\$5,692/.test(document.querySelector('[data-cmp-out]').textContent)"))
@@ -158,7 +159,7 @@ try:
             check(vn + ' J4: no sideways scroll; no script errors', wide(pg) and not errs, errs)
             ctx.close()
             # ---------------- 5. an HDB upgrader: selling after TOP (payments), selling first (budget) ----------------
-            ctx, pg, errs = page(br, kw); pg.goto(B + '/tools/payment-planner/'); pg.wait_for_selector('[data-out]')
+            ctx, pg, errs = page(br, kw); pg.goto(B + '/tools/payment-planner/?j=1'); pg.wait_for_selector('[data-out]')
             typ(pg, 'price', '2,000,000'); pg.click('[data-to-sched]'); pg.fill('[data-k="otp"]', '2026-11-02')
             seg(pg, 'n', '2'); typ(pg, 'p.0.age', '40'); typ(pg, 'p.0.fixed', '9,000'); typ(pg, 'p.1.age', '38'); typ(pg, 'p.1.fixed', '7,000'); seg(pg, 'homes', '1')
             check(vn + ' J5: owning a home: the schedule carries ABSD (a second home) until it is sold', until(pg, "()=>/ABSD 20%/.test(document.querySelector('[data-duty-line]').textContent)"), pg.inner_text('[data-duty-line]'))
@@ -180,8 +181,8 @@ try:
             check(vn + ' J5: selling first instead is compared, with its ABSD', until(pg, "()=>/ABSD up front/.test((document.querySelector('[data-scn-out]')||{}).textContent||'')"))
             REPORT.append((vn, 'J5 upgrader, after TOP (payments)', 20, ms))
             # the same people on How much can I borrow?, with cash and CPF, selling first
-            pg.goto(B + '/tools/planner/'); pg.wait_for_selector('[data-f3="borrow"]')
-            check(vn + ' J5: the budget row opens with the same people, money, loan and home', until(pg, "()=>document.querySelector('[data-k=\"p.1.fixed\"]').value==='7,000'&&document.querySelector('[data-k=\"homes\"] [aria-pressed=\"true\"]').dataset.v==='1'"))
+            pg.goto(B + '/tools/planner/?j=1'); pg.wait_for_selector('[data-f3="borrow"]')
+            check(vn + ' J5 (Plan My Move): the budget row opens with the same people, money, loan and home', until(pg, "()=>document.querySelector('[data-k=\"p.1.fixed\"]').value==='7,000'&&document.querySelector('[data-k=\"homes\"] [aria-pressed=\"true\"]').dataset.v==='1'"))
             good, ms = answer_after(pg, "()=>!!document.querySelector('[data-max]')")
             kept = pg.inner_text('[data-max]') if good else ''
             seg(pg, 'plan', 'sell'); typ(pg, 'sale.price', '700,000'); typ(pg, 'sale.loan', '100,000'); typ(pg, 'sale.cpfRefund', '250,000')
@@ -194,10 +195,11 @@ try:
                 ctx, pg, errs = page(br, kw); pg.goto(B + '/tools/payment-planner/'); pg.wait_for_selector('[data-out]')
                 typ(pg, 'price', '2,000,000'); until(pg, "()=>/2,000,000/.test(document.querySelector('[data-out]').textContent)&&window.__f3Settled()"); pg.evaluate("document.activeElement.blur();window.scrollTo(0,0)")
                 m = pg.evaluate("()=>({h:document.documentElement.scrollHeight,w:document.querySelector('main').innerText.split(/\\s+/).filter(x=>/[A-Za-z0-9$]/.test(x)).length,ask:[...document.querySelectorAll('a,button')].filter(a=>/Ask Ken/i.test(a.textContent)&&a.offsetParent&&getComputedStyle(a).visibility!=='hidden').length})")
-                # V3.6 (Ken's audit, 26 Oct 2026): the main answer now says what to prepare at each stage ("When you pay it": booking fee, S&P,
-                # stamp duty, the buyer's share in construction, the total, then the bank). That adds about 264px and 53 words at $2M on a phone,
-                # so the V3.3 limits of 1,600px and 150 words are raised to 1,900px and 210 words. Tighten them again if the stage list is trimmed.
-                check('phone V3.3/V3.6: $2,000,000 and nothing tapped: under 1,900px tall, under 210 words in main, one Ask Ken', m['h'] < 1900 and m['w'] < 210 and m['ask'] == 1, m)
+                # V3.6 (Ken's audit, 26 Oct 2026): the main answer says what to prepare at each stage, which raised the V3.3 limits (1,600px, 150 words) to 1,900px and 210.
+                # V3.7 (Ken, 27 Oct 2026): a new launch leads with the upfront sum and lists its stages in groups (booking; S&P and stamp duty, BSD and ABSD apart,
+                # with the upfront subtotal; construction; the bank), each row with room for when and how it is paid. That is about 2,150px and 260 words at $2M
+                # on a phone, so the limits are now 2,300px and 290 words. Tighten them again if the stage list is folded away.
+                check('phone V3.3/V3.7: $2,000,000 and nothing tapped: under 2,300px tall, under 290 words in main, one Ask Ken', m['h'] < 2300 and m['w'] < 290 and m['ask'] == 1, m)
                 REPORT.append(('phone', 'V3.3 cost page at $2M: height px / words', m['h'], m['w']))
                 ctx.close()
             ctx, pg, errs = page(br, kw); pg.goto(B + '/tools/tdsr/'); pg.wait_for_selector('[data-out]')
@@ -213,9 +215,9 @@ try:
                 check(vn + ' V3.3: printing shows the schedule expanded, with no bar, chip lists or buttons', pg.evaluate("()=>getComputedStyle(document.querySelector('[data-allpay]')).display!=='none'&&getComputedStyle(document.querySelector('[data-bar]')).display==='none'&&getComputedStyle(document.querySelector('[data-to-sched]')).display==='none'"))
                 pg.emulate_media(media='screen'); ctx.close()
             # ---------------- start fresh ----------------
-            ctx, pg, errs = page(br, kw); pg.goto(B + '/tools/tdsr/'); pg.wait_for_selector('[data-out]'); typ(pg, 'p.0.age', '35'); typ(pg, 'p.0.fixed', '8,000'); until(pg, settled)
-            pg.goto(B + '/tools/planner/'); pg.wait_for_selector('[data-f3="borrow"]')
-            check(vn + ': carried figures are visible and can be cleared in one step', pg.is_visible('[data-carry]'))
+            ctx, pg, errs = page(br, kw); pg.goto(B + '/tools/tdsr/?j=1'); pg.wait_for_selector('[data-out]'); typ(pg, 'p.0.age', '35'); typ(pg, 'p.0.fixed', '8,000'); until(pg, settled)
+            pg.goto(B + '/tools/planner/?j=1'); pg.wait_for_selector('[data-f3="borrow"]')
+            check(vn + ' (Plan My Move): carried figures are visible and can be cleared in one step', pg.is_visible('[data-carry]'))
             pg.click('[data-fresh]'); pg.wait_for_selector('[data-f3="borrow"]')
             check(vn + ': after “Start fresh” nothing is carried', until(pg, "()=>document.querySelector('[data-k=\"p.0.age\"]').value===''") and not pg.is_visible('[data-carry]'))
             check(vn + ': no address carries a figure', '35' not in pg.url and '8000' not in pg.url and '8,000' not in pg.url)

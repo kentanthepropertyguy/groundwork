@@ -47,14 +47,18 @@ def fill(pg, k, v, keep=False):
 def seg(pg, k, v): pg.evaluate("([k,v])=>{const b=[...document.querySelectorAll('[data-k=\"'+k+'\"] button[data-v=\"'+v+'\"]')].find(x=>x.offsetParent)||document.querySelector('[data-k=\"'+k+'\"] button[data-v=\"'+v+'\"]'); b.click()}", [k, v])
 def close(pg): pg.evaluate("()=>window.__f3OpenChip&&window.__f3OpenChip(null)")
 def out(pg): return pg.inner_text('[data-out]')
+# the "Cash you'll need" figure on the cost page (V3.7: a new launch leads with the upfront sum, so the cash is the second row there)
+def cashv(pg): return pg.evaluate("()=>{const r=[...document.querySelectorAll('[data-out] .f3-ar')].find(x=>/^Cash you’ll need$/.test(x.querySelector('.f3-an').textContent.trim()));return r?r.querySelector('.f3-af').textContent:''}")
 def clean(tag, name, t): check(f'{tag} {name}: the card reads cleanly (no NaN, undefined, null or negative amount)', not re.search(r'NaN|undefined|null|\$-|−\$\d', t), t[:300])
 def opt(pg, chip, text): pg.evaluate("k=>window.__f3OpenChip(k)", chip); pg.wait_for_timeout(150); pg.locator(f'[data-optl="{chip}"] .f3-opt', has_text=text).first.click(); settle(pg)
 def sheet(pg): return pg.evaluate("()=>{const h=GW_SHEET.mount(window.__f3Sheet());const m=h.querySelector('.gs-main');const r={fits:m.scrollHeight<=m.clientHeight+1,f1:(h.querySelector('.gs-figs [data-sheet-fig]')||{}).textContent,basis:h.querySelector('[data-sheet-basis]').textContent,txt:h.textContent};GW_SHEET.unmount();return r}")
 def upgrade(pg, price='750,000', loan='250,000', cpf='205,000', inc='8,000', age='35'):
     fresh(pg, '/tools/hdb-upgrade/')
-    fill(pg, 'sale.price', price); pg.click('[data-stdone="worth"]'); settle(pg)
-    fill(pg, 'sale.loan', loan); fill(pg, 'sale.cpfRefund', cpf); pg.click('[data-stdone="sell"]'); settle(pg)
-    fill(pg, 'p.0.fixed', inc); fill(pg, 'p.0.age', age); pg.click('[data-stdone="borrow"]'); settle(pg)
+    # a step closes itself once answered (the next one opens), so Done is pressed only while it is still showing
+    done = lambda k: (settle(pg), pg.is_visible(f'[data-stdone="{k}"]') and pg.click(f'[data-stdone="{k}"]'), settle(pg))
+    fill(pg, 'sale.price', price); done('worth')
+    fill(pg, 'sale.loan', loan); fill(pg, 'sale.cpfRefund', cpf); done('sell')
+    fill(pg, 'p.0.fixed', inc); fill(pg, 'p.0.age', age); done('borrow')
 try:
   with sync_playwright() as p:
     br = p.chromium.launch()
@@ -66,7 +70,7 @@ try:
         # ---- 1. first purchase ----
         fresh(pg, '/tools/payment-planner/'); fill(pg, 'price', '1,500,000'); settle(pg); t = out(pg)
         eng = pg.evaluate("()=>{const c=GW_FIN3.cost({n:1,p:[{res:'SC'},{}],loans:[],pkind:'new',price:1500000,homes:0,ratePct:null,years:null,cpf:null,loanAmt:null});return {cash:c.cash,duty:c.duty,absd:c.absd,monthly:c.monthly}}")
-        check(f'{tag} first purchase: cost page cash equals the engine, stamp duty named, no ABSD', money(pg.inner_text('[data-answer]')) == round(eng['cash']) and 'stamp duty' in t and 'ABSD' not in t and eng['absd'] == 0, [t[:200], eng])
+        check(f'{tag} first purchase: cost page cash equals the engine, stamp duty named, no ABSD', money(cashv(pg)) == round(eng['cash']) and 'stamp duty' in t and 'ABSD' not in t and eng['absd'] == 0, [t[:200], eng])
         clean(tag, 'first purchase cost', t)
         fresh(pg, '/tools/tdsr/'); fill(pg, 'p.0.fixed', '8,000'); settle(pg); pg.click('[data-cashrow] > summary'); fill(pg, 'cash', '150,000'); fill(pg, 'cpf', '100,000'); settle(pg); t = out(pg)
         eng = pg.evaluate("()=>{const a=GW_FIN3.afford({n:1,p:[{age:35,fixed:8000,res:'SC'},{}],loans:[],cash:150000,cpf:100000,homes:0,plan:'keep',akind:'new',bkind:'private',sale:{},cpfBal:[{},{}],ratePct:null,years:null});return {b:a.budget,lim:a.limitedBy}}")
@@ -74,8 +78,8 @@ try:
         check(f'{tag} first purchase: the budget says stamp duty is included and which limit binds', 'stamp duty included' in t and ('cash and CPF are the limit' in t or 'loan is the limit' in t))
         clean(tag, 'first purchase borrow', t)
         # ---- 2. second purchase ----
-        fresh(pg, '/tools/payment-planner/'); fill(pg, 'price', '1,500,000'); settle(pg); c1 = money(pg.inner_text('[data-answer]'))
-        opt(pg, 'who', 'Second home'); close(pg); settle(pg); t = out(pg); c2 = money(pg.inner_text('[data-answer]'))
+        fresh(pg, '/tools/payment-planner/'); fill(pg, 'price', '1,500,000'); settle(pg); c1 = money(cashv(pg))
+        opt(pg, 'who', 'Second home'); close(pg); settle(pg); t = out(pg); c2 = money(cashv(pg))
         check(f'{tag} second purchase: ABSD 20% is named and added to the cash ($300,000 on $1.5M)', 'ABSD' in t and c2 - c1 == 300000, [c1, c2, t[:200]])
         fresh(pg, '/tools/tdsr/'); fill(pg, 'p.0.fixed', '15,000'); fill(pg, 'p.0.age', '45'); settle(pg); pg.click('[data-cashrow] > summary'); fill(pg, 'cash', '700,000'); fill(pg, 'cpf', '0')
         pg.click('[data-dutywho] > summary'); seg(pg, 'homes', '1'); seg(pg, 'plan', 'keep'); settle(pg); t = out(pg)
@@ -112,11 +116,11 @@ try:
         # ---- 7. adjusting the entries ----
         fresh(pg, '/tools/payment-planner/'); fill(pg, 'price', '2,000,000'); settle(pg)
         g = lambda: {'cash': money(pg.inner_text('[data-answer]')), 'mo': money(pg.inner_text('[data-out] .f3-ar:nth-of-type(3) .f3-af') or '') if False else None, 't': out(pg)}
-        c0 = money(pg.inner_text('[data-answer]')); fill(pg, 'price', '2,200,000'); settle(pg); c1 = money(pg.inner_text('[data-answer]'))
+        c0 = money(cashv(pg)); fill(pg, 'price', '2,200,000'); settle(pg); c1 = money(cashv(pg))
         check(f'{tag} adjust price: the cash rises with the price', c1 > c0, [c0, c1])
-        opt(pg, 'loan', '70%'); t = out(pg); c2 = money(pg.inner_text('[data-answer]'))
+        opt(pg, 'loan', '70%'); t = out(pg); c2 = money(cashv(pg))
         check(f'{tag} adjust loan: a smaller loan needs more cash', c2 > c1 and '$1,540,000 loan' in t, [c1, c2])
-        opt(pg, 'cpf', '$300,000'); c3 = money(pg.inner_text('[data-answer]'))
+        opt(pg, 'cpf', '$300,000'); c3 = money(cashv(pg))
         check(f'{tag} adjust CPF: $300,000 of CPF lowers the cash by $300,000', c2 - c3 == 300000, [c2, c3])
         mo0 = re.search(r'Monthly instalment\s*On a [^\n]*\n?\s*\$([\d,]+)', out(pg)); opt(pg, 'rate', '3%'); t = out(pg)
         check(f'{tag} adjust rate: below 4%, income needed says it is tested at 4%', 'tested at 4%' in t, t[:300])

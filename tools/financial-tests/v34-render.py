@@ -84,11 +84,11 @@ try:
         check(f'{tag} sell → borrow: the row is open and the sale is counted in a budget', pg.evaluate("document.querySelector('[data-cashrow]').open") and pg.query_selector('[data-budget]') is not None and 'Counts your home’s sale' in t, t[:300])
         # the Value Explorer's resales for the block pre-fill the selling price
         pg.goto(B + '/tools/stamp-duty/'); pg.evaluate("sessionStorage.clear();sessionStorage.setItem('gw.ctx.v1',JSON.stringify({v:1,type:'hdb',hdb:{town:'TAMPINES',block:'123',street:'TAMPINES ST 11',flatType:'4 ROOM',n:9,lo:720000,hi:780000}}))")
-        pg.goto(B + '/tools/sale-proceeds/'); pg.wait_for_selector('[data-out]'); settle(pg)
-        check(f'{tag} sell: the price comes from the Value Explorer, with its resales beside it', pg.input_value('[data-k="sale.price"]') == '750,000' and 'Blk 123' in pg.inner_text('[data-blockhint]'), [pg.input_value('[data-k="sale.price"]')])
+        pg.goto(B + '/tools/sale-proceeds/?j=1'); pg.wait_for_selector('[data-out]'); settle(pg)
+        check(f'{tag} sell (Plan My Move): the price comes from the Value Explorer, with its resales beside it', pg.input_value('[data-k="sale.price"]') == '750,000' and 'Blk 123' in pg.inner_text('[data-blockhint]'), [pg.input_value('[data-k="sale.price"]')])
         # ---- 2. Upgrade from HDB ----
-        pg.goto(B + '/tools/hdb-upgrade/'); pg.wait_for_selector('[data-out]'); pg.evaluate(SPY); settle(pg)
-        check(f'{tag} upgrade: step 1 carries the Value Explorer’s range; step 2 is the one open', 'Blk 123' in pg.inner_text('[data-step="worth"]') and pg.is_visible('[data-ste="sell"]') and not pg.is_visible('[data-ste="borrow"]'))
+        pg.goto(B + '/tools/hdb-upgrade/?j=1'); pg.wait_for_selector('[data-out]'); pg.evaluate(SPY); settle(pg)
+        check(f'{tag} upgrade (Plan My Move): step 1 carries the Value Explorer’s range; step 2 is the one open', 'Blk 123' in pg.inner_text('[data-step="worth"]') and pg.is_visible('[data-ste="sell"]') and not pg.is_visible('[data-ste="borrow"]'))
         pg.fill('[data-ste="sell"] [data-k="sale.loan"]', '250,000'); pg.fill('[data-ste="sell"] [data-k="sale.cpfRefund"]', '205,000'); pg.click('[data-stdone="sell"]'); settle(pg)
         check(f'{tag} upgrade: step 2 answers $480,650 with the cash and CPF', '$480,650' in pg.inner_text('[data-step="sell"]') and '$275,650 cash + $205,000 CPF' in pg.inner_text('[data-step="sell"]'))
         pg.fill('[data-ste="borrow"] [data-k="p.0.fixed"]', '8,000'); pg.fill('[data-ste="borrow"] [data-k="p.0.age"]', '35'); pg.click('[data-stdone="borrow"]'); settle(pg)
