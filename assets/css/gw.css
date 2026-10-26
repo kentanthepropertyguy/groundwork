@@ -854,3 +854,11 @@ body.lg .gw-rws .lg-sb .kpr-results{margin-top:12px}
 /* FE V2: one or two borrowers, chosen up front (calculators with borrowers) */
 .gw-add.gw-add-x{display:none!important}
 .gw-bn small{display:block;margin-top:6px;font-size:13px;color:var(--gw-muted)}
+/* V3.4 (26 Oct 2026): the Calculators page is four questions, one column; single-figure calculators as text links */
+.gw-tdir .gw-tls.gw-tls-one{grid-template-columns:minmax(0,1fr);max-width:760px}
+.gw-tdir .gw-tls-one .gw-tl{padding:20px 22px;position:relative;padding-right:48px}
+.gw-tdir .gw-tls-one .gw-tl::after{content:"›";position:absolute;right:22px;top:50%;transform:translateY(-50%);font-size:24px;color:var(--gw-muted)}
+.gw-tdir .gw-tls-one .gw-tl-t b{font-size:18px}
+.gw-mone{margin:14px 0 0;font-size:15px;color:var(--gw-muted);display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline}
+.gw-mone a{color:var(--gw-ink);text-decoration:underline;text-underline-offset:3px}
+.gw-ms-tools .gw-mone{font-size:13.5px;gap:4px 14px;margin:10px 0 0}

@@ -6,7 +6,7 @@ let ok = 0, fail = 0;
 const check = (n, c, i) => { if (c) { ok++; } else { fail++; console.log('  FAIL', n, i === undefined ? '' : i); } };
 const walk = (d, o = []) => { for (const f of fs.readdirSync(d, { withFileTypes: true })) { if (/^(\.|node_modules|_)/.test(f.name)) continue; const p = path.join(d, f.name); if (f.isDirectory()) walk(p, o); else if (f.name.endsWith('.html')) o.push(p); } return o; };
 const pages = walk(ROOT).filter((f) => /class="gw-links"/.test(fs.readFileSync(f, 'utf8')));
-check('at least 18 pages carry the site header (the old New launch payments and HDB upgrade planner addresses are redirects and carry none)', pages.length >= 18, pages.length);
+check('at least 17 pages carry the site header (V3.4: the old New launch payments, What can I afford? and HDB and EC loan limit addresses are redirects and carry none)', pages.length >= 17, pages.length);
 const strip = (h) => h.replace(/^(\.\.\/)+/, '').replace(/^\.\//, '').replace(/^\//, '');
 const resolves = (from, href) => {
   if (/^(https?:|mailto:|tel:|#)/.test(href)) return true;
@@ -44,11 +44,12 @@ for (const f of pages) {
   check(rel + ': the old prices address is no longer a second menu entry', !names.some((x) => /research\/#\/prices$/.test(x)), names);
   ['research/#/', 'research/#/budget', 'research/#/browse'].forEach((h) => check(rel + ': ' + h + ' is listed once in the menu', names.filter((x) => x.replace(/^(\.\.\/)+|^\//, '') === h).length === 1, names.filter((x) => /research\/#/.test(x))));
   const ts = (t.match(/<section class="gw-ms gw-ms-tools">(.*?)<\/section>/s) || [])[1] || '';
-  ['planner', 'payment-planner', 'sale-proceeds', 'ssd', 'stamp-duty', 'tdsr', 'msr', 'mortgage'].forEach((id) => {
+  // V3.4: the four questions and the three single-figure calculators are linked; the folded pages' old addresses (planner, msr) are not, they redirect
+  ['payment-planner', 'tdsr', 'sale-proceeds', 'hdb-upgrade', 'ssd', 'stamp-duty', 'mortgage'].forEach((id) => {
     const inMenu = new RegExp('href="((\\.\\./)*|/)tools/' + id + '/"').test(t);
     check(rel + ': tool ' + id + ' still has a direct link in the menu or its sections', inMenu);
   });
-  check(rel + ': the old HDB upgrade planner is no longer linked (it is folded into What can I afford?; its address redirects)', !/href="((\.\.\/)*|\/)tools\/hdb-upgrade\/"/.test(t));
+  check(rel + ': What can I afford? and the HDB and EC loan limit are not linked by their old addresses (they redirect to How much can I borrow?)', !/href="((\.\.\/)*|\/)tools\/(planner|msr)\/"/.test(hdr + ts));
   const foot = (t.match(/<nav aria-label="Footer">(.*?)<\/nav>/s) || [])[1] || '';
   const fl = [...foot.matchAll(/<a\b[^>]*>(.*?)<\/a>/gs)].map((m) => m[1]);
   // Footer, final (26 Oct 2026): no footer navigation (the header and menu carry it); the privacy notice is linked at the end of the disclosures
@@ -66,26 +67,16 @@ for (const f of pages) {
 }
 {
   const t = fs.readFileSync(path.join(ROOT, 'tools/index.html'), 'utf8'), main = t.slice(t.indexOf('<main'), t.indexOf('</main>'));
-  // 24 Oct 2026: four task sections, each tool once, no badges; the HDB upgrade planner is folded into What can I afford? and "Full payment planning" is no longer a second card for the Payment timeline
-  check('All Tools: four task sections', [...main.matchAll(/<h2 id="tg-[a-z]+">(.*?)<\/h2>/g)].map((x) => x[1]).join('|') === 'Plan a property move|Financing|Buying costs|Selling');
-  check('All Tools: no sub-headings', !/<h3 id="tg-/.test(main));
-  const secOf = (id) => (main.match(new RegExp('aria-labelledby="tg-' + id + '">(.*?)</section>', 's')) || [])[1] || '';
-  const toolsIn = (id) => [...secOf(id).matchAll(/<a class="gw-tl" href="[^"]*" data-tool="([^"]+)"/g)].map((x) => x[1]).join('|');
-  check('All Tools: Plan a property move holds What can I afford? and the Payment timeline', toolsIn('move') === 'planner|payment-planner', toolsIn('move'));
-  check('All Tools: Financing holds How much can I borrow?, HDB and EC loan limit, Mortgage repayment', toolsIn('fin') === 'tdsr|msr|mortgage', toolsIn('fin'));
-  check('All Tools: Buying costs holds Stamp duty', toolsIn('cost') === 'stamp-duty', toolsIn('cost'));
-  check('All Tools: Selling holds Sale proceeds and Seller’s stamp duty', toolsIn('sell') === 'sale-proceeds|ssd', toolsIn('sell'));
-  check('All Tools: the HDB upgrading entry is one line under Plan a property move, into the four-step journey', /<p class="gw-tg-line">.*Upgrading from HDB\?.*href="\.\.\/journey\/#up"/.test(secOf('move')) && !/gw-tg-line/.test(secOf('fin') + secOf('cost') + secOf('sell')));
-  check('All Tools: no badges on the cards', !/<span class="gw-tl-t"><b>[^<]*<\/b><em>/.test(main));
-  check('All Tools: the Payment timeline card opens the page itself (its funding check is a tab inside), with no second "Full payment planning" card', /href="payment-planner\/" data-tool="payment-planner"/.test(main) && !/payment-planner-full|Full payment planning/.test(main));
-  check('All Tools: the Seller’s stamp duty card says what the 4-year question is', /<b>Seller’s stamp duty<\/b>.*?Selling within 4 years\?/s.test(secOf('sell')));
+  // V3.4 (26 Oct 2026): four questions, one column, then the single-figure calculators as text links (Ken's menu concept)
   const tools = [...main.matchAll(/<a class="gw-tl" href="[^"]*" data-tool="([^"]+)"/g)].map((x) => x[1]);
-  ['planner', 'tdsr', 'msr', 'mortgage', 'stamp-duty', 'payment-planner', 'sale-proceeds', 'ssd'].forEach((k) => check('All Tools lists ' + k + ' once', tools.filter((x) => x === k).length === 1, tools));
-  check('All Tools lists exactly those eight tools', tools.length === 8, tools);
-  check('All Tools: nothing that lives under Research is listed here', !tools.some((x) => /^(worth|what-can-i-buy|research)$/.test(x)), tools);
-  check('All Tools: no example result and no HDB-in-four-steps sentence', !/1\.09|Example result|four steps/i.test(main));
-  check('All Tools: search is kept', /data-gw-search="tools"/.test(main));
-  check('All Tools: no tile opens a journey-marked address', !/j=1/.test(main));
+  check('Calculators: the four questions, in order', tools.join('|') === 'payment-planner|tdsr|sale-proceeds|hdb-upgrade', tools);
+  check('Calculators: the four are named as questions', ['What will this home cost me?', 'How much can I borrow?', 'What will I get from selling?', 'Upgrade from HDB'].every((x) => main.indexOf('<b>' + x + '</b>') >= 0));
+  const one = (main.match(/<p class="gw-mone[^"]*">(.*?)<\/p>/s) || [])[1] || '';
+  check('Calculators: Stamp duty, Mortgage instalment and Seller’s stamp duty as text links underneath', [...one.matchAll(/<a href="([^"]*)"[^>]*>(.*?)<\/a>/g)].map((x) => x[1] + '=' + x[2]).join('|') === 'stamp-duty/=Stamp duty|mortgage/=Mortgage instalment|ssd/=Seller’s stamp duty', one);
+  check('Calculators: no badges on the cards', !/<span class="gw-tl-t"><b>[^<]*<\/b><em>/.test(main));
+  check('Calculators: nothing that lives under Research is listed here', !tools.some((x) => /^(worth|what-can-i-buy|research)$/.test(x)), tools);
+  check('Calculators: the folded pages are not cards of their own', !tools.some((x) => /^(planner|msr)$/.test(x)), tools);
+  check('Calculators: no tile opens a journey-marked address', !/j=1/.test(main));
 }
 // the single source for the labels, and the order the sections are shown in
 global.self = global; global.window = global;
@@ -97,6 +88,6 @@ if (GWN && GWN.SECTIONS) {
   // every tool folder is a registered tool with its own address, so the Tools directory can list it
   const dirs = fs.readdirSync(path.join(ROOT, 'tools'), { withFileTypes: true }).filter((d) => d.isDirectory() && fs.existsSync(path.join(ROOT, 'tools', d.name, 'index.html'))).map((d) => d.name);
   const hrefs = (GWN.ENTRIES || []).map((e) => e.href);
-  dirs.forEach((d) => check('tools/' + d + '/ is a registered destination' + (d === 'what-can-i-buy' ? ' (older address of the Research budget search; kept)' : d === 'progressive-payments' ? ' (older address of New launch payments; now a redirect to the Payment timeline)' : d === 'hdb-upgrade' ? ' (older address of the HDB upgrade planner; now a redirect to What can I afford? set up for a flat being sold)' : ''), d === 'hdb-upgrade' || d === 'what-can-i-buy' || d === 'progressive-payments' || hrefs.some((h) => h && h.replace(/\/$/, '') === 'tools/' + d)));
+  dirs.forEach((d) => check('tools/' + d + '/ is a registered destination' + (d === 'what-can-i-buy' ? ' (older address of the Research budget search; kept)' : d === 'progressive-payments' ? ' (older address of New launch payments; now a redirect to the Payment timeline)' : d === 'planner' ? ' (What can I afford?: now a redirect to How much can I borrow? with the cash and CPF row)' : d === 'msr' ? ' (HDB and EC loan limit: now a redirect to How much can I borrow? set for HDB)' : ''), d === 'planner' || d === 'msr' || d === 'what-can-i-buy' || d === 'progressive-payments' || hrefs.some((h) => h && h.replace(/\/$/, '') === 'tools/' + d)));
 }
 console.log('nav-tests: ' + ok + ' passed, ' + fail + ' failed'); process.exit(fail ? 1 : 0);

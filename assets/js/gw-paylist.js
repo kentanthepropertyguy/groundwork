@@ -40,7 +40,7 @@
     const foot = kind === 'completed'
       ? ['The 1% option fee and 4% exercise payment are planning conventions. Your option sets the actual amounts, and both are part of the price, not extra.', duty]
       : ['Construction stages have no dates: each falls due as the building reaches it. The TOP and final payments are estimates.'].concat(rows.some((r) => r.provisional) ? ['The final 15% is shown as one provisional payment.'] : [], [duty]);
-    return { ok: true, price: s.price, rows, total: $(s.totals.amount), totalLabel: 'Total to pay, with stamp duty', foot, link: { href: 'payment-planner/', text: 'See the dates, and check your cash and CPF against each payment: Payment timeline' } };
+    return { ok: true, price: s.price, rows, total: $(s.totals.amount), totalLabel: 'Total to pay, with stamp duty', foot, link: { href: 'payment-planner/', text: 'See the cash, CPF and every payment date: What will this home cost me?' } };
   }
 
   // The basic HDB list (GW_SCHEDULE.hdb): amounts HDB fixes, the event each payment falls on, and no invented date.

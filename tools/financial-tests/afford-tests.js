@@ -101,7 +101,7 @@ const sc = (o) => Object.assign({ kind: 'completed', buyers: [{ res: 'SC', age: 
     const age = Math.max(iw(bs, asses), iw(bs, gross)), std = Math.max(0, Math.min(30, Math.floor(65 - age))), yrs = o.years || std;
     const income = bs.reduce((t, b) => t + asses(b), 0), r = A.assess(sc({ buyers: bs.map((b) => Object.assign({ res: 'SC', variable: 0 }, b)), years: o.years, ratePct: o.rate || 2, cash: o.cash || 100000, cpf: o.cpf || 200000 }));
     ok(r.state === 'ok', name + ': answered', r.state);
-    ok(Math.abs(r.B.iwaaUse - age) < 1e-9, name + ': income-weighted age used (' + age.toFixed(2) + ')', [r.B.iwaaUse, age]);
+    ok(Math.abs(r.B.iwaaUse - age) < 1e-6,   /* the engine tidies the age to 6 decimals */ name + ': income-weighted age used (' + age.toFixed(2) + ')', [r.B.iwaaUse, age]);
     ok(r.years === yrs, name + ': eligible tenure ' + yrs + ' years', [r.years, yrs]);
     const cap = incomeLoan(income, 0, o.rate || 2, yrs);
     ok(Math.abs(r.borrow.max - cap) < 1, name + ': maximum borrowing = 55% of the combined assessable income at the 4% test rate over that tenure (' + Math.round(cap) + ')', [r.borrow.max, cap]);

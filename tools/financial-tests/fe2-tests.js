@@ -33,15 +33,15 @@ const addM = (iso, m) => T.iso(T.addMonths(new Date(iso + 'T00:00:00Z'), m));
 {
   const mas = C.borrowers([{ age: 60, fixed: 8000 }, { age: 30, fixed: 10000 }]);
   ok(near(mas.iwaaGross, (60 * 8000 + 30 * 10000) / 18000, 1e-9) && near(mas.iwaaGross, 43.33, 0.01), '2: MAS worked example: 60 on $8,000 and 30 on $10,000 = 43.33', mas.iwaaGross);
-  ok(!mas.ageUnverified && mas.iwaaUse === mas.iwaaGross, '2: fixed income only: both weightings agree, the age is not flagged', mas);
+  ok(!mas.ageUnverified && mas.iwaaUse === Math.round(mas.iwaaGross * 1e6) / 1e6, '2: fixed income only: both weightings agree, the age is not flagged', mas);
   const B = C.borrowers([{ age: 45, fixed: 15000 }, { age: 38, fixed: 9000 }]), want = (45 * 15000 + 38 * 9000) / 24000;
-  ok(near(B.iwaaUse, want, 1e-9), '2: 45 on $15,000 and 38 on $9,000 = ' + want.toFixed(3), B.iwaaUse);
+  ok(near(B.iwaaUse, want, 1e-6), '2: 45 on $15,000 and 38 on $9,000 = ' + want.toFixed(3), B.iwaaUse);
   const tn = C.bankTenure('private', B.iwaaUse);
   ok(tn.std === Math.min(30, Math.floor(65 - want)) && tn.std === 22, '2: standard tenure from the weighted age: 65 - 42.4 = 22 years', tn.std);
   const t2 = C.tdsr({ kind: 'private', borrowers: [{ age: 45, fixed: 15000 }, { age: 38, fixed: 9000 }], loans: 0 });
   ok(t2.ok && near(t2.maxLoan, 0.55 * 24000 / instal(1, 4, 22), 5), '2: TDSR on the combined $24,000 over the joint tenure of 22 years', t2.maxLoan);
   const v = C.borrowers([{ age: 50, fixed: 10000, variable: 10000 }, { age: 30, fixed: 10000 }]);
-  ok(v.ageUnverified && v.iwaaUse === Math.max(v.iwaa, v.iwaaGross), '2: with variable income the weightings differ: the older age is used and flagged', v);
+  ok(v.ageUnverified && v.iwaaUse === Math.round(Math.max(v.iwaa, v.iwaaGross) * 1e6) / 1e6, '2: with variable income the weightings differ: the older age is used and flagged', v);
 }
 // ---- 3. two buyers, one borrower: only the borrower sizes the loan; both buyers count for stamp duty ----
 {

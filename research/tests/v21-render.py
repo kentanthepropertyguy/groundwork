@@ -13,7 +13,8 @@ def chk(name, cond, info=None):
     if cond: ok += 1; print('  ok  ', name)
     else: bad += 1; print('  FAIL', name, info)
 PORTRAIT = "[...document.querySelectorAll('img')].filter(i => /ken-(portrait|circle)/.test(i.src) && i.offsetParent && !i.closest('footer')).length"   # outside the footer (the footer keeps Ken's photo)
-CALCS = {'stamp-duty': 'Total stamp duty', 'tdsr': 'Indicative maximum loan', 'msr': 'Indicative maximum loan', 'mortgage': 'Monthly instalment', 'sale-proceeds': 'Cash in hand after costs', 'ssd': 'Seller’s Stamp Duty'}
+# V3.4: the HDB and EC loan limit and Sale proceeds are now in the four-question frame (fin3-render.py, v34-render.py); these are the single-figure calculators left
+CALCS = {'stamp-duty': 'Total stamp duty', 'mortgage': 'Monthly instalment', 'ssd': 'Seller’s Stamp Duty'}
 with sync_playwright() as p:
     br = p.chromium.launch()
     for vn, vp in (('desktop', {'width': 1280, 'height': 900}), ('phone', {'width': 390, 'height': 844})):

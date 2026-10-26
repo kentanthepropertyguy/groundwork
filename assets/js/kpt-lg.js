@@ -382,7 +382,7 @@
       // The line is filled after the page is drawn, once find.json has given the median price (afterProject); until then it is hidden.
       // V2-01: on a first-look page (no typical price) the line is still there, hidden, so an asking price typed above can be sent on.
       (T || canAsk ? '<p class="lg-run" data-lg-run-line data-typical="" hidden><span data-lg-run-what></span> ' +
-        '<a href="../tools/planner/" data-lg-run="planner"><b>Can I afford this?</b></a> · <a href="../tools/payment-planner/" data-lg-run="payment-planner">Plan the payments</a> · <a href="../tools/stamp-duty/" data-lg-run="stamp-duty">Stamp duty</a> · <a href="../tools/mortgage/" data-lg-run="mortgage">Mortgage (75% loan)</a>' + (M.sale && M.sale.selected === 'new' ? ' · <a href="../tools/progressive-payments/" data-lg-run="progressive">New launch payments</a>' : '') + '</p>' : '');
+        '<a href="../tools/payment-planner/" data-lg-run="payment-planner"><b>What will this home cost me?</b></a> · <a href="../tools/tdsr/" data-lg-run="tdsr">How much can I borrow?</a> · <a href="../tools/stamp-duty/" data-lg-run="stamp-duty">Stamp duty</a> · <a href="../tools/mortgage/" data-lg-run="mortgage">Mortgage (75% loan)</a>' + (M.sale && M.sale.selected === 'new' ? ' · <a href="../tools/progressive-payments/" data-lg-run="progressive">New launch payments</a>' : '') + '</p>' : '');
   }
   // 25 Oct 2026: under the answer, the evidence a visitor asked for, in order: what each home type (or, without reliable types, each size) sells
   // for; every transaction, filterable; and what homes here rent for (gw-records.js, gw-rent.js). Each part is left out when its data is missing.
@@ -422,8 +422,8 @@
     // Without it the order is unchanged: budget, then the asking price, then the owner's. Messages are wired by the page (research/index.html) from the report's own finding.
     const forWho = ctx && (ctx.forWho === 'sell' || ctx.forWho === 'buy') ? ctx.forWho : '';
     const ICO = (d) => '<span class="lg-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg></span>';
-    const stripBudget = '<div class="lg-kenstrip" data-lg-budget><div class="who">' + ICO('<path d="M4 19V9M10 19V5M16 19v-7M21 19H3"/>') + '<div><b>Thinking of buying here?</b><span>Work out your maximum budget, then the stamp duty and payments that come with it.</span></div></div>' +
-      '<a class="lg-btn" href="' + esc(root) + 'tools/planner/" data-kpt-nav="research-to-planner">Check my budget</a></div>';
+    const stripBudget = '<div class="lg-kenstrip" data-lg-budget><div class="who">' + ICO('<path d="M4 19V9M10 19V5M16 19v-7M21 19H3"/>') + '<div><b>Thinking of buying here?</b><span>Work out your budget from your income, cash and CPF, then what a home here costs you.</span></div></div>' +
+      '<a class="lg-btn" href="' + esc(root) + 'tools/tdsr/#cash" data-kpt-nav="research-to-planner">Check my budget</a></div>';
     // V2.1: ONE quiet card to ask Ken (no portrait): the visitor's question leads (asking price for a buyer, the unit's value for an owner), the other
     // message is a plain link beside it. The WhatsApp messages (ids wa, waOwn) are wired by the page from the report's own finding, as before.
     const own = forWho === 'sell', lnk = (id, t, main) => '<a class="' + (main ? 'lg-btn' : 'lg-klink') + '" id="' + id + '" href="#" target="_blank" rel="noopener">' + t + '</a>';
@@ -525,7 +525,8 @@
       const k = 'gw.fin.v1', s = JSON.parse(root.sessionStorage.getItem(k) || '{}') || {};
       s.buyPrice = String(price); if (a.dataset.lgRun === 'mortgage') s.loan = String(Math.round(price * 0.75));
       // "Can I afford this?": the Planner names where the price came from (the typical recent price in past sales, or the asking price typed here) until the buyer changes it
-      if (a.dataset.lgRun === 'planner') s.buyFrom = askedPrice() ? 'asking' : 'typical'; else delete s.buyFrom;
+      // V3.4: the price goes into What will this home cost me?, which names where it came from (the typical recent price, or the asking price typed here) until the buyer changes it
+      if (a.dataset.lgRun === 'payment-planner' || a.dataset.lgRun === 'tdsr') s.buyFrom = askedPrice() ? 'asking' : 'typical'; else delete s.buyFrom;
       root.sessionStorage.setItem(k, JSON.stringify(s));
     } catch (e) { /* storage blocked: the calculator opens empty */ }
     try { KPT().track('tool_selected', { tool: 'calc-' + a.dataset.lgRun, placement: 'research-project' }); } catch (e) { /* analytics unavailable */ }

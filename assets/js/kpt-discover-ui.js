@@ -1,10 +1,13 @@
 /* KPT DISCOVER UI V1: the Budget Search page (tools/what-can-i-buy/). Presentation and wiring only: every matching rule is in kpt-discover.js, the data and wording of evidence come from kpt-find.js,
  * and the place search, distances and map are the Map's own (KPT_MAP, KPT_MAP_VIEW, gw-postal.js), loaded only when the buyer starts typing a place.
  * Nothing typed here (budget, place, size) is sent to analytics, WhatsApp or put in an address. The search is remembered in this tab only (sessionStorage, with the handoff).
+ * Bedrooms on resale (26 Oct 2026): kpt-discover-beds.js (KPT_BEDS) over data/projects/find-beds.json, loaded only once a bedroom count is chosen with resale
+ * included. Confirmed matches are the list; "bedrooms not confirmed" is its own group; developments without bedroom records are counted, never listed as a match.
+ * Without that file (or if it is not from the same URA download as find.json) the page behaves exactly as before.
  */
 (function () {
   'use strict';
-  const CFG = window.KPD_CFG, FI = window.KPT_FIND, D = window.KPT_DISCOVER, M = window.KPT_MARKET;
+  const CFG = window.KPD_CFG, FI = window.KPT_FIND, D = window.KPT_DISCOVER, M = window.KPT_MARKET, KB = window.KPT_BEDS || null;
   KPT.setContext({ tool_name: 'what-can-i-buy', tool_category: 'research', project_name: null });
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -20,19 +23,31 @@
   /* ------------------------------------------------------------------ state */
   const BLANK = { budget: null, over: false, type: 'any', sale: 'either', minSize: null, tenure: 'any', beds: null };
   const S = { req: Object.assign({}, BLANK), near: null, mode: 'entry', edit: false, view: 'list', shown: {}, helps: {}, sel: null, errBudget: '', pendingWhere: '', draftBudget: '', moreOpen: false, sheetMin: false, layers: null, lyrOpen: false };
-  let srcLine = '', ix, invDoc, sitesDoc, dataReady = null, handoff = null, NM = null, nmLoad = null, nmView = null, nmHost = null, nmLayer = null, nmSig = '', nmBase = '', wasStage = false, NR = null, lastRes = null, seenKey = {};
+  let srcLine = '', ix, findDoc = null, bx = null, bedsState = CFG.BEDS_URL && KB ? 'idle' : 'off', bedsLoad = null, invDoc, sitesDoc, dataReady = null, handoff = null, NM = null, nmLoad = null, nmView = null, nmHost = null, nmLayer = null, nmSig = '', nmBase = '', wasStage = false, NR = null, lastRes = null, seenKey = {};
 
   /* ------------------------------------------------------------------ data */
   const get = (u, opts) => fetch(u, opts).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   function loadData() {
     if (dataReady) return dataReady;
     dataReady = Promise.all([get(CFG.FIND_URL), get(CFG.INV_URL, { cache: 'no-cache' }), get(CFG.SITES_URL)]).then((a) => {
-      ix = FI.prepare(a[0]); invDoc = a[1];
+      findDoc = a[0]; ix = FI.prepare(a[0]); invDoc = a[1];
       sitesDoc = (a[2] && Array.isArray(a[2].sites) ? a[2].sites : []).filter((x) => x && x.stage === 'new-launch' && x.status === 'configured' && /^https:\/\//.test(x.url || '') && x.id && x.name);
     });
     return dataReady;
   }
   const inventory = () => FI.prepareInventory(invDoc, nowMs());
+  /* Resale by bedrooms: find-beds.json, fetched the first time a bedroom count is chosen with resale included. 'off' = keep today's behaviour. */
+  const bedsWanted = () => !!(S.req.beds && S.req.sale !== 'new');
+  const bedsOn = () => bedsState !== 'off';   // the resale bedroom choice is offered (it may still be loading)
+  function loadBeds() {
+    if (bedsState === 'off') return Promise.resolve(null);
+    if (bedsLoad) return bedsLoad;
+    bedsState = 'loading';
+    bedsLoad = Promise.all([loadData(), get(CFG.BEDS_URL)]).then((a) => { bx = KB.prepare(a[1], findDoc); bedsState = bx ? 'ready' : 'off'; return bx; });
+    return bedsLoad;
+  }
+  /** Data for the current requirements: find.json and inventory always, find-beds.json only when bedrooms apply to resale. */
+  const dataFor = () => (bedsWanted() ? loadData().then(loadBeds) : loadData());
 
   /* ------------------------------------------------------------------ the Map's place search (loaded on demand) */
   const addCss = (href) => { if (!document.querySelector('link[href="' + href + '"]')) { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href; document.head.appendChild(l); } };
@@ -122,8 +137,8 @@
     const go = () => { S.mode = 'results'; S.edit = false; S.shown = {}; S.sel = null; S.lyrOpen = false; renderAll(); persist(); window.scrollTo({ top: 0 }); };
     if (snap && snap.req) {
       S.req = Object.assign({}, BLANK, snap.req); S.draftBudget = S.req.budget ? money(S.req.budget) : ''; S.near = null; NR = null; nearErr = ''; S.pendingWhere = '';
-      loadData().then(() => restorePlace(snap.near)).then(go);
-    } else loadData().then(go);
+      dataFor().then(() => restorePlace(snap.near)).then(go);
+    } else dataFor().then(go);
   }
   addEventListener('popstate', (e) => {
     const st = e.state && (e.state.kd === 'f' || e.state.kd === 'r') ? e.state : null; if (EMB || !st || !S.ready) return;
@@ -159,10 +174,30 @@
     return [it.sale === 'new' ? 'New launch' : 'Resale', CLS[it.cls] || null, place || null, 'District ' + Number(it.district), String(it.tenure || '').replace(/ yrs /, ' years ').replace(/^(\d+ years) from/, '$1 from') || null].filter(Boolean).join(' · ');
   }
   const TAG = { typical: ['g', 'Typical prices within your maximum'], some: ['a', 'Some sales within your maximum'], huttons: ['b', 'Huttons inventory within your maximum'], over: ['n', 'Up to 5% over your maximum'] };
+  /* bedroom wording (resale): the basis is always named, as on Research; "not confirmed" is never worded as a match */
+  const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const ymS = (s) => { const m = /^(\d{4})-(\d{2})$/.exec(String(s || '')); return m ? MON[Number(m[2]) - 1] + ' ' + m[1] : ''; };
+  const basisWord = (b) => (!b ? '' : b.verified && !b.inferred ? 'bedrooms from floor plans' : b.inferred && !b.verified ? 'bedrooms from URA rental records' : 'bedrooms from floor plans and URA rental records');
+  const bedsNow = () => (lastRes && lastRes.beds ? lastRes.beds : null);
+  const bedLabel = (n, plus) => (plus ? n + '+ bedroom' : n + '-bedroom');
+  const cap1 = (w) => w.charAt(0).toUpperCase() + w.slice(1);
+  function bedsEv(it) {
+    const u = it.ura, b = it.beds, w = bedLabel(b.count, bedsNow() && bedsNow().orMore);
+    if (b.state === 'insufficient') {
+      const k = u.identified, x = u.could;
+      return `<p class="kd-ev"><span>Resales that could be ${esc(w)} (URA)</span>, ${esc(sizeText(u.bandLo, u.bandHi))} · middle half <b>${esc(p2(u.q1) + '–' + p2(u.q3))}</b></p><p class="kd-n">${k ? esc(k + ' of ' + x + ' recent resale' + (x === 1 ? '' : 's') + ' identified as ' + w) : 'Bedrooms not shown in the records for these sizes'} · latest ${esc(ymLabel(u.last))}</p>`;
+    }
+    const g = b.group && Number(b.group) !== b.count ? bedLabel(Number(b.group), false) : w;   // "4+" shows the type that matched
+    const range = b.sized ? sizeText(u.bandLo, u.bandHi) : money(u.sqft[0]) + '–' + money(u.sqft[1]) + ' sq ft';
+    const price = b.sized ? `middle half <b>${esc(p2(u.q1) + '–' + p2(u.q3))}</b>` : `typical <b>${esc(p2(u.med))}</b> · middle half ${esc(p2(u.q1) + '–' + p2(u.q3))}`;
+    const when = u.from && u.to ? ymS(u.from) + '–' + ymS(u.to) : 'latest ' + ymLabel(u.last);
+    return `<p class="kd-ev"><span>${esc(cap1(g))} resales (URA)${b.sized ? ' at your minimum size' : ''}</span>, ${esc(range)} · ${price}</p><p class="kd-n">${u.n} sale${u.n === 1 ? '' : 's'} · ${esc(when)}${u.basis ? ' · ' + esc(basisWord(u.basis)) : ''}</p>`;
+  }
   function cardHtml(it) {
-    const u = it.ura, nm = FI.displayName(it.name), id = esc(it.id), tag = TAG[it.tier];
+    const u = it.ura, nm = FI.displayName(it.name), id = esc(it.id), unconf = !!(it.beds && it.beds.state === 'insufficient'), tag = unconf ? ['n', 'Bedrooms not confirmed'] : TAG[it.tier];
     let ev = '', n = '';
-    if (u) {
+    if (u && it.beds) ev = bedsEv(it);
+    else if (u) {
       ev = `<p class="kd-ev"><span>${it.sale === 'new' ? 'Developer sales (URA)' : 'Recent sales (URA)'}</span>, ${esc(sizeText(u.bandLo, u.bandHi))} · middle half <b>${esc(p2(u.q1) + '–' + p2(u.q3))}</b></p>`;
       n = `<p class="kd-n">${u.n} sale${u.n === 1 ? '' : 's'} · latest ${esc(ymLabel(u.last))}</p>`;
     }
@@ -173,10 +208,10 @@
       else if (iv.state === 'nomatch') inv = `<p class="kd-inv kd-inv-no"><span>Huttons inventory · checked ${esc(iv.when || '')}</span> none at your maximum${S.req.minSize ? ' and size' : ''}</p>`;
       else if (iv.state === 'zero') inv = `<p class="kd-inv kd-inv-no"><span>Huttons inventory · checked ${esc(iv.when || '')}</span> no units shown</p>`;
     }
-    const research = u ? `<a data-f="go" data-id="${id}" href="../../research/#/p/${id}/${it.sale}">Research page ›</a>` : '';
+    const research = u ? `<a data-f="go" data-id="${id}"${it.beds && it.beds.state === 'reliable' && it.beds.group ? ` data-bed="${esc(it.beds.group)}"` : ''} href="../../research/#/p/${id}/${it.sale}">Research page ›</a>` : '';
     const map = `<a data-f="go" data-id="${id}" href="../../research/map/#p=${id}">View on Map ›</a>`;
     const loc = stageOn() && NM && NM.BYID[it.id] && NM.BYID[it.id].pos ? `<button type="button" class="kd-link kd-loc" data-f="locate" data-id="${id}" aria-pressed="${S.sel === it.id}">Show here on map</button>` : '';
-    return `<article class="kd-card${S.sel === it.id ? ' is-sel' : ''}" data-pid="${id}"><h3>${esc(nm)}</h3><p class="kd-meta">${esc(meta(it))}</p>${ev}${n}${inv}<p><span class="kd-tag kd-tg-${tag[0]}">${tag[1]}</span></p><div class="kd-acts">${loc}${research}${map}</div></article>`;
+    return `<article class="kd-card${S.sel === it.id ? ' is-sel' : ''}${unconf ? ' kd-unc' : ''}" data-pid="${id}"><h3>${esc(nm)}</h3><p class="kd-meta">${esc(meta(it))}</p>${ev}${n}${inv}<p><span class="kd-tag kd-tg-${tag[0]}">${tag[1]}</span></p><div class="kd-acts">${loc}${research}${map}</div></article>`;
   }
 
   /* ------------------------------------------------------------------ the requirements form (one component: the entry screen, the desktop panel and the phone sheet) */
@@ -186,9 +221,13 @@
   function bedsBlock(inv) {
     const r = S.req, usable = D.inventoryUsable(inv);
     let note, off = false;
-    if (r.sale === 'resale') { off = true; note = 'Not available for resale: the sales records don’t include bedrooms, and we never work them out from size.'; }
+    if (bedsOn() && r.sale !== 'new') {   // resale by bedroom type: Research's own types, from the accepted classification
+      const RES = 'Resales are matched on bedroom types from URA rental records or floor plans; where those don’t confirm it, they’re listed separately.';
+      note = r.sale === 'resale' ? RES : r.beds && !usable ? 'Applied to resale only: new launches can’t be matched on bedrooms just now.' : RES + ' New launches: from Huttons inventory.';
+    }
+    else if (r.sale === 'resale') { off = true; note = CFG.BEDS_URL ? 'Bedroom matching for resale isn’t available just now.' : 'Not available for resale: the sales records don’t include bedrooms, and we never work them out from size.'; }
     else if (!usable) { off = true; note = 'Bedroom matching uses recently checked Huttons inventory for new launches, which isn’t available right now.'; }
-    else if (r.beds && r.sale === 'either') note = 'Applied to new launches only. Resale isn’t filtered by bedrooms.';
+    else if (r.beds && r.sale === 'either') note = CFG.BEDS_URL ? 'Applied to new launches only: resale bedroom matching isn’t available just now.' : 'Applied to new launches only. Resale isn’t filtered by bedrooms.';
     else if (r.beds) note = 'Matched on Huttons inventory, so only new launches with a matching bedroom type are listed.';
     else note = 'For new launches only, from Huttons inventory. Resale can’t be filtered by bedrooms.';
     return `<div class="kd-f"><span class="kd-l">Bedrooms <small>optional</small></span>${seg('beds', [['', 'Any'], [1, '1'], [2, '2'], [3, '3'], [4, '4+']].map((o) => (o[0] !== '' && off ? o.concat([true]) : o)), r.beds || '', off ? ' aria-disabled="true"' : '')}<p class="kd-note">${esc(note)}</p></div>`;
@@ -222,11 +261,14 @@
     if (r.sale !== 'either') out.push([r.sale === 'new' ? 'New launch' : 'Resale', 'sale']);
     if (r.minSize) out.push([money(r.minSize) + '+ sq ft', 'size']);
     if (r.tenure !== 'any') out.push([r.tenure === 'free' ? 'Freehold or 900+ year lease' : '99-year', 'tenure']);
-    if (r.beds) out.push([(r.beds === 4 ? '4+' : r.beds) + ' bed', 'beds']);
+    if (r.beds) out.push([(r.beds === 4 ? '4+' : r.beds) + ' bed', 'more']);
     return `<div class="kd-chips">${out.map((c) => `<button type="button" class="kd-chip" data-f="edit" data-focus="${c[1]}">${esc(c[0])}</button>`).join('')}</div>`;
   }
   function headline(res) {
     const r = res.req, c = res.counts, N = c.projects, max = m2(r.budget);
+    if (res.beds) { const w = bedWord(r.beds).replace('-', '\u2011'), sw = r.sale === 'resale' ? 'resales' : 'sales';
+      if (!N) return c.insufficient ? `No confirmed ${w} ${sw} within ${max}` : `No developments with recent ${w} ${sw} within ${max}`;
+      return `${N} development${N === 1 ? '' : 's'} with recent ${w} ${sw} within ${max}`; }
     if (!N) return `No developments with recent sales within ${max}`;
     const allHut = c.typical + c.some === 0 && c.huttons > 0;
     if (allHut && r.beds && r.sale === 'new') return `${N} new launch${N === 1 ? '' : 'es'} with ${bedWord(r.beds)} homes from Huttons inventory within ${max}`;
@@ -243,6 +285,7 @@
     if (c.typical && (c.some || c.huttons)) tiers.push(c.typical + ' with typical prices within your maximum');
     if (c.some) tiers.push(c.some + ' with only some sales within it');
     if (c.huttons) tiers.push(c.huttons + ' from Huttons inventory');
+    if (res.beds && c.insufficient) tiers.push(c.insufficient + ' not confirmed as ' + bedWord(res.req.beds) + ', listed after');
     return `<p class="kd-sub">${esc(s)}</p>${tiers.length ? `<p class="kd-sub kd-tiers">${esc(tiers.join(' · '))}</p>` : ''}`;
   }
   const NEW_NOTE = 'Developer sales recorded by URA. These don’t show what is still available; Huttons inventory is added where we have it.';
@@ -263,14 +306,39 @@
     }
     return h;
   }
+  /* Bedrooms not confirmed: resales within the maximum that COULD be the chosen count. Their own group, after the matches, never counted as one. */
+  function unconfHtml(res) {
+    const b = res.beds; if (!b) return '';
+    const w = bedWord(res.req.beds), list = b.insufficient;
+    let h = '';
+    if (list.length) {
+      const key = 'unconf', shown = S.shown[key] || 5, left = list.length - shown, secs = D.sections(list), multi = secs.length > 1 || (secs[0] && secs[0].cls !== 'condo');
+      h += `<section class="kd-sec kd-unconf"><h2 class="kd-ch">${esc(cap1(w))} not confirmed <span class="kd-cnt">${list.length}</span></h2><p class="kd-gn">Resales here within your maximum could be ${esc(w)}, but the records don’t confirm the bedrooms. Check the floor plan before relying on them.</p>`;
+      let used = 0;
+      secs.forEach((s) => { const its = s.groups.reduce((a, g) => a.concat(g.items), []), take = Math.max(0, Math.min(its.length, shown - used)); if (!take) return; used += take; h += (multi ? `<h3 class="kd-uch">${esc(CLS_H[s.cls])}</h3>` : '') + its.slice(0, take).map(cardHtml).join(''); });
+      h += `${left > 0 ? `<button type="button" class="kd-more-b" data-f="more" data-key="unconf">Show ${Math.min(left, 20)} more${left > 20 ? ' (' + left + ' left)' : ''} <span aria-hidden="true">⌄</span></button>` : ''}</section>`;
+    }
+    const u = b.unclassified.count;
+    if (u) h += `<p class="kd-gn kd-uncl">${u} more development${u === 1 ? ' has' : 's have'} resales within your maximum, but ${u === 1 ? 'its' : 'their'} records don’t show bedrooms. <button type="button" class="kd-link" data-f="alt" data-id="beds">Show any bedroom</button></p>`;
+    return h;
+  }
+  /* why so few: what a bedroom choice left out, counted by reason (in the method note, not in front of the answer) */
+  const WHY = { above: 'no {w} resale, confirmed or possible, within your maximum', small: '{w} homes smaller than your minimum size', stale: 'no {w} resale in the last 6 months', absent: 'no recent {w} resale on record' };
+  function excludedText(res) {
+    const b = res.beds; if (!b) return '';
+    const by = {}; Object.keys(b.excluded).forEach((k) => { const r = ['above', 'small', 'stale', 'absent'].find((x) => k.split('/').indexOf(x) > -1) || 'above'; by[r] = (by[r] || 0) + b.excluded[k]; });
+    const w = bedWord(res.req.beds), parts = ['above', 'small', 'stale', 'absent'].filter((k) => by[k]).map((k) => by[k] + ' with ' + WHY[k].replace('{w}', w));
+    return parts.length ? 'With ' + w + ' chosen, these resale developments were left out: ' + parts.join('; ') + '. “No recent resale on record” doesn’t mean a development has no such homes.' : '';
+  }
   function emptyHtml(res) {
-    const alts = D.alternatives(ix, res.req.near ? Object.assign({}, res.req) : res.req, { inv: inventory() });
+    const q = res.req.near ? Object.assign({}, res.req) : res.req, ctx = { inv: inventory() };
+    const alts = res.beds && KB ? KB.alternatives(ix, bx, q, ctx) : D.alternatives(ix, q, ctx);
     return `<div class="kd-empty"><p>Try one of these:</p>${alts.length ? `<ul>${alts.map((a) => `<li><button type="button" class="kd-link" data-f="alt" data-id="${a.id}">${esc(a.label)}</button> <span>${a.count} ${a.count === 1 ? 'development' : 'developments'}</span></li>`).join('')}</ul>` : '<p class="kd-note">Raise the maximum or change a requirement under Edit search.</p>'}<p class="kd-note">Or <a href="#" data-f="ken">ask Ken what may work</a>.</p></div>`;
   }
   function unplacedHtml(res) {
     const u = res.unplaced; if (!u.length) return '';
     const names = {}, list = u.filter((i) => !names[i.id] && (names[i.id] = 1));
-    return `<details class="kd-unp"><summary>${list.length} more fit${list.length === 1 ? 's' : ''} your maximum but ${list.length === 1 ? 'has' : 'have'} no verified map position</summary><p class="kd-gn">Not confirmed to be within ${esc(FI.radiusText(S.near.r))} of ${esc(NR.label)}, so not sorted by distance.</p><ul>${list.map((i) => `<li>${i.ura ? `<a data-f="go" data-id="${esc(i.id)}" href="../../research/#/p/${esc(i.id)}/${i.sale}">${esc(FI.displayName(i.name))}</a>` : `<b>${esc(FI.displayName(i.name))}</b>`}<span>${i.sale === 'new' ? 'New launch' : 'Resale'}</span></li>`).join('')}</ul></details>`;
+    return `<details class="kd-unp"><summary>${list.length} more fit${list.length === 1 ? 's' : ''} your maximum but ${list.length === 1 ? 'has' : 'have'} no verified map position</summary><p class="kd-gn">Not confirmed to be within ${esc(FI.radiusText(S.near.r))} of ${esc(NR.label)}, so not sorted by distance.</p><ul>${list.map((i) => `<li>${i.ura ? `<a data-f="go" data-id="${esc(i.id)}" href="../../research/#/p/${esc(i.id)}/${i.sale}">${esc(FI.displayName(i.name))}</a>` : `<b>${esc(FI.displayName(i.name))}</b>`}<span>${i.sale === 'new' ? 'New launch' : 'Resale'}${i.beds && i.beds.state === 'insufficient' ? ' · bedrooms not confirmed' : ''}</span></li>`).join('')}</ul></details>`;
   }
   function upcomingHtml(res) {
     if (!(S.near && NR && NM) || res.req.sale === 'resale') return '';
@@ -287,13 +355,20 @@
     'These are past sales, not homes for sale, and not a valuation. New-launch sales don’t show whether units remain; where Huttons inventory was checked recently it is shown separately, with the date.',
     'Distances are in a straight line. Bedrooms are matched only for new launches, from Huttons inventory, and are never worked out from size. Condos, ECs and cluster housing are never mixed.',
     'The optional “up to 5% over” list shows developments whose recent sales start just above your maximum. It is never mixed into the main list.'];
+  const BEDS_METHOD = 'Bedrooms: for resale, a development is matched on the bedroom types its Research page shows, worked out from URA rental records or developers’ floor plans (URA doesn’t record bedrooms with a sale), and only where enough of its resales are identified. Where they aren’t, resales that could be that size are listed separately as “not confirmed”. For new launches, bedrooms come from Huttons inventory checked recently. Studios and penthouses don’t count as a number of bedrooms. Condos, ECs and cluster housing are never mixed.';
+  function method(res) {
+    if (!bedsOn() || res.req.sale === 'new') return METHOD;
+    const m = METHOD.slice(); m[3] = 'Distances are in a straight line. ' + BEDS_METHOD;
+    const x = excludedText(res); if (x) m.push(x);
+    return m;
+  }
   function resultsHtml(res) {
     const r = res.req, body = res.state === 'ok' ? listHtml(res) : emptyHtml(res);
     return `<div class="kd-lead"><p class="kd-eye">I’m looking to buy</p><h1 class="kd-h1" id="kdH">${esc(headline(res))}</h1>${res.state === 'ok' ? subLine(res) : ''}</div>
       ${chips()}<div class="kd-bar"><div class="kd-barrow"><button type="button" class="kd-btn kd-ghost" data-f="edit" aria-expanded="${S.edit}">Edit search</button>${S.near ? `<div class="kd-radin">${radChips()}</div>` : ''}</div></div>
       ${S.near ? `<div class="kd-quick">${radChips()}</div>` : ''}<div class="kd-quick2">${overToggle(res.counts)}</div>
-      ${body}${res.state === 'ok' ? unplacedHtml(res) + upcomingHtml(res) : ''}
-      <details class="kd-meth"><summary>How these are matched</summary><div class="inner">${METHOD.map((t) => `<p>${esc(t)}</p>`).join('')}</div></details>`;
+      ${body}${unconfHtml(res)}${res.state === 'ok' || (res.beds && res.counts.insufficient) ? unplacedHtml(res) + upcomingHtml(res) : ''}
+      <details class="kd-meth"><summary>How these are matched</summary><div class="inner">${method(res).map((t) => `<p>${esc(t)}</p>`).join('')}</div></details>`;
   }
 
   /* ------------------------------------------------------------------ map (the Map's own view; one Leaflet map kept alive across re-renders) */
@@ -358,7 +433,8 @@
   function reqNow() { return Object.assign({}, S.req, { near: nearInput() }); }
   function compute() {
     if (!S.req.budget || !ix) { lastRes = null; return null; }
-    lastRes = D.search(ix, reqNow(), { inv: inventory() });
+    if (bedsState === 'off' && CFG.BEDS_URL && S.req.sale === 'resale' && S.req.beds) S.req.beds = null;   // resale bedroom data unavailable: never show a bedroom chip that isn't applied
+    lastRes = KB ? KB.search(ix, bedsState === 'ready' ? bx : null, reqNow(), { inv: inventory() }) : D.search(ix, reqNow(), { inv: inventory() });
     window.__kdRes = lastRes;
     return lastRes;
   }
@@ -390,7 +466,7 @@
     const root = $('root'), bey = $('beyond'); if (bey) bey.hidden = S.mode === 'entry';
     if (S.mode === 'entry') {
       root.className = 'kd is-entry';
-      root.innerHTML = `<div class="kd-entry">${EMB ? '' : '<p class="kd-eye">I’m looking to buy</p><h1 class="kd-h1">What are you looking for?</h1><p class="kd-lede">Tell us your maximum and where. Add requirements if you have them, and change any of it later without starting again.</p>'}${srcLine ? `<p class="kd-src">${esc(srcLine)}</p>` : ''}<div id="kdForm" class="kd-form"></div>${srcLine ? '' : '<p class="kd-fine">Not sure of your budget? <a href="' + BASE + 'tools/planner/">Work out what you can afford first ›</a></p>'}</div>`;
+      root.innerHTML = `<div class="kd-entry">${EMB ? '' : '<p class="kd-eye">I’m looking to buy</p><h1 class="kd-h1">What are you looking for?</h1><p class="kd-lede">Tell us your maximum and where. Add requirements if you have them, and change any of it later without starting again.</p>'}${srcLine ? `<p class="kd-src">${esc(srcLine)}</p>` : ''}<div id="kdForm" class="kd-form"></div>${srcLine ? '' : '<p class="kd-fine">Not sure of your budget? <a href="' + BASE + 'tools/tdsr/#cash">Work out what you can afford first ›</a></p>'}</div>`;
       $('kdForm').innerHTML = formHtml(true); bindInputs(); return;
     }
     root.className = 'kd is-results' + (S.edit ? ' is-edit' : '');
@@ -469,7 +545,7 @@
     // Hosted in Research: remember the search for this tab, then open the results page (Back returns here with the form as it was).
     if (EMB) { persist(); try { window.sessionStorage.setItem('kpt.find.from', 'research'); } catch (e) { /* the results page then keeps its own prefilled form one step back */ } location.href = BASE + 'tools/what-can-i-buy/'; return; }
     $('root').innerHTML = '<p class="kd-load">Loading…</p>';
-    loadData().then(() => { S.mode = 'results'; S.edit = false; S.shown = {}; renderAll(); persist(); setHist('r', true); const h = $('kdH'); if (h && h.scrollIntoView) window.scrollTo({ top: 0 }); });
+    dataFor().then(() => { S.mode = 'results'; S.edit = false; S.shown = {}; renderAll(); persist(); setHist('r', true); const h = $('kdH'); if (h && h.scrollIntoView) window.scrollTo({ top: 0 }); });
   }
   function onClick(e) {
     const card = e.target.closest ? e.target.closest('.kd-card[data-pid]') : null;   // a card (not one of its links or buttons) chooses that development on the map
@@ -478,12 +554,14 @@
     if (f === 'locate') { selectDev(t.dataset.id, true); const b = document.querySelector('#kdRes [data-f=locate][data-id="' + t.dataset.id + '"]'); if (b) b.focus(); return; }
     if (f === 'zoom') { if (nmView) { if (Number(t.dataset.d) > 0) nmView.zoom(1); else nmView.zoomOut(1); } return; }
     if (f === 'sheet') { S.sheetMin = !S.sheetMin; applySheet(); nmSig = ''; nmBase = ''; syncMap(lastRes); return; }
-    if (f === 'go') { try { window.sessionStorage.setItem('kpt.pulse.for', 'buy'); } catch (x) { /* the Research page then shows its default order */ } KPT.track('find_research_click', { project_id: t.dataset.id }); return; }   // Market pulse: a buyer's question comes first on the report
+    if (f === 'go') { try { window.sessionStorage.setItem('kpt.pulse.for', 'buy'); if (t.dataset.bed) { window.sessionStorage.removeItem('kpt.research.size'); window.sessionStorage.setItem('kpt.research.bed', t.dataset.bed); } } catch (x) { /* the Research page then shows its default order */ } KPT.track('find_research_click', { project_id: t.dataset.id }); return; }   // Market pulse: a buyer's question comes first on the report
     if (f === 'show') { show(); return; }
     if (f === 'seg') {
       const k = t.dataset.k; let v = t.dataset.v; if (k === 'beds') v = v ? Number(v) : null;
       S.req[k] = v;
-      if (k === 'sale' && v === 'resale') S.req.beds = null;
+      if (k === 'sale' && v === 'resale' && !bedsOn()) S.req.beds = null;
+      if (k === 'sale' && v === 'new' && !D.inventoryUsable(inventory())) S.req.beds = null;   // the control is off there: nothing hidden stays applied
+      if (bedsWanted() && bedsState === 'idle') { const go = () => { if (S.mode === 'results') commit(true); else { renderForm(); bindInputs(); } }; loadBeds().then(go, go); if (S.mode !== 'results') { renderForm(); bindInputs(); } return; }
       if (S.mode === 'results') commit(true); else { renderForm(); bindInputs(); }
       return;
     }
@@ -498,6 +576,7 @@
       S.edit = !S.edit || !!t.dataset.focus; const el = $('kdEdit'); if (el) el.classList.toggle('open', S.edit); $('root').classList.toggle('is-edit', S.edit); lockPage(S.edit);
       document.querySelectorAll('[data-f=edit][aria-expanded]').forEach((b) => b.setAttribute('aria-expanded', String(S.edit)));
       const fo = { budget: 'kdBudget', place: 'kdPlace', size: 'kdMin' }[t.dataset.focus]; if (S.edit && fo && $(fo)) { if (fo === 'kdMin' && !document.querySelector('[data-more]').open) document.querySelector('[data-more]').open = true; $(fo).focus(); }
+      else if (S.edit && t.dataset.focus === 'more') { const m = document.querySelector('#kdEdit [data-more]'); if (m) { m.open = true; const b = m.querySelector('[data-k=beds] [aria-checked=true]'); if (b) b.focus(); } }
       return;
     }
     if (f === 'done') { e.preventDefault(); closeEdit(true); return; }
@@ -551,7 +630,7 @@
     }
     if (valid && !(st && st.kd === 'f')) {
       $('root').innerHTML = '<p class="kd-load">Loading…</p>';
-      loadData().then(() => restorePlace(init.near, init.where)).then(() => {
+      dataFor().then(() => restorePlace(init.near, init.where)).then(() => {
         S.mode = 'results'; renderAll(); if (!init.near && !init.where) persist();
         // a saved search opens on its results, with the prefilled form one step back; arriving from the Research form, the form is the Research page itself, so this entry is simply the results
         if (!st) { let fromR = false; try { fromR = window.sessionStorage.getItem('kpt.find.from') === 'research'; window.sessionStorage.removeItem('kpt.find.from'); } catch (e) { fromR = false; } if (fromR) setHist('r', false); else { setHist('f', false); setHist('r', true); } }
@@ -583,6 +662,6 @@
     S.req = Object.assign({}, BLANK); S.near = null; S.pendingWhere = ''; S.draftBudget = ''; S.errBudget = ''; S.moreOpen = false; S.edit = false; S.sel = null; S.helps = {}; srcLine = '';
     embedStart();
   }
-  window.__kd = { S, state: () => S, res: () => lastRes, parseBudget, embed: EMB, reset: resetEmbed };
+  window.__kd = { S, state: () => S, res: () => lastRes, parseBudget, embed: EMB, reset: resetEmbed, beds: () => bedsState };
   start();
 })();

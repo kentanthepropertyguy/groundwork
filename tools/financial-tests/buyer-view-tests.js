@@ -107,12 +107,15 @@ function judged(s, price) { const r = A.assess(s); if (price) { const q = r.quot
 // ---- 5. the Research hand-over and the page wiring are in place ----
 {
   const lg = fs.readFileSync(path.join(H.root, 'assets/js/kpt-lg.js'), 'utf8');
-  ok(/data-lg-run="planner"><b>Can I afford this\?<\/b>/.test(lg) && /s\.buyFrom = askedPrice\(\) \? 'asking' : 'typical'/.test(lg), 'research: "Can I afford this?" hands the price on, naming whether it is the typical price or an asking price');
+  // V3.4: the price goes to What will this home cost me? (and How much can I borrow?), named as the typical price or an asking price
+  ok(/data-lg-run="payment-planner"><b>What will this home cost me\?<\/b>/.test(lg) && /s\.buyFrom = askedPrice\(\) \? 'asking' : 'typical'/.test(lg), 'research: "What will this home cost me?" hands the price on, naming whether it is the typical price or an asking price');
   ok(!/buyFrom\s*=\s*[^;]*location|buyPrice[^;]*location\.(hash|search)/.test(lg), 'research: the price is never placed in an address');
   const ui = fs.readFileSync(path.join(H.root, 'assets/js/gw-answer-ui.js'), 'utf8');
   ok(/GW_VIEW/.test(ui) && !/function statusHtml|function tilesHtml/.test(ui), 'planner: the page draws from the view; the second status banner and price card are gone');
-  const html = fs.readFileSync(path.join(H.root, 'tools/planner/index.html'), 'utf8');
-  ok(/gw-buyer-view\.js\?v=[0-9a-f]{10}/.test(html) && html.indexOf('gw-buyer-view.js') < html.indexOf('gw-answer-ui.js'), 'planner: the view script is loaded (hashed) before the page script');
+  // V3.4: What can I afford? is the cash-and-CPF row of How much can I borrow? (tools/planner/ redirects there), so the script order is checked on that page
+  const html = fs.readFileSync(path.join(H.root, 'tools/tdsr/index.html'), 'utf8');
+  // FE V3 (25 Oct 2026): What can I afford? is drawn by gw-fin3-ui.js from GW_ANSWER directly (gw-fin3-core.js); this view module stays for its own tests
+  ok(/gw-fin3-core\.js\?v=[0-9a-f]{10}/.test(html) && html.indexOf('gw-answer.js') < html.indexOf('gw-fin3-core.js') && html.indexOf('gw-fin3-core.js') < html.indexOf('gw-fin3-ui.js'), 'borrowing page (V3.4, with the budget): the engine, then the V3 core, then the page script, all hashed');
   ok(!/data-range/.test(html), 'planner: no price slider in the page');
 }
 

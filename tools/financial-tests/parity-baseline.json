@@ -1,0 +1,596 @@
+{
+ "afford": {
+  "A01": {
+   "budget": "$912,000",
+   "tiles": {
+    "Borrowing capacity": "$921,000",
+    "Monthly mortgage": "$3,266",
+    "Cash you’d need": "$99,960",
+    "CPF you’d use": "$150,000"
+   },
+   "limited": "Limited by your cash and CPF.",
+   "quote": null,
+   "text": "Your budget, about$912,000Limited by your cash and CPF.Borrowing capacity$921,000what your income supportsMonthly mortgage$3,266on $684,000 over 30 years at 4%Cash you’d need$99,960incl. $21,960 stamp dutyCPF you’d use$150,000Payment dates aren’t checked for a new launch until you add monthly savings. See the payments.Explore homes within my budgetPlan the paymentsAn estimate from your figures, no",
+   "budget_n": 912000,
+   "tiles_n": {
+    "Borrowing capacity": 921000,
+    "Monthly mortgage": 3266,
+    "Cash you’d need": 99960,
+    "CPF you’d use": 150000
+   }
+  },
+  "A02": {
+   "budget": "$1,768,000",
+   "tiles": {
+    "Borrowing capacity": "$1,618,000",
+    "Monthly mortgage": "$6,331",
+    "Cash you’d need": "$200,000",
+    "CPF you’d use": "$300,000"
+   },
+   "limited": "Limited by your cash and CPF.",
+   "quote": null,
+   "text": "Your budget, about$1,768,000Limited by your cash and CPF.Borrowing capacity$1,618,000what your income supportsMonthly mortgage$6,331on $1,326,000 over 30 years at 4%Cash you’d need$200,000incl. $58,000 stamp dutyCPF you’d use$300,000Payment dates aren’t checked for a new launch until you add monthly savings. See the payments.Explore homes within my budgetPlan the paymentsAn estimate from your figu",
+   "budget_n": 1768000,
+   "tiles_n": {
+    "Borrowing capacity": 1618000,
+    "Monthly mortgage": 6331,
+    "Cash you’d need": 200000,
+    "CPF you’d use": 300000
+   }
+  },
+  "A03": {
+   "budget": "$1,515,000",
+   "tiles": {
+    "Borrowing capacity": "$1,250,000",
+    "Monthly mortgage": "$5,998",
+    "Cash you’d need": "$299,850",
+    "CPF you’d use": "$200,000"
+   },
+   "limited": "Limited by your cash and CPF.",
+   "quote": null,
+   "text": "Your budget, about$1,515,000Limited by your cash and CPF.Borrowing capacity$1,250,000what your income supportsMonthly mortgage$5,998on $1,136,000 over 25 years at 4%Cash you’d need$299,850incl. $121,100 stamp dutyCPF you’d use$200,000Includes ABSD of $75,750.Payment dates aren’t checked for a new launch until you add monthly savings. See the payments.Explore homes within my budgetPlan the payments",
+   "budget_n": 1515000,
+   "tiles_n": {
+    "Borrowing capacity": 1250000,
+    "Monthly mortgage": 5998,
+    "Cash you’d need": 299850,
+    "CPF you’d use": 200000
+   }
+  },
+  "A04": {
+   "budget": "$1,700,000",
+   "tiles": {
+    "Borrowing capacity": "$2,269,000",
+    "Monthly mortgage": "$7,726",
+    "Cash you’d need": "$1,499,600",
+    "CPF you’d use": "$0"
+   },
+   "limited": "Limited by your cash and CPF.",
+   "quote": null,
+   "text": "Your budget, about$1,700,000Limited by your cash and CPF.Borrowing capacity$2,269,000what your income supportsMonthly mortgage$7,726on $1,275,000 over 20 years at 4%Cash you’d need$1,499,600incl. $1,074,600 stamp dutyCPF you’d use$0Includes ABSD of $1,020,000.Payment dates aren’t checked for a new launch until you add monthly savings. See the payments.Explore homes within my budgetPlan the payment",
+   "budget_n": 1700000,
+   "tiles_n": {
+    "Borrowing capacity": 2269000,
+    "Monthly mortgage": 7726,
+    "Cash you’d need": 1499600,
+    "CPF you’d use": 0
+   }
+  },
+  "A05": {
+   "budget": "$1,032,000",
+   "tiles": {
+    "Borrowing capacity": "$709,000",
+    "Monthly mortgage": "$3,435",
+    "Cash you’d need": "$799,880",
+    "CPF you’d use": "$0"
+   },
+   "limited": "Limited by your cash and CPF.",
+   "quote": null,
+   "text": "Your budget, about$1,032,000Limited by your cash and CPF.Borrowing capacity$709,000what your income supportsMonthly mortgage$3,435on $464,000 over 15 years at 4%Cash you’d need$799,880incl. $232,280 stamp dutyCPF you’d use$0Includes ABSD of $206,400, as you’ll still own a home.Payment dates aren’t checked for a new launch until you add monthly savings. See the payments.Explore homes within my budg",
+   "budget_n": 1032000,
+   "tiles_n": {
+    "Borrowing capacity": 709000,
+    "Monthly mortgage": 3435,
+    "Cash you’d need": 799880,
+    "CPF you’d use": 0
+   }
+  },
+  "A06": {
+   "budget": "$978,000",
+   "tiles": {
+    "Borrowing capacity": "$402,000",
+    "Monthly mortgage": "$5,500",
+    "Cash you’d need": "$399,564",
+    "CPF you’d use": "$200,000"
+   },
+   "limited": "Limited by your income (what a bank could lend).",
+   "quote": null,
+   "text": "Your budget, about$978,000Limited by your income (what a bank could lend).Borrowing capacity$402,000what your income supportsMonthly mortgage$5,500on $402,000 over 7 years at 4%Cash you’d need$399,564incl. $23,940 stamp dutyCPF you’d use$200,000Payment dates aren’t checked for a new launch until you add monthly savings. See the payments.Explore homes within my budgetPlan the paymentsAn estimate fr",
+   "budget_n": 978000,
+   "tiles_n": {
+    "Borrowing capacity": 402000,
+    "Monthly mortgage": 5500,
+    "Cash you’d need": 399564,
+    "CPF you’d use": 200000
+   }
+  },
+  "A07": {
+   "budget": "$1,544,000",
+   "tiles": {
+    "Borrowing capacity": "$1,040,000",
+    "Monthly mortgage": "$7,700",
+    "Cash you’d need": "$299,820",
+    "CPF you’d use": "$250,000"
+   },
+   "limited": "Limited by your income (what a bank could lend).",
+   "quote": null,
+   "text": "Your budget, about$1,544,000Limited by your income (what a bank could lend).Borrowing capacity$1,040,000what your income supportsMonthly mortgage$7,700on $1,040,000 over 15 years at 4%Cash you’d need$299,820incl. $46,800 stamp dutyCPF you’d use$250,000Payment dates aren’t checked for a new launch until you add monthly savings. See the payments.Explore homes within my budgetPlan the paymentsAn esti",
+   "budget_n": 1544000,
+   "tiles_n": {
+    "Borrowing capacity": 1040000,
+    "Monthly mortgage": 7700,
+    "Cash you’d need": 299820,
+    "CPF you’d use": 250000
+   }
+  },
+  "A08": {
+   "budget": "$983,000",
+   "tiles": {
+    "Borrowing capacity": "$869,000",
+    "Monthly mortgage": "$3,520",
+    "Cash you’d need": "$149,840",
+    "CPF you’d use": "$120,000"
+   },
+   "limited": "Limited by your cash and CPF.",
+   "quote": null,
+   "text": "Your budget, about$983,000Limited by your cash and CPF.Borrowing capacity$869,000what your income supportsMonthly mortgage$3,520on $737,000 over 30 years at 4%Cash you’d need$149,840incl. $24,090 stamp dutyCPF you’d use$120,000Payment dates aren’t checked for a new launch until you add monthly savings. See the payments.Explore homes within my budgetPlan the paymentsAn estimate from your figures, n",
+   "budget_n": 983000,
+   "tiles_n": {
+    "Borrowing capacity": 869000,
+    "Monthly mortgage": 3520,
+    "Cash you’d need": 149840,
+    "CPF you’d use": 120000
+   }
+  },
+  "A09": {
+   "budget": "$1,601,000",
+   "tiles": {
+    "Borrowing capacity": "$1,349,000",
+    "Monthly mortgage": "$6,066",
+    "Cash you’d need": "$249,900",
+    "CPF you’d use": "$200,000"
+   },
+   "limited": "Limited by your cash and CPF.",
+   "quote": null,
+   "text": "Your budget, about$1,601,000Limited by your cash and CPF.Borrowing capacity$1,349,000what your income supportsMonthly mortgage$6,066on $1,200,000 over 27 years at 4%Cash you’d need$249,900incl. $49,650 stamp dutyCPF you’d use$200,000Explore homes within my budgetPlan the paymentsAn estimate from your figures, not a bank approval.",
+   "budget_n": 1601000,
+   "tiles_n": {
+    "Borrowing capacity": 1349000,
+    "Monthly mortgage": 6066,
+    "Cash you’d need": 249900,
+    "CPF you’d use": 200000
+   }
+  },
+  "A10": {
+   "budget": "$2,216,000",
+   "tiles": {
+    "Borrowing capacity": "$1,633,000",
+    "Monthly mortgage": "$9,900",
+    "Cash you’d need": "$332,684",
+    "CPF you’d use": "$330,000"
+   },
+   "limited": "Limited by your income (what a bank could lend).",
+   "quote": null,
+   "text": "Your budget, about$2,216,000Limited by your income (what a bank could lend).Borrowing capacity$1,633,000what your income supportsMonthly mortgage$9,900on $1,633,000 over 20 years at 4%Cash you’d need$332,684incl. $80,400 stamp dutyCPF you’d use$330,000Counts your home’s sale: about $232,830 cash and $280,000 back to CPF.Payment dates aren’t checked for a new launch until you add monthly savings. S",
+   "budget_n": 2216000,
+   "tiles_n": {
+    "Borrowing capacity": 1633000,
+    "Monthly mortgage": 9900,
+    "Cash you’d need": 332684,
+    "CPF you’d use": 330000
+   }
+  },
+  "A11": {
+   "budget": "$1,515,000",
+   "tiles": {
+    "Borrowing capacity": "$1,810,000",
+    "Monthly mortgage": "$5,522",
+    "Cash you’d need": "$249,850",
+    "CPF you’d use": "$250,000"
+   },
+   "limited": "Limited by your cash and CPF.",
+   "quote": null,
+   "text": "Your budget, about$1,515,000Limited by your cash and CPF.Borrowing capacity$1,810,000what your income supportsMonthly mortgage$5,522on $1,136,000 over 29 years at 4%Cash you’d need$249,850incl. $121,100 stamp dutyCPF you’d use$250,000Includes ABSD of $75,750.Payment dates aren’t checked for a new launch until you add monthly savings. See the payments.Explore homes within my budgetPlan the payments",
+   "budget_n": 1515000,
+   "tiles_n": {
+    "Borrowing capacity": 1810000,
+    "Monthly mortgage": 5522,
+    "Cash you’d need": 249850,
+    "CPF you’d use": 250000
+   }
+  },
+  "A12": {
+   "budget": "$1,087,000",
+   "tiles": {
+    "Borrowing capacity": "$1,036,000",
+    "Monthly mortgage": "$3,892",
+    "Cash you’d need": "$199,830",
+    "CPF you’d use": "$100,000"
+   },
+   "limited": "Limited by your cash and CPF.",
+   "quote": "$1,200,000: $32,600 short.Loan $900,000 · $4,297 a month · cash $232,600 · CPF $100,000A price of $1,087,000 fits. About $33,000 more cash would make it fit.",
+   "text": "Your budget, about$1,087,000Limited by your cash and CPF.Borrowing capacity$1,036,000what your income supportsMonthly mortgage$3,892on $815,000 over 30 years at 4%Cash you’d need$199,830incl. $28,080 stamp dutyCPF you’d use$100,000Payment dates aren’t checked for a new launch until you add monthly savings. See the payments.$1,200,000: $32,600 short.Loan $900,000 · $4,297 a month · cash $232,600 · ",
+   "budget_n": 1087000,
+   "tiles_n": {
+    "Borrowing capacity": 1036000,
+    "Monthly mortgage": 3892,
+    "Cash you’d need": 199830,
+    "CPF you’d use": 100000
+   }
+  },
+  "A13": {
+   "budget": "$1,255,000",
+   "tiles": {
+    "Borrowing capacity": "$1,458,000",
+    "Monthly mortgage": "$3,273",
+    "Cash you’d need": "$349,550",
+    "CPF you’d use": "$250,000"
+   },
+   "limited": "Limited by your cash and CPF.",
+   "quote": null,
+   "text": "Your budget, about$1,255,000Limited by your cash and CPF.Borrowing capacity$1,458,000what your income supportsMonthly mortgage$3,273on $690,000 over 25 years at 3%Cash you’d need$349,550incl. $34,800 stamp dutyCPF you’d use$250,000Payment dates aren’t checked for a new launch until you add monthly savings. See the payments.Explore homes within my budgetPlan the paymentsAn estimate from your figure",
+   "budget_n": 1255000,
+   "tiles_n": {
+    "Borrowing capacity": 1458000,
+    "Monthly mortgage": 3273,
+    "Cash you’d need": 349550,
+    "CPF you’d use": 250000
+   }
+  },
+  "A14": {
+   "budget": "$1,158,000",
+   "tiles": {
+    "Borrowing capacity": "$1,803,000",
+    "Monthly mortgage": "$2,689",
+    "Cash you’d need": "$899,420",
+    "CPF you’d use": "$0"
+   },
+   "limited": "Limited by your cash and CPF.",
+   "quote": null,
+   "text": "Your budget, about$1,158,000Limited by your cash and CPF.Borrowing capacity$1,803,000what your income supportsMonthly mortgage$2,689on $521,000 over 26 years at 4%Cash you’d need$899,420incl. $262,520 stamp dutyCPF you’d use$0Includes ABSD of $231,600, as you’ll still own a home.Explore homes within my budgetPlan the paymentsAn estimate from your figures, not a bank approval.",
+   "budget_n": 1158000,
+   "tiles_n": {
+    "Borrowing capacity": 1803000,
+    "Monthly mortgage": 2689,
+    "Cash you’d need": 899420,
+    "CPF you’d use": 0
+   }
+  }
+ },
+ "msr": {
+  "M01": {
+   "head": "Indicative maximum loan",
+   "value": "$569,366",
+   "sub": "over 25 years, tested at 3%",
+   "rows": {
+    "Price this loan supports": "$759,155 (75% loan)",
+    "Income counted": "$9,000 a month",
+    "MSR limit, 30%": "$2,700 a month",
+    "Left for the new loan": "$2,700 a month",
+    "Tenure": "25 years (the shortest of 25, 65 minus average age)",
+    "Loan limit (LTV)": "75%"
+   },
+   "warn": [],
+   "text": "Indicative maximum loan$569,366over 25 years, tested at 3%Your monthly income, as HDB count itLeft for the new loan$2,700 a month30%Above the 30% limit$6,300 a month70%Price this loan supports$759,155 (75% loan)Add the remaining lease. If it won’t last until the youngest applicant is 95, HDB lends less than 75% of the price.HDB also looks at your other loans, so it may lend less than this.See the workingIncome counted$9,000 a monthMSR limit, 30%$2,700 a monthLeft for the new loan$2,700 a monthTenure25 years (the shortest of 25, 65 minus average age)Loan limit (LTV)75%Assumptions and sourcesHDB",
+   "maxLoan": 569366,
+   "theoretical": null,
+   "years": 25,
+   "testRate": 3.0,
+   "price": 759155,
+   "ltv": 75.0
+  },
+  "M02": {
+   "head": "Indicative maximum loan",
+   "value": "$379,578",
+   "sub": "over 25 years, tested at 3%",
+   "rows": {
+    "Price this loan supports": "$506,103 (75% loan)",
+    "Income counted": "$6,000 a month",
+    "MSR limit, 30%": "$1,800 a month",
+    "Left for the new loan": "$1,800 a month",
+    "Tenure": "25 years (the shortest of 25, 65 minus average age)",
+    "Loan limit (LTV)": "75%"
+   },
+   "warn": [],
+   "text": "Indicative maximum loan$379,578over 25 years, tested at 3%Your monthly income, as HDB count itLeft for the new loan$1,800 a month30%Above the 30% limit$4,200 a month70%Price this loan supports$506,103 (75% loan)Add the remaining lease. If it won’t last until the youngest applicant is 95, HDB lends less than 75% of the price.HDB also looks at your other loans, so it may lend less than this.See the workingIncome counted$6,000 a monthMSR limit, 30%$1,800 a monthLeft for the new loan$1,800 a monthTenure25 years (the shortest of 25, 65 minus average age)Loan limit (LTV)75%Assumptions and sourcesHDB",
+   "maxLoan": 379578,
+   "theoretical": null,
+   "years": 25,
+   "testRate": 3.0,
+   "price": 506103,
+   "ltv": 75.0
+  },
+  "M03": {
+   "head": "Indicative maximum loan",
+   "value": "$437,635",
+   "sub": "over 25 years, tested at 4%",
+   "rows": {
+    "Price this loan supports": "$583,514 (75% loan)",
+    "Income counted": "$7,700 a month",
+    "MSR limit, 30%": "$2,310 a month",
+    "TDSR limit, 55%, less all debts": "$4,235 a month",
+    "Left for the new loan": "$2,310 a month (MSR is the limit)",
+    "Tenure": "25 years (standard up to 25)",
+    "Loan limit (LTV)": "75%"
+   },
+   "warn": [],
+   "text": "Indicative maximum loan$437,635over 25 years, tested at 4%Your monthly income, as banks count itLeft for the new loan$2,310 a month30%Above the 30% limit$5,390 a month70%Price this loan supports$583,514 (75% loan)Using 25 years, the longest that keeps the 75% loan limit. 30 years is allowed at the lower 55% limit: maximum loan $483,855. Type it under Loan tenure to use it.See the workingIncome counted$7,700 a monthMSR limit, 30%$2,310 a monthTDSR limit, 55%, less all debts$4,235 a monthLeft for the new loan$2,310 a month (MSR is the limit)Tenure25 years (standard up to 25)Loan limit (LTV)75%As",
+   "maxLoan": 437635,
+   "theoretical": null,
+   "years": 25,
+   "testRate": 4.0,
+   "price": 583514,
+   "ltv": 75.0
+  },
+  "M04": {
+   "head": "Indicative maximum loan",
+   "value": "$473,097",
+   "sub": "over 17 years, tested at 4%",
+   "rows": {
+    "Loan limit with this lease": "Only 45% of the price can be borrowed with this lease",
+    "Income counted": "$14,000 a month",
+    "MSR limit, 30%": "$4,200 a month",
+    "Less existing property loans": "−$1,000",
+    "TDSR limit, 55%, less all debts": "$6,700 a month",
+    "Left for the new loan": "$3,200 a month (MSR is the limit)",
+    "Tenure": "17 years (standard up to 17)",
+    "Loan limit (LTV)": "45%"
+   },
+   "warn": [],
+   "text": "Indicative maximum loan$473,097over 17 years, tested at 4%Your monthly income, as banks count itExisting property loans$1,000 a month7%Left for the new loan$3,200 a month23%Above the 30% limit$9,800 a month70%Loan limit with this leaseOnly 45% of the price can be borrowed with this leaseUsing 17 years, the longest that keeps the 45% loan limit. 27 years is allowed at the lower 25% limit: maximum loan $633,402. Type it under Loan tenure to use it.See the workingIncome counted$14,000 a monthMSR limit, 30%$4,200 a monthLess existing property loans−$1,000TDSR limit, 55%, less all debts$6,700 a mon",
+   "maxLoan": 473097,
+   "theoretical": null,
+   "years": 17,
+   "testRate": 4.0,
+   "price": null,
+   "ltv": 45.0
+  },
+  "M05": {
+   "head": "Indicative maximum loan",
+   "value": "$848,318",
+   "sub": "over 30 years, tested at 4%",
+   "rows": {
+    "Price this loan supports": "$1,131,091 (75% loan)",
+    "Income counted": "$13,500 a month",
+    "MSR limit, 30%": "$4,050 a month",
+    "TDSR limit, 55%, less all debts": "$7,425 a month",
+    "Left for the new loan": "$4,050 a month (MSR is the limit)",
+    "Tenure": "30 years (standard up to 30)",
+    "Loan limit (LTV)": "75%"
+   },
+   "warn": [],
+   "text": "Indicative maximum loan$848,318over 30 years, tested at 4%Your monthly income, as banks count itLeft for the new loan$4,050 a month30%Above the 30% limit$9,450 a month70%Price this loan supports$1,131,091 (75% loan)New EC buyers have a household income ceiling: $16,000 a month, or $18,000 for EC sites whose land tender closed on or after 24 Aug 2026. MSR applies to ECs bought from the developer.Using 30 years, the longest that keeps the 75% loan limit. 35 years is allowed at the lower 55% limit: maximum loan $914,686. Type it under Loan tenure to use it.See the workingIncome counted$13,500 a m",
+   "maxLoan": 848318,
+   "theoretical": null,
+   "years": 30,
+   "testRate": 4.0,
+   "price": 1131091,
+   "ltv": 75.0
+  },
+  "M06": {
+   "head": "Indicative maximum loan",
+   "value": "$682,887",
+   "sub": "over 27 years, tested at 4%",
+   "rows": {
+    "Price this loan supports": "$910,516 (75% loan)",
+    "Income counted": "$11,500 a month",
+    "MSR limit, 30%": "$3,450 a month",
+    "TDSR limit, 55%, less all debts": "$5,725 a month",
+    "Left for the new loan": "$3,450 a month (MSR is the limit)",
+    "Tenure": "27 years (standard up to 27)",
+    "Loan limit (LTV)": "75%"
+   },
+   "warn": [],
+   "text": "Indicative maximum loan$682,887over 27 years, tested at 4%Your monthly income, as banks count itLeft for the new loan$3,450 a month30%Above the 30% limit$8,050 a month70%Price this loan supports$910,516 (75% loan)New EC buyers have a household income ceiling: $16,000 a month, or $18,000 for EC sites whose land tender closed on or after 24 Aug 2026. MSR applies to ECs bought from the developer.Using 27 years, the longest that keeps the 75% loan limit. 35 years is allowed at the lower 55% limit: maximum loan $779,177. Type it under Loan tenure to use it.See the workingIncome counted$11,500 a mon",
+   "maxLoan": 682887,
+   "theoretical": null,
+   "years": 27,
+   "testRate": 4.0,
+   "price": 910516,
+   "ltv": 75.0
+  },
+  "M07": {
+   "head": "Indicative maximum loan",
+   "value": "$155,343",
+   "sub": "over 10 years, tested at 3%",
+   "rows": {
+    "Price this loan supports": "$207,124 (75% loan)",
+    "Income counted": "$5,000 a month",
+    "MSR limit, 30%": "$1,500 a month",
+    "Left for the new loan": "$1,500 a month",
+    "Tenure": "10 years (the shortest of 25, 65 minus average age)",
+    "Loan limit (LTV)": "75%"
+   },
+   "warn": [],
+   "text": "Indicative maximum loan$155,343over 10 years, tested at 3%Your monthly income, as HDB count itLeft for the new loan$1,500 a month30%Above the 30% limit$3,500 a month70%Price this loan supports$207,124 (75% loan)Add the remaining lease. If it won’t last until the youngest applicant is 95, HDB lends less than 75% of the price.HDB also looks at your other loans, so it may lend less than this.See the workingIncome counted$5,000 a monthMSR limit, 30%$1,500 a monthLeft for the new loan$1,500 a monthTenure10 years (the shortest of 25, 65 minus average age)Loan limit (LTV)75%Assumptions and sourcesHDB",
+   "maxLoan": 155343,
+   "theoretical": null,
+   "years": 10,
+   "testRate": 3.0,
+   "price": 207124,
+   "ltv": 75.0
+  },
+  "M08": {
+   "head": "Indicative maximum loan",
+   "value": "$459,793",
+   "sub": "over 20 years, tested at 3%",
+   "rows": {
+    "Price this loan supports": "$613,057 (75% loan)",
+    "Income counted": "$8,500 a month",
+    "MSR limit, 30%": "$2,550 a month",
+    "Left for the new loan": "$2,550 a month",
+    "Tenure": "20 years (the shortest of 25, 65 minus average age)",
+    "Loan limit (LTV)": "75%"
+   },
+   "warn": [],
+   "text": "Indicative maximum loan$459,793over 20 years, tested at 3%Your monthly income, as HDB count itLeft for the new loan$2,550 a month30%Above the 30% limit$5,950 a month70%Price this loan supports$613,057 (75% loan)Add the remaining lease. If it won’t last until the youngest applicant is 95, HDB lends less than 75% of the price.HDB also looks at your other loans, so it may lend less than this.See the workingIncome counted$8,500 a monthMSR limit, 30%$2,550 a monthLeft for the new loan$2,550 a monthTenure20 years (the shortest of 25, 65 minus average age)Loan limit (LTV)75%Assumptions and sourcesHDB",
+   "maxLoan": 459793,
+   "theoretical": null,
+   "years": 20,
+   "testRate": 3.0,
+   "price": 613057,
+   "ltv": 75.0
+  },
+  "M09": {
+   "head": "Indicative maximum loan",
+   "value": "$197,530",
+   "sub": "over 7 years, tested at 4%",
+   "rows": {
+    "Price this loan supports": "$263,373 (75% loan)",
+    "Income counted": "$9,000 a month",
+    "MSR limit, 30%": "$2,700 a month",
+    "TDSR limit, 55%, less all debts": "$4,950 a month",
+    "Left for the new loan": "$2,700 a month (MSR is the limit)",
+    "Tenure": "7 years (standard up to 7)",
+    "Loan limit (LTV)": "75%"
+   },
+   "warn": [],
+   "text": "Indicative maximum loan$197,530over 7 years, tested at 4%Your monthly income, as banks count itLeft for the new loan$2,700 a month30%Above the 30% limit$6,300 a month70%Price this loan supports$263,373 (75% loan)Using 7 years, the longest that keeps the 75% loan limit. 17 years is allowed at the lower 55% limit: maximum loan $399,176. Type it under Loan tenure to use it.See the workingIncome counted$9,000 a monthMSR limit, 30%$2,700 a monthTDSR limit, 55%, less all debts$4,950 a monthLeft for the new loan$2,700 a month (MSR is the limit)Tenure7 years (standard up to 7)Loan limit (LTV)75%Assump",
+   "maxLoan": 197530,
+   "theoretical": null,
+   "years": 7,
+   "testRate": 4.0,
+   "price": 263373,
+   "ltv": 75.0
+  },
+  "M10": {
+   "head": "Indicative maximum loan",
+   "value": "$932,141",
+   "sub": "over 24 years, tested at 4%",
+   "rows": {
+    "Price this loan supports": "$1,242,855 (75% loan)",
+    "Income counted": "$16,800 a month",
+    "MSR limit, 30%": "$5,040 a month",
+    "TDSR limit, 55%, less all debts": "$9,240 a month",
+    "Left for the new loan": "$5,040 a month (MSR is the limit)",
+    "Tenure": "24 years (standard up to 24)",
+    "Loan limit (LTV)": "75%"
+   },
+   "warn": [],
+   "text": "Indicative maximum loan$932,141over 24 years, tested at 4%Your monthly income, as banks count itLeft for the new loan$5,040 a month30%Above the 30% limit$11,760 a month70%Price this loan supports$1,242,855 (75% loan)New EC buyers have a household income ceiling: $16,000 a month, or $18,000 for EC sites whose land tender closed on or after 24 Aug 2026. MSR applies to ECs bought from the developer.Using 24 years, the longest that keeps the 75% loan limit. 34 years is allowed at the lower 55% limit: maximum loan $1,123,050. Type it under Loan tenure to use it.See the workingIncome counted$16,800 ",
+   "maxLoan": 932141,
+   "theoretical": null,
+   "years": 24,
+   "testRate": 4.0,
+   "price": 1242855,
+   "ltv": 75.0
+  },
+  "M11": {
+   "head": "HDB loan eligibility",
+   "value": "Income above the ceiling",
+   "sub": "Household income $18,000 a month; the HDB loan ceiling for families is $16,000. You may need a bank loan instead.",
+   "rows": {
+    "Theoretical maximum loan, if the ceiling were met": "$1,138,733 over 25 years, tested at 3%",
+    "Price that theoretical loan supports": "$1,518,310 (75% loan)",
+    "Income counted": "$18,000 a month",
+    "MSR limit, 30%": "$5,400 a month",
+    "Left for the new loan": "$5,400 a month",
+    "Tenure": "25 years (the shortest of 25, 65 minus average age)",
+    "Loan limit (LTV)": "75%"
+   },
+   "warn": [],
+   "text": "HDB loan eligibilityIncome above the ceilingHousehold income $18,000 a month; the HDB loan ceiling for families is $16,000. You may need a bank loan instead.Theoretical maximum loan, if the ceiling were met$1,138,733 over 25 years, tested at 3%Your monthly income, as HDB count itLeft for the new loan$5,400 a month30%Above the 30% limit$12,600 a month70%Price that theoretical loan supports$1,518,310 (75% loan)Add the remaining lease. If it won’t last until the youngest applicant is 95, HDB lends less than 75% of the price.HDB also looks at your other loans, so it may lend less than this.See the",
+   "maxLoan": null,
+   "theoretical": 1138733,
+   "years": 25,
+   "testRate": 3.0,
+   "price": 1518310,
+   "ltv": 75.0
+  },
+  "M12": {
+   "head": "Indicative maximum loan",
+   "value": "$459,793",
+   "sub": "over 20 years, tested at 3%",
+   "rows": {
+    "Price this loan supports": "$613,057 (75% loan)",
+    "Income counted": "$8,500 a month",
+    "MSR limit, 30%": "$2,550 a month",
+    "Left for the new loan": "$2,550 a month",
+    "Tenure": "20 years (the shortest of 25, 65 minus average age)",
+    "Loan limit (LTV)": "75%"
+   },
+   "warn": [],
+   "text": "Indicative maximum loan$459,793over 20 years, tested at 3%Your monthly income, as HDB count itLeft for the new loan$2,550 a month30%Above the 30% limit$5,950 a month70%Price this loan supports$613,057 (75% loan)Add the remaining lease. If it won’t last until the youngest applicant is 95, HDB lends less than 75% of the price.HDB also looks at your other loans, so it may lend less than this.See the workingIncome counted$8,500 a monthMSR limit, 30%$2,550 a monthLeft for the new loan$2,550 a monthTenure20 years (the shortest of 25, 65 minus average age)Loan limit (LTV)75%Assumptions and sourcesHDB",
+   "maxLoan": 459793,
+   "theoretical": null,
+   "years": 20,
+   "testRate": 3.0,
+   "price": 613057,
+   "ltv": 75.0
+  },
+  "M13": {
+   "head": "Indicative maximum loan",
+   "value": "$569,366",
+   "sub": "over 25 years, tested at 3%",
+   "rows": {
+    "Price this loan supports": "$1,123,550 (51% loan)",
+    "Income counted": "$9,000 a month",
+    "MSR limit, 30%": "$2,700 a month",
+    "Left for the new loan": "$2,700 a month",
+    "Tenure": "25 years (the shortest of 25, 65 minus average age, lease minus 20)",
+    "Loan limit (LTV)": "50.7%"
+   },
+   "warn": [],
+   "text": "Indicative maximum loan$569,366over 25 years, tested at 3%Your monthly income, as HDB count itLeft for the new loan$2,700 a month30%Above the 30% limit$6,300 a month70%Price this loan supports$1,123,550 (51% loan)The remaining lease doesn’t cover the youngest applicant to age 95, so HDB pro-rates the loan limit: about 50.7% of the price here instead of 75%. CPF use is pro-rated too. HDB confirms the exact figure.HDB also looks at your other loans, so it may lend less than this.See the workingIncome counted$9,000 a monthMSR limit, 30%$2,700 a monthLeft for the new loan$2,700 a monthTenure25 yea",
+   "maxLoan": 569366,
+   "theoretical": null,
+   "years": 25,
+   "testRate": 3.0,
+   "price": 1123550,
+   "ltv": 51.0
+  },
+  "M14": {
+   "head": "Indicative maximum loan",
+   "value": "$204,340",
+   "sub": "over 7 years, tested at 3%",
+   "rows": {
+    "Price this loan supports": "$272,453 (75% loan)",
+    "Income counted": "$9,000 a month",
+    "MSR limit, 30%": "$2,700 a month",
+    "Left for the new loan": "$2,700 a month",
+    "Tenure": "7 years (the shortest of 25, 65 minus average age)",
+    "Loan limit (LTV)": "75%"
+   },
+   "warn": [],
+   "text": "Indicative maximum loan$204,340over 7 years, tested at 3%Your monthly income, as HDB count itLeft for the new loan$2,700 a month30%Above the 30% limit$6,300 a month70%Price this loan supports$272,453 (75% loan)Add the remaining lease. If it won’t last until the youngest applicant is 95, HDB lends less than 75% of the price.HDB also looks at your other loans, so it may lend less than this.See the workingIncome counted$9,000 a monthMSR limit, 30%$2,700 a monthLeft for the new loan$2,700 a monthTenure7 years (the shortest of 25, 65 minus average age)Loan limit (LTV)75%Assumptions and sourcesHDB t",
+   "maxLoan": 204340,
+   "theoretical": null,
+   "years": 7,
+   "testRate": 3.0,
+   "price": 272453,
+   "ltv": 75.0
+  },
+  "M15": {
+   "head": "HDB purchase eligibility",
+   "value": "Singles age requirement not met",
+   "sub": "Singles buying an HDB flat under the Single Singapore Citizen scheme must be 35 or older, and the age entered is 32. This limits the purchase itself, so a bank loan does not change it. Other schemes may apply: confirm with an HFE letter.",
+   "rows": {
+    "Theoretical maximum HDB loan, if the requirements were met": "$316,315 over 25 years, tested at 3%",
+    "Price that theoretical loan supports": "$421,753 (75% loan)",
+    "Income counted": "$5,000 a month",
+    "MSR limit, 30%": "$1,500 a month",
+    "Left for the new loan": "$1,500 a month",
+    "Tenure": "25 years (the shortest of 25, 65 minus average age)",
+    "Loan limit (LTV)": "75%"
+   },
+   "warn": [],
+   "text": "HDB purchase eligibilitySingles age requirement not metSingles buying an HDB flat under the Single Singapore Citizen scheme must be 35 or older, and the age entered is 32. This limits the purchase itself, so a bank loan does not change it. Other schemes may apply: confirm with an HFE letter.Theoretical maximum HDB loan, if the requirements were met$316,315 over 25 years, tested at 3%Your monthly income, as HDB count itLeft for the new loan$1,500 a month30%Above the 30% limit$3,500 a month70%Price that theoretical loan supports$421,753 (75% loan)Add the remaining lease. If it won’t last until t",
+   "maxLoan": null,
+   "theoretical": 316315,
+   "years": 25,
+   "testRate": 3.0,
+   "price": 421753,
+   "ltv": 75.0
+  }
+ }
+}

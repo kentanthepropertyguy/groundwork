@@ -6,7 +6,7 @@ const rd = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 const R = rd('research/index.html'), W = rd('tools/what-can-i-buy/index.html'), MAP = rd('research/map/index.html');
 const ver = (s, k) => { const m = new RegExp(k + "\\s*[:=]\\s*'([^']*)'").exec(s) || new RegExp(k + '[^\\n]*?\\?v=([0-9a-f]{10})').exec(s); return m && m[1]; };
 t('Research passes the Budget form the same data versions as the Budget page', () => {
-  ['FIND_URL', 'INV_URL', 'SITES_URL'].forEach((k) => {
+  ['FIND_URL', 'INV_URL', 'SITES_URL', 'BEDS_URL'].forEach((k) => {
     const a = new RegExp(k + ":\\s*[^,}]*?\\?v=([0-9a-f]{10})").exec(R), b = new RegExp(k + ":\\s*[^,}]*?\\?v=([0-9a-f]{10})").exec(W);
     assert.ok(a && b, k + ' present in both'); assert.strictEqual(a[1], b[1], k);
   });

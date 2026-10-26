@@ -10,7 +10,8 @@
  *    Each tier still needs the same evidence as before (3+ sales, a sale in the last 6 months, a size band that sold in 2+ months).
  *  - Past sales are never presented as homes for sale. Huttons inventory (new launches only) is a separate source and is labelled as such.
  *  - Up to 5% over the maximum is a separate, optional group, never mixed into the main list.
- *  - Bedrooms are never inferred. They are matched only on new launches, only from Huttons inventory that was checked recently. Resale is never filtered by bedrooms.
+ *  - Bedrooms are never inferred here. search() matches them only on new launches, only from Huttons inventory that was checked recently, and never filters resale by them.
+ *    Resale by bedrooms is kpt-discover-beds.js (the accepted classification and Research's bedroom types, find-beds.json), which reuses these rules.
  *  - Property classes (condo, EC, cluster) are matched by the same rules and listed apart, never pooled.
  */
 (function (root, factory) {
@@ -127,10 +128,11 @@
   }
 
   /** One-tap ways to widen an empty or thin search. Offered only when they would add something; nothing is applied automatically. */
-  function alternatives(ix, rq, ctx) {
-    const req = clean(rq), base = search(ix, req, ctx).counts.projects, out = [];
-    const tryIt = (id, label, change) => { const c = search(ix, Object.assign({}, req, change), ctx).counts.projects; if (c > base) out.push({ id, label, count: c }); };
-    if (!req.over) { const n = search(ix, Object.assign({}, req, { over: true }), ctx), c = n.counts.projects + n.counts.over; if (c > base) out.push({ id: 'over', label: 'Include up to 5% over your maximum', count: c }); }
+  function alternatives(ix, rq, ctx, run) {
+    const S = run || search;   // run: the page's search when bedrooms apply to resale (kpt-discover-beds.js), so each count is what the buyer would see
+    const req = clean(rq), base = S(ix, req, ctx).counts.projects, out = [];
+    const tryIt = (id, label, change) => { const c = S(ix, Object.assign({}, req, change), ctx).counts.projects; if (c > base) out.push({ id, label, count: c }); };
+    if (!req.over) { const n = S(ix, Object.assign({}, req, { over: true }), ctx), c = n.counts.projects + n.counts.over; if (c > base) out.push({ id: 'over', label: 'Include up to 5% over your maximum', count: c }); }
     if (req.near) { const next = T.radii.find((r) => r > req.near.radius); if (next) tryIt('radius', 'Widen to ' + FI.radiusText(next), { near: Object.assign({}, req.near, { radius: next }) }); }
     if (req.minSize) tryIt('size', 'Remove the minimum size', { minSize: null });
     if (req.tenure !== 'any') tryIt('tenure', 'Include any tenure', { tenure: 'any' });

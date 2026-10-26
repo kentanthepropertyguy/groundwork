@@ -339,7 +339,10 @@
     const bad = (badAge ? [{ field: 'age', text: LIMITS.age.text }] : []).concat(badMoney ? [{ field: 'income', text: LIMITS.income.text }] : []);
     // Phase B (Oct 2026): which weighting MAS means is unconfirmed, so the age that sets the tenure and the loan limit is the HIGHER of the two (the older age can only
     // shorten the tenure or lower the limit). iwaa and iwaaGross keep their meaning; iwaaUse is what the loan work uses. ageUnverified: the two differ, so the choice mattered.
-    const iwaaUse = iwaa === null ? null : (iwaaGross === null ? iwaa : Math.max(iwaa, iwaaGross));
+    // 26 Oct 2026: a weighted average of whole ages can carry floating-point noise (48 becomes 48.00000000000001), which shortened a single borrower's tenure by a year
+    // for some bonus amounts. The age used is rounded to 1e-6 of a year before any tenure is worked out; the rule is unchanged.
+    const tidy = (x) => (x === null ? null : Math.round(x * 1e6) / 1e6);
+    const iwaaUse = iwaa === null ? null : tidy(iwaaGross === null ? iwaa : Math.max(iwaa, iwaaGross));
     const ageUnverified = bs.length > 1 && iwaa !== null && iwaaGross !== null && Math.abs(iwaa - iwaaGross) > 1e-9;
     return { list: bs, gross: G, assessable: AS, iwaa, iwaaGross, iwaaUse, ageUnverified, avgAge, youngest, haircut: G - AS, bad };
   }

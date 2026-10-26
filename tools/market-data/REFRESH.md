@@ -27,7 +27,9 @@ To add a development: `pdftotext -layout brochure.pdf b.txt`, then `node tools/m
 
 URA-first classification for every development (rental contracts first, checked layout tables where they add coverage) and the repeatable, ranked brochure pass are described in `BEDROOM.md`. Neither is part of `refresh-all.js` yet.
 
-**Transactions and rents (25 Oct 2026).** Run `refresh-all.js` with `--snapshot <private accepted snapshot.json> --report <private folder>` once the bedroom step below is done, with the 12 `rental-*.json` quarter files in the same raw folder. It rebuilds bedroom research, the individual transactions (`data/projects/tx/`) and private rents (`data/projects/rent/`) from the SAME URA fetch as every other figure. Never pass `--yield` to `build-rent-research.js` for the site: gross yield is not published.
+**Transactions and rents (25 Oct 2026).** Run `refresh-all.js` with `--snapshot <private accepted snapshot.json> --report <private folder>` once the bedroom step below is done, with the 12 `rental-*.json` quarter files in the same raw folder. It rebuilds bedroom research, Budget Search's resale bedroom file (`data/projects/find-beds.json`), the individual transactions (`data/projects/tx/`) and private rents (`data/projects/rent/`) from the SAME URA fetch as every other figure. Never pass `--yield` to `build-rent-research.js` for the site: gross yield is not published.
+
+A refresh WITHOUT `--snapshot` leaves `find-beds.json` from the previous download; Budget Search then refuses it (as-of date differs from `find.json`) and offers bedrooms for new launches only until it is rebuilt with `--snapshot`. Bump `BEDS_URL`'s `?v=` in `tools/what-can-i-buy/index.html` and `research/index.html` with the other data versions.
 
 **Manual bedroom step after each URA refresh.** Run `fetch-ura-rental.js`, then `bedroom-hybrid.js --previous` and `bedroom-metrics.js`; the commands are in `BEDROOM.md`, "Refresh".
 - The classification uses only the latest 12 quarters of URA rental contracts. This is enforced in code, so extra files can never widen it.

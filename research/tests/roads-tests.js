@@ -68,7 +68,7 @@ const walk = (d, o = []) => { fs.readdirSync(d, { withFileTypes: true }).forEach
 t('every page that loads the shared search script points at its current version (so the road search reaches every visitor)', () => {
   const cur = sha('assets/js/gw-nav.js'); let n = 0;
   walk(root).forEach((f) => { const m = /gw-nav\.js\?v=([0-9a-f]+)/.exec(fs.readFileSync(f, 'utf8')); if (m) { n++; assert.strictEqual(m[1], cur, path.relative(root, f)); } });
-  assert.ok(n >= 18, 'pages ' + n);   // 18: the old New launch payments and HDB upgrade planner addresses are redirects and load no site script
+  assert.ok(n >= 17, 'pages ' + n);   // 17 (V3.4): the old New launch payments, What can I afford? and HDB and EC loan limit addresses are redirects and load no site script; Upgrade from HDB is a page again
 });
 t('the Browse address redirects into Research, and the Map scripts carry new versions', () => {
   assert.ok(/research\/#\/browse/.test(fs.readFileSync(path.join(root, 'projects/index.html'), 'utf8')));

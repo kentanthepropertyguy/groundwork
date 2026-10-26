@@ -214,7 +214,7 @@
     h += '<p class="gw-vx-note"><b>Past sales, not a valuation.</b> Floor, facing, condition and renovation can put your flat above or below these. HDB gives an official value only to a buyer, after an Option to Purchase.</p>';
     if (o.mid) h += o.mid;   // the Research view puts nearby blocks and the Map here
     else if (o.deep) h += '<a class="gw-vx-next" href="' + r + 'research/' + esc(o.deep) + '" data-gw-go="hdb-research"><b>Compare nearby blocks</b><span>Other blocks’ resales of this flat type, and where this block is on the Map ›</span></a>';
-    if (o.path) h += '<div class="gw-pathnext"><a class="gw-btn pri" href="' + r + 'tools/sale-proceeds/#hdb" data-gw-go="up-sale-proceeds">Next: your sale proceeds ›</a><span>Step 2 of 4 · the cash and CPF you’d have after selling</span></div>';
+    if (o.path) h += '<div class="gw-pathnext"><a class="gw-btn pri" href="' + r + 'tools/hdb-upgrade/" data-gw-go="up-hdb-upgrade">Back to Upgrade from HDB ›</a><span>Your selling price is filled in from these resales; change it there if you like</span></div>';
     if (d.lo !== undefined && d.n >= 3 && ASKM()) h += ASKM().panelHtml('hdb', { lo: d.lo, q1: d.q1, q3: d.q3, hi: d.hi, n: d.n, midN: d.midN, level: d.level, where, ft, ps: d.rows.map((x) => x[9]) }, { title: 'Buying here? Check an asking price' });
     if (o.after) h += o.after;   // Research's HDB view: the rents, after the resale figures and their asking-price check
     if (o.view) h += kenCta({ head: 'Want a view on a flat here?', text: 'Ken can tell you where a flat in this block might sit against these sales, and what would move it.', msg: hdbViewMsg(c), label: 'Ask Ken on WhatsApp', ctx: 'worth-hdb' });

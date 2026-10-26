@@ -19,16 +19,22 @@ def check(n, c, i=''):
     global ok, fail
     if c: ok += 1; print('  ok  ', n)
     else: fail += 1; print('  FAIL', n, i)
-CARDS = {'planner': '/tools/planner/', 'payment-planner': '/tools/payment-planner/', 'tdsr': '/tools/tdsr/', 'msr': '/tools/msr/', 'mortgage': '/tools/mortgage/', 'stamp-duty': '/tools/stamp-duty/', 'sale-proceeds': '/tools/sale-proceeds/', 'ssd': '/tools/ssd/'}
+CARDS = {'payment-planner': '/tools/payment-planner/', 'tdsr': '/tools/tdsr/', 'sale-proceeds': '/tools/sale-proceeds/', 'hdb-upgrade': '/tools/hdb-upgrade/', 'mortgage': '/tools/mortgage/', 'stamp-duty': '/tools/stamp-duty/', 'ssd': '/tools/ssd/'}
 def timeline(pg, kind, fills, price='1,500,000'):
-    pg.goto(B + '/tools/payment-planner/'); pg.wait_for_selector('[data-k="cash"]', state='attached'); pg.wait_for_timeout(400)
-    pg.click('.gw-chips[data-k="kind"] [data-v="%s"]' % kind); pg.wait_for_timeout(200)
-    pg.fill('[data-k="price"]', price); pg.fill('[data-k="otp"]', '2026-11-01'); pg.wait_for_timeout(200)
-    pg.click('[data-tab="funding"]'); pg.wait_for_timeout(300)
-    pg.evaluate("document.querySelectorAll('#pl-fund-form details').forEach(d => { d.open = true; })")
-    for k, v in fills: pg.fill('[data-k="%s"]' % k, v)
-    pg.wait_for_timeout(1000)
-    st = pg.query_selector('.pl-st'); mo = pg.query_selector('.pl-sf-w')
+    # FE V3: the Payment timeline is one page: type, price and date, then the funding check opened on the same page (no tabs)
+    pg.goto(B + '/tools/payment-planner/'); pg.wait_for_selector('[data-f3="pay"]'); pg.evaluate("sessionStorage.removeItem('gw.fin3.v1')"); pg.reload(); pg.wait_for_selector('[data-f3="pay"]')
+    pg.evaluate("k=>document.querySelector('[data-k=\"pkind\"] button[data-v=\"'+k+'\"]').click()", kind)
+    # FE V3.3: the date, the schedule and the funding check sit behind "All payments"
+    pg.fill('[data-k="price"]', price); pg.evaluate("()=>window.__f3AllPay(true)"); pg.fill('[data-k="otp"]', '2026-11-01')
+    pg.evaluate("()=>{document.querySelector('[data-fund]').open=true;document.querySelectorAll('[data-fund] details').forEach(d=>d.open=true)}")
+    # FE V3.2: entries behind an assumption chip are opened, typed and closed again
+    REVEAL = r'''k=>{const f=document.querySelector('[data-k="'+k+'"]');if(!f||(f.checkVisibility?f.checkVisibility():f.offsetParent))return false;const pn=f.closest('[data-chp]');if(pn&&window.__f3OpenChip)window.__f3OpenChip(pn.dataset.chp,k);const cu=f.closest('[data-cust]');if(cu)cu.hidden=false;const d=f.closest('details');if(d)d.open=true;return !!pn}'''
+    for k, v in fills:
+        key = {'borrowers.0.fixed': 'p.0.fixed', 'borrowers.0.age': 'p.0.age'}.get(k, k); opened = pg.evaluate(REVEAL, key)
+        pg.locator('[data-k="%s"]' % key).first.fill(v)
+        if opened: pg.evaluate("()=>window.__f3OpenChip(null)")
+    pg.wait_for_function("()=>window.__f3Settled&&window.__f3Settled()&&!!document.querySelector('[data-fund-out] .pl-st')", timeout=8000)
+    st = pg.query_selector('[data-fund-out] .pl-st'); mo = pg.query_selector('[data-fund-out] .pl-sf-w')
     return (st.get_attribute('class') if st else ''), (st.inner_text() if st else ''), (mo.inner_text() if mo else '')
 try:
   with sync_playwright() as p:
@@ -37,34 +43,23 @@ try:
         ctx = br.new_context(**kw); pg = ctx.new_page(); errs = []
         pg.on('pageerror', lambda e: errs.append(str(e)))
         pg.route(re.compile(r'googletagmanager|facebook\.net|onemap'), lambda r: r.fulfill(status=200, body=''))
-        # ---- 1. the directory
+        # ---- 1. the Calculators page (V3.4: four questions, then the single-figure calculators as text links)
         pg.goto(B + '/tools/'); pg.wait_for_selector('.gw-tdir'); pg.wait_for_timeout(300)
-        heads = pg.eval_on_selector_all('.gw-tdir .gw-tg h2', 'e => e.map(x => x.innerText)')
-        check(vn + ': All Tools has four task sections in order', heads == ['Plan a property move', 'Financing', 'Buying costs', 'Selling'], heads)
-        check(vn + ': eight cards, each tool once, no badges', pg.locator('.gw-tdir a.gw-tl').count() == 8 and pg.locator('.gw-tdir a.gw-tl em').count() == 0)
-        check(vn + ': search is kept', pg.query_selector('[data-gw-search="tools"]') is not None)
-        check(vn + ': no sideways scroll on All Tools', pg.evaluate('document.documentElement.scrollWidth <= innerWidth'))
+        check(vn + ': four question cards, each once, no badges', pg.locator('.gw-tdir a.gw-tl').count() == 4 and pg.locator('.gw-tdir a.gw-tl em').count() == 0)
+        check(vn + ': Stamp duty, Mortgage instalment and Seller’s stamp duty as text links', pg.locator('.gw-tdir .gw-mone a').count() == 3)
+        check(vn + ': no sideways scroll on the Calculators page', pg.evaluate('document.documentElement.scrollWidth <= innerWidth'))
         for tool, path in CARDS.items():
-            pg.goto(B + '/tools/'); pg.wait_for_selector('.gw-tdir'); pg.click('a.gw-tl[data-tool="%s"]' % tool); pg.wait_for_load_state(); pg.wait_for_timeout(200)
-            check(vn + ': the ' + tool + ' card opens ' + path + ' as a standalone tool', pg.url.split('#')[0].endswith(path) and 'j=1' not in pg.url, pg.url)
-        pg.goto(B + '/tools/'); pg.wait_for_selector('.gw-tdir'); pg.click('.gw-tg-line a'); pg.wait_for_url('**/journey/#up', timeout=10000); pg.wait_for_timeout(400)
-        check(vn + ': "Upgrading from HDB?" opens the four-step journey, with the budget step on What can I afford?', pg.is_visible('#up') and pg.get_attribute('#up [data-up-step="planner"] a', 'href').endswith('tools/planner/#sell'))
+            pg.goto(B + '/tools/'); pg.wait_for_selector('.gw-tdir'); pg.click('.gw-tdir a[data-tool="%s"]' % tool); pg.wait_for_load_state(); pg.wait_for_timeout(200)
+            check(vn + ': the ' + tool + ' link opens ' + path + ' as a standalone tool', pg.url.split('#')[0].endswith(path) and 'j=1' not in pg.url, pg.url)
+        pg.goto(B + '/journey/#up'); pg.wait_for_selector('#up'); pg.wait_for_timeout(400)
+        check(vn + ': Plan My Move’s "Upgrade from HDB" leads into the four-step thread', pg.is_visible('#up') and pg.get_attribute('#up [data-gw-up-go]', 'href').endswith('tools/hdb-upgrade/'), pg.get_attribute('#up [data-gw-up-go]', 'href'))
         # search, by the words people use (the menu's search box)
         pg.goto(B + '/tools/'); pg.wait_for_selector('.gw-tdir')
-        for q, want in [('HDB upgrade', 'tools/planner/#sell'), ('TDSR', 'tools/tdsr/'), ('ABSD', 'tools/stamp-duty/'), ('Full payment planning', 'tools/payment-planner/')]:
+        for q, want in [('HDB upgrade', 'tools/hdb-upgrade/'), ('TDSR', 'tools/tdsr/'), ('ABSD', 'tools/stamp-duty/'), ('Full payment planning', 'tools/payment-planner/'), ('What can I afford', 'tools/tdsr/#cash'), ('MSR', 'tools/tdsr/#hdb')]:
             hits = pg.evaluate("q => GWN.matchTools(q, 5).map(e => e.href)", q)
             check(vn + ': search "' + q + '" leads to ' + want, bool(hits) and hits[0] == want, hits)
-        check(vn + ': the Tools menu column no longer lists the HDB upgrade planner', pg.locator('.gw-ms-tools a[href$="tools/hdb-upgrade/"]').count() == 0)
-        # ---- 2. the old planner address
-        pg.goto(B + '/journey/#up'); pg.wait_for_timeout(300)
-        pg.evaluate("""() => { sessionStorage.setItem('kpt.hdb.input', JSON.stringify({salePrice:600000,outstandingLoan:200000,cpfRefund:150000,buyers:[{age:35,income:6000},{age:33,income:5000}],cashSavings:100000,otherCpfOa:50000,residency:'all-sc',timing:'sell-first'})); }""")
-        pg.goto(B + '/tools/hdb-upgrade/'); pg.wait_for_url('**/tools/planner/**', timeout=10000); pg.wait_for_selector('[data-pa]'); pg.wait_for_timeout(900)
-        g = lambda k: pg.evaluate("k => { const e = document.querySelector('[data-k=\"' + k + '\"]'); if (!e) return null; return e.dataset.t === 'chip' ? ((e.querySelector('[aria-pressed=true]') || {}).dataset || {}).v : e.value; }", k)
-        check(vn + ': the old address opens What can I afford? set up for an HDB flat being sold first', g('home') == 'sell' and g('order') == 'sell' and g('flat.type') == 'hdb' and g('owns') == 'one', (g('home'), g('order'), g('flat.type'), g('owns')))
-        check(vn + ': every old figure is carried over (flat, loan, refund, two buyers, cash, CPF)', g('flat.price') == '600,000' and g('flat.loan') == '200,000' and g('flat.cpfRefund') == '150,000' and g('buyers.0.age') == '35' and g('buyers.1.age') == '33' and g('cash') == '100,000' and g('cpf') == '50,000', (g('flat.price'), g('flat.cpfRefund'), g('buyers.1.age'), g('cash'), g('cpf')))
-        check(vn + ': the upgrade path strip shows step 3 of 4 on What can I afford?', pg.is_visible('[data-gw-strip]') and 'Step 3 of 4' in pg.inner_text('[data-gw-strip]') and 'Budget' in pg.inner_text('[data-gw-strip] [aria-current]'), pg.inner_text('[data-gw-strip]') if pg.query_selector('[data-gw-strip]') else None)
-        check(vn + ': nothing personal in the address', '?' not in pg.url.replace('?j=1', '') and 'price' not in pg.url and 'income' not in pg.url, pg.url)
-        check(vn + ': no sideways scroll on the Planner with the strip', pg.evaluate('document.documentElement.scrollWidth <= innerWidth'))
+        check(vn + ': the Calculators menu column links Upgrade from HDB, and not the folded pages’ old addresses', pg.locator('.gw-ms-tools a[href$="tools/hdb-upgrade/"]').count() == 1 and pg.locator('.gw-ms-tools a[href$="tools/planner/"], .gw-ms-tools a[href$="tools/msr/"]').count() == 0)
+        # ---- 2. the old planner address: fin3-connect-render.py (FE V3)
         # ---- 3. the Timeline's instalment warning
         base = [('cash', '125,000'), ('cpf', '330,000'), ('borrowers.0.fixed', '21,000'), ('borrowers.0.age', '35'), ('ratePct', '3'), ('years', '30')]
         c, t, m = timeline(pg, 'completed', base)

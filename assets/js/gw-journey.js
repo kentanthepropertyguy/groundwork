@@ -62,10 +62,10 @@
     const d = dir || 'unsure', S = [];
     const msg = 'Hi Ken, I own ' + ownText(type, c) + ' and I’m thinking of moving' + (dir && dir !== 'unsure' ? ' to ' + DIR[dir] : '') + '.';
     const H = type === 'hdb' && c.hdb && c.hdb.block ? c.hdb : null, Ld = type === 'landed' && c.landed && c.landed.street ? c.landed : null;
-    const planner = { href: r + 'tools/planner/#sell', label: 'Work out my budget ›', data: 'data-gw-go="planner-sell"' };   // 24 Oct 2026: What can I afford?, set up for the flat being sold (the HDB upgrade planner is folded into it)
+    const planner = { href: r + 'tools/hdb-upgrade/', label: 'Work out my upgrade budget ›', data: 'data-gw-go="hdb-upgrade"' };   // V3.4: Upgrade from HDB, the four-step thread
     const find = { href: r + 'tools/what-can-i-buy/', label: 'See what it buys ›', data: 'data-gw-go="what-can-i-buy"' };
     // Package 2: for a private home or landed seller, the budget step is the Planner, opened with the sale already in it (tools/planner/#sell; the figures come from Sale proceeds, in this tab only).
-    const nextBuy = { href: r + 'tools/planner/#sell', label: 'What can I buy next? ›', data: 'data-gw-go="planner-sell"' };
+    const nextBuy = { href: r + 'tools/tdsr/#sell', label: 'What can I buy next? ›', data: 'data-gw-go="borrow-sell"' };   // V3.4: How much can I borrow?, with the sale counted in its cash-and-CPF row
     // R2.1: the sale proceeds calculator sits between "what it could fetch" and "what I can afford". Figures typed there fill the planner (this tab only).
     const proceeds = (n, kind) => step(n, 'Work out your sale proceeds', 'Cash and CPF back, after the loan and costs.', { href: r + 'tools/sale-proceeds/#' + kind, label: 'Work out my sale proceeds ›', data: 'data-gw-go="sale-proceeds"' });
     const hdbWorth = H ? step(1, 'What flats like yours sold for', 'Blk ' + H.block + ' ' + title(H.street) + ', ' + flatLabel(H.flatType) + (H.lo !== undefined && H.hi !== undefined ? ': ' + H.n + ' recent resales, ' + money(H.lo) + ' – ' + money(H.hi) + '.' : '.'), { href: r + 'journey/worth/#hdb', label: 'See the sales again ›', data: 'data-gw-go="worth-hdb"' })
@@ -78,13 +78,12 @@
         lead = 'Another HDB flat? HDB’s own calculator covers HDB loans and grants. A private home? Groundwork works out your budget.';
         S.push(proceeds(2, 'hdb'));
         S.push(step(3, 'Plan an HDB-to-HDB move with HDB', 'What you can borrow from HDB and the grants that apply.', { href: HDB_BUDGET, label: 'Open HDB’s calculator ›', ext: true, data: 'data-gw-go="hdb-budget"' }));
-        S.push(step(4, 'Moving to a private home instead?', 'Your range for a private home, if you sell first.', planner));
+        S.push(step(4, 'Moving to a private home instead?', 'Your budget for a private home, if you sell first.', planner));
       } else {
         head = 'Moving from your HDB flat';
-        lead = 'Four steps: what it could fetch, your cash and CPF, your budget, and what it buys' + (d === 'area' ? ' in the area you have in mind.' : '.');
-        S.push(proceeds(2, 'hdb'));
-        S.push(step(3, 'Work out your budget', 'Your range for a private home. Step 2’s sale price, loan and CPF refund are filled in.', planner));
-        S.push(step(4, 'See what it buys', 'Sizes and developments at that budget.', find));
+        lead = 'What it could fetch, then your upgrade budget in four short steps, then what it buys' + (d === 'area' ? ' in the area you have in mind.' : '.');
+        S.push(step(2, 'Work out your upgrade budget', 'What you get from selling, how much you can borrow, and the private home budget they give. Step 1’s price is filled in.', planner));
+        S.push(step(3, 'See what it buys', 'Sizes and developments at that budget.', find));
         note = 'Moving to another HDB flat? HDB’s own calculator covers HDB loans and grants.';
       }
       S.push(kenStep('Talk through the timing with Ken', 'Sell first or buy first, how much to keep in reserve, and which homes fit.', msg, 'Ask Ken on WhatsApp', 'move-hdb'));
@@ -112,11 +111,12 @@
 
   // R2.1: "Upgrade from HDB" is its own four-step path. Each step is a page that also works on its own; figures carry over in this tab.
   // The page marks finished steps and points the main button at the next one (gw-nav.js reads this tab's progress).
+  // V3.4 (26 Oct 2026): the four questions of Upgrade from HDB, one page (tools/hdb-upgrade/); every figure carries into the next step there
   const UP_STEPS = [
-    ['worth', 'What your flat could fetch', 'Recent resales in your block', 'journey/worth/#hdb', 'Start: look up my block'],
-    ['sale-proceeds', 'Your sale proceeds', 'Cash and CPF back, after the loan and costs', 'tools/sale-proceeds/#hdb', 'Next: work out my sale proceeds'],
-    ['planner', 'Your budget', 'What you could afford for a private home, in What can I afford?', 'tools/planner/#sell', 'Next: work out my budget'],
-    ['what-can-i-buy', 'What it buys', 'Sizes and developments at that budget', 'tools/what-can-i-buy/', 'Next: see what it buys'],
+    ['worth', 'What is my flat worth?', 'Recent resales in your block, or your own estimate', 'tools/hdb-upgrade/', 'Start: Upgrade from HDB'],
+    ['sell', 'What will I get from selling?', 'Cash and CPF back, after the loan and costs', 'tools/hdb-upgrade/', 'Carry on: Upgrade from HDB'],
+    ['borrow', 'How much can I borrow?', 'From your income and age', 'tools/hdb-upgrade/', 'Carry on: Upgrade from HDB'],
+    ['budget', 'So what can I buy?', 'Your private home budget, then the homes it buys', 'tools/hdb-upgrade/', 'Carry on: Upgrade from HDB'],
   ];
   function upPanel(r) {
     return '<section class="gw-panel gw-up" id="up" data-gw-panel="up" data-gw-up aria-labelledby="gwUpH"><div class="gw-ph"><p class="gw-kicker">Upgrade from HDB</p><h2 id="gwUpH">Four steps to your next home</h2>' +

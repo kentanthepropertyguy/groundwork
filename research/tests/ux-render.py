@@ -69,7 +69,7 @@ try:
             pg.locator('.gw-path[data-gw-path="sell"]').click(); pg.wait_for_function("location.hash === '#sell'")
             check(vn + ': a chosen path still deep-links (#sell)', pg.locator('#sell').is_visible())
             pg.goto(B + '/journey/#up'); pg.wait_for_selector('#up'); check(vn + ': journey/#up still opens the upgrade path', pg.locator('#up').is_visible())
-            pg.goto(B + '/tools/'); pg.wait_for_selector('h1'); check(vn + ': the directory is "Property Calculators & Tools" at /tools/', pg.inner_text('h1') == 'Property Calculators & Tools')
+            pg.goto(B + '/tools/'); pg.wait_for_selector('h1'); check(vn + ': the directory is "Calculators" at /tools/ (V3.4: four questions)', pg.inner_text('h1') == 'Calculators')
             check(vn + ': no page errors', not errs, errs); ctx.close()
 
             print('\n== 2. Research opens the analysis; bedrooms first,', vn)

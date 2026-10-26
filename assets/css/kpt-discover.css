@@ -198,3 +198,9 @@ body.kd-hasmap .kd-mapbox .lyr-p{top:46px}
 .kd-seg[data-k=tenure] button{white-space:normal;line-height:1.2;padding:8px 6px}.kd-seg[data-k=tenure] button[data-v=free]{flex:1.7}
 /* V2.1: Beyond the numbers is one quiet line */
 .kd-ken-l{margin:4px 0 0;color:var(--muted)}.kd-ken-l a{color:var(--blue);font-weight:600;text-decoration:none;white-space:nowrap}
+/* Bedroom Search (26 Oct 2026): resales whose bedroom count is not confirmed are their own quieter group, after the matches */
+.kd-unconf .kd-ch .kd-cnt{color:var(--muted);font-size:14px;font-weight:600;margin-left:6px;letter-spacing:0}
+.kd-uch{margin:14px 0 0;font-size:15px;color:var(--ink);font-weight:700}
+.kd-card.kd-unc{background:#FBFBFA;border-style:dashed}
+.kd-card.kd-unc .kd-ev b{font-size:16px}
+.kd-uncl{margin-top:18px}.kd-uncl .kd-link{font-size:13px}
