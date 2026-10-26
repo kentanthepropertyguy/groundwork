@@ -50,8 +50,8 @@
   };
   const EXISTING = {
     planner: { path: 'planner/', title: 'What can I afford?', name: 'What can I afford?', tag: 'Maximum budget', short: 'Your maximum property budget, from your cash, CPF and income', group: 'buy', icon: 'planner' },
-    'payment-planner': { path: 'payment-planner/', title: 'Payment timeline', name: 'Payment timeline', tag: 'Payment dates', short: 'See when and how much you need to pay.', group: 'buy', icon: 'payment-planner' },
-    'hdb-upgrade': { path: 'planner/#sell', title: 'Upgrading from HDB?', name: 'Upgrading from HDB?', tag: 'What can I afford?, set up for a flat being sold', short: 'Your budget for a private home once your flat is sold', group: 'upgrade' },   // folded into What can I afford? (24 Oct 2026); tools/hdb-upgrade/ redirects
+    'payment-planner': { path: 'payment-planner/', title: 'What will this home cost me?', name: 'What will this home cost me?', tag: 'Cash, CPF and payment dates', short: 'Cash, CPF, monthly instalment and every payment date for a price.', group: 'buy', icon: 'payment-planner' },
+    'hdb-upgrade': { path: 'hdb-upgrade/', title: 'Upgrade from HDB', name: 'Upgrade from HDB', tag: 'Flat value → proceeds → loan → budget', short: 'Flat value → proceeds → loan → budget, in four steps', group: 'upgrade' },   // folded into What can I afford? (24 Oct 2026); tools/hdb-upgrade/ redirects
     'what-can-i-buy': { path: 'what-can-i-buy/', title: 'What can this budget buy?', name: 'What can this budget buy?', tag: 'Search by budget, area and must-haves', short: 'Developments with recent sales within your budget', group: 'research' },
     worth: { path: '../journey/worth/', title: 'Property values & prices', name: 'Property prices & past sales', tag: 'HDB, condo and landed sales · asking price', short: 'What comparable homes sold for. Check an asking price', group: 'research', icon: 'worth' },
     research: { path: '../research/', title: 'Research a property', name: 'Research a property', tag: 'HDB, condo and landed · prices, past sales, rents', short: 'Recent sales, an asking-price check, and comparisons', group: 'research', icon: 'research' },
@@ -60,29 +60,24 @@
   // budget buy?) is listed under Research in the menu and on the homepage, so each feature has one home.
   // All Tools (24 Oct 2026): four sections by the task in hand, each tool once, no badges. The HDB upgrade planner is folded into What can I afford?
   // (tools/hdb-upgrade/ redirects); "Upgrading from HDB?" is a line under the first section into the four-step journey. "Full payment planning" was the
-  // Payment timeline opened at its funding check, so it is no longer a second card (search still finds the term).
+  // What will this home cost me? opened at its funding check, so it is no longer a second card (search still finds the term).
+  // V3.4 (26 Oct 2026): the Calculators page is four questions (Ken's menu concept); the single-figure calculators are text links underneath.
+  // What can I afford? and the HDB and EC loan limit are part of How much can I borrow? (their addresses redirect there).
   const DIRECTORY = [
-    ['move', 'Plan a property move', [
-      ['planner', { short: 'Find your buying budget, or check a property price.' }],
-      ['payment-planner', { short: 'See when to pay and how much, and optionally check your funding.' }]],
-      '<p class="gw-tg-line"><span aria-hidden="true">→</span> Upgrading from HDB? Start with your <a href="../journey/#up" data-gw-nav-to="up" data-tool="guide-up">Sell / Upgrade journey</a>: flat value, sale proceeds, then your budget in What can I afford?</p>'],
-    ['fin', 'Financing', [
-      ['tdsr', { short: 'Detailed bank-loan assessment under TDSR, from income and debts.' }],
-      ['msr', { short: 'HDB loans, bank loans and the MSR limit for HDB flats and new ECs.' }],
-      ['mortgage', { short: 'Monthly instalments and total interest.' }]]],
-    ['cost', 'Buying costs', [
-      ['stamp-duty', { short: 'Buyer’s Stamp Duty (BSD) and ABSD for your purchase.' }]]],
-    ['sell', 'Selling', [
-      ['sale-proceeds', { short: 'Estimate the cash and CPF returned when you sell.' }],
-      ['ssd', { name: 'Seller’s stamp duty', short: 'Selling within 4 years? Check whether SSD applies and estimate it.' }]]],
+    ['four', 'Four questions', [
+      ['payment-planner', { name: 'What will this home cost me?', short: 'Upfront, monthly and the income it needs — from a price' }],
+      ['tdsr', { short: 'Bank loan limit and the home price it supports — from your income' }],
+      ['sale-proceeds', { name: 'What will I get from selling?', short: 'Cash in hand and CPF back — from a selling price' }],
+      ['hdb-upgrade', { name: 'Upgrade from HDB', href: 'hdb-upgrade/', short: 'Flat value → proceeds → loan → budget, in four steps' }]],
+      '<p class="gw-mone gw-tone">Looking for one figure? <a href="stamp-duty/" data-tool="stamp-duty">Stamp duty</a> <a href="mortgage/" data-tool="mortgage">Mortgage instalment</a> <a href="ssd/" data-tool="ssd">Seller’s stamp duty</a></p>'],
   ];
-  const ORDER = { move: ['planner', 'payment-planner'], fin: ['tdsr', 'msr', 'mortgage'], cost: ['stamp-duty'], sell: ['sale-proceeds', 'ssd'] };
+  const ORDER = { four: ['payment-planner', 'tdsr', 'sale-proceeds', 'hdb-upgrade'] };
   const GROUPS = DIRECTORY.map((g) => [g[0], g[1]]);
 
   // The tools page (mirrors tools/index.html, which is static): four task sections, every card independent (Package 3 still applies: a tool opened from here starts blank).
   function directoryHtml() {
     const tile = (id, o) => { const t = TOOLS[id] || EXISTING[id]; o = o || {}; return '<a class="gw-tl" href="' + (o.href || t.path) + '" data-tool="' + (o.tool || id) + '">' + svg(t.icon || id) + '<span class="gw-tl-t"><b>' + esc(o.name || t.name) + '</b></span><span class="gw-tl-s">' + esc(o.short || t.short) + '</span></a>'; };
-    return DIRECTORY.map((g, k) => '<section class="gw-tg' + (k === 0 ? ' gw-tg-top' : '') + '" aria-labelledby="tg-' + g[0] + '"><h2 id="tg-' + g[0] + '">' + esc(g[1]) + '</h2><div class="gw-tls">' + g[2].map((x) => tile(x[0], x[1])).join('') + '</div>' + (g[3] || '') + '</section>').join('');
+    return DIRECTORY.map((g, k) => '<section class="gw-tg' + (k === 0 ? ' gw-tg-top' : '') + '" aria-labelledby="tg-' + g[0] + '"><h2 id="tg-' + g[0] + '" class="gw-vh">' + esc(g[1]) + '</h2><div class="gw-tls gw-tls-one">' + g[2].map((x) => tile(x[0], x[1])).join('') + '</div>' + (g[3] || '') + '</section>').join('');
   }
 
   /* ---------------- fields (markup) ---------------- */

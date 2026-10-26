@@ -1,0 +1,79 @@
+/* ==========================================================================
+   GROUNDWORK — the one-page A4 summary (gw-sheet.js). Sizes, colours and rules follow the approved concept (26 Oct 2026),
+   measured from it in points: 16.1mm side margins, 21pt serif question, 30pt and 24pt serif figures, 9.5pt body, 8pt notes.
+   On screen the sheet is never seen (it is built off-screen only to be measured); in print it is the only thing on the page.
+   ========================================================================== */
+@page { size: A4; margin: 0; }
+.gw-sheet-host { position: fixed; left: -10000px; top: 0; width: 210mm; pointer-events: none; }
+.gs-sheet {
+  --gs-ink: #16213E; --gs-muted: #6B7280; --gs-rule: #D9D5CB; --gs-gold: #A9822F;
+  --gs-sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --gs-serif: "Iowan Old Style", Charter, Cambria, Georgia, "Times New Roman", "Liberation Serif", serif;
+  width: 210mm; height: 297mm; box-sizing: border-box; padding: 13.6mm 16.1mm 15.6mm; background: #fff; color: var(--gs-ink);
+  font-family: var(--gs-sans); font-size: 9.5pt; line-height: 1.42; display: flex; flex-direction: column; overflow: hidden;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact; font-variant-numeric: lining-nums tabular-nums; letter-spacing: 0;
+}
+.gs-sheet * { box-sizing: border-box; }
+.gs-main { flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+.gs-sheet b { font-weight: 600; }
+/* band 1 */
+.gs-hd { display: flex; justify-content: space-between; align-items: baseline; gap: 12pt; padding-bottom: 12pt; border-bottom: 0.7pt solid var(--gs-ink); }
+.gs-wm { font-size: 10pt; font-weight: 700; letter-spacing: 0.22em; }
+.gs-meta { font-size: 9pt; color: var(--gs-muted); white-space: nowrap; }
+/* band 2 */
+.gs-q { padding: 15pt 0 14pt; border-bottom: 0.7pt solid var(--gs-rule); }
+.gs-q h1 { margin: 0; font-family: var(--gs-serif); font-weight: 400; font-size: 21pt; line-height: 1.2; letter-spacing: -0.005em; }
+.gs-basis { margin: 7pt 0 0; font-size: 9.5pt; line-height: 1.42; color: var(--gs-muted); }
+.gs-basis b { color: var(--gs-ink); font-weight: 600; }
+/* band 3 */
+.gs-figs { display: grid; grid-template-columns: 40% 32% 28%; padding: 11pt 0 14pt; border-bottom: 0.7pt solid var(--gs-rule); }
+.gs-f { display: flex; flex-direction: column; min-width: 0; padding-right: 12pt; }
+.gs-fl { font-size: 9pt; color: var(--gs-muted); }
+.gs-fv { margin-top: 4pt; font-family: var(--gs-serif); font-weight: 400 !important; font-size: 24pt; line-height: 1.12; white-space: nowrap; }
+.gs-f1 .gs-fv { font-size: 30pt; }
+.gs-fs { margin-top: 5pt; font-size: 8.5pt; line-height: 1.42; color: var(--gs-muted); }
+.gs-judge { margin: 12pt 0 0; padding: 2pt 0 2pt 12.6pt; border-left: 1.5pt solid var(--gs-gold); font-size: 10pt; line-height: 1.42; }
+/* band 4 */
+.gs-work { display: grid; grid-template-columns: minmax(0, 210pt) minmax(0, 1fr); column-gap: 30pt; margin-top: 15pt; }
+.gs-col { display: flex; flex-direction: column; gap: 14pt; min-width: 0; }
+.gs-bt { margin: 0 0 7pt; font-size: 8.5pt; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gs-muted); }
+.gs-gt { margin: 0; padding: 5pt 0 4pt; font-size: 8pt; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gs-muted); border-top: 0.7pt solid var(--gs-rule); }
+.gs-gt:first-of-type { border-top: 0; padding-top: 0; }
+.gs-rows { display: flex; flex-direction: column; }
+.gs-r { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; column-gap: 8pt; padding: 5pt 0 6pt; border-top: 0.7pt dotted var(--gs-rule); }
+.gs-rows > .gs-r:first-child { border-top: 0; }
+.gs-when .gs-r { grid-template-columns: minmax(0, 1fr) 82pt auto; padding: 5pt 0 5.5pt; }
+.gs-rl { display: flex; flex-direction: column; min-width: 0; }
+.gs-rn { font-size: 9.5pt; }
+.gs-rn i { font-style: normal; color: var(--gs-muted); }
+.gs-rl small { font-size: 8pt; line-height: 1.38; color: var(--gs-muted); }
+.gs-rw { font-size: 8.5pt; color: var(--gs-muted); white-space: nowrap; }
+.gs-rv { font-family: var(--gs-serif); font-weight: 400 !important; font-size: 11pt; text-align: right; white-space: nowrap; }
+.gs-r.tot { border-top: 0.7pt solid var(--gs-ink); }
+.gs-r.tot .gs-rn { font-weight: 600; }
+.gs-r.tot .gs-rv { font-weight: 700 !important; }
+.gs-note { margin: 8pt 0 0; font-size: 8.5pt; line-height: 1.41; color: var(--gs-muted); }
+/* tightening, only when a schedule has more rows than fit: smaller row padding, never a second page */
+.gs-tight .gs-r, .gs-tight .gs-when .gs-r { padding: 3.5pt 0 4pt; }
+.gs-tight .gs-col { gap: 10pt; }
+.gs-tighter .gs-r, .gs-tighter .gs-when .gs-r { padding: 2pt 0 2.5pt; }
+.gs-tighter .gs-q { padding: 11pt 0 10pt; } .gs-tighter .gs-figs { padding: 8pt 0 10pt; } .gs-tighter .gs-work { margin-top: 10pt; }
+.gs-tightest .gs-rl small { display: none; }
+/* band 5 */
+.gs-ft { flex: 0 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); column-gap: 24pt; padding-top: 10pt; border-top: 0.7pt solid var(--gs-rule); font-size: 8pt; line-height: 1.42; color: var(--gs-muted); }
+.gs-ft p { margin: 0; }
+.gs-ftl b { display: block; font-size: 9pt; font-weight: 600; color: var(--gs-ink); }
+.gs-dash { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.gs-ftrt { text-align: right; }
+.gs-ftrt span { display: inline; }
+/* printing: only the sheet, never the page on screen */
+@media print {
+  html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+  body > *:not(.gw-sheet-host) { display: none !important; }
+  .gw-sheet-host { position: static; left: auto; width: auto; }
+  .gs-sheet { page-break-after: avoid; break-after: avoid; }
+}
+/* the site's own heading styles must not reach the sheet */
+.gw-sheet-host .gs-sheet h1, .gw-sheet-host .gs-sheet h3, .gw-sheet-host .gs-sheet p { text-wrap: wrap; }
+.gw-sheet-host .gs-sheet h3.gs-bt { margin: 0 0 7pt !important; font-family: var(--gs-sans) !important; font-size: 8.5pt !important; font-weight: 600 !important; line-height: 1.3 !important; letter-spacing: 0.12em !important; text-transform: uppercase; color: var(--gs-muted) !important; }
+.gw-sheet-host .gs-sheet .gs-q h1 { color: var(--gs-ink) !important; }

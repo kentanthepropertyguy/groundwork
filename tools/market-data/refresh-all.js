@@ -17,6 +17,7 @@
      7. build-pulse.js           The Map's market snapshot, from the same module and records as the Research report -> data/map/pulse.json
    With --snapshot (25 Oct 2026), from the SAME URA fetch, so every figure on a page agrees with the transactions listed under it:
      8. build-bedroom-research.js  Bedroom types (accepted classification, never redone here)      -> data/projects/bedroom
+     8b. build-bedroom-search.js   Budget Search by bedrooms, resale (the same types and gate; read by Budget Search, kpt-discover-beds.js) -> data/projects/find-beds.json
      9. build-tx-history.js        Individual transactions, as URA gives them                       -> data/projects/tx
     10. build-rent-research.js     Private-home rents (URA rental contracts; the raw folder must also hold the 12 rental-*.json quarter
                                    files the classification used). Never with --yield: gross yield is not published (policy).  -> data/projects/rent
@@ -56,6 +57,7 @@ const snap = arg('snapshot'), rep = arg('report');
 if (snap) {
   if (!rep || path.resolve(rep).startsWith(site + path.sep)) { console.error('--snapshot needs --report <a PRIVATE folder outside the site>.'); process.exit(2); }
   run('Bedroom research', 'build-bedroom-research.js', ['--raw', raw, '--snapshot', snap, '--site', site, '--report', rep]);
+  run('Budget Search by bedrooms (resale)', 'build-bedroom-search.js', ['--raw', raw, '--snapshot', snap, '--site', site, '--report', rep]);
   run('Transaction history', 'build-tx-history.js', ['--raw', raw, '--snapshot', snap, '--site', site, '--out', path.join(tmp, 'tx'), '--report', rep, '--to', man.latestMonth]);
   run('Private-home rents', 'build-rent-research.js', ['--raw', raw, '--snapshot', snap, '--site', site, '--out', path.join(tmp, 'rent'), '--report', rep, '--to', man.latestMonth]);
   ['tx', 'rent'].forEach((d) => { fs.rmSync(path.join(dp, d), { recursive: true, force: true }); copy(path.join(tmp, d), path.join(dp, d)); });

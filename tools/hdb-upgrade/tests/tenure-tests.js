@@ -171,7 +171,7 @@ test('the age-75 cap is labelled as a lender policy, not a MAS rule, wherever it
 
 test('joint borrowers: the age is the income-weighted average, the higher of the counted and gross weightings (MAS explainer: gross monthly income; Notice wording unsettled), and a blank tenure uses it', () => {
   const B = C.borrowers([{ age: 40, fixed: 5000, variable: 0, rental: 0 }, { age: 66, fixed: 1000, variable: 9000, rental: 0 }]);
-  assert.ok(B.iwaaGross > B.iwaa, 'variable income is counted at 70%, so the older borrower weighs less when counted'); assert.strictEqual(B.iwaaUse, Math.max(B.iwaa, B.iwaaGross)); assert.strictEqual(B.ageUnverified, true);
+  assert.ok(B.iwaaGross > B.iwaa, 'variable income is counted at 70%, so the older borrower weighs less when counted'); assert.strictEqual(B.iwaaUse, Math.round(Math.max(B.iwaa, B.iwaaGross) * 1e6) / 1e6);   // tidied to 6 decimals (the 26 Oct floating-point fix) assert.strictEqual(B.ageUnverified, true);
   // MAS's own worked example: 60 earning $8,000 and 30 earning $10,000 gives 43.34
   const m = C.borrowers([{ age: 60, fixed: 8000 }, { age: 30, fixed: 10000 }]); near(m.iwaaGross, 43.33, 0.01); near(m.iwaa, 43.33, 0.01);
   const j = C.tdsr({ kind: 'private', borrowers: [{ age: 40, fixed: 5000 }, { age: 66, fixed: 1000, variable: 9000 }], debts: 0, loans: 0 });

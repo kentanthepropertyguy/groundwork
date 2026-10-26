@@ -109,7 +109,7 @@
       '<p class="pa-fine">Stays on this device.</p></section>' +
       '<section class="pa-sec" aria-labelledby="pa-h-home"><h2 class="pa-h" id="pa-h-home">The home</h2>' + chips('kind', 'What are you buying?', [['new', 'New launch'], ['completed', 'Completed private home'], ['hdb', 'HDB flat']], { value: 'new' }) +
       '<div class="pa-route" data-when="kind:hdb" hidden>' + hdbRoute(true) + '</div>' +
-      '<p class="pa-note">Buying an EC, or buying before you sell? Use the <a href="../payment-planner/">payment timeline</a>.</p></section>' +
+      '<p class="pa-note">Buying an EC, or buying before you sell? Use <a href="../payment-planner/">What will this home cost me?</a>.</p></section>' +
       '<section class="pa-sec" aria-labelledby="pa-h-loan"><h2 class="pa-h" id="pa-h-loan">The loan</h2><div class="pa-pair">' + numf('ratePct', 'Interest rate you expect', '% a year', { ph: '4', hint: 'Sets your monthly mortgage. Banks test at 4% or higher.' }) + numf('years', 'Loan years', 'years', { ph: 'suggested for you', hint: 'Leave empty and we suggest one.' }) + '</div></section>' +
       '<details class="pa-adj" data-adj><summary><span>More options</span><em data-adj-sum></em></summary><div class="pa-adj-b">' +
       datef('otp', 'Option date') + money('setAside', 'Set aside for fees and renovation', { opt: true, ph: '0', hint: 'Kept out of the money used for the purchase.' }) + '</div></details>';
@@ -280,7 +280,7 @@
 
   // The payment dates, on demand. What they were based on is stated first (standard schedule, the option date typed, or the monthly amounts typed); a shortfall found here is a
   // projection from those entries, and the table never claims more than was tested.
-  const TL_LINK = '<p class="pa-fine"><a class="pa-link" href="../payment-planner/" data-pa-dates>Open the payment timeline</a> for every date and each option.</p>';
+  const TL_LINK = '<p class="pa-fine"><a class="pa-link" href="../payment-planner/" data-pa-dates>See what this home will cost</a> for every date and each option.</p>';
   function datesHtml(res) {
     const a = res.at, v = V.build(res, VIEW_CTX), d = v.dates;
     if (!(res.checked && a && a.tl)) return '<details class="pa-how" data-dates-d><summary><span>Payment dates</span><em>' + esc(d.label.toLowerCase()) + '</em></summary><p class="pa-fine pa-dd">' + d.summary + '</p>' + TL_LINK + '</details>';

@@ -88,7 +88,7 @@
   const CPF2_TXT = 'A buyer who still owns a home when buying can use only the Ordinary Account savings above a set-aside: the Basic Retirement Sum if one of their homes lasts until they are 95, or the Full Retirement Sum if none does. OA, SA and RA all count towards it (CPF Board).';
   const CPF_HINT = 'The CPF you can use for this home, not your whole balance. We don’t check CPF’s limits.', CPF_HELP = 'CPF cannot pay the booking fee, the minimum cash or stamp duty up front. Your CPF housing limits may cap what you can use further, so the planner may show more CPF than you can actually use.';
   // An HDB flat follows HDB's own loan rules, so no payment timeline is worked out for it: the way on is the HDB and EC loan limit calculator.
-  const hdbRoute = () => '<p><b>An HDB flat follows different rules,</b> so no payment timeline is worked out for it here. It has its own loan rules (an HDB loan or a bank loan) and a 30% limit on the loan repayment against your income (MSR).</p><a class="gw-btn pri pl-hdb-go" href="../msr/#hdb-loan" data-pl-hdb>Open the HDB loan limit calculator →</a><p class="gw-fine">Your age carries over from here.</p>';
+  const hdbRoute = () => '<p><b>An HDB flat follows different rules,</b> so no payment schedule is worked out for it here. It has its own loan rules (an HDB loan or a bank loan) and a 30% limit on the loan repayment against your income (MSR).</p><a class="gw-btn pri pl-hdb-go" href="../tdsr/#hdb" data-pl-hdb>See how much HDB or a bank could lend →</a><p class="gw-fine">Your age carries over from here.</p>';
   const cpfNoteHtml = (i) => ((i.cpf > 0 || (i.sale && i.sale.cpf > 0)) ? '<details class="gw-fine pl-cpfnote"><summary><b>CPF is as you entered it.</b> <em>What that means</em></summary><p>It is not checked against CPF’s valuation limit, withdrawal limit, the home’s lease or your age, so it is not confirmed as usable. Whatever CPF does not allow has to be paid in cash, which makes the shortfall larger.</p></details>' : '');
 
   /* ---------------- fields (same markup conventions as the other calculators) ---------------- */
@@ -201,7 +201,7 @@
       '<div class="pl-prop" data-prop><div class="pl-prop-bar" data-prop-bar><div class="pl-prop-bar-t"><p class="pl-kick">Your property</p><p class="pl-prop-sum" data-prop-sum></p></div><button type="button" class="pl-prop-edit" data-prop-edit aria-expanded="false" aria-controls="pl-prop-form">Edit</button></div>' +
       '<div class="pl-prop-form" id="pl-prop-form" data-prop-form>' + p.purchase + '</div></div>' +
       '<div class="pl-screens" data-screens>' +
-      '<div class="pl-tabs" role="tablist" aria-label="Payment timeline screens" data-tabs>' + tab('schedule', '1', 'Payment schedule', 'When and how much', false) + tab('funding', '2', 'Funding check', 'Can you cover it?', true) + '</div>' +
+      '<div class="pl-tabs" role="tablist" aria-label="Payment screens" data-tabs>' + tab('schedule', '1', 'Payment schedule', 'When and how much', false) + tab('funding', '2', 'Funding check', 'Can you cover it?', true) + '</div>' +
       /* ---- screen 1 ---- */
       '<div class="pl-panel" role="tabpanel" id="pl-p-schedule" aria-labelledby="pl-t-schedule" data-panel="schedule">' +
       '<h2 class="pl-h2" tabindex="-1" data-focus>When you pay, and how much</h2><p class="pl-lead pl-sr" data-sched-lead aria-live="polite"></p>' +
@@ -408,7 +408,7 @@
   // The engine tests them one after another from the earliest date a stage could be called, so only the first carries that date, as a floor ("earliest").
   const PROGRESS = 'As construction progresses';
   function stageMark(events) { let seen = false; return events.map((e) => { if (e.type === 'pay' && e.basis === 'earliest') { const o = Object.assign({}, e, { undated: true, firstUndated: !seen }); seen = true; return o; } return e; }); }
-  const whenHtml = (e) => (e.undated ? '<span class="pl-prog">' + PROGRESS + '</span>' + (e.firstUndated ? '<small class="pl-early">earliest ' + day(e.date) + '</small>' : '') : dateLabel(e.date, e.basis, e.id) + basisTag(e.basis));
+  const whenHtml = (e) => (e.undated ? '<span class="pl-prog">' + PROGRESS + '</span>' + (e.firstUndated ? ' <small class="pl-early">· earliest ' + day(e.date) + '</small>' : '') : dateLabel(e.date, e.basis, e.id) + basisTag(e.basis));
   const basisTag = (b) => '<span class="pl-basis b-' + b + '">' + esc(root.GW_SCHEDULE.BASIS_TAG[b] || b) + '</span>';
   /* ---- the single stage-by-stage list, on both screens (Ken, 19 Oct 2026): every payment in order with its amount; on the funding screen also how it is paid and the monthly mortgage after it. No chart. ---- */
   const payPart = (f, label, v) => (v > 0.005 ? '<span class="pl-pay' + (f === 'short' ? ' bad' : '') + '" data-f="' + f + '" data-v="' + Math.round(v) + '">' + label + '</span>' : '');
@@ -565,7 +565,7 @@
       '<p class="pl-tp">You can change the income, plan a private condominium instead, or see illustrative figures. Illustrative figures do not mean the household can buy this EC.</p>' +
       '<div class="pl-ec-b">' + sw + '<button type="button" class="gw-btn sec" data-ec-illus="yes">Continue with illustrative calculations</button></div><div class="pl-ec-l">' + edit('buyers:borrowers.0.fixed', 'Change the income') + '</div>' + nc + det + '</div>';
     if (c.outcome === 'unknown') return '<div class="pl-ec warn">' + kick + tag + '<p class="pl-tp">' + why + '</p>' + act + (c.need === 'tender' ? setRow('tender', 'When did the land tender close?', TENDER_BTN, i.tender) : '') +
-      (c.need === 'income' ? '<p class="pl-tp">No payment timeline is worked out until the income is entered, because the loan depends on it. Nothing here means the household can buy a new EC.</p>' : '<p class="pl-tp">Illustrative calculations stay available below. They do not mean the household can buy a new EC.</p>') + nc + det + '</div>';
+      (c.need === 'income' ? '<p class="pl-tp">No payment schedule is worked out until the income is entered, because the loan depends on it. Nothing here means the household can buy a new EC.</p>' : '<p class="pl-tp">Illustrative calculations stay available below. They do not mean the household can buy a new EC.</p>') + nc + det + '</div>';
     return '<div class="pl-ec ok">' + kick + tag + '<p class="pl-tp">' + why + ' <b>This is only an income check.</b></p>' + nc + det + '</div>';
   }
   // o: { why: 'zero' | 'mop', ruleLoan, ltv, used, a, b } — a loan estimate that is not complete, said plainly beside the result
@@ -593,7 +593,7 @@
   const undatedStage = (r, date) => { const e = r.events.filter((x) => x.type === 'pay' && x.date === date && x.uncovered > 0)[0]; return !!e && (r.kind === 'new' || r.kind === 'ec') && e.confidence === 'estimate' && e.id !== 'top' && e.id !== 'csc'; };
   function summaryText(r, v, scn) {
     const h = r.headline;
-    return ['Payment timeline (Groundwork): ' + $(r.price) + ' ' + kindText(r, v) + ', ' + ORDER_T[r.order] + ', ' + optionText(r.otp) + '.',
+    return ['What will this home cost me? (Groundwork): ' + $(r.price) + ' ' + kindText(r, v) + ', ' + ORDER_T[r.order] + ', ' + optionText(r.otp) + '.',
       h.peak > 0 && !instalOnly(root.GW_SCHEDULE.shortfall(r), v) ? (firstMiss(r).amount > 0 ? 'Not covered: ' + $(r.totals.uncovered) + ' in total; the first short payment is ' + firstMiss(r).label + (undatedStage(r, h.firstGap) ? ' (timing depends on construction progress)' : ' ' + onDay(h.firstGap)) + '.' : 'First shortfall: ' + $(h.peak) + ' ' + onDay(h.peakAt) + (h.peakCause ? ', ' + h.peakCause : '') + '.') : h.peak > 0 ? 'Every payment covered on its date; the monthly mortgage is not tested (no monthly savings entered).' : 'Every payment covered on its due date at the earliest dates.',
       'Loan ' + (r.loan.capped ? 'sized to what the entered income supports (figure not included; rule limit ' + pc(r.loan.ltv) + ')' : pc(r.loan.ltv)) + ' over ' + r.loan.years + ' years at ' + pc(r.loan.ratePct / 100, 2) + ' (' + r.loan.loans + ' housing loan' + (r.loan.loans === 1 ? '' : 's') + ' counted)' + (r.loan.cov > 0 ? '; worked on the bank valuation of ' + $(r.loan.valuation) + ', with ' + $(r.loan.cov) + ' above it paid in cash' : '') + '; estimated instalment ' + $(r.instalment.final) + '/mo once the whole loan is paid out.',
       v.joint && v.joint.ageUnverified && r.loan.capped ? 'Two borrowers with variable income: which income weights the average age is not confirmed, so the older of the two ages is used.' : '',
@@ -1171,10 +1171,12 @@
     q('[data-print]').addEventListener('click', () => { track('planner_print', {}); try { root.print(); } catch (e) { /* no print */ } });
     q('[data-copy]').addEventListener('click', () => { if (!last) return; const t = summaryText(last.r, last.i, last.scn); const done = () => { out.note.textContent = 'Summary copied. It carries the result and the price, not your cash, CPF or income.'; }; track('planner_share', {});
       if (root.navigator && root.navigator.clipboard) root.navigator.clipboard.writeText(t).then(done, () => { out.note.textContent = t; }); else out.note.textContent = t; });
-    $$('[data-fb]').forEach((b) => b.addEventListener('click', () => { track('planner_feedback', { answer: b.dataset.fb }); $$('[data-fb]').forEach((x) => { x.setAttribute('aria-pressed', String(x === b)); }); const n = q('[data-fb-note]'); n.innerHTML = 'Thank you. <a href="' + esc(waUrl('Hi Ken, feedback on the Payment timeline (' + b.dataset.fb + '): ')) + '" target="_blank" rel="noopener" data-gw-wa="calc-payment-planner-feedback">Tell Ken what was missing ›</a>'; }));
-    function wa() { const a = q('[data-ask-wa]'); if (!a) return; const m = 'Hi Ken, I’m using the Payment timeline on Groundwork' + (last ? ' for a ' + KIND[last.i.uiKind || last.r.kind] + ' (' + ORDER_T[last.r.order] + ')' : '') + ' and would like to talk through the order of moves. (Ref ' + REF + ')'; const u = waUrl(m); if (root.GW_WA) root.GW_WA.set(a, u); else a.setAttribute('href', u); }
+    $$('[data-fb]').forEach((b) => b.addEventListener('click', () => { track('planner_feedback', { answer: b.dataset.fb }); $$('[data-fb]').forEach((x) => { x.setAttribute('aria-pressed', String(x === b)); }); const n = q('[data-fb-note]'); n.innerHTML = 'Thank you. <a href="' + esc(waUrl('Hi Ken, feedback on What will this home cost me? (' + b.dataset.fb + '): ')) + '" target="_blank" rel="noopener" data-gw-wa="calc-payment-planner-feedback">Tell Ken what was missing ›</a>'; }));
+    function wa() { const a = q('[data-ask-wa]'); if (!a) return; const m = 'Hi Ken, I’m using What will this home cost me? on Groundwork' + (last ? ' for a ' + KIND[last.i.uiKind || last.r.kind] + ' (' + ORDER_T[last.r.order] + ')' : '') + ' and would like to talk through the order of moves. (Ref ' + REF + ')'; const u = waUrl(m); if (root.GW_WA) root.GW_WA.set(a, u); else a.setAttribute('href', u); }
     recalc();
   }
   if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount(); }
-  return { dateProblems, stageMark, whenHtml, instalSteps, sumHtml, schedSumHtml, pageHtml, formHtml, loanLine, warnHtml, assumeHtml, compareHtml, scheduleTableHtml, fundTableHtml, verdictHtml, instalHtml, leavesOutHtml, scheduleText, needHtml, fixHtml, entriesHtml, summaryText, ecIncomeCheck, ecHtml, ecGate, illusHtml, msrCase, grossOf, REF };
+  // FE V3: the Payments page draws the lists with these renderers; it says whether the option date is missing (timings are then read as "after the option")
+  function setUndated(u, kind) { UND = !!u; if (kind) KIND_NOW = kind; }
+  return { setUndated, dateProblems, stageMark, whenHtml, instalSteps, sumHtml, schedSumHtml, pageHtml, formHtml, loanLine, warnHtml, assumeHtml, compareHtml, scheduleTableHtml, fundTableHtml, verdictHtml, instalHtml, leavesOutHtml, scheduleText, needHtml, fixHtml, entriesHtml, summaryText, ecIncomeCheck, ecHtml, ecGate, illusHtml, msrCase, grossOf, REF };
 });

@@ -222,7 +222,9 @@
     if (!e) { const body = `<p class="basis">Loading prices…</p>`; return mobile ? `<aside class="bs" aria-label="Selected development"><div class="bs-hd"><button type="button" class="grab" data-dpmore aria-label="Expand"></button>${head}</div>${body}</aside>` : `<aside class="dp" aria-label="Selected development"><div class="dp-in">${head}${body}</div></aside>`; }
     if (S.sec.pr === undefined && !M.lead(name)) S.sec.pr = true;   // no typical price to lead with: the sales that do exist are shown straight away
     const nb = M.nearbyFor(name);
-    const pricesBody = `<div class="mkts">${marketHtml(name, 'sec', nb.ref)}${marketHtml(name, 'new', nb.ref)}${pos ? '<p class="basis" style="margin:2px 0 0">Select a size to compare nearby.</p>' : ''}${classNote(name)}</div>`;
+    // V3.4: the typical recent price goes into What will this home cost me? (this tab only; that page labels it the typical price in past sales)
+    const L0 = M.lead(name), costLink = L0 && L0.row && L0.row.pmed > 0 ? `<p class="basis mcost"><a href="../../tools/payment-planner/" data-m-cost="${Math.round(L0.row.pmed)}">What would a ${fmtM(L0.row.pmed)} home here cost me? ›</a></p>` : '';
+    const pricesBody = `<div class="mkts">${costLink}${marketHtml(name, 'sec', nb.ref)}${marketHtml(name, 'new', nb.ref)}${pos ? '<p class="basis" style="margin:2px 0 0">Select a size to compare nearby.</p>' : ''}${classNote(name)}</div>`;
     const nopos = `<p class="basis nopos">Not on the map yet, so neighbourhood and nearby prices are not shown.${help('URA’s data has no verified location for this development, so it cannot be placed on the map or measured against anything nearby. Its own prices by size are still shown.', 'Why there is no map position')}</p>`;
     const secs = sx('pr', 'Prices by size', pricesBody) + (pos ? sx('cmp', nb.mode === 'compare' ? 'Compare nearby homes' : 'Nearby prices', nearbyHtml(name, nb)) + sx('am', amTitle(), amenBody(name)) + sx('nbr', 'Explore nearby developments', nearHtml(name, mobile)) : '') + sx('meth', 'Data and methodology', methBody());
     const open = `<a class="btn b" href="../#/p/${esc(p.id)}" data-m-full="${esc(p.id)}">View Full Research ›</a>`;
@@ -414,6 +416,8 @@
     // A size the visitor selected on the Map goes with them (this tab only, as a 100 sq ft band start, never a typed number) so the full analysis opens on the same size.
     // With none selected, nothing is passed: Research asks which size rather than choosing one.
     if (fl && S.band && M && S.proj && M.BY[S.proj] && M.BY[S.proj].id === fl.dataset.mFull) { const bp = String(S.band).split(':'); if (/^\d{3,5}$/.test(bp[1] || '')) { try { sessionStorage.setItem('kpt.research.size', bp[1]); } catch (x) { /* storage blocked */ } fl.setAttribute('href', '../#/p/' + fl.dataset.mFull + '/' + (bp[0] === 'new' ? 'new' : 'resale')); } }   // the same market: new sales, or resales (a sale type the development lacks falls back to its own default)
+    const mc = e.target.closest && e.target.closest('a[data-m-cost]');
+    if (mc) { try { const k = 'gw.fin.v1', f = JSON.parse(sessionStorage.getItem(k) || '{}') || {}; f.buyPrice = Number(mc.dataset.mCost).toLocaleString('en-US'); f.buyFrom = 'typical'; sessionStorage.setItem(k, JSON.stringify(f)); const g = JSON.parse(sessionStorage.getItem('gw.fin3.v1') || 'null'); if (g && g.raw) { delete g.raw.price; sessionStorage.setItem('gw.fin3.v1', JSON.stringify(g)); } } catch (x) { /* storage blocked: the calculator opens empty */ } }
     if (fl) { try { sessionStorage.setItem('kpt.map.out', JSON.stringify({ id: fl.dataset.mFull, h: location.hash, n: history.length })); } catch (x) { /* Back to Map then opens the Map for that development */ } }
     if (SP.open && !(e.target.closest && (e.target.closest('#sources') || e.target.closest('.m-src')))) closeSources(false);
     if (!M) return;
