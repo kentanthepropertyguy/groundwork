@@ -89,9 +89,9 @@ try:
         # ---- 2. Upgrade from HDB ----
         pg.goto(B + '/tools/hdb-upgrade/?j=1'); pg.wait_for_selector('[data-out]'); pg.evaluate(SPY); settle(pg)
         check(f'{tag} upgrade (Plan My Move): step 1 carries the Value Explorer’s range; step 2 is the one open', 'Blk 123' in pg.inner_text('[data-step="worth"]') and pg.is_visible('[data-ste="sell"]') and not pg.is_visible('[data-ste="borrow"]'))
-        pg.fill('[data-ste="sell"] [data-k="sale.loan"]', '250,000'); pg.fill('[data-ste="sell"] [data-k="sale.cpfRefund"]', '205,000'); pg.click('[data-stdone="sell"]'); settle(pg)
+        pg.fill('[data-ste="sell"] [data-k="sale.loan"]', '250,000'); pg.fill('[data-ste="sell"] [data-k="sale.cpfRefund"]', '205,000'); settle(pg); (pg.is_visible('[data-stdone="sell"]') and pg.click('[data-stdone="sell"]')); settle(pg)   # a step closes itself once answered
         check(f'{tag} upgrade: step 2 answers $480,650 with the cash and CPF', '$480,650' in pg.inner_text('[data-step="sell"]') and '$275,650 cash + $205,000 CPF' in pg.inner_text('[data-step="sell"]'))
-        pg.fill('[data-ste="borrow"] [data-k="p.0.fixed"]', '8,000'); pg.fill('[data-ste="borrow"] [data-k="p.0.age"]', '35'); pg.click('[data-stdone="borrow"]'); settle(pg)
+        pg.fill('[data-ste="borrow"] [data-k="p.0.fixed"]', '8,000'); pg.fill('[data-ste="borrow"] [data-k="p.0.age"]', '35'); settle(pg); (pg.is_visible('[data-stdone="borrow"]') and pg.click('[data-stdone="borrow"]')); settle(pg)   # a step closes itself once answered
         b1 = money(pg.inner_text('[data-budget]').replace('M', '0000').replace('.', '')) if pg.query_selector('[data-budget]') else None
         t = out(pg)
         check(f'{tag} upgrade: the budget card shows buy up to, upfront and reserve, with KPT assumptions', b1 and 'Upfront it needs' in t and 'Left in reserve' in t and 'KPT assumptions' in t, t[:300])
@@ -100,7 +100,7 @@ try:
         check(f'{tag} upgrade: nothing asked twice (each entry appears once)', pg.evaluate("['sale.price','sale.loan','sale.cpfRefund','p.0.fixed','p.0.age'].every(k=>document.querySelectorAll('[data-k=\"'+k+'\"]').length===1)"))
         pg.click('[data-stc="sell"]'); settle(pg)
         check(f'{tag} upgrade: Change reopens a step', pg.is_visible('[data-ste="sell"]'))
-        pg.fill('[data-ste="sell"] [data-k="sale.loan"]', '300,000'); pg.click('[data-stdone="sell"]'); settle(pg)
+        pg.fill('[data-ste="sell"] [data-k="sale.loan"]', '300,000'); settle(pg); (pg.is_visible('[data-stdone="sell"]') and pg.click('[data-stdone="sell"]')); settle(pg)   # a step closes itself once answered
         b2 = pg.inner_text('[data-budget]')
         check(f'{tag} upgrade: changing a step updates the budget', b2 != sh['figures'][0]['value'].replace('S$', '$'), [b2])
         # V3.5: funds kept aside are an assumption chip, "None" by default; a custom amount recalculates the budget
