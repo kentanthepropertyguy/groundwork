@@ -522,3 +522,11 @@ body:has(.f3-frame) .gw-nav .in,body:has(.f3-frame) .gw-foot .in{max-width:1360p
   .f3-card,.f3-frame .f3-card{padding-left:12px;padding-right:12px}
   .f3-next,.f3-frame .f3-next{padding-left:10px;padding-right:10px}
 }
+
+/* V3.7: Borrow's incomes on top: one field, or two side by side (stacked on a phone); the prompt for a missing second income beside them */
+.f3-inc{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 16px;align-items:end;margin-bottom:12px}
+.f3-inc>div>.f3-f,.f3-inc>.f3-f{margin-bottom:0}
+.f3-inc>div{min-width:0}
+.f3-incneed{margin:-4px 0 12px;font-size:14px;line-height:1.45;color:var(--f3-blue);font-weight:600}
+/* a loan estimate's quiet line: muted, small, beneath the figure's own words */
+.f3-indic{display:block;margin-top:4px;font-size:12px;line-height:1.4;color:var(--f3-muted)}
