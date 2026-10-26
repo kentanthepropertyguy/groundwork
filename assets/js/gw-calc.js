@@ -640,5 +640,5 @@
   };
   const ASK = (tool) => 'Hi Ken, I’m using the ' + tool + ' on Groundwork and have a question.';
 
-  return { mortgage, stampDuty, bsdLines, ssd, saleProceeds, saleEstimate, cpfInterestEstimate, cpfSecondHome, tdsr, msr, progressive, borrowers, bankTenure, tenureNote, tenureMaxText, tenureTierText, tenureLimit, messages, ASK, instal, parseDate: D, parseMoney, parseNum, LIMITS, dutyAt };
+  return { flatCheck, mortgage, stampDuty, bsdLines, ssd, saleProceeds, saleEstimate, cpfInterestEstimate, cpfSecondHome, tdsr, msr, progressive, borrowers, bankTenure, tenureNote, tenureMaxText, tenureTierText, tenureLimit, messages, ASK, instal, parseDate: D, parseMoney, parseNum, LIMITS, dutyAt };
 });

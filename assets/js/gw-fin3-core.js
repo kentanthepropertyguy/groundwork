@@ -318,5 +318,41 @@
     return r && r.ok && r.flat ? Object.assign({ scenario: r.scenario }, r.flat) : null;
   }
 
-  return { flat, sell, incomeNeeded, cost, borrowersOf, loansOf, needOf, borrow, priceLoan, ownedOf, toAssess, afford, dutyBuyers, schedule, timelineInput, incomeLoan, funding, engineKind };
+  /* ---------------- V3.7: an HDB flat on What will this home cost me? ---------------- */
+  // Ken, 27 Oct 2026: answer the question for an HDB resale flat (st.pkind 'hdb') or a new HDB flat (st.pkind 'bto'), with an HDB loan or a bank loan (st.hdbLoan).
+  // No rule of its own: the loan limit, the minimum cash and the cash above the valuation are GW_CALC.flatCheck's (the HDB loan limit page's); the loan limit and
+  // tenure are GW_RULES.hdbLoan's (HDB loan) or GW_CALC.bankTenure's with the MAS rows (bank loan); stamp duty is GW_CALC.stampDuty's (kind 'hdb'); the instalment
+  // and the income the 30% MSR needs are GW_CALC.mortgage's; the payment steps are GW_SCHEDULE.hdb's. Eligibility, grants, the lease and HDB's use of CPF savings are
+  // said on the page, not assumed.
+  function costHdb(st) {
+    const flat = st.pkind === 'bto' ? 'bto' : 'resale';
+    if (!(has(st.price) && st.price > 0)) return { state: 'need', need: ['price'], hdb: true, flat };
+    const lender = st.hdbLoan === 'bank' ? 'bank' : 'hdb', H = R.hdbLoan, L = loansOf(st), bs = engineBorrowers(st);
+    const aged = bs.length && bs.every((b) => has(b.age));
+    let age = null;
+    if (aged) { if (bs.length === 1) age = bs[0].age; else if (lender === 'hdb') age = bs.reduce((a, b) => a + b.age, 0) / bs.length; else { const Bc = bs.some((b) => b.fixed > 0 || b.variable > 0) ? C.borrowers(bs) : null; age = Bc && Bc.iwaaUse !== null ? Bc.iwaaUse : Math.max.apply(null, bs.map((b) => b.age)); } }
+    const ageAssumed = age === null, std = lender === 'hdb' ? H.maxTenureYears : R.bankLtv.standardTenure.hdb;
+    if (ageAssumed) age = Math.max(21, (lender === 'hdb' ? H.endAge : R.bankLtv.endAge) - (has(st.years) ? Math.min(st.years, std) : std));
+    let years, maxYears, lower = false, ltv, minCash;
+    if (lender === 'hdb') { maxYears = Math.max(0, Math.min(H.maxTenureYears, Math.floor(H.endAge - age))); years = has(st.years) ? Math.min(st.years, maxYears) : maxYears; ltv = H.ltv; minCash = H.minCash; }
+    else { const t = C.bankTenure('hdb', age, has(st.years) ? st.years : undefined); maxYears = t.allowed; years = t.years; lower = t.lower; const row = (t.lower ? R.bankLtv.lower : R.bankLtv.standard)[Math.min(L.home, 2)]; ltv = row.ltv; minCash = row.minCash; }
+    if (!(years >= 1)) return { state: 'invalid', hdb: true, flat, errors: [{ field: 'years', text: lender === 'hdb' ? 'An HDB loan ends by age ' + H.endAge + ', so there is no HDB loan tenure at this age. A bank loan, or no loan, may still work.' : 'Banks usually end a loan by age ' + R.bankLtv.maturityAge + ', so there is no bank loan tenure at this age.' }] };
+    const where = { price: st.price, valuation: flat === 'resale' && has(st.valuation) && st.valuation > 0 ? st.valuation : undefined };
+    const lim = C.flatCheck(where, Infinity, ltv, minCash), typed = has(st.loanAmt) ? st.loanAmt : null;
+    const fc = C.flatCheck(where, typed !== null ? Math.min(typed, lim.loanLimit) : lim.loanLimit, ltv, minCash);
+    const ratePct = has(st.ratePct) ? st.ratePct : (lender === 'hdb' ? Math.round(R.hdbLoanRate * 1000) / 10 : 4);
+    const m = fc.loan > 0.5 ? C.mortgage({ loan: fc.loan, ratePct: ratePct, years: years, lender: lender }) : null;
+    const d = C.stampDuty({ price: fc.dutyBase, kind: 'hdb', buyers: dutyBuyers(st), couple: st.couple });
+    if (!d.ok) return { state: 'invalid', hdb: true, flat, errors: d.invalid || [] };
+    const sch = S.hdb({ flat: flat, price: st.price, loan: lender });
+    // a new flat's booking fee (HDB, by flat size) is part of the down payment: paid when booking, then deducted from what is payable at the Agreement for Lease
+    const BF = R.hdbPayments.bto.bookingFee, room = st.btoRoom === '2' ? '2' : st.btoRoom === '3' ? '3' : '4', bookingFee = flat === 'bto' ? (room === '2' ? BF.flexi2 : room === '3' ? BF.room3 : BF.room4plus) : 0;
+    const duty = d.total, flex = fc.cashOrCpf + duty, cpfUsed = Math.min(Math.max(0, has(st.cpf) ? st.cpf : 0), flex);
+    return { state: 'ok', hdb: true, flat: flat, lender: lender, price: st.price, valuation: where.valuation || null, cov: fc.cov, base: fc.base, loan: fc.loan, ruleLoan: lim.loanLimit, typed: typed, overLimit: typed !== null && typed > lim.loanLimit + 0.5,
+      ltv: ltv, minCash: minCash, cashMin: fc.cashMin, cashOnly: fc.cashOnly, down: fc.down, cashOrCpf: fc.cashOrCpf, bsd: d.bsd, absd: d.absd, absdRate: d.absdRate, duty: duty, dutyNotes: d.notes || [],
+      flex: flex, cpfUsed: cpfUsed, cpfLeft: Math.max(0, (has(st.cpf) ? st.cpf : 0) - cpfUsed), cash: fc.down + duty - cpfUsed, monthly: m && m.ok ? m.monthly : 0, incomeMsr: m && m.ok ? m.stress.incomeForMsr : 0, stressRate: m && m.ok ? m.stress.rate : null,
+      years: years, maxYears: maxYears, capped: has(st.years) && st.years > maxYears, lower: lower, ratePct: ratePct, age: age, ageAssumed: ageAssumed, homeLoans: L.home, bookingFee: bookingFee, room: room, events: sch.ok ? sch.events : [], foot: sch.ok ? sch.foot : [] };
+  }
+
+  return { costHdb, flat, sell, incomeNeeded, cost, borrowersOf, loansOf, needOf, borrow, priceLoan, ownedOf, toAssess, afford, dutyBuyers, schedule, timelineInput, incomeLoan, funding, engineKind };
 });

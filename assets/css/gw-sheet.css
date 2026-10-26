@@ -9,7 +9,7 @@
   --gs-ink: #16213E; --gs-muted: #6B7280; --gs-rule: #D9D5CB; --gs-gold: #A9822F;
   --gs-sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --gs-serif: "Iowan Old Style", Charter, Cambria, Georgia, "Times New Roman", "Liberation Serif", serif;
-  width: 210mm; height: 297mm; box-sizing: border-box; padding: 13.6mm 16.1mm 15.6mm; background: #fff; color: var(--gs-ink);
+  width: 210mm; height: 279mm; box-sizing: border-box; padding: 13.6mm 16.1mm 13mm; background: #fff; color: var(--gs-ink);
   font-family: var(--gs-sans); font-size: 9.5pt; line-height: 1.42; display: flex; flex-direction: column; overflow: hidden;
   -webkit-print-color-adjust: exact; print-color-adjust: exact; font-variant-numeric: lining-nums tabular-nums; letter-spacing: 0;
 }
@@ -47,7 +47,7 @@
 .gs-rn { font-size: 9.5pt; }
 .gs-rn i { font-style: normal; color: var(--gs-muted); }
 .gs-rl small { font-size: 8pt; line-height: 1.38; color: var(--gs-muted); }
-.gs-rw { font-size: 8.5pt; color: var(--gs-muted); white-space: nowrap; }
+.gs-rw { font-size: 8.5pt; line-height: 1.3; color: var(--gs-muted); overflow-wrap: break-word; }
 .gs-rv { font-family: var(--gs-serif); font-weight: 400 !important; font-size: 11pt; text-align: right; white-space: nowrap; }
 .gs-r.tot { border-top: 0.7pt solid var(--gs-ink); }
 .gs-r.tot .gs-rn { font-weight: 600; }
@@ -66,6 +66,9 @@
 .gs-dash { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .gs-ftrt { text-align: right; }
 .gs-ftrt span { display: inline; }
+/* V3.7: Ken's photograph beside his details in the footer */
+.gs-ft.gs-ft-ph { grid-template-columns: 12mm minmax(0, 1fr) minmax(0, 1.25fr); column-gap: 10pt; align-items: start; }
+.gs-ph { display: block; width: 12mm; height: 12mm; border-radius: 50%; object-fit: cover; }
 /* printing: only the sheet, never the page on screen */
 @media print {
   html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }

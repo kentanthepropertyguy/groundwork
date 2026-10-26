@@ -42,7 +42,7 @@ try:
     def load(raw, loans, hash_=''):
         pg.goto(B + '/tools/tdsr/?parity'); pg.wait_for_selector('[data-out]')
         pg.evaluate("s=>{sessionStorage.clear();sessionStorage.setItem('gw.fin3.v1',JSON.stringify({v:3,raw:s.raw,loans:s.loans}))}", {'raw': raw, 'loans': loans})
-        pg.goto(B + '/tools/tdsr/' + hash_); pg.wait_for_selector('[data-out]'); pg.wait_for_function("()=>window.__f3Settled&&window.__f3Settled()")
+        pg.goto(B + '/tools/tdsr/?j=1' + hash_); pg.wait_for_selector('[data-out]');   # V3.7: the seeded figures are the journey's (gw.fin3.v1); a standalone page starts blank pg.wait_for_function("()=>window.__f3Settled&&window.__f3Settled()")
     for s in SC['afford']:
         o = BASE['afford'][s['id']]; load(s['raw'], s.get('loans', []), '#cash')
         n = pg.evaluate("""()=>{const g=k=>{const e=document.querySelector('[data-out] [data-'+k+']');return e?e.textContent:null};return {budget:g('budget'),cap:g('cap'),mon:g('mon'),cash:g('cashneed'),cpf:g('cpfuse'),fact:(document.querySelector('[data-out] .f3-fact')||{}).textContent||'',text:document.querySelector('[data-out]').textContent.slice(0,300)}}""")

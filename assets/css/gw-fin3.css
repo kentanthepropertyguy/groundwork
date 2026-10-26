@@ -493,3 +493,32 @@ body:has(.f3-frame) .gw-nav .in,body:has(.f3-frame) .gw-foot .in{max-width:1360p
 .f3-stages .f3-ntot .f3-nn{font-weight:700}
 .f3-stages .f3-nbank .f3-nn{font-weight:500;color:var(--f3-body)}
 .f3-stages .f3-nbank b{font-weight:500;color:var(--f3-body)}
+
+/* V3.7: the payment stages (Cost). A heading and its amount on one line, when and how it is paid below across the full width; nothing in a narrow column */
+.f3-stages .f3-sg+.f3-sg,.f3-stages .f3-sg+.f3-sr{margin-top:4px}
+.f3-sgt{margin:12px 0 0;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#8A90A0}
+.f3-nh2+.f3-sg .f3-sgt{margin-top:4px}
+.f3-sr{padding:9px 0;border-top:1px solid #E6E8ED}
+.f3-sgt+.f3-sr{border-top:0}
+.f3-sr1{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 16px}
+.f3-sl{flex:1 1 11em;min-width:0;font-size:15px;font-weight:620;line-height:1.35;color:var(--f3-ink);overflow-wrap:break-word}
+.f3-sl em{font-style:normal;font-weight:450;color:var(--f3-muted);font-size:13px;margin-left:3px}
+.f3-sr1 b{flex:0 0 auto;margin-left:auto;font-size:16px;font-weight:700;color:var(--f3-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.f3-sr1 b small{font-size:12.5px;font-weight:500;color:var(--f3-muted)}
+.f3-sw{margin:3px 0 0;font-size:13.5px;line-height:1.45;color:var(--f3-muted);overflow-wrap:break-word}
+.f3-ssub{border-top:1.5px solid var(--f3-ink)}
+.f3-ssub .f3-sl{font-weight:700}
+.f3-ssub .f3-sr1 b{font-size:19px}
+.f3-stot{margin-top:10px;border-top:2px solid var(--f3-ink)}
+.f3-stot .f3-sl{font-weight:700}
+[data-sg="bank"] .f3-sl,[data-sg="bank"] .f3-sr1 b{font-weight:500;color:var(--f3-body)}
+[data-later]{display:inline-block;margin-top:4px}
+/* V3.7: very narrow screens and large zoom (about 300px across or less): each answer's figure goes under its label instead of beside it */
+@media (max-width:300px){
+  .f3-ar{grid-template-columns:minmax(0,1fr)}
+  .f3-af{text-align:left;white-space:normal;font-size:clamp(22px,12vw,30px)}
+  .f3-ar1 .f3-af{font-size:clamp(18px,11vw,34px)}
+  .f3-al{padding-top:0}
+  .f3-card,.f3-frame .f3-card{padding-left:12px;padding-right:12px}
+  .f3-next,.f3-frame .f3-next{padding-left:10px;padding-right:10px}
+}
