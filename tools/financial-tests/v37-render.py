@@ -208,6 +208,44 @@ try:
         check(f'{tag} D9: Cost shows the quiet line once beneath the instalment (private and HDB)', n1 == 1 and n2 == 1, [n1, n2])
         check(f'{tag} no script errors', not errs, errs)
         ctx.close()
+    # ================= E. Upgrade from HDB, buy first (V3.7.2): the flat's loan is still running =================
+    # Independent working (MAS LTV tiers and minimum cash; IRAS BSD; ABSD 20% for a Singapore Citizen's second home; TDSR 55% at 4%):
+    # the buyer's cash must cover the minimum cash, ABSD and BSD (paid in cash first); cash and CPF together cover the down payment and duty.
+    def bf_budget(cash, cpf, income, age, flat_loan, flat_mo):
+        tiers = (0.45, 0.25) if flat_loan else (0.75, 0.05)
+        yrs = min(30, 65 - age); ltdsr = (lambda m: m * (1 - (1 + .04 / 12) ** -(yrs * 12)) / (.04 / 12))(max(0, income * .55 - (flat_mo if flat_loan else 0)))
+        def ok(P):
+            loan = min(tiers[0] * P, ltdsr); duty = bsd(P) + .20 * P
+            return cash >= tiers[1] * P + duty and cash + cpf >= P - loan + duty
+        lo, hi = 0, 5e6
+        for _ in range(60):
+            m = (lo + hi) / 2; lo, hi = (m, hi) if ok(m) else (lo, m)
+        return int(lo // 1000 * 1000)
+    ctx = br.new_context(viewport={'width': 1440, 'height': 900}); pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
+    opened(pg, '/tools/hdb-upgrade/')
+    base = "n:1,p:[{age:35,fixed:%d,res:'SC'},{}],cash:%d,cpf:%d,homes:1,whose:'both',akind:'completed',bkind:'private',sale:{type:'hdb',price:750000,loan:250000,cpfRefund:205000},cpfBal:[{oa:%d,sa:250000},{}],ratePct:null,years:null"
+    def eng(inc, cash, cpf, extra): return pg.evaluate("()=>{const a=GW_FIN3.afford({" + (base % (inc, cash, cpf, cpf)) + "," + extra + "});return a.state==='ok'?Math.floor(a.budget/1000)*1000:a.state}")
+    e75 = eng(8000, 100000, 150000, "plan:'keep',loans:[]"); e45 = eng(8000, 100000, 150000, "plan:'keep',loans:[{type:'home',who:0,amt:1300}]")
+    check('E1: the reported case, worked out independently: about $376,000 if the flat had no loan (75%), about $216,000 with its loan (45%, 25% cash)', bf_budget(100000, 150000, 8000, 35, False, 0) == 376000 and bf_budget(100000, 150000, 8000, 35, True, 1300) == 216000, [bf_budget(100000, 150000, 8000, 35, False, 0), bf_budget(100000, 150000, 8000, 35, True, 1300)])
+    check('E1: the engine agrees: $376,000 without the loan, $216,000 with it', e75 == 376000 and e45 == 216000, [e75, e45])
+    # income-bound: $4,000 a month and $400,000 cash, so TDSR (not cash) sets the loan and the flat's repayment must count
+    t0 = eng(4000, 400000, 150000, "plan:'keep',loans:[{type:'home',who:0,amt:1300}]"); i0 = bf_budget(400000, 150000, 4000, 35, True, 1300); i1 = bf_budget(400000, 150000, 4000, 35, True, 0)
+    check(f'E2: income-bound: the flat\'s $1,300 repayment lowers the budget (independent {i0:,} with it, {i1:,} if it were ignored); the engine gives {t0:,}', abs(t0 - i0) <= 1000 and i1 > i0, [t0, i0, i1])
+    # the page: seed the journey's entries (cash, CPF, balances, the sale, the income), as Plan My Move would carry them
+    raw = {'n': '1', 'p.0.age': '35', 'p.0.fixed': '8,000', 'cash': '100,000', 'cpf': '150,000', 'cpfBal.0.oa': '150,000', 'cpfBal.0.sa': '250,000', 'homes': '1', 'akind': 'completed', 'sale.type': 'hdb', 'sale.price': '750,000', 'sale.loan': '250,000', 'sale.cpfRefund': '205,000'}
+    pg.evaluate("r=>{sessionStorage.clear();sessionStorage.setItem('gw.fin3.v1',JSON.stringify({v:3,raw:r,loans:[]}))}", raw)
+    opened(pg, '/tools/hdb-upgrade/?j=1'); settle(pg)
+    sell0 = pg.inner_text('[data-budget]'); se = pg.evaluate("()=>{const a=GW_FIN3.afford({" + (base % (8000, 100000, 150000, 150000)) + ",plan:'sell',loans:[]});return Math.floor(a.budget/1000)*1000}")
+    pg.click('[data-bfirst] summary'); settle(pg)
+    check('E3: the flat has a loan: the panel says the new loan is a second housing loan (45%, 25% cash) and asks for the flat\'s repayment; no buy-first budget yet', pg.is_visible('[data-bf-mo] [data-k="upFlatMo"]') and 'second housing loan: banks lend up to 45% of the price, at least 25% must be cash' in pg.inner_text('[data-bfirst-out]') and pg.is_visible('[data-bf-need]') and not pg.query_selector('[data-bf-budget]'), pg.inner_text('[data-bfirst-out]')[:400])
+    pg.fill('[data-k="upFlatMo"]', '1,300'); settle(pg)
+    check('E3: with the $1,300 repayment typed: the buy-first budget is about $216,000, the figure worked out independently', amt(pg.inner_text('[data-bf-budget]')) == 216000 and 'counting the flat’s $1,300 monthly repayment' in pg.inner_text('[data-bfirst-out]'), pg.inner_text('[data-bfirst-out]')[-300:])
+    check(f'E4: sell first is unchanged ({sell0}, the engine\'s sell-first budget)', pg.inner_text('[data-budget]') == sell0 and M(sell0) is not None and abs(M(sell0) - se) <= 10000, [sell0, se])
+    pg.fill('[data-k="sale.loan"]', '0') if pg.locator('[data-k="sale.loan"]:visible').count() else pg.evaluate("()=>{const f=document.querySelector('[data-k=\"sale.loan\"]');f.value='0';f.dispatchEvent(new Event('input',{bubbles:true}))}")
+    settle(pg)
+    check('E5: a flat with no loan left: no repayment asked, the 75% limit, about $376,000', pg.is_hidden('[data-bf-mo]') and 'The flat has no loan left, so the usual 75% limit applies.' in pg.inner_text('[data-bfirst-out]') and amt(pg.inner_text('[data-bf-budget]')) == 376000, pg.inner_text('[data-bfirst-out]')[-300:])
+    check('E: no script errors', not errs, errs)
+    ctx.close()
     # ================= C. layout: desktop, tablet, phone, 320px and 200% zoom =================
     for tag, vp, mob in (('1440', {'width': 1440, 'height': 900}, False), ('1060', {'width': 1060, 'height': 900}, False), ('tablet 820', {'width': 820, 'height': 1180}, True), ('phone 390', {'width': 390, 'height': 844}, True), ('phone 320', {'width': 320, 'height': 700}, True), ('200% zoom (195)', {'width': 195, 'height': 422}, True)):
         ctx = br.new_context(viewport=vp, is_mobile=mob, has_touch=mob); pg = ctx.new_page()
