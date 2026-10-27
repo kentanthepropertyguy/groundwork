@@ -62,11 +62,73 @@ t('type defaults to any; condo, EC and cluster are matched apart and never poole
   assert.strictEqual(D.clean({ budget: 1e6 }).type, 'any'); assert.strictEqual(run(ps, {}).items.length, 3);
   assert.deepStrictEqual(ids(run(ps, { type: 'ec' })), ['e']); assert.deepStrictEqual(D.sections(run(ps, {}).items).map((s) => s.cls), ['condo', 'ec', 'cluster']);
 });
-t('resale and new launch are separate groups; the sale type filter works', () => {
-  const p = P('b', { resale: [row(1000, 5, 3, 202609, 1500000, 1800000)], new: [row(1000, 5, 3, 202609, 1500000, 1800000)] });
-  const either = run([p], {}); assert.deepStrictEqual(either.items.map((i) => i.sale).sort(), ['new', 'resale']);
-  assert.deepStrictEqual(run([p], { sale: 'new' }).items.map((i) => i.sale), ['new']); assert.deepStrictEqual(run([p], { sale: 'resale' }).items.map((i) => i.sale), ['resale']);
+t('resale and new launch are separate groups; the sale type filter works (Research fix: the new launch from its listing)', () => {
+  const p = P('b', { resale: [row(1000, 5, 3, 202609, 1500000, 1800000)], new: [row(1000, 5, 3, 202609, 1500000, 1800000)] }), i = inv([IP('b', [TY(2, [[900, 1700000]])])]);
+  const either = run([p], {}, { inv: i }); assert.deepStrictEqual(either.items.map((x) => x.sale).sort(), ['new', 'resale']);
+  assert.deepStrictEqual(run([p], { sale: 'new' }, { inv: i }).items.map((x) => x.sale), ['new']); assert.deepStrictEqual(run([p], { sale: 'resale' }, { inv: i }).items.map((x) => x.sale), ['resale']);
+  assert.deepStrictEqual(run([p], {}).items.map((x) => x.sale), ['resale'], 'without listings, URA developer sales never make a new-launch match');
 });
+
+console.log('Research fix (Ken, 27 Oct 2026): new launches come only from new-launch listings');
+{
+  const DEV = (id, q1, q3) => P(id, { new: [row(1000, 8, 3, 202609, q1, q3)] });
+  t('a new launch with cheap URA developer sales but no listing is not a new-launch match (before: listed as "typical prices within your maximum")', () => {
+    assert.strictEqual(run([DEV('n', 1200000, 1500000)], { sale: 'new' }, { inv: inv([]) }).items.length, 0);
+    assert.strictEqual(run([DEV('n', 1200000, 1500000)], { sale: 'new' }, {}).items.length, 0);
+  });
+  t('a listing within the maximum makes the match, whatever URA developer sales say: tier "listing", no URA figure carried, price history flagged', () => {
+    const r = run([DEV('n', 2600000, 3200000)], { sale: 'new' }, { inv: inv([IP('n', [TY(2, [[700, 1650000], [800, 1790000], [900, 2150000]]), TY(3, [[1100, 2600000]])])]) });
+    assert.strictEqual(r.items.length, 1); const it = r.items[0];
+    assert.strictEqual(it.tier, 'huttons'); assert.strictEqual(it.ura, null); assert.strictEqual(it.hist, true);
+    assert.deepStrictEqual(it.inv.types, [{ bedrooms: 2, floor: 1650000, lo: 700, hi: 900 }], 'the listed sizes within the maximum (700-899 sq ft), and the lowest listed price');
+  });
+  t('cheaper earlier developer sales never replace or lower the listed price', () => {
+    const r = run([DEV('n', 900000, 1100000)], { sale: 'new' }, { inv: inv([IP('n', [TY(2, [[800, 1950000]])])]) });
+    assert.strictEqual(r.items[0].inv.from, 1950000); assert.strictEqual(r.items[0].ura, null);
+    assert.strictEqual(run([DEV('n', 900000, 1100000)], { sale: 'new', budget: 1500000 }, { inv: inv([IP('n', [TY(2, [[800, 1950000]])])]) }).items.length, 0, 'listing above the maximum: no match from the cheaper URA sales');
+  });
+  t('a listing with no units returned, or a project missing from the listings, is simply not listed (never called sold out)', () => {
+    const z = run([DEV('n', 1200000, 1500000)], { sale: 'new' }, { inv: inv([IP('n', [], { status: 'zero_returned' })]) });
+    assert.strictEqual(z.items.length + z.over.length, 0);
+    assert.ok(!/sold out/i.test(JSON.stringify(z)));
+  });
+  t('a development with no URA developer sales is listed from its listing, with no price history flag', () => {
+    const r = run([P('q', {})], { sale: 'new' }, { inv: inv([IP('q', [TY(1, [[500, 1100000]])])]) });
+    assert.strictEqual(r.items.length, 1); assert.strictEqual(r.items[0].hist, false);
+  });
+  t('no minimum number of listings: one listed type in one size band is enough', () => {
+    assert.strictEqual(run([P('q', {})], { sale: 'new' }, { inv: inv([IP('q', [TY(2, [[700, 1500000]])])]) }).items.length, 1);
+  });
+  t('the 5% list for new launches comes from listed prices only', () => {
+    const r = run([DEV('n', 1200000, 1500000)], { sale: 'new', over: true }, { inv: inv([IP('n', [TY(2, [[800, 2080000]])])]) });
+    assert.strictEqual(r.items.length, 0); assert.strictEqual(r.over.length, 1); assert.strictEqual(r.over[0].inv.from, 2080000); assert.strictEqual(r.over[0].ura, null);
+  });
+  t('minimum size: only listed sizes at or above it count, and the size range shown starts there', () => {
+    const r = run([P('q', {})], { sale: 'new', minSize: 900 }, { inv: inv([IP('q', [TY(2, [[700, 1500000], [900, 1800000], [1000, 2300000]])])]) });
+    assert.deepStrictEqual(r.items[0].inv.types, [{ bedrooms: 2, floor: 1800000, lo: 900, hi: 1000 }]);
+  });
+  t('Either keeps the two sources apart: resale from URA resales, new launches from listings, in separate groups', () => {
+    const p = P('b', { resale: [row(1000, 5, 3, 202609, 1500000, 1800000)], new: [row(1000, 5, 3, 202609, 1200000, 1300000)] });
+    const r = run([p], {}, { inv: inv([IP('b', [TY(3, [[1200, 1900000]])])]) });
+    const rs = r.items.find((x) => x.sale === 'resale'), nw = r.items.find((x) => x.sale === 'new');
+    assert.strictEqual(rs.tier, 'typical'); assert.ok(rs.ura && rs.inv === null); assert.strictEqual(nw.tier, 'huttons'); assert.ok(nw.ura === null && nw.inv.from === 1900000);
+    assert.deepStrictEqual(D.sections(r.items)[0].groups.map((g) => g.sale), ['resale', 'new']);
+  });
+  t('stale listings (past the 21-day window) are not used: no new launch is listed, resale is unchanged', () => {
+    const p = P('b', { resale: [row(1000, 5, 3, 202609, 1500000, 1800000)], new: [row(1000, 5, 3, 202609, 1200000, 1300000)] });
+    const old = iso(NOW - 22 * 24 * H), st = F.prepareInventory(DOC([IP('b', [TY(2, [[900, 1500000]])], { checkedAt: old })], old), NOW);
+    assert.deepStrictEqual(run([p], {}, { inv: st }).items.map((x) => x.sale), ['resale']);
+    const ok20 = iso(NOW - 20 * 24 * H), f20 = F.prepareInventory(DOC([IP('b', [TY(2, [[900, 1500000]])], { checkedAt: ok20 })], ok20), NOW);
+    const nw = run([p], {}, { inv: f20 }).items.find((x) => x.sale === 'new'); assert.ok(nw && nw.inv.past === true && nw.inv.late === true, 'within 21 days: listed, dated and marked as possibly changed');
+  });
+  t('real data: every new-launch item comes from the listings (no URA figure), every resale item from URA resales', () => {
+    const rix = F.prepare(JSON.parse(fs.readFileSync(path.join(root, 'data/projects/find.json'), 'utf8')));
+    const rdoc = JSON.parse(fs.readFileSync(path.join(root, 'data/projects/inventory.json'), 'utf8')), ri = F.prepareInventory(rdoc, Date.parse(rdoc.checkedAt) + 12 * H);
+    let nNew = 0; [1500000, 2000000, 3000000].forEach((b) => [null, 1, 2, 3, 4].forEach((beds) => { const r = D.search(rix, { budget: b, beds }, { inv: ri });
+      r.items.forEach((i) => { if (i.sale === 'new') { nNew++; assert.ok(i.ura === null && i.tier === 'huttons' && i.inv.state === 'match' && i.inv.types.length && i.inv.types.every((t) => t.floor <= b && t.hi > t.lo), i.name); } else assert.ok(i.ura && i.inv === null, i.name); }); }));
+    assert.ok(nNew > 50, nNew);
+  });
+}
 
 console.log('Bedrooms are never inferred');
 const NEWP = P('n', { new: [row(1000, 8, 3, 202609, 2500000, 3000000)] });

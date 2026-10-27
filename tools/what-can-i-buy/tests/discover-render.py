@@ -56,7 +56,7 @@ try:
         t('entry: budget, optional place, type Any, no questionnaire', entry)
         def first_home():
             ctx, pg, errs = open_page(br, kw); search(pg, '1,500,000')
-            h = headline(pg); ok(re.search(r'\d+ developments? with recent sales within \$1\.5m', h), h)
+            h = headline(pg); ok(re.search(r'\d+ developments? with recent sales or developer listings within \$1\.5m', h), h)   # Research fix: names both sources
             ok(not re.search(r'available|for sale|you can buy', h, re.I), h)
             ok(pg.query_selector('.kd-tg-g, .kd-tg-a, .kd-tg-b, .kd-tg-n') is not None, 'cards carry a plain evidence tag')
             ok(pg.query_selector('[data-f=over]:checked') is None, '5% over group is off by default')
