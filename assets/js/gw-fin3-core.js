@@ -120,7 +120,7 @@
     const s = { kind: st.akind === 'completed' ? 'completed' : st.akind === 'hdb' ? 'hdb' : 'new',
       buyers: people(st).map((x) => { const b = { res: resOf(x), fta: ftaOf(x), owned: own[x.k] }; if (!(x.k === 1 && x.nb)) { b.age = x.age; b.fixed = x.fixed; b.variable = x.variable; } return b; }),
       debts: L.otherAmt, ratePct: has(st.ratePct) ? st.ratePct : 4, years: has(st.years) ? st.years : undefined, cash: st.cash, cpf: st.cpf, saveMo: has(st.saveMo) ? st.saveMo : undefined, cpfMo: has(st.cpfMo) ? st.cpfMo : undefined,
-      home: !(st.homes >= 1) ? 'none' : sell ? 'sell' : 'keep', couple: st.couple, cpfBal: st.cpfBal, cover95: st.cover95,
+      home: !(st.homes >= 1) ? 'none' : sell ? 'sell' : 'keep', couple: st.couple, cpfBal: st.cpfBal, cover95: st.cover95, cpfIsUsable: st.cpfIsUsable === true,
       price: has(st.price) && st.price > 0 ? st.price : undefined, valuation: st.akind === 'completed' && has(st.valuation) ? st.valuation : undefined };
     if (st.homes >= 1) {
       s.homeJoint = st.n === 2 ? st.whose === 'both' : undefined;

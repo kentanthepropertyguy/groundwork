@@ -530,3 +530,11 @@ body:has(.f3-frame) .gw-nav .in,body:has(.f3-frame) .gw-foot .in{max-width:1360p
 .f3-incneed{margin:-4px 0 12px;font-size:14px;line-height:1.45;color:var(--f3-blue);font-weight:600}
 /* a loan estimate's quiet line: muted, small, beneath the figure's own words */
 .f3-indic{display:block;margin-top:4px;font-size:12px;line-height:1.4;color:var(--f3-muted)}
+
+/* V3.7.3: "Buy first, then sell": its three figures together (side by side where the card is wide, stacked on a phone), each asked for beside itself */
+.f3-bfin{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:4px 14px;align-items:start}
+.f3-bfin>div{min-width:0}
+.f3-bfneed{margin:-6px 0 8px;font-size:13px;line-height:1.4;color:var(--f3-blue);font-weight:600}
+.f3-bfres{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 12px;margin:6px 0 4px;padding-top:10px;border-top:1px solid #E6E8ED}
+.f3-bfres span{font-size:15px;color:var(--f3-ink)}
+.f3-bfres b{font-family:var(--f3-serif);font-weight:400;font-size:28px;color:var(--f3-ink);white-space:nowrap}

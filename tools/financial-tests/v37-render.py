@@ -72,7 +72,8 @@ try:
         opened(pg, '/tools/hdb-upgrade/')
         check(f'{tag} A2: Sell, then Upgrade opened on its own: no sale figures carried', not val(pg, 'sale.price') and not val(pg, 'sale.loan'), [val(pg, 'sale.price')])
         # A3. Upgrade's own steps carry
-        fill(pg, 'sale.price', '750,000'); fill(pg, 'sale.loan', '250,000'); fill(pg, 'sale.cpfRefund', '205,000'); fill(pg, 'p.0.fixed', '8,000'); fill(pg, 'p.0.age', '35')
+        # V3.7.3: a step closes only on Done
+        fill(pg, 'sale.price', '750,000'); pg.click('[data-stdone="worth"]'); settle(pg); fill(pg, 'sale.loan', '250,000'); fill(pg, 'sale.cpfRefund', '205,000'); pg.click('[data-stdone="sell"]'); settle(pg); fill(pg, 'p.0.fixed', '8,000'); fill(pg, 'p.0.age', '35'); pg.click('[data-stdone="borrow"]'); settle(pg)
         eng = pg.evaluate("()=>GW_FIN3.afford({n:1,p:[{age:35,fixed:8000,res:'SC'},{}],loans:[],cash:0,cpf:0,homes:1,plan:'sell',whose:'both',akind:'new',bkind:'private',sale:{type:'hdb',price:750000,loan:250000,cpfRefund:205000},cpfBal:[{},{}],ratePct:null,years:null}).budget")
         b0 = pg.inner_text('[data-budget]')
         check(f'{tag} A3: Upgrade from HDB carries its four steps into its budget (same as GW_FIN3.afford)', M(b0) is not None and abs(M(b0) - eng) <= 10000, [b0, eng])
@@ -237,14 +238,103 @@ try:
     opened(pg, '/tools/hdb-upgrade/?j=1'); settle(pg)
     sell0 = pg.inner_text('[data-budget]'); se = pg.evaluate("()=>{const a=GW_FIN3.afford({" + (base % (8000, 100000, 150000, 150000)) + ",plan:'sell',loans:[]});return Math.floor(a.budget/1000)*1000}")
     pg.click('[data-bfirst] summary'); settle(pg)
-    check('E3: the flat has a loan: the panel says the new loan is a second housing loan (45%, 25% cash) and asks for the flat\'s repayment; no buy-first budget yet', pg.is_visible('[data-bf-mo] [data-k="upFlatMo"]') and 'second housing loan: banks lend up to 45% of the price, at least 25% must be cash' in pg.inner_text('[data-bfirst-out]') and pg.is_visible('[data-bf-need]') and not pg.query_selector('[data-bf-budget]'), pg.inner_text('[data-bfirst-out]')[:400])
+    check('E3: the flat has a loan: the panel says the new loan is a second housing loan (45%, 25% cash) and asks for the flat\'s repayment beside its field; no buy-first budget yet', pg.is_visible('[data-bf-mo] [data-k="upFlatMo"]') and 'second housing loan: up to 45% of the price, at least 25% in cash' in pg.inner_text('[data-bfirst-out]') and pg.is_visible('[data-bf-need="upFlatMo"]') and not pg.query_selector('[data-bf-budget]'), pg.inner_text('[data-bfirst-out]')[:400])
     pg.fill('[data-k="upFlatMo"]', '1,300'); settle(pg)
-    check('E3: with the $1,300 repayment typed: the buy-first budget is about $216,000, the figure worked out independently', amt(pg.inner_text('[data-bf-budget]')) == 216000 and 'counting the flat’s $1,300 monthly repayment' in pg.inner_text('[data-bfirst-out]'), pg.inner_text('[data-bfirst-out]')[-300:])
+    check('E3: with the $1,300 repayment typed: the buy-first budget is about $216,000, the figure worked out independently', amt(pg.inner_text('[data-bf-budget]')) == 216000 and 'counting its $1,300 monthly repayment' in pg.inner_text('[data-bfirst-out]'), pg.inner_text('[data-bfirst-out]')[-300:])
     check(f'E4: sell first is unchanged ({sell0}, the engine\'s sell-first budget)', pg.inner_text('[data-budget]') == sell0 and M(sell0) is not None and abs(M(sell0) - se) <= 10000, [sell0, se])
     pg.fill('[data-k="sale.loan"]', '0') if pg.locator('[data-k="sale.loan"]:visible').count() else pg.evaluate("()=>{const f=document.querySelector('[data-k=\"sale.loan\"]');f.value='0';f.dispatchEvent(new Event('input',{bubbles:true}))}")
     settle(pg)
     check('E5: a flat with no loan left: no repayment asked, the 75% limit, about $376,000', pg.is_hidden('[data-bf-mo]') and 'The flat has no loan left, so the usual 75% limit applies.' in pg.inner_text('[data-bfirst-out]') and amt(pg.inner_text('[data-bf-budget]')) == 376000, pg.inner_text('[data-bfirst-out]')[-300:])
     check('E: no script errors', not errs, errs)
+    ctx.close()
+    # ================= F. V3.7.3: typing a number never closes a step or loses the field (every numeric input, four calculators) =================
+    # Each field is typed one key at a time, slower than the 120 ms recalculation, then checked: the whole number (with commas for money), still focused,
+    # still visible. The cause of Ken's "$7" report was the Upgrade step opening and closing with the answers; it now closes only on Done.
+    REVEAL_F = """k=>{const fs=[...document.querySelectorAll('[data-k="'+k+'"]')];let f=fs.find(x=>x.offsetParent&&!x.closest('details:not([open])'))||fs[0];if(!f)return false;
+      const ste=f.closest('[data-ste]');if(ste&&ste.hidden){const c=document.querySelector('[data-stc="'+ste.dataset.ste+'"]');if(c&&c.offsetParent)c.click();}
+      const pn=f.closest('[data-chp]');if(pn&&window.__f3OpenChip)window.__f3OpenChip(pn.dataset.chp,k);const cu=f.closest('[data-cust]');if(cu)cu.hidden=false;let d=f.closest('details');while(d){d.open=true;d=d.parentElement.closest('details')}return true}"""
+    def typed_ok(pg, k, digits, money):
+        pg.evaluate(REVEAL_F, k); pg.wait_for_timeout(120)
+        f = pg.locator(f'[data-k="{k}"]:visible').first
+        if not f.count(): return None
+        f.click(); pg.keyboard.press('Control+A'); pg.keyboard.press('Delete'); pg.keyboard.type(digits, delay=140); pg.wait_for_timeout(260)
+        want = f'{int(digits):,}' if money else digits
+        return (f.input_value(), pg.evaluate("k=>!!document.activeElement&&document.activeElement.dataset.k===k&&!!document.activeElement.offsetParent", k), want)
+    for tag, vp in (('desktop', {'width': 1440, 'height': 900}), ('phone', {'width': 390, 'height': 844})):
+        ctx = br.new_context(viewport=vp, is_mobile=tag == 'phone', has_touch=tag == 'phone'); pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
+        for path in ('/tools/hdb-upgrade/?j=1', '/tools/tdsr/', '/tools/payment-planner/', '/tools/sale-proceeds/'):
+            opened(pg, path); pg.evaluate("sessionStorage.clear()"); pg.reload(); ready(pg)
+            if 'hdb-upgrade' in path:   # every step answered (as on a returning visit), so each is reached through its Change; the buy-first fields are then shown too
+                pg.evaluate("r=>sessionStorage.setItem('gw.fin3.v1',JSON.stringify({v:3,raw:r,loans:[]}))", {'n': '1', 'p.0.age': '35', 'p.0.fixed': '8,000', 'homes': '1', 'sale.type': 'hdb', 'sale.price': '750,000', 'sale.loan': '250,000', 'sale.cpfRefund': '205,000'}); pg.reload(); ready(pg)
+            if path == '/tools/payment-planner/': pg.fill('[data-k="price"]', '2,000,000'); settle(pg)
+            keys = pg.evaluate("()=>[...new Set([...document.querySelectorAll('input[data-k][data-t=\"money\"],input[data-k][data-t=\"num\"]')].map(x=>x.dataset.k+'|'+x.dataset.t))]")
+            bad, n = [], 0
+            for kt in keys:
+                k, tt = kt.split('|')
+                if k in ('price2',) or k.startswith('cpfBal.1') or k.startswith('p.1.') and path != '/tools/tdsr/': continue
+                digits = '35' if tt == 'num' and ('age' in k) else '25' if tt == 'num' and k in ('years', 'lease') else '3' if k == 'ratePct' else '12' if tt == 'num' else '750000'
+                r = typed_ok(pg, k, digits, tt == 'money')
+                pg.evaluate("()=>window.__f3OpenChip&&window.__f3OpenChip(null)")
+                if r is None: continue
+                n += 1
+                if not (r[0] == r[2] and r[1]): bad.append((k, r))
+            check(f'F {tag} {path}: every numeric field ({n}) takes a whole number typed key by key: shown in full (with commas), still focused and visible', n >= 3 and not bad, bad)
+        # a repayment in the loans list (its own inputs): typed key by key, kept
+        opened(pg, '/tools/tdsr/'); pg.evaluate("sessionStorage.clear()"); pg.reload(); ready(pg); pg.fill('.f3-inc [data-k="p.0.fixed"]', '8,000'); settle(pg)
+        pg.evaluate("window.__f3OpenChip('loans')"); pg.wait_for_timeout(150)
+        pg.locator('[data-optl="loans"] .f3-opt', has_text='repaying').first.click(); pg.wait_for_selector('[data-chp="loans"] [data-loan="0"] [data-lk="amt"]', state='visible')
+        la = pg.locator('[data-chp="loans"] [data-loan="0"] [data-lk="amt"]'); la.click(); pg.keyboard.type('1300', delay=150); pg.wait_for_timeout(300)
+        check(f'F {tag} a repayment in the loans list: $1,300 typed key by key, kept and focused', la.input_value() == '1,300' and pg.evaluate("document.activeElement.dataset.lk") == 'amt', la.input_value())
+        pg.evaluate("()=>window.__f3OpenChip(null)")
+        # Upgrade: typing never completes a step; only Done does; Change reopens it; backspace, paste and clearing behave
+        opened(pg, '/tools/hdb-upgrade/'); pg.evaluate("sessionStorage.clear()"); pg.reload(); ready(pg)
+        f = pg.locator('[data-ste="worth"] [data-k="sale.price"]'); f.click(); pg.keyboard.type('750000', delay=160); pg.wait_for_timeout(300)
+        check(f'F {tag} Upgrade step 1: $750,000 typed key by key; the step stays open and the field focused', f.input_value() == '750,000' and pg.is_visible('[data-ste="worth"]') and pg.evaluate("document.activeElement.dataset.k") == 'sale.price', f.input_value())
+        pg.keyboard.press('Backspace'); pg.keyboard.press('Backspace'); pg.keyboard.press('Backspace'); pg.keyboard.type('500', delay=160); pg.wait_for_timeout(300)
+        check(f'F {tag} backspace three digits and type 500: $750,500', f.input_value() == '750,500', f.input_value())
+        pg.keyboard.press('Control+A'); pg.keyboard.insert_text('680000'); pg.wait_for_timeout(300)
+        check(f'F {tag} select all and paste 680000: $680,000, still open', f.input_value() == '680,000' and pg.is_visible('[data-ste="worth"]'), f.input_value())
+        pg.keyboard.press('Control+A'); pg.keyboard.press('Delete'); pg.wait_for_timeout(300)
+        check(f'F {tag} clearing it: empty, no answer invented, still open', f.input_value() == '' and pg.is_visible('[data-ste="worth"]') and not errs, [f.input_value(), errs])
+        pg.keyboard.type('750000', delay=60); settle(pg); pg.click('[data-stdone="worth"]'); settle(pg)
+        check(f'F {tag} only Done completes step 1 (its answer shows) and opens step 2', pg.is_hidden('[data-ste="worth"]') and '$750,000' in pg.inner_text('[data-sta="worth"]') and pg.is_visible('[data-ste="sell"]'))
+        for k, v in (('sale.loan', '250000'), ('sale.cpfRefund', '205000')):
+            g = pg.locator(f'[data-ste="sell"] [data-k="{k}"]'); g.click(); pg.keyboard.type(v, delay=150)
+        pg.wait_for_timeout(300)
+        check(f'F {tag} step 2: loan and CPF used typed in full, focus moved between them; still open', pg.input_value('[data-ste="sell"] [data-k="sale.loan"]') == '250,000' and pg.input_value('[data-ste="sell"] [data-k="sale.cpfRefund"]') == '205,000' and pg.is_visible('[data-ste="sell"]'))
+        pg.click('[data-stdone="sell"]'); settle(pg)
+        for k, v in (('p.0.fixed', '8000'), ('p.0.age', '35')):
+            g = pg.locator(f'[data-ste="borrow"] [data-k="{k}"]'); g.click(); pg.keyboard.type(v, delay=150)
+        pg.wait_for_timeout(300); check(f'F {tag} step 3: income and age typed; still open until Done', pg.is_visible('[data-ste="borrow"]') and pg.input_value('[data-ste="borrow"] [data-k="p.0.fixed"]') == '8,000')
+        pg.click('[data-stdone="borrow"]'); settle(pg); sell1 = pg.inner_text('[data-budget]')
+        pg.click('[data-stc="worth"]'); pg.wait_for_timeout(200)
+        check(f'F {tag} Change reopens step 1 with its figure, focused for editing', pg.is_visible('[data-ste="worth"]') and pg.input_value('[data-ste="worth"] [data-k="sale.price"]') == '750,000' and pg.evaluate("document.activeElement.dataset.k") == 'sale.price')
+        pg.click('[data-stdone="worth"]'); settle(pg)
+        # ================= G. V3.7.3: Buy first, then sell: three figures together, each asked for beside itself =================
+        pg.click('[data-bfirst] summary'); settle(pg)
+        check(f'G {tag} the three inputs sit together in the section, labelled as asked', all(pg.is_visible(f'[data-bfirst] [data-k="{k}"]') for k in ('upFlatMo', 'bfCash', 'bfCpf')) and all(x in pg.inner_text('[data-bfirst]') for x in ['Existing HDB monthly mortgage repayment', 'Available cash for the next purchase', 'Available usable CPF for the next purchase']))
+        check(f'G {tag} nothing typed: each missing figure is asked for beside its own field; no budget invented', all(pg.is_visible(f'[data-bf-need="{k}"]') for k in ('upFlatMo', 'bfCash', 'bfCpf')) and pg.query_selector('[data-bf-wait]') is not None and not pg.query_selector('[data-bf-budget]'))
+        for k, v in (('bfCash', '100000'), ('bfCpf', '150000')):
+            g = pg.locator(f'[data-k="{k}"]'); g.click(); pg.keyboard.type(v, delay=120)
+        settle(pg)
+        check(f'G {tag} the repayment still blank: asked beside it, not taken as zero', pg.is_visible('[data-bf-need="upFlatMo"]') and pg.is_hidden('[data-bf-need="bfCash"]') and not pg.query_selector('[data-bf-budget]'))
+        g = pg.locator('[data-k="upFlatMo"]'); g.click(); pg.keyboard.type('1300', delay=120); pg.wait_for_timeout(350)
+        still = pg.evaluate("document.activeElement.dataset.k") == 'upFlatMo'; settle(pg)
+        check(f'G {tag} Ken\'s case: $216,000 buy first (worked out independently, E1), updating as typed without losing the field; sell first unchanged ({sell1})', amt(pg.inner_text('[data-bf-budget]')) == 216000 and pg.inner_text('[data-budget]') == sell1 and still, [pg.inner_text('[data-bf-budget]'), pg.inner_text('[data-budget]'), still])
+        pg.fill('[data-k="bfCash"]', '20,000'); settle(pg)
+        check(f'G {tag} not enough cash: says so plainly, no figure', pg.query_selector('[data-bf-none]') is not None and 'leave nothing to buy with before the flat is sold' in pg.inner_text('[data-bfirst-out]'))
+        pg.fill('[data-k="bfCash"]', '100,000'); settle(pg)
+        pg.click('[data-stc="sell"]'); pg.wait_for_timeout(150); pg.fill('[data-ste="sell"] [data-k="sale.loan"]', '0'); settle(pg); pg.click('[data-stdone="sell"]'); settle(pg)
+        check(f'G {tag} a fully paid flat: no repayment asked; the 75% limit; about $376,000', pg.is_hidden('[data-bf-mo]') and amt(pg.inner_text('[data-bf-budget]')) == 376000 and 'no loan left' in pg.inner_text('[data-bfirst-out]'), pg.inner_text('[data-bfirst-out]')[:200])
+        sh = pg.evaluate("()=>{const h=GW_SHEET.mount(window.__f3Sheet());const m=h.querySelector('.gs-main');const r={fits:m.scrollHeight<=m.clientHeight+1,f1:(h.querySelector('[data-sheet-fig]')||{}).textContent};GW_SHEET.unmount();return r}")
+        check(f'G {tag} Save as PDF still builds and fits, led by the sell-first budget', sh['fits'] and M(sh['f1'] or '') is not None, sh)
+        check(f'F/G {tag} no script errors', not errs, errs)
+        ctx.close()
+    # journey: the guided journey's cash and CPF fill the buy-first fields once, to adjust
+    ctx = br.new_context(viewport={'width': 1440, 'height': 900}); pg = ctx.new_page()
+    opened(pg, '/tools/hdb-upgrade/'); pg.evaluate("r=>{sessionStorage.clear();sessionStorage.setItem('gw.fin3.v1',JSON.stringify({v:3,raw:r,loans:[]}))}", {'n': '1', 'p.0.age': '35', 'p.0.fixed': '8,000', 'cash': '90,000', 'cpf': '120,000', 'homes': '1', 'sale.type': 'hdb', 'sale.price': '750,000', 'sale.loan': '250,000', 'sale.cpfRefund': '205,000'})
+    opened(pg, '/tools/hdb-upgrade/?j=1'); settle(pg); pg.click('[data-bfirst] summary'); settle(pg)
+    check('G Plan My Move: the journey\'s cash ($90,000) and CPF ($120,000) are already in the buy-first fields, to change as needed', pg.input_value('[data-k="bfCash"]') == '90,000' and pg.input_value('[data-k="bfCpf"]') == '120,000', [pg.input_value('[data-k="bfCash"]'), pg.input_value('[data-k="bfCpf"]')])
     ctx.close()
     # ================= C. layout: desktop, tablet, phone, 320px and 200% zoom =================
     for tag, vp, mob in (('1440', {'width': 1440, 'height': 900}, False), ('1060', {'width': 1060, 'height': 900}, False), ('tablet 820', {'width': 820, 'height': 1180}, True), ('phone 390', {'width': 390, 'height': 844}, True), ('phone 320', {'width': 320, 'height': 700}, True), ('200% zoom (195)', {'width': 195, 'height': 422}, True)):

@@ -138,7 +138,11 @@
       '<div class="f3-upchips"><div class="f3-chips" role="group" aria-label="Assumptions">' + chip('ures', 'Keep funds aside: None') + '</div><p class="f3-fine f3-chipnote">An optional amount kept out of the purchase. Tap to change it.</p><div class="f3-scrim" data-scrim hidden></div>' +
       panel('ures', 'Keep funds aside', money('reserve', 'Amount to keep aside', { ph: 'e.g. 30,000', hint: 'Kept out of the purchase: the budget is worked out without it.' })) + '</div></form>' +
       '<div class="f3-out f3-out-pay" aria-label="Your upgrade budget"><div class="f3-card f3-card-pay"><div data-out aria-live="polite"></div>' +
-      '<div class="f3-opts"><details class="f3-in-d" data-bfirst hidden><summary>Buy first, then sell — what changes</summary><div class="f3-cmpin"><div data-bf-mo hidden>' + money('upFlatMo', 'The flat’s monthly loan repayment', { ph: 'e.g. 1,300', hint: 'Needed only to compare buying first: the flat’s loan is still running when you buy.' }) + '</div><div data-bfirst-out></div></div></details>' +
+      '<div class="f3-opts"><details class="f3-in-d" data-bfirst hidden><summary>Buy first, then sell — what changes</summary><div class="f3-cmpin"><div class="f3-bfin">' +
+        '<div data-bf-mo>' + money('upFlatMo', 'Existing HDB monthly mortgage repayment', { ph: 'e.g. 1,300' }) + '<p class="f3-bfneed" data-bf-need="upFlatMo" hidden>Add the flat’s monthly repayment: its loan is still running.</p></div>' +
+        '<div>' + money('bfCash', 'Available cash for the next purchase', { ph: 'e.g. 100,000', hint: 'Not counting the flat’s sale proceeds.' }) + '<p class="f3-bfneed" data-bf-need="bfCash" hidden>Add the cash you have now (0 if none).</p></div>' +
+        '<div>' + money('bfCpf', 'Available usable CPF for the next purchase', { ph: 'e.g. 150,000', hint: 'Ordinary Account savings above the retirement set-aside, while you still own the flat. CPF Board confirms.' }) + '<p class="f3-bfneed" data-bf-need="bfCpf" hidden>Add the CPF you can use (0 if none).</p></div>' +
+        '</div><div data-bfirst-out></div></div></details>' +
       '<details class="f3-in-d" data-why hidden><summary data-why-sum>How it is worked out</summary><ul class="f3-why" data-why-out></ul></details>' +
       '<a class="f3-rowlnk" data-to-cost href="../payment-planner/" hidden>What a home at this price costs each month</a><a class="f3-rowlnk" data-to-homes href="../what-can-i-buy/" data-gw-go="what-can-i-buy" hidden>See homes around this budget</a>' +
       '<button type="button" class="f3-rowlnk f3-pdf" data-save-pdf hidden>Save as PDF</button></div></div>' +
@@ -260,7 +264,7 @@
           comm: N('sale.comm', 0, 10, 'Enter a fee between 0% and 10%.'), legal: M('sale.legal'), penalty: M('sale.penalty'), o55: o['sale.o55'] === 'yes' ? 'yes' : o['sale.o55'] === 'no' ? 'no' : '', cpf55: M('sale.cpf55'), cpfUse: M('sale.cpfUse'), bought: o['sale.bought'] || null, sold: o['sale.sold'] || (o['sale.bought'] ? new Date().toISOString().slice(0, 10) : null) },
         cpfBal: [0, 1].map((k) => ({ oa: M('cpfBal.' + k + '.oa'), sa: M('cpfBal.' + k + '.sa') })), cover95: o.cover95 === 'yes' ? true : o.cover95 === 'no' ? false : null,
         ratePct: N('ratePct', L.ratePct.min, L.ratePct.max, 'Enter a rate between ' + L.ratePct.min + '% and ' + L.ratePct.max + '%.'), years: N('years', L.years.min, L.years.max, 'Enter between ' + L.years.min + ' and ' + L.years.max + ' years.'),
-        saveMo: M('saveMo'), cpfMo: M('cpfMo'), upFlatMo: M('upFlatMo'),
+        saveMo: M('saveMo'), cpfMo: M('cpfMo'), upFlatMo: M('upFlatMo'), bfCash: M('bfCash'), bfCpf: M('bfCpf'),
         flatPrice: M('flatPrice'), flatVal: M('flatVal'), reserve: M('reserve'), bkind: o.bkind || 'private', hdbLoan: o.hdbLoan || 'hdb', btoRoom: o.btoRoom || '4', household: o.household || 'family', lease: N('lease', 1, 99, 'Enter the remaining lease, 1 to 99 years.'), akind: o.akind || 'new', price: M('price'), valuation: M('valuation'), loanAmt: M('loanAmt'),
         pkind: o.pkind || 'new', otp: o.otp || null, noDate: o.noDate === '1', top: o.top || null, csc: o.csc || null, completion: o.completion || null,
         order: o.order || 'none', saleWhen: o.saleWhen || 'unsure', saleMonth: N('saleMonth', 1, 120, 'Between 1 and 120 months.'), saleDate: o.saleDate || null, saleAfter: N('saleAfter', 0, 120, 'Between 0 and 120 months.'), refund: o.refund === '1', rent: M('rent') };
@@ -899,6 +903,34 @@
 
     /* ---- V3.4: Upgrade from HDB, the four-step thread ---- */
     const stepOpen = {};   // steps the visitor opened with Change
+    // V3.7.3 (Ken): the step being worked on stays open until its Done is pressed. It used to follow the answers: the first unanswered step was the open one,
+    // so the first digit of a price (or of the CPF used) "answered" the step and it closed mid-typing. Now typing never completes a step; only Done does.
+    let curStep, doneReq = null, doneJust = false;
+    // V3.7.3 (Ken, 27 Oct 2026): "Buy first, then sell", with its own three figures side by side: the flat's monthly repayment (when its loan is still running),
+    // the cash and the usable CPF available now. The sale proceeds are not counted. The flat's loan makes the new one a second housing loan (MAS: 45% LTV, 25% cash)
+    // and its repayment counts in TDSR. A missing figure is asked beside its own field; nothing is assumed to be zero. Sell first (the answer above) is unchanged.
+    let bfSeeded = false;
+    function paintBuyFirst(st, u, a) {
+      const o = q('[data-bfirst-out]'); if (!o) return;
+      // the cash and CPF this tab already has (the guided journey's savings) fill the two fields once, to change as needed
+      if (!bfSeeded) { bfSeeded = true; [['bfCash', st.cash], ['bfCpf', st.cpf]].forEach((x) => { if (raw[x[0]] === undefined || raw[x[0]] === '') { if (x[1] > 0) { put(x[0], Math.round(x[1]).toLocaleString('en-US')); raw[x[0]] = Math.round(x[1]).toLocaleString('en-US'); } } }); st = Object.assign({}, st, { bfCash: mv(raw.bfCash), bfCpf: mv(raw.bfCpf) }); }
+      const rm = root.GW_RULES.absdRefundMonths || 6, L2 = root.GW_RULES.bankLtv.standard[1], L1 = root.GW_RULES.bankLtv.standard[0];
+      const flatLoan = st.sale.loan > 0.5, listed = (st.loans || []).filter((l) => l.type === 'home' && l.amt > 0)[0], flatMo = st.upFlatMo > 0 ? st.upFlatMo : listed ? listed.amt : (st.upFlatMo === 0 ? 0 : null);
+      const moBox = q('[data-bf-mo]'); if (moBox) moBox.hidden = !flatLoan;
+      const need = { upFlatMo: flatLoan && flatMo === null, bfCash: !(typeof st.bfCash === 'number'), bfCpf: !(typeof st.bfCpf === 'number') };
+      $$('[data-bf-need]').forEach((p) => { p.hidden = !need[p.dataset.bfNeed]; });
+      const loanTxt = flatLoan ? 'The flat’s ' + $(st.sale.loan) + ' loan is still running, so the new loan is a second housing loan: up to ' + pc(L2.ltv) + ' of the price, at least ' + pc(L2.minCash) + ' in cash, and the flat’s repayment counts against your income.' : 'The flat has no loan left, so the usual ' + pc(L1.ltv) + ' limit applies.';
+      const sellTxt = a && a.state === 'ok' ? ' Selling first, the answer above is about ' + fmtP(Math.floor(a.budget / 1000) * 1000) + '.' : '';
+      if (need.upFlatMo || need.bfCash || need.bfCpf) { o.innerHTML = '<div class="f3-bfres" data-bf-wait><span>Buy first, then sell</span><b>—</b></div><p class="f3-fine">Add the figures marked above to see the buy-first budget. ' + loanTxt + ' While you still own the flat, ABSD on the new home is paid upfront (a married couple with a Singapore Citizen can have it refunded if the flat is sold within ' + rm + ' months, IRAS).</p>'; return; }
+      const res = Math.max(0, st.reserve || 0), cash = Math.max(0, st.bfCash - res);
+      const k0 = F.afford(Object.assign({}, u, { plan: 'keep', cash: cash, cpf: st.bfCpf, cpfIsUsable: true, sale: Object.assign({}, u.sale, { oCash: null, oCpf: null }), loans: (u.loans || []).concat(flatLoan ? [{ type: 'home', who: 0, amt: flatMo }] : []) }));
+      const absdTxt = (t) => (t && t.absd > 0 ? ' ' + $(t.absd) + ' of ABSD is paid upfront (a married couple with a Singapore Citizen can have it refunded if the flat is sold within ' + rm + ' months, IRAS).' : '');
+      if (k0.state === 'ok') {
+        o.innerHTML = '<div class="f3-bfres"><span>Buy first, then sell, about</span><b data-bf-budget>' + fmtP(Math.floor(k0.budget / 1000) * 1000) + '</b></div><p class="f3-fine">From ' + $(cash) + ' cash' + (res > 0 ? ' (after the ' + $(res) + ' kept aside)' : '') + ' and ' + $(st.bfCpf) + ' CPF, without the flat’s sale proceeds' + (flatLoan ? ', counting its ' + $(flatMo) + ' monthly repayment' : '') + '. ' + loanTxt + absdTxt(k0.top) + sellTxt + '</p>';
+      } else {
+        o.innerHTML = '<div class="f3-bfres"><span>Buy first, then sell</span><b data-bf-none>No budget</b></div><p class="f3-fine" data-bf-short>' + (k0.state === 'income' || k0.state === 'no-income' ? 'The income left after the flat’s repayment supports no new loan.' : 'With ' + $(cash) + ' cash and ' + $(st.bfCpf) + ' CPF, the cash minimum and the ABSD of a second home leave nothing to buy with before the flat is sold.') + ' ' + loanTxt + sellTxt + '</p>';
+      }
+    }
     function upSt(st) {
       // the thread's planning conventions (KPT assumptions): the flat is an HDB flat sold first, then a private home is bought; its loan is repaid at the sale;
       // savings not entered count as none; a reserve (none unless the visitor sets one, as in the HDB upgrade planner) is kept out of the cash before the budget is worked out
@@ -923,9 +955,13 @@
       if (has2 && sv.state === 'ok') setA('sell', $(sv.total), $(sv.cash) + ' cash + ' + $(sv.cpf) + ' CPF' + (sv.o55 ? ' (' + $(sv.cpfUsable) + ' usable' + (sv.cpfProvisional ? ', provisional' : '') + ')' : '') + (sv.penalty ? ' · after a ' + $(sv.penalty) + ' penalty' : '') + ' · sold at ' + $(sv.price));
       if (has3) setA('borrow', $r(bw.maxLoan), 'On ' + $(bw.income) + ' a month' + (bw.joint ? ' between you' : '') + ' · age ' + (bw.joint ? Math.round(bw.age) + ' (weighted)' : bw.age) + ' · ' + (bw.debts > 0 ? $(bw.debts) + ' a month of other loans' : 'no other loans'));
       // which step is open: the first one not answered, plus any the visitor opened with Change
-      const order = ['worth', 'sell', 'borrow']; const first = order.filter((k) => !done_[k])[0];
-      order.forEach((k) => { const ed = stepOpen[k] || k === first, li = q('[data-step="' + k + '"]'); const a = q('[data-sta="' + k + '"]'), e = q('[data-ste="' + k + '"]');
-        if (a) a.hidden = ed || !done_[k]; if (e) e.hidden = !ed; if (li) { li.classList.toggle('done', !!done_[k] && !ed); li.classList.toggle('later', !done_[k] && k !== first && !stepOpen[k]); } });
+      const order = ['worth', 'sell', 'borrow'];
+      if (curStep === undefined) curStep = order.filter((k) => !done_[k])[0] || null;   // on arrival: the first step not yet answered
+      doneJust = !!doneReq;
+      if (doneReq) { const k = doneReq; doneReq = null; if (done_[k]) { stepOpen[k] = false; if (curStep === k || curStep === null) curStep = order.filter((x) => !done_[x] && x !== k)[0] || null; } }   // Done on an unanswered step keeps it open
+      const typing = (k) => { const e = q('[data-ste="' + k + '"]'), ae = document.activeElement; return !!e && !e.hidden && !!ae && e.contains(ae) && /^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName) && !doneJust; };
+      order.forEach((k) => { const ed = stepOpen[k] || k === curStep || typing(k), li = q('[data-step="' + k + '"]'); const a = q('[data-sta="' + k + '"]'), e = q('[data-ste="' + k + '"]');
+        if (a) a.hidden = ed || !done_[k]; if (e) e.hidden = !ed; if (li) { li.classList.toggle('done', !!done_[k] && !ed); li.classList.toggle('later', !done_[k] && !ed); } });
       { const li = q('[data-step="budget"]'); if (li) li.classList.toggle('later', !(has2 && has3)); }
       const cl = q('[data-up-costs]'); if (cl && sv.state === 'ok') cl.innerHTML = 'Agent ' + sv.costs.commissionPct + '% plus GST and legal fees of ' + $(sv.costs.legal) + ' are taken off: ' + $(sellCosts(sv.r).selling) + ' in all. To change them, use <a href="../sale-proceeds/" data-gw-go="up-sale-proceeds">What will I get from selling?</a>';
       // the budget
@@ -960,17 +996,7 @@
         '<li><b>The monthly instalment</b> would be about ' + $(t.monthly) + ' over ' + yrs(a.years) + ' at ' + a.ratePct + '%.</li>',
         '<li>' + (saved ? 'Your savings, ' + $(u.cash) + ' cash and ' + $(u.cpf) + ' CPF, are counted as you entered them on How much can I borrow?.' : 'Savings besides the sale are not counted; add them on How much can I borrow? (Add my cash and CPF).') + '</li>'];
       if (why) { why.hidden = false; q('[data-why-sum]').textContent = 'How the ' + bTxt + ' is worked out'; q('[data-why-out]').innerHTML = wl.join(''); }
-      if (bf) { bf.hidden = false; const rm = root.GW_RULES.absdRefundMonths || 6;
-        // V3.7.2 (Ken, 27 Oct 2026): buying first, the flat's loan is still running. The engine reads the home's loan as the first "home" repayment listed, so it is
-        // passed back here: the new loan is then a second housing loan (MAS: 45% LTV, at least 25% cash) and the flat's repayment counts in TDSR. Its monthly figure is
-        // asked, never assumed: with the loan known but the repayment blank, no buy-first budget is shown. Sell first (u) is unchanged.
-        const flatLoan = st.sale.loan > 0.5, listed = (st.loans || []).filter((l) => l.type === 'home' && l.amt > 0)[0], flatMo = st.upFlatMo > 0 ? st.upFlatMo : listed ? listed.amt : null;
-        const moBox = q('[data-bf-mo]'); if (moBox) moBox.hidden = !flatLoan || (!!listed && !(st.upFlatMo > 0));
-        const L2 = root.GW_RULES.bankLtv.standard[1], k0 = flatLoan && flatMo === null ? null : F.afford(Object.assign({}, u, { plan: 'keep', loans: (u.loans || []).concat(flatLoan ? [{ type: 'home', who: 0, amt: flatMo }] : []) }));
-        const loanTxt = flatLoan ? 'The flat still has a ' + $(st.sale.loan) + ' loan, so the new loan is a second housing loan: banks lend up to ' + pc(L2.ltv) + ' of the price, at least ' + pc(L2.minCash) + ' must be cash, and the flat’s repayment counts against your income.' : 'The flat has no loan left, so the usual ' + pc(root.GW_RULES.bankLtv.standard[0].ltv) + ' limit applies.';
-        q('[data-bfirst-out]').innerHTML = '<p class="f3-fine">Buying before you sell, you still own the flat when you buy. So: ABSD is paid upfront on the new home (a married couple with a Singapore Citizen can have it refunded if the flat is sold within ' + rm + ' months, IRAS); the sale proceeds aren’t there yet for the down payment; and CPF can be used only above a set-aside while you own the flat. ' + loanTxt + '</p>' +
-          (!k0 ? '<p class="f3-fine" data-bf-need><b>Add the flat’s monthly loan repayment</b> to see the buy-first budget.</p>'
-            : k0.state === 'ok' ? '<p class="f3-fine">On your figures, without the proceeds, the budget would be about <b data-bf-budget>' + fmtP(Math.floor(k0.budget / 1000) * 1000) + '</b>' + (k0.top && k0.top.absd > 0 ? ', with ' + $(k0.top.absd) + ' of ABSD paid upfront' : '') + (flatLoan ? ', counting the flat’s ' + $(flatMo) + ' monthly repayment' : '') + '.</p>' : '<p class="f3-fine">On your figures, without the proceeds, there is no budget to show until your own cash and CPF balances are added.</p>'); }
+      if (bf) { bf.hidden = false; paintBuyFirst(st, u, a); }
       if (toc) { toc.hidden = false; toc.textContent = 'What a ' + bTxt + ' home costs each month'; toc.dataset.price = String(Math.floor(a.budget / 1000) * 1000); toc.dataset.what = 'budget'; toc.dataset.kind = u.akind === 'completed' ? 'completed' : 'new'; }
       if (toh) { toh.hidden = false; toh.textContent = 'See homes around ' + bTxt; }
       setBar('<span class="f3-bm"><span class="k">Buy up to about</span><b>' + bTxt + '</b><span class="s">' + $r(upfront) + ' upfront · ' + $r(reserve) + ' reserve</span></span>');
@@ -985,7 +1011,7 @@
     // Change opens a step; Done closes it again
     box.addEventListener('click', (e) => {
       const c = e.target.closest('[data-stc]'); if (c) { stepOpen[c.dataset.stc] = true; changed(true); setTimeout(() => { const f = q('[data-ste="' + c.dataset.stc + '"] input'); if (f) f.focus(); }, 30); return; }
-      const d = e.target.closest('[data-stdone]'); if (d) { stepOpen[d.dataset.stdone] = false; changed(true); return; }
+      const d = e.target.closest('[data-stdone]'); if (d) { doneReq = d.dataset.stdone; changed(true); return; }
       const w = e.target.closest('[data-up-worth]'); if (w) { try { if (root.GWJ && root.GWJ.ctx) root.GWJ.ctx.set({ path: 'upgrade', type: 'hdb' }); } catch (x) { /* ignore */ } }
       const oc = e.target.closest('[data-open-chip]'); if (oc) openChip(oc.dataset.openChip);
     });
