@@ -121,7 +121,7 @@ try:
         shot(pg, f'budget-{vn}')
         pg.fill('#kdBudget', '1800000'); pg.click('#rwBudget button:has-text("Show developments")'); pg.wait_for_url('**/tools/what-can-i-buy/**', timeout=20000); pg.wait_for_selector('.kd-res, [data-kd-res], #kdList, .kd-card', timeout=20000); pg.wait_for_timeout(800)
         t = pg.inner_text('#root')
-        check(vn + ': results for that budget, and the budget is not in the address', 'developments with recent sales within $1.8m' in t and '1800000' not in pg.url and '1,800,000' not in pg.url, (t[:80], pg.url))
+        check(vn + ': results for that budget, and the budget is not in the address', re.search(r'developments with recent sales( or developer listings)? within \$1\.8m', t) is not None and '1800000' not in pg.url and '1,800,000' not in pg.url, (t[:80], pg.url))
         shot(pg, f'budget-results-{vn}')
         pg.go_back(); pg.wait_for_url('**/research/**', timeout=15000); pg.wait_for_selector('#rwBudget #kdBudget', timeout=20000)
         check(vn + ': Back returns to the Budget option with the budget still entered', expanded(pg) == 'budget' and pg.input_value('#kdBudget') == '1,800,000', (expanded(pg), pg.input_value('#kdBudget')))

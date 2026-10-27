@@ -69,7 +69,7 @@ try:
         def three_either():
             ctx, pg, errs = open_page(br, kw); form(pg, '2,000,000', beds=3)
             ok('New launches: from new-launch listings' in pg.inner_text('.kd-more'), pg.inner_text('.kd-more'))
-            show(pg); h = H(pg); ok(re.match(r'\d+ developments? with recent 3-bedroom sales within \$2\.0m', h), h)
+            show(pg); h = H(pg); ok(re.match(r'\d+ developments? with recent 3-bedroom resales or developer listings within \$2\.0m', h), h)
             ok(re.search(r'\d+ not confirmed as 3-bedroom, listed after', pg.inner_text('.kd-lead')), 'not-confirmed count in the summary')
             un = pg.query_selector('.kd-unconf'); ok(un is not None, 'not-confirmed group'); ut = un.inner_text()
             ok('Check the floor plan' in ut and 'Bedrooms not confirmed' in ut and re.search(r'identified as 3-bedroom|Bedrooms not shown', ut), ut[:300])
@@ -127,7 +127,7 @@ try:
         t('Research page link from a confirmed match opens that development on its 3-bedroom type', to_research)
         def fallback():
             ctx, pg, errs = open_page(br, kw, no_beds=True); form(pg, '2,000,000', beds=3); show(pg)
-            ok(re.match(r'\d+ developments with recent sales within \$2\.0m', H(pg)), 'plain headline: ' + H(pg)); ok(pg.query_selector('.kd-unconf') is None)
+            ok(re.match(r'\d+ developments with recent sales or developer listings within \$2\.0m', H(pg)), 'plain headline: ' + H(pg)); ok(pg.query_selector('.kd-unconf') is None)
             pg.click('.kd-bar [data-f=edit]'); pg.wait_for_selector('#kdEdit.open'); pg.evaluate("document.querySelector('#kdEdit [data-more]').open = true")
             ok('resale bedroom matching isn’t available just now' in pg.inner_text('#kdEdit'), pg.inner_text('#kdEdit .kd-more'))
             pg.click('#kdEdit [data-f=seg][data-k=sale][data-v=resale]'); pg.wait_for_timeout(400)

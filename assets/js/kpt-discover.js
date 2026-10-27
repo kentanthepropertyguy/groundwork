@@ -9,6 +9,10 @@
  *      "some"     = only the lower part is (q1 <= maximum < q3): some past sales were within it, not the typical price
  *    Each tier still needs the same evidence as before (3+ sales, a sale in the last 6 months, a size band that sold in 2+ months).
  *  - Past sales are never presented as homes for sale. Huttons inventory (new launches only) is a separate source and is labelled as such.
+ *  - Research fix (Ken, 27 Oct 2026): NEW LAUNCHES ARE MATCHED ONLY ON THE LATEST NEW-LAUNCH LISTINGS (the approved developer inventory snapshot, within its 21-day window):
+ *    their listed prices, bedroom types and sizes. URA developer sales never make a new-launch match, are never used as a current price and never set its tier;
+ *    they stay on each development's Research page as price history (item.hist says whether there is any). No listing is not "sold out": the development is
+ *    simply not listed. RESALE is unchanged: URA resale sales and the accepted bedroom classification. With Either the two stay in separate groups.
  *  - Up to 5% over the maximum is a separate, optional group, never mixed into the main list.
  *  - Bedrooms are never inferred here. search() matches them only on new launches, only from Huttons inventory that was checked recently, and never filters resale by them.
  *    Resale by bedrooms is kpt-discover-beds.js (the accepted classification and Research's bedroom types, find-beds.json), which reuses these rules.
@@ -66,7 +70,9 @@
       const inc = t.bands.filter((b) => Array.isArray(b) && typeof b[0] === 'number' && typeof b[1] === 'number' && (!req.minSize || b[0] + 50 >= req.minSize));
       if (!inc.length) return;
       const floor = Math.min.apply(null, inc.map((b) => b[1])); if (floor > B) return;
-      types.push({ bedrooms: t.bedrooms, floor });
+      // the listed sizes of this type at or under the maximum (and at or above the minimum size): the 100 sq ft bands whose listed price is within it
+      const fit = inc.filter((b) => b[1] <= B);
+      types.push({ bedrooms: t.bedrooms, floor, lo: Math.min.apply(null, fit.map((b) => b[0])), hi: Math.max.apply(null, fit.map((b) => b[0])) + 100 });
     });
     return types.length ? { types: types.sort((a, b) => a.bedrooms - b.bedrooms), from: Math.min.apply(null, types.map((t) => t.floor)) } : null;
   }
@@ -92,16 +98,17 @@
       if (near) { if (!near.pos[rec.id]) placed = false; else if (!(dist(rec.id) != null && dist(rec.id) <= near.radius)) return; }
       sales.forEach((sale) => {
         let u = null, uo = null, im = null, imo = null, ist = 'unchecked', when = null, past = false, lt = false;
-        // bedrooms: new launches only, from Huttons inventory; a bedroom choice makes the URA price test irrelevant for them (a bedroom type is never worked out from a size)
-        if (sale === 'resale' || !req.beds) { u = uraMatch(ix, rec, sale, req, B); if (!u) uo = uraMatch(ix, rec, sale, req, B2); }
+        // resale: URA resale sales. New launches: the listings only (never URA developer sales, which stay on Research as price history)
+        if (sale === 'resale') { u = uraMatch(ix, rec, sale, req, B); if (!u) uo = uraMatch(ix, rec, sale, req, B2); }
         if (sale === 'new' && ip) {
           const fr = FI.freshness(inv, ip); past = fr === 'dated'; lt = !!fr && FI.late(inv, ip);
           if (fr && ip.status === 'ok') { im = invMatch(ip, req, B); if (!im) imo = invMatch(ip, req, B2); ist = im ? 'match' : 'nomatch'; when = FI.whenText(Date.parse(ip.checkedAt || new Date(inv.fileAt).toISOString()), inv.now); }
           else if (fr && ip.status === 'zero_returned') { ist = 'zero'; when = FI.whenText(Date.parse(ip.checkedAt || new Date(inv.fileAt).toISOString()), inv.now); }
         }
+        if (sale === 'new' && ist !== 'match' && !imo) return;   // no current listing within reach: not a new-launch match (and never called sold out)
         const hit = u || im, hitOver = !hit && (uo || imo); if (!hit && !hitOver) return;
         const it = { id: rec.id, name: rec.name, street: rec.street || '', district: rec.d, seg: rec.seg || null, tenure: rec.tl || '', mixed: !!rec.m, tenGroup: rec.tg, cls, sale,
-          tier: hit ? (u ? u.tier : 'huttons') : 'over', ura: u || uo || null, dist: dist(rec.id), inv: sale === 'new' ? { state: ist, when, past, late: lt, from: (im || imo) ? (im || imo).from : null, types: (im || imo) ? (im || imo).types : [] } : null };
+          tier: hit ? (u ? u.tier : 'huttons') : 'over', ura: u || uo || null, hist: sale === 'new' && Array.isArray(rec.new) && rec.new.length > 0, dist: dist(rec.id), inv: sale === 'new' ? { state: ist, when, past, late: lt, from: (im || imo) ? (im || imo).from : null, types: (im || imo) ? (im || imo).types : [] } : null };
         if (!placed) { if (hit) unplaced.push(it); return; }
         (hit ? items : over).push(it);
       });

@@ -23,7 +23,7 @@
   /* ------------------------------------------------------------------ state */
   const BLANK = { budget: null, over: false, type: 'any', sale: 'either', minSize: null, tenure: 'any', beds: null };
   const S = { req: Object.assign({}, BLANK), near: null, mode: 'entry', edit: false, view: 'list', shown: {}, helps: {}, sel: null, errBudget: '', pendingWhere: '', draftBudget: '', moreOpen: false, sheetMin: false, layers: null, lyrOpen: false };
-  let srcLine = '', ix, findDoc = null, bx = null, bedsState = CFG.BEDS_URL && KB ? 'idle' : 'off', bedsLoad = null, invDoc, sitesDoc, dataReady = null, handoff = null, NM = null, nmLoad = null, nmView = null, nmHost = null, nmLayer = null, nmSig = '', nmBase = '', wasStage = false, NR = null, lastRes = null, seenKey = {};
+  let invLoaded = false, srcLine = '', ix, findDoc = null, bx = null, bedsState = CFG.BEDS_URL && KB ? 'idle' : 'off', bedsLoad = null, invDoc, sitesDoc, dataReady = null, handoff = null, NM = null, nmLoad = null, nmView = null, nmHost = null, nmLayer = null, nmSig = '', nmBase = '', wasStage = false, NR = null, lastRes = null, seenKey = {};
 
   /* ------------------------------------------------------------------ data */
   const get = (u, opts) => fetch(u, opts).then((r) => (r.ok ? r.json() : null)).catch(() => null);
@@ -32,10 +32,18 @@
     dataReady = Promise.all([get(CFG.FIND_URL), get(CFG.INV_URL, { cache: 'no-cache' }), get(CFG.SITES_URL)]).then((a) => {
       findDoc = a[0]; ix = FI.prepare(a[0]); invDoc = a[1];
       sitesDoc = (a[2] && Array.isArray(a[2].sites) ? a[2].sites : []).filter((x) => x && x.stage === 'new-launch' && x.status === 'configured' && /^https:\/\//.test(x.url || '') && x.id && x.name);
+      invLoaded = true; dataLoaded();   // Research fix (27 Oct 2026): the form drawn before the listings arrived is brought up to date (it was left showing them as missing)
     });
     return dataReady;
   }
   const inventory = () => FI.prepareInventory(invDoc, nowMs());
+  /* The listings have just loaded (or failed to): redraw only the bedroom control wherever it is drawn (the entry form, the Research form, the edit panel), so nothing typed,
+     focused or open is disturbed. A bedroom choice for new launches only is kept when the listings are usable and cleared, visibly, when they are not. */
+  function dataLoaded() {
+    const usable = D.inventoryUsable(inventory());
+    if (!usable && S.req.sale === 'new' && S.req.beds) { S.req.beds = null; if (S.mode === 'results') { commit(true); return; } }
+    document.querySelectorAll('[data-bedsblk]').forEach((el) => { el.outerHTML = bedsBlock(inventory()); });
+  }
   /* Resale by bedrooms: find-beds.json, fetched the first time a bedroom count is chosen with resale included. 'off' = keep today's behaviour. */
   const bedsWanted = () => !!(S.req.beds && S.req.sale !== 'new');
   const bedsOn = () => bedsState !== 'off';   // the resale bedroom choice is offered (it may still be loading)
@@ -173,7 +181,7 @@
     const place = S.near && NR && it.dist != null ? kmText(it.dist) + ' from ' + NR.label : '';
     return [it.sale === 'new' ? 'New launch' : 'Resale', CLS[it.cls] || null, place || null, 'District ' + Number(it.district), String(it.tenure || '').replace(/ yrs /, ' years ').replace(/^(\d+ years) from/, '$1 from') || null].filter(Boolean).join(' · ');
   }
-  const TAG = { typical: ['g', 'Typical prices within your maximum'], some: ['a', 'Some sales within your maximum'], huttons: ['b', 'New-launch listings within your maximum'], over: ['n', 'Up to 5% over your maximum'] };
+  const TAG = { typical: ['g', 'Typical prices within your maximum'], some: ['a', 'Some sales within your maximum'], huttons: ['b', 'Developer listings within your maximum'], over: ['n', 'Up to 5% over your maximum'] };
   /* bedroom wording (resale): the basis is always named, as on Research; "not confirmed" is never worded as a match */
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const ymS = (s) => { const m = /^(\d{4})-(\d{2})$/.exec(String(s || '')); return m ? MON[Number(m[2]) - 1] + ' ' + m[1] : ''; };
@@ -202,15 +210,16 @@
       n = `<p class="kd-n">${u.n} sale${u.n === 1 ? '' : 's'} · latest ${esc(ymLabel(u.last))}</p>`;
     }
     let inv = '';
-    if (it.inv) {
+    if (it.inv && it.inv.types && it.inv.types.length) {
       const iv = it.inv;
-      // V3.10: the check date always; "(as shown then)" once it is over 2 days old, and "may have changed since" past the 14-day cadence
-      const chk = `New-launch listings · updated ${esc(iv.when || '')}${iv.late ? ' · may have changed since' : ''}`;
-      if (iv.state === 'match' || (it.tier === 'over' && iv.from)) inv = `<p class="kd-inv"><span>${chk}</span> ${esc(bedsNoun(iv.types))} homes from around <b>${esc(p2(iv.from))}</b>${iv.past ? ' (as shown then)' : ''}</p>`;
-      else if (iv.state === 'nomatch') inv = `<p class="kd-inv kd-inv-no"><span>${chk}</span> none at your maximum${S.req.minSize ? ' and size' : ''}</p>`;
-      else if (iv.state === 'zero') inv = `<p class="kd-inv kd-inv-no"><span>${chk}</span> no units shown</p>`;
+      // V3.10: the check date always; "(as shown then)" once it is over 2 days old, and "may have changed since" past the 14-day cadence.
+      // Research fix (27 Oct 2026): a new launch is shown from its listing alone: each bedroom type listed within the maximum, its listed sizes and an indicative asking price.
+      const chk = `Developer listings · Checked ${esc(iv.when || '')}${iv.late ? ' · may have changed since' : ''}`;
+      const rows = iv.types.map((t) => `<li><span>${esc(FI.typeNoun ? FI.typeNoun(t.bedrooms) : t.bedrooms + '-bedroom')}</span>${t.lo ? ' · ' + esc(sizeText(t.lo, t.hi)) : ''} · from around <b>${esc(p2(t.floor))}</b></li>`).join('');
+      inv = `<div class="kd-inv"><span>${chk}</span><ul class="kd-invt">${rows}</ul><p class="kd-n">Indicative asking prices${iv.past ? ' (as shown then)' : ''}. Availability may have changed.</p></div>`;
     }
-    const research = u ? `<a data-f="go" data-id="${id}"${it.beds && it.beds.state === 'reliable' && it.beds.group ? ` data-bed="${esc(it.beds.group)}"` : ''} href="../../research/#/p/${id}/${it.sale}">Research page ›</a>` : '';
+    const research = it.sale === 'new' ? `<a data-f="go" data-id="${id}" href="../../research/#/p/${id}${it.hist ? '/new' : ''}">${it.hist ? 'Past developer sales ›' : 'Research page ›'}</a>`
+      : u ? `<a data-f="go" data-id="${id}"${it.beds && it.beds.state === 'reliable' && it.beds.group ? ` data-bed="${esc(it.beds.group)}"` : ''} href="../../research/#/p/${id}/${it.sale}">Research page ›</a>` : '';
     const map = `<a data-f="go" data-id="${id}" href="../../research/map/#p=${id}">View on Map ›</a>`;
     const loc = stageOn() && NM && NM.BYID[it.id] && NM.BYID[it.id].pos ? `<button type="button" class="kd-link kd-loc" data-f="locate" data-id="${id}" aria-pressed="${S.sel === it.id}">Show here on map</button>` : '';
     return `<article class="kd-card${S.sel === it.id ? ' is-sel' : ''}${unconf ? ' kd-unc' : ''}" data-pid="${id}"><h3>${esc(nm)}</h3><p class="kd-meta">${esc(meta(it))}</p>${ev}${n}${inv}<p><span class="kd-tag kd-tg-${tag[0]}">${tag[1]}</span></p><div class="kd-acts">${loc}${research}${map}</div></article>`;
@@ -221,18 +230,20 @@
   const help = (k, text) => `<button type="button" class="kd-i" data-f="help" data-k="${k}" aria-expanded="${!!S.helps[k]}" aria-label="More about this">ⓘ</button><p class="kd-hp" data-hp="${k}"${S.helps[k] ? '' : ' hidden'}>${esc(text)}</p>`;
   const radChips = () => (S.near ? `<div class="kd-rad" role="radiogroup" aria-label="Distance">${RADII.map((x) => `<button type="button" role="radio" aria-checked="${x === S.near.r}" data-f="rad" data-r="${x}">${esc(FI.radiusText(x))}</button>`).join('')}</div>` : '');
   function bedsBlock(inv) {
-    const r = S.req, usable = D.inventoryUsable(inv);
+    const r = S.req, usable = D.inventoryUsable(inv), loading = !invLoaded;
     let note, off = false;
     if (bedsOn() && r.sale !== 'new') {   // resale by bedroom type: Research's own types, from the accepted classification
       const RES = 'Resales are matched on bedroom types from URA rental records or floor plans; where those don’t confirm it, they’re listed separately.';
-      note = r.sale === 'resale' ? RES : r.beds && !usable ? 'Applied to resale only: new launches can’t be matched on bedrooms just now.' : RES + ' New launches: from new-launch listings.';
+      note = r.sale === 'resale' ? RES : r.beds && !usable && !loading ? 'Applied to resale only: new launches can’t be matched on bedrooms just now.' : RES + ' New launches: from new-launch listings.';
     }
     else if (r.sale === 'resale') { off = true; note = CFG.BEDS_URL ? 'Bedroom matching for resale isn’t available just now.' : 'Not available for resale: the sales records don’t include bedrooms, and we never work them out from size.'; }
-    else if (!usable) { off = true; note = 'Bedroom matching uses recently updated new-launch listings, which aren’t available right now.'; }
+    else if (loading && r.sale === 'new') note = 'Matched on new-launch listings (loading).';   // still loading: the choice can be made now and is kept
+    else if (!usable && !loading) { off = true; note = 'Bedroom matching uses recently updated new-launch listings, which aren’t available right now.'; }
     else if (r.beds && r.sale === 'either') note = CFG.BEDS_URL ? 'Applied to new launches only: resale bedroom matching isn’t available just now.' : 'Applied to new launches only. Resale isn’t filtered by bedrooms.';
     else if (r.beds) note = 'Matched on new-launch listings, so only new launches with a matching bedroom type are listed.';
+    else if (r.sale === 'new' && bedsOn()) note = 'Matched on the bedroom types in new-launch listings.';   // resale has its own bedroom matching: never say it can't be filtered
     else note = 'For new launches only, from new-launch listings. Resale can’t be filtered by bedrooms.';
-    return `<div class="kd-f"><span class="kd-l">Bedrooms <small>optional</small></span>${seg('beds', [['', 'Any'], [1, '1'], [2, '2'], [3, '3'], [4, '4+']].map((o) => (o[0] !== '' && off ? o.concat([true]) : o)), r.beds || '', off ? ' aria-disabled="true"' : '')}<p class="kd-note">${esc(note)}</p></div>`;
+    return `<div class="kd-f" data-bedsblk><span class="kd-l">Bedrooms <small>optional</small></span>${seg('beds', [['', 'Any'], [1, '1'], [2, '2'], [3, '3'], [4, '4+']].map((o) => (o[0] !== '' && off ? o.concat([true]) : o)), r.beds || '', off ? ' aria-disabled="true"' : '')}<p class="kd-note">${esc(note)}</p></div>`;
   }
   function overToggle(counts) {
     const n = counts && !S.req.over && counts.over ? ` <i>${counts.over} more</i>` : '';
@@ -255,6 +266,9 @@
   const doneText = () => { const c = lastRes ? lastRes.counts.projects : 0; return 'Show ' + c + (c === 1 ? ' development' : ' developments'); };
 
   /* ------------------------------------------------------------------ results */
+  const invUsable = () => D.inventoryUsable(inventory());
+  /* new launches asked for, but the listings can't be used (missing, or past the 21-day window): said once, plainly; past developer sales are never put in their place */
+  const invGone = (res) => (res.req.sale !== 'resale' && invLoaded && !invUsable() ? `<p class="kd-gn kd-invgone">New launches are listed only from recent developer listings, which couldn’t be loaded just now${res.req.sale === 'either' ? ', so only resale is shown' : ''}. Past developer sales are on each development’s <a href="${BASE}research/">Research page</a>.</p>` : '');
   const placeLine = () => (S.near && NR ? 'Within ' + FI.radiusText(S.near.r) + ' of ' + NR.label : '');
   function chips() {
     const r = S.req, out = [['Max ' + m2(r.budget), 'budget']];
@@ -268,33 +282,38 @@
   }
   function headline(res) {
     const r = res.req, c = res.counts, N = c.projects, max = m2(r.budget);
-    if (res.beds) { const w = bedWord(r.beds).replace('-', '\u2011'), sw = r.sale === 'resale' ? 'resales' : 'sales';
+    if (res.beds) { const w = bedWord(r.beds).replace('-', '\u2011'), sw = r.sale === 'resale' ? 'resales' : c.huttons ? 'resales or developer listings' : 'sales';
       if (!N) return c.insufficient ? `No confirmed ${w} ${sw} within ${max}` : `No developments with recent ${w} ${sw} within ${max}`;
       return `${N} development${N === 1 ? '' : 's'} with recent ${w} ${sw} within ${max}`; }
+    if (!N && r.sale === 'new') return invUsable() ? `No new launches with listings within ${max}` : 'Developer listings couldn’t be loaded just now';
     if (!N) return `No developments with recent sales within ${max}`;
     const allHut = c.typical + c.some === 0 && c.huttons > 0;
-    if (allHut && r.beds && r.sale === 'new') return `${N} new launch${N === 1 ? '' : 'es'} with ${bedWord(r.beds)} homes in new-launch listings within ${max}`;
-    if (allHut) return `${N} new launch${N === 1 ? '' : 'es'} in new-launch listings within ${max}`;
+    if (c.huttons && !allHut) return `${N} development${N === 1 ? '' : 's'} with recent sales or developer listings within ${max}`;
+    if (allHut && r.beds && r.sale === 'new') return `${N} new launch${N === 1 ? '' : 'es'} with ${bedWord(r.beds)} homes in developer listings within ${max}`;
+    if (allHut) return `${N} new launch${N === 1 ? '' : 'es'} in developer listings within ${max}`;
     return `${N} development${N === 1 ? '' : 's'} with recent sales within ${max}`;
   }
   function subLine(res) {
     const c = res.counts, bits = [];
     if (S.near && NR) bits.push(placeLine());
-    bits.push(S.near && NR ? 'nearest first' : 'typical prices first');
-    bits.push('past sales, not homes for sale');
+    const hasN = res.items.some((i) => i.sale === 'new'), hasR = res.items.some((i) => i.sale === 'resale');
+    bits.push(S.near && NR ? 'nearest first' : hasR ? 'typical prices first' : 'A to Z');
+    // Research fix: say what each source is (resale = past sales; new launches = current listings), never one blanket line for both
+    bits.push(hasR && hasN ? 'resale from past sales, new launches from developer listings' : hasN ? 'from current developer listings' : 'past sales, not homes for sale');
     let s = bits.join(' · ');
     const tiers = [];
     if (c.typical && (c.some || c.huttons)) tiers.push(c.typical + ' with typical prices within your maximum');
     if (c.some) tiers.push(c.some + ' with only some sales within it');
-    if (c.huttons) tiers.push(c.huttons + ' from new-launch listings');
+    if (c.huttons && (c.typical || c.some)) tiers.push(c.huttons + ' new launch' + (c.huttons === 1 ? '' : 'es') + ' from developer listings');
     if (res.beds && c.insufficient) tiers.push(c.insufficient + ' not confirmed as ' + bedWord(res.req.beds) + ', listed after');
     return `<p class="kd-sub">${esc(s)}</p>${tiers.length ? `<p class="kd-sub kd-tiers">${esc(tiers.join(' · '))}</p>` : ''}`;
   }
-  const NEW_NOTE = 'Developer sales recorded by URA. These don’t show what is still available; new-launch listings are added where we have them.';
+  const NEW_NOTE = 'From developer listings: bedroom types, sizes and indicative asking prices within your maximum. Developments without a current listing aren’t shown. Past developer sales are on each Research page.';
+  const RES_NOTE = 'Past sales recorded by URA, not current listings.';
   function groupHtml(g, key) {
     const shown = S.shown[key] || 5, items = g.items, name = g.sale === 'new' ? 'New launch' : 'Resale';
     const left = items.length - shown;
-    return `<div class="kd-g"><div class="kd-gh"><h3>${name}</h3><span>${items.length}</span></div>${g.sale === 'new' ? `<p class="kd-gn">${esc(NEW_NOTE)}</p>` : ''}${items.slice(0, shown).map(cardHtml).join('')}${left > 0 ? `<button type="button" class="kd-more-b" data-f="more" data-key="${esc(key)}">Show ${Math.min(left, 20)} more${left > 20 ? ' (' + left + ' left)' : ''} <span aria-hidden="true">⌄</span></button>` : ''}</div>`;
+    return `<div class="kd-g"><div class="kd-gh"><h3>${name}</h3><span>${items.length}</span></div><p class="kd-gn">${esc(g.sale === 'new' ? NEW_NOTE : RES_NOTE)}</p>${items.slice(0, shown).map(cardHtml).join('')}${left > 0 ? `<button type="button" class="kd-more-b" data-f="more" data-key="${esc(key)}">Show ${Math.min(left, 20)} more${left > 20 ? ' (' + left + ' left)' : ''} <span aria-hidden="true">⌄</span></button>` : ''}</div>`;
   }
   function listHtml(res) {
     const secs = D.sections(res.items), multi = secs.length > 1 || (secs[0] && secs[0].cls !== 'condo');
@@ -304,7 +323,7 @@
     });
     if (res.req.over && res.over.length) {
       const key = 'over', shown = S.shown[key] || 5, left = res.over.length - shown;
-      h += `<section class="kd-sec kd-over"><h2 class="kd-ch">Up to 5% over your maximum</h2><p class="kd-gn">Their recent sales start above ${esc(m2(res.req.budget))} but within 5% of it. Listed apart from the developments above.</p>${res.over.slice(0, shown).map(cardHtml).join('')}${left > 0 ? `<button type="button" class="kd-more-b" data-f="more" data-key="over">Show ${Math.min(left, 20)} more <span aria-hidden="true">⌄</span></button>` : ''}</section>`;
+      h += `<section class="kd-sec kd-over"><h2 class="kd-ch">Up to 5% over your maximum</h2><p class="kd-gn">Their recent resales or listed prices start above ${esc(m2(res.req.budget))} but within 5% of it. Listed apart from the developments above.</p>${res.over.slice(0, shown).map(cardHtml).join('')}${left > 0 ? `<button type="button" class="kd-more-b" data-f="more" data-key="over">Show ${Math.min(left, 20)} more <span aria-hidden="true">⌄</span></button>` : ''}</section>`;
     }
     return h;
   }
@@ -352,11 +371,11 @@
     rows.sort((a, b) => a.d - b.d);
     return `<section class="kd-sec kd-up"><h2 class="kd-ch">Upcoming launches within ${esc(FI.radiusText(S.near.r))}</h2><p class="kd-gn">No prices here yet, so these are possibilities, not budget matches.</p><ul class="kd-ul">${rows.map((x) => `<li><a href="${esc(x.url)}"${x.ext ? ' target="_blank" rel="noopener"' : ''} data-f="go">${esc(x.name)}${x.ext ? ' <span aria-hidden="true">↗</span>' : ''}</a><span>${esc(kmText(x.d) + (x.tag ? ' · ' + x.tag : ''))}</span></li>`).join('')}</ul></section>`;
   }
-  const METHOD = ['Your budget is your maximum. A development is listed when its URA sales in the last 12 months, at your minimum size or larger, include prices at or under it, with at least 3 such sales, one of them in the last 6 months.',
-    '“Typical prices within your maximum” means the middle half of those sales is at or under it. “Some sales within your maximum” means only part of the range is, and typical prices are higher.',
-    'These are past sales, not homes for sale, and not a valuation. New-launch sales don’t show whether units remain; where new-launch listings were updated recently they are shown separately, with the date.',
+  const METHOD = ['Your budget is your maximum. Resale: a development is listed when its URA resales in the last 12 months, at your minimum size or larger, include prices at or under it, with at least 3 such sales, one of them in the last 6 months.',
+    'For resale, “Typical prices within your maximum” means the middle half of those sales is at or under it. “Some sales within your maximum” means only part of the range is, and typical prices are higher.',
+    'Resale figures are past sales, not homes for sale, and not a valuation. New launches are listed only from developer listings checked in the last 21 days (the date is on each card): the bedroom types and sizes listed, with indicative asking prices at or under your maximum. Past developer sales are never used as current prices; they stay on each development’s Research page as price history.',
     'Distances are in a straight line. Bedrooms are matched only for new launches, from new-launch listings, and are never worked out from size. Condos, ECs and cluster housing are never mixed.',
-    'The optional “up to 5% over” list shows developments whose recent sales start just above your maximum. It is never mixed into the main list.'];
+    'The optional “up to 5% over” list shows developments whose recent resales or listed prices start just above your maximum. It is never mixed into the main list.'];
   const BEDS_METHOD = 'Bedrooms: for resale, a development is matched on the bedroom types its Research page shows, worked out from URA rental records or developers’ floor plans (URA doesn’t record bedrooms with a sale), and only where enough of its resales are identified. Where they aren’t, resales that could be that size are listed separately as “not confirmed”. For new launches, bedrooms come from recently updated new-launch listings. Studios and penthouses don’t count as a number of bedrooms. Condos, ECs and cluster housing are never mixed.';
   function method(res) {
     if (!bedsOn() || res.req.sale === 'new') return METHOD;
@@ -366,7 +385,7 @@
   }
   function resultsHtml(res) {
     const r = res.req, body = res.state === 'ok' ? listHtml(res) : emptyHtml(res);
-    return `<div class="kd-lead"><p class="kd-eye">I’m looking to buy</p><h1 class="kd-h1" id="kdH">${esc(headline(res))}</h1>${res.state === 'ok' ? subLine(res) : ''}</div>
+    return `<div class="kd-lead"><p class="kd-eye">I’m looking to buy</p><h1 class="kd-h1" id="kdH">${esc(headline(res))}</h1>${res.state === 'ok' ? subLine(res) : ''}${invGone(res)}</div>
       ${chips()}<div class="kd-bar"><div class="kd-barrow"><button type="button" class="kd-btn kd-ghost" data-f="edit" aria-expanded="${S.edit}">Edit search</button>${S.near ? `<div class="kd-radin">${radChips()}</div>` : ''}</div></div>
       ${S.near ? `<div class="kd-quick">${radChips()}</div>` : ''}<div class="kd-quick2">${overToggle(res.counts)}</div>
       ${body}${unconfHtml(res)}${res.state === 'ok' || (res.beds && res.counts.insufficient) ? unplacedHtml(res) + upcomingHtml(res) : ''}
@@ -562,7 +581,7 @@
       const k = t.dataset.k; let v = t.dataset.v; if (k === 'beds') v = v ? Number(v) : null;
       S.req[k] = v;
       if (k === 'sale' && v === 'resale' && !bedsOn()) S.req.beds = null;
-      if (k === 'sale' && v === 'new' && !D.inventoryUsable(inventory())) S.req.beds = null;   // the control is off there: nothing hidden stays applied
+      if (k === 'sale' && v === 'new' && invLoaded && !D.inventoryUsable(inventory())) S.req.beds = null;   // the control is off there: nothing hidden stays applied
       if (bedsWanted() && bedsState === 'idle') { const go = () => { if (S.mode === 'results') commit(true); else { renderForm(); bindInputs(); } }; loadBeds().then(go, go); if (S.mode !== 'results') { renderForm(); bindInputs(); } return; }
       if (S.mode === 'results') commit(true); else { renderForm(); bindInputs(); }
       return;
@@ -616,7 +635,8 @@
     const valid = !!(init && S.req.budget && D.clean(S.req).budget);
     if (valid && init.planner) srcLine = plannerLine(init);
     S.mode = 'entry'; renderAll(); S.ready = true;
-    if (valid) loadData().then(() => (init.near || init.where ? restorePlace(init.near, init.where) : null)).then(() => { if (S.mode === 'entry' && (S.near || S.pendingWhere) && !document.activeElement.matches('input')) renderAll(); });
+    const ld = loadData();   // Research fix: the listings load as soon as the form is shown (before, a fresh form in Research loaded nothing until Show developments)
+    if (valid) ld.then(() => (init.near || init.where ? restorePlace(init.near, init.where) : null)).then(() => { if (S.mode === 'entry' && (S.near || S.pendingWhere) && !document.activeElement.matches('input')) renderAll(); });
   }
   function start() {
     if (EMB) { embedStart(); return; }
