@@ -96,10 +96,12 @@ try:
         check(f'{tag} upgrade: the card says it is an estimate, not a bank approval, and names the KPT assumptions', 'not a bank approval' in t and 'KPT assumptions' in t)
         pg.click('[data-bfirst] > summary'); bf = pg.inner_text('[data-bfirst-out]')
         # V3.7.2: the flat's $250,000 loan is still running when buying first, so its monthly repayment is asked, never assumed to be zero
-        check(f'{tag} upgrade, buy first: explained with ABSD and the second housing loan; the flat\'s repayment is asked before any budget is shown', 'ABSD' in bf and 'second housing loan' in bf and 'Add the flat’s monthly loan repayment' in bf and 'without the proceeds' not in bf, bf[:300])
+        need = lambda k: pg.evaluate("k=>{const e=document.querySelector('[data-bf-need=\"'+k+'\"]');return !!e&&!e.hidden&&!!e.offsetParent}", k)
+        # V3.7.3: each missing figure is asked beside its own input; the flat's repayment is never assumed to be zero
+        check(f'{tag} upgrade, buy first: explained with ABSD and the second housing loan; the flat\'s repayment is asked beside its field before any budget is shown', 'ABSD' in bf and 'second housing loan' in bf and need('upFlatMo') and pg.query_selector('[data-bf-budget]') is None and 'without the proceeds' not in bf, bf[:300])
         pg.fill('[data-k="upFlatMo"]', '1,300'); settle(pg); bf = pg.inner_text('[data-bfirst-out]')
-        # this client has no savings or CPF balances entered, so with the repayment in, the panel asks for them (the budget itself: v37-render E3)
-        check(f'{tag} upgrade, buy first: with the repayment in, it moves on to the savings and CPF balances it still needs', 'Add the flat’s monthly loan repayment' not in bf and 'no budget to show until your own cash and CPF balances are added' in bf, bf[-300:])
+        # this client has no savings or CPF entered, so with the repayment in, the panel asks for those two beside their fields (the budget itself: v37-render G)
+        check(f'{tag} upgrade, buy first: with the repayment in, it asks only for the cash and usable CPF still missing', not need('upFlatMo') and need('bfCash') and need('bfCpf') and pg.query_selector('[data-bf-budget]') is None, bf[-300:])
         clean(tag, 'upgrade', t)
         # ---- 5. owner aged 55+ ----
         fresh(pg, '/tools/sale-proceeds/'); fill(pg, 'sale.price', '750,000'); fill(pg, 'sale.loan', '250,000'); fill(pg, 'sale.cpfRefund', '205,000', keep=True); seg(pg, 'sale.o55', 'yes'); close(pg); settle(pg); t = out(pg)

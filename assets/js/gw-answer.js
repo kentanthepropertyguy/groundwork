@@ -119,11 +119,12 @@
     // C1 (B3): CPF while a buyer still owns another home. Only OA above the retirement-sum set-aside can be used (CPF Board); the planned CPF is never counted above that.
     const bal = Array.isArray(s.cpfBal) ? s.cpfBal : [];
     out.cpfBal = bal; out.cover95 = s.cover95 === true ? true : s.cover95 === false ? false : null;
+    out.cpfIsUsable = s.cpfIsUsable === true;   // V3.7.3: the buyer has typed the CPF they can use (already above the set-aside): taken as typed, not checked again
     const year = /^\d{4}/.test(String(s.otp || '')) ? +String(s.otp).slice(0, 4) : +todayIso().slice(0, 4);
     out.cpfYear = year;
     out.cpfCheck = (mode) => {
       const at = out.ownedAt(mode), subject = at.map((c) => c >= 1);
-      if (!subject.some(Boolean) || !(out.cpf > 0)) return { applies: false, usable: out.cpf };
+      if (!subject.some(Boolean) || !(out.cpf > 0) || out.cpfIsUsable) return { applies: false, usable: out.cpf };
       const r = C.cpfSecondHome({ year: year, cover95: out.cover95, members: duty.map((b, k) => ({ oa: bal[k] ? bal[k].oa : undefined, sa: bal[k] ? bal[k].sa : undefined, age: b.age, subject: subject[k] })) });
       if (!r.ok) return { applies: true, missing: r.missing, usable: 0, check: r };
       return { applies: true, usable: Math.min(out.cpf, r.usable), check: r, capped: r.usable < out.cpf - 0.5 };
