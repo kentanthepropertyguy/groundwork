@@ -552,3 +552,23 @@ main:has(.f3-frame){background:#fff}
 .f3-next,.f3-frame .f3-next{background:none;border-radius:0;border-top:1px solid #E6E7EB;padding:16px 0 4px;margin-top:20px}
 .f3-sub{background:none;border-radius:0;padding:2px 0 2px 16px;border-left:2px solid #E6E7EB}
 .f3-frame .f3-card{box-shadow:0 1px 2px rgba(22,33,62,.04)}
+/* V3.12 Stage 1 (Ken, 27 Oct 2026): How much can I borrow? groups each borrower's own figures; a loan in both names once, below them */
+.f3-bwho{margin-bottom:14px}
+.f3-bp{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:12px}
+.f3-bpc{border:1px solid var(--f3-line);border-radius:12px;margin:0;padding:14px 16px 16px;min-width:0;display:flex;flex-direction:column;gap:12px;background:#fff}
+.f3-bpc legend{padding:0 6px;margin-left:-6px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--f3-muted)}
+.f3-bpc .f3-f,.f3-bpc .f3-q{margin:0}
+.f3-jl{display:flex;flex-direction:column;gap:10px;margin:0 0 14px;padding:12px 0 0;border-top:1px solid var(--f3-line)}
+.f3-own{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.f3-saleoffer{margin:10px 0 0;padding:10px 0 0;border-top:1px solid var(--f3-line)}
+.f3-saleoffer .f3-lnk{margin-top:6px}
+.f3-sp{margin:14px 0 0}
+@media (max-width:640px){.f3-bp{grid-template-columns:minmax(0,1fr)}.f3-bpc{padding:12px 14px 14px}}
+/* V3.12 Stage 1: existing homes, one card each (What will this home cost me?) */
+.f3-homes{display:flex;flex-direction:column;gap:12px}
+.f3-hl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.f3-hc{border:1px solid var(--f3-line);border-radius:12px;padding:12px 14px 14px;display:flex;flex-direction:column;gap:12px;background:#fff;min-width:0}
+.f3-hch{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.f3-hch b{font-size:15px;font-weight:700;color:var(--f3-ink)}
+.f3-hc .f3-q,.f3-hc .f3-f{margin:0}
+.f3-homes .f3-add{align-self:flex-start}

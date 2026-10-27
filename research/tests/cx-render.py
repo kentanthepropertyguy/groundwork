@@ -69,6 +69,7 @@ with sync_playwright() as p:
         chk(vn + ': the income is on the first screen', pg.locator('[data-k="p.0.fixed"]').evaluate('e=>e.getBoundingClientRect().bottom') < vp['height'])
         chk(vn + ': the cash and CPF row is open', pg.evaluate("document.querySelector('[data-cashrow]').open"))
         pg.fill('[data-k="p.0.fixed"]', '10,000'); pg.fill('[data-k="cash"]', '300,000'); pg.fill('[data-k="cpf"]', '150,000')
+        pg.click('[data-k="p.0.own"] [data-v="0"]')   # V3.12 (Ken, 27 Oct 2026): the properties owned are answered for the budget, never assumed
         pg.wait_for_function("()=>!!document.querySelector('[data-max]')", timeout=8000)
         chk(vn + ': with figures, the budget is there', '$' in pg.inner_text('[data-max]'))
         pg.reload(); pg.wait_for_selector('[data-k="cash"]', state='attached'); pg.wait_for_timeout(300)

@@ -106,6 +106,8 @@
   /* ---------------- 2. What can I afford? ---------------- */
   // homes each person owns now, from the household answer (how many, and whose)
   function ownedOf(st) {
+    // V3.12 Stage 1: the existing-homes list (fromHomes) and the borrowing page's per-person answer give each person's count directly; the household answer is read as before
+    if (Array.isArray(st.owned)) return (st.n === 2 ? [0, 1] : [0]).map((k) => Math.max(0, Math.min(2, Math.round(nn(st.owned[k])))));
     const h = Math.max(0, Math.min(2, Math.round(nn(st.homes))));
     if (st.n !== 2) return [h];
     return st.whose === '0' ? [h, 0] : st.whose === '1' ? [0, h] : [h, h];
@@ -123,14 +125,15 @@
       home: !(st.homes >= 1) ? 'none' : sell ? 'sell' : 'keep', couple: st.couple, cpfBal: st.cpfBal, cover95: st.cover95, cpfIsUsable: st.cpfIsUsable === true,
       price: has(st.price) && st.price > 0 ? st.price : undefined, valuation: st.akind === 'completed' && has(st.valuation) ? st.valuation : undefined };
     if (st.homes >= 1) {
-      s.homeJoint = st.n === 2 ? st.whose === 'both' : undefined;
+      s.homeJoint = st.n === 2 ? (st.homeJoint === true || st.homeJoint === false ? st.homeJoint : st.whose === 'both') : undefined;
       // the home's own loan: the first home-loan repayment listed (none listed = no loan on it); the others are loans on other homes the buyers own
       const sl = st.sale || {};
       s.flat = { hasLoan: homeLoans.length ? 'yes' : 'no', instalment: homeLoans.length ? homeLoans[0].amt : 0, type: sl.type === 'private' ? 'private' : 'hdb', price: sl.price, loan: sl.loan, cpfRefund: sl.cpfRefund, heldOver4: sl.type === 'private' && sl.held === true ? true : undefined };
       // Sale proceeds' own cash and CPF (own commission, legal fees, SSD) when it handed them over; otherwise the same engine works the sale out here
       if (has(sl.oCash)) { s.flat.overrideCash = sl.oCash; s.flat.overrideCpf = has(sl.oCpf) ? sl.oCpf : 0; s.flat.cpfRefund55 = 0; }   // V3.5: oCpf is already the usable CPF (55+ rule applied in sell())
       const extra = homeLoans.slice(1);
-      if (own.some((c) => c >= 2) || (st.n === 2 && st.whose === 'both' && st.homes >= 2)) { s.otherLoans = Math.min(2, extra.length); s.otherInstal = extra.reduce((a, l) => a + l.amt, 0); }
+      const apart = st.n === 2 && st.homeJoint === false && own.filter((c) => c >= 1).length >= 2;   // V3.12: two homes owned separately (one each): two homes, as when one person owns two
+      if (own.some((c) => c >= 2) || (st.n === 2 && st.whose === 'both' && st.homes >= 2) || apart) { s.otherLoans = Math.min(2, extra.length); s.otherInstal = extra.reduce((a, l) => a + l.amt, 0); }
       else if (extra.length) s.debts += extra.reduce((a, l) => a + l.amt, 0);   // a second home loan with no second home: still a monthly repayment
       if (sell) s.order = 'sell';
     } else if (homeLoans.length) s.debts += L.homeAmt;   // a home loan with no home owned (e.g. a guarantor's share): counted as a repayment
@@ -155,12 +158,42 @@
     return out;
   }
 
+  /* ---------------- V3.12 Stage 1: the existing homes, one by one ---------------- */
+  // list: [{ own: '0' | '1' | 'both', type: 'hdb' | 'private', act: 'keep' | 'sell', mort: 'yes' | 'no' | '', amt }]   (n: 1 or 2; with one person every home is theirs)
+  // Returns the entries the calculations already read: homes and whose (the household answer, for every case it can express), owned (each person's count),
+  // homeJoint (the home kept or sold is owned by both), soldOwners (who owns the home being sold), sell (a home is being sold), and the home-loan
+  // repayments as list rows, the home being sold (or the first home) first, a home owned by both entered once. Nothing is counted twice and nothing is invented:
+  // a home "still paying" with no repayment typed gives no row (as a blank repayment did before); the page asks for it.
+  function fromHomes(list, n) {
+    const L = (Array.isArray(list) ? list : []).filter((h) => h && typeof h === 'object');
+    const ownersOf = (h) => (n !== 2 ? [0] : h.own === 'both' ? [0, 1] : h.own === '1' ? [1] : [0]);
+    const owned = (n === 2 ? [0, 1] : [0]).map((k) => L.filter((h) => ownersOf(h).indexOf(k) >= 0).length);
+    const si = L.findIndex((h) => h.act === 'sell'), pi = si >= 0 ? si : 0, prim = L[pi] || null;
+    const order = L.map((h, i) => i).sort((a, b) => (a === pi ? -1 : b === pi ? 1 : a - b));
+    const rows = order.map((i) => L[i]).filter((h) => h.mort === 'yes').map((h) => ({ type: 'home', who: ownersOf(h)[0], amt: has(h.amt) ? h.amt : null }));
+    const homes = Math.min(2, Math.max.apply(null, [0].concat(owned)));
+    const whose = n !== 2 ? 'both' : owned[0] === 0 ? '1' : owned[1] === 0 ? '0' : 'both';
+    return { owned: owned, homes: homes, whose: whose, homeJoint: n === 2 && prim ? ownersOf(prim).length === 2 : undefined, soldOwners: si >= 0 ? ownersOf(L[si]) : null,
+      sell: si >= 0, sellType: si >= 0 && L[si].type === 'private' ? 'private' : 'hdb', rows: rows, count: L.length };
+  }
+
+  // the entries with the home list applied: its homes replace the household answer, its home-loan repayments replace any home-loan rows (other loans stay),
+  // and "selling" sets the plan; when (buy first or sell first) is the page's own answer, orderChoice, as before ('buy' if not given)
+  function withHomes(st, list, orderChoice) {
+    const n = st.n === 2 ? 2 : 1, H = fromHomes(list, n), other = (st.loans || []).filter((l) => l && l.type !== 'home');
+    const o = Object.assign({}, st, { homes: H.homes, whose: H.whose, owned: H.owned, soldOwners: H.soldOwners, loans: H.rows.concat(other),
+      plan: H.sell ? 'sell' : 'keep', order: H.sell ? (orderChoice === 'sell' ? 'sell' : 'buy') : 'none' });
+    if (H.homeJoint !== undefined && H.owned[0] >= 1 && H.owned[1] >= 1) o.homeJoint = H.homeJoint; else delete o.homeJoint;
+    if (H.sell) o.sale = Object.assign({}, st.sale || {}, { type: H.sellType });
+    return o;
+  }
+
   /* ---------------- 3. How much do I pay, and when? ---------------- */
   const engineKind = (k) => (k === 'resaleec' ? 'completed' : k === 'ec' ? 'ec' : k === 'completed' ? 'completed' : 'new');
   // the buyers for stamp duty: residency and homes owned at the purchase (sold first: the home sold no longer counts for its owners)
   function dutyBuyers(st) {
-    const own = ownedOf(st), sellFirst = st.homes >= 1 && st.order === 'sell';
-    return people(st).map((x) => ({ res: resOf(x), fta: ftaOf(x), owned: Math.max(0, own[x.k] - (sellFirst && own[x.k] >= 1 ? 1 : 0)) }));
+    const own = ownedOf(st), sellFirst = st.homes >= 1 && st.order === 'sell', sold = Array.isArray(st.soldOwners) ? st.soldOwners : null;
+    return people(st).map((x) => ({ res: resOf(x), fta: ftaOf(x), owned: Math.max(0, own[x.k] - (sellFirst && own[x.k] >= 1 && (!sold || sold.indexOf(x.k) >= 0) ? 1 : 0)) }));
   }
   function schedule(st) {
     if (st.pkind === 'hdb') return { ok: false, hdb: true };
@@ -418,5 +451,5 @@
     return res;
   }
 
-  return { assetLoan, assetRun, costHdb, flat, sell, incomeNeeded, cost, borrowersOf, loansOf, needOf, borrow, priceLoan, ownedOf, toAssess, afford, dutyBuyers, schedule, timelineInput, incomeLoan, funding, engineKind };
+  return { assetLoan, assetRun, costHdb, flat, sell, incomeNeeded, cost, borrowersOf, loansOf, needOf, borrow, priceLoan, ownedOf, toAssess, afford, dutyBuyers, schedule, timelineInput, incomeLoan, funding, engineKind, fromHomes, withHomes };
 });
