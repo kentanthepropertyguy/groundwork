@@ -268,6 +268,23 @@
     }
    ]
   },
+  "550500": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "500 SERANGOON NORTH AVENUE 4 SINGAPORE 550500",
+     "BLK_NO": "500",
+     "ROAD_NAME": "SERANGOON NORTH AVENUE 4",
+     "BUILDING": "NIL",
+     "ADDRESS": "500 SERANGOON NORTH AVENUE 4 SINGAPORE 550500",
+     "POSTAL": "550500",
+     "LATITUDE": "1.374526016307015",
+     "LONGITUDE": "103.8757442338135"
+    }
+   ]
+  },
   "556103": {
    "found": 0,
    "totalNumPages": 0,

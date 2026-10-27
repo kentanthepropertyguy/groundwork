@@ -176,6 +176,20 @@ try:
         ctx, pg, errs = fresh(br, kw); open_map(pg, '#pl=hdb%3Abishan%2F155%2Fbishan-st-13&r=500&ft=5-room'); txt = panel(pg)
         check(vn + ': a shared Map link to a block opens it with its flat type, even with the layer off', 'Blk 155 Bishan Street 13' in txt and pg.locator('.hft[aria-pressed=true]').inner_text() == '5-room' and '5 resales in this block' in txt, txt[:200])
         ref[vn + '-map'] = money(txt)[:2]; shot(pg, f'7-map-deeplink-{vn}'); ctx.close()
+        # V3.11 (Ken, 27 Oct 2026): prices show at once. A block with several flat types opens on its most-resold type in the block (chips still switch it);
+        # a postal code that is an HDB block shows the same prices panel itself (Blk 500 Serangoon North Avenue 4, 550500), never a button to it
+        ctx, pg, errs = fresh(br, kw); open_map(pg, '#pl=hdb%3Abishan%2F304%2Fshunfu-rd'); txt = panel(pg)
+        check(vn + ': a block with several flat types shows prices at once, on its most-resold type (Blk 304 Shunfu Road: 3-room, 4 resales in the block)', pg.locator('.hft[aria-pressed=true]').inner_text() == '3-room' and '4 resales in this block' in txt and len(money(txt)) >= 2 and 'Choose a flat type' not in txt and pg.locator('.hft').count() >= 3, txt[:300])
+        check(vn + ': ... and its link opens the full HDB research for that flat type', '3-room' in (pg.get_attribute('[data-hdb-panel=ok] a[data-m-hdb]', 'href') or ''), pg.get_attribute('[data-hdb-panel=ok] a[data-m-hdb]', 'href'))
+        pg.click('.hft[data-hft="4-room"]'); pg.wait_for_function("document.querySelector('.hft[aria-pressed=true]').textContent==='4-room'"); txt2 = panel(pg)
+        check(vn + ': choosing another flat type switches the prices and keeps it in the link', '4-room' in txt2 and 'ft=4-room' in hash_(pg) and pg.locator('.hft[aria-pressed=true]').count() == 1, [txt2[:200], hash_(pg)])
+        pg.click('.hft[data-hft="4-room"]'); pg.wait_for_timeout(200); check(vn + ': choosing it again keeps it (prices never disappear)', pg.locator('.hft[aria-pressed=true]').inner_text() == '4-room' and len(money(panel(pg))) >= 1); ctx.close()
+        ctx, pg, errs = fresh(br, kw); open_map(pg); pg.fill('#q', '550500'); pg.wait_for_selector('.sugg button[data-pick^="postal"]'); pg.click('.sugg button[data-pick^="postal"]')
+        pg.wait_for_selector('[data-hdb-panel=ok] .hev', timeout=20000); sel = '.bs' if mob else '.dp'; txt = pg.inner_text(sel)
+        check(vn + ': postal code 550500 shows Blk 500 Serangoon North Avenue 4\'s resale prices straight away: flat-type chips, prices, count and dates, and the full research link', '500 Serangoon North Avenue 4' in txt and pg.locator('.hft').count() >= 1 and pg.locator('.hft[aria-pressed=true]').count() == 1 and len(money(txt)) >= 2 and re.search(r'\d+ resales? (in this block|on )', txt) and 'Registered ' in txt and pg.locator('[data-hdb-panel=ok] a[data-m-hdb]').count() == 1 and 'HDB resale prices for Blk' not in txt, txt[:400])
+        if mob: check(vn + ': ... on a phone it is the block\'s own sheet: prices first, nearby developments behind "Developments nearby"', 'Developments nearby' in pg.inner_text('.bs [data-dpmore].btn') and pg.locator('.bs .rad button').count() == 0, pg.inner_text('.bs')[-200:])
+        check(vn + ': ... with no estimate: every price is a recorded resale, labelled as past HDB records', 'Historical resale prices from HDB records' in txt and not re.search(r'estimate|valuation of|worth about', txt, re.I))
+        check(vn + ': ... the postal code stays out of the address bar\'s research link, and no errors', '550500' not in (pg.get_attribute('[data-hdb-panel=ok] a[data-m-hdb]', 'href') or '') and not errs, errs); shot(pg, f'7b-map-postal-{vn}'); ctx.close()
 
         print('\n== 8. Condo, EC, cluster, landed and new-launch postal codes,', vn)
         for code, want, label in (('575749', 'jadescape', 'condo'), ('579819', 'bishan-loft', 'EC'), ('359419', 'dunsfold-18', 'cluster')):

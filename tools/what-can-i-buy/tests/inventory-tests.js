@@ -103,10 +103,10 @@ t('a project missing from the file, stale (over 21 days), or unverified shows "c
 });
 t('zero_returned shows the zero line; units shown with no match show the "none near your size and budget" line with the date', () => {
   const ura = mkIx([URAP('uu', 'UU', 'S1', '10', [row(900, 6, 2, 202609, 2400000, 2800000)])]);
-  const z = cards(run(ura, prep([IP('uu', 'UU', [], { status: 'zero_returned' })])))[0].huttons; assert.strictEqual(z.kind, 'zero'); assert.strictEqual(z.text, 'No units currently shown in Huttons inventory for this project.');
-  const nm = cards(run(ura, prep([IP('uu', 'UU', [TY(3, 1500000, [[900, 1400000]])])])))[0].huttons; assert.strictEqual(nm.kind, 'nomatch'); assert.ok(/^Checked today, (Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d+ [A-Z][a-z]{2}: none of the units currently shown in Huttons inventory are about your size and budget\.$/.test(nm.text), nm.text);
+  const z = cards(run(ura, prep([IP('uu', 'UU', [], { status: 'zero_returned' })])))[0].huttons; assert.strictEqual(z.kind, 'zero'); assert.strictEqual(z.text, 'No units currently shown in new-launch listings for this project.');
+  const nm = cards(run(ura, prep([IP('uu', 'UU', [TY(3, 1500000, [[900, 1400000]])])])))[0].huttons; assert.strictEqual(nm.kind, 'nomatch'); assert.ok(/^Updated today, (Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d+ [A-Z][a-z]{2}: none of the units currently listed are about your size and budget\.$/.test(nm.text), nm.text);
   const old = cards(run(ura, prep([IP('uu', 'UU', [TY(3, 1500000, [[900, 1400000]])], { checkedAt: iso(NOW - 5 * D) })], NOW, iso(NOW - 5 * D))))[0].huttons;   // V3.10: a dated check speaks in the past
-  assert.ok(/: none of the units shown in Huttons inventory then were about your size and budget\.$/.test(old.text) && !/currently/.test(old.text), old.text);
+  assert.ok(/: none of the units listed then were about your size and budget\.$/.test(old.text) && !/currently/.test(old.text), old.text);
 });
 t('missing is never zero: a Huttons-only project that is not in the file, stale, or unverified is never shown at all', () => {
   const inv = prep([IP('lucerne-grand', 'Lucerne Grand', OK, Object.assign({}, META, { status: 'unverified' })), IP('x2', 'X Two', OK, Object.assign({}, META, { checkedAt: iso(NOW - 22 * D) }))]);
@@ -159,7 +159,7 @@ t('URA wins for a project URA has: the inventory entry needs no metadata and the
   assert.ok(/District 10/.test(c.meta) && /Holland Link/.test(c.meta) && !/District 03|Freehold/.test(c.meta));
 });
 t('a project passing both paths (URA and inventory) is one card', () => {
-  const ura = mkIx([URAP('amb', 'AMB', 'S1', '10', [row(900, 6, 3, 202609, 2400000, 2800000)])]), r = run(ura, prep([IP('amb', 'Amb', OK)])), c = cards(r).filter((x) => x.id === 'amb'); assert.strictEqual(c.length, 1); assert.strictEqual(c[0].basis, 'Current Huttons inventory and URA sales');
+  const ura = mkIx([URAP('amb', 'AMB', 'S1', '10', [row(900, 6, 3, 202609, 2400000, 2800000)])]), r = run(ura, prep([IP('amb', 'Amb', OK)])), c = cards(r).filter((x) => x.id === 'amb'); assert.strictEqual(c.length, 1); assert.strictEqual(c[0].basis, 'Current new-launch listings and URA sales');
 });
 t('resale and sub-sale never use inventory: a resale journey ignores the file even when it lists a project', () => assert.deepStrictEqual(ids(run(empty, prep([A(OK)]), { openTo: 'resale' })), []));
 t('the misleading-guard: a $2.0m unit at about 700 sqft and a $3.0m unit at about 1,060 sqft, window 1,050–1,150, shows From around $3m and never $2m', () => {
@@ -215,12 +215,12 @@ t('studio and 5+ bedroom wording; 5+ never prints a decimal or "5+ bedrooms home
 });
 t('a dated check (2–7 days) is in the past tense, says "as shown then", and tells the buyer units may have changed', () => {
   const ip = A(OK, { checkedAt: iso(NOW - 3 * D) }), c = cards(run(empty, prep([ip], NOW, iso(NOW - 3 * D))))[0].huttons;
-  assert.strictEqual(c.kind, 'dated'); assert.ok(/CHECKED (MON|TUE|WED|THU|FRI|SAT|SUN) \d/.test(c.label)); assert.strictEqual(c.from, 'From around $2.7m (as shown then).'); assert.ok(/matched/.test(c.size)); assert.strictEqual(c.budget, 'Your ~$2.6m budget was slightly below what we saw then for homes around this size.');
+  assert.strictEqual(c.kind, 'dated'); assert.ok(/UPDATED (MON|TUE|WED|THU|FRI|SAT|SUN) \d/.test(c.label)); assert.strictEqual(c.from, 'From around $2.7m (as shown then).'); assert.ok(/matched/.test(c.size)); assert.strictEqual(c.budget, 'Your ~$2.6m budget was slightly below what we saw then for homes around this size.');
   assert.strictEqual(c.datedNote, 'Units may have changed since. Ask Ken for the latest.'); assert.ok(/shown then/.test(c.note));
 });
 t('a fresh check says CHECKED TODAY (or YESTERDAY) with the date, has no past tense, no dated note', () => {
-  const c = cards(one(A(OK)))[0].huttons; assert.ok(/^HUTTONS INVENTORY · CHECKED TODAY, (MON|TUE|WED|THU|FRI|SAT|SUN) \d+ [A-Z]{3}$/.test(c.label), c.label); assert.strictEqual(c.datedNote, null); assert.ok(!/then/.test(c.from + c.budget));
-  const y = cards(run(empty, prep([A(OK, { checkedAt: iso(NOW - 30 * H) })], NOW, iso(NOW - 30 * H))))[0].huttons; assert.ok(/^HUTTONS INVENTORY · CHECKED YESTERDAY, (MON|TUE|WED|THU|FRI|SAT|SUN) \d+ [A-Z]{3}$/.test(y.label), y.label);
+  const c = cards(one(A(OK)))[0].huttons; assert.ok(/^NEW-LAUNCH LISTINGS · UPDATED TODAY, (MON|TUE|WED|THU|FRI|SAT|SUN) \d+ [A-Z]{3}$/.test(c.label), c.label); assert.strictEqual(c.datedNote, null); assert.ok(!/then/.test(c.from + c.budget));
+  const y = cards(run(empty, prep([A(OK, { checkedAt: iso(NOW - 30 * H) })], NOW, iso(NOW - 30 * H))))[0].huttons; assert.ok(/^NEW-LAUNCH LISTINGS · UPDATED YESTERDAY, (MON|TUE|WED|THU|FRI|SAT|SUN) \d+ [A-Z]{3}$/.test(y.label), y.label);
 });
 t('the price note under the figure', () => assert.strictEqual(cards(one(A(OK)))[0].huttons.note, 'Lowest price currently shown for these homes, rounded. Prices vary by unit.'));
 t('no "from" figure when the status is not ok, or when no band is of about the buyer\'s size', () => {
@@ -290,7 +290,7 @@ t('every card in both groups carries the same actions and tick label (resale and
 });
 t('the New launch lede, group note, order lines and methodology change only when the inventory layer is on', () => {
   const on = F.shortlist(real, base({ openTo: 'both', inv: F.prepareInventory(sim, NOW) }));
-  assert.ok(/plus a check of current Huttons inventory where we could make one/.test(on.dataLine)); assert.strictEqual(on.groups[1].note, F.NEW_NOTE_INV); assert.ok(/Not by quality, value or price\.$/.test(on.orderLine));
+  assert.ok(/plus current new-launch listings where we have them/.test(on.dataLine)); assert.strictEqual(on.groups[1].note, F.NEW_NOTE_INV); assert.ok(/Not by quality, value or price\.$/.test(on.orderLine));
   const off = F.shortlist(real, base({ openTo: 'both' })); assert.strictEqual(off.groups[1].note, F.NEW_NOTE);
 });
 
@@ -346,8 +346,8 @@ t('a resale card and a new launch card with the same inputs use the same tone: b
   assert.ok(/^Bedrooms and layout, floor and facing, /.test(a.notEvaluated) && /^Bedrooms and layout, floor and facing, /.test(b.notEvaluated));
 });
 t('the closing methodology line is the V10 line; the Huttons paragraphs are all present', () => {
-  const m = F.METHOD_INV; assert.ok(/Apart from the Huttons check, it doesn’t show what is for sale now, and the Huttons price is only a rounded starting point\.$/.test(m[m.length - 1]));
-  ['Huttons inventory is the list of units currently shown', 'The “From around” figure is the lowest price currently shown for homes about your size', 'Checks older than 7 days', 'We check Huttons inventory for new launch projects only'].forEach((s) => assert.ok(m.some((x) => x.indexOf(s) === 0), s));
+  const m = F.METHOD_INV; assert.ok(/Apart from the new-launch listings, it doesn’t show what is for sale now, and the listed price is only a rounded starting point\.$/.test(m[m.length - 1]));
+  ['New-launch listings are the units listed for sale when they were last updated', 'The “From around” figure is the lowest price currently shown for homes about your size', 'Checks older than 7 days', 'We have new-launch listings for new launch projects only'].forEach((s) => assert.ok(m.some((x) => x.indexOf(s) === 0), s));
 });
 
 console.log('Get Ken\'s view handoff');
@@ -474,6 +474,11 @@ t('privacy and wording over a grid with the real file: no counts, no "available"
   const strs = (v, a) => { a = a || []; if (typeof v === 'string') a.push(v); else if (Array.isArray(v)) v.forEach((x) => strs(x, a)); else if (v && typeof v === 'object') Object.keys(v).forEach((k) => { if (k !== 'checkedAt') strs(v[k], a); }); return a; };   // checkedAt is the machine-readable file time (never shown; the page says today / yesterday / a weekday)
   [900000, 1500000, 2200000, 2600000, 3500000, 5000000].forEach((b) => [[600, 800], [870, 1000], [1000, 1100], [1300, 1500]].forEach((sz) => ['new', 'both'].forEach((openTo) => [RNOW, CHK + 4 * D].forEach((at) => { const r = rrun({ budget: b, openTo, size: { lo: sz[0], hi: sz[1], source: 'explicit', line: 'x' } }, at); strs(r).forEach((x) => { n++; assert.ok(!bad.test(x), 'bad text: ' + x.slice(0, 80)); }); }))));
   assert.ok(n > 500);
+});
+t('V3.11 (Ken, 27 Oct 2026): no public text names Huttons: every card, label, note, order line and method line over the real-file grid, fresh, dated and late, and the fixed notes', () => {
+  const strs = (v, a) => { a = a || []; if (typeof v === 'string') a.push(v); else if (Array.isArray(v)) v.forEach((x) => strs(x, a)); else if (v && typeof v === 'object') Object.keys(v).forEach((k) => { if (k !== 'checkedAt' && k !== 'kind') strs(v[k], a); }); return a; };
+  let n = 0; [1500000, 2200000, 3500000].forEach((b) => ['new', 'both'].forEach((openTo) => [RNOW, CHK + 4 * D, CHK + 16 * D].forEach((at) => { strs(rrun({ budget: b, openTo, size: { lo: 870, hi: 1100, source: 'explicit', line: 'x' } }, at)).forEach((x) => { n++; assert.ok(!/huttons/i.test(x), 'names Huttons: ' + x.slice(0, 100)); }); })));
+  F.METHOD_INV.concat([F.NEW_NOTE_INV]).forEach((x) => assert.ok(!/huttons/i.test(x), x)); assert.ok(n > 100);
 });
 t('the real data gives no exact price: every "From around" and budget sentence uses rounded figures and the buyer\'s own budget only', () => { const out = JSON.stringify(rrun(KS)); const tot = (out.match(/\$\d[\d.,]*m?/g) || []); tot.forEach((x) => assert.ok(/^\$\d+(\.\d{1,2})?m$/.test(x), x)); });
 t('handoff with real project names: no Huttons, counts, prices, ranges, check times or source text', () => { const names = cards(rrun(KS)).slice(0, 2).map((c) => c.name), m = HM({ names, budget: 2200000, size: { from: 1000, to: 1100 }, district: null }); assert.ok(!/huttons|inventory|checked|from around|\bunits?\b|\bavailable\b|\d{2}:\d{2}/i.test(m), m); assert.ok(/^Hi Ken, I’m comparing /.test(m)); assert.ok(/\$2\.2m/.test(m)); assert.strictEqual((m.match(/\$/g) || []).length, 1); });

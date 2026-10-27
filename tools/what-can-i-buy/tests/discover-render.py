@@ -86,7 +86,7 @@ try:
         # Bedroom Search Integration (26 Oct 2026): resale is matched on the accepted bedroom types (find-beds.json); see beds-search-render.py
         def resale_beds():
             ctx, pg, errs = open_page(br, kw, q=_at(12)); pg.wait_for_selector('#kdBudget'); pg.click('[data-f=moresum]')
-            ok(re.search(r'URA rental records or floor plans', pg.inner_text('.kd-more')) and 'Huttons' in pg.inner_text('.kd-more'), 'bedroom note: resale by recorded types, new launches by Huttons')
+            ok(re.search(r'URA rental records or floor plans', pg.inner_text('.kd-more')) and 'new-launch listings' in pg.inner_text('.kd-more') and 'Huttons' not in pg.inner_text('.kd-more'), 'bedroom note: resale by recorded types, new launches by Huttons')
             pg.click('[data-f=seg][data-k=sale][data-v=resale]'); pg.wait_for_timeout(200)
             ok(pg.query_selector('[data-f=seg][data-k=beds][data-v="2"][disabled]') is None, 'bedrooms are on for resale')
             ok('listed separately' in pg.inner_text('.kd-more'), 'and unconfirmed homes are said to be listed apart'); ctx.close()
@@ -96,7 +96,7 @@ try:
             pg.click('.kd-bar [data-f=edit]'); pg.wait_for_selector('#kdEdit.open')
             pg.evaluate("document.querySelector('#kdEdit [data-more]').open = true")
             pg.click('#kdEdit [data-f=seg][data-k=beds][data-v="2"]'); pg.wait_for_timeout(500)
-            ok('New launches: from Huttons inventory' in pg.inner_text('#kdEdit'), 'either + bedrooms: note names both sources')
+            ok('New launches: from new-launch listings' in pg.inner_text('#kdEdit'), 'either + bedrooms: note names both sources')
             ok(re.search(r'2.bedroom', pg.inner_text('#kdH')), 'the headline names the bedrooms: ' + pg.inner_text('#kdH'))
             ok(re.search(r'2 bed', pg.inner_text('.kd-chips')), 'chip shows bedrooms'); ok(not errs, str(errs)); ctx.close()
         t('choosing bedrooms with New launch or Resale selected applies them to both, each from its own source', beds_either)
@@ -107,7 +107,7 @@ try:
             ok('Applied to resale only' in pg.inner_text('.kd-more'), 'and say new launches cannot be matched: ' + pg.inner_text('.kd-more'))
             pg.click('[data-f=seg][data-k=sale][data-v=new]'); pg.wait_for_timeout(200)
             ok(pg.query_selector('[data-f=seg][data-k=beds][data-v="3"][disabled]') is not None, 'new launch only: bedrooms off when inventory is out of date')
-            ok("isn’t available right now" in pg.inner_text('.kd-more')); ctx.close()
+            ok("aren’t available right now" in pg.inner_text('.kd-more') and 'Huttons' not in pg.inner_text('.kd-more')); ctx.close()
         t('with no recently checked inventory: resale bedrooms still work, new-launch bedrooms are off and explained', beds_stale)
         def planner_handoff():
             pre = "if(!sessionStorage.getItem('kpt.handoff'))sessionStorage.setItem('kpt.handoff', JSON.stringify({v:1,from:'hdb-upgrade',state:'ok',budget:{low:1790000,high:1840000},purpose:null,openTo:'both'}))"

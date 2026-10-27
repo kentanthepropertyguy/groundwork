@@ -68,7 +68,7 @@ try:
         t('$1.5m, 2 bedrooms, resale: confirmed 2-bedroom resales with Research\'s figures and the basis named', two_bed)
         def three_either():
             ctx, pg, errs = open_page(br, kw); form(pg, '2,000,000', beds=3)
-            ok('New launches: from Huttons inventory' in pg.inner_text('.kd-more'), pg.inner_text('.kd-more'))
+            ok('New launches: from new-launch listings' in pg.inner_text('.kd-more'), pg.inner_text('.kd-more'))
             show(pg); h = H(pg); ok(re.match(r'\d+ developments? with recent 3-bedroom sales within \$2\.0m', h), h)
             ok(re.search(r'\d+ not confirmed as 3-bedroom, listed after', pg.inner_text('.kd-lead')), 'not-confirmed count in the summary')
             un = pg.query_selector('.kd-unconf'); ok(un is not None, 'not-confirmed group'); ut = un.inner_text()

@@ -40,13 +40,13 @@
     if (pl && pl.includes(':')) { const i = pl.indexOf(':'); S.place = { t: pl.slice(0, i), n: pl.slice(i + 1) }; S.start = false; }
     else if (id && M.BYID[id]) { if (M.BYID[id].n !== S.proj) loadProject(M.BYID[id].n); S.start = false; }
     if (q.get('r') && S.proj) S.radius = +q.get('r');
-    S.hft = S.place && S.place.t === 'hdb' && /^[a-z0-9-]{3,24}$/.test(q.get('ft') || '') ? q.get('ft') : null;
+    S.hft = S.place && (S.place.t === 'hdb' || S.place.t === 'postal') && /^[a-z0-9-]{3,24}$/.test(q.get('ft') || '') ? q.get('ft') : null;
     const nr = +(S.place ? q.get('r') : q.get('nr'));   // the nearby radius; on a development, r is the price-comparison radius
     S.pr = M.RADII.includes(nr) ? nr : 1000; S.nall = false; S.min = false;
   }
   function addr() {
     const q = new URLSearchParams();
-    if (S.place) { q.set('pl', S.place.t + ':' + S.place.n); if (S.place.t !== 'area' && S.pr !== 1000) q.set('r', S.pr); if (S.place.t === 'hdb' && S.hft) q.set('ft', S.hft); } else if (!S.start && S.proj) { q.set('p', M.BY[S.proj].id); if (!M.BY[S.proj].up) q.set('r', S.radius); if (S.pr !== 1000 && M.BY[S.proj].pos) q.set('nr', S.pr); }
+    if (S.place) { q.set('pl', S.place.t + ':' + S.place.n); if (S.place.t !== 'area' && S.pr !== 1000) q.set('r', S.pr); if ((S.place.t === 'hdb' || S.place.t === 'postal') && S.hft) q.set('ft', S.hft); } else if (!S.start && S.proj) { q.set('p', M.BY[S.proj].id); if (!M.BY[S.proj].up) q.set('r', S.radius); if (S.pr !== 1000 && M.BY[S.proj].pos) q.set('nr', S.pr); }
     return q.toString() ? '#' + q : location.pathname + location.search;
   }
   let lastHash = location.hash;
@@ -77,14 +77,18 @@
     if (S.hdbEv && S.hdbEv.key === h.key) return;
     const ev = S.hdbEv = { key: h.key, state: 'loading' };
     Promise.all([hdbLib(), hdbJson(hdbBase + 'index.json')]).then((a) => hdbJson(hdbBase + 't/' + h.town + '.json?v=' + encodeURIComponent(a[1].sourceVersion)).then((T) => { T.id = h.town; ev.I = a[1]; ev.T = T; ev.state = 'ok'; }))
-      .catch(() => { ev.state = 'error'; }).then(() => { if (S.hdbEv === ev && S.place && S.place.t === 'hdb' && S.place.n === h.key) refreshCard(); });
+      .catch(() => { ev.state = 'error'; }).then(() => { if (S.hdbEv === ev && S.place && ((S.place.t === 'hdb' && S.place.n === h.key) || S.place.t === 'postal')) refreshCard(); });
   }
   const hdbSection = (d) => {
     const h = d.hdb, ev = S.hdbEv && S.hdbEv.key === h.key ? S.hdbEv : null; ensureHdbEv(h);
     if (!ev || ev.state === 'loading') return '<div class="sec hdbs" data-hdb-panel="loading"><div class="sh"><b>Recent HDB resales</b></div><p class="basis" style="margin:8px 0 0">Loading the resale records…</p></div>';
     if (ev.state === 'error') return '<div class="sec hdbs" data-hdb-panel="error"><div class="sh"><b>Recent HDB resales</b></div><p class="basis" style="margin:8px 0 0">The resale records could not be loaded just now. Please try again in a moment.</p></div>';
     const GV = window.GWV, GH = window.GWH, I = ev.I, T = ev.T, si = T.streets.indexOf(h.street), ty = GV.hdbTypes(T, h.block, si);
-    const want = S.hft ? I.types.findIndex((t) => GH.typeSlug(t) === S.hft) : -1, t = want >= 0 && ty.all.indexOf(want) >= 0 ? want : (ty.inBlock.length === 1 ? ty.inBlock[0] : -1);
+    // V3.11 (Ken, 27 Oct 2026): prices show at once. With no flat type chosen, the panel opens on the type with the most resales in this block
+    // (then the most recent; the street's when the block has none), using the same evidence the full research uses; the chips still switch it.
+    const ev0 = (x) => GV.hdbComps(T, h.block, si, x), pickDefault = () => { const pool = ty.inBlock.length ? ty.inBlock : ty.all; let best = -1, bk = null;
+      pool.forEach((x) => { const d = ev0(x); if (!d || !d.n) return; const k = [d.level === 'block' ? 1 : 0, d.n, d.newest || 0]; if (!bk || k[0] > bk[0] || (k[0] === bk[0] && (k[1] > bk[1] || (k[1] === bk[1] && k[2] > bk[2])))) { bk = k; best = x; } }); return best; };
+    const want = S.hft ? I.types.findIndex((t) => GH.typeSlug(t) === S.hft) : -1, t = want >= 0 && ty.all.indexOf(want) >= 0 ? want : pickDefault();
     const chips = ty.all.map((x) => `<button type="button" class="hft" data-hft="${GH.typeSlug(I.types[x])}" aria-pressed="${x === t}">${esc(GV.flatLabel(I.types[x]))}</button>`).join('');
     let body = '<p class="basis" style="margin:8px 0 0">Choose a flat type to see what flats like it sold for.</p>', link = '';
     if (t >= 0) {
@@ -300,11 +304,12 @@
     } else {
       const nx = M.RADII[M.RADII.indexOf(d.r) + 1], hb = d.t === 'postal' ? hdbOfAddr(M.PC[pl.n]) : null;
       if (d.t === 'postal' && !M.HDBM && !hdbP) loadHdb().then((ok) => { if (ok && S.place && S.place.t === 'postal') render(); });
-      const hideDevs = d.t === 'hdb' && mobile && !S.more;
-      body = (d.t === 'hdb' ? hdbSection(d) : hb ? `<div class="sec" style="margin-top:14px;padding-top:0;border:0"><button type="button" class="nb" data-pick="hdb|${esc(hb.key)}"><b>HDB resale prices for Blk ${esc(hb.block)}</b><span class="m">By flat type, from HDB records</span><i aria-hidden="true">›</i></button></div>` : '') + (hideDevs ? '' : `<div class="sec" style="margin-top:14px;padding-top:0;border:0"><div class="sh"><b>Developments within ${radText(d.r)}${help(d.t === 'mrt' ? 'Straight-line distance from the nearest exit, not walking time.' : d.t === 'road' ? 'Straight-line distance from the middle of the road, not walking time. The road’s position is approximate, and no house is placed on it.' : 'Straight-line distance, not walking time. Living near a school does not decide admission; check the MOE registration rules.', 'How distances are measured')}</b><span>${d.list.length} with recorded sales</span></div>${radHtml()}${d.list.length ? d.list.slice(0, mobile && !S.more ? 3 : 6).map((x) => devRow(x)).join('') : `<p class="basis" style="margin:8px 0 0">None with recorded sales within ${radText(d.r)}.</p>${nx ? `<button type="button" class="lnk" data-pr="${nx}">Look within ${radText(nx)} ›</button>` : ''}`}</div>${d.ups && d.ups.length && (!mobile || S.more) ? `<div class="sec"><div class="sh"><b>New launches and sites${help('Launches and awarded government land sale sites with a verified location. They have no recorded sales, so no prices are shown.', 'About these')}</b><span>${d.ups.length} within ${radText(d.r)}</span></div>${d.ups.slice(0, 3).map(upRow).join('')}</div>` : ''}${d.t === 'road' ? roadLanded(d) : ''}`);
+      const isBlk = d.t === 'hdb' || !!hb; d.isBlk = isBlk;   // V3.11: a postal code that is an HDB block gets the block's phone sheet (prices first, developments behind a button)
+      const hideDevs = isBlk && mobile && !S.more;
+      body = (d.t === 'hdb' ? hdbSection(d) : hb ? hdbSection({ hdb: hb }) : '') + (hideDevs ? '' : `<div class="sec" style="margin-top:14px;padding-top:0;border:0"><div class="sh"><b>Developments within ${radText(d.r)}${help(d.t === 'mrt' ? 'Straight-line distance from the nearest exit, not walking time.' : d.t === 'road' ? 'Straight-line distance from the middle of the road, not walking time. The road’s position is approximate, and no house is placed on it.' : 'Straight-line distance, not walking time. Living near a school does not decide admission; check the MOE registration rules.', 'How distances are measured')}</b><span>${d.list.length} with recorded sales</span></div>${radHtml()}${d.list.length ? d.list.slice(0, mobile && !S.more ? 3 : 6).map((x) => devRow(x)).join('') : `<p class="basis" style="margin:8px 0 0">None with recorded sales within ${radText(d.r)}.</p>${nx ? `<button type="button" class="lnk" data-pr="${nx}">Look within ${radText(nx)} ›</button>` : ''}`}</div>${d.ups && d.ups.length && (!mobile || S.more) ? `<div class="sec"><div class="sh"><b>New launches and sites${help('Launches and awarded government land sale sites with a verified location. They have no recorded sales, so no prices are shown.', 'About these')}</b><span>${d.ups.length} within ${radText(d.r)}</span></div>${d.ups.slice(0, 3).map(upRow).join('')}</div>` : ''}${d.t === 'road' ? roadLanded(d) : ''}`);
     }
     if (!mobile) return `<aside class="dp" aria-label="${esc(d.title)}"><div class="dp-in">${head}${body}</div></aside>`;
-    const more = (d.t === 'area' ? d.devs.length : d.list.length + (d.ups ? d.ups.length : 0)) > (d.t === 'hdb' ? 0 : 3) ? `<div class="bs-act"><button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">${d.t === 'area' ? 'Developments' : d.t === 'hdb' ? 'Developments nearby' : 'More developments'} ${S.more ? '⌄' : '⌃'}</button></div>` : '';
+    const more = (d.t === 'area' ? d.devs.length : d.list.length + (d.ups ? d.ups.length : 0)) > (d.isBlk ? 0 : 3) ? `<div class="bs-act"><button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">${d.t === 'area' ? 'Developments' : d.isBlk ? 'Developments nearby' : 'More developments'} ${S.more ? '⌄' : '⌃'}</button></div>` : '';
     return `<aside class="bs${S.more ? ' open' : ''}" aria-label="${esc(d.title)}"><div class="bs-hd"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}</div>${body}${more}</aside>`;
   }
   function startCard(mobile) {
@@ -376,7 +381,7 @@
   // a block chosen on the map: the radius the visitor chose stays, the map centres on the block, and the panel changes to the block
   function hdbPick(key) { S.start = false; S.more = false; S.min = false; S.hl = null; S.nall = false; S.hft = null; S.place = { t: 'hdb', n: key }; go(true); }
   function dotPick(n) { loadProject(n); S.start = false; go(true); }
-  function placePick(t, n) { S.start = false; S.more = false; S.min = false; S.hl = null; S.pr = 1000; S.nall = false; S.place = { t, n }; go(true); }
+  function placePick(t, n) { S.start = false; S.more = false; S.min = false; S.hl = null; S.pr = 1000; S.nall = false; S.hft = null; S.place = { t, n }; go(true); }
   function pickItem(v) { const i = v.indexOf('|'), t = v.slice(0, i), n = v.slice(i + 1); S.suggOpen = false; S.q = ''; S.qi = -1; if (t === 'dev') dotPick(n); else placePick(t, n); }
 
   /* ---------------- licence notices: generated from what is actually loaded ---------------- */
@@ -440,7 +445,7 @@
     if (d.band) { S.band = S.band === d.band ? null : d.band; refreshCard(); return; }
     if (d.rc) { S.rc[d.rc] = !S.rc[d.rc]; refreshCard(); return; }
     if (d.am) { S.hl = S.hl === d.am ? null : d.am; view.hl(S.hl, true, narrow() ? { tl: [28, 84], br: [28, sheetH()] } : { tl: [48, 84], br: [420, 70] }); return; }
-    if (d.hft) { S.hft = S.hft === d.hft ? null : d.hft; history.replaceState(null, '', addr()); lastHash = location.hash; refreshCard(); return; }
+    if (d.hft) { S.hft = d.hft; history.replaceState(null, '', addr()); lastHash = location.hash; refreshCard(); return; }
     if (d.pick) { pickItem(d.pick); return; }
     if (d.zoom) { if (+d.zoom > 0) view.zoom(1); else view.zoomOut(1); return; }
   });
