@@ -19,14 +19,15 @@ for (const f of pages) {
   const rel = path.relative(ROOT, f), t = fs.readFileSync(f, 'utf8');
   const hdr = (t.match(/<nav class="gw-links"[^>]*>(.*?)<\/nav>/s) || [])[1] || '';
   const links = [...hdr.matchAll(/<a\b([^>]*)>(.*?)<\/a>/gs)].map((m) => ({ attrs: m[1], text: m[2].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim(), href: (m[1].match(/href="([^"]*)"/) || [])[1] }));
-  check(rel + ': header reads Plan My Move · Research · Map · Calculators (V2.1: no external New Launches link; launches are on the Map)', links.map((l) => l.text).join('|') === 'Plan My Move|Research|Map|Calculators' && !/kentanthepropertyguy\.com\/#developments/.test(t), links.map((l) => l.text));
+  // V3.9 (Ken, 27 Oct 2026): New Launches, the on-site directory (research/new-launches/), sits between Map and Calculators; still no external launches link
+  check(rel + ': header reads Plan My Move · Research · Map · New Launches · Calculators', links.map((l) => l.text).join('|') === 'Plan My Move|Research|Map|New Launches|Calculators' && !/kentanthepropertyguy\.com\/#developments/.test(t) && /(^|\/)research\/new-launches\/$/.test((links.find((l) => l.text === 'New Launches') || {}).href || ''), links.map((l) => l.text));
   { const ft = (t.match(/<footer class="gw-foot">[\s\S]*?<\/footer>/) || [''])[0];
     check(rel + ': the footer is the one place with Ken’s photo and the LIVE line (footer follow-up)', !ft || (/ken-portrait\.jpg/.test(ft) && /class="gw-live"/.test(ft) && (t.replace(ft, '').replace(/<script[\s\S]*?<\/script>/g, '').match(/ken-portrait\.jpg/g) || []).length === 0)); }
   const pm = links.find((l) => l.text === 'Plan My Move'), cl = links.find((l) => l.text === 'Calculators');
   check(rel + ': Plan My Move opens Guide Me at its start (journey/, no path chosen); Calculators keeps the /tools/ address', pm && /(^|\/)journey\/$/.test(pm.href) && cl && /(^|\/)tools\/$/.test(cl.href), [pm, cl]);
   check(rel + ': Map is a top-level header item and opens the one Map', links.filter((l) => /^Map$/.test(l.text)).length === 1 && /(^|\/)research\/map\/$/.test((links.find((l) => /^Map$/.test(l.text)) || {}).href || ''));
   const cur = links.filter((l) => /aria-current/.test(l.attrs)).map((l) => l.text);
-  const want = /^tools\//.test(rel) ? ['Calculators'] : /^journey\//.test(rel) ? ['Plan My Move'] : rel === 'research/map/index.html' ? ['Map'] : /^research\//.test(rel) ? ['Research'] : [];
+  const want = /^tools\//.test(rel) ? ['Calculators'] : /^journey\//.test(rel) ? ['Plan My Move'] : rel === 'research/map/index.html' ? ['Map'] : rel === 'research/new-launches/index.html' ? ['New Launches'] : /^research\//.test(rel) ? ['Research'] : [];
   // the planner, timeline and calculators belong to Calculators; the Guide Me pages (journey/) belong to Plan My Move
   check(rel + ': at most one header item is the current page', cur.length <= 1, cur);
   check(rel + ': current section is ' + (want.join() || 'none until the browser marks it'), cur.join() === want.join() || (!want.length && !cur.length), cur);
@@ -44,11 +45,11 @@ for (const f of pages) {
   check(rel + ': the old prices address is no longer a second menu entry', !names.some((x) => /research\/#\/prices$/.test(x)), names);
   ['research/#/', 'research/#/budget', 'research/#/browse'].forEach((h) => check(rel + ': ' + h + ' is listed once in the menu', names.filter((x) => x.replace(/^(\.\.\/)+|^\//, '') === h).length === 1, names.filter((x) => /research\/#/.test(x))));
   const ts = (t.match(/<section class="gw-ms gw-ms-tools">(.*?)<\/section>/s) || [])[1] || '';
-  // V3.4: the four questions and the three single-figure calculators are linked; the folded pages' old addresses (planner, msr) are not, they redirect
-  ['payment-planner', 'tdsr', 'sale-proceeds', 'hdb-upgrade', 'ssd', 'stamp-duty', 'mortgage'].forEach((id) => {
-    const inMenu = new RegExp('href="((\\.\\./)*|/)tools/' + id + '/"').test(t);
-    check(rel + ': tool ' + id + ' still has a direct link in the menu or its sections', inMenu);
-  });
+  // V3.8 (Ken 27 Oct 2026): the seven calculators are the Calculators column, in order; Upgrade from HDB is reached through Plan My Move (journey/#up,
+  // checked above), not listed as a calculator. The folded pages' old addresses (planner, msr) are not linked, they redirect.
+  const tcol = [...ts.matchAll(/<a class="gw-mi" href="[^"]*" data-gw-nav-to="([^"]+)"/g)].map((x) => x[1]);
+  check(rel + ': the Calculators column lists the seven calculators, in order', tcol.join('|') === 'payment-planner|tdsr|pledged-assets|mortgage|sale-proceeds|stamp-duty|ssd', tcol);
+  check(rel + ': Upgrade from HDB is not listed as a calculator', tcol.indexOf('hdb-upgrade') < 0);
   check(rel + ': What can I afford? and the HDB and EC loan limit are not linked by their old addresses (they redirect to How much can I borrow?)', !/href="((\.\.\/)*|\/)tools\/(planner|msr)\/"/.test(hdr + ts));
   const foot = (t.match(/<nav aria-label="Footer">(.*?)<\/nav>/s) || [])[1] || '';
   const fl = [...foot.matchAll(/<a\b[^>]*>(.*?)<\/a>/gs)].map((m) => m[1]);
@@ -67,12 +68,11 @@ for (const f of pages) {
 }
 {
   const t = fs.readFileSync(path.join(ROOT, 'tools/index.html'), 'utf8'), main = t.slice(t.indexOf('<main'), t.indexOf('</main>'));
-  // V3.4 (26 Oct 2026): four questions, one column, then the single-figure calculators as text links (Ken's menu concept)
-  const tools = [...main.matchAll(/<a class="gw-tl" href="[^"]*" data-tool="([^"]+)"/g)].map((x) => x[1]);
-  check('Calculators: the four questions, in order', tools.join('|') === 'payment-planner|tdsr|sale-proceeds|hdb-upgrade', tools);
-  check('Calculators: the four are named as questions', ['What will this home cost me?', 'How much can I borrow?', 'What will I get from selling?', 'Upgrade from HDB'].every((x) => main.indexOf('<b>' + x + '</b>') >= 0));
-  const one = (main.match(/<p class="gw-mone[^"]*">(.*?)<\/p>/s) || [])[1] || '';
-  check('Calculators: Stamp duty, Mortgage instalment and Seller’s stamp duty as text links underneath', [...one.matchAll(/<a href="([^"]*)"[^>]*>(.*?)<\/a>/g)].map((x) => x[1] + '=' + x[2]).join('|') === 'stamp-duty/=Stamp duty|mortgage/=Mortgage instalment|ssd/=Seller’s stamp duty', one);
+  // V3.8 (Ken 27 Oct 2026): seven equal calculator cards, in his order and names; Upgrade from HDB is in Plan My Move, linked from the section under them
+  const tools = [...main.matchAll(/<a class="gw-tc" href="[^"]*" data-tool="([^"]+)"/g)].map((x) => x[1]);
+  check('Calculators: the seven calculators, in order', tools.join('|') === 'payment-planner|tdsr|pledged-assets|mortgage|sale-proceeds|stamp-duty|ssd', tools);
+  check('Calculators: named as Ken named them', ['Purchase Costs &amp; Timeline', 'How Much Can I Borrow?', 'Pledged &amp; Unpledged Assets', 'Mortgage Instalment', 'Sale Proceeds', 'Buyer’s Stamp Duty', 'Seller’s Stamp Duty'].every((x) => main.indexOf('<b>' + x + '</b>') >= 0));
+  check('Calculators: no single-figure text links and no Upgrade card; Plan My Move is the section underneath', !/gw-mone/.test(main) && tools.indexOf('hdb-upgrade') < 0 && /<section class="gw-pmm"[\s\S]*href="\.\.\/journey\/"/.test(main));
   check('Calculators: no badges on the cards', !/<span class="gw-tl-t"><b>[^<]*<\/b><em>/.test(main));
   check('Calculators: nothing that lives under Research is listed here', !tools.some((x) => /^(worth|what-can-i-buy|research)$/.test(x)), tools);
   check('Calculators: the folded pages are not cards of their own', !tools.some((x) => /^(planner|msr)$/.test(x)), tools);

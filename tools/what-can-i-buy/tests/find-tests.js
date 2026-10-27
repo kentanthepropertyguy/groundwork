@@ -302,7 +302,7 @@ t('HDB and budget-only handoffs carry a budget only: no place is asked for or gu
 t('freehold wording stays accurate: "Freehold or 900+ year lease" wherever the choice is shown (never plain "Freehold")', () => { assert.ok(/'Freehold or 900\+ year lease'/.test(ui)); assert.ok(/'Freehold or 900\+ yr'/.test(ui)); assert.ok(!/\['Freehold'\]|, 'Freehold'\]/.test(ui)); assert.ok(!/999-year only/.test(ui)); });
 
 console.log('Pinery Residences exclusion (V10.4.1: unresolved Huttons D18 vs URA D16 identity; targeted only)');
-const invRaw = JSON.parse(fs.readFileSync(path.join(root, 'data/projects/inventory.json'), 'utf8'));
+const invRaw = JSON.parse(fs.readFileSync(path.join(root, 'tools/what-can-i-buy/tests/fixtures/inventory-sample.json'), 'utf8'));   // V3.10: the frozen copy, not the live file
 const invP = F.prepareInventory(invRaw, Date.parse(invRaw.checkedAt) + 3600e3);
 const allIds = (r) => r.groups.reduce((a, g) => a.concat(g.cards.map((c) => c.id), (g.more || []).map((c) => c.id)), []);
 t('synthetic: a project with the Pinery id is dropped by prepare(); every other project is untouched', () => {

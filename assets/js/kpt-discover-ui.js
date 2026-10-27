@@ -204,9 +204,11 @@
     let inv = '';
     if (it.inv) {
       const iv = it.inv;
-      if (iv.state === 'match' || (it.tier === 'over' && iv.from)) inv = `<p class="kd-inv"><span>Huttons inventory · checked ${esc(iv.when || '')}</span> ${esc(bedsNoun(iv.types))} homes from around <b>${esc(p2(iv.from))}</b></p>`;
-      else if (iv.state === 'nomatch') inv = `<p class="kd-inv kd-inv-no"><span>Huttons inventory · checked ${esc(iv.when || '')}</span> none at your maximum${S.req.minSize ? ' and size' : ''}</p>`;
-      else if (iv.state === 'zero') inv = `<p class="kd-inv kd-inv-no"><span>Huttons inventory · checked ${esc(iv.when || '')}</span> no units shown</p>`;
+      // V3.10: the check date always; "(as shown then)" once it is over 2 days old, and "may have changed since" past the 14-day cadence
+      const chk = `Huttons inventory · checked ${esc(iv.when || '')}${iv.late ? ' · may have changed since' : ''}`;
+      if (iv.state === 'match' || (it.tier === 'over' && iv.from)) inv = `<p class="kd-inv"><span>${chk}</span> ${esc(bedsNoun(iv.types))} homes from around <b>${esc(p2(iv.from))}</b>${iv.past ? ' (as shown then)' : ''}</p>`;
+      else if (iv.state === 'nomatch') inv = `<p class="kd-inv kd-inv-no"><span>${chk}</span> none at your maximum${S.req.minSize ? ' and size' : ''}</p>`;
+      else if (iv.state === 'zero') inv = `<p class="kd-inv kd-inv-no"><span>${chk}</span> no units shown</p>`;
     }
     const research = u ? `<a data-f="go" data-id="${id}"${it.beds && it.beds.state === 'reliable' && it.beds.group ? ` data-bed="${esc(it.beds.group)}"` : ''} href="../../research/#/p/${id}/${it.sale}">Research page ›</a>` : '';
     const map = `<a data-f="go" data-id="${id}" href="../../research/map/#p=${id}">View on Map ›</a>`;

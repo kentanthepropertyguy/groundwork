@@ -149,7 +149,7 @@ try:
         check(f'{tag} Bedroom Search: the page asks for the bedroom data', has_beds)
         # ---- 11. navigation ----
         pg.goto(B + '/tools/'); t = pg.inner_text('main')
-        check(f'{tag} navigation: the Calculators page lists the four questions', all(x in t for x in ['What will this home cost me?', 'How much can I borrow?', 'What will I get from selling?', 'Upgrade from HDB']))
+        check(f'{tag} navigation: the Calculators page lists the seven calculators (V3.8)', all(x in t for x in ['Purchase Costs & Timeline', 'How Much Can I Borrow?', 'Pledged & Unpledged Assets', 'Mortgage Instalment', 'Sale Proceeds', 'Buyer’s Stamp Duty', 'Seller’s Stamp Duty']))
         for old, want in (('/tools/planner/', '/tools/tdsr/'), ('/tools/msr/', '/tools/tdsr/')):
             pg.goto(B + old); pg.wait_for_url(re.compile('.*' + re.escape(want) + '.*'), timeout=8000); check(f'{tag} navigation: {old} opens {want}', want in pg.url)
         # ---- 12. Save as PDF on every tool, with the scenario figures ----

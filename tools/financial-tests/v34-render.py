@@ -128,12 +128,13 @@ try:
             pg.goto(B + old); pg.wait_for_selector('[data-f3]'); check(f'{tag} old address {old} opens {want}', pg.url.endswith(want), pg.url)
         # ---- 4. the Calculators page and the header menu ----
         pg.goto(B + '/tools/'); pg.wait_for_timeout(300)
-        cards = pg.evaluate("[...document.querySelectorAll('.gw-tdir .gw-tl')].map(a=>[a.querySelector('b').textContent,a.getAttribute('href')])")
-        check(f'{tag} calculators: four questions in order', cards == [['What will this home cost me?', 'payment-planner/'], ['How much can I borrow?', 'tdsr/'], ['What will I get from selling?', 'sale-proceeds/'], ['Upgrade from HDB', 'hdb-upgrade/']], cards)
-        one = pg.evaluate("[...document.querySelectorAll('.gw-tdir .gw-mone a')].map(a=>a.textContent)")
-        check(f'{tag} calculators: stamp duty, mortgage and SSD as text links underneath', one == ['Stamp duty', 'Mortgage instalment', 'Seller’s stamp duty'], one)
+        # V3.8 (Ken 27 Oct 2026): seven equal calculator cards replace the four questions and the text links; the menu lists the same seven (v38-render covers the rest)
+        SEVEN = [['Purchase Costs & Timeline', 'payment-planner/'], ['How Much Can I Borrow?', 'tdsr/'], ['Pledged & Unpledged Assets', 'pledged-assets/'], ['Mortgage Instalment', 'mortgage/'], ['Sale Proceeds', 'sale-proceeds/'], ['Buyer’s Stamp Duty', 'stamp-duty/'], ['Seller’s Stamp Duty', 'ssd/']]
+        cards = pg.evaluate("[...document.querySelectorAll('.gw-tdir .gw-tc')].map(a=>[a.querySelector('b').textContent,a.getAttribute('href')])")
+        check(f'{tag} calculators: the seven, in order', cards == SEVEN, cards)
+        check(f'{tag} calculators: no Upgrade card and no text links underneath', pg.locator('.gw-tdir .gw-mone').count() == 0 and not any(c[1] == 'hdb-upgrade/' for c in cards))
         col = pg.evaluate("[...document.querySelectorAll('.gw-ms-tools .gw-mi b')].map(b=>b.textContent)")
-        check(f'{tag} header menu: the same four questions', col == ['What will this home cost me?', 'How much can I borrow?', 'What will I get from selling?', 'Upgrade from HDB'], col)
+        check(f'{tag} header menu: the same seven', col == [c[0] for c in SEVEN], col)
         check(f'{tag} no script errors', not errs, errs[:3])
         ctx.close()
     br.close()

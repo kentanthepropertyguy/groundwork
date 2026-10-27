@@ -2,6 +2,10 @@
 import json, os, pathlib, re, socket, subprocess, sys, time
 from playwright.sync_api import sync_playwright
 ROOT = pathlib.Path(__file__).resolve().parents[3]
+# V3.10: the page's clock is set from the live inventory file's own date (12 hours after the check), so a data refresh needs no test edit
+import datetime as _dt
+_INV_AT = _dt.datetime.fromisoformat(json.load(open(ROOT / 'data/projects/inventory.json'))['checkedAt'].replace('Z', '+00:00'))
+_at = lambda hours: '?now=' + (_INV_AT + _dt.timedelta(hours=hours)).strftime('%Y-%m-%dT%H:%M:%SZ')
 PNG = bytes.fromhex('89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d49444154789c6360000002000001e221bc330000000049454e44ae426082')
 def port():
     s = socket.socket(); s.bind(('127.0.0.1', 0)); p = s.getsockname()[1]; s.close(); return p
@@ -81,14 +85,14 @@ try:
         t('ticking "up to 5% over" adds a separate, labelled group', over_group)
         # Bedroom Search Integration (26 Oct 2026): resale is matched on the accepted bedroom types (find-beds.json); see beds-search-render.py
         def resale_beds():
-            ctx, pg, errs = open_page(br, kw, q='?now=2026-10-08T00:00:00Z'); pg.wait_for_selector('#kdBudget'); pg.click('[data-f=moresum]')
+            ctx, pg, errs = open_page(br, kw, q=_at(12)); pg.wait_for_selector('#kdBudget'); pg.click('[data-f=moresum]')
             ok(re.search(r'URA rental records or floor plans', pg.inner_text('.kd-more')) and 'Huttons' in pg.inner_text('.kd-more'), 'bedroom note: resale by recorded types, new launches by Huttons')
             pg.click('[data-f=seg][data-k=sale][data-v=resale]'); pg.wait_for_timeout(200)
             ok(pg.query_selector('[data-f=seg][data-k=beds][data-v="2"][disabled]') is None, 'bedrooms are on for resale')
             ok('listed separately' in pg.inner_text('.kd-more'), 'and unconfirmed homes are said to be listed apart'); ctx.close()
         t('bedrooms work for resale, matched on recorded bedroom types, with unconfirmed ones apart', resale_beds)
         def beds_either():
-            ctx, pg, errs = open_page(br, kw, q='?now=2026-10-08T00:00:00Z'); search(pg, '3,000,000')
+            ctx, pg, errs = open_page(br, kw, q=_at(12)); search(pg, '3,000,000')
             pg.click('.kd-bar [data-f=edit]'); pg.wait_for_selector('#kdEdit.open')
             pg.evaluate("document.querySelector('#kdEdit [data-more]').open = true")
             pg.click('#kdEdit [data-f=seg][data-k=beds][data-v="2"]'); pg.wait_for_timeout(500)
@@ -97,7 +101,7 @@ try:
             ok(re.search(r'2 bed', pg.inner_text('.kd-chips')), 'chip shows bedrooms'); ok(not errs, str(errs)); ctx.close()
         t('choosing bedrooms with New launch or Resale selected applies them to both, each from its own source', beds_either)
         def beds_stale():
-            ctx, pg, errs = open_page(br, kw, q='?now=2026-12-30T00:00:00Z'); pg.wait_for_selector('#kdBudget'); pg.click('[data-f=moresum]')
+            ctx, pg, errs = open_page(br, kw, q=_at(24 * 30)); pg.wait_for_selector('#kdBudget'); pg.click('[data-f=moresum]')
             ok(pg.query_selector('[data-f=seg][data-k=beds][data-v="3"][disabled]') is None, 'bedrooms stay on for resale when inventory is out of date')
             pg.click('[data-f=seg][data-k=beds][data-v="3"]'); pg.wait_for_timeout(300)
             ok('Applied to resale only' in pg.inner_text('.kd-more'), 'and say new launches cannot be matched: ' + pg.inner_text('.kd-more'))

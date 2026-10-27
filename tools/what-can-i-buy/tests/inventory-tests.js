@@ -80,8 +80,8 @@ t('resale-only journey is unaffected by inventory (no inventory flag, same cards
 console.log('Freshness, missing, stale, clock');
 const OK = [TY(3, 2900000, [[900, 2700000]])];
 const fr = (ageMs, extra) => { const ip = IP('alpha', 'Alpha', OK, Object.assign({}, META, extra || {}, { checkedAt: iso(NOW - ageMs) })); const inv = prep([ip], NOW, iso(NOW - ageMs)); return inv ? F.freshness(inv, ip) : 'off'; };
-t('48 hours is fresh; just over 48 hours is dated; 7 days is dated; just over 7 days is treated as not checked', () => {
-  assert.strictEqual(fr(0), 'fresh'); assert.strictEqual(fr(48 * H), 'fresh'); assert.strictEqual(fr(48 * H + 1000), 'dated'); assert.strictEqual(fr(7 * D), 'dated'); assert.strictEqual(fr(7 * D + 1000), null);
+t('48 hours is fresh; just over 48 hours is dated; 21 days is dated (V3.10: 14-day cadence plus 7 days\' grace); just over 21 days is treated as not checked', () => {
+  assert.strictEqual(fr(0), 'fresh'); assert.strictEqual(fr(48 * H), 'fresh'); assert.strictEqual(fr(48 * H + 1000), 'dated'); assert.strictEqual(fr(7 * D + 1000), 'dated'); assert.strictEqual(fr(21 * D), 'dated'); assert.strictEqual(fr(21 * D + 1000), null);
 });
 t('a check time in the future: within an hour = every project treated as not checked; over an hour = the whole layer is off', () => {
   const ip = IP('alpha', 'Alpha', OK, Object.assign({}, META, { checkedAt: iso(NOW + 30 * 60000) })), inv = prep([ip], NOW, iso(NOW + 30 * 60000));
@@ -93,27 +93,29 @@ t('a browser clock behind the file: nothing is treated as checked, and the page 
   const r = run(real, F.prepareInventory(DOC([ip], iso(NOW - 2 * H)), NOW - 3 * H));   // clock three hours before the check
   assert.ok(r.inventory && r.inventory.active); assert.ok(cards(r).every((c) => c.huttons.kind === 'unchecked'));
 });
-t('a project missing from the file, stale (over 7 days), or unverified shows "couldn\'t check"; never "no units"', () => {
+t('a project missing from the file, stale (over 21 days), or unverified shows "couldn\'t check"; never "no units"', () => {
   const ura = mkIx([URAP('uu', 'UU', 'S1', '10', [row(900, 6, 2, 202609, 2400000, 2800000)])]);
   const mkr = (ips) => cards(run(ura, prep(ips)))[0].huttons;
   assert.strictEqual(mkr([]).kind, 'unchecked');
-  assert.strictEqual(mkr([IP('uu', 'UU', OK, { checkedAt: iso(NOW - 8 * D) })]).kind, 'unchecked');
+  assert.strictEqual(mkr([IP('uu', 'UU', OK, { checkedAt: iso(NOW - 22 * D) })]).kind, 'unchecked');
   assert.strictEqual(mkr([IP('uu', 'UU', [], { status: 'unverified' })]).kind, 'unchecked');
   assert.ok(!/No units/.test(mkr([]).text)); assert.strictEqual(mkr([]).text, F.HUT.unchecked);
 });
 t('zero_returned shows the zero line; units shown with no match show the "none near your size and budget" line with the date', () => {
   const ura = mkIx([URAP('uu', 'UU', 'S1', '10', [row(900, 6, 2, 202609, 2400000, 2800000)])]);
   const z = cards(run(ura, prep([IP('uu', 'UU', [], { status: 'zero_returned' })])))[0].huttons; assert.strictEqual(z.kind, 'zero'); assert.strictEqual(z.text, 'No units currently shown in Huttons inventory for this project.');
-  const nm = cards(run(ura, prep([IP('uu', 'UU', [TY(3, 1500000, [[900, 1400000]])])])))[0].huttons; assert.strictEqual(nm.kind, 'nomatch'); assert.strictEqual(nm.text, 'Checked today: none of the units currently shown in Huttons inventory are about your size and budget.');
+  const nm = cards(run(ura, prep([IP('uu', 'UU', [TY(3, 1500000, [[900, 1400000]])])])))[0].huttons; assert.strictEqual(nm.kind, 'nomatch'); assert.ok(/^Checked today, (Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d+ [A-Z][a-z]{2}: none of the units currently shown in Huttons inventory are about your size and budget\.$/.test(nm.text), nm.text);
+  const old = cards(run(ura, prep([IP('uu', 'UU', [TY(3, 1500000, [[900, 1400000]])], { checkedAt: iso(NOW - 5 * D) })], NOW, iso(NOW - 5 * D))))[0].huttons;   // V3.10: a dated check speaks in the past
+  assert.ok(/: none of the units shown in Huttons inventory then were about your size and budget\.$/.test(old.text) && !/currently/.test(old.text), old.text);
 });
 t('missing is never zero: a Huttons-only project that is not in the file, stale, or unverified is never shown at all', () => {
-  const inv = prep([IP('lucerne-grand', 'Lucerne Grand', OK, Object.assign({}, META, { status: 'unverified' })), IP('x2', 'X Two', OK, Object.assign({}, META, { checkedAt: iso(NOW - 9 * D) }))]);
+  const inv = prep([IP('lucerne-grand', 'Lucerne Grand', OK, Object.assign({}, META, { status: 'unverified' })), IP('x2', 'X Two', OK, Object.assign({}, META, { checkedAt: iso(NOW - 22 * D) }))]);
   assert.deepStrictEqual(ids(run(empty, inv)), []);
 });
-t('{when} is Singapore time: today, yesterday, then "Fri 2 Oct"; no clock time', () => {
+t('{when} is Singapore time and always the date: "today, Tue 6 Oct", "yesterday, Mon 5 Oct", then "Fri 2 Oct"; no clock time (V3.10)', () => {
   const at = (s) => F.whenText(Date.parse(s), NOW);
-  assert.strictEqual(at('2026-10-06T09:33:00Z'), 'today'); assert.strictEqual(at('2026-10-05T10:00:00Z'), 'yesterday'); assert.strictEqual(at('2026-10-02T03:00:00Z'), 'Fri 2 Oct');
-  assert.strictEqual(F.whenText(Date.parse('2026-10-05T16:30:00Z'), Date.parse('2026-10-06T16:30:00Z')), 'yesterday');   // 00:30 SGT on the 6th vs 00:30 SGT on the 7th
+  assert.strictEqual(at('2026-10-06T09:33:00Z'), 'today, Tue 6 Oct'); assert.strictEqual(at('2026-10-05T10:00:00Z'), 'yesterday, Mon 5 Oct'); assert.strictEqual(at('2026-10-02T03:00:00Z'), 'Fri 2 Oct');
+  assert.strictEqual(F.whenText(Date.parse('2026-10-05T16:30:00Z'), Date.parse('2026-10-06T16:30:00Z')), 'yesterday, Tue 6 Oct');   // 00:30 SGT on the 6th vs 00:30 SGT on the 7th
   assert.strictEqual(F.whenText(Date.parse('2026-10-05T15:59:00Z'), Date.parse('2026-10-06T16:01:00Z')), 'Mon 5 Oct');   // 23:59 on the 5th vs 00:01 on the 7th SGT
   assert.ok(!/\d:\d\d/.test(at('2026-10-06T09:33:00Z')));
 });
@@ -216,9 +218,9 @@ t('a dated check (2–7 days) is in the past tense, says "as shown then", and te
   assert.strictEqual(c.kind, 'dated'); assert.ok(/CHECKED (MON|TUE|WED|THU|FRI|SAT|SUN) \d/.test(c.label)); assert.strictEqual(c.from, 'From around $2.7m (as shown then).'); assert.ok(/matched/.test(c.size)); assert.strictEqual(c.budget, 'Your ~$2.6m budget was slightly below what we saw then for homes around this size.');
   assert.strictEqual(c.datedNote, 'Units may have changed since. Ask Ken for the latest.'); assert.ok(/shown then/.test(c.note));
 });
-t('a fresh check says CHECKED TODAY (or YESTERDAY), has no past tense, no dated note', () => {
-  const c = cards(one(A(OK)))[0].huttons; assert.strictEqual(c.label, 'HUTTONS INVENTORY · CHECKED TODAY'); assert.strictEqual(c.datedNote, null); assert.ok(!/then/.test(c.from + c.budget));
-  const y = cards(run(empty, prep([A(OK, { checkedAt: iso(NOW - 30 * H) })], NOW, iso(NOW - 30 * H))))[0].huttons; assert.strictEqual(y.label, 'HUTTONS INVENTORY · CHECKED YESTERDAY');
+t('a fresh check says CHECKED TODAY (or YESTERDAY) with the date, has no past tense, no dated note', () => {
+  const c = cards(one(A(OK)))[0].huttons; assert.ok(/^HUTTONS INVENTORY · CHECKED TODAY, (MON|TUE|WED|THU|FRI|SAT|SUN) \d+ [A-Z]{3}$/.test(c.label), c.label); assert.strictEqual(c.datedNote, null); assert.ok(!/then/.test(c.from + c.budget));
+  const y = cards(run(empty, prep([A(OK, { checkedAt: iso(NOW - 30 * H) })], NOW, iso(NOW - 30 * H))))[0].huttons; assert.ok(/^HUTTONS INVENTORY · CHECKED YESTERDAY, (MON|TUE|WED|THU|FRI|SAT|SUN) \d+ [A-Z]{3}$/.test(y.label), y.label);
 });
 t('the price note under the figure', () => assert.strictEqual(cards(one(A(OK)))[0].huttons.note, 'Lowest price currently shown for these homes, rounded. Prices vary by unit.'));
 t('no "from" figure when the status is not ok, or when no band is of about the buyer\'s size', () => {
@@ -412,26 +414,38 @@ t('the schema check catches a count, an unrounded price, an exact size and a uni
   assert.ok(schemaErrors(DOC([IP('a', 'A', [TY(3, 2900000, [[912, 2600000]])])])).includes('band start'));
   assert.ok(schemaErrors(DOC([IP('a', 'A', [TY(3, 2900001, [[900, 2600000]])])])).includes('ceiling'));
 });
-console.log('Real Huttons inventory file (verified public-safe export, 6 Oct 2026)');
-const INV_SHA = 'e998ef3bd0841d0f723f8da3dd03814daa5561873263c8b9a5920967b3de8f70', INV_PATH = path.join(root, 'data/projects/inventory.json');
+console.log('Live inventory file: any approved refresh (V3.10: shape and behaviour only, never its content)');
+{ const LIVE_PATH = path.join(root, 'data/projects/inventory.json'), liveTxt = fs.readFileSync(LIVE_PATH, 'utf8'), LIVE = JSON.parse(liveTxt), LAT = Date.parse(LIVE.checkedAt), CONTRACT = require('./inventory-contract.js');
+  t('the live file passes the inventory data contract (shape, rounding, privacy, layout)', () => assert.deepStrictEqual(CONTRACT.check(liveTxt), []));
+  t('it loads (schema v2): every project is indexed an hour after its check, none when the clock is behind the file', () => { const x = F.prepareInventory(LIVE, LAT + H); assert.ok(x); assert.strictEqual(x.slugs.length, LIVE.projects.filter((p) => F.FIND_EXCLUDED === undefined || F.FIND_EXCLUDED.indexOf(p.slug) < 0).length); const b = F.prepareInventory(LIVE, LAT - H); assert.ok(!b || b.slugs.every((s) => !F.freshness(b, b.bySlug[s]))); });
+  t('freshness from the file\'s own date: fresh to 48 hours, dated to 21 days (late, "may have changed since", after 14), then not used', () => {
+    const p = LIVE.projects.find((x) => x.status === 'ok' && x.checkedAt === LIVE.checkedAt) || LIVE.projects[0], st = (h) => { const x = F.prepareInventory(LIVE, LAT + h * H); return [F.freshness(x, x.bySlug[p.slug]), F.late(x, x.bySlug[p.slug])]; };
+    assert.deepStrictEqual(st(47), ['fresh', false]); assert.deepStrictEqual(st(49), ['dated', false]); assert.deepStrictEqual(st(14 * 24 - 1), ['dated', false]);
+    assert.deepStrictEqual(st(14 * 24 + 1), ['dated', true]); assert.deepStrictEqual(st(21 * 24 - 1), ['dated', true]); assert.deepStrictEqual(st(21 * 24 + 1), [null, false]);
+  });
+}
+console.log('Frozen copy of the 27 Oct 2026 file (tests/fixtures/inventory-sample.json): outcomes for named projects');
+const INV_SHA = '8da7a34e18b82020feae3d5a1e4ab2efe025288919cd3bc25ee8f52848152bad', INV_PATH = path.join(root, 'tools/what-can-i-buy/tests/fixtures/inventory-sample.json');
 const invBuf = fs.existsSync(INV_PATH) ? fs.readFileSync(INV_PATH) : Buffer.from('{}'), RDOC = JSON.parse(invBuf.toString('utf8'));
 const CHK = Date.parse(RDOC.checkedAt || 0), RNOW = CHK + 12 * H;
 const rinv = (at) => F.prepareInventory(RDOC, at == null ? RNOW : at);
 const rrun = (o, at) => F.shortlist(real, base(Object.assign({ inv: rinv(at) }, o)));
 const KS = { budget: 2200000, size: { lo: 1000, hi: 1100, source: 'explicit', line: 'x' } };
-t('inventory.json is byte-identical to the verified export (SHA-256 pinned): 53,675 bytes (V10.3.5: 87 projects, 24 with a reviewed region)', () => { assert.strictEqual(crypto.createHash('sha256').update(invBuf).digest('hex'), INV_SHA); assert.strictEqual(invBuf.length, 53675); });
-t('it passes the schema checks, loads as schema v2 with 87 projects: 80 ok and 7 zero_returned (no units currently shown, all URA-listed, no bedroom types)', () => { assert.deepStrictEqual(schemaErrors(RDOC), []); const x = rinv(); assert.ok(x); assert.strictEqual(x.slugs.length, 87); assert.ok(RDOC.projects.every((p) => p.status === 'ok' || p.status === 'zero_returned')); assert.strictEqual(RDOC.projects.filter((p) => p.status === 'ok').length, 80); const z = RDOC.projects.filter((p) => p.status === 'zero_returned'); assert.strictEqual(z.length, 7); z.forEach((p) => assert.deepStrictEqual(p.byBedrooms, [], p.slug)); });
-t('V10.3.5: 63 projects are listed by URA (identity from find.json, no metadata fields); the other 24 are reviewed metadata projects and each carries a valid district, tenure group, tenure and reviewed region; no CHECK, unpriced or held-back project is present', () => { const ura = new Set(real.projects.map((p) => p.id)); const u = RDOC.projects.filter((p) => ura.has(p.slug)), m = RDOC.projects.filter((p) => !ura.has(p.slug)); assert.strictEqual(u.length, 63); assert.strictEqual(m.length, 24);
+t('the frozen copy is byte-identical to the verified 27 Oct export (SHA-256 pinned): 54,400 bytes (27 Oct 2026 refresh: 89 projects, 25 with a reviewed region)', () => { assert.strictEqual(crypto.createHash('sha256').update(invBuf).digest('hex'), INV_SHA); assert.strictEqual(invBuf.length, 54400); });
+t('it passes the schema checks, loads as schema v2 with 89 projects: 79 ok and 10 zero_returned (no units currently shown, no bedroom types)', () => { assert.deepStrictEqual(schemaErrors(RDOC), []); const x = rinv(); assert.ok(x); assert.strictEqual(x.slugs.length, 89); assert.ok(RDOC.projects.every((p) => p.status === 'ok' || p.status === 'zero_returned')); assert.strictEqual(RDOC.projects.filter((p) => p.status === 'ok').length, 79); const z = RDOC.projects.filter((p) => p.status === 'zero_returned'); assert.strictEqual(z.length, 10); z.forEach((p) => assert.deepStrictEqual(p.byBedrooms, [], p.slug)); });
+t('27 Oct 2026: 62 condominium projects are listed by URA (identity from find.json, no metadata fields); of the other 27, 25 are reviewed metadata projects and each carries a valid district, tenure group, tenure and reviewed region, and 2 are ECs that find.json lists (Altura, Aurelle of Tampines) and so carry no metadata; no CHECK, unpriced or held-back project is present', () => { const ura = new Set(real.projects.map((p) => p.id)), ecs = new Set(JSON.parse(fs.readFileSync(path.join(root, 'data/projects/find.json'), 'utf8')).projects.filter((p) => p.c === 'ec').map((p) => p.id)); const u = RDOC.projects.filter((p) => ura.has(p.slug)), rest = RDOC.projects.filter((p) => !ura.has(p.slug)), m = rest.filter((p) => 'district' in p), e = rest.filter((p) => !('district' in p)); assert.strictEqual(u.length, 62); assert.strictEqual(m.length, 25); assert.deepStrictEqual(e.map((p) => p.slug).sort(), ['altura', 'aurelle-of-tampines']); e.forEach((p) => { assert.ok(ecs.has(p.slug), p.slug); assert.ok(!('tenure' in p) && !('region' in p), p.slug); });
   u.forEach((p) => { assert.ok(!('district' in p) && !('tenure' in p) && !('region' in p), p.slug); });
   m.forEach((p) => { assert.ok(/^(0[1-9]|1\d|2[0-8])$/.test(p.district) && typeof p.tenureGroup === 'number' && p.tenure && ['CCR', 'RCR', 'OCR'].indexOf(p.region) > -1, p.slug); });
   assert.ok(!RDOC.projects.some((p) => p.status !== 'ok' && p.status !== 'zero_returned')); assert.ok(m.every((p) => p.status === 'ok')); });
 t('the file carries no private fields: only slug, name, checkedAt, status and byBedrooms [bedrooms, label, ceiling, bands], plus district, tenureGroup, tenure, street and region on reviewed metadata projects only', () => { const ura = new Set(real.projects.map((p) => p.id)), ALLOW = ['byBedrooms', 'checkedAt', 'district', 'name', 'region', 'slug', 'status', 'street', 'tenure', 'tenureGroup'];
   RDOC.projects.forEach((p) => { const k = Object.keys(p).sort(); if (ura.has(p.slug)) assert.deepStrictEqual(k, ['byBedrooms', 'checkedAt', 'name', 'slug', 'status']); else k.forEach((x) => assert.ok(ALLOW.indexOf(x) > -1, p.slug + ' ' + x)); p.byBedrooms.forEach((b) => assert.deepStrictEqual(Object.keys(b).sort(), ['bands', 'bedrooms', 'ceiling', 'label'])); }); assert.deepStrictEqual(Object.keys(RDOC).sort(), ['checkedAt', 'kind', 'projects', 'source', 'tool', 'v']); });
-t('freshness with the real file: fresh to 48 hours, dated to 7 days, then treated as not checked; a clock behind the file is not checked', () => {
-  const kinds = (at) => { const r = rrun(KS, at), c = cards(r).find((x) => x.id === 'kassia'); return c && c.huttons ? c.huttons.kind : null; };
-  assert.strictEqual(kinds(CHK + 47 * H), 'fresh'); assert.strictEqual(kinds(CHK + 49 * H), 'dated'); assert.strictEqual(kinds(CHK + 7 * D - H), 'dated');
-  assert.strictEqual(kinds(CHK + 7 * D + H), 'unchecked'); assert.strictEqual(kinds(CHK - H), 'unchecked');
-  assert.strictEqual(rinv(CHK + 3 * H).slugs.length, 87);
+t('freshness with the frozen copy: fresh to 48 hours, dated to 21 days (V3.10), late after 14 days, then treated as not checked; a clock behind the file is not checked', () => {
+  const card = (at) => cards(rrun(KS, at)).find((x) => x.id === 'kassia'), kinds = (at) => { const c = card(at); return c && c.huttons ? c.huttons.kind : null; };
+  assert.strictEqual(kinds(CHK + 47 * H), 'fresh'); assert.strictEqual(kinds(CHK + 49 * H), 'dated'); assert.strictEqual(kinds(CHK + 14 * D - H), 'dated'); assert.strictEqual(kinds(CHK + 21 * D - H), 'dated');
+  assert.ok(!/MAY HAVE CHANGED/.test(card(CHK + 14 * D - H).huttons.label)); assert.ok(/ · MAY HAVE CHANGED SINCE$/.test(card(CHK + 15 * D).huttons.label), card(CHK + 15 * D).huttons.label);
+  assert.ok(/\(as shown then\)/.test(card(CHK + 15 * D).huttons.from) && !/available|in stock/i.test(JSON.stringify(card(CHK + 15 * D).huttons)));
+  assert.strictEqual(kinds(CHK + 21 * D + H), 'unchecked'); assert.strictEqual(kinds(CHK - H), 'unchecked');
+  assert.strictEqual(rinv(CHK + 3 * H).slugs.length, 89);
 });
 t('bedroom type and 100 sqft band matching with real data: Kassia 3-bedroom band 1,000 sqft (floor $2.1m, ceiling $2.25m) for a 1,000-1,100 sqft window', () => {
   const c = cards(rrun(KS)).find((x) => x.id === 'kassia'); assert.ok(c); assert.strictEqual(c.tier, 'a'); assert.strictEqual(c.huttons.from, 'From around $2.1m'); assert.ok(/3-bedroom/.test(c.huttons.size)); assert.ok(/falls within/.test(c.huttons.budget));
@@ -497,7 +511,7 @@ t('Resale: Recent sales range, "recent sales", Latest, no quiet line, same shape
   cs.forEach((c) => { const s = c.simple; assert.strictEqual(s.priceLead, 'Recent sales'); assert.ok(/^\$\d\.\d\dm–\$\d\.\d\dm$/.test(s.figure)); assert.ok(/^\d+ sales in the last 12 months$/.test(s.sales)); assert.ok(/^Recent homes sold: about [\d,]+–[\d,]+ sqft$/.test(s.size)); assert.ok(/^Latest: /.test(s.latest)); assert.strictEqual(s.quiet, null); assert.ok(/^(Within|A little above) your ~\$2\.2m budget$/.test(s.budget.text)); });
 });
 t('dated inventory (3 days): the From figure keeps "(as shown then)"', () => {
-  const NOWD = Date.parse('2026-10-10T14:00:00Z'), c = allCards(F.shortlist(real, base(Object.assign({ inv: F.prepareInventory(JSON.parse(fs.readFileSync(path.join(root, 'data/projects/inventory.json'), 'utf8')), NOWD), openTo: 'new' }, LW)))).find((x) => x.slug === 'lentor-gardens-residences');
+  const NOWD = Date.parse('2026-10-30T14:00:00Z'), c = allCards(F.shortlist(real, base(Object.assign({ inv: F.prepareInventory(JSON.parse(fs.readFileSync(INV_PATH, 'utf8')), NOWD), openTo: 'new' }, LW)))).find((x) => x.slug === 'lentor-gardens-residences');
   assert.strictEqual(c.simple.priceNote, '(as shown then)'); assert.strictEqual(c.simple.figure, '$2.2m');
 });
 t('the buyer-facing strings carry no source names, methodology, banned words or extra price figures', () => {

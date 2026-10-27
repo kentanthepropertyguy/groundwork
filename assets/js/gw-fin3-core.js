@@ -354,5 +354,69 @@
       years: years, maxYears: maxYears, capped: has(st.years) && st.years > maxYears, lower: lower, ratePct: ratePct, age: age, ageAssumed: ageAssumed, homeLoans: L.home, bookingFee: bookingFee, room: room, events: sch.ok ? sch.events : [], foot: sch.ok ? sch.foot : [] };
   }
 
-  return { costHdb, flat, sell, incomeNeeded, cost, borrowersOf, loansOf, needOf, borrow, priceLoan, ownedOf, toAssess, afford, dutyBuyers, schedule, timelineInput, incomeLoan, funding, engineKind };
+  /* ---------------- 4. Pledged & Unpledged Assets (V3.8) ---------------- */
+  // How eligible financial assets change what a bank may lend: the same TDSR / MSR engines as How much can I borrow?, run twice, once with the
+  // monthly figure MAS counts for the assets (GW_CALC.assetIncome) added to the borrower's income and once without. Adds no rule.
+  // a: { age, fixed, variable (monthly), homeDebts (monthly repayments on the housing loans still running), debts (all other monthly repayments: car,
+  //      personal, credit), homeLoans: 0|1|2 (housing loans outstanding), prop: 'private'|'hdb'|'ec'
+  //      (hdb = an HDB flat with a bank loan; ec = a new EC from the developer), value, kind: 'cash'|'other', pledged: true|false,
+  //      price (optional: the loan limit on it), target (optional: the loan wanted), ratePct (optional quoted rate), years (optional tenure) }
+  // One borrower: with two, banks differ on whether asset income weights the age that sets the tenure (not settled by MAS), so it is not modelled.
+  function assetRun(a, monthly) {
+    const B = [{ age: a.age, fixed: nn(a.fixed), variable: nn(a.variable), assetIncome: monthly > 0 ? monthly : 0 }], hl = Math.max(0, Math.min(2, Math.round(nn(a.homeLoans))));
+    const tenure = has(a.years) ? a.years : undefined, rate = has(a.ratePct) ? a.ratePct : undefined;
+    // V3.8.1: MAS Notice 645 para 6(f) counts only property loans (para 2(p)(i)-(iv): to buy Property, or secured on it) in the 30% MSR for an HDB flat
+    // or new EC; para 9 counts every repayment (car, personal, credit too) in TDSR. So the home-loan repayments go to both, the others to TDSR only.
+    const home = hl > 0 ? nn(a.homeDebts) : 0, other = nn(a.debts);
+    if (a.prop === 'ec') return C.msr({ scenario: 'ec', borrowers: B, propertyLoans: home, otherDebts: other, loans: hl, tenure: tenure, quotedRatePct: rate });
+    if (a.prop === 'hdb') return C.tdsr({ kind: 'hdb', borrowers: B, debts: home + other, propertyLoans: home, loans: hl, tenure: tenure, quotedRatePct: rate });
+    return C.tdsr({ kind: 'private', borrowers: B, debts: home + other, loans: hl, tenure: tenure, quotedRatePct: rate });
+  }
+  // the loan from one run: 0 when there is no income at all (the engine asks for one), Infinity past the engine's own ceiling (only reached by a search)
+  const runLoan = (r) => (!r ? 0 : !r.ok ? (r.invalid ? Infinity : 0) : r.noTenure ? 0 : r.maxLoan);
+  function assetLoan(a) {
+    a = a || {};
+    if (!has(a.age)) return { state: 'need', need: ['age'] };
+    // a housing loan still running: its repayment changes both tests, so it is asked, never taken as zero
+    if (Math.round(nn(a.homeLoans)) > 0 && !has(a.homeDebts)) return { state: 'need', need: ['homeDebts'] };
+    const ai = C.assetIncome({ value: a.value, kind: a.kind, pledged: a.pledged === true }), monthly = ai ? ai.monthly : 0;
+    const r = assetRun(a, monthly), r0 = assetRun(a, 0);
+    if (r && !r.ok && r.invalid) return { state: 'invalid', errors: r.invalid };
+    if (r && !r.ok) return { state: 'zero', asset: ai };   // no income and no assets: nothing to lend against
+    if (r.noTenure) return { state: 'notenure', cause: r.cause, asset: ai };
+    const capW = r.maxLoan, cap0 = runLoan(r0), P = has(a.price) && a.price > 0 ? a.price : null;
+    const ltv = r.ltv, minCash = r.minCash, limit = P !== null ? P * ltv : null;
+    const loanW = limit !== null ? Math.min(capW, limit) : capW, loan0 = limit !== null ? Math.min(cap0, limit) : cap0;
+    // what holds the loan down: the share of the price (LTV) when it is lower than what the income supports, otherwise the income test
+    const incomeTest = r.binding === 'msr' ? 'msr' : 'tdsr', by = limit !== null && limit < capW - 0.5 ? 'ltv' : incomeTest;
+    const by0 = limit !== null && limit < cap0 - 0.5 ? 'ltv' : incomeTest;
+    // the other treatment of the same assets, for the comparison row
+    const alt = ai ? C.assetIncome({ value: a.value, kind: a.kind, pledged: !(a.pledged === true) }) : null, rAlt = alt ? assetRun(a, alt.monthly) : null;
+    const capAlt = rAlt ? runLoan(rAlt) : null, loanAlt = capAlt === null ? null : limit !== null ? Math.min(capAlt, limit) : capAlt;
+    const share = incomeTest === 'msr' ? R.msr : R.tdsr, counted = r.B.assessable, cap = share * counted;
+    const res = { state: 'ok', asset: ai, alt: alt, prop: a.prop === 'ec' || a.prop === 'hdb' ? a.prop : 'private', years: r.tenure.years, tenure: r.tenure, rate: r.rate, ltv: ltv, minCash: minCash,
+      capWith: capW, capWithout: cap0, price: P, limit: limit, loanWith: loanW, loanWithout: loan0, extra: Math.max(0, loanW - loan0), extraIfNoLimit: Math.max(0, capW - cap0),
+      by: by, byWithout: by0, incomeTest: incomeTest, share: share, income: counted, incomeWithout: counted - monthly, cap: cap, forNew: r.forNew, forNewMsr: a.prop === 'hdb' || a.prop === 'ec' ? r.forNewMsr : null, forNewTdsr: r.forNewTdsr,
+      homeDebts: Math.round(nn(a.homeLoans)) > 0 ? nn(a.homeDebts) : 0, otherDebts: nn(a.debts), debts: (Math.round(nn(a.homeLoans)) > 0 ? nn(a.homeDebts) : 0) + nn(a.debts),
+      capAlt: capAlt, loanAlt: loanAlt, monthly: C.instal(loanW, (has(a.ratePct) ? a.ratePct : 4) / 100, r.tenure.years),
+      down: P !== null ? P - loanW : null, cashMin: P !== null ? P * minCash : null, target: null };
+    // the assets a target loan needs, for the same kind and treatment (and the other treatment): found by running the same engine, so it can
+    // never disagree with the figure above. A target the price's loan limit can't reach, or one the income already supports, says so instead.
+    if (has(a.target) && a.target > 0) {
+      const T0 = a.target, need = (pledged) => {
+        const loanAt = (v) => runLoan(assetRun(a, (C.assetIncome({ value: v, kind: a.kind, pledged: pledged }) || { monthly: 0 }).monthly));
+        // the search stays within what the engine takes: assets counting at most its monthly-income ceiling (beyond that it reports an error, not a loan)
+        const h = R.financialAssets.haircut[a.kind === 'other' ? 'other' : 'cash'][pledged ? 'pledged' : 'unpledged'];
+        const MAX = Math.min(C.LIMITS.money.max, Math.floor(C.LIMITS.income.max * R.financialAssets.months / (1 - h))); if (loanAt(MAX) < T0) return null;
+        let lo = 0, hi = MAX; for (let k = 0; k < 80 && hi - lo > 1; k++) { const mid = (lo + hi) / 2; if (loanAt(mid) >= T0) hi = mid; else lo = mid; }
+        return Math.ceil(hi / 1000) * 1000;
+      };
+      if (limit !== null && T0 > limit + 0.5) res.target = { state: 'ltv', amount: T0, limit: limit };
+      else if (T0 <= cap0 + 0.5) res.target = { state: 'covered', amount: T0 };
+      else { const v = need(a.pledged === true), vAlt = need(!(a.pledged === true)); res.target = v === null ? { state: 'unreachable', amount: T0 } : { state: 'ok', amount: T0, value: v, valueAlt: vAlt, have: nn(a.value), short: Math.max(0, v - nn(a.value)) }; }
+    }
+    return res;
+  }
+
+  return { assetLoan, assetRun, costHdb, flat, sell, incomeNeeded, cost, borrowersOf, loansOf, needOf, borrow, priceLoan, ownedOf, toAssess, afford, dutyBuyers, schedule, timelineInput, incomeLoan, funding, engineKind };
 });

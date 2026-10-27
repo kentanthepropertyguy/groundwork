@@ -111,10 +111,10 @@ try:
         ctx.close()
         # ---- 10. All Tools entry (FE V3): the Payment timeline opens on the schedule; the funding check is an optional section on the same page; the old #funding address opens it
         ctx, pg, errs = page(br, kw)
-        open_(pg, '/tools/', '.gw-tdir'); pg.click('a.gw-tl[data-tool="payment-planner"]'); pg.wait_for_selector('[data-f3="pay"]')
+        open_(pg, '/tools/', '.gw-tdir'); pg.click('a.gw-tc[data-tool="payment-planner"]'); pg.wait_for_selector('[data-f3="pay"]')
         check(vn + ': Payment timeline from All Tools opens on the schedule, the funding check closed and optional', not pg.evaluate("()=>document.querySelector('[data-fund]').open"))
         open_(pg, '/tools/', '.gw-tdir')
-        check(vn + ': All Tools has no second card for the Payment timeline', pg.query_selector('a.gw-tl[data-tool="payment-planner-full"]') is None and pg.locator('a.gw-tl[data-tool="payment-planner"]').count() == 1)
+        check(vn + ': All Tools has no second card for the Payment timeline', pg.query_selector('a.gw-tc[data-tool="payment-planner-full"]') is None and pg.locator('a.gw-tc[data-tool="payment-planner"]').count() == 1)
         pg.goto(B + '/tools/payment-planner/#funding'); pg.wait_for_selector('[data-f3="pay"]')
         check(vn + ': the old "#funding" address opens the funding check', pg.wait_for_function("()=>document.querySelector('[data-fund]').open", timeout=8000) is not None)
         check(vn + ': no script errors on the entry pages', not errs, errs)

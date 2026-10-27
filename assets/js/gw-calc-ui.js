@@ -37,6 +37,7 @@
     'what-can-i-buy': '<circle cx="11" cy="11" r="6"/><path d="m20 20-4.2-4.2"/>',
     worth: '<path d="M5 20V12m5 8V7m5 13v-6m5 6V4"/>',
     research: '<path d="M4 20V8l6-4v16M10 20V10l6 3v7M16 20v-6l4 2v4"/><path d="M3 20h18"/>',
+    'pledged-assets': '<rect x="4.5" y="10.5" width="15" height="9.5" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/><path d="M12 14.5v2"/>',
   };
   const svg = (k) => '<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + ICON[k] + '</svg>';
   // name: plain words (menu, directory, page heading) · tag: the term people know · title: the formal name (page titles, WhatsApp).
@@ -63,21 +64,26 @@
   // What will this home cost me? opened at its funding check, so it is no longer a second card (search still finds the term).
   // V3.4 (26 Oct 2026): the Calculators page is four questions (Ken's menu concept); the single-figure calculators are text links underneath.
   // What can I afford? and the HDB and EC loan limit are part of How much can I borrow? (their addresses redirect there).
+  // V3.8 (Ken 27 Oct 2026): seven calculators, equal, in a two-column grid of cards (one column on a phone), in Ken's order (the borrowing tools together).
+  // Upgrade from HDB is part of Plan My Move (its address and page are unchanged); one section under the cards leads there. An eighth card fits the grid as is.
   const DIRECTORY = [
-    ['four', 'Four questions', [
-      ['payment-planner', { name: 'What will this home cost me?', short: 'Upfront, monthly and the income it needs — from a price' }],
-      ['tdsr', { short: 'Bank loan limit and the home price it supports — from your income' }],
-      ['sale-proceeds', { name: 'What will I get from selling?', short: 'Cash in hand and CPF back — from a selling price' }],
-      ['hdb-upgrade', { name: 'Upgrade from HDB', href: 'hdb-upgrade/', short: 'Flat value → proceeds → loan → budget, in four steps' }]],
-      '<p class="gw-mone gw-tone">Looking for one figure? <a href="stamp-duty/" data-tool="stamp-duty">Stamp duty</a> <a href="mortgage/" data-tool="mortgage">Mortgage instalment</a> <a href="ssd/" data-tool="ssd">Seller’s stamp duty</a></p>'],
+    ['payment-planner', 'payment-planner/', 'Purchase Costs & Timeline', 'How much to pay, and when.'],
+    ['tdsr', 'tdsr/', 'How Much Can I Borrow?', 'Housing loan estimate and TDSR.'],
+    ['pledged-assets', 'pledged-assets/', 'Pledged & Unpledged Assets', 'Use financial assets to support your housing loan.'],
+    ['mortgage', 'mortgage/', 'Mortgage Instalment', 'Monthly repayments and interest.'],
+    ['sale-proceeds', 'sale-proceeds/', 'Sale Proceeds', 'Cash and CPF after selling.'],
+    ['stamp-duty', 'stamp-duty/', 'Buyer’s Stamp Duty', 'BSD and ABSD calculation.'],
+    ['ssd', 'ssd/', 'Seller’s Stamp Duty', 'Calculate SSD when selling.'],
   ];
-  const ORDER = { four: ['payment-planner', 'tdsr', 'sale-proceeds', 'hdb-upgrade'] };
-  const GROUPS = DIRECTORY.map((g) => [g[0], g[1]]);
-
-  // The tools page (mirrors tools/index.html, which is static): four task sections, every card independent (Package 3 still applies: a tool opened from here starts blank).
+  const ORDER = { seven: DIRECTORY.map((x) => x[0]) };
+  const GROUPS = [['seven', 'Calculators']];
+  const GO = '<svg class="gw-tc-go" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 16 16 8M9.5 8H16v6.5"/></svg>';
+  // The tools page (mirrors tools/index.html, which is static): every card independent (a calculator opened from here starts blank).
   function directoryHtml() {
-    const tile = (id, o) => { const t = TOOLS[id] || EXISTING[id]; o = o || {}; return '<a class="gw-tl" href="' + (o.href || t.path) + '" data-tool="' + (o.tool || id) + '">' + svg(t.icon || id) + '<span class="gw-tl-t"><b>' + esc(o.name || t.name) + '</b></span><span class="gw-tl-s">' + esc(o.short || t.short) + '</span></a>'; };
-    return DIRECTORY.map((g, k) => '<section class="gw-tg' + (k === 0 ? ' gw-tg-top' : '') + '" aria-labelledby="tg-' + g[0] + '"><h2 id="tg-' + g[0] + '" class="gw-vh">' + esc(g[1]) + '</h2><div class="gw-tls gw-tls-one">' + g[2].map((x) => tile(x[0], x[1])).join('') + '</div>' + (g[3] || '') + '</section>').join('');
+    const card = (x) => '<li><a class="gw-tc" href="' + x[1] + '" data-tool="' + x[0] + '">' + svg(x[0]) + GO + '<b>' + esc(x[2]) + '</b><span>' + esc(x[3]) + '</span></a></li>';
+    return '<h2 class="gw-vh">Calculators</h2><ul class="gw-tcs">' + DIRECTORY.map(card).join('') + '</ul>' +
+      '<section class="gw-pmm" aria-labelledby="gw-pmm-h"><div><h2 id="gw-pmm-h">Planning your next property move?</h2><p>Buying, selling or upgrading? Use Plan My Move to connect your financial calculations across the journey.</p></div>' +
+      '<a class="gw-pmm-go" href="../journey/" data-gw-nav-to="journey">Explore Plan My Move <span aria-hidden="true">→</span></a></section>';
   }
 
   /* ---------------- fields (markup) ---------------- */

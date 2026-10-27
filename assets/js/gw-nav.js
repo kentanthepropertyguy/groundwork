@@ -42,6 +42,8 @@
     doc: '<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>',
     search: '<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.3-4.3"/>',
     menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+    launch: '<path d="M4 20V10l6-4 6 4v10"/><path d="M8 20v-5h4v5"/><path d="M18 3v5M15.5 5.5h5"/><path d="M3 20h18"/>',
+    'pledged-assets': '<rect x="4.5" y="10.5" width="15" height="9.5" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/><path d="M12 14.5v2"/>',
     close: '<path d="m6 6 12 12M18 6 6 18"/>',
   };
   const svg = (k, size) => '<svg viewBox="0 0 24 24" width="' + (size || 22) + '" height="' + (size || 22) + '" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + ICON[k] + '</svg>';
@@ -50,24 +52,27 @@
      name: plain words · tag: the term people know it by · href: from the site root (or a full address) · t: what people type.
      menu: shown in the menu's tool grid · search: found by the search only (a more specific way into a page that is already listed). */
   const ENTRIES = [
-    { id: 'stamp-duty', name: 'Stamp duty', tag: 'BSD · ABSD', short: 'What you pay when you buy', href: 'tools/stamp-duty/', icon: 'stamp-duty', menu: 1, quick: 1, sec: 'tools',
+    { id: 'stamp-duty', name: 'Buyer’s Stamp Duty', tag: 'BSD and ABSD calculation', short: 'What you pay when you buy', href: 'tools/stamp-duty/', icon: 'stamp-duty', menu: 1, quick: 1, sec: 'tools',
       t: ['stamp duty', 'absd', 'bsd', 'buyers stamp duty', 'additional buyers stamp duty', 'buyer stamp duty', 'duty', 'stamp', 'remission', 'absd remission', 'absd refund', 'second property', 'second home', 'third property', 'foreigner', 'pr buying', 'permanent resident', 'tax when buying', 'property purchase tax'] },
-    { id: 'mortgage', name: 'Mortgage repayment', quickName: 'Mortgage', tag: 'Monthly instalment', short: 'Instalment and total interest', href: 'tools/mortgage/', icon: 'mortgage', menu: 1, quick: 1, sec: 'tools',
+    { id: 'mortgage', name: 'Mortgage Instalment', quickName: 'Mortgage', tag: 'Monthly repayments and interest', short: 'Instalment and total interest', href: 'tools/mortgage/', icon: 'mortgage', menu: 1, quick: 1, sec: 'tools',
       t: ['mortgage', 'home loan', 'loan repayment', 'monthly repayment', 'monthly instalment', 'instalment', 'installment', 'monthly payment', 'interest', 'interest rate', 'bank loan', 'hdb loan', 'loan', 'amortisation', 'amortization', 'refinance', 'repricing'] },
-    { id: 'tdsr', name: 'How much can I borrow?', tag: 'Loan limit, and a budget with your cash and CPF', short: 'Bank loan limit and the home price it supports — from your income', href: 'tools/tdsr/', icon: 'tdsr', menu: 1, quick: 1, sec: 'tools',
+    { id: 'tdsr', name: 'How Much Can I Borrow?', tag: 'Housing loan estimate and TDSR', short: 'Bank loan limit and the home price it supports — from your income', href: 'tools/tdsr/', icon: 'tdsr', menu: 1, quick: 1, sec: 'tools',
       t: ['tdsr', 'total debt servicing ratio', 'how much can i borrow', 'borrow', 'borrowing', 'loan limit', 'loan eligibility', 'max loan', 'maximum loan', 'loan amount', 'affordability', 'afford', 'ltv', 'loan to value', 'income', 'debt', 'stress test', 'medium term rate'] },
+    // V3.8: Pledged & Unpledged Assets (MAS Notice 645 financial assets), its own calculator
+    { id: 'pledged-assets', name: 'Pledged & Unpledged Assets', tag: 'Use financial assets to support your housing loan', short: 'How savings and investments may raise what a bank lends', href: 'tools/pledged-assets/', icon: 'pledged-assets', menu: 1, sec: 'tools',
+      t: ['pledged assets', 'unpledged assets', 'pledge', 'pledged', 'unpledged', 'pledging', 'pledge funds', 'show funds', 'show fund', 'showing funds', 'financial assets', 'asset based', 'asset-based', 'savings', 'investments', 'fixed deposit', 'retiree loan', 'no income loan', 'tdsr assets', 'income from assets'] },
     { id: 'msr', name: 'HDB and EC loan limit', tag: 'MSR · in How much can I borrow?', short: 'For HDB flats and new ECs', href: 'tools/tdsr/#hdb', icon: 'msr', search: 1, sec: 'tools',
       t: ['msr', 'mortgage servicing ratio', 'hdb loan', 'hdb loan limit', 'ec', 'executive condo', 'executive condominium', 'hfe', 'hdb flat eligibility', 'bto', 'resale flat loan', 'hdb flat loan', 'hdb borrow'] },
     { id: 'planner', name: 'What can I afford?', tag: 'Your budget · in How much can I borrow?, with your cash and CPF', short: 'Your maximum property budget, from your cash, CPF and income', href: 'tools/tdsr/#cash', icon: 'planner', search: 1, sec: 'tools',
       t: ['planner', 'what can i afford', 'afford', 'affordability', 'comfortable budget', 'maximum budget', 'maximum property budget', 'budget', 'how much can i afford', 'highest price', 'new launch budget', 'upgrade budget', 'keep my flat', 'sell first'] },
-    { id: 'payment-planner', name: 'What will this home cost me?', tag: 'Cash, CPF and payment dates', short: 'Upfront, monthly and the income it needs — from a price', href: 'tools/payment-planner/', icon: 'payment-planner', menu: 1, sec: 'tools',
+    { id: 'payment-planner', name: 'Purchase Costs & Timeline', tag: 'How much to pay, and when', short: 'Upfront, monthly and the income it needs — from a price', href: 'tools/payment-planner/', icon: 'payment-planner', menu: 1, sec: 'tools',
       t: ['what will this home cost me', 'what will it cost', 'cost me', 'cash needed', 'cash you need', 'upfront', 'payment timeline', 'full payment planning', 'funding check', 'can i fund it', 'new launch payments', 'new launch payment', 'progressive payments', 'progressive payment', 'progressive', 'payment schedule', 'uncompleted', 'temporary occupation permit', 'company buyer', 'company purchase', 'buying through a company', 'entity', 'ec payment schedule', 'hdb payment schedule', 'bto payment schedule', 'booking fee', 'option fee', 'downpayment', 'down payment', 'under construction', 'construction stages', 'cash flow', 'cashflow', 'timeline', 'planner', 'payment planner', 'shortfall', 'funding gap', 'buy first', 'sell first', 'buy first sell later', 'sell first buy later', 'bridging', 'absd refund', 'when to pay', 'payment dates', 'how much cash do i need', 'cash needed', 'cpf needed', 'upgrade timing'] },
-    { id: 'sale-proceeds', name: 'What will I get from selling?', tag: 'Sale proceeds · cash in hand and CPF back', short: 'Cash in hand and CPF back — from a selling price', href: 'tools/sale-proceeds/', icon: 'sale-proceeds', menu: 1, quick: 1, sec: 'tools',
+    { id: 'sale-proceeds', name: 'Sale Proceeds', tag: 'Cash and CPF after selling', short: 'Cash in hand and CPF back — from a selling price', href: 'tools/sale-proceeds/', icon: 'sale-proceeds', menu: 1, quick: 1, sec: 'tools',
       t: ['sale proceeds', 'proceeds', 'selling', 'sell', 'sell my flat', 'sell my hdb', 'sell my condo', 'cash proceeds', 'net proceeds', 'cpf refund', 'refund cpf', 'accrued interest', 'cpf accrued interest', 'how much will i get', 'cash from sale', 'agent commission', 'selling costs'] },
-    { id: 'ssd', name: 'Selling within 4 years?', tag: 'SSD', short: 'Seller’s Stamp Duty', href: 'tools/ssd/', icon: 'ssd', menu: 1, sec: 'tools',
+    { id: 'ssd', name: 'Seller’s Stamp Duty', tag: 'Calculate SSD when selling', short: 'Seller’s Stamp Duty', href: 'tools/ssd/', icon: 'ssd', menu: 1, sec: 'tools',
       t: ['ssd', 'sellers stamp duty', 'seller stamp duty', 'selling stamp duty', 'sell within', 'sell early', 'selling early', 'holding period', 'minimum holding', 'stamp duty selling'] },
     // V3.4 (26 Oct 2026): Upgrade from HDB is the four-step thread at tools/hdb-upgrade/ again; What can I afford? and the HDB/EC loan limit are part of How much can I borrow? (search still finds them by name).
-    { id: 'hdb-upgrade', name: 'Upgrade from HDB', tag: 'Flat value → proceeds → loan → budget', short: 'Flat value → proceeds → loan → budget, in four steps', href: 'tools/hdb-upgrade/', icon: 'hdb-upgrade', menu: 1, sec: 'tools',
+    { id: 'hdb-upgrade', name: 'Upgrade from HDB', tag: 'Flat value → proceeds → loan → budget', short: 'Flat value → proceeds → loan → budget, in four steps', href: 'tools/hdb-upgrade/', icon: 'hdb-upgrade', search: 1, sec: 'sell',
       t: ['hdb upgrade', 'hdb upgrade planner', 'upgrade planner', 'upgrade', 'upgrading', 'upgrader', 'hdb to condo', 'hdb to private', 'upgrade from hdb', 'can i afford to upgrade', 'afford a condo', 'private property budget', 'sell hdb buy condo', 'next home budget', 'budget'] },
     { id: 'map', name: 'Map', tag: 'Homes, prices and what is nearby', short: 'See what is around a home, and what nearby homes sold for', href: 'research/map/', icon: 'map', menu: 1, sec: 'research',
       t: ['map', 'maps', 'on a map', 'nearby', 'near me', 'around', 'neighbourhood', 'neighborhood', 'location', 'area', 'schools', 'school', 'mrt', 'near mrt', 'amenities', 'supermarket', 'park', 'explore', 'where'] },
@@ -95,6 +100,9 @@
       t: ['browse', 'all developments', 'directory', 'list', 'a to z', 'every development', 'all condos'] },
     { id: 'sample', name: 'Sample research report', tag: 'Jadescape or Thomson Three?', href: 'research/sample/', icon: 'doc', search: 1, sec: 'research',
       t: ['sample', 'report', 'sample report', 'research report', 'detailed research', 'comparison report'] },
+    // V3.9 (Ken 27 Oct 2026): the New launches directory, Ken's projects with their own sites (data/research/sites.json, "directory" set by Ken)
+    { id: 'new-launches', name: 'New launches', tag: 'Ken’s current projects, each with its own site', href: 'research/new-launches/', icon: 'launch', menu: 1, sec: 'research',
+      t: ['new launches', 'new launch', 'launches', 'all new launches', 'new launch directory', 'current projects', 'ken projects', 'project sites', 'thomson reserve', 'lucerne grand'] },
     // V2.1: new launches are on the Groundwork Map (under-construction launches and awarded GLS sites, data/map/upcoming.json); no link leaves the site for them
     { id: 'launches', name: 'New launches on the Map', tag: 'Launches and awarded sites, with confirmed facts', href: 'research/map/', icon: 'map', search: 1, sec: 'research',
       t: ['new launches', 'new launch', 'launch', 'launches', 'showflat', 'show flat', 'development guides', 'lucerne grand', 'thomson reserve', 'hougang central', 'preview'] },
@@ -110,12 +118,12 @@
     guide: { name: 'Plan My Move', href: 'journey/', nav: 'journey', q: 'Buying, selling or both?', say: 'Pick your goal. We take you through the right tools, step by step.', ids: ['guide-buy', 'guide-sell', 'guide-up', 'guide-move'] },
     buy: { name: 'Buy', href: 'journey/#buy', nav: 'buy', q: 'Looking to buy?', say: 'Work out your maximum budget, then explore the homes within it.', ids: ['guide-buy', 'tdsr', 'what-can-i-buy', 'payment-planner'] },
     sell: { name: 'Sell', href: 'journey/#sell', nav: 'sell', q: 'Planning to sell?', say: 'See what homes like yours sold for, then what you would take home.', ids: ['guide-sell', 'worth', 'sale-proceeds', 'hdb-upgrade', 'guide-move'] },
-    // V3.4: four questions, then the single-figure calculators as text links (ONE_FIGURE)
-    tools: { name: 'Calculators', href: 'tools/', nav: 'tools', q: 'Know what to work out?', say: 'Four questions. Type one number, get an answer, change what you like.', ids: ['payment-planner', 'tdsr', 'sale-proceeds', 'hdb-upgrade'] },
+    // V3.8 (Ken 27 Oct 2026): seven calculators, equal, in this order; Upgrade from HDB is part of Plan My Move
+    tools: { name: 'Calculators', href: 'tools/', nav: 'tools', q: 'Know what to work out?', say: 'Find the numbers you need for your next property decision.', ids: ['payment-planner', 'tdsr', 'pledged-assets', 'mortgage', 'sale-proceeds', 'stamp-duty', 'ssd'] },
     map: { name: 'Map', href: 'research/map/', nav: 'map', q: '', say: '', ids: [] },
     // The header's one way into buying and selling (25 Oct 2026): "Plan My Move", the Guide me page at its start, showing all four choices (Buy, Sell, Upgrade from HDB, Sell and buy again).
     move: { name: 'Plan My Move', href: 'journey/', nav: 'journey', q: '', say: '', ids: [] },
-    research: { name: 'Research', href: 'research/', nav: 'research', q: 'Looking at a property?', say: 'What homes really sold for, from URA and HDB records. The Map is part of Research.', ids: ['research', 'map', 'what-can-i-buy', 'directory', 'sample'] },
+    research: { name: 'Research', href: 'research/', nav: 'research', q: 'Looking at a property?', say: 'What homes really sold for, from URA and HDB records. The Map is part of Research.', ids: ['research', 'map', 'new-launches', 'what-can-i-buy', 'directory', 'sample'] },
   };
   // The menu's columns (25 Oct 2026) follow the main navigation: Plan My Move (the four journeys), Research (with the Map), Calculators.
   const SEC_ORDER = ['guide', 'research', 'tools'];
@@ -123,7 +131,7 @@
   // The full menu keeps its four columns (Buy, Sell, Research, Tools), whose links go straight to a chosen path.
   const NAV_ORDER = ['move', 'research', 'map', 'tools'];
   const MENU_TOOLS = SECTIONS.tools.ids;
-  const QUICK = ['payment-planner', 'tdsr', 'sale-proceeds', 'hdb-upgrade'];
+  const QUICK = ['payment-planner', 'tdsr', 'pledged-assets', 'sale-proceeds'];
   const ONE_FIGURE = [['stamp-duty', 'Stamp duty'], ['mortgage', 'Mortgage instalment'], ['ssd', 'Seller’s stamp duty']];
   const oneFigureHtml = (r, cls) => '<p class="' + (cls || 'gw-mone') + '">Looking for one figure? ' + ONE_FIGURE.map((x) => '<a href="' + r + byId[x[0]].href + '" data-gw-nav-to="' + x[0] + '">' + x[1] + '</a>').join(' ') + '</p>';
   const href = (e, r) => (e.ext ? e.href : (r || '') + e.href);
@@ -279,7 +287,7 @@
   // Side by side on a wide screen, one after another on a phone.
   function menuHtml(r) {
     const sec = (k) => { const S = SECTIONS[k]; return '<section class="gw-ms gw-ms-' + k + '"><a class="gw-msh" href="' + r + S.href + '" data-gw-nav-to="' + S.nav + '"><b>' + S.name + '</b><span aria-hidden="true">›</span></a><p class="gw-msq">' + esc(S.q) + '</p>' +
-      '<div class="gw-ml">' + S.ids.filter((id) => k === 'research' || k === 'tools' || k === 'guide' || SECTIONS.research.ids.indexOf(id) < 0).map((id) => row(byId[id], r)).join('') + '</div>' + (k === 'tools' ? oneFigureHtml(r) : '') + '</section>'; };
+      '<div class="gw-ml">' + S.ids.filter((id) => k === 'research' || k === 'tools' || k === 'guide' || SECTIONS.research.ids.indexOf(id) < 0).map((id) => row(byId[id], r)).join('') + '</div></section>'; };
     return '<div class="gw-mx">' + searchHtml('menu', 'Search, e.g. ABSD or Jadescape') +
       '<div class="gw-mx-body" data-gw-menu-body><div class="gw-mcols">' + SEC_ORDER.map(sec).join('') + '</div>' +
       '<div class="gw-mfoot"><a class="gw-mhome" href="' + (r || './') + '" data-gw-nav-to="home">' + svg('home', 18) + 'Home</a>' + 

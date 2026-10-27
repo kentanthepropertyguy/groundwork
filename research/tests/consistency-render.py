@@ -40,7 +40,7 @@ try:
             check(f'{vn}: {nm}: the heading is left-aligned', m['align'] in ('left', 'start'), m)
             left_edges[nm] = m['left']; pg.close()
         # the content below a heading starts where the heading starts
-        for nm, path, sel in (('Guide me', '/journey/', '.gw-paths a'), ('Property values', '/journey/worth/', '[data-vx-pc] input, .gw-vx-pc input'), ('Tools', '/tools/', '.gw-tl'), ('Research', '/research/', '#q')):
+        for nm, path, sel in (('Guide me', '/journey/', '.gw-paths a'), ('Property values', '/journey/worth/', '[data-vx-pc] input, .gw-vx-pc input'), ('Tools', '/tools/', '.gw-tl, .gw-tc'), ('Research', '/research/', '#q')):
             pg, errs = opn(ctx, path); l = pg.evaluate("(s) => { const e = [...document.querySelectorAll(s)].find(x => x.getBoundingClientRect().width > 0); return e ? Math.round(e.getBoundingClientRect().left) : null }", sel)
             check(f'{vn}: {nm}: the content lines up with the heading', l is not None and abs(l - left_edges[nm]) <= 2, (l, left_edges[nm])); pg.close()
         # V2.1: no Ken band on these pages (one understated introduction, on the homepage); the footer keeps the credentials, without a portrait
