@@ -121,6 +121,19 @@ console.log('Research fix (Ken, 27 Oct 2026): new launches come only from new-la
     const ok20 = iso(NOW - 20 * 24 * H), f20 = F.prepareInventory(DOC([IP('b', [TY(2, [[900, 1500000]])], { checkedAt: ok20 })], ok20), NOW);
     const nw = run([p], {}, { inv: f20 }).items.find((x) => x.sale === 'new'); assert.ok(nw && nw.inv.past === true && nw.inv.late === true, 'within 21 days: listed, dated and marked as possibly changed');
   });
+  t('Results layout (28 Oct): a listing-only development takes its class from the project index (ctx.cls), so an EC is matched and listed as an EC; without it, as before', () => {
+    const i = inv([IP('q', [TY(3, [[900, 1500000]])], { district: '27', tenureGroup: 0, tenure: '99 yrs (start year not given)', region: 'OCR' })]);
+    const ec = D.search(mk([]), { budget: 2000000, sale: 'new' }, { inv: i, cls: { q: 'ec' } }); assert.deepStrictEqual(ec.items.map((x) => x.cls), ['ec']); assert.deepStrictEqual(D.sections(ec.items).map((x) => x.cls), ['ec']);
+    assert.strictEqual(D.search(mk([]), { budget: 2000000, sale: 'new', type: 'condo' }, { inv: i, cls: { q: 'ec' } }).items.length, 0, 'not a condo');
+    assert.strictEqual(D.search(mk([]), { budget: 2000000, sale: 'new', type: 'ec' }, { inv: i, cls: { q: 'ec' } }).items.length, 1, 'found with EC chosen');
+    assert.deepStrictEqual(D.search(mk([]), { budget: 2000000, sale: 'new' }, { inv: i }).items.map((x) => x.cls), ['condo'], 'no index given: read as before');
+    const rix = F.prepare(JSON.parse(fs.readFileSync(path.join(root, 'data/projects/find.json'), 'utf8'))), pidx = JSON.parse(fs.readFileSync(path.join(root, 'data/projects/index.json'), 'utf8'));
+    const cls = {}; pidx.rows.forEach((r) => { cls[r[pidx.fields.indexOf('id')]] = r[pidx.fields.indexOf('cls')]; });
+    const rdoc = JSON.parse(fs.readFileSync(path.join(root, 'data/projects/inventory.json'), 'utf8')), ri = F.prepareInventory(rdoc, Date.parse(rdoc.checkedAt) + 12 * H);
+    const r = D.search(rix, { budget: 3000000, sale: 'new' }, { inv: ri, cls }), ng = r.items.find((x) => x.id === 'north-gaia');
+    if (ng) assert.strictEqual(ng.cls, 'ec', 'North Gaia is an EC'); r.items.forEach((x) => { if (cls[x.id]) assert.strictEqual(x.cls, cls[x.id], x.id); });
+    const ids = r.items.map((x) => x.id); assert.strictEqual(new Set(ids).size, ids.length, 'nothing listed twice'); assert.strictEqual(r.counts.projects, ids.length);
+  });
   t('real data: every new-launch item comes from the listings (no URA figure), every resale item from URA resales', () => {
     const rix = F.prepare(JSON.parse(fs.readFileSync(path.join(root, 'data/projects/find.json'), 'utf8')));
     const rdoc = JSON.parse(fs.readFileSync(path.join(root, 'data/projects/inventory.json'), 'utf8')), ri = F.prepareInventory(rdoc, Date.parse(rdoc.checkedAt) + 12 * H);
@@ -213,9 +226,9 @@ t('the page loads the shared modules, with no questionnaire and no "workable" sc
 t('property type defaults to Any and bedrooms are described as new-launch only', () => {
   assert.ok(/type: 'any'/.test(ui) || /type:'any'/.test(ui)); assert.ok(/new launch/i.test(ui) && /bedroom/i.test(ui));
 });
-t('the headline describes past sales, never current availability', () => {
+t('the headline says how many match, never current availability (Results layout, 28 Oct: "N developments match your search")', () => {
   const m = ui.match(/function headline\(res\) \{[\s\S]*?\n  \}/); assert.ok(m, 'headline found');
-  assert.ok(/recent sales/.test(m[0])); assert.ok(!/available|for sale|you can buy/i.test(m[0]));
+  assert.ok(/match your search/.test(m[0])); assert.ok(!/available|for sale|you can buy/i.test(m[0]));
 });
 t('budget, place text and requirements never reach analytics, links or storage outside this tab', () => {
   assert.ok(!/localStorage/.test(ui)); const ev = ui.match(/track\('find_shown'[^)]*\)/)[0]; assert.ok(/budget_band/.test(ev) && !/budget:/.test(ev) && !/place/.test(ev));

@@ -397,8 +397,10 @@ t('a size is applied only when the buyer typed a minimum: never worked out from 
 // (the V10 "tick two to compare" boxes were part of the old results page; Research opens each development and compares from there)
 t('the page-level Get Ken\'s view button and its message are unchanged', () => { assert.ok(/kv\.href = KPT\.waLink\(\{ message: R\.waMessage\(budget\) \}\)/.test(page)); assert.ok(/id="kenView"[^>]*>Get Ken's view →/.test(page)); });
 t('a place is applied only by an explicit choice, never from typed text alone', () => { assert.ok(/f === 'pick'\) \{ pickPlace\(/.test(ui)); assert.ok(/if \(opts\.length === 1\) opts\[0\]\.click\(\)/.test(ui)); });
-t('"Show N more" exists for the groups and is the only control that expands them', () => { assert.ok(/data-f="more" data-key="\$\{esc\(key\)\}">Show \$\{Math\.min\(left, 20\)\} more/.test(ui)); assert.ok(/f === 'more'\) \{ S\.shown\[t\.dataset\.key\]/.test(ui)); });
-t('the page makes no network request other than find.json, inventory.json, the launch microsites list, the existing budget data and (only once a place is typed) the Map\'s own data files', () => { const f = page.match(/fetch\([^)]*\)/g) || []; f.forEach((x) => assert.ok(/FIND_URL|INV_URL|SITES_URL|\bu\)|f\(u\)|u \+ '\?v=' \+ MAP_V/.test(x), x)); });
+t('"Show N more" exists for the groups and is the only control that expands them', () => { assert.ok(/data-f="more" data-key="\$\{esc\(key\)\}">Show \$\{Math\.min\(left, \d+\)\} more/.test(ui)); /* Results layout (28 Oct 2026): 20 rows, then 30 more at a time */ assert.ok(/f === 'more'\) \{ S\.shown\[t\.dataset\.key\]/.test(ui)); });
+t('the page makes no network request other than find.json, inventory.json, the launch microsites list, the existing budget data and (only once a place is typed) the Map\'s own data files', () => { const f = page.match(/fetch\([^)]*\)/g) || []; f.forEach((x) => assert.ok(/FIND_URL|INV_URL|SITES_URL|\bu\)|f\(u\)|u \+ '\?v=' \+ MAP_V/.test(x), x));
+  // Results layout (28 Oct 2026): plus the project index and the upcoming-launch list Research and the Map already publish (class and link destinations), and nothing else
+  (ui.match(/(?<![.\w])get\((?!u,)[^)]*\)/g) || []).forEach((x) => assert.ok(/CFG\.(FIND|INV|SITES|BEDS)_URL|data\/projects\/index\.json|data\/map\/upcoming\.json/.test(x), x)); });
 
 console.log('Data file');
 const schemaErrors = (doc) => {

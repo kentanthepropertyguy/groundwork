@@ -5,6 +5,7 @@ with the page clock set from the file's own date (so a refresh needs no edit her
   12 hours  : "updated today/yesterday, <date>", no "(as shown then)", no caveat
   5 days    : "updated <date>", prices "(as shown then)", no caveat
   16 days   : "updated <date> · may have changed since", "(as shown then)"
+  (Results layout, 28 Oct 2026: the line is said once per New launch group, ending in a full stop.)
   (Ken, 28 Oct 2026: the line reads "Developer listings · Checked <date>"; "Availability may have changed." under the prices is the standing disclaimer,
    so the 14-day caveat is checked as "may have changed since".)
   22 days   : the check is not used at all (no Huttons line)
@@ -37,11 +38,11 @@ try:
             pg.click('[data-f=seg][data-k=sale][data-v=new]'); pg.click('[data-f=show]'); pg.wait_for_selector('#kdH', timeout=25000)
             out = pg.evaluate("()=>[...document.querySelectorAll('.kd-inv')].map(p=>p.innerText.replace(/\\s+/g,' ').trim())"); ctx.close(); return out
         L = lines(12)
-        check('12 hours: lines say "updated today" or "yesterday" with the date; no "(as shown then)", no caveat', L and all(re.match(r'^Developer listings · Checked (today|yesterday), (Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d+ [A-Z][a-z]{2} ', x) for x in L) and not any('as shown then' in x or 'may have changed since' in x for x in L), L[:3])
+        check('12 hours: lines say "updated today" or "yesterday" with the date; no "(as shown then)", no caveat', L and all(re.match(r'^Developer listings · Checked (today|yesterday), (Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d+ [A-Z][a-z]{2}[ .]', x) for x in L) and not any('as shown then' in x or 'may have changed since' in x for x in L), L[:3])
         L = lines(5 * 24)
-        check('5 days: "updated <date>", prices "(as shown then)", no caveat', L and all(re.match(r'^Developer listings · Checked (Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d+ [A-Z][a-z]{2} ', x) for x in L) and any('(as shown then)' in x for x in L) and not any('may have changed since' in x for x in L), L[:3])
+        check('5 days: "updated <date>", prices "(as shown then)", no caveat', L and all(re.match(r'^Developer listings · Checked (Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d+ [A-Z][a-z]{2}[ .]', x) for x in L) and any('(as shown then)' in x for x in L) and not any('may have changed since' in x for x in L), L[:3])
         L = lines(16 * 24)
-        check('16 days (past the 14-day cadence): "· may have changed since" on every line, prices "(as shown then)"', L and all(' · may have changed since ' in x + ' ' for x in L) and any('(as shown then)' in x for x in L), L[:3])
+        check('16 days (past the 14-day cadence): "· may have changed since" on every line, prices "(as shown then)"', L and all(' · may have changed since' in x for x in L) and any('(as shown then)' in x for x in L), L[:3])
         check('no line ever names Huttons, says available, in stock, sold or gives a unit count', not any(re.search(r'huttons|available|in stock|\bsold\b|\d+ units?', x, re.I) for x in L), L[:3])
         L = lines(22 * 24)
         check('22 days: the check is no longer used (no Huttons line)', L == [], L[:3])
