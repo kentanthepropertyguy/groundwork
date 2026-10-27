@@ -39,12 +39,30 @@ try:
     br = p.chromium.launch(); pg = br.new_page(viewport={'width': 1280, 'height': 900}); errs = []
     pg.on('pageerror', lambda e: errs.append(str(e)))
     pg.route(re.compile(r'googletagmanager|facebook\.net|onemap'), lambda r: r.fulfill(status=200, body=''))
-    def load(raw, loans, hash_=''):
+    def load(raw, loans, hash_='', sale=None):
         pg.goto(B + '/tools/tdsr/?parity'); pg.wait_for_selector('[data-out]')
-        pg.evaluate("s=>{sessionStorage.clear();sessionStorage.setItem('gw.fin3.v1',JSON.stringify({v:3,raw:s.raw,loans:s.loans}))}", {'raw': raw, 'loans': loans})
-        pg.goto(B + '/tools/tdsr/?j=1' + hash_); pg.wait_for_selector('[data-out]');   # V3.7: the seeded figures are the journey's (gw.fin3.v1); a standalone page starts blank pg.wait_for_function("()=>window.__f3Settled&&window.__f3Settled()")
+        pg.evaluate("s=>{sessionStorage.clear();sessionStorage.setItem('gw.fin3.v1',JSON.stringify({v:3,raw:s.raw,loans:s.loans}));if(s.sale)sessionStorage.setItem('gw.fin3.hand.v1',JSON.stringify({v:1,to:'borrow',from:'sell',t:Date.now(),sale:s.sale}))}", {'raw': raw, 'loans': loans, 'sale': sale})
+        pg.goto(B + '/tools/tdsr/?j=1' + hash_); pg.wait_for_selector('[data-out]');
+        if sale: pg.wait_for_selector('[data-offer-add]', state='visible', timeout=15000); pg.click('[data-offer-add]'); pg.wait_for_function("()=>window.__f3Settled&&window.__f3Settled()")
+        # Ken's review (27 Oct): an old plan's owner with no home-loan row is asked whether they have a housing loan (never assumed None); the old page's
+        # assumption (none) is answered explicitly here, so the figures are compared like for like
+        if pg.locator('[data-hl-ask]').count():
+            for k in (0, 1):
+                g = pg.locator(f'[data-k="p.{k}.hl"]')
+                if g.count() and g.first.is_visible() and g.locator('[aria-pressed="true"]').count() == 0: g.locator('[data-v="0"]').first.click()
+            pg.wait_for_function("()=>window.__f3Settled&&window.__f3Settled()")   # V3.7: the seeded figures are the journey's (gw.fin3.v1); a standalone page starts blank pg.wait_for_function("()=>window.__f3Settled&&window.__f3Settled()")
     for s in SC['afford']:
-        o = BASE['afford'][s['id']]; load(s['raw'], s.get('loans', []), '#cash')
+        # V3.12 Stage 1 (Ken, 27 Oct 2026): the budget needs the properties each buyer owns (stamp duty), never assumed. The old page's unanswered default,
+        # a first home, is answered "None" here; a home kept converts by itself. The page no longer counts a sale on its own: the sell-first couple (A10)
+        # takes the sale's cash and CPF from What will I get from selling? by choosing to add them, and, having sold first, owns none. The baseline is unchanged.
+        raw = dict(s['raw']); sale = None
+        if raw.get('plan') == 'sell':
+            sale = {k: raw.pop(k) for k in list(raw) if k.startswith('sale.')}
+            for k in ('homes', 'whose', 'plan', 'order'): raw.pop(k, None)
+        if not raw.get('homes') or raw.get('homes') == '0':
+            raw['p.0.own'] = '0'
+            if raw.get('n') == '2': raw['p.1.own'] = '0'
+        o = BASE['afford'][s['id']]; load(raw, s.get('loans', []), '#cash', sale)
         n = pg.evaluate("""()=>{const g=k=>{const e=document.querySelector('[data-out] [data-'+k+']');return e?e.textContent:null};return {budget:g('budget'),cap:g('cap'),mon:g('mon'),cash:g('cashneed'),cpf:g('cpfuse'),fact:(document.querySelector('[data-out] .f3-fact')||{}).textContent||'',text:document.querySelector('[data-out]').textContent.slice(0,300)}}""")
         old = {'budget': o['budget_n'], 'cap': o['tiles_n'].get('Borrowing capacity'), 'mon': o['tiles_n'].get('Monthly mortgage'), 'cash': o['tiles_n'].get('Cash you’d need'), 'cpf': o['tiles_n'].get('CPF you’d use')}
         new = {k: money(n[k]) for k in ('budget', 'cap', 'mon', 'cash', 'cpf')}
@@ -57,7 +75,7 @@ try:
         o = BASE['msr'][s['id']]; raw, loans = msr_raw(s['old']); load(raw, loans)
         sh = pg.evaluate("()=>window.__f3Sheet&&window.__f3Sheet()")
         n = pg.evaluate("""()=>{const o=document.querySelector('[data-out]');const c=o.querySelector('[data-cap]');const e=o.querySelector('[data-elig]');return {cap:c?c.textContent:null,elig:e?e.dataset.elig:'',text:o.textContent}}""")
-        yrs = re.search(r'Over (\d+) years', n['text']); ltv = re.search(r'supports at ([\d.]+)%', n['text'])
+        yrs = re.search(r'Over (\d+) years', n['text']); ltv = re.search(r'covers only ([\d.]+)% of the price', n['text'])
         pv = [f['value'] for f in (sh or {}).get('figures', []) if f.get('key') == 'price']; pr = re.search(r'S\$([\d,.]+)(M?)', pv[0]) if pv else None
         price_new = None
         if pr: price_new = int(round(float(pr.group(1).replace(',', '')) * 1e6)) if pr.group(2) else money(pr.group(1))

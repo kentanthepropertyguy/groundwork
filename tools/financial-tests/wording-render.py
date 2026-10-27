@@ -43,7 +43,7 @@ try:
         check(vn + ': HDB loan limit: Family at $9,000: the loan leads, no eligibility line', elig() == '' and 'HDB may lend about' in out())
         hh('Single, 35'); so = out()
         check(vn + ': HDB loan limit: Single, $9,000 against the $8,000 ceiling: eligibility leads, not the loan', elig() == 'ceiling' and '$8,000' in so and 'singles' in so, so[:300])
-        check(vn + ': HDB loan limit: the loan is kept, labelled as if eligible, with the price it supports', 'HDB could lend, if eligible' in so and '$569,000' in so and 'Home price this loan supports' in so, so[:400])
+        check(vn + ': HDB loan limit: the loan is kept, labelled as if eligible, with the price it supports', 'HDB could lend, if eligible' in so and '$569,000' in so and 'Home price this loan could support' in so, so[:400])
         age('32'); ao = out()
         check(vn + ': HDB loan limit: Single at 32 leads with the age requirement', elig() == 'age' and 'Singles must be 35 or older' in ao, ao[:300])
         check(vn + ': HDB loan limit: it names the age entered and refers to HFE', 'age entered is 32' in ao and 'HFE' in ao, ao[:420])

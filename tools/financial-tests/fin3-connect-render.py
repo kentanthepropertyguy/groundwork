@@ -51,8 +51,9 @@ def sale_cash(pg): return num(pg.inner_text('[data-cash]'))
 def arrive(pg):
     pg.click('[data-to-borrow]'); pg.wait_for_selector('[data-f3="borrow"]'); pg.wait_for_function("()=>!!window.__f3OpenChip&&window.__f3Settled&&window.__f3Settled()")   # the page's script has run
 DW = "()=>{const d=document.querySelector('[data-dutywho]');if(d)d.open=true}"
-def counted(pg):
-    m = re.search(r'Counts your home’s sale: about \$([\d,]+) cash and \$([\d,]+) back to CPF', out(pg)); return (int(m.group(1).replace(',', '')), int(m.group(2).replace(',', ''))) if m else None
+def offered(pg):   # V3.12: the sale waits as an offer on the borrowing page, never counted on its own
+    t = pg.inner_text('[data-saleoffer]') if pg.locator('[data-saleoffer]').count() else ''
+    m = re.search(r'About \$([\d,]+) in cash and \$([\d,]+) back to CPF', t); return (int(m.group(1).replace(',', '')), int(m.group(2).replace(',', ''))) if m else None
 try:
     with sync_playwright() as p:
         br = p.chromium.launch()
@@ -62,23 +63,22 @@ try:
             check(vn + ': the selling page offers “What can this buy me next?”', pg.is_visible('[data-to-borrow]'))
             arrive(pg)
             check(vn + ': the arrival address carries no figures (hash cleared)', until(pg, "()=>!location.hash") and not re.search(r'\d{3}', pg.url.split('/tools/tdsr/')[-1]), pg.url)
-            check(vn + ': a home owned, selling it first, are set, and the cash and CPF row is open', segv(pg, 'homes') == '1' and segv(pg, 'plan') == 'sell' and pg.evaluate("document.querySelector('[data-cashrow]').open"))
-            check(vn + ': the sale price, loan and CPF refund (with interest) arrive filled', val(pg, 'sale.price') == '800,000' and val(pg, 'sale.loan') == '200,000' and val(pg, 'sale.cpfRefund') == '170,000', [val(pg, 'sale.price'), val(pg, 'sale.loan'), val(pg, 'sale.cpfRefund')])
+            # V3.12 Stage 1 (Ken, 27 Oct 2026): no home or sale is set on the borrowing page; the sale's cash and CPF wait as an offer, added only on request
+            check(vn + ': the cash and CPF row is open with the sale offered, and no home, sale or sale figure is set or counted', pg.evaluate("document.querySelector('[data-cashrow]').open") and pg.is_visible('[data-offer-add]') and pg.locator('[data-k="sale.price"]').count() == 0 and pg.locator('[data-k="plan"]').count() == 0 and val(pg, 'cash') == '')
+            check(vn + ': the offer is the selling page’s own cash and the $170,000 refund (tie-out)', offered(pg) == (cash0, 170000), [offered(pg), cash0])
             check(vn + ': age, income, cash and CPF are not invented', val(pg, 'p.0.fixed') == '' and val(pg, 'cash') == '')
-            typ(pg, 'p.0.age', '40'); typ(pg, 'p.0.fixed', '21,000'); typ(pg, 'cash', '100,000'); typ(pg, 'cpf', '200,000')
-            check(vn + ': the sale is counted with the same cash as the selling page and the $170,000 refund (tie-out)', until(pg, "()=>/Counts your home’s sale/.test(document.querySelector('[data-out]').textContent)") and counted(pg) == (cash0, 170000), [counted(pg), cash0])
-            seg(pg, 'plan', 'keep')
-            check(vn + ': “Keeping it” takes the sale out (not left counted)', until(pg, "()=>!/Counts your home’s sale/.test(document.querySelector('[data-out]').textContent)"))
-            seg(pg, 'plan', 'sell')
-            check(vn + ': selling first again brings back the same figures', until(pg, "()=>/Counts your home’s sale/.test(document.querySelector('[data-out]').textContent)") and counted(pg) == (cash0, 170000))
+            typ(pg, 'p.0.age', '40'); typ(pg, 'p.0.fixed', '21,000'); typ(pg, 'cash', '100,000'); typ(pg, 'cpf', '200,000'); seg(pg, 'p.0.own', '0'); until(pg, budget_ready); until(pg, settled)
+            b_before = num(pg.inner_text('[data-max]'))
+            pg.click('[data-offer-add]'); until(pg, settled)
+            fv = lambda k: int(re.sub(r'\D', '', val(pg, k)) or 0)
+            check(vn + ': added on request: the cash and CPF include exactly the offered figures, once', fv('cash') == 100000 + cash0 and fv('cpf') == 370000 and not pg.is_visible('[data-saleoffer]'), [val(pg, 'cash'), val(pg, 'cpf')])
+            check(vn + ': and the budget rises with them', until(pg, "(b)=>{const m=document.querySelector('[data-max]');return m&&parseInt(m.textContent.replace(/\\D/g,''))>b}", b_before))
             check(vn + ': no script errors (sale)', not errs, errs); ctx.close()
-            # ---- 1b. a private home sold within its SSD period: the selling page's SSD-inclusive figures travel as its own ----
+            # ---- 1b. a private home sold within its SSD period: the selling page's SSD-inclusive figures are what is offered ----
             ctx, pg, errs = page(br, kw); sale_page(pg, kind='private', price='1,500,000', loan='600,000', cpf='220,000', dates=('2024-06-01', '2026-10-20')); cash1 = sale_cash(pg)
             check(vn + ': SSD sale: the selling page shows SSD as a line', pg.query_selector('[data-ssd]') is not None)
-            arrive(pg); typ(pg, 'p.0.age', '40'); typ(pg, 'p.0.fixed', '21,000'); typ(pg, 'cash', '100,000'); typ(pg, 'cpf', '200,000')
-            check(vn + ': SSD sale: the cash counted is the selling page’s own (SSD included)', until(pg, "()=>/Counts your home’s sale/.test(document.querySelector('[data-out]').textContent)") and until(pg, settled) and counted(pg) is not None and counted(pg)[0] == cash1, [counted(pg), cash1])
-            typ(pg, 'sale.price', '1,600,000')
-            check(vn + ': editing the sale price retires the selling page’s figures (it is worked out here, and SSD needs the held answer)', until(pg, "()=>!/Counts your home’s sale/.test(document.querySelector('[data-out]').textContent)") and pg.is_visible('[data-k="sale.held"]'))
+            arrive(pg)
+            check(vn + ': SSD sale: the cash offered is the selling page’s own (SSD included)', offered(pg) is not None and offered(pg)[0] == cash1, [offered(pg), cash1])
             check(vn + ': no script errors (SSD sale)', not errs, errs); ctx.close()
             # ---- 2. the HDB upgrade address is Upgrade from HDB again (V3.4) ----
             ctx, pg, errs = page(br, kw); pg.goto(B + '/tools/hdb-upgrade/'); pg.wait_for_selector('[data-f3="upgrade"]')
@@ -87,7 +87,7 @@ try:
             check(vn + ': no script errors (upgrade address)', not errs, errs); ctx.close()
             # ---- 3. the budget -> Budget Search, only when Explore is pressed ----
             ctx, pg, errs = page(br, kw); pg.goto(B + '/tools/planner/'); pg.wait_for_selector('[data-f3="borrow"]')
-            typ(pg, 'p.0.age', '35'); typ(pg, 'p.0.fixed', '12,000'); typ(pg, 'cash', '300,000'); typ(pg, 'cpf', '200,000'); until(pg, budget_ready); until(pg, settled)
+            typ(pg, 'p.0.age', '35'); typ(pg, 'p.0.fixed', '12,000'); typ(pg, 'cash', '300,000'); typ(pg, 'cpf', '200,000'); seg(pg, 'p.0.own', '0'); until(pg, budget_ready); until(pg, settled)
             b0 = num(pg.inner_text('[data-max]'))
             check(vn + ': nothing is handed to Budget Search while the figures are worked out', ss(pg, 'kpt.handoff') is None)
             check(vn + ': no budget in the Explore link', '?' not in (pg.get_attribute('[data-to-homes]', 'href') or ''))
@@ -108,7 +108,7 @@ try:
             # ---- 5. C1 rules on the page ----
             ctx, pg, errs = page(br, kw); pg.goto(B + '/tools/planner/'); pg.wait_for_selector('[data-f3="borrow"]'); pg.evaluate(DW)
             seg(pg, 'n', '2'); typ(pg, 'p.0.age', '35'); typ(pg, 'p.0.fixed', '9,000'); typ(pg, 'p.1.age', '33'); typ(pg, 'p.1.fixed', '7,000'); typ(pg, 'cash', '300,000'); typ(pg, 'cpf', '250,000')
-            pg.locator('[data-k="p.1.res"]').select_option('PR')
+            pg.locator('[data-k="p.1.res"]').select_option('PR'); seg(pg, 'p.0.own', '0'); seg(pg, 'p.1.own', '0')   # V3.12: the properties owned are answered, never assumed
             check(vn + ': a Citizen and a PR buying: the married question appears', until(pg, "()=>{const g=document.querySelector('[data-k=\"couple\"]');return g&&g.offsetParent}"))
             seg(pg, 'couple', 'no'); until(pg, budget_ready); pg.wait_for_function("()=>/ABSD/.test(document.querySelector('[data-out]').textContent)"); notm = num(pg.inner_text('[data-max]'))
             seg(pg, 'couple', 'yes')
@@ -117,7 +117,7 @@ try:
             check(vn + ': two Citizens: no married question', not pg.is_visible('[data-k="couple"]'))
             pg.locator('[data-k="p.1.res"]').select_option('FTA')
             check(vn + ': an FTA national pays as a Citizen: the same budget', until(pg, "(b)=>{const m=document.querySelector('[data-max]');return m&&parseInt(m.textContent.replace(/\\D/g,''))===b}", sc))
-            pg.locator('[data-k="p.1.res"]').select_option('SC'); seg(pg, 'homes', '1'); seg(pg, 'whose', '1')
+            pg.locator('[data-k="p.1.res"]').select_option('SC'); seg(pg, 'p.1.own', '1')
             check(vn + ': the second buyer owns a home: CPF balances are asked before any budget (the full OA is not assumed)', until(pg, "()=>!document.querySelector('[data-cpf2]').hidden&&/CPF balances/.test(document.querySelector('[data-out]').textContent)"))
             seg(pg, 'cover95', 'yes'); typ(pg, 'cpfBal.0.oa', '150,000'); typ(pg, 'cpfBal.0.sa', '90,000'); typ(pg, 'cpfBal.1.oa', '120,000'); typ(pg, 'cpfBal.1.sa', '80,000')
             check(vn + ': with the balances: the co-buyer’s home brings ABSD into the budget', until(pg, "()=>/\\(ABSD \\$/.test(document.querySelector('[data-out]').textContent)"), out(pg)[:400])

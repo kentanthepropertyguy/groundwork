@@ -81,7 +81,10 @@ try:
         # the hand-off to the borrowing page: the sale is counted in "Add my cash and CPF"
         pg.click('[data-to-borrow]'); pg.wait_for_selector('[data-f3="borrow"]'); pg.fill('[data-k="p.0.fixed"]', '8,000'); settle(pg)
         t = out(pg)
-        check(f'{tag} sell → borrow: the row is open and the sale is counted in a budget', pg.evaluate("document.querySelector('[data-cashrow]').open") and pg.query_selector('[data-budget]') is not None and 'Counts your home’s sale' in t, t[:300])
+        # V3.12 Stage 1 (Ken, 27 Oct 2026): the sale is offered, never counted on its own; added on request, and the budget waits for the properties owned
+        check(f'{tag} sell → borrow: the row is open and the sale waits as an offer, not counted', pg.evaluate("document.querySelector('[data-cashrow]').open") and pg.is_visible('[data-offer-add]') and 'not in your figures' in pg.inner_text('[data-saleoffer]') and pg.input_value('[data-k="cash"]') == '' and pg.query_selector('[data-budget]') is None, [t[:200], pg.inner_text('[data-saleoffer]')[:200]])
+        pg.click('[data-offer-add]'); pg.click('[data-k="p.0.own"] [data-v="0"]'); settle(pg)
+        check(f'{tag} sell → borrow: added on request, the cash and CPF include it, and with the properties owned answered the budget follows', pg.input_value('[data-k="cash"]') != '' and pg.query_selector('[data-budget]') is not None and not pg.is_visible('[data-saleoffer]'), out(pg)[:200])
         # the Value Explorer's resales for the block pre-fill the selling price
         pg.goto(B + '/tools/stamp-duty/'); pg.evaluate("sessionStorage.clear();sessionStorage.setItem('gw.ctx.v1',JSON.stringify({v:1,type:'hdb',hdb:{town:'TAMPINES',block:'123',street:'TAMPINES ST 11',flatType:'4 ROOM',n:9,lo:720000,hi:780000}}))")
         pg.goto(B + '/tools/sale-proceeds/?j=1'); pg.wait_for_selector('[data-out]'); settle(pg)
@@ -115,6 +118,8 @@ try:
         why = pg.evaluate("document.querySelector('[data-why-out]').textContent")
         check(f'{tag} borrow: bonus typed as a year is counted a month (24,000 / 12 = 2,000 at 70%)', '$10,000 a month' in why and '$9,400' in why, why[:200])
         pg.click('[data-cashrow] > summary'); pg.fill('[data-k="cash"]', '200,000'); pg.fill('[data-k="cpf"]', '150,000'); settle(pg)
+        check(f'{tag} borrow (V3.12): with cash and CPF but the properties owned not answered, no budget is assumed and the page asks', pg.query_selector('[data-budget]') is None and pg.is_visible('[data-own-need]') and pg.evaluate("document.querySelector('[data-dutywho]').open"))
+        pg.click('[data-k="p.0.own"] [data-v="0"]'); settle(pg)
         check(f'{tag} borrow: "Add my cash and CPF" turns the loan into a budget and says what limits it', pg.query_selector('[data-budget]') is not None and re.search(r'(cash and CPF are the limit|The loan is the limit)', pg.inner_text('[data-out] .f3-fact')) is not None)
         common(pg, tag, 'borrow with cash')
         pg.evaluate("window.__f3OpenChip('bkind')"); pg.click('[data-optl="bkind"] .f3-opt:nth-child(2)'); settle(pg)

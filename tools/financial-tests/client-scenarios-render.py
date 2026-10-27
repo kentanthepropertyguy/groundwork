@@ -72,7 +72,7 @@ try:
         eng = pg.evaluate("()=>{const c=GW_FIN3.cost({n:1,p:[{res:'SC'},{}],loans:[],pkind:'new',price:1500000,homes:0,ratePct:null,years:null,cpf:null,loanAmt:null});return {cash:c.cash,duty:c.duty,absd:c.absd,monthly:c.monthly}}")
         check(f'{tag} first purchase: cost page cash equals the engine, stamp duty named, no ABSD', money(cashv(pg)) == round(eng['cash']) and 'stamp duty' in t and 'ABSD' not in t and eng['absd'] == 0, [t[:200], eng])
         clean(tag, 'first purchase cost', t)
-        fresh(pg, '/tools/tdsr/'); fill(pg, 'p.0.fixed', '8,000'); settle(pg); pg.click('[data-cashrow] > summary'); fill(pg, 'cash', '150,000'); fill(pg, 'cpf', '100,000'); settle(pg); t = out(pg)
+        fresh(pg, '/tools/tdsr/'); fill(pg, 'p.0.fixed', '8,000'); settle(pg); pg.click('[data-cashrow] > summary'); fill(pg, 'cash', '150,000'); fill(pg, 'cpf', '100,000'); seg(pg, 'p.0.own', '0'); settle(pg); t = out(pg)   # V3.12: properties owned answered (None), never assumed
         eng = pg.evaluate("()=>{const a=GW_FIN3.afford({n:1,p:[{age:35,fixed:8000,res:'SC'},{}],loans:[],cash:150000,cpf:100000,homes:0,plan:'keep',akind:'new',bkind:'private',sale:{},cpfBal:[{},{}],ratePct:null,years:null});return {b:a.budget,lim:a.limitedBy}}")
         check(f'{tag} first purchase: Borrow budget equals the engine (age 35 assumed and said)', money(pg.inner_text('[data-budget]')) == int(eng['b'] // 1000 * 1000) and 'age 35 assumed' in t, [t[:250], eng])
         check(f'{tag} first purchase: the budget says stamp duty is included and which limit binds', 'stamp duty included' in t and ('cash and CPF are the limit' in t or 'loan is the limit' in t))
@@ -82,10 +82,10 @@ try:
         opt(pg, 'who', 'Second home'); close(pg); settle(pg); t = out(pg); c2 = money(cashv(pg))
         check(f'{tag} second purchase: ABSD 20% is named and added to the cash ($300,000 on $1.5M)', 'ABSD' in t and c2 - c1 == 300000, [c1, c2, t[:200]])
         fresh(pg, '/tools/tdsr/'); fill(pg, 'p.0.fixed', '15,000'); fill(pg, 'p.0.age', '45'); settle(pg); pg.click('[data-cashrow] > summary'); fill(pg, 'cash', '700,000'); fill(pg, 'cpf', '0')
-        pg.click('[data-dutywho] > summary'); seg(pg, 'homes', '1'); seg(pg, 'plan', 'keep'); settle(pg); t = out(pg)
+        seg(pg, 'p.0.own', '1'); settle(pg); t = out(pg)   # V3.12: owns one property (kept)
         check(f'{tag} second purchase: the Borrow budget includes the ABSD and says so', '(ABSD $' in t, t[:300])
         # ---- 3. joint borrowers, different incomes ----
-        fresh(pg, '/tools/tdsr/'); fill(pg, 'p.0.fixed', '12,000'); fill(pg, 'p.0.age', '40'); opt(pg, 'n', 'Two of us'); fill(pg, 'p.1.fixed', '4,000', keep=True); fill(pg, 'p.1.age', '30'); close(pg); settle(pg); t = out(pg)
+        fresh(pg, '/tools/tdsr/'); fill(pg, 'p.0.fixed', '12,000'); fill(pg, 'p.0.age', '40'); seg(pg, 'n', '2'); fill(pg, 'p.1.fixed', '4,000'); fill(pg, 'p.1.age', '30'); close(pg); settle(pg); t = out(pg)
         eng = pg.evaluate("()=>{const r=GW_CALC.tdsr({kind:'private',borrowers:[{age:40,fixed:12000,variable:0},{age:30,fixed:4000,variable:0}],debts:0,loans:0});return {l:r.maxLoan,y:r.tenure.years,age:r.B.iwaaUse}}")
         check(f'{tag} joint borrowers: the loan and tenure equal GW_CALC.tdsr for both, at the income-weighted age', money(pg.inner_text('[data-cap]')) == int(eng['l'] // 1000 * 1000) and f"Over {eng['y']} years" in t and 'between you' in t.lower(), [t[:200], eng])
         # ---- 4. HDB upgrade, sell first and buy first ----

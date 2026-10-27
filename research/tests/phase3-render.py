@@ -61,7 +61,13 @@ try:
         # postal code
         pg.fill('#q', '570155'); pg.wait_for_selector('.sugg button', timeout=6000); shot(pg, f'map-postal-suggest-{vn}')
         check(vn + ': a postal code is offered as an address', '155 Bishan Street 13' in pg.inner_text('.sugg'), pg.inner_text('.sugg'))
-        pg.keyboard.press('ArrowDown'); pg.keyboard.press('Enter'); pg.wait_for_selector('.rad', timeout=6000); pg.wait_for_timeout(900); t = card(pg); shot(pg, f'map-postal-{vn}')
+        pg.keyboard.press('ArrowDown'); pg.keyboard.press('Enter'); pg.wait_for_selector('.dp h2, .bs h2', timeout=6000)
+        # V3.11 (Ken, 27 Oct 2026): a postal code that is an HDB block shows the block's prices first; on a phone its sheet keeps the nearby developments
+        # (and their radius) behind "Developments nearby", as an HDB block's sheet does, so the check opens it there
+        if pg.locator('.bs [data-dpmore].btn').count() and 'Developments nearby' in pg.inner_text('.bs [data-dpmore].btn'):
+            check(vn + ': the HDB block\'s prices come first; nearby developments are one tap away', pg.locator('.bs [data-hdb-panel]').count() == 1 and pg.locator('.bs .rad').count() == 0)
+            pg.click('.bs [data-dpmore].btn')
+        pg.wait_for_selector('.rad', timeout=6000); pg.wait_for_timeout(900); t = card(pg); shot(pg, f'map-postal-{vn}')
         check(vn + ': postal card names the address and the default 1 km', '155 Bishan Street 13' in t and '1 km' in t, t)
         check(vn + ': four radius choices, 1 km selected', pg.evaluate("[...document.querySelectorAll('.rad button')].map(b=>b.dataset.pr+(b.getAttribute('aria-checked')==='true'?'*':'')).join(',')") == '500,1000*,2000,3000')
         check(vn + ': a circle is drawn on the Map', circles(pg) >= 1)
