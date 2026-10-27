@@ -42,7 +42,30 @@
     const L = (st.loans || []).filter((l) => l && has(l.amt) && l.amt > 0 && who.indexOf(st.n === 2 ? (+l.who || 0) : 0) >= 0);
     const home = L.filter((l) => l.type === 'home'), other = L.filter((l) => l.type !== 'home');
     const add = (a) => a.reduce((s, l) => s + l.amt, 0);
-    return { list: L, home: home.length, homeAmt: add(home), otherAmt: add(other), total: add(L) };
+    // home: the housing loans the loan limit counts (loanCount, below); alt: the count read per borrower; rows: the repayments listed (each counted once in TDSR)
+    return { list: L, home: loanCount(st, home), alt: perBorrower(st, home), rows: home.length, homeAmt: add(home), otherAmt: add(other), total: add(L) };
+  }
+  // V3.12 Stage 2 (Ken, 28 Oct 2026; Claude E's verification of MAS Notice 632 para 30(ac)): how two borrowers' separate housing loans are counted for the loan limit.
+  //   'conservative' (the default until banks confirm in writing): every housing loan of the borrowers counts once (a loan in both names once), so a separate loan
+  //     each is two: 35% / 25% cash (lower tier 15%). This is how Stage 1 counted.
+  //   'per_borrower': each borrower's own loans (a loan in both names counts for each of its borrowers), the borrower with the most sets the tier: one each is
+  //     45% / 25% (lower tier 25%). Shown beside the conservative figure as "45% may apply", subject to the bank, never as the result.
+  // Internal: not a customer control. A second person who buys but does not borrow (nb) brings no loans; one whose income is used is a borrower, and theirs count.
+  const CFG = { LTV_JOINT_SEPARATE_LOANS: 'conservative' };
+  function loanCount(st, rows) { return (st._ltvMode || CFG.LTV_JOINT_SEPARATE_LOANS) === 'per_borrower' ? perBorrower(st, rows) : rows.length; }
+  // each borrower's own loans (a loan in both names, joint: true, counts for each of its borrowers); the borrower with the most. Rows with no joint flag are their owner's own.
+  function perBorrower(st, rows) {
+    if (!rows.length) return 0;
+    const ks = borrowersOf(st).map((x) => x.k), whoOf = (l) => (st.n === 2 ? (+l.who || 0) : 0);
+    return Math.max.apply(null, ks.map((k) => rows.filter((l) => l.joint === true || whoOf(l) === k).length));
+  }
+  // the home's own loan (the home kept, or the one being sold) and the loans on other homes. V3.12 Stage 2: rows from the existing-homes list say which home they belong
+  // to (prim: the home sold, or the first home), so a sold home with no loan takes no other home's loan as its own; older rows (no prim flag) are read as before, the first is the home's.
+  function homeRows(L) {
+    const rows = L.list.filter((l) => l.type === 'home');
+    if (!rows.some((l) => typeof l.prim === 'boolean')) return { flat: rows[0] || null, other: rows.slice(1) };
+    const f = rows.filter((l) => l.prim === true)[0] || null;
+    return { flat: f, other: rows.filter((l) => l !== f) };
   }
   // what is still missing before a figure can be worked out: an age and an income (0 is an answer) for every borrower
   function needOf(st) {
@@ -90,7 +113,7 @@
     const binding = kind === 'hdb-loan' ? 'msr' : (r.binding === 'msr' ? 'msr' : 'tdsr');
     return { state: 'ok', kind: kind, maxLoan: maxLoan, years: years, ratePct: ratePct, testRatePct: r.rate * 100, monthly: monthly, binding: binding, share: binding === 'msr' ? R.msr : R.tdsr,
       income: r.B.gross, counted: r.B.assessable, joint: r.B.list.length > 1, age: r.B.list.length > 1 ? (kind === 'hdb-loan' ? r.B.avgAge : r.B.iwaaUse) : r.B.list[0] ? r.B.list[0].age : null,
-      ageUnverified: !!r.B.ageUnverified && kind !== 'hdb-loan', debts: L.total, homeLoans: L.home, debtsCut: r0 && r0.ok && !r0.noTenure ? Math.max(0, r0.maxLoan - maxLoan) : 0, ageCut: ageCut,
+      ageUnverified: !!r.B.ageUnverified && kind !== 'hdb-loan', debts: L.total, homeLoans: L.home, homeRows: L.rows, altLtv: L.alt < L.home && !st._ltvMode ? (function () { const ra = borrowRun(Object.assign({}, st, { _ltvMode: 'per_borrower' })); return ra.ok && ra.ltv > r.ltv + 1e-9 ? ra.ltv : null; })() : null, debtsCut: r0 && r0.ok && !r0.noTenure ? Math.max(0, r0.maxLoan - maxLoan) : 0, ageCut: ageCut,
       ltv: r.ltv, minCash: r.minCash, longer: r.longer || null, notes: (r.notes || []).filter((x) => ['commitments', 'lease-unknown', 'ec-ceiling', 'ceiling', 'single-age'].indexOf(x.id) < 0),
       // HDB loan eligibility, as the HDB and EC loan limit page reported it: 'age' (singles under 35) leads, then 'ceiling' (household income above HDB's ceiling); the loan is then theoretical
       household: r.household || null, ceiling: r.ceiling || null, lease: r.tenure && r.tenure.lease ? r.tenure.lease : null, youngest: r.B.youngest,
@@ -117,7 +140,7 @@
   // the entries as GW_ANSWER.assess reads them. Ownership, housing loans and the sale are separate answers there; here they come from the few questions asked:
   // the homes owned (and whose), the home-loan repayments in the list (the first is the home's own loan, any others are loans on other homes), and the sale when added.
   function toAssess(st) {
-    const own = ownedOf(st), L = loansOf(st), homeLoans = L.list.filter((l) => l.type === 'home');
+    const own = ownedOf(st), L = loansOf(st), HL = homeRows(L), homeLoans = HL.flat ? [HL.flat].concat(HL.other) : HL.other;
     const sell = st.homes >= 1 && st.plan === 'sell';
     const s = { kind: st.akind === 'completed' ? 'completed' : st.akind === 'hdb' ? 'hdb' : 'new',
       buyers: people(st).map((x) => { const b = { res: resOf(x), fta: ftaOf(x), owned: own[x.k] }; if (!(x.k === 1 && x.nb)) { b.age = x.age; b.fixed = x.fixed; b.variable = x.variable; } return b; }),
@@ -128,13 +151,21 @@
       s.homeJoint = st.n === 2 ? (st.homeJoint === true || st.homeJoint === false ? st.homeJoint : st.whose === 'both') : undefined;
       // the home's own loan: the first home-loan repayment listed (none listed = no loan on it); the others are loans on other homes the buyers own
       const sl = st.sale || {};
-      s.flat = { hasLoan: homeLoans.length ? 'yes' : 'no', instalment: homeLoans.length ? homeLoans[0].amt : 0, type: sl.type === 'private' ? 'private' : 'hdb', price: sl.price, loan: sl.loan, cpfRefund: sl.cpfRefund, heldOver4: sl.type === 'private' && sl.held === true ? true : undefined };
+      s.flat = { hasLoan: HL.flat ? 'yes' : 'no', instalment: HL.flat ? HL.flat.amt : 0, type: sl.type === 'private' ? 'private' : 'hdb', price: sl.price, loan: sl.loan, cpfRefund: sl.cpfRefund, heldOver4: sl.type === 'private' && sl.held === true ? true : undefined };
       // Sale proceeds' own cash and CPF (own commission, legal fees, SSD) when it handed them over; otherwise the same engine works the sale out here
       if (has(sl.oCash)) { s.flat.overrideCash = sl.oCash; s.flat.overrideCpf = has(sl.oCpf) ? sl.oCpf : 0; s.flat.cpfRefund55 = 0; }   // V3.5: oCpf is already the usable CPF (55+ rule applied in sell())
-      const extra = homeLoans.slice(1);
+      const extra = HL.other, extraAmt = extra.reduce((a, l) => a + l.amt, 0);
       const apart = st.n === 2 && st.homeJoint === false && own.filter((c) => c >= 1).length >= 2;   // V3.12: two homes owned separately (one each): two homes, as when one person owns two
-      if (own.some((c) => c >= 2) || (st.n === 2 && st.whose === 'both' && st.homes >= 2) || apart) { s.otherLoans = Math.min(2, extra.length); s.otherInstal = extra.reduce((a, l) => a + l.amt, 0); }
-      else if (extra.length) s.debts += extra.reduce((a, l) => a + l.amt, 0);   // a second home loan with no second home: still a monthly repayment
+      if (own.some((c) => c >= 2) || (st.n === 2 && st.whose === 'both' && st.homes >= 2) || apart) {
+        // V3.12 Stage 2: the loans the limit counts are loanCount's. GW_ANSWER counts the home's own loan (kept) plus otherLoans, so otherLoans is
+        // the per-borrower count less the home's own loan when the home is kept, or without it when it is sold first (the basis the answer takes when the sale is counted).
+        // Repayments are unchanged: any not carried by otherLoans are added to the monthly debts, so TDSR still counts each one once.
+        const soldBasis = sell && C.saleEstimate(s.flat, { owner55: false }).counted;
+        const target = soldBasis ? loanCount(st, extra) : Math.max(0, loanCount(st, homeLoans) - (HL.flat ? 1 : 0));
+        s.otherLoans = Math.min(2, target);
+        if (s.otherLoans > 0) s.otherInstal = extraAmt; else if (extra.length) s.debts += extraAmt;
+      }
+      else if (extra.length) s.debts += extraAmt;   // a second home loan with no second home: still a monthly repayment
       if (sell) s.order = 'sell';
     } else if (homeLoans.length) s.debts += L.homeAmt;   // a home loan with no home owned (e.g. a guarantor's share): counted as a repayment
     return s;
@@ -170,7 +201,8 @@
     const owned = (n === 2 ? [0, 1] : [0]).map((k) => L.filter((h) => ownersOf(h).indexOf(k) >= 0).length);
     const si = L.findIndex((h) => h.act === 'sell'), pi = si >= 0 ? si : 0, prim = L[pi] || null;
     const order = L.map((h, i) => i).sort((a, b) => (a === pi ? -1 : b === pi ? 1 : a - b));
-    const rows = order.map((i) => L[i]).filter((h) => h.mort === 'yes').map((h) => ({ type: 'home', who: ownersOf(h)[0], amt: has(h.amt) ? h.amt : null }));
+    // V3.12 Stage 2: each row says whose loan it is (joint: a home owned by both, its loan in both names) and whether it is the home kept or sold (prim)
+    const rows = order.filter((i) => L[i].mort === 'yes').map((i) => ({ type: 'home', who: ownersOf(L[i])[0], joint: ownersOf(L[i]).length === 2, prim: i === pi, amt: has(L[i].amt) ? L[i].amt : null }));
     const homes = Math.min(2, Math.max.apply(null, [0].concat(owned)));
     const whose = n !== 2 ? 'both' : owned[0] === 0 ? '1' : owned[1] === 0 ? '0' : 'both';
     return { owned: owned, homes: homes, whose: whose, homeJoint: n === 2 && prim ? ownersOf(prim).length === 2 : undefined, soldOwners: si >= 0 ? ownersOf(L[si]) : null,
@@ -215,18 +247,30 @@
       dates: { mode: 'grouped', top: st.top || undefined, csc: st.csc || undefined, completion: st.completion || undefined },
       valuation: (st.pkind === 'completed' || st.pkind === 'resaleec') && has(st.valuation) ? st.valuation : undefined, refund: { assume: false }, rent: { monthly: 0 } };
     // the home being sold (or kept): its loan counts for the loan limit while it is owned; its instalment is paid until it sells
-    const homeLoans = L.list.filter((l) => l.type === 'home');
+    // V3.12 Stage 2: the loan limit counts the housing loans as loanCount does; the home being sold is the listed home's own row (homeRows), never another home's.
+    // Buying first the sold home's loan is still outstanding: GW_TIMELINE counts it (flatLoan) plus loansOther, so loansOther is the per-borrower count less that one.
+    // Selling first it is gone: loansOther is the per-borrower count of the other homes' loans. Keeping: every loan.
+    const HL = homeRows(L), allRows = HL.flat ? [HL.flat].concat(HL.other) : HL.other;
     if (order === 'buy') {
-      i.flatLoan = homeLoans.length ? 'outstanding' : 'none'; i.flatInstal = homeLoans.length ? homeLoans[0].amt : 0;
-      i.loansOther = Math.min(2, Math.max(0, homeLoans.length - 1));
+      i.flatLoan = HL.flat ? 'outstanding' : 'none'; i.flatInstal = HL.flat ? HL.flat.amt : 0;
+      i.loansOther = Math.min(2, Math.max(0, loanCount(st, allRows) - (HL.flat ? 1 : 0)));
+      if (HL.flat) i.mayRise = true;   // the sold home's loan counts until the bank has the sale evidence (Notice 632 para 8(a)(ii)): it may then lend more; never assumed
       if (sw === 'unsure') i.sale.undecided = true;
       else if (sw === 'afterKeys') i.sale.afterKeys = has(st.saleAfter) ? st.saleAfter : 3;
       else if (st.saleDate) i.sale.date = st.saleDate; else i.sale.month = has(st.saleMonth) && st.saleMonth > 0 ? st.saleMonth : 5;
       if (sw !== 'unsure' && st.refund) i.refund = { assume: true, monthsAfterSale: 2 };
     } else if (order === 'sell') {
-      i.loansOther = Math.min(2, Math.max(0, homeLoans.length - 1));
+      // V3.12 Stage 2: whose home is sold, as the cost card counts it (dutyBuyers), so the funding check's ABSD is the cost card's. Without it the engine took the cautious
+      // view (one owner only) and a home owned by both, sold first, showed $360,000 of ABSD in the funding check and $0 on the cost card. IRAS: the home stops counting
+      // for each of its owners once the buyer has exercised the option to purchase it.
+      i.sale.owners = Array.isArray(st.soldOwners) ? st.soldOwners.slice() : people(st).map((x) => x.k).filter((k) => own[k] >= 1);
+      i.loansOther = Math.min(2, loanCount(st, HL.other));
+      // V3.12 Stage 2 (Ken, 28 Oct; Claude E: MAS Notice 632 paras 8(a)(ii), 9): selling first, the sold home's loan is left out of the loan limit and its repayment
+      // out of TDSR on condition that the bank has the sale evidence before the new loan is paid out (signed contract + IRAS stamp certificate; an HDB flat: HDB's
+      // approval; or the loan repaid). Otherwise it counts: ifNot is that fallback, worked out beside the result.
+      if (HL.flat) i.ifNot = { loansOther: Math.min(2, loanCount(st, allRows)), debtsHome: HL.other.reduce((a, l) => a + l.amt, 0) + HL.flat.amt };
       if (has(st.rent) && st.rent > 0) i.rent = { monthly: st.rent };
-    } else i.loansOther = Math.min(2, homeLoans.length);   // homes kept: every home loan still counts
+    } else i.loansOther = Math.min(2, loanCount(st, allRows));   // homes kept: every home loan still counts
     // the sale money: counted only when the sale has a date (or is sold first) and its figures are in (C.saleEstimate never invents the CPF refund)
     if (order === 'sell' || (order === 'buy' && sw !== 'unsure')) {
       const sl = st.sale || {};
@@ -235,7 +279,7 @@
       i.saleEst = est; if (est.counted) { i.sale.cash = Math.max(0, est.cash); i.sale.cpf = est.cpf; }
     }
     // other repayments the bank counts (the home being sold, buying first, is counted by the engine through flatInstal)
-    i.debtsOther = L.otherAmt; i.debtsHome = order === 'none' ? L.homeAmt : homeLoans.slice(1).reduce((a, l) => a + l.amt, 0);
+    i.debtsOther = L.otherAmt; i.debtsHome = order === 'none' ? L.homeAmt : HL.other.reduce((a, l) => a + l.amt, 0);
     i.bors = B; i.gross = Bc.gross;
     // CPF while a buyer still owns a home at the purchase: only the OA above the retirement-sum set-aside can be used (CPF Board), per member; the balances are asked, never assumed
     const at = dutyBuyers(st).map((d) => d.owned), subj = at.map((c) => c >= 1);
@@ -265,7 +309,10 @@
     const lim = incomeLoan(i, rule.loan.loans);
     let r = rule, capped = false;
     if (lim < rule.loan.loanMax - 0.5) { const r2 = T.timeline(Object.assign({}, i, { loanCap: lim })); if (r2.ok) { r = r2; capped = true; } }
-    return { ok: true, r: r, i: i, capped: capped, limit: Math.min(lim, rule.loan.ruleLoanMax !== undefined ? rule.loan.ruleLoanMax : rule.loan.loanMax), ruleLoan: rule.loan.loanMax };
+    // sold first with its loan still running: the result assumes the bank has the sale evidence in time; ifNot is the limit if it does not (V3.12 Stage 2)
+    let ifNot = null;
+    if (i.ifNot) { const i2 = Object.assign({}, i, i.ifNot), r2 = T.timeline(i2); if (r2.ok && r2.loan.ltv < rule.loan.ltv - 1e-9) ifNot = { ltv: r2.loan.ltv, minCash: r2.loan.minCash, loanMax: Math.min(r2.loan.loanMax, incomeLoan(i2, r2.loan.loans)) }; }
+    return { ok: true, r: r, i: i, capped: capped, limit: Math.min(lim, rule.loan.ruleLoanMax !== undefined ? rule.loan.ruleLoanMax : rule.loan.loanMax), ruleLoan: rule.loan.loanMax, ifNot: ifNot, mayRise: !!i.mayRise };
   }
 
   /* ---------------- 3a. What will this home cost me? (price first: no date, no income needed) ---------------- */
@@ -276,7 +323,7 @@
     st = Object.assign({}, st, over || {});
     if (st.pkind === 'hdb') return { state: 'hdb' };
     if (!(st.price > 0)) return { state: 'need', need: ['price'] };
-    const kind = engineKind(st.pkind), bs = engineBorrowers(st), L = loansOf(st);
+    const kind = engineKind(st.pkind), bs = engineBorrowers(st), CL = costLoans(st), L = CL.L;
     const aged = bs.length && bs.every((b) => has(b.age)), withInc = aged && bs.some((b) => b.fixed > 0 || b.variable > 0);
     const Bc = withInc ? C.borrowers(bs) : null;
     const years0 = has(st.years) ? st.years : undefined, std = R.bankLtv.standardTenure.private;
@@ -298,15 +345,28 @@
     const cpfIn = has(st.cpf) ? st.cpf : 0, cpfUsed = Math.min(cpfIn, flex), downCash = prog.cashMin + cov + (flex - cpfUsed), duty = prog.duty;
     return { state: 'ok', kind: kind, price: P, loan: loan, ltv: prog.ltv, ruleLoan: rule.loanMax, lower: prog.lower, lowerWhy: prog.lowerWhy, years: prog.years, ratePct: ratePct,
       down: P - loan, cashMin: prog.cashMin, minCash: prog.minCash, cov: cov, flex: flex, cpfUsed: cpfUsed, cpfLeft: Math.max(0, cpfIn - cpfUsed), downCash: downCash,
-      bsd: duty.bsd, absd: duty.absd, absdRate: duty.absdRate, duty: duty.total, cash: downCash + duty.total, monthly: prog.finalMonthly,
-      typed: typed, overLimit: typed !== null && typed > rule.loanMax + 0.5, incomeCap: incomeCap, aboveIncome: incomeCap !== null && loan > incomeCap + 0.5, homeLoans: L.home, ageAssumed: ageAssumed, age: age };
+      bsd: duty.bsd, absd: duty.absd, absdRate: duty.absdRate, duty: duty.total, dutyNotes: duty.notes || [], cash: downCash + duty.total, monthly: prog.finalMonthly,
+      typed: typed, overLimit: typed !== null && typed > rule.loanMax + 0.5, incomeCap: incomeCap, aboveIncome: incomeCap !== null && loan > incomeCap + 0.5, homeLoans: L.home, homeRows: L.rows, ageAssumed: ageAssumed, age: age,
+      // V3.12 Stage 2: sold first with its loan running, the conditional result's fallback (the sold home's loan counted); bought first with its loan running, the limit may rise
+      // once the bank has the sale evidence (never assumed); with the conservative count, what the per-borrower reading would give at the same price
+      ifNot: CL.sellExcl && !st._keepSold ? sideOf(cost(st, { _keepSold: true }), loan, downCash + duty.total) : null,
+      mayRise: CL.buyFirstLoan, alt: L.alt < L.home && !st._ltvMode ? sideOf(cost(st, { _ltvMode: 'per_borrower' }), loan, downCash + duty.total) : null };
+  }
+  // the same price worked out another way, as the difference it makes: its loan limit, and the loan and cash it gives against this result's
+  function sideOf(c2, loan, cash) { return c2 && c2.state === 'ok' ? { ltv: c2.ltv, minCash: c2.minCash, loan: c2.loan, cash: c2.cash, loanMore: c2.loan - loan, cashMore: c2.cash - cash } : null; }
+  // the housing loans the cost card counts: selling first (st.order 'sell'), the sold home's own loan is left out of the loan limit and of TDSR, on the condition the
+  // page states (MAS Notice 632 para 8(a)(ii): the bank has the sale evidence before the new loan is paid out); _keepSold counts it (the fallback). Buying first it counts.
+  function costLoans(st) {
+    const L0 = loansOf(st), HL = homeRows(L0), selling = st.homes >= 1 && (st.order === 'sell' || st.order === 'buy') && !!HL.flat;
+    if (!(selling && st.order === 'sell') || st._keepSold) return { L: L0, sellExcl: selling && st.order === 'sell', buyFirstLoan: selling && st.order === 'buy' };
+    return { L: loansOf(Object.assign({}, st, { loans: (st.loans || []).filter((l) => l !== HL.flat) })), sellExcl: true, buyFirstLoan: false };
   }
 
   // the household income a price needs (before CPF): the lowest monthly salary at which the same engines (TDSR; MSR with it for a new EC) lend the loan,
   // at the age, tenure, rate and other repayments used for the cost. No new rule: it is the borrowing calculation run backwards.
   function incomeNeeded(st, c) {
     if (!c || c.state !== 'ok' || !(c.loan > 0)) return null;
-    const L = loansOf(st), run = (inc) => incomeLoan({ gross: inc, bors: [{ age: c.age, fixed: inc, variable: 0 }], uiKind: st.pkind, order: 'none', debtsOther: L.otherAmt, debtsHome: L.homeAmt, years: c.years, ratePct: c.ratePct }, L.home);
+    const L = costLoans(st).L, run = (inc) => incomeLoan({ gross: inc, bors: [{ age: c.age, fixed: inc, variable: 0 }], uiKind: st.pkind, order: 'none', debtsOther: L.otherAmt, debtsHome: L.homeAmt, years: c.years, ratePct: c.ratePct }, L.home);
     let lo = 0, hi = 500000;
     if (run(hi) < c.loan - 0.5) return { state: 'out' };
     for (let k = 0; k < 40; k++) { const mid = (lo + hi) / 2; if (run(mid) >= c.loan - 0.5) hi = mid; else lo = mid; }
@@ -451,5 +511,5 @@
     return res;
   }
 
-  return { assetLoan, assetRun, costHdb, flat, sell, incomeNeeded, cost, borrowersOf, loansOf, needOf, borrow, priceLoan, ownedOf, toAssess, afford, dutyBuyers, schedule, timelineInput, incomeLoan, funding, engineKind, fromHomes, withHomes };
+  return { assetLoan, assetRun, costHdb, flat, sell, incomeNeeded, cost, borrowersOf, loansOf, needOf, borrow, priceLoan, ownedOf, toAssess, afford, dutyBuyers, schedule, timelineInput, incomeLoan, funding, engineKind, fromHomes, withHomes, CFG, loanCount };
 });

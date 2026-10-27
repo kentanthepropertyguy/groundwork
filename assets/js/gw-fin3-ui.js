@@ -115,9 +115,9 @@
     money('p.' + k + '.fixed', 'Monthly income, before CPF', { ph: k ? 'e.g. 6,000' : 'e.g. 8,000', cls: 'f3-big' }) +
     money('p.' + k + '.debts', 'Other monthly debts', { opt: true, ph: 'car, personal, cards' }) +
     seg('p.' + k + '.hl', 'Outstanding housing loans', LN, '0', { hint: '<span data-when="n:2">In this person’s name only.</span>' }) +
-    '<div data-when="p.' + k + '.hl:1,2">' + money('p.' + k + '.hlAmt', 'Their monthly repayment', { ph: 'all of them, a month' }) + '</div></fieldset>';
+    '<div data-when="p.' + k + '.hl:1,2">' + money('p.' + k + '.hlAmt', 'Their monthly repayment', { ph: 'all of them, a month' }) + '</div><input type="hidden" data-k="p.' + k + '.hlOk" data-t="hid"></fieldset>';   // hlOk: chosen by the visitor (V3.12 Stage 2)
   const bpJointHtml = () => '<div class="f3-jl" data-when="n:2">' + seg('jl', 'Housing loans in both your names', LN, '0', { hint: 'Counted once, not once for each of you.' }) +
-    '<div data-when="jl:1,2">' + money('jlAmt', 'Their monthly repayment', { ph: 'a month' }) + '</div></div>';
+    '<div data-when="jl:1,2">' + money('jlAmt', 'Their monthly repayment', { ph: 'a month' }) + '</div><input type="hidden" data-k="jlOk" data-t="hid"></div>';
   const ownHtml = () => '<div class="f3-own"><p class="f3-fine">Stamp duty (ABSD) depends on the properties each buyer owns on the day you buy, including HDB flats and any share. A home you are selling stops counting once your buyer has exercised the option to purchase it.</p>' +
     seg('p.0.own', '<span data-when="n:1">Properties you own now</span><span data-when="n:2">Properties Person 1 owns now</span>', [['0', 'None'], ['1', '1'], ['2', '2 or more']], '', {}) +
     '<div data-when="n:2">' + seg('p.1.own', 'Properties Person 2 owns now', [['0', 'None'], ['1', '1'], ['2', '2 or more']], '', {}) + '</div>' +
@@ -230,7 +230,7 @@
       '<details class="f3-x3" data-fund><summary><b>Check it against my cash and loan</b><em>the cash you have, a home you’re selling, and the monthly mortgage as it builds up</em></summary><div class="f3-xb">' +
       '<div class="f3-grid f3-grid-fund"><form class="f3-form" novalidate data-fund-form><p class="f3-fine">Uses the price and the assumptions above.</p>' +
       '<div class="f3-grp"><h2 class="f3-gh">Your cash</h2>' + money('cash', 'Cash you have now', { ph: 'e.g. 200,000' }) + '</div>' +
-      '<div class="f3-grp" data-when="selling:1"><h2 class="f3-gh">The home you’re selling</h2>' + seg('order', 'Which comes first?', [['buy', 'Buy first, then sell'], ['sell', 'Sell first, then buy']], 'buy', { hint: 'Sell first means your buyer exercises the option to purchase before you buy.' }) +
+      '<div class="f3-grp" data-when="selling:1"><h2 class="f3-gh">The home you’re selling</h2>' + seg('order', 'Which comes first?', [['buy', 'Buy first, then sell'], ['sell', 'Sell first, then buy']], 'buy', { hint: 'Sell first: your buyer exercises the option before you exercise yours.' }) +
       '<div data-when="order:buy">' + seg('saleWhen', 'When does the sale complete?', [['unsure', 'Not decided yet'], ['date', '<span data-when="pkind:new,ec">During construction</span><span data-when="pkind:completed,resaleec,hdb">Around completion</span>'], ['afterKeys', '<span data-when="pkind:new,ec">After TOP</span><span data-when="pkind:completed,resaleec,hdb">After completion</span>']], 'unsure') + '<p class="f3-fine" data-when="saleWhen:unsure">Not decided: no sale money is counted, and the home stays in the plan with its loan and instalment.</p>' +
       '<div class="f3-g2" data-when="saleWhen:date">' + numf('saleMonth', 'Sale completes', 'months after the option', { ph: '5' }) + datef('saleDate', 'or on', { opt: true }) + '</div>' +
       '<div class="f3-g2" data-when="saleWhen:afterKeys">' + numf('saleAfter', 'Sale completes', 'months after the keys', { ph: '3' }) + '</div></div>' +
@@ -317,7 +317,9 @@
     function borrowEntries(o, st, M) {
       const rows = [], need = [], two = st.n === 2;
       const add = (who, hl, key) => { if (hl === '' && key !== 'jlAmt') { need.push(key.replace('hlAmt', 'hl')); return; } if (hl !== '1' && hl !== '2') return; const a = M(key); if (a === null || !(a > 0)) { need.push(key); return; }
-        if (hl === '1') rows.push({ type: 'home', who: who, amt: a }); else { const h = Math.round(a / 2 * 100) / 100; rows.push({ type: 'home', who: who, amt: h }, { type: 'home', who: who, amt: Math.round((a - h) * 100) / 100 }); } };
+        // V3.12 Stage 2: a loan in both names is marked joint, so it counts once for each borrower (the loan limit) and once in the repayments
+        const j = key === 'jlAmt';
+        if (hl === '1') rows.push({ type: 'home', who: who, joint: j, amt: a }); else { const h = Math.round(a / 2 * 100) / 100; rows.push({ type: 'home', who: who, joint: j, amt: h }, { type: 'home', who: who, joint: j, amt: Math.round((a - h) * 100) / 100 }); } };
       (two ? [0, 1] : [0]).forEach((k) => { const d = M('p.' + k + '.debts'); if (d !== null && d > 0) rows.push({ type: 'other', who: k, amt: d }); add(k, o['p.' + k + '.hl'] === undefined ? '0' : o['p.' + k + '.hl'], 'p.' + k + '.hlAmt'); });
       if (two) add(0, o.jl || '0', 'jlAmt');
       st.loans = rows; st.hlNeed = need;
@@ -327,6 +329,13 @@
         st.owned = ow.map(Number); st.homes = Math.max.apply(null, st.owned);
         st.whose = !two ? 'both' : st.owned[0] === 0 ? '1' : st.owned[1] === 0 ? '0' : 'both';
         if (two && st.owned[0] >= 1 && st.owned[1] >= 1) { if (o.ownTog === 'yes') st.homeJoint = true; else if (o.ownTog === 'no') st.homeJoint = false; else st.ownKnown = false; }
+      }
+      // V3.12 Stage 2 (Ken, 27 Oct 2026): a borrower who owns a property must confirm their housing loans before the budget is worked out. "None" is only the form's
+      // starting choice, so it is not taken as an answer for an owner until they choose it (the loan figure above the budget still shows, as before).
+      st.hlConfirm = [];
+      if (st.ownKnown) {
+        (two ? [0, 1] : [0]).forEach((k) => { if (st.owned[k] >= 1 && !(k === 1 && st.p[1] && st.p[1].nb) && o['p.' + k + '.hlOk'] !== '1') st.hlConfirm.push('p.' + k + '.hl'); });
+        if (two && st.homeJoint === true && o.jlOk !== '1') st.hlConfirm.push('jl');
       }
     }
     // ---- the conditional parts: shown only when they apply ----
@@ -362,7 +371,7 @@
         if (f === 'act' && hb.dataset.v === 'sell') homesL.forEach((x, j) => { if (j !== i && x.act === 'sell') { x.act = 'keep'; homeNote = 'One home can be sold in a plan for now, so Existing home ' + (j + 1) + ' is now kept.'; } });
         drawHomes(); changed(true); if (f === 'mort' && h.mort === 'yes') setTimeout(() => { const a = q('[data-home="' + i + '"] [data-hk="amt"]'); if (a) a.focus(); }, 0); return; }
       const sg = e.target.closest('[data-t="seg"] button'); if (sg && sg.parentElement.dataset.k === 'ownAny' && sg.dataset.v === 'yes' && !homesL.length) { homesL.push(newHome()); drawHomes(); }
-      if (sg) { const g = sg.parentElement; if (SALE_K.indexOf(g.dataset.k) >= 0) { put('sale.oCash', ''); put('sale.oCpf', ''); } fieldsOf(g.dataset.k).forEach((x) => setSeg(x, sg.dataset.v)); if (g.dataset.k === 'n' && sg.dataset.v === '2') { const f = q(page === 'borrow' ? '[data-inc] [data-k="p.1.fixed"]' : '[data-k="p.1.age"]'); setTimeout(() => { if (f && f.offsetParent) f.focus(); }, page === 'borrow' ? 40 : 0); } changed(true); return; }
+      if (sg) { const g = sg.parentElement; if (SALE_K.indexOf(g.dataset.k) >= 0) { put('sale.oCash', ''); put('sale.oCpf', ''); } fieldsOf(g.dataset.k).forEach((x) => setSeg(x, sg.dataset.v)); if (/^(p\.[01]\.hl|jl)$/.test(g.dataset.k)) put(g.dataset.k + 'Ok', '1'); if (g.dataset.k === 'n' && sg.dataset.v === '2') { const f = q(page === 'borrow' ? '[data-inc] [data-k="p.1.fixed"]' : '[data-k="p.1.age"]'); setTimeout(() => { if (f && f.offsetParent) f.focus(); }, page === 'borrow' ? 40 : 0); } changed(true); return; }
       const ch = e.target.closest('[data-chip]'); if (ch) { openChip(ch.getAttribute('aria-expanded') === 'true' ? null : ch.dataset.chip); return; }
       if (e.target.closest('[data-chp-done]')) { const k0 = openK; openChip(null); const c0 = q('[data-chip="' + k0 + '"]'); if (c0) c0.focus(); return; }
       if (e.target.closest('[data-fresh]')) { fresh(); return; }
@@ -417,7 +426,7 @@
       if (raw['p.0.hl'] === undefined && loans.length) {
         [0, 1].forEach((k) => { const L = loans.filter((l) => (+l.who || 0) === k), H = L.filter((l) => l.type === 'home'), O = L.filter((l) => l.type !== 'home'), sum = (a) => a.reduce((s, l) => { const v = mv(l.amt); return s + (v > 0 ? v : 0); }, 0);
           if (O.length && sum(O) > 0) raw['p.' + k + '.debts'] = Math.round(sum(O)).toLocaleString('en-US');
-          if (H.length) { raw['p.' + k + '.hl'] = H.length >= 2 ? '2' : '1'; if (sum(H) > 0) raw['p.' + k + '.hlAmt'] = Math.round(sum(H)).toLocaleString('en-US'); } });
+          if (H.length) { raw['p.' + k + '.hl'] = H.length >= 2 ? '2' : '1'; raw['p.' + k + '.hlOk'] = '1'; if (sum(H) > 0) raw['p.' + k + '.hlAmt'] = Math.round(sum(H)).toLocaleString('en-US'); } });
         loans = [];
       }
       // V3.12 (Ken, 27 Oct 2026): an old plan that owned a home but listed no home-loan repayment: whether a housing loan is outstanding is asked, never assumed None
@@ -430,6 +439,9 @@
         if (two && owned[0] >= 1 && owned[1] >= 1) raw.ownTog = cnt('both') ? 'yes' : 'no';
         const put2 = (key, who) => { const M = H.filter((h) => h.own === who && h.mort === 'yes'); if (!M.length) return; raw[key] = M.length >= 2 ? '2' : '1'; const s = M.reduce((a, h) => a + (h.amt > 0 ? h.amt : 0), 0); if (s > 0) raw[key === 'jl' ? 'jlAmt' : key + 'Amt'] = Math.round(s).toLocaleString('en-US'); };
         put2('p.0.hl', '0'); if (two) { put2('p.1.hl', '1'); put2('jl', 'both'); }
+        // V3.12 Stage 2: an owner whose homes all have their loan status answered there has confirmed their housing loans (None included)
+        const done = (sel) => { const M = H.filter(sel); return M.length > 0 && M.every((h) => h.mort === 'yes' || h.mort === 'no'); };
+        if (done((h) => !two || h.own !== '1')) raw['p.0.hlOk'] = '1'; if (two && done((h) => h.own !== '0')) raw['p.1.hlOk'] = '1'; if (two && done((h) => h.own === 'both')) raw.jlOk = '1';
         // a home whose loan status was not answered there is asked here too (its owner's housing loans are not set to None)
         H.forEach((h) => { if (h.mort === 'yes' || h.mort === 'no') return; (h.own === 'both' ? [0, 1] : [h.own === '1' ? 1 : 0]).forEach((k) => { if (k < (two ? 2 : 1) && raw['p.' + k + '.hl'] === undefined) raw['p.' + k + '.hl'] = ''; }); });
       }
@@ -705,7 +717,7 @@
       if (page === 'pay') {
         set('pkind', { new: 'New launch', ec: 'New EC', completed: 'Completed private', resaleec: 'Resale EC', hdb: 'HDB resale flat', bto: 'New HDB flat (BTO)' }[st.pkind] || 'New launch');
         set('who', (st.n === 2 ? 'Two buyers' : RN[st.p[0].res] || 'Singapore Citizen') + ', ' + (st.homes === 0 ? 'first home' : st.homes === 1 ? 'own a home' : 'own 2+ homes') + (L0.total > 0 ? ', loans' : ''));
-        set('loan', c && c.state === 'ok' && c.hdb ? (c.typed === 0 ? 'No loan' : (c.lender === 'hdb' ? 'HDB loan' : 'Bank loan') + (c.typed !== null ? ' ' + $s(c.loan) : '')) : c && c.state === 'ok' ? (c.typed !== null ? 'Loan ' + $s(c.loan) : pc(c.ltv) + ' loan') : (st.pkind === 'hdb' || st.pkind === 'bto' ? (st.hdbLoan === 'bank' ? 'Bank loan' : 'HDB loan') : '75% loan'));
+        set('loan', !c && st.price > 0 && unanswered(st).length ? 'Loan' : c && c.state === 'ok' && c.hdb ? (c.typed === 0 ? 'No loan' : (c.lender === 'hdb' ? 'HDB loan' : 'Bank loan') + (c.typed !== null ? ' ' + $s(c.loan) : '')) : c && c.state === 'ok' ? (c.typed !== null ? 'Loan ' + $s(c.loan) : pc(c.ltv) + ' loan') : (st.pkind === 'hdb' || st.pkind === 'bto' ? (st.hdbLoan === 'bank' ? 'Bank loan' : 'HDB loan') : '75% loan'));
         set('rate', (c && c.state === 'ok' ? c.ratePct : st.ratePct !== null ? st.ratePct : 4) + '% · ' + (c && c.state === 'ok' ? c.years : (st.years || 30)) + ' years');
         set('cpf', st.cpf > 0 ? 'CPF ' + $s(st.cpf) : 'No CPF');
       }
@@ -724,6 +736,27 @@
     }
     /* ---- the one-page summary ("Save as PDF"): filled from the result object that drew the answer card; nothing recalculated, nothing read back from the page ---- */
     let view = null;
+    let absdOpen = false, ltvOpen = false;
+    // V3.12 Stage 2 (Ken, 28 Oct 2026): the refund's conditions, deadlines and claim, under "How the refund works" only. The married couple's are Claude E's verified wording
+    // (IRAS, Stamp Duties (Spouses) (Remission of ABSD) Rules); the single senior's are GW_CALC.stampDuty's own note (not yet re-verified by Claude E).
+    function refundWhy(rn) {
+      const m = root.GW_RULES.absdRefundMonths || 6;
+      if (rn.id !== 'refund') return esc(rn.text.replace(/; the ABSD is paid upfront first\.?$/, '.'));
+      return 'A married couple including a Singapore Citizen, buying in their two names only, can get this ABSD back if their first home is sold (their buyer exercises the option) within ' + m + ' months of buying a completed home, or of TOP or CSC for one under construction. Each must have owned no more than one home when buying; they must still be married and have bought no other home in between. The refund is claimed from IRAS after the sale, within ' + m + ' months of it, so it is not counted here.';
+    }
+    // V3.12 Stage 2 (Ken, 28 Oct 2026; Claude E: MAS Notice 632 paras 8(a)(ii) and 9): what the bank needs before the new loan is paid out to leave the sold home's loan out
+    function ltvWhy(st) { return 'Before your new loan is paid out, your bank needs ' + (st.sale && st.sale.type === 'private' ? 'the sale contract signed by you and your buyer, with IRAS’s stamp-duty certificate' : 'HDB’s letter approving your flat’s sale (for a private home or EC: the sale contract signed by you and your buyer, with IRAS’s stamp-duty certificate)') + ', or the old loan repaid. With it, the old loan is left out of the loan limit and its repayment out of your debt limit (TDSR). MAS Notice 632.'; }
+    function ltvMore(st) { return ' <button type="button" class="f3-lnk" data-ltv-more aria-expanded="' + ltvOpen + '">What the bank needs</button><span data-ltv-why' + (ltvOpen ? '' : ' hidden') + '><br>' + ltvWhy(st) + '</span>'; }
+    // the conditional loan limits under the cost card's instalment: sold first (the result assumes the sale evidence in time; the fallback stated), bought first (it may rise;
+    // not assumed), and two borrowers' separate loans (the per-borrower 45%, at the same price). One short line each, never a box.
+    function ltvLines(st, c) {
+      let h = '';
+      if (c.ifNot) h += '<br><span class="f3-cond" data-ltv-cond="sell">The ' + pc(c.ltv) + ' loan limit assumes your bank receives your sale documents before releasing your new loan. Otherwise it is ' + pc(c.ifNot.ltv) + (c.ifNot.cashMore > 999 ? ', about ' + $r(c.ifNot.cashMore) + ' more upfront' : '') + '.' + ltvMore(st) + '</span>';
+      else if (c.mayRise) h += '<br><span class="f3-cond" data-ltv-cond="buy">If your bank receives your sale documents before releasing your new loan, it may lend more. Not assumed here.' + ltvMore(st) + '</span>';
+      if (c.alt) { const more = c.alt.loanMore > 999, less = -c.alt.cashMore > 999;
+        h += '<br><span class="f3-cond" data-ltv-alt>' + pc(c.alt.ltv) + ' may apply if your bank counts each borrower’s own housing loans' + (more || less ? ': at this price, ' + [more ? $r(c.alt.loanMore) + ' more loan' : '', less ? $r(-c.alt.cashMore) + ' less upfront' : ''].filter(Boolean).join(' and ') : ': at this price your income, not the limit, sets the loan') + '. Your bank confirms the limit.</span>'; }
+      return h;
+    }   // V3.12 Stage 2: "How the refund works" opened by the visitor (kept across repaints)
     function pdfBtn(on) { $$('[data-save-pdf]').forEach((x) => { x.hidden = !on; }); }
     const SG = (str) => String(str).replace(/\$/g, 'S$');                       // the card's own formatting, with the Singapore dollar sign of the sheet
     const plain = (h) => String(h).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
@@ -755,7 +788,7 @@
       const receipt = [{ label: 'Cash, at least', sub: pc(c.minCash) + ' of the price. MAS rule.', value: SG($(c.cashMin)) }]
         .concat(c.cov > 0 ? [{ label: 'Above the valuation', sub: 'The bank lends on the lower of price and valuation.', value: SG($(c.cov)) }] : [])
         .concat([{ label: 'Cash or CPF', sub: pc(c.flex / c.price) + ' of the price', value: SG($(c.flex)) }, { label: 'Buyer’s Stamp Duty', sub: 'Usually cash first; CPF may reimburse eligible duty', value: SG($(c.bsd)) }])
-        .concat(c.absd > 0 ? [{ label: 'ABSD ' + Math.round(c.absdRate * 100) + '%', sub: 'Usually paid in cash first', value: SG($(c.absd)) }] : [])
+        .concat(c.absd > 0 ? [{ label: 'ABSD ' + Math.round(c.absdRate * 100) + '%', sub: absdSub(c), value: SG($(c.absd)) }] : [])
         .concat([{ key: 'fromyou', label: 'From you, cash and CPF', sub: 'Cash ' + SG($(c.cash)) + ' + CPF ' + SG($(c.cpfUsed)), value: SG($(v.up)), cls: 'tot' }, { key: 'loan', label: 'Bank loan', sub: pc(c.loan / c.price) + ' of the price', value: SG($(c.loan)) }]);
       const monthly = [{ label: 'Instalment at ' + c.ratePct + '%, ' + yrs(c.years), value: SG($(c.monthly)) }].concat(incOk ? [{ label: 'Income needed at the ' + (inc.rule === 'msr' ? '30%' : '55%') + ' limit', sub: plain(v.incBasis), value: '≈ ' + SG(r100(inc.income)) }] : []);
       // the schedule: dates when an option date was entered, otherwise timings from the option, with the estimate labels
@@ -789,7 +822,7 @@
         { key: 'monthly', label: 'Monthly instalment', value: SG($(a.top.monthly)), sub: 'On a ' + SG($r(a.top.loan)) + ' loan · ' + yrs(a.years) + ' at ' + a.ratePct + '%' }] : [
         { key: 'lend', label: v.lendL || 'The bank may lend about', value: SG($r(b.maxLoan)), sub: 'Over ' + yrs(b.years) + ', ending at age ' + v.endAge + (b.ageAssumed ? ' (age 35 assumed)' : '') },
         { key: 'monthly', label: 'Monthly instalment', value: SG($(b.monthly)), sub: SG(v.instSub) },
-        { key: 'price', label: 'Home price this loan could support', value: '≈ ' + SG(v.pTxt), sub: SG(priceSub(b, v.upfront).replace(/<[^>]+>/g, '')) }];
+        { key: 'price', label: 'Home price this loan could support', value: '≈ ' + SG(v.pTxt), sub: SG(priceSub(b, v.upfront).replace(/<br>/g, ' ').replace(/<[^>]+>/g, '')) }];
       const how = [{ label: 'Income, before CPF', sub: b.counted < b.income - 0.5 ? 'Salary and any bonus, commission or rent, a month' : 'A month', value: SG($(b.income)) }]
         .concat(b.counted < b.income - 0.5 ? [{ label: 'Income the bank counts', sub: 'Bonus, commission and rent at 70%', value: SG($(b.counted)) }] : [])
         .concat([{ label: v.msr ? 'The limit: 30% of income' : 'The limit: 55% of income', sub: v.msr ? 'For home loans (MSR)' + (b.kind === 'hdb-loan' ? '' : ', and 55% for all loans (TDSR)') : 'For all loan repayments (TDSR)', value: SG($(b.counted * b.share)) + '/mo' }])
@@ -853,8 +886,14 @@
     // V3.12 (Ken, 27 Oct 2026): the price a loan could support is not a budget: the upfront it needs (the rest of the price, plus stamp duty) leads its line,
     // with the share the loan covers; ABSD comes on top for anyone who already owns property
     function priceSub(b, upfront) {
-      return (upfront !== null ? '<b>Needs about ' + $r(upfront) + ' upfront</b> in cash and CPF: the loan covers only ' + pc(b.ltv) + ' of the price' + (b.homeLoans > 0 ? ', and ABSD may add more' : '') + '. ' : 'The loan covers ' + pc(b.ltv) + ' of the price. ') + 'Not a budget: add your cash and CPF for that.';
+      return (upfront !== null ? '<b>Needs about ' + $r(upfront) + ' upfront</b> in cash and CPF: the loan covers only ' + pc(b.ltv) + ' of the price' + eachOwn(b) + (b.homeLoans > 0 ? ', and ABSD may add more' : '') + '. ' : 'The loan covers ' + pc(b.ltv) + ' of the price' + eachOwn(b) + '. ') + 'Not a budget: add your cash and CPF for that.' + (b.altLtv ? altLine(b.altLtv) : '');
     }
+    // V3.12 Stage 2: the ABSD line says it is paid upfront; when IRAS's refund could apply later, that it is conditional and not counted
+    function absdSub(c) { return (c.dutyNotes || []).some((n) => n.id === 'refund' || n.id === 'single-senior') ? 'Paid upfront, usually in cash first. Any refund later is conditional and not counted' : 'Usually paid in cash first'; }
+    // V3.12 Stage 2 (Ken, 28 Oct 2026): two borrowers with a separate housing loan each. Default (conservative): both loans count, 35%, and one short line says 45% may
+    // apply if the bank counts each borrower's own loans (altLtv / alt). With the internal setting per_borrower, 45% is used and the bracket says so (eachOwn).
+    function eachOwn(x) { return x && x.homeRows >= 2 && x.homeLoans < Math.min(2, x.homeRows) ? ' (MAS counts each borrower’s own housing loans: one each; your bank confirms the limit)' : ''; }
+    function altLine(ltv) { return '<br><span class="f3-cond" data-ltv-alt>' + pc(ltv) + ' may apply if your bank counts each borrower’s own housing loans. Your bank confirms the limit.</span>'; }
     function paintBorrow(st) {
       const b0 = F.borrow(st, { assumeAge: true }), hn = (st.hlNeed || []).length && b0.state !== 'need' ? { state: 'need', need: st.hlNeed } : null, b = hn || b0; lastB = b; paintChips(st, null); paintPS(st, b);
       const why = q('[data-why]'), toc = q('[data-to-cost]'), quietB = () => { if (why) why.hidden = true; if (toc) toc.hidden = true; { const th = q('[data-to-homes]'); if (th) th.hidden = true; } lastBudget = null; setBar(''); view = null; pdfBtn(false); };
@@ -879,7 +918,7 @@
       const jb = judgeBorrow(st, b, step);
       // V3.4: the cash and CPF row turns the loan into a budget (private homes; GW_FIN3.afford, the engine "What can I afford?" used), with the same age assumption as the loan
       // V3.12: the budget needs the properties each person owns (stamp duty); until they are answered it is not worked out, never assumed to be a first home
-      const funds0 = st.bkind === 'private' && (st.cash !== null || st.cpf !== null), funds = funds0 && st.ownKnown;
+      const funds0 = st.bkind === 'private' && (st.cash !== null || st.cpf !== null), hlc = funds0 && st.ownKnown ? (st.hlConfirm || []) : [], funds = funds0 && st.ownKnown && !hlc.length;
       const cr = q('[data-cashrow]'), cp = q('[data-cpf2]'); let a = null;
       { const cs = q('[data-cash-sum]'); if (cs) cs.textContent = st.bkind === 'private' ? 'Add my cash and CPF' : 'Add my cash and CPF: private homes only'; }
       if (funds) { const A0 = Math.max(21, root.GW_RULES.bankLtv.endAge - root.GW_RULES.bankLtv.standardTenure.private); a = F.afford(Object.assign({}, st, { price: null, cash: st.cash || 0, cpf: st.cpf || 0, p: st.p.map((x, k) => (k < st.n && typeof x.age !== 'number' ? Object.assign({}, x, { age: A0 }) : x)) })); }
@@ -918,6 +957,7 @@
           row('Monthly instalment', $(b.monthly), instSub) +
           row('Home price this loan could support', '<span class="f3-approx">≈</span> ' + pTxt, priceSub(b, upfront)) + priceRow +
           (funds0 && !st.ownKnown ? '<p class="f3-note" data-own-need>To turn this into a budget, say how many properties ' + (st.n === 2 ? 'each of you owns' : 'you own') + ' under “Add my cash and CPF”: stamp duty depends on it.</p>' : '') +
+          (hlc.length ? '<p class="f3-note" data-hl-confirm>Before the budget, confirm ' + hlc.map((k) => (k === 'jl' ? 'the housing loans in both your names' : st.n === 2 ? 'Person ' + (+k.split('.')[1] + 1) + '’s housing loans' : 'your housing loans')).join(' and ') + ': choose None, 1 or 2+ above. A loan on a property you own changes the loan limit, so “None” is not assumed.</p>' : '') +
           (a && a.state === 'ask-cpf' ? '<p class="f3-note">You’ll still own a home, so CPF lets you use only the OA above a set-aside. Add your CPF balances under “Add my cash and CPF” to see your budget.</p>' : '') +
           (a && a.state === 'out-of-reach' ? '<p class="f3-note">' + (a.lever ? 'Your cash and CPF don’t cover the minimum payments yet: about <b>' + $(a.lever.amount) + '</b> more cash would bring a ' + $s(a.lever.forPrice) + ' home within reach.' : 'Your cash and CPF don’t cover the minimum payments yet.') + '</p>' : '') +
           '<p class="f3-fact">' + jb.text + '</p>';
@@ -926,6 +966,8 @@
       const wl = [];
       wl.push('<li><b>Income:</b> ' + (b.counted < b.income - 0.5 ? $(b.income) + ' a month, with bonus and commission counted at 70%: ' + $(b.counted) + '.' : $(b.income) + ' a month before CPF.') + '</li>');
       wl.push('<li><b>The limit:</b> ' + (msr ? 'up to 30% of income for home-loan repayments (MSR)' + (b.kind === 'hdb-loan' ? '' : ', and 55% for all loans (TDSR)') : 'up to 55% of income for all loan repayments (TDSR)') + ', tested at ' + test + '%.</li>');
+      if (b.altLtv) wl.push('<li><b>Loan limit:</b> ' + pc(b.ltv) + ' of the price, counting both of your housing loans. If your bank counts each borrower’s own loans (one each), it may be ' + pc(b.altLtv) + '. Your bank confirms the limit.</li>');
+      else if (eachOwn(b)) wl.push('<li><b>Loan limit:</b> ' + pc(b.ltv) + ' of the price: MAS counts each borrower’s own housing loans, and you each have one. If your bank counts both loans together, it is ' + pc(root.GW_RULES.bankLtv[b.ltv < root.GW_RULES.bankLtv.standard[1].ltv ? 'lower' : 'standard'][2].ltv) + '. Your bank confirms the limit.</li>');
       if (b.debtsCut > 999) wl.push('<li><b>Your loans:</b> the ' + $(b.debts) + ' a month you already pay lowers it by about ' + $r(b.debtsCut) + '.</li>');
       wl.push('<li><b>Tenure:</b> ' + yrs(b.years) + (b.joint ? ', using the ' + (b.kind === 'hdb-loan' ? 'average' : 'income-weighted') + ' age of ' + Math.round(b.age * 10) / 10 : '') + (b.ageCut ? ', shorter than ' + b.ageCut.full + ' so it ends by age ' + (b.kind === 'hdb-loan' ? 65 : root.GW_RULES.bankLtv.endAge) : '') + '.</li>');
       (b.notes || []).forEach((n) => wl.push('<li>' + esc(n.text) + '</li>'));
@@ -1070,7 +1112,7 @@
       const moBox = q('[data-bf-mo]'); if (moBox) moBox.hidden = !flatLoan;
       const need = { upFlatMo: flatLoan && flatMo === null, bfCash: !(typeof st.bfCash === 'number'), bfCpf: !(typeof st.bfCpf === 'number') };
       $$('[data-bf-need]').forEach((p) => { p.hidden = !need[p.dataset.bfNeed]; });
-      const loanTxt = flatLoan ? 'The flat’s ' + $(st.sale.loan) + ' loan is still running, so the new loan is a second housing loan: up to ' + pc(L2.ltv) + ' of the price, at least ' + pc(L2.minCash) + ' in cash, and the flat’s repayment counts against your income.' : 'The flat has no loan left, so the usual ' + pc(L1.ltv) + ' limit applies.';
+      const loanTxt = flatLoan ? 'The flat’s ' + $(st.sale.loan) + ' loan is still running, so the new loan is a second housing loan: up to ' + pc(L2.ltv) + ' of the price, at least ' + pc(L2.minCash) + ' in cash, and the flat’s repayment counts against your income. If your bank receives HDB’s approval of the flat’s sale before releasing the new loan, it may lend more; not assumed here.' : 'The flat has no loan left, so the usual ' + pc(L1.ltv) + ' limit applies.';
       const sellTxt = a && a.state === 'ok' ? ' Selling first, the answer above is about ' + fmtP(Math.floor(a.budget / 1000) * 1000) + '.' : '';
       if (need.upFlatMo || need.bfCash || need.bfCpf) { o.innerHTML = '<div class="f3-bfres" data-bf-wait><span>Buy first, then sell</span><b>—</b></div><p class="f3-fine">Add the figures marked above to see the buy-first budget. ' + loanTxt + ' While you still own the flat, ABSD on the new home is paid upfront (a married couple with a Singapore Citizen can have it refunded if the flat is sold within ' + rm + ' months, IRAS).</p>'; return; }
       const res = Math.max(0, st.reserve || 0), cash = Math.max(0, st.bfCash - res);
@@ -1081,6 +1123,13 @@
       } else {
         o.innerHTML = '<div class="f3-bfres"><span>Buy first, then sell</span><b data-bf-none>No budget</b></div><p class="f3-fine" data-bf-short>' + (k0.state === 'income' || k0.state === 'no-income' ? 'The income left after the flat’s repayment supports no new loan.' : 'With ' + $(cash) + ' cash and ' + $(st.bfCpf) + ' CPF, the cash minimum and the ABSD of a second home leave nothing to buy with before the flat is sold.') + ' ' + loanTxt + sellTxt + '</p>';
       }
+    }
+    // V3.12 Stage 2 (Ken, 28 Oct 2026; MAS Notice 632 para 8(a)(ii)): selling the flat first with its loan still running, the budget's loan limit assumes HDB has approved
+    // the flat's sale before the new loan is paid out; otherwise the flat's loan counts (the one-loan row). One short line; the documents under "What the bank needs".
+    function upCond(st, a) {
+      if (!(st.sale && st.sale.loan > 0.5) || !a.top) return '';
+      const RB = root.GW_RULES.bankLtv, low = a.top.ltv < RB.standard[0].ltv - 1e-9, fb = (low ? RB.lower : RB.standard)[1];
+      return '<br><span class="f3-cond" data-ltv-cond="sell">The ' + pc(a.top.ltv) + ' loan limit assumes your bank receives HDB’s approval of your flat’s sale before releasing your new loan. Otherwise it is ' + pc(fb.ltv) + ', with at least ' + pc(fb.minCash) + ' in cash.' + ltvMore(Object.assign({}, st, { sale: Object.assign({}, st.sale, { type: 'hdb' }) })) + '</span>';
     }
     function upSt(st) {
       // the thread's planning conventions (KPT assumptions): the flat is an HDB flat sold first, then a private home is bought; its loan is repaid at the sale;
@@ -1135,7 +1184,7 @@
         : 'The timing of the payments is the limit here.') +
         (dI > 999 ? ' Each extra $1,000 a month of income, including a co-borrower’s, adds about ' + $(dI) + (dC > 999 ? '; each $10,000 kept in reserve takes off about ' + $(dC) : '') + '.' : dC > 999 ? ' Each $10,000 kept in reserve takes off about ' + $(dC) + '.' : '');
       out.innerHTML = '<p class="f3-eb">Your upgrade budget</p>' +
-        row('Buy up to about', '<span data-answer data-budget>' + bTxt + '</span>', 'Sell first, then buy · ' + (u.akind === 'completed' ? 'completed' : 'new-launch') + ' private home', 'f3-ar1') +
+        row('Buy up to about', '<span data-answer data-budget>' + bTxt + '</span>', 'Sell first, then buy · ' + (u.akind === 'completed' ? 'completed' : 'new-launch') + ' private home' + upCond(st, a), 'f3-ar1') +
         row('Upfront it needs', '<span data-upfront>' + $r(upfront) + '</span>', 'From your ' + (sv.o55 ? $(a.sale.cash + a.sale.cpf) + ' of usable proceeds' : $(sv.total) + ' proceeds') + (saved ? ' and ' + $(saved) + ' of savings' : '')) +
         row('Left in reserve', '<span data-reserve>' + $r(reserve) + '</span>', u.reserveKept > 0 ? 'The funds you chose to keep aside' : 'No funds kept aside: tap “Keep funds aside” to set some') +
         (al55 ? '<ul class="f3-alert"><li>' + al55 + '</li></ul>' : '') +
@@ -1321,6 +1370,17 @@
       if (P && P.setUndated) P.setUndated(und, F.engineKind(st.pkind));
       const sched = q('[data-sched]'), bd = q('[data-bd]'), cmp = q('[data-cmp]'), lh = q('[data-loan-hint]'), ob = q('.f3-opts [data-open-borrow]');
       const quiet = () => { view = null; pdfBtn(false); const sec0 = q('[data-schsec]'); if (sec0) sec0.hidden = true; [bd, cmp].forEach((x) => { x.hidden = true; }); if (ob) ob.hidden = true; if (lh) lh.textContent = ''; setBar(''); sched.innerHTML = ''; if (scnD) scnD.hidden = true; };
+      // V3.12 Stage 2 (Ken, 27 Oct 2026): whether an existing home still has a loan sets the loan limit (and the monthly commitments), so no cash, CPF or instalment is shown
+      // until it is answered for every home; nothing is assumed (Stage 1 showed the figures with no loan counted, and said so)
+      const un = st.price > 0 ? unanswered(st) : [];
+      if (un.length) {
+        paintChips(st, null);
+        const nm = un.map((i) => 'Existing home ' + (i + 1)).join(' and ');
+        // stamp duty does not depend on the loan, so it is shown meanwhile (who owns what is already answered)
+        const c0 = isHdb(st) ? F.costHdb(st) : F.cost(st), dutyRow = c0 && c0.state === 'ok' ? row('Stamp duty', $(c0.duty), '<span data-duty-line>' + (c0.absd > 0 ? $(c0.bsd) + ' BSD + ' + $(c0.absd) + ' ABSD ' + Math.round(c0.absdRate * 100) + '%' : 'Buyer’s stamp duty') + '</span>, whatever the loan') : '';
+        out.innerHTML = '<p class="f3-eb">For a ' + $(st.price) + ' ' + KN[st.pkind] + '</p>' + row('Cash you’ll need', '<span class="f3-dash">—</span>', 'Waiting for one answer: is a home loan still being paid on ' + nm + '?') + row('CPF used', '<span class="f3-dash">—</span>', '') + row('Monthly instalment', '<span class="f3-dash">—</span>', 'On the ' + (isHdb(st) ? 'loan' : 'bank loan')) + dutyRow;
+        quiet(); paintFund(st); return;
+      }
       if (isHdb(st)) { paintHdb(st, quiet); return; }
       const c = F.cost(st); paintChips(st, c);
       if (c.state !== 'ok') {
@@ -1329,7 +1389,7 @@
         quiet(); fundOut.innerHTML = '<p class="f3-fine">Enter the price above first.</p>'; return;
       }
       done();
-      if (lh) lh.innerHTML = 'Up to ' + $(c.ruleLoan) + ' (' + pc(c.ltv) + ' of the price' + (c.homeLoans ? ', with ' + (c.homeLoans === 1 ? 'a home loan' : 'two home loans') + ' already' : '') + ')' + (c.overLimit ? ' · <b class="f3-warn">above the limit</b>' : '') + '. Leave it blank for the most allowed.';
+      if (lh) lh.innerHTML = 'Up to ' + $(c.ruleLoan) + ' (' + pc(c.ltv) + ' of the price' + (c.homeLoans ? ', with ' + (eachOwn(c) ? 'one home loan each' : c.homeLoans === 1 ? 'a home loan' : 'two home loans') + ' already' : '') + ')' + (c.overLimit ? ' · <b class="f3-warn">above the limit</b>' : '') + '. Leave it blank for the most allowed.';
       const k = q('[data-k="loanAmt"]'); if (k) k.placeholder = 'up to ' + Math.round(c.ruleLoan).toLocaleString('en-US');
       // ---- the three answers ----
       const up = c.down + c.duty, minCash = c.cashMin + c.cov + c.duty, withCpf = st.cpf > 0;
@@ -1348,14 +1408,18 @@
       if (st.years && c.years < st.years) alerts.push('You chose ' + yrs(st.years) + '. Most banks end a loan by age ' + root.GW_RULES.bankLtv.maturityAge + ', so ' + yrs(c.years) + ' is used here. MAS allows up to ' + root.GW_RULES.bankLtv.maxTenure.private + ' years for a private home; a bank may decide differently.');
       if (c.lower) { const c0 = F.cost(Object.assign({}, st, { years: null })), more = c0.state === 'ok' && !c0.lower ? (c.down + c.duty) - (c0.down + c0.duty) : 0;
         alerts.push('A lower loan limit applies because ' + (c.lowerWhy === 'age' ? 'the loan runs past age 65' : 'the tenure is over 30 years') + ': banks may lend ' + pc(c.ltv) + ' of the price instead of ' + pc(c0.state === 'ok' ? c0.ltv : 0.75) + ', and at least ' + pc(c.minCash) + ' must be cash' + (more > 0.5 ? '. That is ' + $(more) + ' more from you' + (F.engineKind(st.pkind) !== 'completed' ? ', most of it during construction,' : '') + ' than with ' + yrs(c0.years) + '.' : '.')); }
+      // V3.12 Stage 2 (Ken, 27 Oct 2026): ABSD payable now is kept apart from any refund later, in one short line under the cash (never a box): the figure is what is
+      // paid upfront; a refund depends on IRAS's conditions after the purchase, so it is never taken off the cash. The conditions (GW_CALC.stampDuty's own note) open on request.
+      const rn = c.absd > 0 ? (c.dutyNotes || []).filter((n) => n.id === 'refund' || n.id === 'single-senior')[0] : null;
+      const absdLine = rn ? '<br><span data-absd-upfront>ABSD is payable upfront. You may qualify for a refund after selling your existing home. <button type="button" class="f3-lnk" data-absd-more aria-expanded="' + absdOpen + '">How the refund works</button><span data-absd-why' + (absdOpen ? '' : ' hidden') + '><br>' + refundWhy(rn) + '</span></span>' : '';
       if (st.homes >= 1 && st.cpf > 0) alerts.push('While you own another home, only CPF above a set-aside can be used. <button type="button" class="f3-lnk" data-open-fund>Check it</button>');
       // V3.7: a new launch leads with what is needed upfront (booking, the S&P and stamp duty, from the schedule), then what follows during construction
       const pl = planOf(st, c), bucUp = pl && pl.buc && pl.later > 0.5;
       const upRow = bucUp ? row('Needed upfront', '<span data-answer data-upfront>' + $(pl.upfront) + '</span>', 'Booking fee, the S&P payment and <span data-duty-line>' + (c.absd > 0 ? $(c.bsd) + ' BSD + ' + $(c.absd) + ' ABSD ' + Math.round(c.absdRate * 100) + '%' : $(c.duty) + ' stamp duty') + '</span>, ' + (pl.dated ? pl.dutyBy.replace(/^By/, 'by') : 'within about ' + pl.upWeeks + ' weeks of booking') + '<br><span data-later>Then <b>' + $(pl.later) + '</b> during construction · <b>' + $(pl.total) + '</b> from you in all</span>', 'f3-ar1') : '';
       out.innerHTML = '<p class="f3-eb">For a ' + $(c.price) + ' ' + KN[st.pkind] + '</p>' + upRow +
-        row('Cash you’ll need', bucUp ? $(c.cash) : '<span data-answer>' + $(c.cash) + '</span>', bucUp ? 'In all, with stamp duty. ' + cashSub : cashSub + '<br>' + dutyTxt, bucUp ? 'f3-ar2' : 'f3-ar1') +
+        row('Cash you’ll need', bucUp ? $(c.cash) : '<span data-answer>' + $(c.cash) + '</span>', (bucUp ? 'In all, with stamp duty. ' + cashSub : cashSub + '<br>' + dutyTxt) + absdLine, bucUp ? 'f3-ar2' : 'f3-ar1') +
         row('CPF used', $(c.cpfUsed), cpfSub, 'f3-ar2') +
-        row('Monthly instalment', $(c.monthly), 'On a ' + $(c.loan) + ' loan · ' + yrs(c.years) + ' at ' + c.ratePct + '%' + (F.engineKind(st.pkind) !== 'completed' ? ', once fully drawn' : '') + INDIC) + incRow + judgeCost(st, c, inc, mine, up) +
+        row('Monthly instalment', $(c.monthly), 'On a ' + $(c.loan) + ' loan · ' + yrs(c.years) + ' at ' + c.ratePct + '%' + (F.engineKind(st.pkind) !== 'completed' ? ', once fully drawn' : '') + ltvLines(st, c) + INDIC) + incRow + judgeCost(st, c, inc, mine, up) +
         (alerts.length ? '<ul class="f3-alert">' + alerts.map((x) => '<li>' + x + '</li>').join('') + '</ul>' : '') + stagesHtml(st, c);
       $$('[data-open-fund]', out).forEach((x) => x.addEventListener('click', () => { allPay(true); fundD.open = true; try { fundD.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { /* ignore */ } }));
       $$('[data-to-sched]', out).forEach((x) => { x.textContent = allOpen() ? 'Hide payments' : 'All payments'; x.classList.toggle('up', allOpen()); x.setAttribute('aria-expanded', String(allOpen())); x.addEventListener('click', (e) => { e.preventDefault(); const o = !allOpen(); allPay(o); if (o) { try { q('[data-allpay]').scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (er) { /* ignore */ } } }); });
@@ -1363,7 +1427,7 @@
       q('[data-bd-sum]').textContent = 'Where the ' + $(up) + ' goes';
       { const ln = (t, ctx, v, cls) => '<div class="f3-rl' + (cls ? ' ' + cls : '') + '"><div><span>' + t + '</span>' + (ctx ? '<small>' + ctx + '</small>' : '') + '</div><b>' + v + '</b></div>';
         q('[data-bd-out]').innerHTML = '<div class="f3-rcpt">' + ln('Cash, at least', pc(c.minCash) + ' of the price. MAS rule.', $(c.cashMin)) + (c.cov > 0 ? ln('Above the valuation', 'The bank lends on the lower of price and valuation; the gap is cash.', $(c.cov)) : '') +
-          ln('Cash or CPF', pc(c.flex / c.price) + ' of the price', $(c.flex)) + ln('Buyer’s stamp duty', 'Usually paid in cash first; CPF may reimburse it if eligible, or pay it directly for some purchases under construction', $(c.bsd)) + (c.absd > 0 ? ln('ABSD ' + Math.round(c.absdRate * 100) + '%', 'Additional buyer’s stamp duty; usually paid in cash first', $(c.absd)) : '') +
+          ln('Cash or CPF', pc(c.flex / c.price) + ' of the price', $(c.flex)) + ln('Buyer’s stamp duty', 'Usually paid in cash first; CPF may reimburse it if eligible, or pay it directly for some purchases under construction', $(c.bsd)) + (c.absd > 0 ? ln('ABSD ' + Math.round(c.absdRate * 100) + '%', 'Additional buyer’s stamp duty; ' + absdSub(c).charAt(0).toLowerCase() + absdSub(c).slice(1), $(c.absd)) : '') +
           ln('From you, cash and CPF', 'Cash ' + $(c.cash) + ' + CPF ' + $(c.cpfUsed), $(up), 'tot') + ln('Bank loan', pc(c.loan / c.price) + ' of the price', $(c.loan)) + '</div><p class="f3-fine">Legal and valuation fees are not included.</p>'; }
       paintCmp(st, c);
       setBar(bucUp ? '<span class="f3-bm"><span class="k">Needed upfront</span><b>' + $(pl.upfront) + '</b><span class="s">then ' + $(pl.later) + ' · ' + $(c.monthly) + '/mo</span></span>' : '<span class="f3-bm"><span class="k">Cash you’ll need</span><b>' + $(c.cash) + '</b><span class="s">' + $(c.monthly) + '/mo · CPF ' + $(c.cpfUsed) + '</span></span>');
@@ -1462,13 +1526,16 @@
       const row = (k, a, b) => '<tr><th scope="row">' + k + '</th><td>' + a + '</td><td>' + b + '</td></tr>';
       o.innerHTML = '<table class="f3-cmp"><thead><tr><th></th><th scope="col">' + $s(c.price) + '</th><th scope="col">' + $s(c2.price) + '</th></tr></thead><tbody>' + row('Cash you’ll need', $(c.cash), $(c2.cash)) + row('CPF used', $(c.cpfUsed), $(c2.cpfUsed)) + row('Monthly instalment', $(c.monthly), $(c2.monthly)) + row('Bank loan', $(c.loan), $(c2.loan)) + row('Stamp duty', $(c.duty), $(c2.duty)) + '</tbody></table>' + (c.typed !== null ? '<p class="f3-fine">The same share of the price is borrowed.</p>' : '');
     }
-    const unanswered = (st) => (st.homesL || []).map((h, i) => (h.mort === '' ? i : -1)).filter((i) => i >= 0);
+    function unanswered(st) { return (st.homesL || []).map((h, i) => (h.mort === '' ? i : -1)).filter((i) => i >= 0); }
     function paintHomeAsk(st) {
       const u = unanswered(st); if (!u.length || !out) return;
       const nm = u.map((i) => 'Existing home ' + (i + 1)).join(' and ');
-      out.insertAdjacentHTML('beforeend', '<p class="f3-note" data-home-ask>' + nm + ': still paying a home loan on ' + (u.length > 1 ? 'them' : 'it') + '? Not answered yet, so no loan is counted on ' + (u.length > 1 ? 'them' : 'it') + ' here. <button type="button" class="f3-lnk" data-open-who>Answer it</button></p>');
+      if (!(st.price > 0)) return;
+      out.insertAdjacentHTML('beforeend', '<p class="f3-note" data-home-ask>' + nm + ': still paying a home loan on ' + (u.length > 1 ? 'them' : 'it') + '? Not answered yet. It sets the loan limit and your monthly commitments, so the figures wait for it. <button type="button" class="f3-lnk" data-open-who>Answer it</button></p>');
     }
-    box.addEventListener('click', (e) => { if (e.target.closest('[data-open-who]')) openChip('who'); });
+    box.addEventListener('click', (e) => { if (e.target.closest('[data-open-who]')) openChip('who');
+      const lm = e.target.closest('[data-ltv-more]'); if (lm) { ltvOpen = !ltvOpen; lm.setAttribute('aria-expanded', String(ltvOpen)); const w = lm.parentElement.querySelector('[data-ltv-why]'); if (w) w.hidden = !ltvOpen; }
+      const am = e.target.closest('[data-absd-more]'); if (am) { absdOpen = !absdOpen; am.setAttribute('aria-expanded', String(absdOpen)); const w = am.parentElement.querySelector('[data-absd-why]'); if (w) w.hidden = !absdOpen; } });
     function paintFund(st) {
       if (!fundD || !P) return;
       { const u = unanswered(st); if (u.length) { if (scnD) scnD.hidden = true; lastF = null;
@@ -1484,6 +1551,7 @@
       fundOut.innerHTML = P.verdictHtml(r, v).replace(/<a class="pl-link"[^>]*>[^<]*<\/a>/, '') + P.sumHtml(r, v, { view: f.capped ? 'income' : 'rule', cap: f.capped, limit: f.limit, why: why }, false) +
         (r.saleUndecided ? '<p class="f3-note">Sale date not decided: no money from the sale is counted. The home still counts for the loan limit, and its instalment carries on.</p>' : '') +
         (i.saleEst && !i.saleEst.counted && (i.order === 'sell' || (i.order === 'buy' && !i.sale.undecided)) ? '<p class="f3-note">The sale isn’t counted yet: add its price, loan and CPF refund.</p>' : '') +
+        (f.ifNot ? '<p class="f3-fine" data-fund-cond="sell">The ' + pc(r.loan.ltv) + ' loan limit assumes your bank receives your sale documents before releasing your new loan. Otherwise it is ' + pc(f.ifNot.ltv) + ', with at least ' + pc(f.ifNot.minCash) + ' in cash.</p>' : f.mayRise ? '<p class="f3-fine" data-fund-cond="buy">If your bank receives your sale documents before releasing your new loan, it may lend more. Not assumed here.</p>' : '') +
         P.fundTableHtml(r) + P.instalHtml(r, v);
       paintScn();
     }

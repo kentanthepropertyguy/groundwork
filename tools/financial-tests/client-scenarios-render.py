@@ -79,10 +79,10 @@ try:
         clean(tag, 'first purchase borrow', t)
         # ---- 2. second purchase ----
         fresh(pg, '/tools/payment-planner/'); fill(pg, 'price', '1,500,000'); settle(pg); c1 = money(cashv(pg))
-        opt(pg, 'who', 'Second home'); close(pg); settle(pg); t = out(pg); c2 = money(cashv(pg))
+        opt(pg, 'who', 'Second home'); pg.evaluate("()=>document.querySelector('[data-home=\"0\"] [data-hk=\"mort\"][data-v=\"no\"]').click()"); close(pg); settle(pg); t = out(pg); c2 = money(cashv(pg))   # V3.12 Stage 2: its loan status answered (no loan), as the old “second home” assumed
         check(f'{tag} second purchase: ABSD 20% is named and added to the cash ($300,000 on $1.5M)', 'ABSD' in t and c2 - c1 == 300000, [c1, c2, t[:200]])
         fresh(pg, '/tools/tdsr/'); fill(pg, 'p.0.fixed', '15,000'); fill(pg, 'p.0.age', '45'); settle(pg); pg.click('[data-cashrow] > summary'); fill(pg, 'cash', '700,000'); fill(pg, 'cpf', '0')
-        seg(pg, 'p.0.own', '1'); settle(pg); t = out(pg)   # V3.12: owns one property (kept)
+        seg(pg, 'p.0.own', '1'); seg(pg, 'p.0.hl', '0'); settle(pg); t = out(pg)   # V3.12: owns one property (kept); Stage 2: its housing loans confirmed (None)
         check(f'{tag} second purchase: the Borrow budget includes the ABSD and says so', '(ABSD $' in t, t[:300])
         # ---- 3. joint borrowers, different incomes ----
         fresh(pg, '/tools/tdsr/'); fill(pg, 'p.0.fixed', '12,000'); fill(pg, 'p.0.age', '40'); seg(pg, 'n', '2'); fill(pg, 'p.1.fixed', '4,000'); fill(pg, 'p.1.age', '30'); close(pg); settle(pg); t = out(pg)
