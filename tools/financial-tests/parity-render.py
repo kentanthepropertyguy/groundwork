@@ -50,6 +50,13 @@ try:
             for k in (0, 1):
                 g = pg.locator(f'[data-k="p.{k}.hl"]')
                 if g.count() and g.first.is_visible() and g.locator('[aria-pressed="true"]').count() == 0: g.locator('[data-v="0"]').first.click()
+            pg.wait_for_function("()=>window.__f3Settled&&window.__f3Settled()")
+        # V3.12 Stage 2 (Ken, 27 Oct): an owner's housing loans are confirmed before the budget ("None" is only the form's starting choice); the old page's
+        # assumption (none) is chosen explicitly here, for each owner the old plan listed no home loan for
+        if pg.locator('[data-hl-confirm]').count():
+            for k in ('p.0.hl', 'p.1.hl', 'jl'):
+                g = pg.locator(f'[data-k="{k}"]')
+                if g.count() and g.first.is_visible() and pg.evaluate(f"()=>(document.querySelector('[data-k=\"{k}Ok\"]')||{{}}).value") != '1' and g.locator('[aria-pressed="true"]').get_attribute('data-v') == '0': g.locator('[data-v="0"]').first.click()
             pg.wait_for_function("()=>window.__f3Settled&&window.__f3Settled()")   # V3.7: the seeded figures are the journey's (gw.fin3.v1); a standalone page starts blank pg.wait_for_function("()=>window.__f3Settled&&window.__f3Settled()")
     for s in SC['afford']:
         # V3.12 Stage 1 (Ken, 27 Oct 2026): the budget needs the properties each buyer owns (stamp duty), never assumed. The old page's unanswered default,

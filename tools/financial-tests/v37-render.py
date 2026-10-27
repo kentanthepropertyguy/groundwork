@@ -121,6 +121,8 @@ try:
             opened(pg, '/tools/payment-planner/'); pg.evaluate("sessionStorage.clear()"); pg.reload(); ready(pg)
             fill(pg, 'price', price)
             for ch, t in setup: opt(pg, ch, t)
+            if pg.locator('[data-home="0"] [data-hk="mort"]').count():   # V3.12 Stage 2: the home's loan status is answered (no loan), as the old “second home” assumed
+                pg.evaluate("()=>document.querySelector('[data-home=\"0\"] [data-hk=\"mort\"][data-v=\"no\"]').click()"); ready(pg)
             return out(pg), rows(pg)
         # B1. Ken's new launch: $2.65M, PR, second home, 75%, no CPF
         P0 = 2650000; b, ab = bsd(P0), P0 * .30

@@ -77,7 +77,7 @@ try:
         pg.evaluate("GW_SHEET.unmount()")
         # an option date, a second home and the full dated schedule still fit one page
         pg.evaluate("window.__f3AllPay(true)"); typ(pg, 'otp', '2026-11-02')
-        pg.evaluate("()=>{document.querySelector('[data-k=\"ownAny\"] button[data-v=\"yes\"]').click()}")   # V3.12: one existing home (its card); until(pg, "()=>window.__f3Settled()&&/ABSD/.test(document.querySelector('[data-duty-line]').textContent)")
+        pg.evaluate("()=>{document.querySelector('[data-k=\"ownAny\"] button[data-v=\"yes\"]').click()}"); until(pg, "()=>!!document.querySelector('[data-home=\"0\"] [data-hk=\"mort\"]')"); pg.evaluate("()=>document.querySelector('[data-home=\"0\"] [data-hk=\"mort\"][data-v=\"no\"]').click()"); until(pg, "()=>window.__f3Settled()")   # V3.12 Stage 2: its loan status answered   # V3.12: one existing home (its card); until(pg, "()=>window.__f3Settled()&&/ABSD/.test(document.querySelector('[data-duty-line]').textContent)")
         sh2 = sheet(pg)
         check('cost (dated, second home): dates on the schedule, ABSD in the cash line', '2 Nov 2026' in sh2['text'] and '28 Dec 2026' in sh2['text'] and 'ABSD 20%' in sh2['text'] and 'option 2 Nov 2026' in sh2['basis'] and 'owns a home' in sh2['basis'], sh2['basis'])
         n, size, only = one_page(pg, os.path.join(tmp, '.cost-dated.pdf'))

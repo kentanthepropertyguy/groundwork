@@ -51,7 +51,7 @@ try:
         check(f'{tag} A: the independent figures are Ken\'s (BSD $102,100, ABSD $795,000, 20% + duties $1,427,100, in all $1,559,600, $9,489 a month)',
               b == 102100 and ab == 795000 and P0 * .20 + b + ab == 1427100 and P0 * .25 + b + ab == 1559600 and round(pmt(loan, .04, 30)) == 9489)
         fresh(pg, '/tools/payment-planner/'); pg.fill('[data-k="price"]', '2,650,000'); settle(pg)
-        opt(pg, 'who', 'Permanent Resident'); opt(pg, 'who', 'Second home'); close(pg)
+        opt(pg, 'who', 'Permanent Resident'); opt(pg, 'who', 'Second home'); pg.evaluate("()=>document.querySelector('[data-home=\"0\"] [data-hk=\"mort\"][data-v=\"no\"]').click()"); settle(pg); close(pg)   # V3.12 Stage 2: the home's loan status answered (no loan), as the old “second home” assumed
         o = pg.inner_text('[data-out]'); r = rows(pg)
         check(f'{tag} A: the card: cash $1,559,600 with BSD and ABSD named, $9,489 a month once fully drawn', D(P0 * .25 + b + ab) in o and D(b) + ' BSD + ' + D(ab) + ' ABSD' in o and D(ab) in o and '$9,489' in o and 'once fully drawn' in o, o[:600])
         want = [('Booking fee', P0 * .05, 'cash'), ('At the S&P', P0 * .15, 'cash or CPF'), ('Buyer’s stamp duty', b, 'Within 14 days of signing the S&P'), ('ABSD', ab, 'Within 14 days of signing the S&P'), ('Upfront, in all', P0 * .20 + b + ab, ''), ('Foundation stage, your share', P0 * .05, 'the bank pays the rest'), ('From you, in all', P0 * .25 + b + ab, ''), ('The bank pays', loan, ''), ('Then each month', 9489, '')]
@@ -86,7 +86,7 @@ try:
         check(f'{tag} C: Borrow offers the standard tenure and 35, 30, 25 and 20 years for a private home', 'Standard' in t and all(f'{y} years' in t for y in (35, 30, 25, 20)), t)
         close(pg)
         # ---------- D. CPF on a second home ----------
-        fresh(pg, '/tools/payment-planner/'); pg.fill('[data-k="price"]', '1,500,000'); settle(pg); opt(pg, 'who', 'Second home'); close(pg)
+        fresh(pg, '/tools/payment-planner/'); pg.fill('[data-k="price"]', '1,500,000'); settle(pg); opt(pg, 'who', 'Second home'); pg.evaluate("()=>document.querySelector('[data-home=\"0\"] [data-hk=\"mort\"][data-v=\"no\"]').click()"); settle(pg); close(pg)
         o = pg.inner_text('[data-out]')
         check(f'{tag} D: second home: "up to" is qualified, and the CPF set-aside is named', 'If you have it, CPF can pay up to' in o and 'only CPF above a set-aside can be used' in o, o[:700])
         check(f'{tag} D: no wording says CPF "can come from" as if the buyer had it', 'can come from CPF' not in o)

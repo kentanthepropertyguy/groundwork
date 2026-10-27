@@ -117,7 +117,7 @@ try:
             check(vn + ': two Citizens: no married question', not pg.is_visible('[data-k="couple"]'))
             pg.locator('[data-k="p.1.res"]').select_option('FTA')
             check(vn + ': an FTA national pays as a Citizen: the same budget', until(pg, "(b)=>{const m=document.querySelector('[data-max]');return m&&parseInt(m.textContent.replace(/\\D/g,''))===b}", sc))
-            pg.locator('[data-k="p.1.res"]').select_option('SC'); seg(pg, 'p.1.own', '1')
+            pg.locator('[data-k="p.1.res"]').select_option('SC'); seg(pg, 'p.1.own', '1'); seg(pg, 'p.1.hl', '0')   # V3.12 Stage 2: an owner's housing loans are confirmed (None chosen)
             check(vn + ': the second buyer owns a home: CPF balances are asked before any budget (the full OA is not assumed)', until(pg, "()=>!document.querySelector('[data-cpf2]').hidden&&/CPF balances/.test(document.querySelector('[data-out]').textContent)"))
             seg(pg, 'cover95', 'yes'); typ(pg, 'cpfBal.0.oa', '150,000'); typ(pg, 'cpfBal.0.sa', '90,000'); typ(pg, 'cpfBal.1.oa', '120,000'); typ(pg, 'cpfBal.1.sa', '80,000')
             check(vn + ': with the balances: the co-buyer’s home brings ABSD into the budget', until(pg, "()=>/\\(ABSD \\$/.test(document.querySelector('[data-out]').textContent)"), out(pg)[:400])
