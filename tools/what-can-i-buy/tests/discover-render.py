@@ -38,6 +38,9 @@ def search(pg, budget, sale=None, typ=None):
     if sale: pg.click(f'[data-f=seg][data-k=sale][data-v={sale}]')
     pg.click('[data-f=show]'); pg.wait_for_selector('.kd-card, .kd-empty, .kd-none', timeout=20000)
 def headline(pg): return pg.inner_text('#kdH') if pg.query_selector('#kdH') else pg.inner_text('.kd-h1')
+# Results layout (Ken, 28 Oct 2026): the headline is "N developments match your search" and the budget is a chip ("Up to $1.8M"); summary() is both, with "$1.8M" read as "$1.8m"
+def summary(pg): return re.sub(r'(\$[\d.]+)M\b', lambda m: m.group(1) + 'm', headline(pg) + ' | ' + (pg.inner_text('.kd-chips') if pg.query_selector('.kd-chips') else ''))
+SUMJS = "(document.querySelector('#kdH').innerText + ' | ' + document.querySelector('.kd-chips').innerText).replace(/(\\$[\\d.]+)M\\b/g, '$1m')"
 def no_overflow(pg): return not pg.evaluate('document.documentElement.scrollWidth>innerWidth+1')
 VIEWS = [('desktop', dict(viewport={'width': 1440, 'height': 900})), ('phone', dict(viewport={'width': 390, 'height': 844}, device_scale_factor=2, has_touch=True, is_mobile=True))]
 try:
@@ -56,25 +59,26 @@ try:
         t('entry: budget, optional place, type Any, no questionnaire', entry)
         def first_home():
             ctx, pg, errs = open_page(br, kw); search(pg, '1,500,000')
-            h = headline(pg); ok(re.search(r'\d+ developments? with recent sales or developer listings within \$1\.5m', h), h)   # Research fix: names both sources
+            h = summary(pg); ok(re.search(r'^\d+ developments? match your search \|.*Up to \$1\.5m', h, re.S), h)   # Results layout: plain headline, budget as a chip
+            ok('past URA transactions' in pg.inner_text('.kd-g[data-sale=resale] .kd-gn') and 'not current listings' in pg.inner_text('.kd-g[data-sale=resale] .kd-gn'), 'resale said once to be past transactions, not listings')
             ok(not re.search(r'available|for sale|you can buy', h, re.I), h)
-            ok(pg.query_selector('.kd-tg-g, .kd-tg-a, .kd-tg-b, .kd-tg-n') is not None, 'cards carry a plain evidence tag')
+            ok(pg.query_selector('.kd-row .kd-rp b') is not None and pg.query_selector('.kd-tg-g, .kd-tg-a') is None, 'rows carry one price figure and no evidence badge (Results layout)')
             ok(pg.query_selector('[data-f=over]:checked') is None, '5% over group is off by default')
             ok(no_overflow(pg), 'no sideways scroll'); ok(not errs, str(errs)); ctx.close()
         t('a first-time buyer with $1.5m and no area gets developments, described as past sales', first_home)
         def keyboard():
             ctx, pg, errs = open_page(br, kw); pg.wait_for_selector('#kdBudget'); pg.fill('#kdBudget', '1.8m'); pg.press('#kdBudget', 'Enter')
-            pg.wait_for_selector('.kd-card', timeout=20000); ok('$1.8m' in headline(pg), headline(pg)); ctx.close()
+            pg.wait_for_selector('.kd-card', timeout=20000); ok('$1.8m' in summary(pg), summary(pg)); ctx.close()
         t('Enter in the budget box shows results; "1.8m" is understood', keyboard)
         def bad_budget():
             ctx, pg, errs = open_page(br, kw); pg.wait_for_selector('#kdBudget'); pg.fill('#kdBudget', '1000'); pg.click('[data-f=show]')
             ok('$300,000' in pg.inner_text('#kdBudgetErr'), 'error names the allowed range'); ok(pg.query_selector('.kd-card') is None); ctx.close()
         t('a budget outside $300,000 to $20,000,000 is refused with the allowed range', bad_budget)
         def edit_no_restart():
-            ctx, pg, errs = open_page(br, kw); search(pg, '1,500,000'); before = headline(pg)
+            ctx, pg, errs = open_page(br, kw); search(pg, '1,500,000'); before = summary(pg)
             pg.click('.kd-bar [data-f=edit]'); pg.wait_for_selector('#kdEdit.open')
-            pg.fill('#kdEdit #kdBudget', '2,500,000'); pg.wait_for_function("document.querySelector('#kdH').innerText.includes('$2.5m')", timeout=15000)
-            ok(headline(pg) != before); pg.click('#kdEdit [data-f=seg][data-k=type][data-v=condo]'); pg.wait_for_timeout(300)
+            pg.fill('#kdEdit #kdBudget', '2,500,000'); pg.wait_for_function(SUMJS + ".includes('$2.5m')", timeout=15000)
+            ok(summary(pg) != before); pg.click('#kdEdit [data-f=seg][data-k=type][data-v=condo]'); pg.wait_for_timeout(300)
             ok('Condo' in pg.inner_text('.kd-chips'), 'type shows as a chip'); ok(pg.query_selector('#kdBudget') is not None)
             ok(pg.query_selector('.kd-entry') is None, 'never returns to the entry screen'); ok(not errs, str(errs)); ctx.close()
         t('changing budget and type after results updates them without restarting', edit_no_restart)
@@ -97,8 +101,7 @@ try:
             pg.evaluate("document.querySelector('#kdEdit [data-more]').open = true")
             pg.click('#kdEdit [data-f=seg][data-k=beds][data-v="2"]'); pg.wait_for_timeout(500)
             ok('New launches: from new-launch listings' in pg.inner_text('#kdEdit'), 'either + bedrooms: note names both sources')
-            ok(re.search(r'2.bedroom', pg.inner_text('#kdH')), 'the headline names the bedrooms: ' + pg.inner_text('#kdH'))
-            ok(re.search(r'2 bed', pg.inner_text('.kd-chips')), 'chip shows bedrooms'); ok(not errs, str(errs)); ctx.close()
+            ok(re.search(r'2 bedrooms', pg.inner_text('.kd-chips')), 'a chip names the bedrooms: ' + pg.inner_text('.kd-chips')); ok(not errs, str(errs)); ctx.close()
         t('choosing bedrooms with New launch or Resale selected applies them to both, each from its own source', beds_either)
         def beds_stale():
             ctx, pg, errs = open_page(br, kw, q=_at(24 * 30)); pg.wait_for_selector('#kdBudget'); pg.click('[data-f=moresum]')
@@ -118,9 +121,9 @@ try:
             ok(pg.query_selector('.kd-fine') is None, 'no second "work out your budget" prompt')
             ok(pg.query_selector('[data-f=seg][data-k=type][aria-checked=true][data-v=any]') is not None, 'type is Any')
             ok(pg.query_selector('[data-f=moresum]') is not None, 'more requirements stay folded away')
-            pg.click('[data-f=show]'); pg.wait_for_selector('.kd-card', timeout=25000); ok('$1.84m' in headline(pg), headline(pg))
+            pg.click('[data-f=show]'); pg.wait_for_selector('.kd-card', timeout=25000); ok('$1.84m' in summary(pg), summary(pg))
             ok(pg.query_selector('.kd-bar [data-f=edit]') is not None, 'results still editable')
-            pg.reload(); pg.wait_for_selector('.kd-card', timeout=25000); ok('$1.84m' in headline(pg), 'coming back to the page returns to the same results')
+            pg.reload(); pg.wait_for_selector('.kd-card', timeout=25000); ok('$1.84m' in summary(pg), 'coming back to the page returns to the same results')
             ok(not errs, str(errs)); ctx.close()
         def planner_place_first():
             pre = "sessionStorage.setItem('kpt.handoff', JSON.stringify({v:1,from:'hdb-upgrade',state:'ok',budget:{low:1790000,high:1840000},purpose:null,openTo:'both'}))"
@@ -154,24 +157,24 @@ try:
             pg.wait_for_selector('.kd-sg', timeout=20000); pg.click('.kd-sg:has-text("Bishan MRT")'); pg.click('[data-f=seg][data-k=sale][data-v=resale]'); pg.click('[data-f=seg][data-k=type][data-v=condo]')
             n0 = pg.evaluate('history.length'); pg.click('[data-f=show]'); pg.wait_for_selector('.kd-card', timeout=25000); pg.wait_for_selector('.kd-map.leaflet-container', timeout=20000)
             ok(pg.evaluate('history.length') == n0 + 1 and hist(pg)[1] == 'r', 'Show developments adds exactly one history entry: ' + str(hist(pg)))
-            h1 = headline(pg); n1 = pg.evaluate('history.length')
+            h1 = summary(pg); n1 = pg.evaluate('history.length')
             # map layers, selecting a marker, the Edit panel, a different distance: none of it adds a history entry
             pg.tap('.lyr-b') if phone else pg.click('.lyr-b'); pg.click('[data-layer=school]'); pg.tap('.lyr-b') if phone else pg.click('.lyr-b')
             pg.click('.kd-bar [data-f=edit]'); pg.click('[data-f=rad][data-r="2000"]:visible'); pg.wait_for_timeout(300); pg.evaluate("document.querySelector('#kdDone').click()"); pg.wait_for_timeout(200)
             pg.click('.kd-card [data-f=locate]') if pg.query_selector('.kd-card [data-f=locate]') else None; pg.wait_for_timeout(300)
             ok(pg.evaluate('history.length') == n1, 'layers, distance, selecting and the Edit panel add no history entries: ' + str(pg.evaluate('history.length') - n1))
-            h2 = headline(pg)
+            h2 = summary(pg)
             pg.go_back(); pg.wait_for_selector('#kdBudget', timeout=10000); pg.wait_for_function("!document.querySelector('.kd-card')", timeout=5000)
             ok(pg.input_value('#kdBudget') == '2,000,000' and pg.input_value('#kdPlace') == 'Bishan MRT', 'Back is the form with the budget and place kept: ' + pg.input_value('#kdBudget') + ' / ' + pg.input_value('#kdPlace'))
             ok(pg.get_attribute('[data-f=seg][data-k=type][aria-checked=true]', 'data-v') == 'condo' and pg.get_attribute('[data-f=seg][data-k=sale][aria-checked=true]', 'data-v') == 'resale', 'and so are the property type and sale choices')
             ok('2 km' in pg.inner_text('.kd-rad [aria-checked=true]') and not pg.evaluate("document.body.classList.contains('kd-hasmap')") and pg.locator('.kd-map').count() == 0, 'and the distance; the map is gone with the results')
             pg.go_forward(); pg.wait_for_selector('.kd-card', timeout=15000); pg.wait_for_selector('.kd-map.leaflet-container', timeout=20000)
-            ok(headline(pg) == h2 and 'Bishan MRT' in pg.inner_text('.kd-chips'), 'Forward returns to the same results: ' + headline(pg))
+            ok(summary(pg) == h2 and 'Bishan MRT' in pg.inner_text('.kd-chips'), 'Forward returns to the same results: ' + headline(pg))
             # Back, change the budget on the form, Show developments: updated results
-            pg.go_back(); pg.wait_for_selector('#kdBudget'); pg.fill('#kdBudget', '1,500,000'); pg.click('[data-f=show]'); pg.wait_for_selector('.kd-card', timeout=25000); pg.wait_for_function("document.querySelector('#kdH, .kd-h1').innerText.indexOf('$1.5m') > -1", timeout=8000)
-            ok('$1.5m' in headline(pg), 'edited requirements give updated results: ' + headline(pg))
+            pg.go_back(); pg.wait_for_selector('#kdBudget'); pg.fill('#kdBudget', '1,500,000'); pg.click('[data-f=show]'); pg.wait_for_selector('.kd-card', timeout=25000); pg.wait_for_function(SUMJS + ".indexOf('$1.5m') > -1", timeout=8000)
+            ok('$1.5m' in summary(pg), 'edited requirements give updated results: ' + summary(pg))
             # a reload keeps the results, and Back from there is still the prefilled form, and Back again leaves the page
-            pg.reload(); pg.wait_for_selector('.kd-card', timeout=25000); ok('$1.5m' in headline(pg), 'a reload stays on the results')
+            pg.reload(); pg.wait_for_selector('.kd-card', timeout=25000); ok('$1.5m' in summary(pg), 'a reload stays on the results')
             pg.go_back(); pg.wait_for_selector('#kdBudget', timeout=10000); ok(pg.input_value('#kdBudget') == '1,500,000', 'Back after a reload is the prefilled form')
             pg.go_back(); pg.wait_for_function("location.pathname.indexOf('what-can-i-buy') < 0", timeout=8000)
             ok(True); ok(not errs, str(errs)); ctx.close()
@@ -275,10 +278,10 @@ try:
                 dot = pg.evaluate("(()=>{const ds=[...document.querySelectorAll('.kd-map path.leaflet-interactive')].filter(p=>p.getAttribute('fill')==='#0E8C89');if(!ds.length)return null;const r=ds[ds.length-1].getBoundingClientRect();return [r.left+r.width/2,r.top+r.height/2]})()")
                 ok(dot is not None, 'matching developments are drawn on the map')
                 # editing without losing results
-                n0 = pg.locator('.kd-card').count(); h0 = headline(pg)
+                n0 = pg.locator('.kd-card').count(); h0 = summary(pg)
                 pg.click('.kd-bar [data-f=edit]'); pg.wait_for_selector('#kdEdit.open'); ok(rect(pg, '#kdEdit')['w'] < 420 and pg.locator('.kd-card').count() == n0, 'Edit opens inside the panel and the results stay')
                 pg.fill('#kdBudget', '2,500,000'); pg.wait_for_timeout(900)
-                ok(pg.locator('.kd-card').count() >= n0 and pg.locator('.kd-map.leaflet-container').count() == 1 and headline(pg) != h0, 'changing the budget updates the results; the map stays: ' + headline(pg))
+                ok(pg.locator('.kd-card').count() >= n0 and pg.locator('.kd-map.leaflet-container').count() == 1 and summary(pg) != h0, 'changing the budget updates the results; the map stays: ' + summary(pg))
                 ok('Bishan MRT' in pg.inner_text('.kd-chips'), 'the place is kept')
                 pg.click('#kdEdit [data-f=clearplace]') if pg.query_selector('#kdEdit [data-f=clearplace]') else None; pg.wait_for_timeout(600)
                 ok(pg.locator('.kd-card').count() > 0 and not pg.evaluate("document.body.classList.contains('kd-hasmap')") and pg.locator('.kd-map').count() == 0, 'clearing the place returns to the list-first results')
@@ -292,7 +295,7 @@ try:
                 m, sh = rect(pg, '.kd-map'), rect(pg, '.kd-main')
                 ok(m and m['w'] >= 389 and m['h'] >= 500, 'the map fills the screen: ' + str(m))
                 ok(sh and sh['b'] >= 843 and sh['h'] <= 844 * 0.6 and sh['h'] > 150, 'results are in a bottom sheet that leaves the map visible: ' + str(sh))
-                ok(pg.locator('.kd-shd').is_visible() and 'Minimise' in pg.inner_text('.kd-shd') and 'nearest first' in pg.inner_text('.kd-main') and 'past sales' in pg.inner_text('.kd-main'), 'the sheet says it can be minimised; order and "past sales" stay in view: ' + pg.inner_text('.kd-shd'))
+                ok(pg.locator('.kd-shd').is_visible() and 'Minimise' in pg.inner_text('.kd-shd') and 'nearest first' in pg.inner_text('.kd-main') and 'past URA transactions' in pg.inner_text('.kd-main'), 'the sheet says it can be minimised; order and "past transactions" stay in view: ' + pg.inner_text('.kd-shd'))
                 ok(pg.locator('.kd-vt').count() == 0, 'no List | Map switch')
                 lb = rect(pg, '.lyr-b'); ok(lb and lb['t'] >= 0 and lb['r'] <= 390 and lb['b'] < sh['t'], 'Layers sits on the map above the sheet: ' + str(lb))
                 pg.tap('.lyr-b'); pg.wait_for_timeout(120); lp = rect(pg, '.lyr-p'); ok(lp and lp['l'] >= 0 and lp['r'] <= 390 and lp['b'] <= sh['t'] + 1, 'the Layers list opens on the map: ' + str(lp)); pg.tap('.lyr-b')

@@ -206,3 +206,109 @@ body.kd-hasmap .kd-mapbox .lyr-p{top:46px}
 .kd-card.kd-unc{background:#FBFBFA;border-style:dashed}
 .kd-card.kd-unc .kd-ev b{font-size:16px}
 .kd-uncl{margin-top:18px}.kd-uncl .kd-link{font-size:13px}
+
+/* ---- Results layout (Ken, 28 Oct 2026): the width is used for comparison, not for bigger cards.
+   List view (no place chosen): a centred container up to 1,400px; desktop = one compact table per group; phone and the map panel = compact expandable cards.
+   Same V3.8 language: white, navy ink, hairlines, one blue for actions. ---- */
+body[data-kd-view=list] .kd-wrap{max-width:1400px}
+@media (min-width:900px){
+  body[data-kd-view=list] .kd-cols{grid-template-columns:minmax(0,1fr)}
+  body[data-kd-view=list] .kd-main{max-width:none}
+}
+.kd.is-results .kd-h1{font-size:28px;letter-spacing:-.025em;margin:0}
+@media (min-width:900px){.kd.is-results .kd-h1{font-size:34px}}
+.kd.is-results .kd-lead{margin-top:6px}
+/* chips: plain words, with Edit search as the one outlined pill */
+.kd.is-results .kd-bar{margin-top:10px;padding:6px 0 8px}
+.kd.is-results .kd-barrow{display:flex;align-items:center;gap:6px;min-width:0}
+.kd.is-results .kd-chips{margin:0;flex:0 1 auto;min-width:0;gap:2px}
+.kd.is-results .kd-chip{border:0;background:transparent;padding:7px 10px;border-radius:10px;font-weight:500;font-size:14.5px;color:var(--ink)}
+.kd.is-results .kd-chip:hover{background:var(--grey)}
+.kd-editb{flex:none;display:inline-flex;align-items:center;gap:8px;border:1px solid #CFCFD6;background:#fff;border-radius:980px;padding:7px 14px;font:inherit;font-size:14.5px;font-weight:600;color:var(--ink);cursor:pointer;white-space:nowrap;min-height:38px}
+.kd-editb:hover{border-color:var(--ink)}.kd-editb[aria-expanded=true]{border-color:var(--ink);background:var(--grey)}
+.kd.is-results .kd-quick2{margin:2px 0 0}.kd.is-results .kd-quick2 .kd-tick{margin-top:4px;font-size:13.5px}
+/* groups */
+.kd.is-results .kd-sec{margin-top:22px}
+.kd.is-results .kd-g{margin-top:18px}
+.kd.is-results .kd-gh{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 2px;flex-wrap:wrap}
+.kd.is-results .kd-gh h3,.kd.is-results .kd-gh .kd-ch{margin:0;font-size:19px;font-weight:750;color:var(--ink);letter-spacing:-.02em}
+.kd-cnt{color:var(--muted);font-size:14px;font-weight:500;margin-left:4px;letter-spacing:0}
+.kd.is-results .kd-gn{border-left:0;padding-left:0;margin:2px 0 8px;font-size:13px}
+.kd-sort{display:inline-flex;align-items:center;gap:4px;font-size:13.5px;color:var(--muted)}
+.kd-sort select{border:0;background:transparent;font:inherit;font-size:13.5px;color:var(--ink);font-weight:600;padding:6px 2px;cursor:pointer;min-height:32px;field-sizing:content}
+/* rows: a real table. Phone and the map panel: each row is a compact card (name and price, district · tenure, size); its details are the row after it */
+.kd-tbl{width:100%;border-collapse:collapse;border-top:1px solid var(--line)}
+.kd-tbl,.kd-tb{display:block}.kd-th{display:none}
+.kd-card.kd-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:0;row-gap:2px;border:0;border-bottom:1px solid var(--line);border-radius:0;margin:0;padding:11px 2px;background:transparent;align-items:baseline}
+.kd-row>td{display:block;padding:0;min-width:0}
+.kd-rnc{grid-column:1 / 3;grid-row:1;padding-right:12px!important}
+.kd-rn{margin:0;font-size:16px;line-height:1.3;font-weight:650;color:var(--ink);letter-spacing:-.01em;min-width:0}
+.kd-rt{border:0;background:transparent;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.kd-rt::after{content:"⌄";color:var(--muted);font-weight:400;font-size:13px;margin-left:6px}.kd-rt[aria-expanded=true]::after{content:"⌃"}
+.kd-rt:hover{color:var(--blue)}
+.kd-rdist{margin-left:8px;font-size:12.5px;color:var(--muted);font-weight:500}
+.kd-rdi{grid-column:1;grid-row:2;font-size:13px;color:var(--muted)}
+.kd-rten{grid-column:2;grid-row:2;font-size:13px;color:var(--muted)}.kd-rten::before{content:"\00a0· "}
+.kd-rs{grid-column:1 / 3;grid-row:3;font-size:13.5px;color:var(--body);font-variant-numeric:tabular-nums}
+.kd-rp{grid-column:3;grid-row:1 / span 2;text-align:right;font-variant-numeric:tabular-nums;align-self:start}
+.kd-rp b{font-size:16px;font-weight:750;color:var(--ink);white-space:nowrap}
+.kd-rp small{display:block;font-size:11.5px;color:var(--muted);font-weight:500;white-space:nowrap}
+.kd-ac{grid-column:1 / -1;grid-row:4}
+.kd-row .kd-acts{gap:16px;margin-top:4px}.kd-row .kd-acts a,.kd-row .kd-loc{font-size:13.5px;font-weight:600}
+.kd-rxr{display:block}.kd-rxr[hidden]{display:none}.kd-rxr>td{display:block;padding:0 0 12px}
+.kd-rx{padding:10px 12px;background:#FAFAFB;border-radius:12px;display:grid;gap:6px}
+.kd-rx .kd-ev{font-size:13.5px}.kd-rx .kd-ev b{font-size:15px}
+.kd-invd{font-size:13.5px}.kd-invd>span{display:block;color:var(--muted);font-size:12.5px}
+.kd-card.kd-row.is-sel{box-shadow:inset 3px 0 0 var(--ink);padding-left:10px}
+.kd-card.kd-row.kd-unc{background:transparent;border-style:solid}
+.kd-row.is-hl{box-shadow:inset 3px 0 0 var(--blue)}
+.kd-vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.kd.is-results .kd-more-b{min-height:40px;margin-top:10px;background:var(--grey);font-size:14px}
+.kd-unconf>summary{cursor:pointer;list-style:none;display:flex;align-items:baseline;gap:6px;padding:12px 0;border-top:1px solid var(--line)}
+.kd-unconf>summary::-webkit-details-marker{display:none}
+.kd-unconf>summary .kd-ch{font-size:17px;font-weight:700}
+.kd-unconf>summary::after{content:"⌄";color:var(--muted);margin-left:auto}.kd-unconf[open]>summary::after{content:"⌃"}
+.kd-sortl{display:none}
+/* desktop table (list view only; the map panel keeps the cards) */
+@media (min-width:900px){
+  .kd-sortl{display:inline}.kd-sortm{display:none}
+  body:not(.kd-hasmap) .kd-tbl{display:table;table-layout:fixed;border-top:0}
+  body:not(.kd-hasmap) .kd-th{display:table-header-group}
+  body:not(.kd-hasmap) .kd-tb{display:table-row-group}
+  body:not(.kd-hasmap) .kd-th th{text-align:left;padding:6px 4px 6px;font-size:12.5px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--line);vertical-align:bottom}
+  body:not(.kd-hasmap) .kd-th th:nth-child(1){width:29%}body:not(.kd-hasmap) .kd-th th:nth-child(2){width:7%}body:not(.kd-hasmap) .kd-th th:nth-child(3){width:19%}
+  body:not(.kd-hasmap) .kd-th th:nth-child(4){width:17%}body:not(.kd-hasmap) .kd-th th:nth-child(5){width:14%}body:not(.kd-hasmap) .kd-th th:nth-child(6){width:14%}
+  body:not(.kd-hasmap) .kd-th th.r{text-align:right}
+  .kd-sh{border:0;background:transparent;font:inherit;color:inherit;padding:4px 0;cursor:pointer;display:inline-flex;align-items:center;gap:5px;text-align:inherit}
+  .kd-sh:hover{color:var(--ink)}.kd-th th[aria-sort] .kd-sh{color:var(--ink)}
+  .kd-arr{font-size:9px;color:var(--ink)}
+  body:not(.kd-hasmap) .kd-card.kd-row{display:table-row;padding:0;border:0}
+  body:not(.kd-hasmap) .kd-row>td{display:table-cell;padding:11px 4px;border-bottom:1px solid var(--line);vertical-align:middle;font-size:14px;color:var(--body)}
+  body:not(.kd-hasmap) .kd-rnc{padding-right:12px!important}
+  body:not(.kd-hasmap) .kd-rn{font-size:15px}
+  body:not(.kd-hasmap) .kd-rten::before{content:none}
+  body:not(.kd-hasmap) .kd-rbed{display:none}
+  body:not(.kd-hasmap) .kd-rp{text-align:right}
+  body:not(.kd-hasmap) .kd-row .kd-acts{margin:0;justify-content:flex-end;gap:14px;flex-wrap:nowrap}
+  body:not(.kd-hasmap) .kd-row:hover>td{background:#FAFAFB}
+  body:not(.kd-hasmap) .kd-row.is-open>td{border-bottom:0}
+  body:not(.kd-hasmap) .kd-rxr{display:table-row}.kd-rxr[hidden]{display:none!important}
+  body:not(.kd-hasmap) .kd-rxr>td{display:table-cell;padding:0 4px 12px;border-bottom:1px solid var(--line)}
+  body:not(.kd-hasmap) .kd-card.kd-row.is-sel>td:first-child{box-shadow:inset 3px 0 0 var(--ink)}
+}
+@media (max-width:899px){
+  .kd.is-results .kd-barrow{gap:4px}
+  .kd.is-results .kd-barrow{flex-wrap:wrap}
+  .kd.is-results .kd-chips{flex-wrap:wrap;overflow:visible;flex:0 1 auto;gap:0 2px}   /* every chip whole, wrapping; never cut off */
+  body:not(.kd-hasmap) .kd.is-results .kd-bar{position:static;border-bottom:0}
+  .kd.is-results .kd-h1{font-size:24px}
+  .kd.is-results .kd-bar{padding:6px 16px 8px}
+  .kd.is-results .kd-chip{padding:7px 8px;font-size:14px}
+  /* phone list: compact cards; Research and Map are in the details, opened by tapping the name (with the map, they stay on each card) */
+  body:not(.kd-hasmap) .kd-row:not(.is-open) .kd-acts{display:none}
+}
+.kd.is-results .kd-tick i{white-space:nowrap}
+@media (max-width:899px){.kd.is-results .kd-chip{padding:6px 7px;font-size:13.5px}.kd-editb{min-height:36px;padding:6px 12px;font-size:14px}}
+.kd-rx p{margin:0}
+@media (max-width:899px){.kd-card.kd-row.is-open{border-bottom:0}.kd-rxr{border-bottom:1px solid var(--line)}}
+body.kd-hasmap .kd-card.kd-row.is-open{border-bottom:0}body.kd-hasmap .kd-rxr{border-bottom:1px solid var(--line)}

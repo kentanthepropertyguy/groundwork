@@ -53,22 +53,24 @@ def beds_state(pg, scope=''):
 def open_more(pg, scope=''):   # as a buyer does: tap "More requirements" (the page then keeps it open across redraws)
     if not pg.evaluate(f"document.querySelector('{scope} [data-more]').open"): pg.click(f'{scope} [data-more] > summary >> visible=true')
 def H(pg): return pg.inner_text('#kdH').replace('‑', '-')
-def group(pg, name): return pg.query_selector(f'.kd-g:has(.kd-gh h3:text-is("{name}"))')
-def money(s): return float(s.replace('$', '').replace('m', '')) * 1e6 if s.endswith('m') else float(s.replace('$', '').replace(',', ''))
+def group(pg, name): return pg.query_selector('.kd-g[data-sale=%s]' % ('new' if name == 'New launch' else 'resale'))
+def money(s): return float(s.replace('$', '').replace('M', '').replace('m', '')) * 1e6
+# Results layout (Ken, 28 Oct 2026): one row per development, its asking price "from $1.90M"; the check date once per group; the listed types in the search result itself
 def new_cards_ok(pg, budget, beds=None):
-    g = group(pg, 'New launch'); ok(g, 'a New launch group'); cards = g.query_selector_all('.kd-card'); ok(cards, 'new-launch cards')
-    for c in cards:
-        txt = c.inner_text()
-        ok('Developer listings · Checked' in txt, 'check date on every new-launch card (Ken, 28 Oct: “Developer listings · Checked [date]”): ' + txt[:120])
-        ok('(URA)' not in txt and 'Developer sales' not in txt, 'no URA developer sales used as the evidence: ' + txt[:160])
-        rows = c.query_selector_all('.kd-invt li'); ok(rows, 'bedroom types listed')
-        for r in rows:
-            rt = r.inner_text(); m = re.search(r'from around (\$[\d.,]+m?)', rt); ok(m, rt)
-            ok(money(m.group(1)) <= budget + 5000, 'listed price within the maximum: ' + rt)
-            ok(re.search(r'\d[\d,]*–[\d,]+ sq ft', rt), 'listed sizes shown: ' + rt)
-            if beds: ok(rt.startswith(f'{beds}-bedroom') or (beds == 4 and re.match(r'(4-bedroom|5\+ bedroom)', rt)), 'only the chosen bedroom type: ' + rt)
-        ok('Indicative asking prices' in txt and 'Availability may have changed.' in txt, 'indicative asking prices and the availability disclaimer')
-    return cards
+    gs = pg.query_selector_all('.kd-g[data-sale=new]'); ok(gs, 'a New launch group')
+    for g in gs:
+        note = g.query_selector('.kd-gn').inner_text(); ok(note.count('Developer listings · Checked') == 1 and 'Indicative asking prices' in note and 'Availability may have changed.' in note, 'check date once for the group, with the disclaimer: ' + note)
+        rows = g.query_selector_all('.kd-row'); ok(rows, 'new-launch rows')
+        for c in rows:
+            txt = c.inner_text(); ok('(URA)' not in txt and 'Developer sales' not in txt and 'Developer listings · Checked' not in txt, 'no URA developer sales, no repeated date: ' + txt[:160])
+            m = re.search(r'from (\$[\d.]+M)', c.query_selector('.kd-rp').inner_text()); ok(m, txt)
+            ok(money(m.group(1)) <= budget + 5000, 'listed price within the maximum: ' + txt)
+            ok(re.search(r'\d[\d,]*–[\d,]+ sq ft', c.query_selector('.kd-rs').inner_text()), 'listed sizes shown: ' + txt)
+    its = pg.evaluate("__kd.res().items.filter(i => i.sale === 'new').map(i => ({ ura: i.ura, types: i.inv.types.map(t => t.bedrooms) }))")
+    for it in its:
+        ok(it['ura'] is None, 'no URA figure behind a new launch')
+        if beds: ok(all(b == beds or (beds == 4 and b >= 4) for b in it['types']), 'only the chosen bedroom type: ' + str(it['types']))
+    return gs
 def clean_text(pg):
     b = pg.inner_text('#root'); ok(not re.search(r'huttons', b, re.I), 'no source name in the search or its results (Ken’s own credentials in the footer are not part of it)'); ok(not re.search(r'sold out', b, re.I), 'never "sold out"')
 def no_overflow(pg): return not pg.evaluate('document.documentElement.scrollWidth>innerWidth+1')
@@ -88,9 +90,9 @@ try:
             s = beds_state(pg, '#rwBudget'); ok(s['disabled'] == 0 and s['chosen'] == ['2'] and 'Matched on new-launch listings' in s['note'], 'after loading: still 2 bedrooms, enabled: ' + str(s))
             ok(pg.input_value('#rwBudget #kdBudget') == '2,000,000', 'the budget typed during loading is kept')
             pg.click('#rwBudget [data-f=show]'); pg.wait_for_url(re.compile(r'what-can-i-buy')); pg.wait_for_selector('.kd-card', timeout=20000)
-            ok(re.match(r'\d+ new launch(es)? with 2-bedroom homes in developer listings within \$2\.0m', H(pg)), H(pg))
+            ok(re.match(r'^\d+ developments? match(es)? your search$', H(pg)) and '2 bedrooms' in pg.inner_text('.kd-chips') and 'New launch' in pg.inner_text('.kd-chips'), H(pg))
             ok(group(pg, 'Resale') is None, 'New launch only: no resale group'); new_cards_ok(pg, 2000000, 2)
-            ok('from current developer listings' in pg.inner_text('.kd-lead'), pg.inner_text('.kd-lead')); ok('past sales, not homes for sale' not in pg.inner_text('.kd-lead'))
+            ok('past' not in pg.inner_text('.kd-lead'), 'no blanket past-sales line: ' + pg.inner_text('.kd-lead'))
             clean_text(pg); ok(no_overflow(pg), 'no sideways scroll'); ok(not errs, str(errs)); ctx.close()
         t('Research, fresh entry (before: bedrooms off, the listings never loaded): listings load at once, a choice made while loading is kept, 2-bedroom new launches from listings', research_fresh)
         def research_loaded():
@@ -126,16 +128,15 @@ try:
         def switching():
             ctx, pg, errs, rel = open_page(br, kw, 'tools/what-can-i-buy/')
             pg.wait_for_selector('#kdBudget'); pg.fill('#kdBudget', '2,000,000'); pg.click('[data-f=show]'); pg.wait_for_selector('.kd-card', timeout=20000)
-            ok(re.match(r'\d+ developments with recent sales or developer listings within \$2\.0m', H(pg)), H(pg))
-            ok('resale from past sales, new launches from developer listings' in pg.inner_text('.kd-lead'), pg.inner_text('.kd-lead'))
+            ok(re.match(r'^\d+ developments match your search$', H(pg)), H(pg))
             rg, ng = group(pg, 'Resale'), group(pg, 'New launch'); ok(rg and ng, 'both groups')
-            ok('Past sales recorded by URA, not current listings.' in rg.inner_text(), 'resale labelled as past transactions')
-            ok('From developer listings' in ng.inner_text(), 'new launches labelled as listings'); ok('(URA)' in rg.query_selector('.kd-card').inner_text(), 'resale evidence from URA')
+            ok('Estimates from past URA transactions, not current listings.' in rg.query_selector('.kd-gn').inner_text(), 'resale labelled once as past transactions')
+            ok('Developer listings · Checked' in ng.inner_text(), 'new launches labelled as listings'); ok(pg.evaluate("__kd.res().items.filter(i => i.sale === 'resale').every(i => i.ura && !i.inv)"), 'resale evidence from URA')
             new_cards_ok(pg, 2000000)
             for v, want in (('new', ('New launch',)), ('resale', ('Resale',)), ('either', ('Resale', 'New launch'))):
                 pg.click('.kd-bar [data-f=edit]'); pg.click(f'#kdEdit [data-k=sale] [data-v={v}]'); pg.wait_for_timeout(300); pg.click('#kdEdit [data-f=done] >> visible=true')
-                names = pg.eval_on_selector_all('.kd-g .kd-gh h3', 'e=>[...new Set(e.map(x=>x.textContent))]'); ok(sorted(names) == sorted(want), v + ': ' + str(names))
-                if v == 'resale': ok('past sales, not homes for sale' in pg.inner_text('.kd-lead'), 'resale keeps its past-sales line')
+                names = pg.eval_on_selector_all('.kd-g', 'e=>[...new Set(e.map(x=>x.dataset.sale === "new" ? "New launch" : "Resale"))]'); ok(sorted(names) == sorted(want), v + ': ' + str(names))
+                if v == 'resale': ok('Estimates from past URA transactions' in pg.inner_text('.kd-g[data-sale=resale] .kd-gn'), 'resale keeps its past-transactions line')
             clean_text(pg); ok(no_overflow(pg), 'no sideways scroll'); ok(not errs, str(errs)); ctx.close()
         t('Either at $2m: resale from URA resales and new launches from listings, labelled apart; switching New launch / Resale / Either', switching)
         def budgets():
@@ -150,7 +151,7 @@ try:
             for b in ('1', '2', '3', '4', ''):
                 pg.click('.kd-bar [data-f=edit]'); open_more(pg, '#kdEdit'); pg.click(f'#kdEdit [data-k=beds] [data-v="{b}"]'); pg.wait_for_timeout(300); pg.click('#kdEdit [data-f=done] >> visible=true')
                 if pg.query_selector('.kd-card'): new_cards_ok(pg, 2500000, int(b) if b else None)
-                else: ok(H(pg).startswith('No new launches with listings'), H(pg))
+                else: ok(H(pg) == 'No developments match your search', H(pg))
             ok(not errs, str(errs)); ctx.close()
         t('bedroom combinations 1, 2, 3, 4+ and Any on new launches: only listed types of that count', bed_combos)
         def saved():
@@ -169,9 +170,10 @@ try:
         def links():
             ctx, pg, errs, rel = open_page(br, kw, 'tools/what-can-i-buy/')
             pg.wait_for_selector('#kdBudget'); pg.fill('#kdBudget', '2,000,000'); pg.click('[data-k=sale] [data-v=new]'); pg.click('[data-f=show]'); pg.wait_for_selector('.kd-card', timeout=20000)
-            a = pg.query_selector('.kd-card a:text-is("Past developer sales ›")'); ok(a, 'a price-history link on a new launch with developer sales')
+            a = pg.query_selector('.kd-card a[href$="/new"]:text-is("Research")'); ok(a, 'a Research link (past developer sales) on a new launch that has them')
+            if not a.is_visible(): pid = a.get_attribute('data-id'); pg.click(f'.kd-row[data-pid="{pid}"] .kd-rt'); pg.wait_for_timeout(200); a = pg.query_selector(f'.kd-row[data-pid="{pid}"] a[href$="/new"]')   # phone: in the opened card
             href = a.get_attribute('href'); ok(re.search(r'research/#/p/[a-z0-9-]+/new$', href), href)
-            mp = pg.query_selector('.kd-card a:text-is("View on Map ›")').get_attribute('href'); ok(re.search(r'research/map/#p=[a-z0-9-]+$', mp), mp)
+            mp = pg.query_selector('.kd-card a:text-is("Map")').get_attribute('href'); ok(re.search(r'research/map/#p=[a-z0-9-]+$', mp), mp)
             a.click(); pg.wait_for_url(re.compile(r'research/#/p/')); pg.wait_for_function("/new sales/i.test(document.body.innerText) && /Transactions/.test(document.body.innerText)", timeout=30000)   # Research: the development's developer (new) sales and every transaction
             pg.goto(BASE + '/research/map/' + mp.split('research/map/')[1]); pg.wait_for_selector('.leaflet-container', timeout=30000)
             ok(not errs, str(errs)); ctx.close()

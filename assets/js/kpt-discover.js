@@ -115,7 +115,9 @@
     }
     all.forEach((p) => { seen[p.id] = 1; consider(p, invOn ? inv.bySlug[p.id] : null); });
     // new launches Huttons lists but URA has no sales for yet: listed from the Huttons price floor alone, labelled as such
-    if (invOn && sales.indexOf('new') > -1) inv.slugs.forEach((s) => { if (seen[s]) return; const r = FI.recordFor(ix, inv.bySlug[s]); if (r && r.rec) consider(r.rec, inv.bySlug[s]); });
+    // Results layout (Ken, 28 Oct 2026): a listing-only development takes its class (condo / EC / cluster) from the project index Research uses (ctx.cls, id -> class),
+    // so an EC such as North Gaia is matched and listed as an EC, never as a condo. Without ctx.cls it is read as before (condo).
+    if (invOn && sales.indexOf('new') > -1) inv.slugs.forEach((s) => { if (seen[s]) return; const r = FI.recordFor(ix, inv.bySlug[s]); if (!(r && r.rec)) return; const k = ctx && ctx.cls ? ctx.cls[s] : null; consider(TYPES.indexOf(k) > 0 ? Object.assign({}, r.rec, { c: k }) : r.rec, inv.bySlug[s]); });
     const cmp = (x, y) => (near ? (x.dist - y.dist) : 0) || TIER[x.tier] - TIER[y.tier] || (x.ura && y.ura ? (x.ura.strength === y.ura.strength ? 0 : x.ura.strength === 'good' ? -1 : 1) || y.ura.n - x.ura.n || y.ura.last - x.ura.last : x.ura ? -1 : y.ura ? 1 : 0) || (x.name < y.name ? -1 : x.name > y.name ? 1 : 0) || (x.sale < y.sale ? -1 : 1);
     items.sort(cmp); over.sort(cmp); unplaced.sort(cmp);
     const ids = (a) => { const o = {}; a.forEach((i) => { o[i.id] = 1; }); return Object.keys(o).length; };
