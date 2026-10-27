@@ -124,7 +124,7 @@ const FD = rd('data/projects/find.json'), BD = fs.existsSync(path.join(root, 'da
 if (!BD) console.log('  skip shipped-data searches: data/projects/find-beds.json not present');
 else {
   console.log('Shipped data (' + FD.asOf + ', data to ' + FD.latestMonth + ')');
-  const X = F.prepare(FD), BXl = K.prepare(BD, FD), INV = { inv: F.prepareInventory(rd('data/projects/inventory.json'), Date.parse('2026-10-08T00:00:00Z')) };
+  const X = F.prepare(FD), BXl = K.prepare(BD, FD), INV = { inv: F.prepareInventory(rd('tools/what-can-i-buy/tests/fixtures/inventory-sample.json'), Date.parse('2026-10-08T00:00:00Z')) };
   const L = (rq) => K.search(X, BXl, rq, INV);
   t('find-beds.json is accepted beside the live find.json (same URA download)', () => assert.ok(BXl));
   const check = (r, B) => {

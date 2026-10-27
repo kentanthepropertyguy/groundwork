@@ -18,7 +18,7 @@
   // Thresholds (all in one place so tests and the methodology read the same numbers).
   const T = { budgetPct: 0.10, widenBudgetPct: 0.15, minSales: 3, goodSales: 5, minActiveMonths: 2, recencyMonths: 6, perStreet: 2, maxCards: 5, bothResale: 3, bothNew: 2, sizePad: 100,
     inferMinDeals: 15, referenceStep: 50000, referenceMaxUp: 0.5,
-    radii: [500, 1000, 2000, 3000], nearFirst: 6, nearResale: 4, nearNew: 2, nearOther: 12, nearMax: 60, invFreshHours: 48, invMaxDays: 7, invFutureMs: 3600000, invBand: 100, invSchema: 2, moreMax: 5, maxMessage: 400 };
+    radii: [500, 1000, 2000, 3000], nearFirst: 6, nearResale: 4, nearNew: 2, nearOther: 12, nearMax: 60, invFreshHours: 48, invCadenceDays: 14, invMaxDays: 21, invFutureMs: 3600000, invBand: 100, invSchema: 2, moreMax: 5, maxMessage: 400 };
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   // Reviewed district to general-area names. UI orientation only: a district contains places not named here, and no project is ever said to be "in" a named neighbourhood.
@@ -321,8 +321,9 @@
   const dayNo = (ms) => Math.floor((ms + SGT) / DAY);
   /** "today", "yesterday" or "Fri 2 Oct", in Singapore time. No clock time is ever shown. */
   function whenText(checkedMs, nowMs) {
-    const d = dayNo(nowMs) - dayNo(checkedMs); if (d === 0) return 'today'; if (d === 1) return 'yesterday';
-    const dt = new Date(checkedMs + SGT); return WEEKDAY[dt.getUTCDay()] + ' ' + dt.getUTCDate() + ' ' + MON[dt.getUTCMonth()];
+    // V3.10: the actual date of the check is always shown; "today" or "yesterday" only alongside it, while that is literally true
+    const d = dayNo(nowMs) - dayNo(checkedMs), dt = new Date(checkedMs + SGT), day = WEEKDAY[dt.getUTCDay()] + ' ' + dt.getUTCDate() + ' ' + MON[dt.getUTCMonth()];
+    return d === 0 ? 'today, ' + day : d === 1 ? 'yesterday, ' + day : day;
   }
   /** Validates and indexes inventory.json (schema v2). Returns null when the file is unusable, so FIND behaves exactly as V9.1. */
   function prepareInventory(doc, nowMs) {
@@ -335,11 +336,18 @@
       return { fileAt, now: nowMs, clockBehind: nowMs < fileAt, bySlug: by, slugs: Object.keys(by).sort() };
     } catch (e) { return null; }
   }
-  /** 'fresh' (within 48 hours), 'dated' (48 hours to 7 days) or null (older, future, or no usable time). A missing project is never fresh. */
+  /** 'fresh' (within 48 hours), 'dated' (48 hours to 21 days) or null (older, future, or no usable time). A missing project is never fresh.
+   *  V3.10 (Ken, 27 Oct 2026): Huttons inventory is refreshed every 14 days (T.invCadenceDays), with 7 days' grace for a late refresh
+   *  (T.invMaxDays 21); past that a check is ignored exactly as before. Changing the cadence is a change to these two numbers only. */
   function freshness(inv, ip) {
     const at = Date.parse(ip && ip.checkedAt ? ip.checkedAt : inv.fileAt); if (!isFinite(at) || inv.clockBehind) return null;
     const age = inv.now - at; if (age < 0) return null;
     return age <= T.invFreshHours * HOUR ? 'fresh' : age <= T.invMaxDays * DAY ? 'dated' : null;
+  }
+  /** Past the 14-day cadence but still within the 21-day window: shown with a soft "may have changed since", never as an error. */
+  function late(inv, ip) {
+    if (!inv || !freshness(inv, ip)) return false;
+    const at = Date.parse(ip && ip.checkedAt ? ip.checkedAt : inv.fileAt); return inv.now - at > T.invCadenceDays * DAY;
   }
   /** Price evidence for one project against the buyer's size window and budget window. Uses only size bands whose centre is in the window.
    *  Returns null, or { types:[{bedrooms,floor,ceiling,fit}], primary, fit }. Prices are never used to rank. */
@@ -405,11 +413,11 @@
 
   /* ---- V10 wording (one place). {B} is the buyer's own budget; the only price ever shown from Huttons is the single rounded "From around" figure. */
   const HUT = {
-    label: (when) => 'HUTTONS INVENTORY' + (when ? ' · CHECKED ' + when.toUpperCase() : ''),
+    label: (when, lt) => 'HUTTONS INVENTORY' + (when ? ' · CHECKED ' + when.toUpperCase() : '') + (lt ? ' · MAY HAVE CHANGED SINCE' : ''),
     unchecked: 'We couldn’t check current Huttons inventory for this project. That doesn’t mean nothing is listed.',
     zero: 'No units currently shown in Huttons inventory for this project.',
-    nomatchBed: (when) => 'Checked ' + when + ': none of the units currently shown in Huttons inventory match the bedrooms and budget you chose.',
-    nomatch: (when) => 'Checked ' + when + ': none of the units currently shown in Huttons inventory are about your size and budget.',
+    nomatchBed: (when, past) => 'Checked ' + when + (past ? ': none of the units shown in Huttons inventory then matched the bedrooms and budget you chose.' : ': none of the units currently shown in Huttons inventory match the bedrooms and budget you chose.'),
+    nomatch: (when, past) => 'Checked ' + when + (past ? ': none of the units shown in Huttons inventory then were about your size and budget.' : ': none of the units currently shown in Huttons inventory are about your size and budget.'),
     note: 'Lowest price currently shown for these homes, rounded. Prices vary by unit.',
     notePast: 'Lowest price shown then for these homes, rounded. Prices vary by unit.',
     dated: 'Units may have changed since. Ask Ken for the latest.',
@@ -427,7 +435,7 @@
       above: pre + (past ? 'gave you room within the ' + homes + ' we saw then' + ar + '.' : 'gives you room within the ' + homes + ' we’re currently seeing' + ar + '.'),
       below: pre + (past ? 'was slightly below what we saw then for ' + homes + ar + '.' : 'is slightly below what we’re currently seeing for ' + homes + ar + '.'),
     }[p.fit];
-    return { kind: past ? 'dated' : 'fresh', label: HUT.label(when), when, size, from: 'From around ' + m2(p.floor) + (past ? ' (as shown then).' : ''), budget, note: past ? HUT.notePast : HUT.note, datedNote: past ? HUT.dated : null, fit: p.fit };
+    return { kind: past ? 'dated' : 'fresh', label: HUT.label(when, late(o.inv, c.ip)), when, late: late(o.inv, c.ip), size, from: 'From around ' + m2(p.floor) + (past ? ' (as shown then).' : ''), budget, note: past ? HUT.notePast : HUT.note, datedNote: past ? HUT.dated : null, fit: p.fit };
   }
   function supportRow(c, o) {
     const s = c.sup, label = 'URA DEVELOPER SALES';
@@ -455,7 +463,8 @@
     }
     // URA-only: the V9.1 card, plus one honest status line about Huttons
     const v = card(c.ura, o, un, null), when = c.fresh ? whenText(Date.parse(c.ip.checkedAt || new Date(o.inv.fileAt).toISOString()), o.inv.now) : null;
-    const hut = c.hut === 'zero' ? { kind: 'zero', label: HUT.label(when), text: HUT.zero } : c.hut === 'nomatch' ? { kind: 'nomatch', label: HUT.label(when), text: o.beds ? HUT.nomatchBed(when) : HUT.nomatch(when) } : { kind: 'unchecked', label: HUT.label(null), text: HUT.unchecked };
+    const lt = c.fresh ? late(o.inv, c.ip) : false, pastH = c.fresh === 'dated';
+    const hut = c.hut === 'zero' ? { kind: 'zero', label: HUT.label(when, lt), text: HUT.zero } : c.hut === 'nomatch' ? { kind: 'nomatch', label: HUT.label(when, lt), text: o.beds ? HUT.nomatchBed(when, pastH) : HUT.nomatch(when, pastH) } : { kind: 'unchecked', label: HUT.label(null), text: HUT.unchecked };
     if (o.beds) v.simple.quiet = QUIET_UNCONFIRMED + ' ' + QUIET_BED;      // V10.3.3: bedroom not confirmed for a project without a matching Huttons bedroom type
     return Object.assign(v, { slug: c.id, basis: 'URA developer sales only', huttons: hut, hasCheck: false, ask: ASK_LABEL, tier: c.tier, tick: base.tick, ask: ASK_LABEL, link: base.link, linkText: base.linkText });
   }
@@ -667,7 +676,7 @@
   ];
 
   const METHOD_INV = METHOD.slice(0, METHOD.length - 1).concat([
-    '“Updated today” beside New launch is when we last looked at current Huttons inventory. If the check is more than 2 days old the date is shown instead, and prices are described as “as shown then”.',
+    'The date beside New launch is when we last checked Huttons inventory. If that is more than 2 days ago, prices are described as “as shown then”; more than 14 days ago, we add that units may have changed since; after 21 days the check isn’t used at all.',
     'Huttons inventory is the list of units currently shown in Huttons’ own system when we last checked, with the date. It may not include every unit the developer has, and it excludes other agents’ listings. We show it only for new launch projects.',
     'The “From around” figure is the lowest price currently shown for homes about your size, rounded to $50k. We don’t publish a range, the number of units or which units. Prices vary by unit, and only Ken can say what you could actually get.',
     'Checks older than 7 days aren’t used. If we couldn’t check a project, we say so. That isn’t the same as there being no units.',
@@ -682,6 +691,6 @@
   }
 
   return { VERSION, T, radiusText, DISTRICT_AREAS, AREA_ALIASES, AREA_CHOICES, NEW_LABEL, NEW_NOTE, NEW_NOTE_INV, resolveArea, districtLabel, districtShort, BASE_NOT_EVAL, METHOD, METHOD_INV, ANALYTICS_KEYS, HUT,
-    prepareInventory, freshness, recordFor, invMatch, bedsFor, effectivePrefs, prefOrder, support, newCandidates, whenText, handoffMessage, askEvent, typeNoun,
+    prepareInventory, freshness, late, recordFor, invMatch, bedsFor, effectivePrefs, prefOrder, support, newCandidates, whenText, handoffMessage, askEvent, typeNoun,
     displayName, prepare, inferSize, sizeWindow, sizeWindows, BED_WORDS, GROUP_SUB, matchDistricts, unsupported, notEvaluated, matchProject, eligible, shortlist, count, compare, why, card, analytics, bucket, m2, p2, num, sizeText, ymLabel, monthsBetween };
 });

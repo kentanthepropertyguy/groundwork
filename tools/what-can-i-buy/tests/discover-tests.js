@@ -92,7 +92,7 @@ t('with both sale types and a bedroom choice, resale stays unfiltered and the no
 });
 t('without fresh inventory a bedroom search lists no new launch and inventoryUsable is false', () => {
   assert.strictEqual(D.inventoryUsable(null), false);
-  const stale = F.prepareInventory(DOC([IP('n', [TY(2, [[900, 1800000]])], { checkedAt: iso(NOW - 9 * 24 * H) })], iso(NOW - 9 * 24 * H)), NOW);
+  const stale = F.prepareInventory(DOC([IP('n', [TY(2, [[900, 1800000]])], { checkedAt: iso(NOW - 22 * 24 * H) })], iso(NOW - 22 * 24 * H)), NOW);   // V3.10: past the 21-day window
   assert.strictEqual(D.inventoryUsable(stale), false); assert.strictEqual(run([NEWP], { beds: 2, sale: 'new' }, { inv: stale }).items.length, 0);
   assert.strictEqual(D.inventoryUsable(inv([IP('n', [TY(2, [[900, 1800000]])])])), true);
 });

@@ -319,12 +319,24 @@
     return { ok: true, usable: members.reduce((a, m) => a + m.usable, 0), members, sumName, setAside, year, yearAsked: asked, outdated: asked > years[years.length - 1], cover, cautious: cover !== 'yes', older: members.some((m) => m.older && m.subject) };
   }
 
+  /* ---------------- financial assets (MAS Notice 645 paras 17(e), 19-21) ---------------- */
+  // o: { value, kind: 'cash' | 'other', pledged: true | false }  -> what MAS counts: the value less the minimum deduction, spread over 48 months.
+  // Returns { value, kind, pledged, haircut, counted (after the deduction), monthly, months } or null for no value.
+  function assetIncome(o) {
+    o = o || {}; if (!pos(o.value)) return null;
+    const A = R.financialAssets, kind = o.kind === 'other' ? 'other' : 'cash', pledged = o.pledged === true, h = A.haircut[kind][pledged ? 'pledged' : 'unpledged'];
+    const counted = o.value * (1 - h);
+    return { value: o.value, kind, pledged, haircut: h, counted, monthly: counted / A.months, months: A.months };
+  }
+
   /* ---------------- shared: borrowers, ages and tenure ---------------- */
-  // b: [{ age, fixed, variable, rental }]  -> gross and assessable (after the MAS 30% haircuts) income, income-weighted age
+  // b: [{ age, fixed, variable, rental, assetIncome }]  -> gross and assessable (after the MAS 30% haircuts) income, income-weighted age
+  // assetIncome (V3.8): the monthly figure MAS counts for eligible financial assets, already after its deduction and the 48 months (assetIncome(), below).
+  // It is part of gross monthly income (Notice 645 para 17(e)), so it counts in both totals; only the Pledged & Unpledged Assets calculator passes it.
   function borrowers(list) {
-    const bs = (list || []).filter((b) => b && (pos(b.fixed) || pos(b.variable) || pos(b.rental)));
-    const gross = (b) => nn(b.fixed) + nn(b.variable) + nn(b.rental);
-    const assess = (b) => nn(b.fixed) + nn(b.variable) * (1 - R.variableIncomeHaircut) + nn(b.rental) * (1 - R.rentalIncomeHaircut);
+    const bs = (list || []).filter((b) => b && (pos(b.fixed) || pos(b.variable) || pos(b.rental) || pos(b.assetIncome)));
+    const gross = (b) => nn(b.fixed) + nn(b.variable) + nn(b.rental) + nn(b.assetIncome);
+    const assess = (b) => nn(b.fixed) + nn(b.variable) * (1 - R.variableIncomeHaircut) + nn(b.rental) * (1 - R.rentalIncomeHaircut) + nn(b.assetIncome);
     const G = bs.reduce((s, b) => s + gross(b), 0), AS = bs.reduce((s, b) => s + assess(b), 0);
     const aged = bs.filter((b) => pos(b.age));
     // MAS Notice 632 footnote 6: weighted by income as counted under Notice 645, i.e. after the 30% haircuts (A2-05)
@@ -332,7 +344,7 @@
     // R1.2.2: the same age weighted by gross income, for disclosure only. Which of the two MAS means (Notice 632 fn. 3: "gross monthly income ... as determined in accordance with Notice 645") is not confirmed, so the engine's result (iwaa, above) is unchanged and is labelled unverified wherever two borrowers differ.
     const iwaaGross = aged.length === bs.length && G > 0 ? bs.reduce((s, b) => s + b.age * gross(b), 0) / G : null;
     const badAge = (list || []).some((b) => b && num(b.age) !== null && outOf('age', b.age));
-    const badMoney = (list || []).some((b) => b && ['fixed', 'variable', 'rental'].some((k) => num(b[k]) !== null && (b[k] < 0 || b[k] > LIMITS.income.max)));
+    const badMoney = (list || []).some((b) => b && ['fixed', 'variable', 'rental', 'assetIncome'].some((k) => num(b[k]) !== null && (b[k] < 0 || b[k] > LIMITS.income.max)));
     const everyone = (list || []).filter((b) => b && pos(b.age)); // HDB averages every applicant's age, earning or not
     const avgAge = everyone.length ? everyone.reduce((s, b) => s + b.age, 0) / everyone.length : null;
     const youngest = everyone.length ? Math.min.apply(null, everyone.map((b) => b.age)) : null;
@@ -640,5 +652,5 @@
   };
   const ASK = (tool) => 'Hi Ken, I’m using the ' + tool + ' on Groundwork and have a question.';
 
-  return { flatCheck, mortgage, stampDuty, bsdLines, ssd, saleProceeds, saleEstimate, cpfInterestEstimate, cpfSecondHome, tdsr, msr, progressive, borrowers, bankTenure, tenureNote, tenureMaxText, tenureTierText, tenureLimit, messages, ASK, instal, parseDate: D, parseMoney, parseNum, LIMITS, dutyAt };
+  return { assetIncome, flatCheck, mortgage, stampDuty, bsdLines, ssd, saleProceeds, saleEstimate, cpfInterestEstimate, cpfSecondHome, tdsr, msr, progressive, borrowers, bankTenure, tenureNote, tenureMaxText, tenureTierText, tenureLimit, messages, ASK, instal, parseDate: D, parseMoney, parseNum, LIMITS, dutyAt };
 });

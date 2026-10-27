@@ -862,3 +862,71 @@ body.lg .gw-rws .lg-sb .kpr-results{margin-top:12px}
 .gw-mone{margin:14px 0 0;font-size:15px;color:var(--gw-muted);display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline}
 .gw-mone a{color:var(--gw-ink);text-decoration:underline;text-underline-offset:3px}
 .gw-ms-tools .gw-mone{font-size:13.5px;gap:4px 14px;margin:10px 0 0}
+
+/* V3.8 (Ken 27 Oct 2026): the Calculators page is seven equal cards, two columns on a desktop and one on a phone, on the warm calculator
+   background; each card is one link (icon, title, one line, a quiet arrow). Plan My Move sits under them as one restrained section. */
+main:has(.gw-tcs){background:#FAF9F6}
+main:has(.gw-tcs) .gw-hero,main:has(.gw-tcs) .gw-jsec{background:transparent}
+.gw-tcs{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:1fr;gap:14px;max-width:880px}
+.gw-tcs>li{display:flex;min-width:0}
+.gw-tc{position:relative;flex:1;min-width:0;display:grid;grid-template-columns:44px minmax(0,1fr);column-gap:14px;row-gap:2px;align-content:center;min-height:98px;padding:18px 46px 18px 18px;background:#fff;border:1px solid #E6E7EB;border-radius:14px;box-shadow:0 1px 2px rgba(22,33,62,.04);color:var(--gw-ink) !important;text-decoration:none !important;transition:border-color .15s,box-shadow .15s}
+.gw-tc>svg:first-child{grid-row:1/span 2;align-self:center;width:44px;height:44px;padding:10px;border-radius:12px;background:#F1F2F5;color:var(--gw-ink)}
+.gw-tc b{font-size:17px;font-weight:650;line-height:1.3;color:var(--gw-ink);letter-spacing:-.01em}
+.gw-tc span{font-size:14.5px;line-height:1.45;color:var(--gw-muted)}
+.gw-tc .gw-tc-go{position:absolute;top:16px;right:16px;color:#A3A8B3}
+.gw-tc:hover{border-color:#B9BDC7;box-shadow:0 6px 18px rgba(22,33,62,.07)}
+.gw-tc:hover .gw-tc-go{color:var(--gw-ink)}
+.gw-tc:focus-visible{outline:2px solid var(--gw-ink);outline-offset:3px}
+.gw-pmm{margin-top:34px;max-width:880px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px 28px;padding:24px 26px;border-radius:14px;background:#F0F1F3}
+.gw-pmm>div{flex:1 1 360px;min-width:0}
+.gw-pmm h2{margin:0 0 4px;font-size:18px;font-weight:700;letter-spacing:-.01em;color:var(--gw-ink)}
+.gw-pmm p{margin:0;font-size:15px;line-height:1.5;color:var(--gw-body)}
+.gw-pmm-go{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 18px;border:1.5px solid var(--gw-ink);border-radius:999px;font-size:15px;font-weight:650;color:var(--gw-ink) !important;text-decoration:none !important;white-space:nowrap}
+.gw-pmm-go:hover{background:var(--gw-ink);color:#fff !important}
+.gw-pmm-go:focus-visible{outline:2px solid var(--gw-ink);outline-offset:3px}
+.gw-tdir:has(.gw-tcs){gap:0}
+.gw-tdir:has(.gw-tcs) .gw-tofficial{margin-top:22px}
+@media (max-width:640px){
+  .gw-tcs{grid-template-columns:minmax(0,1fr);grid-auto-rows:auto;gap:10px}
+  .gw-tc{min-height:0;padding:15px 42px 15px 15px;column-gap:12px}
+  .gw-tc>svg:first-child{width:40px;height:40px;padding:9px}
+  .gw-tc b{font-size:16.5px}
+  .gw-pmm{margin-top:26px;padding:20px}
+  .gw-pmm-go{width:100%;justify-content:center}
+}
+
+/* V3.8 (Ken 27 Oct 2026): less boxing on the single-figure calculators too. The entries sit on the page (no card around them) with the same
+   light-filled fields as the other calculators; the answer is one white card with dividers, not a grey panel holding white boxes. */
+main:has(.gw-tcs){background:#fff}
+.gw-pmm{margin-top:40px;padding:26px 0 0;border-radius:0;background:none;border-top:1px solid #E6E7EB}
+.gw-calc .gw-calc-in{background:none;border:0;border-radius:0;padding:0}
+.gw-calc .gw-in{background:#F3F4F7;border:1px solid transparent}
+.gw-calc .gw-in:hover{background:#EEF0F4}
+.gw-calc .gw-in:focus-within{background:#fff;border-color:var(--gw-ink)}
+.gw-calc .gw-calc-out{background:#fff;border:1px solid #E4E5E9;border-radius:4px;box-shadow:0 1px 2px rgba(22,33,62,.04);padding:28px 30px 22px}
+.gw-calc-out .gw-rows,.gw-calc-out .gw-stack{background:none;border-radius:0;padding-left:0;padding-right:0}
+.gw-calc-out .gw-stack,.gw-calc-out>div>.gw-rows{border-top:1px solid #E6E7EB;padding-top:12px}
+.gw-calc-out .gw-work,.gw-calc-out .gw-vx-tw{background:none;border:0;border-top:1px solid #E6E7EB;border-radius:0}
+.gw-calc-out .gw-work>summary{padding-left:0;padding-right:0}
+.gw-calc .gw-saved,.gw-calc .gw-reuse{background:none;padding:0}
+@media (max-width:719px){.gw-calc .gw-calc-in{padding:0}.gw-calc .gw-calc-out{padding:22px 18px 18px}}
+
+/* V3.9 (Ken 27 Oct 2026, Claude D's approved proposal): New launches. Compact white entries, name and location on the left, "Explore project"
+   on the right; the whole entry is the one link. Two columns on a desktop, one on a phone. No descriptions, chips or decoration. */
+main:has(.gw-nls){background:#fff}
+.gw-nls{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;max-width:1040px}
+.gw-nls>li{display:flex;min-width:0}
+.gw-nl{flex:1;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:12px 20px;padding:18px 22px;background:#fff;border:1px solid #E6E7EB;border-radius:12px;color:var(--gw-ink) !important;text-decoration:none !important;transition:border-color .15s,box-shadow .15s}
+.gw-nl>span:first-child{display:grid;gap:2px;min-width:0}
+.gw-nl b{font-size:18px;font-weight:650;letter-spacing:-.01em;color:var(--gw-ink)}
+.gw-nl small{font-size:15px;color:var(--gw-muted)}
+.gw-nl-go{flex:none;display:inline-flex;align-items:center;gap:6px;font-size:15.5px;font-weight:650;color:var(--gw-blue);white-space:nowrap}
+.gw-nl:hover{border-color:#B9BDC7;box-shadow:0 6px 18px rgba(22,33,62,.07)}
+.gw-nl:hover .gw-nl-go{text-decoration:underline;text-underline-offset:3px}
+.gw-nl:focus-visible{outline:2px solid var(--gw-ink);outline-offset:3px}
+.gw-rown-all{color:var(--gw-blue);text-decoration:none;font-weight:600;white-space:nowrap}
+.gw-rown-all:hover{text-decoration:underline;text-underline-offset:3px}
+@media (max-width:640px){.gw-nls{grid-template-columns:minmax(0,1fr);gap:10px}.gw-nl{padding:16px 16px}.gw-nl b{font-size:17px}.gw-nl small{font-size:14px}.gw-nl-go{font-size:15px}}
+/* V3.9: New Launches sits in the desktop header between Map and Calculators; on the narrowest desktop widths (900-959px) it would crowd the
+   header, so it steps back there (the menu's Research column always has it). Below 900px the compact header has no links at all. */
+@media (max-width:959px){.gw-nav .gw-links a[data-kpt-nav="new-launches"]{display:none}}

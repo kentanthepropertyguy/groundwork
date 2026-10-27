@@ -16,7 +16,11 @@ ANS = json.load(open(ROOT / 'research/tests/fixtures/onemap-postal.json'))['answ
 def _search(r):
     m = re.search(r'searchVal=(\d+)', r.request.url); body = ANS.get(m.group(1), {'found': 0, 'results': []}) if m else {'found': 0, 'results': []}
     r.fulfill(status=200, content_type='application/json', headers={'access-control-allow-origin': '*'}, body=json.dumps(body))
-BASE = f'http://127.0.0.1:{P}'; NOW = '?now=2026-10-08T00:00:00Z'
+# V3.10: the page's clock is set from the live inventory file's own date (12 hours after the check), so a data refresh needs no test edit
+import datetime as _dt
+_INV_AT = _dt.datetime.fromisoformat(json.load(open(ROOT / 'data/projects/inventory.json'))['checkedAt'].replace('Z', '+00:00'))
+_at = lambda hours: '?now=' + (_INV_AT + _dt.timedelta(hours=hours)).strftime('%Y-%m-%dT%H:%M:%SZ')
+BASE = f'http://127.0.0.1:{P}'; NOW = _at(12)
 passed = failed = 0
 def t(name, fn):
     global passed, failed

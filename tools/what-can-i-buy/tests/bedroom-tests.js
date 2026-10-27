@@ -3,7 +3,7 @@ const assert = require('assert'), fs = require('fs'), path = require('path');
 const root = path.join(__dirname, '../../../');
 const ENG = require(root + 'assets/js/kpt-engine.js'), FI = require(root + 'assets/js/kpt-find.js');
 const rj = (f) => JSON.parse(fs.readFileSync(root + f, 'utf8'));
-const ix = FI.prepare(rj('data/projects/find.json')), E = ENG.DEFAULTS, invDoc = rj('data/projects/inventory.json');
+const ix = FI.prepare(rj('data/projects/find.json')), E = ENG.DEFAULTS, invDoc = rj('tools/what-can-i-buy/tests/fixtures/inventory-sample.json');   // V3.10: named-project outcomes use a frozen copy of the 27 Oct file, never the live data file (refreshed every 14 days)
 const inv = () => FI.prepareInventory(invDoc, Date.parse(invDoc.checkedAt) + 3600e3);
 let pass = 0, fail = 0;
 const t = (n, f) => { try { f(); pass++; console.log('  ok   ' + n); } catch (e) { fail++; console.log('  FAIL ' + n + '\n       ' + e.message.split('\n')[0]); } };
@@ -93,7 +93,7 @@ t('$2.2m 3BR: The Hillshore (2BR fits, its 3BR is far above budget) is not subst
 t('$2.2m 3BR: the a/b set is the 3BR-matched projects, Sora shows 3 Bedroom only', () => {
   const ab = cand(2200000, '3br').filter((x) => x.tier === 'a' || x.tier === 'b').map(nm).sort();
   // V10.3.5 inventory: Gems Ville, Lucerne Grand, Narra Residences and Ocho are new in the 2026-10-07 inventory, each with a 3-bedroom band inside the budget window (Gems Ville/Ocho/Lucerne Grand are reviewed metadata projects)
-  assert.deepStrictEqual(ab, ['Canberra Crescent Residences', 'Gems Ville', 'Jansen House', 'Kassia', 'Lentor Gardens Residences', 'Lentoria', 'Lucerne Grand', 'Narra Residences', 'Ocho', 'Sora', 'The Sen', 'Vela Bay']);
+  assert.deepStrictEqual(ab, ['Canberra Crescent Residences', 'Gems Ville', 'Jansen House', 'Kassia', 'Lentor Gardens Residences', 'Lentoria', 'Lucerne Grand', 'Narra Residences', 'Ocho', 'Sora', 'The Sen', 'The Serra Residences', 'Vela Bay']);   // 27 Oct 2026 refresh adds The Serra Residences (reviewed metadata project, a 3-bedroom band inside the budget window)
   const sora = cardsOf(run(2200000, { bed: '3br' }), 'new').concat(cardsOf(run(2200000, { bed: '3br' }), 'new')).find((cd) => cd.name === 'Sora'); assert.ok(sora); assert.ok(/^3 Bedroom( · about [\d,]+–[\d,]+ sqft)?$/.test(sora.simple.size), sora.simple.size); assert.strictEqual(sora.simple.size.split(' · ')[0], '3 Bedroom');   // V10.3.6 adds the size range of the 3-bedroom homes shown
 });
 t('$2.6m 3BR: The Hillshore stays (its 3BR is inside budget) and shows 3 Bedroom; Canberra Crescent (4BR only) does not qualify', () => {

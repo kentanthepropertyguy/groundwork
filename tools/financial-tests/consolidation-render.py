@@ -19,7 +19,7 @@ def check(n, c, i=''):
     global ok, fail
     if c: ok += 1; print('  ok  ', n)
     else: fail += 1; print('  FAIL', n, i)
-CARDS = {'payment-planner': '/tools/payment-planner/', 'tdsr': '/tools/tdsr/', 'sale-proceeds': '/tools/sale-proceeds/', 'hdb-upgrade': '/tools/hdb-upgrade/', 'mortgage': '/tools/mortgage/', 'stamp-duty': '/tools/stamp-duty/', 'ssd': '/tools/ssd/'}
+CARDS = {'payment-planner': '/tools/payment-planner/', 'tdsr': '/tools/tdsr/', 'sale-proceeds': '/tools/sale-proceeds/', 'pledged-assets': '/tools/pledged-assets/', 'mortgage': '/tools/mortgage/', 'stamp-duty': '/tools/stamp-duty/', 'ssd': '/tools/ssd/'}
 def timeline(pg, kind, fills, price='1,500,000'):
     # FE V3: the Payment timeline is one page: type, price and date, then the funding check opened on the same page (no tabs)
     pg.goto(B + '/tools/payment-planner/'); pg.wait_for_selector('[data-f3="pay"]'); pg.evaluate("sessionStorage.removeItem('gw.fin3.v1')"); pg.reload(); pg.wait_for_selector('[data-f3="pay"]')
@@ -43,10 +43,10 @@ try:
         ctx = br.new_context(**kw); pg = ctx.new_page(); errs = []
         pg.on('pageerror', lambda e: errs.append(str(e)))
         pg.route(re.compile(r'googletagmanager|facebook\.net|onemap'), lambda r: r.fulfill(status=200, body=''))
-        # ---- 1. the Calculators page (V3.4: four questions, then the single-figure calculators as text links)
+        # ---- 1. the Calculators page (V3.8, Ken 27 Oct 2026: seven equal calculator cards; Upgrade from HDB through Plan My Move)
         pg.goto(B + '/tools/'); pg.wait_for_selector('.gw-tdir'); pg.wait_for_timeout(300)
-        check(vn + ': four question cards, each once, no badges', pg.locator('.gw-tdir a.gw-tl').count() == 4 and pg.locator('.gw-tdir a.gw-tl em').count() == 0)
-        check(vn + ': Stamp duty, Mortgage instalment and Seller’s stamp duty as text links', pg.locator('.gw-tdir .gw-mone a').count() == 3)
+        check(vn + ': seven calculator cards, each once, no badges', pg.locator('.gw-tdir a.gw-tc').count() == 7 and pg.locator('.gw-tdir a.gw-tc em').count() == 0)
+        check(vn + ': no text links underneath; the Plan My Move section links to the journey', pg.locator('.gw-tdir .gw-mone a').count() == 0 and pg.get_attribute('.gw-pmm a', 'href') == '../journey/')
         check(vn + ': no sideways scroll on the Calculators page', pg.evaluate('document.documentElement.scrollWidth <= innerWidth'))
         for tool, path in CARDS.items():
             pg.goto(B + '/tools/'); pg.wait_for_selector('.gw-tdir'); pg.click('.gw-tdir a[data-tool="%s"]' % tool); pg.wait_for_load_state(); pg.wait_for_timeout(200)
@@ -58,7 +58,7 @@ try:
         for q, want in [('HDB upgrade', 'tools/hdb-upgrade/'), ('TDSR', 'tools/tdsr/'), ('ABSD', 'tools/stamp-duty/'), ('Full payment planning', 'tools/payment-planner/'), ('What can I afford', 'tools/tdsr/#cash'), ('MSR', 'tools/tdsr/#hdb')]:
             hits = pg.evaluate("q => GWN.matchTools(q, 5).map(e => e.href)", q)
             check(vn + ': search "' + q + '" leads to ' + want, bool(hits) and hits[0] == want, hits)
-        check(vn + ': the Calculators menu column links Upgrade from HDB, and not the folded pages’ old addresses', pg.locator('.gw-ms-tools a[href$="tools/hdb-upgrade/"]').count() == 1 and pg.locator('.gw-ms-tools a[href$="tools/planner/"], .gw-ms-tools a[href$="tools/msr/"]').count() == 0)
+        check(vn + ': Upgrade from HDB is in the Plan My Move menu column, not the Calculators one; the folded pages’ old addresses are not linked', pg.locator('.gw-ms-tools a[href$="tools/hdb-upgrade/"]').count() == 0 and pg.locator('.gw-ms-guide a[href$="journey/#up"]').count() == 1 and pg.locator('.gw-ms-tools a[href$="tools/planner/"], .gw-ms-tools a[href$="tools/msr/"]').count() == 0)
         # ---- 2. the old planner address: fin3-connect-render.py (FE V3)
         # ---- 3. the Timeline's instalment warning
         base = [('cash', '125,000'), ('cpf', '330,000'), ('borrowers.0.fixed', '21,000'), ('borrowers.0.age', '35'), ('ratePct', '3'), ('years', '30')]

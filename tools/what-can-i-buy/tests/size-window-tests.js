@@ -3,7 +3,7 @@ const assert = require('assert'), fs = require('fs'), path = require('path');
 const root = path.join(__dirname, '../../../');
 const ENG = require(root + 'assets/js/kpt-engine.js'), FI = require(root + 'assets/js/kpt-find.js');
 const rj = (f) => JSON.parse(fs.readFileSync(root + f, 'utf8'));
-const ix = FI.prepare(rj('data/projects/find.json')), E = ENG.DEFAULTS, invDoc = rj('data/projects/inventory.json');
+const ix = FI.prepare(rj('data/projects/find.json')), E = ENG.DEFAULTS, invDoc = rj('tools/what-can-i-buy/tests/fixtures/inventory-sample.json');   // V3.10: named-project outcomes use a frozen copy of the 27 Oct file, never the live data file (refreshed every 14 days)
 const inv = () => FI.prepareInventory(invDoc, Date.parse(invDoc.checkedAt) + 3600e3);
 let pass = 0, fail = 0;
 const t = (n, f) => { try { f(); pass++; console.log('  ok   ' + n); } catch (e) { fail++; console.log('  FAIL ' + n + '\n       ' + e.message.split('\n')[0]); } };

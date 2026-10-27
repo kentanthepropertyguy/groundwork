@@ -90,10 +90,20 @@
     stressRate: BASE.stressRate,
     // MAS Notice 645 paras 17-18 and "Calculating TDSR": banks count no more than 70% of variable income (commission,
     // bonuses, allowances) and of rental income (stamped tenancy with at least 6 months left). Para 9: debts include at
-    // least 20% of the instalment on a loan the borrower guarantees. Income from financial assets is not modelled.
+    // least 20% of the instalment on a loan the borrower guarantees. Financial assets: financialAssets, below.
     // https://www.mas.gov.sg/regulation/explainers/tdsr-for-property-loans/calculating-tdsr  Checked 2026-10-09.
     variableIncomeHaircut: 0.30,
     rentalIncomeHaircut: 0.30,
+    // MAS Notice 645 (rev. 21 Aug 2025) paras 17(e), 19-21, Illustrative Example 1 (checked 27 Oct 2026): the value of the borrower's eligible
+    // financial assets counts in gross monthly income (for TDSR and the 30% MSR alike) after a MINIMUM deduction, then spread over 48 months.
+    //   cash   = Singapore dollar notes, coins and deposits (para 19(a));
+    //   other  = units in authorised collective investment schemes and registered business trusts, government and corporate debentures, stocks
+    //            and shares, structured deposits, foreign currency and gold (para 19(b)): with a secondary market or a reasonable basis for valuation.
+    // Assets must be unencumbered. Pledged = pledged with the lending bank to secure the loan, for at least 4 years; anything else is unpledged.
+    // Unpledged cash must still be in the borrower's account when the loan is disbursed (para 21). These are MAS MINIMUMS: a bank may deduct more,
+    // or not accept an asset class (bank policy, not modelled). CPF savings, property, insurance policies and crypto are not on the list.
+    // https://www.mas.gov.sg/regulation/notices/notice-645
+    financialAssets: { months: 48, pledgeYears: 4, haircut: { cash: { pledged: 0, unpledged: 0.70 }, other: { pledged: 0.30, unpledged: 0.70 } }, checked: '2026-10-27' },
 
     // MAS — Mortgage Servicing Ratio: property loan instalments (including the new one) <= 30% of gross monthly income,
     // for HDB flats and for ECs bought from the developer. The MAS 4% floor applies to bank loans. Checked 2026-10-09.
@@ -257,6 +267,7 @@
       absd: 'IRAS, ABSD (rates from 27 Apr 2023) and its remission pages (married couples, HDB flats and new ECs, FTAs, single SC seniors)',
       ssd: 'IRAS, Seller’s Stamp Duty for residential property (all holding periods from 14 Jan 2011); MOF (from 4 Jul 2025)',
       tdsr: 'MAS Notice 645 (rev. 21 Aug 2025): TDSR 55%, the higher of 4% and the loan rate, 30% haircut on variable and rental income',
+      financialAssets: 'MAS Notice 645 (rev. 21 Aug 2025) paras 17(e), 19-21: eligible financial assets count in income after a minimum deduction (cash pledged 4+ years 0%, other assets pledged 4+ years 30%, unpledged or pledged under 4 years 70%), spread over 48 months',
       msr: 'MAS Notice 645 (MSR 30%); HDB, Housing loan from HDB (3% floor, 75% LTV pro-rated by lease, 25 years, income ceilings)',
       ltv: 'MAS Notice 632 (rev. 21 Aug 2025): loan tenure and loan-to-value limits',
       cpf: 'CPF Board: refund of CPF principal plus accrued interest on sale; no cash top-up if sold at market value; OA rate 2.5%',

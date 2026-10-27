@@ -70,7 +70,7 @@
     });
     return types.length ? { types: types.sort((a, b) => a.bedrooms - b.bedrooms), from: Math.min.apply(null, types.map((t) => t.floor)) } : null;
   }
-  /** Is Huttons inventory usable at all right now (checked within 7 days)? The bedroom control depends on it. */
+  /** Is Huttons inventory usable at all right now (checked within 21 days, kpt-find.js)? The bedroom control depends on it. */
   function inventoryUsable(inv) { return !!(inv && inv.slugs.some((s) => FI.freshness(inv, inv.bySlug[s]))); }
 
   /** One search. ix = FI.prepare(find.json). ctx = { inv: FI.prepareInventory(...) | null }.
@@ -91,17 +91,17 @@
       let placed = true;
       if (near) { if (!near.pos[rec.id]) placed = false; else if (!(dist(rec.id) != null && dist(rec.id) <= near.radius)) return; }
       sales.forEach((sale) => {
-        let u = null, uo = null, im = null, imo = null, ist = 'unchecked', when = null;
+        let u = null, uo = null, im = null, imo = null, ist = 'unchecked', when = null, past = false, lt = false;
         // bedrooms: new launches only, from Huttons inventory; a bedroom choice makes the URA price test irrelevant for them (a bedroom type is never worked out from a size)
         if (sale === 'resale' || !req.beds) { u = uraMatch(ix, rec, sale, req, B); if (!u) uo = uraMatch(ix, rec, sale, req, B2); }
         if (sale === 'new' && ip) {
-          const fr = FI.freshness(inv, ip);
+          const fr = FI.freshness(inv, ip); past = fr === 'dated'; lt = !!fr && FI.late(inv, ip);
           if (fr && ip.status === 'ok') { im = invMatch(ip, req, B); if (!im) imo = invMatch(ip, req, B2); ist = im ? 'match' : 'nomatch'; when = FI.whenText(Date.parse(ip.checkedAt || new Date(inv.fileAt).toISOString()), inv.now); }
           else if (fr && ip.status === 'zero_returned') { ist = 'zero'; when = FI.whenText(Date.parse(ip.checkedAt || new Date(inv.fileAt).toISOString()), inv.now); }
         }
         const hit = u || im, hitOver = !hit && (uo || imo); if (!hit && !hitOver) return;
         const it = { id: rec.id, name: rec.name, street: rec.street || '', district: rec.d, seg: rec.seg || null, tenure: rec.tl || '', mixed: !!rec.m, tenGroup: rec.tg, cls, sale,
-          tier: hit ? (u ? u.tier : 'huttons') : 'over', ura: u || uo || null, dist: dist(rec.id), inv: sale === 'new' ? { state: ist, when, from: (im || imo) ? (im || imo).from : null, types: (im || imo) ? (im || imo).types : [] } : null };
+          tier: hit ? (u ? u.tier : 'huttons') : 'over', ura: u || uo || null, dist: dist(rec.id), inv: sale === 'new' ? { state: ist, when, past, late: lt, from: (im || imo) ? (im || imo).from : null, types: (im || imo) ? (im || imo).types : [] } : null };
         if (!placed) { if (hit) unplaced.push(it); return; }
         (hit ? items : over).push(it);
       });

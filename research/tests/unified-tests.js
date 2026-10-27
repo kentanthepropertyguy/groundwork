@@ -6,10 +6,12 @@ const rd = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 const R = rd('research/index.html'), W = rd('tools/what-can-i-buy/index.html'), MAP = rd('research/map/index.html');
 const ver = (s, k) => { const m = new RegExp(k + "\\s*[:=]\\s*'([^']*)'").exec(s) || new RegExp(k + '[^\\n]*?\\?v=([0-9a-f]{10})').exec(s); return m && m[1]; };
 t('Research passes the Budget form the same data versions as the Budget page', () => {
-  ['FIND_URL', 'INV_URL', 'SITES_URL', 'BEDS_URL'].forEach((k) => {
+  ['FIND_URL', 'SITES_URL', 'BEDS_URL'].forEach((k) => {
     const a = new RegExp(k + ":\\s*[^,}]*?\\?v=([0-9a-f]{10})").exec(R), b = new RegExp(k + ":\\s*[^,}]*?\\?v=([0-9a-f]{10})").exec(W);
     assert.ok(a && b, k + ' present in both'); assert.strictEqual(a[1], b[1], k);
   });
+  // V3.10: the Huttons inventory is refreshed every 14 days and loaded with no version tag in either place (fetched with cache: 'no-cache')
+  ['R', 'W'].forEach((n) => { const t = n === 'R' ? R : W; assert.ok(/INV_URL:/.test(t) && !/INV_URL:[^,}]*\?v=/.test(t), n + ': INV_URL has no version tag'); });
 });
 t('Research, the Budget page and the Map page use one Map version', () => {
   const m = /MAPV = '([^']+)'/.exec(R), w = /MAP_V: '([^']+)'/.exec(W), p = /kpt-map-core\.js\?v=([\d.-]+)/.exec(MAP);
