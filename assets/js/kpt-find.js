@@ -210,7 +210,7 @@
   const budWord = (o) => (o.range && o.range.high > o.range.low ? m2(o.range.low) + '–' + m2(o.range.high) : '~' + m2(o.budget));
   const NEW_LABEL = 'New launch projects with recent developer sales';
   const NEW_NOTE = 'Based on developer sales recorded by URA in the last 12 months. This data cannot tell us whether units are still available from the developer.';
-  const NEW_NOTE_INV = 'URA sales show what sold, not what is for sale. Where we checked current Huttons inventory, we say so and when.';
+  const NEW_NOTE_INV = 'URA sales show what sold, not what is for sale. Where we have current new-launch listings, we say so, with the date they were updated.';
   const FIT = { inside: 0, above: 1, below: 2 };
   const compare = (x, y) => (x.strength === y.strength ? 0 : x.strength === 'good' ? -1 : 1) || FIT[x.fit] - FIT[y.fit] || y.n - x.n || y.last - x.last || (x.name < y.name ? -1 : x.name > y.name ? 1 : 0);
 
@@ -413,11 +413,11 @@
 
   /* ---- V10 wording (one place). {B} is the buyer's own budget; the only price ever shown from Huttons is the single rounded "From around" figure. */
   const HUT = {
-    label: (when, lt) => 'HUTTONS INVENTORY' + (when ? ' · CHECKED ' + when.toUpperCase() : '') + (lt ? ' · MAY HAVE CHANGED SINCE' : ''),
-    unchecked: 'We couldn’t check current Huttons inventory for this project. That doesn’t mean nothing is listed.',
-    zero: 'No units currently shown in Huttons inventory for this project.',
-    nomatchBed: (when, past) => 'Checked ' + when + (past ? ': none of the units shown in Huttons inventory then matched the bedrooms and budget you chose.' : ': none of the units currently shown in Huttons inventory match the bedrooms and budget you chose.'),
-    nomatch: (when, past) => 'Checked ' + when + (past ? ': none of the units shown in Huttons inventory then were about your size and budget.' : ': none of the units currently shown in Huttons inventory are about your size and budget.'),
+    label: (when, lt) => 'NEW-LAUNCH LISTINGS' + (when ? ' · UPDATED ' + when.toUpperCase() : '') + (lt ? ' · MAY HAVE CHANGED SINCE' : ''),
+    unchecked: 'We don’t have current new-launch listings for this project. That doesn’t mean nothing is for sale.',
+    zero: 'No units currently shown in new-launch listings for this project.',
+    nomatchBed: (when, past) => 'Updated ' + when + (past ? ': none of the units listed then matched the bedrooms and budget you chose.' : ': none of the units currently listed match the bedrooms and budget you chose.'),
+    nomatch: (when, past) => 'Updated ' + when + (past ? ': none of the units listed then were about your size and budget.' : ': none of the units currently listed are about your size and budget.'),
     note: 'Lowest price currently shown for these homes, rounded. Prices vary by unit.',
     notePast: 'Lowest price shown then for these homes, rounded. Prices vary by unit.',
     dated: 'Units may have changed since. Ask Ken for the latest.',
@@ -458,7 +458,7 @@
       const lo = Math.min.apply(null, c.inv.types.map((x) => x.lo)), hi = Math.max.apply(null, c.inv.types.map((x) => x.hi));
       base.simple = { size: bedLabel(c.inv.types) + (o.beds ? (lo > 0 && hi > lo ? ' · about ' + num(lo) + '–' + num(hi) + ' sqft' : '') : ' · around your size'), badge: o.beds && o.bedWord ? '✓ Matches ' + o.bedWord : null, priceLead: 'From around', figure: m2(pr.floor), priceNote: pastC ? '(as shown then)' : null, budget: budgetLine(o, pr.fit), sales: hasN ? salesLine(sp.n, true) : null, latest: hasN && sp.last ? 'Latest: ' + ymLabel(sp.last) : null, quiet: null };
       if (o.beds) base.notEvaluated = notEvaluated(un, 'new', true);
-      return Object.assign(base, { basis: rated ? 'Current Huttons inventory and URA sales' : 'Current Huttons inventory only', meta: metaLine(c.rec), huttons: huttonsBlock(c, o), ura: supportRow(c, o), hasCheck: true, ask: ASK_LABEL,
+      return Object.assign(base, { basis: rated ? 'Current new-launch listings and URA sales' : 'Current new-launch listings only', meta: metaLine(c.rec), huttons: huttonsBlock(c, o), ura: supportRow(c, o), hasCheck: true, ask: ASK_LABEL,
         why: null, evidence: null, prices: null, indicative: null, strength: rated ? c.sup.kind : null });
     }
     // URA-only: the V9.1 card, plus one honest status line about Huttons
@@ -583,9 +583,9 @@
     }
     if (inv && types.indexOf('new') > -1) {
       out.inventory = { active: true, checkedAt: new Date(inv.fileAt).toISOString() };
-      out.dataLine = 'Based on actual URA sales in the last 12 months (to ' + ymLabel(ix.latest) + ') around your budget and size, plus a check of current Huttons inventory where we could make one. This is a starting list, not a recommendation.';
-      out.orderLine = types.length === 2 ? 'Resale: listed by how much recent evidence there is. New launch: listed by whether your budget sits within the range currently shown in Huttons, then by how much URA evidence there is. Not by quality, value or price.'
-        : 'Listed by whether your budget sits within the range currently shown in Huttons, then by how much URA evidence there is. Not by quality, value or price.';
+      out.dataLine = 'Based on actual URA sales in the last 12 months (to ' + ymLabel(ix.latest) + ') around your budget and size, plus current new-launch listings where we have them. This is a starting list, not a recommendation.';
+      out.orderLine = types.length === 2 ? 'Resale: listed by how much recent evidence there is. New launch: listed by whether your budget sits within the range currently listed, then by how much URA evidence there is. Not by quality, value or price.'
+        : 'Listed by whether your budget sits within the range currently listed, then by how much URA evidence there is. Not by quality, value or price.';
     } else if (inv) out.inventory = { active: true, checkedAt: new Date(inv.fileAt).toISOString() };
 
     // V10.3.1 a short, plain statement of what the priorities did (nothing when no priority applied)
@@ -611,11 +611,11 @@
     if (effect.length) out.effect = effect;      // absent when no priority applied, so the no-priority output is exactly the V10.3 output
     const gap = types.filter((s) => !forType(base, s)); if (gap.length) out.sizeGap = gap;      // sale types with no size to work from at this budget (absent = none)
     if (eff.on.length) {
-      if (inv && types.indexOf('new') > -1) out.orderLine = types.length === 2 ? 'Resale: listed by your priorities, then by how much recent evidence there is. New launch: listed by whether Huttons currently shows homes around your budget and size, then by your priorities, then by how much URA evidence there is. Not by quality, value or price.'
-        : 'Listed by whether Huttons currently shows homes around your budget and size, then by your priorities, then by how much URA evidence there is. Not by quality, value or price.';
+      if (inv && types.indexOf('new') > -1) out.orderLine = types.length === 2 ? 'Resale: listed by your priorities, then by how much recent evidence there is. New launch: listed by whether current listings show homes around your budget and size, then by your priorities, then by how much URA evidence there is. Not by quality, value or price.'
+        : 'Listed by whether current listings show homes around your budget and size, then by your priorities, then by how much URA evidence there is. Not by quality, value or price.';
       else out.orderLine = 'Listed by your priorities, then by how much recent evidence there is. Not by quality or value.';
     }
-    if (beds) out.orderLine = out.orderLine.replace('whether your budget sits within the range currently shown in Huttons', 'whether Huttons currently shows homes of the bedrooms you chose around your budget').replace('whether Huttons currently shows homes around your budget and size', 'whether Huttons currently shows homes of the bedrooms you chose around your budget');   // V10.3.3
+    if (beds) out.orderLine = out.orderLine.replace('whether your budget sits within the range currently listed', 'whether current listings show homes of the bedrooms you chose around your budget').replace('whether current listings show homes around your budget and size', 'whether current listings show homes of the bedrooms you chose around your budget');   // V10.3.3
 
     const asText = (n) => n + (n === 1 ? ' development' : ' developments');
     // radius search: the next radius up that adds at least one development
@@ -670,18 +670,18 @@
     'If freehold or a longer tenure was a priority, only freehold and leases of 900 years or more are shown, and you can remove that filter.',
     'Area filters use postal districts. If you told us where you want to be, we suggest a district and ask you to confirm it before it is used; places that sit in more than one district, or that we don’t recognise, are left for you to choose. The area names are general: a district contains places not named. We don’t match schools, workplaces, family locations, exact distances or neighbourhoods.',
     'Near a place: if you chose a road, MRT station, neighbourhood or development, only developments within your radius are listed, nearest first. Distances are straight-line (as the crow flies), not walking or driving distance. A road is measured from one point on it and a neighbourhood from its centre. Developments with no map position can’t be placed in a radius, so we say how many matched but are left out.',
-    'Where a new launch card says “Current availability not confirmed”, URA’s data can’t tell us whether the developer still has units to sell. Where we also check Huttons inventory, a card with no current match for your size and budget says the same. That isn’t the same as there being none.',
-    '“Does this suit me?” and “Compare these with Ken” open WhatsApp with a message ready to send. It names the project or projects and includes your budget, the size range if you typed one, and the district if you confirmed one. Nothing from Huttons or URA is included, and you can edit it before sending.',
+    'Where a new launch card says “Current availability not confirmed”, URA’s data can’t tell us whether the developer still has units to sell. Where we also have new-launch listings, a card with no current match for your size and budget says the same. That isn’t the same as there being none.',
+    '“Does this suit me?” and “Compare these with Ken” open WhatsApp with a message ready to send. It names the project or projects and includes your budget, the size range if you typed one, and the district if you confirmed one. Nothing from the listings or URA is included, and you can edit it before sending.',
     'This is a shortlist of developments worth investigating. It is not a recommendation or a valuation, and it doesn’t show what is for sale now or its asking price.',
   ];
 
   const METHOD_INV = METHOD.slice(0, METHOD.length - 1).concat([
-    'The date beside New launch is when we last checked Huttons inventory. If that is more than 2 days ago, prices are described as “as shown then”; more than 14 days ago, we add that units may have changed since; after 21 days the check isn’t used at all.',
-    'Huttons inventory is the list of units currently shown in Huttons’ own system when we last checked, with the date. It may not include every unit the developer has, and it excludes other agents’ listings. We show it only for new launch projects.',
+    'The date beside New launch is when the new-launch listings were last updated. If that is more than 2 days ago, prices are described as “as shown then”; more than 14 days ago, we add that units may have changed since; after 21 days they aren’t used at all.',
+    'New-launch listings are the units listed for sale when they were last updated, with the date. They may not include every unit the developer has. We show them only for new launch projects.',
     'The “From around” figure is the lowest price currently shown for homes about your size, rounded to $50k. We don’t publish a range, the number of units or which units. Prices vary by unit, and only Ken can say what you could actually get.',
     'Checks older than 7 days aren’t used. If we couldn’t check a project, we say so. That isn’t the same as there being no units.',
-    'We check Huttons inventory for new launch projects only, so resale cards show URA sales only. That is a difference in the data we hold, not in the options.',
-    'This is a shortlist of developments worth investigating. It is not a recommendation or a valuation. Apart from the Huttons check, it doesn’t show what is for sale now, and the Huttons price is only a rounded starting point.',
+    'We have new-launch listings for new launch projects only, so resale cards show URA sales only. That is a difference in the data we hold, not in the options.',
+    'This is a shortlist of developments worth investigating. It is not a recommendation or a valuation. Apart from the new-launch listings, it doesn’t show what is for sale now, and the listed price is only a rounded starting point.',
   ]);
   const ANALYTICS_KEYS = ['budget_band', 'result_bucket', 'size_source', 'area_filter', 'sale_groups'];
   const bucket = (n) => (n === 0 ? '0' : n < 3 ? '1-2' : n < 5 ? '3-4' : '5+');

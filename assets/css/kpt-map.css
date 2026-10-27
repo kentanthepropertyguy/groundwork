@@ -235,7 +235,8 @@ body.kpm > .gw-nav{flex:none}
 
 
 /* ---- answer-first panel: the most useful fact first, the rest on demand ---- */
-.kpm .lead{margin-top:14px;padding:12px 14px;background:var(--m-paper);border-radius:12px}
+/* V3.11 (Ken, 27 Oct 2026): the price summary sits on the white panel (no grey card): a thin rule above it and between bedroom rows */
+.kpm .lead{margin-top:14px;padding:12px 0 0;background:none;border-top:1px solid var(--m-line);border-radius:0}
 .kpm .ld-k{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--m-mut);display:flex;align-items:center}
 .kpm .ld-p{display:flex;align-items:baseline;gap:5px;margin-top:4px}
 .kpm .ld-p b{font-size:30px;line-height:1.1;font-weight:800;color:var(--m-ink);letter-spacing:-.02em}
@@ -272,7 +273,7 @@ body.kpm > .gw-nav{flex:none}
   .kpm .lyr-b{height:40px;padding:0 12px}
   .kpm .lyr-p{left:auto;right:0;top:46px}
   .kpm .mapstage.more .lyr{display:none}
-  .kpm .bs .lead{margin-top:6px;padding:10px 12px}
+  .kpm .bs .lead{margin-top:6px;padding:10px 0 0}
   .kpm .ld-p b{font-size:26px}
   .kpm .bs .around.key{margin-top:6px}
   .kpm .bs .sxs{margin-top:8px}
@@ -303,11 +304,13 @@ body.kpm > .gw-nav{flex:none}
 .kpm .lyr-r em{display:block;font-style:normal;font-weight:500;font-size:12px;color:var(--m-mut);margin-top:1px}
 .kpm .lyr-r span{min-width:0}
 /* 25 Oct 2026: typical total prices by bedroom type (or size) lead the card; psf is secondary */
-.kpm .ldb{display:grid;gap:8px;margin-top:8px}
+.kpm .ldb{display:grid;gap:0;margin-top:4px}
+.kpm .ldb-r{padding:8px 0}
+.kpm .ldb-r + .ldb-r{border-top:1px solid var(--m-line)}
 .kpm .ldb-r{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:0 10px}
 .kpm .ldb-t{font-size:14px;font-weight:700;color:var(--m-ink)}
 .kpm .ldb-r b{font-size:20px;font-weight:800;color:var(--m-ink);letter-spacing:-.02em;text-align:right}
 .kpm .ldb-m{grid-column:1/-1;font-size:12.5px;color:var(--m-mut);line-height:1.35}
 .kpm .ldb-st{color:var(--m-mut)}
 .kpm .ld-w{margin-top:2px}
-@media (max-width:760px){.kpm .ldb{gap:3px;margin-top:4px}.kpm .ldb-r b{font-size:17px}.kpm .ldb-1 .ldb-t{font-size:13.5px}.kpm .ldb-1 small{font-weight:500;color:var(--m-mut);font-size:12px;margin-left:4px}}
+@media (max-width:760px){.kpm .ldb{gap:0;margin-top:2px}.kpm .ldb-r{padding:3px 0}.kpm .ldb-r b{font-size:17px}.kpm .ldb-1 .ldb-t{font-size:13.5px}.kpm .ldb-1 small{font-weight:500;color:var(--m-mut);font-size:12px;margin-left:4px}}

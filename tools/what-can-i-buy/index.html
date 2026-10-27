@@ -40,7 +40,7 @@
 <script src="../../assets/js/kpt-analytics.js?v=3b78ef5642"></script>
 <script src="../../assets/js/kpt-components.js?v=597f0bf0d3"></script>
 <script src="../../assets/js/kpt-market.js?v=f2c5f82332"></script>
-<script src="../../assets/js/kpt-find.js?v=7835cb043e"></script>
+<script src="../../assets/js/kpt-find.js?v=f67ad54f43"></script>
 <script src="../../assets/js/kpt-discover.js?v=27cd4c4ec9"></script>
 <script src="../../assets/js/kpt-discover-beds.js?v=8a9a8b8867"></script>
 <script>
@@ -48,9 +48,9 @@
 (function () {
   const q = new URLSearchParams(location.search), local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
   const inv = local && /^[\w./-]+\.json$/.test(q.get('inventory') || '') ? q.get('inventory') : '../../data/projects/inventory.json';
-  window.KPD_CFG = { review: local, MAP_V: '2026-10-26.2', FIND_URL: '../../data/projects/find.json?v=df416f6c2b', INV_URL: inv, BEDS_URL: '../../data/projects/find-beds.json?v=3dbf16c1b6', SITES_URL: '../../data/research/sites.json?v=5acb944844' };
+  window.KPD_CFG = { review: local, MAP_V: '2026-10-27.1', FIND_URL: '../../data/projects/find.json?v=df416f6c2b', INV_URL: inv, BEDS_URL: '../../data/projects/find-beds.json?v=3dbf16c1b6', SITES_URL: '../../data/research/sites.json?v=5acb944844' };
 })();
 </script>
-<script src="../../assets/js/kpt-discover-ui.js?v=7287fc7300"></script>
+<script src="../../assets/js/kpt-discover-ui.js?v=e16aaa74f7"></script>
 </body>
 </html>

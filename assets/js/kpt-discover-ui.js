@@ -173,7 +173,7 @@
     const place = S.near && NR && it.dist != null ? kmText(it.dist) + ' from ' + NR.label : '';
     return [it.sale === 'new' ? 'New launch' : 'Resale', CLS[it.cls] || null, place || null, 'District ' + Number(it.district), String(it.tenure || '').replace(/ yrs /, ' years ').replace(/^(\d+ years) from/, '$1 from') || null].filter(Boolean).join(' · ');
   }
-  const TAG = { typical: ['g', 'Typical prices within your maximum'], some: ['a', 'Some sales within your maximum'], huttons: ['b', 'Huttons inventory within your maximum'], over: ['n', 'Up to 5% over your maximum'] };
+  const TAG = { typical: ['g', 'Typical prices within your maximum'], some: ['a', 'Some sales within your maximum'], huttons: ['b', 'New-launch listings within your maximum'], over: ['n', 'Up to 5% over your maximum'] };
   /* bedroom wording (resale): the basis is always named, as on Research; "not confirmed" is never worded as a match */
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const ymS = (s) => { const m = /^(\d{4})-(\d{2})$/.exec(String(s || '')); return m ? MON[Number(m[2]) - 1] + ' ' + m[1] : ''; };
@@ -205,7 +205,7 @@
     if (it.inv) {
       const iv = it.inv;
       // V3.10: the check date always; "(as shown then)" once it is over 2 days old, and "may have changed since" past the 14-day cadence
-      const chk = `Huttons inventory · checked ${esc(iv.when || '')}${iv.late ? ' · may have changed since' : ''}`;
+      const chk = `New-launch listings · updated ${esc(iv.when || '')}${iv.late ? ' · may have changed since' : ''}`;
       if (iv.state === 'match' || (it.tier === 'over' && iv.from)) inv = `<p class="kd-inv"><span>${chk}</span> ${esc(bedsNoun(iv.types))} homes from around <b>${esc(p2(iv.from))}</b>${iv.past ? ' (as shown then)' : ''}</p>`;
       else if (iv.state === 'nomatch') inv = `<p class="kd-inv kd-inv-no"><span>${chk}</span> none at your maximum${S.req.minSize ? ' and size' : ''}</p>`;
       else if (iv.state === 'zero') inv = `<p class="kd-inv kd-inv-no"><span>${chk}</span> no units shown</p>`;
@@ -225,13 +225,13 @@
     let note, off = false;
     if (bedsOn() && r.sale !== 'new') {   // resale by bedroom type: Research's own types, from the accepted classification
       const RES = 'Resales are matched on bedroom types from URA rental records or floor plans; where those don’t confirm it, they’re listed separately.';
-      note = r.sale === 'resale' ? RES : r.beds && !usable ? 'Applied to resale only: new launches can’t be matched on bedrooms just now.' : RES + ' New launches: from Huttons inventory.';
+      note = r.sale === 'resale' ? RES : r.beds && !usable ? 'Applied to resale only: new launches can’t be matched on bedrooms just now.' : RES + ' New launches: from new-launch listings.';
     }
     else if (r.sale === 'resale') { off = true; note = CFG.BEDS_URL ? 'Bedroom matching for resale isn’t available just now.' : 'Not available for resale: the sales records don’t include bedrooms, and we never work them out from size.'; }
-    else if (!usable) { off = true; note = 'Bedroom matching uses recently checked Huttons inventory for new launches, which isn’t available right now.'; }
+    else if (!usable) { off = true; note = 'Bedroom matching uses recently updated new-launch listings, which aren’t available right now.'; }
     else if (r.beds && r.sale === 'either') note = CFG.BEDS_URL ? 'Applied to new launches only: resale bedroom matching isn’t available just now.' : 'Applied to new launches only. Resale isn’t filtered by bedrooms.';
-    else if (r.beds) note = 'Matched on Huttons inventory, so only new launches with a matching bedroom type are listed.';
-    else note = 'For new launches only, from Huttons inventory. Resale can’t be filtered by bedrooms.';
+    else if (r.beds) note = 'Matched on new-launch listings, so only new launches with a matching bedroom type are listed.';
+    else note = 'For new launches only, from new-launch listings. Resale can’t be filtered by bedrooms.';
     return `<div class="kd-f"><span class="kd-l">Bedrooms <small>optional</small></span>${seg('beds', [['', 'Any'], [1, '1'], [2, '2'], [3, '3'], [4, '4+']].map((o) => (o[0] !== '' && off ? o.concat([true]) : o)), r.beds || '', off ? ' aria-disabled="true"' : '')}<p class="kd-note">${esc(note)}</p></div>`;
   }
   function overToggle(counts) {
@@ -273,8 +273,8 @@
       return `${N} development${N === 1 ? '' : 's'} with recent ${w} ${sw} within ${max}`; }
     if (!N) return `No developments with recent sales within ${max}`;
     const allHut = c.typical + c.some === 0 && c.huttons > 0;
-    if (allHut && r.beds && r.sale === 'new') return `${N} new launch${N === 1 ? '' : 'es'} with ${bedWord(r.beds)} homes from Huttons inventory within ${max}`;
-    if (allHut) return `${N} new launch${N === 1 ? '' : 'es'} in Huttons inventory within ${max}`;
+    if (allHut && r.beds && r.sale === 'new') return `${N} new launch${N === 1 ? '' : 'es'} with ${bedWord(r.beds)} homes in new-launch listings within ${max}`;
+    if (allHut) return `${N} new launch${N === 1 ? '' : 'es'} in new-launch listings within ${max}`;
     return `${N} development${N === 1 ? '' : 's'} with recent sales within ${max}`;
   }
   function subLine(res) {
@@ -286,11 +286,11 @@
     const tiers = [];
     if (c.typical && (c.some || c.huttons)) tiers.push(c.typical + ' with typical prices within your maximum');
     if (c.some) tiers.push(c.some + ' with only some sales within it');
-    if (c.huttons) tiers.push(c.huttons + ' from Huttons inventory');
+    if (c.huttons) tiers.push(c.huttons + ' from new-launch listings');
     if (res.beds && c.insufficient) tiers.push(c.insufficient + ' not confirmed as ' + bedWord(res.req.beds) + ', listed after');
     return `<p class="kd-sub">${esc(s)}</p>${tiers.length ? `<p class="kd-sub kd-tiers">${esc(tiers.join(' · '))}</p>` : ''}`;
   }
-  const NEW_NOTE = 'Developer sales recorded by URA. These don’t show what is still available; Huttons inventory is added where we have it.';
+  const NEW_NOTE = 'Developer sales recorded by URA. These don’t show what is still available; new-launch listings are added where we have them.';
   function groupHtml(g, key) {
     const shown = S.shown[key] || 5, items = g.items, name = g.sale === 'new' ? 'New launch' : 'Resale';
     const left = items.length - shown;
@@ -354,10 +354,10 @@
   }
   const METHOD = ['Your budget is your maximum. A development is listed when its URA sales in the last 12 months, at your minimum size or larger, include prices at or under it, with at least 3 such sales, one of them in the last 6 months.',
     '“Typical prices within your maximum” means the middle half of those sales is at or under it. “Some sales within your maximum” means only part of the range is, and typical prices are higher.',
-    'These are past sales, not homes for sale, and not a valuation. New-launch sales don’t show whether units remain; where Huttons inventory was checked recently it is shown separately, with the date.',
-    'Distances are in a straight line. Bedrooms are matched only for new launches, from Huttons inventory, and are never worked out from size. Condos, ECs and cluster housing are never mixed.',
+    'These are past sales, not homes for sale, and not a valuation. New-launch sales don’t show whether units remain; where new-launch listings were updated recently they are shown separately, with the date.',
+    'Distances are in a straight line. Bedrooms are matched only for new launches, from new-launch listings, and are never worked out from size. Condos, ECs and cluster housing are never mixed.',
     'The optional “up to 5% over” list shows developments whose recent sales start just above your maximum. It is never mixed into the main list.'];
-  const BEDS_METHOD = 'Bedrooms: for resale, a development is matched on the bedroom types its Research page shows, worked out from URA rental records or developers’ floor plans (URA doesn’t record bedrooms with a sale), and only where enough of its resales are identified. Where they aren’t, resales that could be that size are listed separately as “not confirmed”. For new launches, bedrooms come from Huttons inventory checked recently. Studios and penthouses don’t count as a number of bedrooms. Condos, ECs and cluster housing are never mixed.';
+  const BEDS_METHOD = 'Bedrooms: for resale, a development is matched on the bedroom types its Research page shows, worked out from URA rental records or developers’ floor plans (URA doesn’t record bedrooms with a sale), and only where enough of its resales are identified. Where they aren’t, resales that could be that size are listed separately as “not confirmed”. For new launches, bedrooms come from recently updated new-launch listings. Studios and penthouses don’t count as a number of bedrooms. Condos, ECs and cluster housing are never mixed.';
   function method(res) {
     if (!bedsOn() || res.req.sale === 'new') return METHOD;
     const m = METHOD.slice(); m[3] = 'Distances are in a straight line. ' + BEDS_METHOD;
