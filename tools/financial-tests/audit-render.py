@@ -50,11 +50,15 @@ try:
         P0 = 2650000; b = bsd(P0); ab = P0 * .30; loan = P0 * .75
         check(f'{tag} A: the independent figures are Ken\'s (BSD $102,100, ABSD $795,000, 20% + duties $1,427,100, in all $1,559,600, $9,489 a month)',
               b == 102100 and ab == 795000 and P0 * .20 + b + ab == 1427100 and P0 * .25 + b + ab == 1559600 and round(pmt(loan, .04, 30)) == 9489)
+        # 28 Oct 2026 (Claude E audit F1): the bank's first release is at the foundation stage (month 8 of the 48-month build), so from TOP the loan has 320 of its
+        # 360 months left: $1,987,500 at 4% over 320 months = $10,111 a month (Ken's $9,489 spread the loan over all 360 months from TOP)
+        i4 = .04 / 12; fromTop = loan * i4 / (1 - (1 + i4) ** -320)
+        check(f'{tag} A: from TOP, worked out independently: $10,111 a month', round(fromTop) == 10111, round(fromTop))
         fresh(pg, '/tools/payment-planner/'); pg.fill('[data-k="price"]', '2,650,000'); settle(pg)
         opt(pg, 'who', 'Permanent Resident'); opt(pg, 'who', 'Second home'); pg.evaluate("()=>document.querySelector('[data-home=\"0\"] [data-hk=\"mort\"][data-v=\"no\"]').click()"); settle(pg); close(pg)   # V3.12 Stage 2: the home's loan status answered (no loan), as the old “second home” assumed
         o = pg.inner_text('[data-out]'); r = rows(pg)
-        check(f'{tag} A: the card: cash $1,559,600 with BSD and ABSD named, $9,489 a month once fully drawn', D(P0 * .25 + b + ab) in o and D(b) + ' BSD + ' + D(ab) + ' ABSD' in o and D(ab) in o and '$9,489' in o and 'once fully drawn' in o, o[:600])
-        want = [('Booking fee', P0 * .05, 'cash'), ('At the S&P', P0 * .15, 'cash or CPF'), ('Buyer’s stamp duty', b, 'Within 14 days of signing the S&P'), ('ABSD', ab, 'Within 14 days of signing the S&P'), ('Upfront, in all', P0 * .20 + b + ab, ''), ('Foundation stage, your share', P0 * .05, 'the bank pays the rest'), ('From you, in all', P0 * .25 + b + ab, ''), ('The bank pays', loan, ''), ('Then each month', 9489, '')]
+        check(f'{tag} A: the card: cash $1,559,600 with BSD and ABSD named, $10,111 a month from TOP', D(P0 * .25 + b + ab) in o and D(b) + ' BSD + ' + D(ab) + ' ABSD' in o and D(ab) in o and '$10,111' in o and ('TOP (estimated' in o or '(estimated TOP)' in o or '(after TOP)' in o), o[:600])
+        want = [('Booking fee', P0 * .05, 'cash'), ('At the S&P', P0 * .15, 'cash or CPF'), ('Buyer’s stamp duty', b, 'Within 14 days of signing the S&P'), ('ABSD', ab, 'Within 14 days of signing the S&P'), ('Upfront, in all', P0 * .20 + b + ab, ''), ('Foundation stage, your share', P0 * .05, 'the bank pays the rest'), ('From you, in all', P0 * .25 + b + ab, ''), ('The bank pays', loan, ''), ('Each month from TOP', 10111, '')]
         check(f'{tag} A: "When you pay it" (V3.7): booking fee, S&P, BSD and ABSD apart, the upfront subtotal, the buyer\'s last share at the foundation stage, the total, then the bank; each amount as worked out',
               len(r) == len(want) and all(x[0].startswith(w[0]) and amt(x[2]) == w[1] and w[2] in x[1] for x, w in zip(r, want)), r)
         check(f'{tag} A: BSD $102,100 and ABSD $795,000 are separate rows, before construction', len(r) > 5 and amt(r[2][2]) == 102100 and amt(r[3][2]) == 795000 and r[5][0].startswith('Foundation'))

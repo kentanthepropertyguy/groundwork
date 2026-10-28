@@ -121,7 +121,9 @@ const AF = (r, n) => (1 - Math.pow(1 + r / 12, -n * 12)) / (r / 12);
   const st = { n: 1, p: [{}], loans: [], pkind: 'new', price: 2000000, loanAmt: 1500000, ratePct: 3, years: 30, cpf: 300000 };
   const c = F.cost(st);
   ok(c.state === 'ok' && c.loan === 1500000 && c.downCash === 200000 && c.duty === 69600 && c.cash === 269600 && c.cpfUsed === 300000, 'cost: $2m, $1.5m loan, $300k CPF: $200,000 cash + $69,600 stamp duty (hand)', c);
-  ok(near(c.monthly, C.instal(1500000, 0.03, 30), 0.01) && Math.round(c.monthly) === 6324, 'cost: $6,324 a month at 3% over 30 years (hand)', c.monthly);
+  // 28 Oct 2026 (Claude E audit F1): a new launch's instalment from TOP. The bank's first release is at the foundation stage (month 8 of a 48-month build), so 40 of the
+  // 360 months have run by TOP: $1.5m over the 320 months left at 3% (hand). The old figure, $6,324, spread the loan over all 360 months from TOP.
+  ok(near(c.monthly, 1500000 * 0.0025 / (1 - Math.pow(1.0025, -320)), 0.01) && Math.round(c.monthly) === 6815, 'cost: $6,815 a month from TOP at 3%, 30 years counted from the first release (hand)', c.monthly);
   ok(c.ageAssumed && !c.overLimit, 'cost: no age typed: the age-65 assumption is flagged, not hidden');
   const p = C.progressive({ price: 2000000, age: 35, years: 30, ratePct: 3, loans: 0, kind: 'private', buyers: F.dutyBuyers(st) });
   ok(near(c.ruleLoan, p.loanMax, 0.01) && near(c.duty, p.duty.total, 0.01), 'cost: the limit and stamp duty equal GW_CALC.progressive', [c.ruleLoan, p.loanMax]);

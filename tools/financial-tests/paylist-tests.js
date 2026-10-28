@@ -65,7 +65,7 @@ ok(!P.model({ kind: 'hdb-resale', price: 600000 }).rows.some((r) => /Option to P
 
 // ---- 3. the split of each stage (New launch payments, now in the Payment Timeline) is the engine's, once ----
 for (const [kind, price, age] of [['new', 2000000, undefined], ['new', 1800000, 40], ['ec', 1300000, 32]]) {
-  const m = P.split({ kind, price, age, buyers: [{ res: 'SC', owned: 0 }] }), e = C.progressive({ kind: kind === 'ec' ? 'ec' : 'private', price, age: age || 35, buyers: [{ res: 'SC', owned: 0 }] });
+  const m = P.split({ kind, price, age, buyers: [{ res: 'SC', owned: 0 }] }), e = C.progressive({ kind: kind === 'ec' ? 'ec' : 'private', price, age: age || 35, buyers: [{ res: 'SC', owned: 0 }], build: true });
   ok(m.ok && e.ok && m.rows.length === e.stages.length && m.rows.every((r, i) => num(r.amount) === Math.round(e.stages[i].amount)), kind + ' split ' + price + ': every stage amount is GW_CALC.progressive’s');
   ok(near(e.stages.reduce((a, s) => a + s.cash + s.cpf + s.flex + s.loan, 0), price) && near(e.stages.reduce((a, s) => a + s.loan, 0), e.loanMax), kind + ' split ' + price + ': cash, CPF and loan add up to the price and the loan to the limit; nothing double-counted');
   ok(near(m.stampDuty, S.schedule({ kind, price, undated: true }).duty.total), kind + ' split ' + price + ': stamp duty equals the schedule’s, and is outside the stages');

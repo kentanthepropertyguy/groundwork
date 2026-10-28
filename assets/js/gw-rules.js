@@ -221,7 +221,11 @@
       // window for the S&P; IRAS: stamp duty within 14 days of signing. Construction-stage dates are the developer's and are
       // unknown at the option, so the headline tests every undated stage at the earliest date it could be called: 4 weeks
       // after the S&P (D2, 14 Oct 2026). The illustration months are typical only and never set the headline (S2-2).
-      newLaunch: { snpDays: 56, dutyDays: 14, earliestStageDays: 28, topMonths: 48, cscMonths: 60, illustrationMonths: { foundation: 10, frame: 18, walls: 22, roof: 26, fittings: 30, roads: 34 } },
+      newLaunch: { snpDays: 56, dutyDays: 14, earliestStageDays: 28, topMonths: 48, cscMonths: 60, illustrationMonths: { foundation: 10, frame: 18, walls: 22, roof: 26, fittings: 30, roads: 34 },
+        // Bank instalments only (Claude E calculator audit F1 and CPF buffer methodology v1.1 A2, A15; 28 Oct 2026): when the bank releases each construction stage, as a share
+        // of the option-to-TOP span (TOP: the developer's date, or topMonths above), rounded half up and never before the month after the S&P (snpMonths). CSC: its date, or
+        // cscMonths. These set when the loan's tenure starts (the month after the first release) and never move a payment date in the cash test above.
+        snpMonths: 2, bankStageFractions: { foundation: 1 / 6, frame: 1 / 3, walls: 1 / 2, roof: 11 / 18, fittings: 13 / 18, roads: 31 / 36 } },
       // Completed private home (D5 defaults, S2-3): 1% option fee, 4% on exercising within 14 days, stamp duty within 14 days
       // of exercising, completion 12 weeks after the option. The option and S&P set the actual terms; every date is editable.
       completed: { optionPct: 0.01, exercisePct: 0.04, exerciseDays: 14, dutyDays: 14, completionDays: 84 },

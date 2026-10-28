@@ -172,27 +172,7 @@
   function annotate(r) {
     return r.events.map((e) => { if (e.type !== 'pay') return Object.assign({}, e); const b = basisOf(e, r.kind); return Object.assign({}, e, { basis: b, tag: BASIS_TAG[b], sentence: dateSentence(Object.assign({}, e, { basis: b }), r.kind, r.undated) }); });
   }
-  // ---- ONE cross-check, kept apart from everything above: the other documented way to count progressive instalments (added 18 Oct 2026) ----
-  // The audited engine charges, after each release, the level instalment on everything released so far over the FULL tenure (the same figure a mortgage
-  // calculator gives for that amount). A worked example published by a broker (icompareloan.com, "Understanding BUC home loans": $2M price, $1.6M loan)
-  // is reproduced to the cent by a different convention: the tenure counts from the FIRST release, and at each release the outstanding balance plus the new
-  // release is re-amortised over the tenure that remains. No bank document that states either convention was found (see tests/57), so the page shows the
-  // engine's figure and says that a bank counting from the first release charges more. This function computes that other figure; it reads releases and
-  // never feeds anything back into the engine. releases: [{ date: 'yyyy-mm-dd', amount }], ratePct a year, years the tenure.
-  function tenureFromFirstRelease(releases, ratePct, years) {
-    const rel = (releases || []).filter((x) => x && pos(x.amount) && /^\d{4}-\d{2}-\d{2}/.test(x.date)).map((x) => ({ date: x.date.slice(0, 10), amount: x.amount })).sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
-    const N = Math.round(years * 12), rate = ratePct / 100 / 12;
-    if (!rel.length || !(N > 0) || !(ratePct >= 0)) return null;
-    const mi = (d) => +d.slice(0, 4) * 12 + (+d.slice(5, 7) - 1), m0 = mi(rel[0].date), by = {};
-    rel.forEach((x) => { const k = mi(x.date) - m0; by[k] = (by[k] || 0) + x.amount; });
-    const last = Math.max.apply(null, Object.keys(by).map(Number)), pmt = (b, n) => (rate > 0 ? b * rate / (1 - Math.pow(1 + rate, -n)) : b / n);
-    let bal = 0, inst = 0; const steps = [];
-    for (let m = 0; m <= last; m++) {
-      if (by[m]) { bal += by[m]; inst = pmt(bal, N - m); steps.push({ month: m, instalment: inst, outstanding: bal }); }
-      bal -= Math.max(0, inst - bal * rate);
-    }
-    return { steps, final: steps[steps.length - 1].instalment };
-  }
+  // (18 Oct 2026 cross-check tenureFromFirstRelease removed 28 Oct 2026: the engine itself now counts the tenure from the first release, GW_CALC.bankPath.)
 
   /* ---------------- HDB flats: the basic payment list (resale and new flat). No engine exists for these, and none is built: this lists the payments, their amounts where HDB
      fixes them and the event each falls on. Every figure is read from GW_RULES.hdbPayments. A date HDB or construction sets is never invented: the trigger is named, or an
@@ -222,5 +202,5 @@
     return { ok: true, version: VERSION, flat, price: P, loan: bank ? 'bank' : 'hdb', events: ev, foot: ['The booking fee is part of the downpayment, not extra.', 'No dates are shown: HDB and construction set them. Stamp duty and legal fees are not added into the amounts.'] };
   }
   const $c = (x) => '$' + Math.round(x).toLocaleString('en-US');
-  return { schedule, hdb, basisOf, dateSentence, shortfall, annotate, tenureFromFirstRelease, BASIS_TAG, VERSION, day, mon, after, UNDATED_REF };
+  return { schedule, hdb, basisOf, dateSentence, shortfall, annotate, BASIS_TAG, VERSION, day, mon, after, UNDATED_REF };
 });
