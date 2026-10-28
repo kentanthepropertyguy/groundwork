@@ -77,11 +77,17 @@ try:
             # ---------------- 2. a couple with their own incomes and loans ----------------
             ctx, pg, errs = page(br, kw); pg.goto(B + '/tools/tdsr/?j=1'); pg.wait_for_selector('[data-out]')   # V3.7: J2-J3 are a Plan My Move journey (standalone calculators share nothing: v37-render.py)
             seg(pg, 'n', '2')
+            # Baseline clean-up (28 Oct 2026): "Two of us" moves the focus to Person 2's income about 40 ms later (V3.12). Typing Person 1's age before that
+            # landed could lose it under load (the bank's age then read 34.2, from the assumed 35, not 34.8), so the journey waits for the focus first, as a person would
+            until(pg, "()=>document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.k==='p.1.fixed'", t=3000)
             # V3.12 Stage 1 (Ken, 27 Oct 2026): each borrower's own figures in their own card, side by side: income, other monthly debts, housing loans
             check(vn + ' J2: “Two of us” shows Person 1 and Person 2, each with income, other monthly debts and housing loans', until(pg, "()=>{const c=[...document.querySelectorAll('.f3-bpc')].filter(x=>x.offsetParent);return c.length===2&&c.every(x=>x.querySelector('[data-k$=\".fixed\"]')&&x.querySelector('[data-k$=\".debts\"]')&&x.querySelector('[data-k$=\".hl\"]'))}"))
             typ(pg, 'p.0.age', '36'); typ(pg, 'p.0.fixed', '8,000'); typ(pg, 'p.0.bonusYr', '12,000'); typ(pg, 'p.1.age', '33'); typ(pg, 'p.1.fixed', '6,000')
             typ(pg, 'p.0.debts', '600'); typ(pg, 'p.1.debts', '300')
             good, ms = answer_after(pg, "()=>/after your \\$900 of loans/.test(document.querySelector('[data-out]').textContent)")
+            # Baseline clean-up (28 Oct 2026): the answer can show "$900 of loans" a frame before the page has settled and redrawn the explanation (the
+            # second income was occasionally still being applied), so the explanation is read only once the page has settled and shows the same entries
+            until(pg, settled); until(pg, "()=>{const w=document.querySelector('[data-why-out]');return !!w&&/\\$900 a month you already pay/.test(w.textContent)&&/income-weighted age of/.test(w.textContent)}")
             why = pg.evaluate("()=>document.querySelector('[data-why-out]').textContent")
             check(vn + ' J2: each person’s income, bonus and loan; the $900 of repayments is counted and costed', good and '$900 a month you already pay lowers it by' in why, out(pg)[:300])
             check(vn + ' J2: and the joint age the bank uses', 'income-weighted age of 34.8' in why, why[:400])

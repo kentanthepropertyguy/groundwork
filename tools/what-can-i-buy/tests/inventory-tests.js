@@ -5,7 +5,9 @@ const F = require(path.join(root, 'assets/js/kpt-find.js')), T = F.T;
 let pass = 0, fail = 0;
 const ui = fs.readFileSync(path.join(root, 'assets/js/kpt-discover-ui.js'), 'utf8');
 const t = (name, fn) => { try { fn(); pass++; console.log('  ok   ' + name); } catch (e) { fail++; console.log('  FAIL ' + name + '\n       ' + e.message); } };
-const FIND_SHA = 'e4516fd8d6e8f8a0b6494619024e4370dcfa6d7e9305015f760e9fa235c6db00';
+// Baseline clean-up (28 Oct 2026): pinned to the find.json that is live (V3.10 onwards, matched against tools.kentanthepropertyguy.com); V9.1's file was
+// e4516fd8…, replaced in approved releases. The 864-case golden parity below still holds against V9.1's results.
+const FIND_SHA = 'df416f6c2b06d11b0f5c8ff61fe9a45502e68173c6a1ca9219bf8eb51022f6f2';
 const H = 3600000, D = 24 * H, NOW = Date.parse('2026-10-06T10:00:00Z');   // 6 Oct 2026, 18:00 Singapore
 const iso = (ms) => new Date(ms).toISOString();
 const real = F.prepare(JSON.parse(fs.readFileSync(path.join(root, 'data/projects/find.json'), 'utf8')));
@@ -32,7 +34,11 @@ const V101_FIELDS = ['simple', 'slug', 'hasCheck', 'ask', 'tick'];
 const stripV101 = (r) => { r.groups.forEach((g) => g.cards.concat(g.more || []).forEach((c) => V101_FIELDS.forEach((k) => delete c[k]))); return r; };
 
 console.log('Golden parity with V9.1 (inventory absent or unusable)');
-const OLDNAMES = (j) => j.split('Verdé Joo Chiat').join('Verd\uFFFD Joo Chiat').split('Enchanté').join('Enchant\uFFFD');   // V10.3.4 display fix is the only intended text difference
+// The intended text differences since V9.1, all display-only, mapped back so everything else must stay byte-identical: V10.3.4 (Verdé, Enchanté), and
+// 28 Oct 2026 (Ken: names joined with @ written in their parts, and "'s" not "'S"; ids and data unchanged). Each pair is [as V9.1 showed it, as shown now].
+const NAME_28OCT = [["448@EAST Coast", "448@East Coast"], ["8@WOODLEIGH", "8@Woodleigh"], ["Citylife@tampines", "Citylife@Tampines"], ["Cityscape @farrer Park", "Cityscape @Farrer Park"], ["Forett@bukit Timah", "Forett@Bukit Timah"], ["King'S Mansion", "King's Mansion"], ["One ST Michael'S", "One ST Michael's"], ["St. Michael'S Road", "St. Michael's Road"], ["People'S Park Complex", "People's Park Complex"], ["Sanctuary@newton", "Sanctuary@Newton"], ["Skysuites@anson", "Skysuites@Anson"], ["ST Patrick'S Residences", "ST Patrick's Residences"], ["St. Patrick'S Road", "St. Patrick's Road"], ["The Hill @one-North", "The Hill @One-North"], ["The Promenade@pelikat", "The Promenade@Pelikat"], ["Vibes@upper Serangoon", "Vibes@Upper Serangoon"]];
+// only the name and street fields: other text (e.g. a link's label) was already written properly in V9.1 and must still match exactly
+const OLDNAMES = (j) => NAME_28OCT.reduce((s, [was, now]) => ['name', 'street'].reduce((x, k) => x.split('"' + k + '":' + JSON.stringify(now)).join('"' + k + '":' + JSON.stringify(was)), s), j).split('Verdé Joo Chiat').join('Verd\uFFFD Joo Chiat').split('Enchanté').join('Enchant\uFFFD');
 const golden = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/golden-v91.json'), 'utf8'));
 t('864 grid cases (budgets x journeys x sizes x areas x freehold x budget window) are byte-identical to V9.1 with no inventory', () => {
   let n = 0, bad = [];
@@ -352,16 +358,16 @@ t('the closing methodology line is the V10 line; the Huttons paragraphs are all 
 
 console.log('Get Ken\'s view handoff');
 const HM = F.handoffMessage;
-t('one project: exact approved text, with budget, typed size and confirmed district', () => assert.strictEqual(HM({ names: ['Lucerne Grand'], budget: 2600000, size: { from: 870, to: 1000 }, district: '22' }), 'Hi Ken, I was looking at Lucerne Grand on Ken Property Tools. Does this suit what I’m looking for? My search: around $2.6m, about 870–1,000 sqft, District 22.'));
+t('one project: exact approved text, with budget, typed size and confirmed district', () => assert.strictEqual(HM({ names: ['Lucerne Grand'], budget: 2600000, size: { from: 870, to: 1000 }, district: '22' }), 'Hi Ken, I was looking at Lucerne Grand on Groundwork. Does this suit what I’m looking for? My search: around $2.6m, about 870–1,000 sqft, District 22.'));
 t('two projects: exact approved text, names in the order ticked, no ranking by type', () => {
   assert.strictEqual(HM({ names: ['Amberwood at Holland', 'Lucerne Grand'], budget: 2600000, size: { from: 870, to: 1000 }, district: '10' }), 'Hi Ken, I’m comparing Amberwood at Holland and Lucerne Grand. Could you help me understand which may suit me better? My search: around $2.6m, about 870–1,000 sqft, District 10.');
   assert.strictEqual(HM({ names: ['Lucerne Grand', 'Amberwood at Holland'], budget: 2600000 }), 'Hi Ken, I’m comparing Lucerne Grand and Amberwood at Holland. Could you help me understand which may suit me better? My search: around $2.6m.');
 });
 t('parts the buyer did not give are left out: no size unless typed, no district unless confirmed', () => {
-  assert.strictEqual(HM({ names: ['A'], budget: 2650000 }), 'Hi Ken, I was looking at A on Ken Property Tools. Does this suit what I’m looking for? My search: around $2.65m.');
-  assert.strictEqual(HM({ names: ['A'], budget: 2600000, district: '10' }), 'Hi Ken, I was looking at A on Ken Property Tools. Does this suit what I’m looking for? My search: around $2.6m, District 10.');
-  assert.strictEqual(HM({ names: ['A'], budget: 2600000, district: 'Holland' }), 'Hi Ken, I was looking at A on Ken Property Tools. Does this suit what I’m looking for? My search: around $2.6m.');
-  assert.strictEqual(HM({ names: ['A'], budget: 0 }), 'Hi Ken, I was looking at A on Ken Property Tools. Does this suit what I’m looking for?');
+  assert.strictEqual(HM({ names: ['A'], budget: 2650000 }), 'Hi Ken, I was looking at A on Groundwork. Does this suit what I’m looking for? My search: around $2.65m.');
+  assert.strictEqual(HM({ names: ['A'], budget: 2600000, district: '10' }), 'Hi Ken, I was looking at A on Groundwork. Does this suit what I’m looking for? My search: around $2.6m, District 10.');
+  assert.strictEqual(HM({ names: ['A'], budget: 2600000, district: 'Holland' }), 'Hi Ken, I was looking at A on Groundwork. Does this suit what I’m looking for? My search: around $2.6m.');
+  assert.strictEqual(HM({ names: ['A'], budget: 0 }), 'Hi Ken, I was looking at A on Groundwork. Does this suit what I’m looking for?');
   assert.strictEqual(HM({ names: [] }), null);
 });
 t('never contains counts, prices from Huttons, check times, basis labels, bedroom data, URA figures, typed location or priorities', () => {
@@ -379,12 +385,20 @@ console.log('Page wiring');
 const page = fs.readFileSync(path.join(root, 'tools/what-can-i-buy/index.html'), 'utf8');
 t('the inventory file is optional: a failed fetch resolves to null and the page shows no error for it', () => { assert.ok(/get\(CFG\.INV_URL, \{ cache: 'no-cache' \}\)/.test(ui)); assert.ok(/const get = [^\n]*\.catch\(\(\) => null\)/.test(ui)); });
 t('review hooks (?now=) work only on localhost or in test mode', () => { assert.ok(/const REVIEW = CFG\.review \|\| \/\^\(localhost\|127\\\.0\\\.0\\\.1\)\$\/\.test\(location\.hostname\)/.test(ui)); assert.ok(/REVIEW && isFinite\(Date\.parse\(params\.get\('now'\)/.test(ui)); });
-t('the page tracks exactly: find_shown, find_research_click, find_ask_click (twice, slugs only)', () => { const tr = page.match(/KPT\.track\('find_[a-z_]+'[^)]*\)/g).sort(); assert.deepStrictEqual(tr, ["KPT.track('find_ask_click', ev)", "KPT.track('find_ask_click', ev)", "KPT.track('find_research_click', { project_id: t.dataset.id })", "KPT.track('find_shown', pl)"]); });
+// Baseline clean-up (28 Oct 2026): this asserted the V10 page's inline calls (find_ask_click came from the "Get Ken's view" button, removed when
+// Budget Search's only WhatsApp link became the one generic "Beyond the numbers" message). Now: Budget Search's own calls, exactly, categorical or slugs only.
+t('Budget Search tracks exactly find_shown (a budget band and categorical facts) and find_research_click (a project slug); nothing typed', () => {
+  const tr = (ui.match(/track\('find_[a-z_]+'/g) || []).sort(); assert.deepStrictEqual(tr, ["track('find_research_click'", "track('find_shown'"]);
+  assert.ok(/track\('find_research_click', \{ project_id: t\.dataset\.id \}\)/.test(ui)); assert.ok(/track\('find_shown', \{ budget_band: bandOf\(/.test(ui));
+  assert.ok(!/KPT\.track\('find_/.test(page.replace(/<script src[^>]*><\/script>/g, '')), 'no inline tracking left in the page');
+});
 t('the only WhatsApp link is a generic message: no budget, place or search in it', () => {
   const wa = ui.split('\n').filter((l) => /waLink\(/.test(l)); assert.ok(wa.length >= 1); wa.forEach((l) => assert.ok(/message: BEYOND_WA/.test(l), l));
   assert.ok(/const BEYOND_WA = 'Hi Ken, I was using Groundwork and have a question\.'/.test(ui));
 });
-t('V10.2: the Beyond the numbers WhatsApp opener is one fixed sentence with no search, budget, project or Huttons detail', () => { const m = /const BEYOND_WA = '([^']*)';/.exec(page); assert.ok(m && m[1] === 'Hi Ken, I was using Ken Property Tools and have a question.', m && m[1]); });
+// Baseline clean-up: the V10.2 opener check expected the old brand ("Ken Property Tools"); the one generic opener is now 'Hi Ken, I was using Groundwork
+// and have a question.' (asserted above, with no search, budget or project in any WhatsApp link). Kept: it carries no search, budget, project or Huttons detail.
+t('the Beyond the numbers WhatsApp opener is one fixed sentence with no search, budget, project or Huttons detail', () => { const m = /const BEYOND_WA = '([^']*)';/.exec(ui); assert.ok(m && m[1] === 'Hi Ken, I was using Groundwork and have a question.', m && m[1]); assert.ok(!/\$|budget|Huttons|\d/.test(m[1])); });
 t('V2.1: Beyond the numbers is one quiet line with a single WhatsApp link (no portrait or biography), and no TikTok mention sits inside the cards or the list code', () => {
   const sec = /<section class="kd-ken"[\s\S]*?<\/section>/.exec(page)[0];
   ['Beyond the numbers', 'Want a second opinion on your shortlist?', 'Message Ken on WhatsApp →'].forEach((x) => assert.ok(sec.indexOf(x) > -1, x));
@@ -395,7 +409,8 @@ t('V2.1: Beyond the numbers is one quiet line with a single WhatsApp link (no po
 t('V10.2: the page has no Ken\'s Take block, and old Buy links land in Budget Search', () => { assert.ok(!/res-ken|Ken's Take/.test(page + ui)); assert.ok(/what-can-i-buy\//.test(fs.readFileSync(path.join(root, 'buy/index.html'), 'utf8'))); });
 t('a size is applied only when the buyer typed a minimum: never worked out from bedrooms or anything else', () => { assert.ok(/function applyMin\(inp\)/.test(ui)); assert.ok(!/minSize = [^;\n]*(beds|SIZE_BEDS)/.test(ui)); const d = fs.readFileSync(path.join(root, 'assets/js/kpt-discover.js'), 'utf8'); assert.ok(!/inferSize|sizeFor|SIZE_BEDS/.test(d)); });
 // (the V10 "tick two to compare" boxes were part of the old results page; Research opens each development and compares from there)
-t('the page-level Get Ken\'s view button and its message are unchanged', () => { assert.ok(/kv\.href = KPT\.waLink\(\{ message: R\.waMessage\(budget\) \}\)/.test(page)); assert.ok(/id="kenView"[^>]*>Get Ken's view →/.test(page)); });
+// Baseline clean-up: the page-level "Get Ken's view" button (with the budget in its message) was removed when Budget Search kept one generic WhatsApp link.
+t('no WhatsApp link from Budget Search carries the budget: the old "Get Ken\'s view" button is gone', () => { assert.ok(!/kv\.href = KPT\.waLink/.test(page) && !/waMessage\(budget\)/.test(page + ui)); });
 t('a place is applied only by an explicit choice, never from typed text alone', () => { assert.ok(/f === 'pick'\) \{ pickPlace\(/.test(ui)); assert.ok(/if \(opts\.length === 1\) opts\[0\]\.click\(\)/.test(ui)); });
 t('"Show N more" exists for the groups and is the only control that expands them', () => { assert.ok(/data-f="more" data-key="\$\{esc\(key\)\}">Show \$\{Math\.min\(left, \d+\)\} more/.test(ui)); /* Results layout (28 Oct 2026): 20 rows, then 30 more at a time */ assert.ok(/f === 'more'\) \{ S\.shown\[t\.dataset\.key\]/.test(ui)); });
 t('the page makes no network request other than find.json, inventory.json, the launch microsites list, the existing budget data and (only once a place is typed) the Map\'s own data files', () => { const f = page.match(/fetch\([^)]*\)/g) || []; f.forEach((x) => assert.ok(/FIND_URL|INV_URL|SITES_URL|\bu\)|f\(u\)|u \+ '\?v=' \+ MAP_V/.test(x), x));
@@ -494,7 +509,7 @@ t('Phase 1: an EC the Huttons inventory lists keeps its inventory card, gains it
   assert.ok(cards(r)[0].link && cards(r)[0].link.indexOf('#/p/ec-x/new') > -1, 'Research link');
   assert.ok(!r.otherTypes || r.otherTypes.every((o) => o.groups.every((g) => g.cards.every((c) => c.id !== 'ec-x'))), 'not repeated');
 });
-t('find.json is byte-identical to V9.1', () => assert.strictEqual(crypto.createHash('sha256').update(fs.readFileSync(path.join(root, 'data/projects/find.json'))).digest('hex'), FIND_SHA));
+t('find.json is byte-identical to the live, approved file', () => assert.strictEqual(crypto.createHash('sha256').update(fs.readFileSync(path.join(root, 'data/projects/find.json'))).digest('hex'), FIND_SHA));
 
 
 console.log('V10.1 buyer-facing card text (display layer only)');

@@ -18,7 +18,8 @@ t('hero is the engine #1 insight (age), with approved wording', () => {
   assert.strictEqual(V.hero.context, 'Outside Central Region · Resale · Last 12 months');
 });
 t('chart is the pure OCR resale age comparison, rounded to 50 sq ft', () => {
-  assert.deepStrictEqual(V.hero.bars.map((b) => [b.label, b.value]), [['25+ years', 1150], ['10–25 years', 800], ['Under 10 years', 700]]);
+  // baseline clean-up (28 Oct 2026): the bar labels now say whose age it is (the lease's), as kpt-result.js writes them; the figures are unchanged
+  assert.deepStrictEqual(V.hero.bars.map((b) => [b.label, b.value]), [['Lease 25+ years old', 1150], ['Lease 10–24 years old', 800], ['Lease under 10 years old', 700]]);
   assert.ok(V.hero.bars.every((b) => !b.tag), 'no indicative tags on Solid age bars');
 });
 t('trade-off is computed from the bars', () => assert.strictEqual(V.hero.tradeoff, 'Going older opened up roughly 350–450 sq ft more space at this budget.'));
@@ -26,7 +27,8 @@ t('"Also at this budget" uses engine insights #2 and #3', () => assert.deepStric
 t('also-lines are the engine\'s own sentences and carry its caveats (new-launch project count, low end)', () => {
   const s = V.also[0].lines.join(' '); assert.ok(/only 6 projects/.test(s)); assert.ok(/low end/.test(s));
 });
-t('EC shown from the engine EC output', () => assert.deepStrictEqual(V.ec, { label: 'Resale EC', text: 'Around 1,050 sq ft at this budget. Eligibility conditions apply.' }));
+// baseline clean-up: the EC line names the eligibility rules it did not check (income ceiling, the 30% MSR cap), worded within the module's own rule (no financing terms)
+t('EC shown from the engine EC output', () => assert.deepStrictEqual(V.ec, { label: 'Resale EC', text: 'Around 1,050 sq ft at this budget. Eligibility conditions apply, including a household income ceiling and a cap on monthly repayments at 30% of income (MSR). This budget wasn’t checked against those rules.' }));
 t("Ken's Take shown only with an Active matching note", () => { assert.ok(V.ken && /new or resale/.test(V.ken.note)); });
 t('footer is the engine source line', () => assert.ok(/^Based on 1,302 private sales across 352 projects/.test(V.footer)));
 
@@ -58,9 +60,10 @@ t('EC hidden when the engine does not show it', () => {
 });
 
 console.log('Fallbacks');
-t('out of range -> thin, no chart, no invented numbers', () => {
+// baseline clean-up: a budget outside the covered range has its own state (out-of-range, "This tool covers budgets from $600,000 to $5 million.") rather than "thin"
+t('out of range -> its own state, no chart, no invented numbers', () => {
   const res = ENG.run({ budget: 5800000, step: null, index: WI, today: '2026-10-08', notes: NOTE }, ENG.DEFAULTS), v = R.view(res);
-  assert.strictEqual(v.state, 'thin'); assert.strictEqual(v.hero, null); assert.strictEqual(v.ken, null); assert.strictEqual(v.ec, null);
+  assert.strictEqual(v.state, 'out-of-range'); assert.ok(/covers budgets from \$600,000 to \$5 million/.test(v.message.title)); assert.strictEqual(v.hero, null); assert.strictEqual(v.ken, null); assert.strictEqual(v.ec, null);
 });
 t('expired data -> expired state', () => assert.strictEqual(R.view(ENG.run({ budget: 1320000, step: WS, index: WI, today: '2027-09-01', notes: NOTE }, ENG.DEFAULTS)).state, 'expired'));
 t('only-concentrated -> no hero chart', () => {
