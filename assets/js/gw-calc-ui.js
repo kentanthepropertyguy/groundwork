@@ -67,13 +67,13 @@
   // V3.8 (Ken 27 Oct 2026): seven calculators, equal, in a two-column grid of cards (one column on a phone), in Ken's order (the borrowing tools together).
   // Upgrade from HDB is part of Plan My Move (its address and page are unchanged); one section under the cards leads there. An eighth card fits the grid as is.
   const DIRECTORY = [
-    ['payment-planner', 'payment-planner/', 'Purchase Costs & Timeline', 'How much to pay, and when.'],
-    ['tdsr', 'tdsr/', 'How Much Can I Borrow?', 'Housing loan estimate and TDSR.'],
-    ['pledged-assets', 'pledged-assets/', 'Pledged & Unpledged Assets', 'Use financial assets to support your housing loan.'],
-    ['mortgage', 'mortgage/', 'Mortgage Instalment', 'Monthly repayments and interest.'],
-    ['sale-proceeds', 'sale-proceeds/', 'Sale Proceeds', 'Cash and CPF after selling.'],
-    ['stamp-duty', 'stamp-duty/', 'Buyer’s Stamp Duty', 'BSD and ABSD calculation.'],
-    ['ssd', 'ssd/', 'Seller’s Stamp Duty', 'Calculate SSD when selling.'],
+    ['payment-planner', 'payment-planner/', 'Purchase Costs & Timeline', 'How much will this home cost me, and when do I pay?'],
+    ['tdsr', 'tdsr/', 'How Much Can I Borrow?', 'How much could a bank lend me?'],
+    ['pledged-assets', 'pledged-assets/', 'Pledged & Unpledged Assets', 'Could my savings and investments help me borrow more?'],
+    ['mortgage', 'mortgage/', 'Mortgage Instalment', 'What will my monthly instalment be?'],
+    ['sale-proceeds', 'sale-proceeds/', 'Sale Proceeds', 'What will I get back when I sell?'],
+    ['stamp-duty', 'stamp-duty/', 'Buyer’s Stamp Duty (BSD\u00a0&\u00a0ABSD)', 'How much stamp duty will I pay when buying a property?'],
+    ['ssd', 'ssd/', 'Seller’s Stamp Duty', 'Will I pay Seller’s Stamp Duty when I sell?'],
   ];
   const ORDER = { seven: DIRECTORY.map((x) => x[0]) };
   const GROUPS = [['seven', 'Calculators']];
@@ -93,6 +93,11 @@
   const datef = (k, label, o) => { o = o || {}; return '<label class="gw-fld"' + (o.when ? ' data-when="' + o.when + '"' : '') + '><span>' + label + (o.opt ? ' <em>optional</em>' : '') + '</span><div class="gw-in"><input type="date" data-k="' + k + '" data-t="date"' + (o.today ? ' data-today="1"' : '') + '></div>' + hint(o.hint) + '</label>'; };
   const chips = (k, label, opts, o) => { o = o || {}; return '<div class="gw-q gw-fld"' + (o.when ? ' data-when="' + o.when + '"' : '') + '><span class="l">' + label + '</span><div class="gw-chips" role="group" aria-label="' + esc(label) + '" data-k="' + k + '" data-t="chip"' + (o.share ? ' data-share="' + o.share + '"' : '') + ' data-default="' + esc(o.value) + '">' + opts.map((x) => '<button type="button" class="gw-chip" data-v="' + x[0] + '" aria-pressed="' + (x[0] === o.value) + '">' + x[1] + '</button>').join('') + '</div>' + hint(o.hint) + '</div>'; };
   const check = (k, label, o) => { o = o || {}; return '<label class="gw-ck"' + (o.when ? ' data-when="' + o.when + '"' : '') + '><input type="checkbox" data-k="' + k + '" data-t="check"' + (o.checked ? ' checked data-default="1"' : '') + '><span>' + label + '</span></label>'; };
+  // Design Standard R2 (28 Oct 2026): secondary inputs as assumption chips, as on the newer calculators. Each chip opens its editor, which holds
+  // the same input as before (same data-k, value, default and hint), so the engine, the saved figures and the WhatsApp text are unchanged.
+  // items: [key, chip label before any value, unit after the value, the field's markup]
+  const achips = (items, note) => '<div class="f3-chips gw-achips">' + items.map((x) => '<button type="button" class="f3-chip" data-ach="' + x[0] + '" data-ach-u="' + esc(x[2]) + '" aria-expanded="false" aria-controls="gw-ach-' + x[0] + '">' + x[1] + '</button>').join('') + '</div>' +
+    '<p class="gw-fine gw-achn">' + note + '</p>' + items.map((x) => '<div class="gw-achp" id="gw-ach-' + x[0] + '" data-achp="' + x[0] + '" hidden>' + x[3] + '<button type="button" class="f3-done" data-ach-done>Done</button></div>').join('');
   const more = (inner, label) => '<details class="gw-more"><summary>' + (label || 'More options') + '</summary><div class="gw-grid">' + inner + '</div></details>';
   const grid = (inner) => '<div class="gw-grid">' + inner + '</div>';
   const RES = [['SC', 'Singapore Citizen'], ['PR', 'Permanent Resident'], ['FR', 'Foreigner']];
@@ -125,15 +130,15 @@
   const KIND_STAMP = [['private', 'Private home'], ['ec', 'New EC from the developer'], ['hdb', 'HDB flat']];
 
   const FORMS = {
-    mortgage: () => chips('lender', 'Loan', [['bank', 'Bank loan'], ['hdb', 'HDB loan']], { value: 'bank' }) + grid(
-      money('loan', 'Loan amount', { share: 'loan', ph: 'e.g. 600,000' }) +
-      numf('ratePct', 'Interest rate', '% a year', { value: '4', hint: '<span data-when="lender:bank">Banks test the loan at 4% or your rate after any lock-in period, if higher. Use the rate you’ve been quoted.</span><span data-when="lender:hdb">HDB’s rate is 2.6% a year for Oct–Dec 2026, valid to 31 Dec 2026 (CPF Board).</span>' }) +
-      numf('years', 'Loan tenure', 'years', { value: '25', hint: '<span data-when="lender:bank">Up to 30 years for HDB flats and 35 for other homes.</span><span data-when="lender:hdb">Up to 25 years for an HDB loan.</span>' })),
-    'stamp-duty': () => grid(money('price', 'Purchase price', { share: 'buyPrice', ph: 'e.g. 1,500,000', hint: 'Or the market value, if that is higher.' })) +
+    mortgage: () => chips('lender', 'Loan', [['bank', 'Bank loan'], ['hdb', 'HDB loan']], { value: 'bank' }) +
+      money('loan', 'Loan amount', { share: 'loan', ph: 'e.g. 600,000', cls: 'gw-mainin' }) +
+      achips([['ratePct', '4% a year', '% a year', numf('ratePct', 'Interest rate', '% a year', { value: '4', hint: '<span data-when="lender:bank">Banks test the loan at 4% or your rate after any lock-in period, if higher. Use the rate you’ve been quoted.</span><span data-when="lender:hdb">HDB’s rate is 2.6% a year for Oct–Dec 2026, valid to 31 Dec 2026 (CPF Board).</span>' })],
+        ['years', '25 years', ' years', numf('years', 'Loan tenure', 'years', { value: '25', hint: '<span data-when="lender:bank">Up to 30 years for HDB flats and 35 for other homes.</span><span data-when="lender:hdb">Up to 25 years for an HDB loan.</span>' })]], 'Usual assumptions. Tap one to change it.'),
+    'stamp-duty': () => money('price', 'Purchase price', { share: 'buyPrice', ph: 'e.g. 1,500,000', hint: 'Or the market value, if that is higher.', cls: 'gw-mainin' }) +
       chips('kind', 'What are you buying?', KIND_STAMP, { value: 'private', hint: 'An EC bought on the resale market counts as a private home here.' }) +
       chips('entity', 'Who is buying?', [['0', 'Individuals'], ['1', 'A company or other entity']], { value: '0' }) + buyersBlock(),
     // A3-12: its own key, so a private home's price never becomes the HDB flat's value in Sale proceeds or the planner
-    ssd: () => grid(money('price', 'Selling price', { share: 'ssdPrice', ph: 'e.g. 1,600,000', hint: 'Or the market value, if that is higher.' }) +
+    ssd: () => money('price', 'Selling price', { share: 'ssdPrice', ph: 'e.g. 1,600,000', hint: 'Or the market value, if that is higher.', cls: 'gw-mainin' }) + grid(
       datef('bought', 'Date you bought', { hint: SSD_DATE_HINT }) + datef('sold', 'Date you sell', { today: true, hint: 'When your buyer exercises your Option to Purchase, or the S&P date.' })),
     'sale-proceeds': () => chips('type', 'Your home', [['hdb', 'HDB flat'], ['private', 'Private home'], ['ec', 'EC']], { value: 'hdb', share: 'homeType' }) + grid(
       money('price', 'Selling price', { share: 'sellPrice', ph: 'e.g. 750,000', hint: '<span data-when="type:hdb"><span data-gw-blockhint hidden></span>Not sure? <a href="../../journey/worth/#hdb" data-gw-go="worth-hdb">See recent resales in your block ›</a></span><span data-when="type:private,ec">Not sure? <a href="../../research/" data-gw-go="research">See recent sales in your development ›</a></span>' }) +
@@ -163,10 +168,12 @@
       '<div data-when="scenario:hdb-loan,hdb-bank">' + more(money('price', 'Flat price', { opt: true, ph: 'the resale price agreed', hint: 'The price in your Option to Purchase.' }) + money('valuation', 'HDB’s valuation of the flat', { opt: true, ph: 'if you have it', hint: 'HDB and banks lend on the lower of the price and the valuation. What the price is above the valuation (cash over valuation) is paid in cash.' }), 'Check a specific flat') + '</div>',
   };
 
+  // Design Standard R2: Mortgage, Stamp duty and SSD use the newer calculators' frame (gw-standard.css, .gw-frame)
+  const FRAME = { mortgage: 1, 'stamp-duty': 1, ssd: 1 };
   // The calculator section on each tool page.
   function pageHtml(id) {
     const t = TOOLS[id];
-    return '<section class="gw-calc" data-calc="' + id + '"><div class="gw-calc-in" aria-label="Your details">' + FORMS[id]() +
+    return '<section class="gw-calc' + (FRAME[id] ? ' gw-frame' : '') + '" data-calc="' + id + '"><div class="gw-calc-in" aria-label="Your details">' + FORMS[id]() +
       '<p class="gw-fine gw-saved" data-saved hidden>Some details are filled in from your other calculations in this tab. <button type="button" class="gw-link" data-clear>Clear them</button> (this clears your figures from every tool in this tab).</p></div>' +
       '<div class="gw-calc-out"><div data-out aria-live="polite"><p class="gw-fine">Enter your details to see the result.</p></div>' +
       (id === 'msr' ? '<div class="gw-sched" data-sched-host></div>' : '') +
@@ -407,7 +414,7 @@
     // conditional fields: data-when="key:v1,v2"
     const applyWhen = () => { $$('[data-when]').forEach((el) => { const [k, vs] = el.dataset.when.split(':'); const g = box.querySelector('[data-k="' + k + '"]'); const v = g ? (g.dataset.t === 'chip' ? chipVal(g) : g.value) : null; el.hidden = vs.split(',').indexOf(v) < 0; }); };
     // ---- read the form ----
-    const live = (el) => { for (let p = el; p && p !== box; p = p.parentElement) if (p.hidden) return false; return true; };
+    const live = (el) => { for (let p = el; p && p !== box; p = p.parentElement) if (p.hidden && !p.hasAttribute('data-achp')) return false; return true; };   // a closed assumption chip's editor still holds a live value (R2)
     let inputErrs = [];
     const fieldName = (el) => { const f = el.closest('.gw-fld'); const sp = f && f.querySelector('span'); return sp ? sp.textContent.replace(/\s*optional\s*$/, '').trim() : ''; };
     function values() {
@@ -670,6 +677,20 @@
     if (mq.addEventListener) mq.addEventListener('change', update);
     pin.querySelector('button').addEventListener('click', () => { outBox.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   }
-  if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount(); }
+  // Design Standard R2: the assumption chips. A chip shows the value its input holds; tapping it opens that input (one at a time); Done or Escape closes it.
+  function achSetup() {
+    const box = document.querySelector('[data-calc]'); if (!box || !box.querySelector('[data-ach]')) return;
+    const chipsOf = () => [].slice.call(box.querySelectorAll('[data-ach]'));
+    const label = (b) => { const i = box.querySelector('[data-achp="' + b.dataset.ach + '"] input'); const v = i ? String(i.value || '').trim() : ''; b.textContent = (v || '—') + b.dataset.achU; };
+    const refresh = () => chipsOf().forEach(label);
+    const open = (k) => chipsOf().forEach((b) => { const on = b.dataset.ach === k && b.getAttribute('aria-expanded') !== 'true'; b.setAttribute('aria-expanded', String(on)); const p = box.querySelector('[data-achp="' + b.dataset.ach + '"]'); if (p) p.hidden = !on; if (on && p) { const i = p.querySelector('input'); if (i) setTimeout(() => i.focus(), 0); } });
+    chipsOf().forEach((b) => b.addEventListener('click', () => open(b.dataset.ach)));
+    [].slice.call(box.querySelectorAll('[data-ach-done]')).forEach((d) => d.addEventListener('click', () => { const k = d.closest('[data-achp]').dataset.achp; open(null); const b = box.querySelector('[data-ach="' + k + '"]'); if (b) b.focus(); }));
+    box.addEventListener('keydown', (e) => { if (e.key === 'Escape' && box.querySelector('[data-achp]:not([hidden])')) { const p = box.querySelector('[data-achp]:not([hidden])'); open(null); const b = box.querySelector('[data-ach="' + p.dataset.achp + '"]'); if (b) b.focus(); } });
+    box.addEventListener('input', refresh); box.addEventListener('change', refresh); box.addEventListener('click', () => setTimeout(refresh, 0));
+    refresh(); setTimeout(refresh, 300);
+  }
+  const start = () => { mount(); achSetup(); };
+  if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start(); }
   return { TOOLS, EXISTING, ORDER, GROUPS, PRESETS, directoryHtml, pageHtml, RENDER, MAX_MESSAGE, svg };
 });

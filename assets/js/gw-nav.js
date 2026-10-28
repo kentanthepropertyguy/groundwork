@@ -52,24 +52,24 @@
      name: plain words · tag: the term people know it by · href: from the site root (or a full address) · t: what people type.
      menu: shown in the menu's tool grid · search: found by the search only (a more specific way into a page that is already listed). */
   const ENTRIES = [
-    { id: 'stamp-duty', name: 'Buyer’s Stamp Duty', tag: 'BSD and ABSD calculation', short: 'What you pay when you buy', href: 'tools/stamp-duty/', icon: 'stamp-duty', menu: 1, quick: 1, sec: 'tools',
+    { id: 'stamp-duty', name: 'Buyer’s Stamp Duty (BSD\u00a0&\u00a0ABSD)', name0: 'Buyer’s Stamp Duty', tag: 'How much stamp duty will I pay when buying a property?', tag0: 'BSD and ABSD calculation', short: 'What you pay when you buy', href: 'tools/stamp-duty/', icon: 'stamp-duty', menu: 1, quick: 1, sec: 'tools',
       t: ['stamp duty', 'absd', 'bsd', 'buyers stamp duty', 'additional buyers stamp duty', 'buyer stamp duty', 'duty', 'stamp', 'remission', 'absd remission', 'absd refund', 'second property', 'second home', 'third property', 'foreigner', 'pr buying', 'permanent resident', 'tax when buying', 'property purchase tax'] },
-    { id: 'mortgage', name: 'Mortgage Instalment', quickName: 'Mortgage', tag: 'Monthly repayments and interest', short: 'Instalment and total interest', href: 'tools/mortgage/', icon: 'mortgage', menu: 1, quick: 1, sec: 'tools',
+    { id: 'mortgage', name: 'Mortgage Instalment', quickName: 'Mortgage', tag: 'What will my monthly instalment be?', tag0: 'Monthly repayments and interest', short: 'Instalment and total interest', href: 'tools/mortgage/', icon: 'mortgage', menu: 1, quick: 1, sec: 'tools',
       t: ['mortgage', 'home loan', 'loan repayment', 'monthly repayment', 'monthly instalment', 'instalment', 'installment', 'monthly payment', 'interest', 'interest rate', 'bank loan', 'hdb loan', 'loan', 'amortisation', 'amortization', 'refinance', 'repricing'] },
-    { id: 'tdsr', name: 'How Much Can I Borrow?', tag: 'Housing loan estimate and TDSR', short: 'Bank loan limit and the home price it supports — from your income', href: 'tools/tdsr/', icon: 'tdsr', menu: 1, quick: 1, sec: 'tools',
+    { id: 'tdsr', name: 'How Much Can I Borrow?', tag: 'How much could a bank lend me?', tag0: 'Housing loan estimate and TDSR', short: 'Bank loan limit and the home price it supports — from your income', href: 'tools/tdsr/', icon: 'tdsr', menu: 1, quick: 1, sec: 'tools',
       t: ['tdsr', 'total debt servicing ratio', 'how much can i borrow', 'borrow', 'borrowing', 'loan limit', 'loan eligibility', 'max loan', 'maximum loan', 'loan amount', 'affordability', 'afford', 'ltv', 'loan to value', 'income', 'debt', 'stress test', 'medium term rate'] },
     // V3.8: Pledged & Unpledged Assets (MAS Notice 645 financial assets), its own calculator
-    { id: 'pledged-assets', name: 'Pledged & Unpledged Assets', tag: 'Use financial assets to support your housing loan', short: 'How savings and investments may raise what a bank lends', href: 'tools/pledged-assets/', icon: 'pledged-assets', menu: 1, sec: 'tools',
+    { id: 'pledged-assets', name: 'Pledged & Unpledged Assets', tag: 'Could my savings and investments help me borrow more?', tag0: 'Use financial assets to support your housing loan', short: 'How savings and investments may raise what a bank lends', href: 'tools/pledged-assets/', icon: 'pledged-assets', menu: 1, sec: 'tools',
       t: ['pledged assets', 'unpledged assets', 'pledge', 'pledged', 'unpledged', 'pledging', 'pledge funds', 'show funds', 'show fund', 'showing funds', 'financial assets', 'asset based', 'asset-based', 'savings', 'investments', 'fixed deposit', 'retiree loan', 'no income loan', 'tdsr assets', 'income from assets'] },
     { id: 'msr', name: 'HDB and EC loan limit', tag: 'MSR · in How much can I borrow?', short: 'For HDB flats and new ECs', href: 'tools/tdsr/#hdb', icon: 'msr', search: 1, sec: 'tools',
       t: ['msr', 'mortgage servicing ratio', 'hdb loan', 'hdb loan limit', 'ec', 'executive condo', 'executive condominium', 'hfe', 'hdb flat eligibility', 'bto', 'resale flat loan', 'hdb flat loan', 'hdb borrow'] },
     { id: 'planner', name: 'What can I afford?', tag: 'Your budget · in How much can I borrow?, with your cash and CPF', short: 'Your maximum property budget, from your cash, CPF and income', href: 'tools/tdsr/#cash', icon: 'planner', search: 1, sec: 'tools',
       t: ['planner', 'what can i afford', 'afford', 'affordability', 'comfortable budget', 'maximum budget', 'maximum property budget', 'budget', 'how much can i afford', 'highest price', 'new launch budget', 'upgrade budget', 'keep my flat', 'sell first'] },
-    { id: 'payment-planner', name: 'Purchase Costs & Timeline', tag: 'How much to pay, and when', short: 'Upfront, monthly and the income it needs — from a price', href: 'tools/payment-planner/', icon: 'payment-planner', menu: 1, sec: 'tools',
+    { id: 'payment-planner', name: 'Purchase Costs & Timeline', tag: 'How much will this home cost me, and when do I pay?', tag0: 'How much to pay, and when', short: 'Upfront, monthly and the income it needs — from a price', href: 'tools/payment-planner/', icon: 'payment-planner', menu: 1, sec: 'tools',
       t: ['what will this home cost me', 'what will it cost', 'cost me', 'cash needed', 'cash you need', 'upfront', 'payment timeline', 'full payment planning', 'funding check', 'can i fund it', 'new launch payments', 'new launch payment', 'progressive payments', 'progressive payment', 'progressive', 'payment schedule', 'uncompleted', 'temporary occupation permit', 'company buyer', 'company purchase', 'buying through a company', 'entity', 'ec payment schedule', 'hdb payment schedule', 'bto payment schedule', 'booking fee', 'option fee', 'downpayment', 'down payment', 'under construction', 'construction stages', 'cash flow', 'cashflow', 'timeline', 'planner', 'payment planner', 'shortfall', 'funding gap', 'buy first', 'sell first', 'buy first sell later', 'sell first buy later', 'bridging', 'absd refund', 'when to pay', 'payment dates', 'how much cash do i need', 'cash needed', 'cpf needed', 'upgrade timing'] },
-    { id: 'sale-proceeds', name: 'Sale Proceeds', tag: 'Cash and CPF after selling', short: 'Cash in hand and CPF back — from a selling price', href: 'tools/sale-proceeds/', icon: 'sale-proceeds', menu: 1, quick: 1, sec: 'tools',
+    { id: 'sale-proceeds', name: 'Sale Proceeds', tag: 'What will I get back when I sell?', tag0: 'Cash and CPF after selling', short: 'Cash in hand and CPF back — from a selling price', href: 'tools/sale-proceeds/', icon: 'sale-proceeds', menu: 1, quick: 1, sec: 'tools',
       t: ['sale proceeds', 'proceeds', 'selling', 'sell', 'sell my flat', 'sell my hdb', 'sell my condo', 'cash proceeds', 'net proceeds', 'cpf refund', 'refund cpf', 'accrued interest', 'cpf accrued interest', 'how much will i get', 'cash from sale', 'agent commission', 'selling costs'] },
-    { id: 'ssd', name: 'Seller’s Stamp Duty', tag: 'Calculate SSD when selling', short: 'Seller’s Stamp Duty', href: 'tools/ssd/', icon: 'ssd', menu: 1, sec: 'tools',
+    { id: 'ssd', name: 'Seller’s Stamp Duty', tag: 'Will I pay Seller’s Stamp Duty when I sell?', tag0: 'Calculate SSD when selling', short: 'Seller’s Stamp Duty', href: 'tools/ssd/', icon: 'ssd', menu: 1, sec: 'tools',
       t: ['ssd', 'sellers stamp duty', 'seller stamp duty', 'selling stamp duty', 'sell within', 'sell early', 'selling early', 'holding period', 'minimum holding', 'stamp duty selling'] },
     // V3.4 (26 Oct 2026): Upgrade from HDB is the four-step thread at tools/hdb-upgrade/ again; What can I afford? and the HDB/EC loan limit are part of How much can I borrow? (search still finds them by name).
     { id: 'hdb-upgrade', name: 'Upgrade from HDB', tag: 'Flat value → proceeds → loan → budget', short: 'Flat value → proceeds → loan → budget, in four steps', href: 'tools/hdb-upgrade/', icon: 'hdb-upgrade', search: 1, sec: 'sell',
@@ -158,7 +158,7 @@
     return 0;
   }
   function scoreEntry(e, q) {
-    let s = Math.max(scoreText(e.name, q), scoreText(e.tag, q) * 0.9);
+    let s = Math.max(scoreText(e.name, q), scoreText(e.tag, q) * 0.9, e.tag0 ? scoreText(e.tag0, q) * 0.9 : 0);   // the earlier description (BSD, TDSR, SSD…) still finds the tool
     e.t.forEach((x) => { s = Math.max(s, scoreText(x, q)); });
     if (s && e.search) s -= 6; // a specific way into a page: listed after the tool itself
     if (s && e.ext) s -= 4;
@@ -168,7 +168,7 @@
     const q = norm(query); if (!q) return [];
     let hits = ENTRIES.map((e, i) => ({ e, i, s: scoreEntry(e, q) })).filter((x) => x.s > 0);
     if (!hits.length && q.length >= TYPO_MIN && q.indexOf(' ') < 0) {   // "valuaton" → valuation
-      hits = ENTRIES.map((e, i) => ({ e, i, s: [e.name, e.tag].concat(e.t).some((x) => norm(x).split(' ').some((w) => w.length >= TYPO_MIN && oneEdit(w, q))) ? 20 - (e.search ? 6 : 0) - (e.ext ? 4 : 0) : 0 })).filter((x) => x.s > 0);
+      hits = ENTRIES.map((e, i) => ({ e, i, s: [e.name, e.tag, e.tag0 || ''].concat(e.t).some((x) => norm(x).split(' ').some((w) => w.length >= TYPO_MIN && oneEdit(w, q))) ? 20 - (e.search ? 6 : 0) - (e.ext ? 4 : 0) : 0 })).filter((x) => x.s > 0);
     }
     return hits.sort((a, b) => b.s - a.s || a.i - b.i).slice(0, max || 5);
   }
@@ -273,7 +273,10 @@
   const findRoads = (query, max) => (roadList.length && String(query || '').trim().length >= 3 ? loadRoads().then((l) => matchRoads(l, query, max)) : Promise.resolve([]));
 
   /* ---------------- markup ---------------- */
-  const row = (e, r, cls) => '<a class="' + (cls || 'gw-mi') + '" href="' + esc(href(e, r)) + '"' + (e.ext ? ' target="_blank" rel="noopener"' : '') + ' data-gw-nav-to="' + e.id + '">' + svg(e.icon) + '<span><b>' + esc(e.name) + (e.ext ? ' <i aria-hidden="true">↗</i>' : '') + '</b><small>' + esc(e.tag) + '</small></span></a>';
+  // Ken, 28 Oct 2026 (R2): calculators carry a short question as their description (tag); the frozen Map keeps the wording it has (tag0)
+  const nameOf = (e) => (e.name0 && typeof document !== 'undefined' && document.body && document.body.classList.contains('kpm') ? e.name0 : e.name);
+  const tagOf = (e) => (e.tag0 && typeof document !== 'undefined' && document.body && document.body.classList.contains('kpm') ? e.tag0 : e.tag);
+  const row = (e, r, cls) => '<a class="' + (cls || 'gw-mi') + '" href="' + esc(href(e, r)) + '"' + (e.ext ? ' target="_blank" rel="noopener"' : '') + ' data-gw-nav-to="' + e.id + '">' + svg(e.icon) + '<span><b>' + esc(nameOf(e)) + (e.ext ? ' <i aria-hidden="true">↗</i>' : '') + '</b><small>' + esc(tagOf(e)) + '</small></span></a>';
   // The search box (hidden until the script runs, so there is never a box that does nothing).
   let sxN = 0;
   // kind 'devs': developments only (the "Condo or apartment" box on Property values & market prices).
@@ -304,7 +307,7 @@
   function researchRows(r) { return '<div class="gw-ml gw-rrows"><a class="gw-mi gw-mi-map" href="' + r + 'research/map/" data-gw-nav-to="map"><img src="' + r + 'assets/img/map-thumb.webp" alt="" width="720" height="298" loading="lazy" decoding="async"><span><b>Map</b><small>Search a place, road or development. See what is nearby.</small></span></a>' + SECTIONS.research.ids.filter((id) => id !== 'map').slice(0, 3).map((id) => row(byId[id], r)).join('') + '</div>'; }
   // Homepage quick tools: five tools and "All tools".
   function quickHtml(r) {
-    return '<div class="gw-qt">' + QUICK.map((id) => { const e = byId[id]; return '<a href="' + r + e.href + '" data-tool="' + id + '">' + svg(e.icon, 26) + '<b>' + esc(e.quickName || e.name) + '</b><small>' + esc(e.tag) + '</small></a>'; }).join('') +
+    return '<div class="gw-qt">' + QUICK.map((id) => { const e = byId[id]; return '<a href="' + r + e.href + '" data-tool="' + id + '">' + svg(e.icon, 26) + '<b>' + esc(e.quickName || e.name) + '</b><small>' + esc(tagOf(e)) + '</small></a>'; }).join('') +
       '<a href="' + r + 'tools/" data-tool="all">' + svg('all', 26) + '<b>All tools</b><small>Every calculator</small></a></div>';
   }
 
@@ -448,7 +451,7 @@
         let h = '', k = 0, after = '';
         // Audit A5-27: the listbox holds only options, in labelled groups; the group headings are visual only.
         const group = (label, inner) => '<div role="group" aria-label="' + label + '" style="display:grid;gap:1px"><p class="gw-sx-h" aria-hidden="true">' + label + '</p>' + inner + '</div>';
-        const toolsHtml = () => (tools.length ? group('Pages', tools.map((e) => opt(k++, href(e, base), svg(e.icon) + '<span><b>' + esc(e.name) + (e.ext ? ' <i aria-hidden="true">↗</i>' : '') + '</b><small>' + (e.sec ? '<em class="gw-sec gw-sec-' + e.sec + '">' + SECTIONS[e.sec].name + '</em> ' : '') + esc(e.tag) + '</small></span>', ' data-gw-nav-to="' + e.id + '"' + (e.ext ? ' target="_blank" rel="noopener"' : ''))).join('')) : '');
+        const toolsHtml = () => (tools.length ? group('Pages', tools.map((e) => opt(k++, href(e, base), svg(e.icon) + '<span><b>' + esc(nameOf(e)) + (e.ext ? ' <i aria-hidden="true">↗</i>' : '') + '</b><small>' + (e.sec ? '<em class="gw-sec gw-sec-' + e.sec + '">' + SECTIONS[e.sec].name + '</em> ' : '') + esc(tagOf(e)) + '</small></span>', ' data-gw-nav-to="' + e.id + '"' + (e.ext ? ' target="_blank" rel="noopener"' : ''))).join('')) : '');
         if (!devFirst) h += toolsHtml();
         if (all.length) h += group('Developments · Research', all.map((d) => d.site
           ? opt(k++, d.site.url, svg('ext') + '<span><b>' + esc(d.site.name) + ' <i aria-hidden="true">↗</i></b><small>Ken’s site for this development</small></span>', ' data-gw-nav-to="site-' + esc(d.site.id) + '" target="_blank" rel="noopener"')

@@ -72,7 +72,7 @@ for (const f of pages) {
   // V3.8 (Ken 27 Oct 2026): seven equal calculator cards, in his order and names; Upgrade from HDB is in Plan My Move, linked from the section under them
   const tools = [...main.matchAll(/<a class="gw-tc" href="[^"]*" data-tool="([^"]+)"/g)].map((x) => x[1]);
   check('Calculators: the seven calculators, in order', tools.join('|') === 'payment-planner|tdsr|pledged-assets|mortgage|sale-proceeds|stamp-duty|ssd', tools);
-  check('Calculators: named as Ken named them', ['Purchase Costs &amp; Timeline', 'How Much Can I Borrow?', 'Pledged &amp; Unpledged Assets', 'Mortgage Instalment', 'Sale Proceeds', 'Buyer’s Stamp Duty', 'Seller’s Stamp Duty'].every((x) => main.indexOf('<b>' + x + '</b>') >= 0));
+  check('Calculators: named as Ken named them', ['Purchase Costs &amp; Timeline', 'How Much Can I Borrow?', 'Pledged &amp; Unpledged Assets', 'Mortgage Instalment', 'Sale Proceeds', 'Buyer’s Stamp Duty (BSD&nbsp;&amp;&nbsp;ABSD)', 'Seller’s Stamp Duty'].every((x) => main.indexOf('<b>' + x + '</b>') >= 0));
   check('Calculators: no single-figure text links and no Upgrade card; Plan My Move is the section underneath', !/gw-mone/.test(main) && tools.indexOf('hdb-upgrade') < 0 && /<section class="gw-pmm"[\s\S]*href="\.\.\/journey\/"/.test(main));
   check('Calculators: no badges on the cards', !/<span class="gw-tl-t"><b>[^<]*<\/b><em>/.test(main));
   check('Calculators: nothing that lives under Research is listed here', !tools.some((x) => /^(worth|what-can-i-buy|research)$/.test(x)), tools);
