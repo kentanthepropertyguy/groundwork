@@ -1,0 +1,140 @@
+/* ==========================================================================
+   GROUNDWORK DESIGN STANDARD v1 · R1 Foundation (28 Oct 2026)
+   Loaded LAST on every page except the Map (the Map is frozen and does not load this file).
+   A consistency pass, not a redesign: the existing approved tokens stay the single source of truth
+   (white page, white cards with the grey --gw-line border, navy --gw-ink type, gold for eyebrows only).
+   This file adds the shared shell, the five layouts, the shared button set and the system typeface
+   everywhere. Superseded rules elsewhere are neutralised here or by value, never deleted.
+   ========================================================================== */
+
+/* ---- 1. tokens: the existing values, plus the shell; old names follow the shared ones ---- */
+:root{
+  --gw-ink:#16213E; --gw-body:#3B4256; --gw-muted:#5F6672; --gw-link:#0B63CE; --gw-gold:#85661F; --gw-wa:#1F7A3D;
+  --gw-line:#E3E3E8; --gw-grey:#F5F5F7; --gw-surface:#FFFFFF; --gw-bg:#FFFFFF;
+  --gw-r:14px; --gw-r-sm:10px;
+  --gw-shell:1360px;                          /* content width */
+  --gw-gutter:clamp(16px,2.8vw,40px);         /* 16 at 390, 40 at 1440 and wider */
+  --gw-shell-w:calc(var(--gw-shell) + 2*var(--gw-gutter));
+  --gw-hdr:58px;
+  --gw-font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  /* aliases (older stylesheets) */
+  --gold:var(--gw-gold); --kpt-gold:var(--gw-gold); --muted:var(--gw-muted); --kpt-muted:var(--gw-muted);
+  --serif:var(--gw-font); --maxw:var(--gw-shell-w); --kpt-wrap:var(--gw-shell-w);
+}
+body.gw-page,body.gw-legacy{--serif:var(--gw-font)}
+.f3-frame{--f3-serif:var(--gw-font)}
+.gs-sheet{--gs-serif:var(--gw-font)}
+.kd{--muted:var(--gw-muted);--gold:var(--gw-gold)}
+
+/* ---- 2. one page background, one typeface ---- */
+html body{background:var(--gw-bg)}
+body.gw-page,body.kpr,body.kdp,body.lg{font-family:var(--gw-font)}
+main:has(.f3-frame){background:transparent}                         /* the calculators no longer tint their page */
+.v2-ken p{font-family:var(--gw-font)}
+.pl-help>summary::before{font-family:var(--gw-font)}
+
+/* ---- 3. the shell: header, footer and every page wrapper on the same edges ---- */
+.gw-nav .in,.gw-foot .in,.gw-wrap,.gw-ken .in,.gw-strip-host,.kd-wrap,
+body[data-kd-view=list] .kd-wrap,.lg-nav .in,.lg-foot .in{
+  max-width:var(--gw-shell-w);padding-left:var(--gw-gutter);padding-right:var(--gw-gutter);margin-left:auto;margin-right:auto;box-sizing:border-box}
+.gw-wrap .gw-wrap{max-width:none;padding-left:0;padding-right:0}
+/* Research (one page, several views): the page wrapper is the shell, each section inside it spans it */
+body.kpr main.kpt-shell,body.kpr main.kpt-shell#app,:root body.kpr.kpt-w-wide .kpt-shell{max-width:var(--gw-shell-w);padding-left:0;padding-right:0;box-sizing:border-box}
+body.lg #app > :not(.lg-page):not(script){max-width:var(--gw-shell-w);padding-left:var(--gw-gutter);padding-right:var(--gw-gutter)}
+body.kpr #app > .kpr-sec{max-width:var(--gw-shell-w);padding-left:var(--gw-gutter);padding-right:var(--gw-gutter);margin-left:auto;margin-right:auto;box-sizing:border-box}
+/* project, HDB block and comparison views: each band carries the gutter, the content inside it is one shell wide */
+body.lg .lg-wrap,body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov){max-width:var(--gw-shell)}
+.gw-launch .gw-wrap{max-width:var(--gw-shell-w)}
+body.kpr[data-view="compare"] main.kpt-shell{max-width:var(--gw-shell-w)}
+.gw-rhome{max-width:none}
+.kpe .kpe-panel-in{max-width:var(--gw-shell-w);padding-left:var(--gw-gutter);padding-right:var(--gw-gutter)}
+/* the Menu panel spans the shell on wide screens: its left edge on the logo, its right edge on the Menu button */
+@media (min-width:900px){.gw-drop{width:min(var(--gw-shell),calc(100vw - 2*var(--gw-gutter)))}}
+/* full-width grey bands become part of the page (the comparison page's navy section stays until R3) */
+.gw-band.grey,body.lg .lg-band.grey,body.lg .lg-band:not(.navy):not(.dark){background:transparent}
+
+/* ---- 4. the five layouts (body[data-layout]) ---- */
+/* analytical: the full shell; intro text 720, the main search 760; tile grids 3-up from 1280 */
+body[data-layout=analytical] .gw-lead,body[data-layout=analytical] .gw-sub,body[data-layout=analytical] .kpr-lead{max-width:720px}
+body[data-layout=analytical] .gw-l-search,body[data-layout=analytical] .gw-tools-hero .gw-sx,body.kpr .kpr-search,body.kpr .gw-rws .lg-sb{max-width:760px}
+.gw-wrap.gw-jwrap,.gw-wrap.gw-tdir,.gw-wrap.gw-prose{max-width:var(--gw-shell-w);margin-left:auto;margin-right:auto}   /* these wrappers are the shell; their caps apply to what is inside */
+body[data-layout=analytical] .gw-tcs,body[data-layout=analytical] .gw-pmm,body[data-layout=analytical] .gw-nls{max-width:none}
+/* Research's landing: the two ways in, the search and its notes share the search column (760); results use the full shell */
+body.kpr .gw-rhead > p,body.kpr .gw-ropts,body.kpr .gw-rws > p,body.kpr .gw-rws > .gw-rex,body.kpr .gw-rws > .gw-raz{max-width:760px}
+@media (min-width:1280px){body[data-layout=analytical] .gw-tcs{grid-template-columns:repeat(3,minmax(0,1fr))}}
+/* guide: one column of 760, left-aligned (never centred); an aside of 360 from 1280 */
+body[data-layout=guide] .gw-jwrap > *,body[data-layout=guide] .gw-vx,body[data-layout=guide] .kd-entry,body[data-layout=guide] .kd-form{max-width:760px;margin-left:0;margin-right:0}
+body[data-layout=guide] .kd{max-width:none;margin-left:0}
+body[data-layout=guide] .gw-hero .gw-wrap > *{max-width:760px}
+@media (min-width:1280px){body[data-layout=guide] .gw-guide-split{display:grid;grid-template-columns:minmax(0,760px) 360px;gap:48px;align-items:start}}
+/* reading: text 720, tables and figures to 1040 */
+body[data-layout=reading] .gr-wrap>*{max-width:min(100%,1040px)}
+body[data-layout=reading] .gr-hero h1{font-size:44px;letter-spacing:-.03em}
+@media (max-width:760px){body[data-layout=reading] .gr-hero h1{font-size:32px}}
+/* the sample report keeps its own page header until R3; its edges follow the shell */
+body.gw-sample .wrap,body.gw-sample .gw-foot .in{max-width:var(--gw-shell-w);padding-left:var(--gw-gutter);padding-right:var(--gw-gutter);margin-left:auto;margin-right:auto;box-sizing:border-box}
+body.gw-sample .nav .pill-sm,body.gw-sample .btn.primary{background:var(--gw-ink);border-color:var(--gw-ink);color:#fff}
+body[data-layout=reading] .gw-prose > *{max-width:720px}
+body[data-layout=reading] .gw-prose table,body[data-layout=reading] figure{max-width:1040px}
+/* tool: from 1024 the inputs (up to 640) beside a sticky answer panel; one column below */
+@media (min-width:1024px){
+  body[data-layout=tool] .f3-frame .f3-grid-pay,body[data-layout=tool] .gw-calc{grid-template-columns:minmax(0,11fr) minmax(380px,9fr);gap:56px}
+  body[data-layout=tool] .f3-frame .f3-form,body[data-layout=tool] .gw-calc-in{max-width:640px;width:100%}
+  body[data-layout=tool] .f3-frame .f3-out,body[data-layout=tool] .gw-calc-out{position:sticky;top:calc(var(--gw-hdr) + 24px)}
+}
+/* app: full-bleed under the header (defined, not applied in R1: the Map is frozen) */
+body[data-layout=app] main{max-width:none;padding:0}
+
+/* ---- 5. type: the system face everywhere, tabular figures ---- */
+body.kpr h1.kpr-h,body.kpr h2.kpr-h2,.kpt-h1,.kpt-h2,.kpr .kpr-a-size{font-family:var(--gw-font);font-weight:700;letter-spacing:-.02em}
+body.kpr .kpr-search input{font-family:var(--gw-font)}
+.f3-af,.f3-rl b,.f3-frame .f3-big .f3-in input,.f3-frame .f3-big .f3-in i,.gs-fv,.gs-rv{font-family:var(--gw-font)}
+.f3-af,.f3-rl b,.gw-vx-figs b,.gw-vx-t td,.gw-rows dd,.gw-calc-out b,.kd table td,.lg-page td{font-variant-numeric:tabular-nums}
+.f3-af{font-weight:650;letter-spacing:-.02em}
+.f3-ar1 .f3-af{font-size:52px;font-weight:700;letter-spacing:-.025em}
+.f3-rl b{font-weight:650}
+/* the tool's main entry: 64px tall, 28px figures (56px and 24px on phones); further money boxes 52px, 18px */
+.f3-frame .f3-big .f3-in{min-height:64px;border-radius:var(--gw-r-sm)}
+.f3-frame .f3-big .f3-in input{font-size:28px;font-weight:500;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.f3-frame .f3-big .f3-in i{font-size:24px}
+@media (max-width:760px){
+  .f3-frame .f3-big .f3-in{min-height:56px}
+  .f3-frame .f3-big .f3-in input{font-size:24px}
+  .f3-frame .f3-big .f3-in i{font-size:21px}
+  .f3-ar1 .f3-af{font-size:40px}
+}
+@media (max-width:560px){.f3-ar1 .f3-af{font-size:34px}.f3-af{font-size:28px}}
+/* 200% zoom on a phone (about 195px): the system face runs wider than the old serif, so the figures step down to stay inside their row */
+@media (max-width:300px){.f3-ar1 .f3-af{font-size:26px}.f3-af{font-size:21px}.f3-af small{font-size:12px}}
+
+/* ---- 6. surfaces: one card style (white, the grey border, one radius) ---- */
+.f3-frame .f3-card,.gw-calc .gw-calc-out{background:var(--gw-surface);border:1px solid var(--gw-line);border-radius:var(--gw-r)}
+
+/* no tinted (warm or gold) card or section backgrounds: white, with the shared grey border where a box is needed */
+.f3-frame .f3-fact,.f3-fact{background:transparent}
+.f3-frame .f3-next{background:var(--gw-surface);border:1px solid var(--gw-line);border-radius:var(--gw-r-sm)}
+body.gr{--gr-warm:var(--gw-surface)}
+body.gr .gr-prov{background:var(--gw-surface);border-color:var(--gw-line)}
+body.gw-sample .band.warm{background:transparent}
+
+/* ---- 7. buttons (Ken, 28 Oct 2026 16:41): Groundwork's original blue CTA system, on every page ----
+   Primary actions: the original bright blue fill. Secondary actions: the original blue outline and text where they were already used.
+   Green only on WhatsApp actions. Navy stays for headings, text and selected states (chips, tabs), never for a call to action.
+   The header buttons (Ask Ken, Search, Menu) keep their original look and 40px tap size; the Map does not load this file. */
+:root{--gw-blue:#0B63CE;--gw-blue-h:#0A56B3}
+.gw-btn{min-height:44px;padding:10px 20px;font-size:15px;font-weight:600;border-radius:980px}
+.lg-btn{min-height:44px;padding:10px 20px;font-size:15px;font-weight:600;font-family:var(--gw-font)}
+@media (max-width:760px){.gw-btn,.lg-btn{min-height:48px}}
+.gw-btn.pri,.gw-next .gw-btn.pri,.lg-btn.primary,.v2-btn.pri,.v2-site .v2-btn,body.lg .lg-sb .v2-site .v2-btn,.v2-sample .go,.kpf-research,.pa-btn.pri,
+.kd-btn:not(.kd-ghost),.f3-done,body.gw-sample .nav .pill-sm,body.gw-sample .btn.primary{background:var(--gw-blue);border-color:var(--gw-blue);color:#fff !important}
+.gw-btn.pri:hover,.gw-next .gw-btn.pri:hover,.lg-btn.primary:hover,.kd-btn:not(.kd-ghost):hover,.f3-done:hover{background:var(--gw-blue-h);border-color:var(--gw-blue-h)}
+body.gw-sample .btn.ghost{color:var(--gw-blue);border-color:var(--gw-blue)}
+.gw-btn.wa{background:var(--gw-wa);border-color:var(--gw-wa);color:#fff !important}
+/* the one secondary action that was outlined in navy (Calculators: Explore Plan My Move) takes the same blue outline as the others */
+.gw-pmm-go{border:1px solid var(--gw-blue);color:var(--gw-blue) !important}
+.gw-pmm-go:hover{background:var(--gw-blue);color:#fff !important}
+/* the older calculators' own controls (Mortgage, Stamp duty, SSD) are left as they are: they move into the newer frame in R2 */
+
+/* ---- 8. navigation ---- */
+/* the Menu marks the page you are on with aria-current="page" (gw-nav.js); it keeps the rows' own ink and semibold, so nothing else changes */
+.gw-mi[aria-current="page"] b{color:var(--gw-ink);font-weight:600}

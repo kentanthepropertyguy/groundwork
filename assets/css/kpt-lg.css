@@ -19,12 +19,12 @@ body.lg sup{ font-size:11px; color:var(--kpt-muted); margin-left:1px; line-heigh
 
 /* ---- the app area: LG sections run full width; any older view keeps a centred column ---- */
 body.lg main#app.kpt-shell, body.lg main.lg-main{ max-width:none !important; padding:0 !important; margin:0; }
-body.lg #app > :not(.lg-page):not(script){ max-width:var(--kpt-wrap); margin-left:auto; margin-right:auto; padding-left:22px; padding-right:22px; box-sizing:border-box; }
+body.lg #app > :not(.lg-page):not(script){ max-width:var(--kpt-wrap); margin-left:auto; margin-right:auto; padding-left:var(--gw-gutter,22px); padding-right:var(--gw-gutter,22px); box-sizing:border-box; }
 body.lg #app > .kpr-back:first-child, body.lg #app > .kpr-state:first-child{ margin-top:28px; }
 
 /* ---- nav ---- */
 .lg-nav{ position:sticky; top:env(safe-area-inset-top,0px); z-index:20; background:rgba(255,255,255,.86); -webkit-backdrop-filter:saturate(180%) blur(20px); backdrop-filter:saturate(180%) blur(20px); border-bottom:1px solid var(--kpt-line); }
-.lg-nav .in{ max-width:var(--kpt-wrap); margin:0 auto; padding:0 22px; display:flex; justify-content:space-between; align-items:center; gap:12px; min-height:52px; box-sizing:border-box; }
+.lg-nav .in{ max-width:var(--kpt-wrap); margin:0 auto; padding:0 var(--gw-gutter,22px); display:flex; justify-content:space-between; align-items:center; gap:12px; min-height:52px; box-sizing:border-box; }
 .lg-nav .bb{ display:flex; align-items:baseline; gap:10px; min-width:0; }
 .lg-nav .brand{ font-weight:600; font-size:17px; letter-spacing:-.02em; color:var(--kpt-ink) !important; text-decoration:none; white-space:nowrap; }
 .lg-nav .tag{ font-size:12.5px; color:var(--kpt-muted); white-space:nowrap; }
@@ -44,7 +44,7 @@ body.lg .kpt-footer.kpt-shell::before{ margin-bottom:20px; }
 
 /* ---- building blocks ---- */
 .lg-page{ display:block; }
-.lg-band{ padding:80px 22px; }
+.lg-band{ padding:80px var(--gw-gutter,22px); }
 .lg-band.grey{ background:var(--kpt-grey); }
 .lg-band.tight{ padding-top:56px; padding-bottom:56px; }
 .lg-wrap{ max-width:var(--kpt-wrap); margin:0 auto; display:grid; gap:30px; min-width:0; }
@@ -55,7 +55,7 @@ body.lg .kpt-footer.kpt-shell::before{ margin-bottom:20px; }
 .lg-sub{ color:var(--kpt-muted); font-size:17px; line-height:1.45; max-width:56ch; }
 .lg-fine{ font-size:13px; color:var(--kpt-muted); line-height:1.5; }
 .lg-center{ text-align:center; justify-self:center; }
-.lg-hero{ padding:64px 22px 72px; text-align:center; }
+.lg-hero{ padding:64px var(--gw-gutter,22px) 72px; text-align:center; }
 .lg-hero .lg-wrap{ justify-items:center; gap:18px; }
 .lg-hero h1{ font-size:76px; line-height:1; letter-spacing:-.045em; }
 .lg-hero h1.lg-name{ font-size:84px; }
@@ -218,7 +218,7 @@ body.lg .v2-quiet, body.lg .v2-site{ border-radius:var(--kpt-radius); }
 body.lg #app > .kpr-sugg-h, body.lg #app > .kpr-results{ max-width:680px; }
 
 /* ---- directory ---- */
-body.lg .kpe-hero{ text-align:center; padding:64px 22px 24px; }
+body.lg .kpe-hero{ text-align:center; padding:64px var(--gw-gutter,22px) 24px; }
 body.lg .kpe-hero .kpt-eyebrow{ color:var(--kpt-gold); font-weight:600; font-size:16px; letter-spacing:-.005em; text-transform:none; }
 body.lg .kpe-hero .kpt-h1{ font-family:var(--kpt-font); font-weight:700; font-size:60px; line-height:1.02; letter-spacing:-.04em; margin:12px 0 0; }
 body.lg .kpe-hero .kpt-lede{ font-size:18px; color:var(--kpt-muted); max-width:var(--gw-measure,56ch); margin:16px auto 0; }
@@ -311,8 +311,8 @@ body.lg .lg-pick ul.kpr-results[role=list]{ background:var(--kpt-grey); border-r
    The development page leads with its name, type and typical price; background and method sit lower or in disclosures.
    ========================================================================== */
 body.kpr .lg-hero h1, body.kpr .lg-hero h1.lg-name, body.kpr .lg-hero h1.md, body.kpr .lg-hero h1.xl{ font-size:44px; line-height:1.08; letter-spacing:-.03em; }
-body.kpr .lg-hero{ padding:40px 22px 44px; }
-body.kpr .lg-band{ padding:56px 22px; }
+body.kpr .lg-hero{ padding:40px var(--gw-gutter,22px) 44px; }
+body.kpr .lg-band{ padding:56px var(--gw-gutter,22px); }
 body.kpr .lg-band.tight{ padding-top:40px; padding-bottom:40px; }
 body.kpr .lg-head h2{ font-size:32px; line-height:1.12; }
 body.kpr .lg-pc h2{ font-size:28px; }
@@ -435,7 +435,7 @@ body.kpr .mp-near button .lg-n{ margin-left:8px; padding-left:8px; border-left:1
   .gwl-near{ grid-template-columns:1fr; gap:0; }
 }
 /* ---------- 25 Oct 2026: what homes here sold and rent for (assets/js/gw-records.js, gw-rent.js). Answer rows, then the evidence. ---------- */
-body.kpr .gwr-band{ padding:44px 22px; border-top:1px solid var(--kpt-line); }
+body.kpr .gwr-band{ padding:44px var(--gw-gutter,22px); border-top:1px solid var(--kpt-line); }
 .gwr-wrap{ gap:16px !important; }
 .gwr-head{ display:grid; gap:6px; }
 .gwr-head h2{ font-size:30px; line-height:1.15; letter-spacing:-.02em; margin:0; }
@@ -509,7 +509,7 @@ body.kpr .gwb-ans .gwr-rentline, body.kpr .lg-ans .gwr-rentline{ margin:2px 0 0;
   body.kpr .lg-ans:not(.gwb-ans) .gwr-rentline{ display:none; }
 }
 /* ---------- CX V2 (26 Oct 2026): a shortcut row under the answer, quieter fine print, less scrolling ---------- */
-.lg-jump{ position:sticky; top:var(--gw-navh,58px); z-index:30; background:rgba(255,255,255,.96); -webkit-backdrop-filter:saturate(180%) blur(16px); backdrop-filter:saturate(180%) blur(16px); border-top:1px solid var(--kpt-line); border-bottom:1px solid var(--kpt-line); padding:0 22px; }
+.lg-jump{ position:sticky; top:var(--gw-navh,58px); z-index:30; background:rgba(255,255,255,.96); -webkit-backdrop-filter:saturate(180%) blur(16px); backdrop-filter:saturate(180%) blur(16px); border-top:1px solid var(--kpt-line); border-bottom:1px solid var(--kpt-line); padding:0 var(--gw-gutter,22px); }
 .lg-jump-in{ display:flex !important; align-items:center; gap:18px; min-height:54px; grid-template-columns:none !important; }
 .lg-jctx{ flex:0 0 auto; display:inline-flex; align-items:center; gap:8px; font:inherit; font-size:15px; color:var(--kpt-ink); background:none; border:0; padding:6px 0; cursor:pointer; min-height:44px; max-width:46%; }
 .lg-jn{ font-weight:700; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }

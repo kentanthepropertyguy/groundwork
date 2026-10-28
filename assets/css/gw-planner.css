@@ -53,7 +53,7 @@
 @media (min-width:900px){
   body[data-view="calc-payment-planner"] .gw-calc-hero{padding:22px 0 8px}body[data-view="calc-payment-planner"] .gw-calc-hero .gw-wrap{gap:6px}body[data-view="calc-payment-planner"] .gw-csec{padding-top:0}
   .pl-grid{grid-template-columns:320px minmax(0,1fr);gap:20px;align-items:start}
-  body[data-view="calc-payment-planner"] .gw-nav .in,body[data-view="calc-payment-planner"] .gw-foot .in,body[data-view="calc-payment-planner"] .gw-calc-hero .gw-wrap{max-width:1360px}body[data-view="calc-payment-planner"] .gw-calc-hero .gw-h1-c,body[data-view="calc-payment-planner"] .gw-calc-hero .gw-sub{max-width:none}
+  body[data-view="calc-payment-planner"] .gw-nav .in,body[data-view="calc-payment-planner"] .gw-foot .in,body[data-view="calc-payment-planner"] .gw-calc-hero .gw-wrap{max-width:var(--gw-shell-w,1360px)}body[data-view="calc-payment-planner"] .gw-calc-hero .gw-h1-c,body[data-view="calc-payment-planner"] .gw-calc-hero .gw-sub{max-width:none}
   .pl-rail{display:block;background:#fff;border:1px solid var(--gw-line);border-radius:14px;padding:16px;position:sticky;top:72px;max-height:calc(100vh - 88px);overflow:auto}
   .pl-sheet+.pl-sheet{margin-top:18px;padding-top:14px;border-top:1px solid var(--gw-line)}
   .pl-assume{display:none}.pl-backdrop{display:none!important}
@@ -67,7 +67,7 @@
   .pl-assume{display:block}.pl-result,.pl-assume,.pl-compare,.pl-timeline{break-inside:avoid;border:1px solid #ccc;margin:0 0 10px}
   .pl-ev{break-inside:avoid}.gw-in input{border:0}.pl-more{display:block}.pl-more>.pl-more-in{display:block}
 }
-.pl .gw-wrap-wide,.gw-wrap.gw-wrap-wide{max-width:1360px}
+.pl .gw-wrap-wide,.gw-wrap.gw-wrap-wide{max-width:var(--gw-shell-w,1360px)}
 .pl .gw-fld>span em{font-size:12px}
 /* first load and incomplete states (RC3): a checklist where the result will appear; nothing empty is drawn */
 .pl-assume:empty,.pl-compare:empty,.pl-timeline:empty{display:none}

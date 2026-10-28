@@ -300,10 +300,7 @@
     const S = SECTIONS[k];
     return '<div class="gw-door gw-door-' + k + '"><p class="gw-lane">' + esc(S.q) + '</p><h2 class="gw-door-t"><a href="' + r + S.href + '" data-gw-nav-to="' + S.nav + '">' + S.name + ' <span aria-hidden="true">›</span></a></h2><p class="gw-door-s">' + esc(S.say) + '</p>' + inner + (more || '') + '</div>';
   }
-  // On the section pages (phones and tablets): the same four names as one row, the current one marked.
-  function secSwitch(cur, r) {
-    return '<nav class="gw-secs" aria-label="Ways to use Groundwork">' + NAV_ORDER.map((k) => { const S = SECTIONS[k]; return '<a href="' + r + S.href + '" data-gw-nav-to="' + S.nav + '"' + (k === cur ? ' aria-current="page"' : '') + '>' + S.name + '</a>'; }).join('') + '</nav>';
-  }
+  // Design Standard R1 (Ken, 28 Oct 2026, D2): the phone section row is no longer drawn; the header and the Menu carry the same links.
   function researchRows(r) { return '<div class="gw-ml gw-rrows"><a class="gw-mi gw-mi-map" href="' + r + 'research/map/" data-gw-nav-to="map"><img src="' + r + 'assets/img/map-thumb.webp" alt="" width="720" height="298" loading="lazy" decoding="async"><span><b>Map</b><small>Search a place, road or development. See what is nearby.</small></span></a>' + SECTIONS.research.ids.filter((id) => id !== 'map').slice(0, 3).map((id) => row(byId[id], r)).join('') + '</div>'; }
   // Homepage quick tools: five tools and "All tools".
   function quickHtml(r) {
@@ -574,7 +571,7 @@
     // Journey or standalone (Package 3). A tool opened from a journey (Buy or Sell in the menu, a Journey page, Research, the Planner, the step strip) gets "?j=1" on its address: only that marker, never a figure.
     // The tool then shares figures with the journey, as before. A tool opened from Tools (the Tools menu column, All tools, search results, a typed address) has no marker and starts a fresh, independent calculation.
     const TOOL_PAGE = /\/tools\/(?!what-can-i-buy\/?$)[a-z0-9-]+\/?$/;
-    const ALONE = '.gw-ms-tools, .gw-sx, .gw-tdir, .gw-qt, .gw-foot, .gw-secs';
+    const ALONE = '.gw-ms-tools, .gw-sx, .gw-tdir, .gw-qt, .gw-foot';
     const fromJourney = (a) => {
       if (a.closest(ALONE)) return false;
       if (a.closest('.gw-ms-buy, .gw-ms-sell, .gw-strip, [data-gw-journey]')) return true;
@@ -589,8 +586,30 @@
     document.addEventListener('click', markJourney, true); document.addEventListener('auxclick', markJourney, true);
     // Plan My Move: marked on the guided-path page, whichever path is open.
     if (/\/journey\/?$/.test(location.pathname)) {
-      const mark = () => { [].slice.call(document.querySelectorAll('.gw-nav .gw-links a[data-kpt-nav], .gw-secs a[data-gw-nav-to]')).forEach((a) => { const k = a.getAttribute('data-kpt-nav') || a.getAttribute('data-gw-nav-to'); if (k === 'journey') a.setAttribute('aria-current', 'page'); }); };
+      const mark = () => { [].slice.call(document.querySelectorAll('.gw-nav .gw-links a[data-kpt-nav]')).forEach((a) => { const k = a.getAttribute('data-kpt-nav'); if (k === 'journey') a.setAttribute('aria-current', 'page'); }); };
       mark(); window.addEventListener('hashchange', mark);
+    }
+    // Design Standard R1: the Menu marks the page you are on (aria-current="page"), on the same address and Research view only.
+    const markMenu = () => {
+      const here = location.pathname.replace(/index\.html$/, ''), h = location.hash || '';
+      [].slice.call(document.querySelectorAll('.gw-menu .gw-drop a[href]')).forEach((a) => {
+        let u; try { u = new URL(a.getAttribute('href'), location.href); } catch (x) { return; }
+        const same = u.origin === location.origin && u.pathname.replace(/index\.html$/, '') === here && (u.hash ? h.indexOf(u.hash) === 0 : !/^#\//.test(h));
+        if (same) a.setAttribute('aria-current', 'page'); else if (a.getAttribute('aria-current') === 'page') a.removeAttribute('aria-current');
+      });
+    };
+    if (!document.body.classList.contains('kpm')) { markMenu(); window.addEventListener('hashchange', markMenu); }   // the Map is frozen: left exactly as it is
+    // Design Standard R1: the layout follows the view on the two pages that change view in place (Research and What can this budget buy?):
+    // the search form is a guide column, the list of results uses the full shell, and the map view keeps its own layout (unchanged in R1).
+    if (document.body.hasAttribute('data-layout') && /\/(research|tools\/what-can-i-buy)\/?$/.test(location.pathname)) {
+      const B = document.body, wcb = /what-can-i-buy/.test(location.pathname);
+      const sync = () => {
+        const kd = B.getAttribute('data-kd-view');
+        const L = kd === 'list' ? 'analytical' : kd === 'stage' ? 'map' : (wcb || /^#\/budget/.test(location.hash)) ? 'guide' : 'analytical';
+        if (B.getAttribute('data-layout') !== L) B.setAttribute('data-layout', L);
+      };
+      sync(); window.addEventListener('hashchange', sync);
+      if (root.MutationObserver) new root.MutationObserver(sync).observe(B, { attributes: true, attributeFilter: ['data-kd-view'] });
     }
     // The four-step page (journey #up): finished steps ticked, the main button points at the next one.
     const upBox = document.querySelector('[data-gw-up]');
@@ -607,5 +626,5 @@
 
   }
   if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount(); }
-  return { ONE_FIGURE, oneFigureHtml, upDone, finStamp, clearJourney, oneEdit, deaccent, ENTRIES, SECTIONS, SEC_ORDER, NAV_ORDER, doorHtml, researchRows, secSwitch, row, MENU_TOOLS, QUICK, UP, MAIN, LAUNCHES, ASK, ICON, svg, norm, matchTools, scoredTools, matchDevs, matchSites, matchRoads, roadList, roadTitle, roadKey, roadLandedHref, roadMapHref, findRoads, roadsNow, displayName, menuHtml, searchHtml, quickHtml, stripHtml, href, esc };
+  return { ONE_FIGURE, oneFigureHtml, upDone, finStamp, clearJourney, oneEdit, deaccent, ENTRIES, SECTIONS, SEC_ORDER, NAV_ORDER, doorHtml, researchRows, row, MENU_TOOLS, QUICK, UP, MAIN, LAUNCHES, ASK, ICON, svg, norm, matchTools, scoredTools, matchDevs, matchSites, matchRoads, roadList, roadTitle, roadKey, roadLandedHref, roadMapHref, findRoads, roadsNow, displayName, menuHtml, searchHtml, quickHtml, stripHtml, href, esc };
 });

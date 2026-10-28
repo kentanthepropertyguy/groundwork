@@ -3,7 +3,7 @@
    Light theme only. Blue for actions, green for favourable evidence, orange for caution, restrained gold for labels.
    Mobile first: one column, 16px side gutters, nothing wider than the screen.
    ========================================================================== */
-body.kpr[data-view="compare"] main.kpt-shell{ max-width:1040px; }
+body.kpr[data-view="compare"] main.kpt-shell{ max-width:var(--gw-shell-w,1040px); }
 .v2{
   --a:#2f7c97; --b:#5a55d6; --a-wash:#edf4f7; --b-wash:#f0effd;
   --ink:#16213E; --muted:#667085; --line:#E6E3DA; --card:#FFFFFF; --soft:#F3F2EC;

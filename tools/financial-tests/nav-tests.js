@@ -27,7 +27,7 @@ for (const f of pages) {
   check(rel + ': Plan My Move opens Guide Me at its start (journey/, no path chosen); Calculators keeps the /tools/ address', pm && /(^|\/)journey\/$/.test(pm.href) && cl && /(^|\/)tools\/$/.test(cl.href), [pm, cl]);
   check(rel + ': Map is a top-level header item and opens the one Map', links.filter((l) => /^Map$/.test(l.text)).length === 1 && /(^|\/)research\/map\/$/.test((links.find((l) => /^Map$/.test(l.text)) || {}).href || ''));
   const cur = links.filter((l) => /aria-current/.test(l.attrs)).map((l) => l.text);
-  const want = /^tools\//.test(rel) ? ['Calculators'] : /^journey\//.test(rel) ? ['Plan My Move'] : rel === 'research/map/index.html' ? ['Map'] : rel === 'research/new-launches/index.html' ? ['New Launches'] : /^research\//.test(rel) ? ['Research'] : [];
+  const want = rel === 'tools/what-can-i-buy/index.html' ? ['Research'] : /^tools\//.test(rel) ? ['Calculators'] : /^journey\//.test(rel) ? ['Plan My Move'] : rel === 'research/map/index.html' ? ['Map'] : rel === 'research/new-launches/index.html' ? ['New Launches'] : /^research\//.test(rel) ? ['Research'] : [];
   // the planner, timeline and calculators belong to Calculators; the Guide Me pages (journey/) belong to Plan My Move
   check(rel + ': at most one header item is the current page', cur.length <= 1, cur);
   check(rel + ': current section is ' + (want.join() || 'none until the browser marks it'), cur.join() === want.join() || (!want.length && !cur.length), cur);
@@ -61,10 +61,11 @@ for (const f of pages) {
 }
 // stray copies at the root ("index (19).html" and the like) are old duplicates, not pages of the site; they keep whatever header they were saved with
 const uniq = new Set(Object.entries(sig).filter(([k]) => !/ \(\d+\)\.html$/.test(k)).map(([, v]) => v)); check('the header is the same list of destinations on every page', uniq.size === 1, [...uniq]);
-// phone section row: the same four, and the All Tools page (Package 3)
+// phone section row: removed in Design Standard R1; the All Tools page (Package 3)
 for (const f of pages) {
   const rel = path.relative(ROOT, f), t = fs.readFileSync(f, 'utf8'), sm = t.match(/<nav class="gw-secs"[^>]*>(.*?)<\/nav>/s);
-  if (sm) check(rel + ': phone section row reads Plan My Move · Research · Map · Calculators', [...sm[1].matchAll(/<a\b[^>]*>(.*?)<\/a>/gs)].map((x) => x[1].replace(/<[^>]+>/g, '').trim()).join('|') === 'Plan My Move|Research|Map|Calculators');
+  // Design Standard R1 (Ken, 28 Oct 2026, D2): the phone section row is removed; the header and the Menu carry the same links
+  check(rel + ': no phone section row (.gw-secs)', !sm && !/class="gw-secs"/.test(t));
 }
 {
   const t = fs.readFileSync(path.join(ROOT, 'tools/index.html'), 'utf8'), main = t.slice(t.indexOf('<main'), t.indexOf('</main>'));

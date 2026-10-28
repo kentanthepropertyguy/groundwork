@@ -397,8 +397,8 @@ a.f3-rowlnk{text-decoration:none}
   .f3-frame .f3-scrim[hidden]{display:none}
   .f3-sheet-open .f3-bar{display:none!important}
 }
-main:has(.f3-frame) .gw-wrap{max-width:1360px}
-body:has(.f3-frame) .gw-nav .in,body:has(.f3-frame) .gw-foot .in{max-width:1360px}
+main:has(.f3-frame) .gw-wrap{max-width:var(--gw-shell-w,1360px)}
+body:has(.f3-frame) .gw-nav .in,body:has(.f3-frame) .gw-foot .in{max-width:var(--gw-shell-w,1360px)}
 /* V3.3 */
 .f3-tag{display:inline-block;margin-left:4px;padding:0 6px;border-radius:4px;background:#EEF0F3;color:#525A6B;font-size:11px;font-weight:600;letter-spacing:.02em;vertical-align:1px}
 .f3-allpay[hidden]{display:none!important}

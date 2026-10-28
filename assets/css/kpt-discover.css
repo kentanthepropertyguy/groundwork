@@ -2,7 +2,7 @@
    Same look as the rest of Groundwork: white, navy ink, hairline borders, one blue for actions, modest type (page title 44px desktop, 32px phone).
    Layout: no place chosen = one list column; a place chosen = the Map is the stage (desktop: a compact results panel on the left; phone: a bottom sheet that minimises). */
 body.kdp{margin:0;background:#fff;color:var(--gw-body,#3B4256);font-family:var(--gw-font,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif);-webkit-font-smoothing:antialiased}
-.kd-wrap{max-width:1040px;margin:0 auto;padding:0 22px 56px}
+.kd-wrap{max-width:var(--gw-shell-w,1040px);margin:0 auto;padding:0 var(--gw-gutter,22px) 56px}
 .kd{--ink:#16213E;--body:#3B4256;--muted:#5F6672;--blue:#0B63CE;--gold:#85661F;--green:#1F7A3D;--grey:#F5F5F7;--line:#E3E3E8;--nav:58px;font-size:15px;line-height:1.45;color:var(--body)}
 .kd *{box-sizing:border-box}
 .kd-load{padding:40px 0;color:var(--muted)}
@@ -210,7 +210,7 @@ body.kd-hasmap .kd-mapbox .lyr-p{top:46px}
 /* ---- Results layout (Ken, 28 Oct 2026): the width is used for comparison, not for bigger cards.
    List view (no place chosen): a centred container up to 1,400px; desktop = one compact table per group; phone and the map panel = compact expandable cards.
    Same V3.8 language: white, navy ink, hairlines, one blue for actions. ---- */
-body[data-kd-view=list] .kd-wrap{max-width:1400px}
+body[data-kd-view=list] .kd-wrap{max-width:var(--gw-shell-w,1400px)}
 @media (min-width:900px){
   body[data-kd-view=list] .kd-cols{grid-template-columns:minmax(0,1fr)}
   body[data-kd-view=list] .kd-main{max-width:none}

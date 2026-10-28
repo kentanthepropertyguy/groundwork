@@ -8,10 +8,10 @@
 /* ---- widths: header, content and footer always share one column ---- */
 :root body.kpt-w-focus .kpt-shell{ max-width:640px; }
 :root body.kpt-w-read  .kpt-shell{ max-width:760px; }
-:root body.kpt-w-wide  .kpt-shell{ max-width:1080px; }
+:root body.kpt-w-wide  .kpt-shell{ max-width:var(--gw-shell-w,1080px); }
 /* Research keeps its narrow reading column below 960px, as before, and widens above it. */
 :root body.kpr.kpt-w-wide .kpt-shell{ max-width:680px; }
-@media (min-width:960px){ :root body.kpr.kpt-w-wide .kpt-shell{ max-width:1080px; } }
+@media (min-width:960px){ :root body.kpr.kpt-w-wide .kpt-shell{ max-width:var(--gw-shell-w,1080px); } }
 
 /* ---- header: product wordmark + one supporting line ---- */
 :root body .kpt-header.kpt-shell{ display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:nowrap; gap:16px; padding:28px 24px 6px; min-height:0; }

@@ -12,7 +12,7 @@
 
 /* ---------- shared header (R2.1: byline to the main site on desktop, New launches, Search, and a Menu that is always visible) ---------- */
 .gw-nav{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.94);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--gw-line);font-family:var(--gw-font)}
-.gw-nav .in{max-width:1040px;margin:0 auto;padding:0 22px;height:58px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.gw-nav .in{max-width:var(--gw-shell-w,1040px);margin:0 auto;padding:0 var(--gw-gutter,22px);height:58px;display:flex;align-items:center;justify-content:space-between;gap:16px}
 .gw-brand{display:flex;flex-direction:column;line-height:1.1;color:var(--gw-ink) !important;text-decoration:none !important;min-width:0}
 .gw-home{display:flex;flex-direction:column;color:var(--gw-ink) !important;text-decoration:none !important}
 .gw-brand b{font-size:15px;letter-spacing:.16em;font-weight:800}
@@ -85,7 +85,7 @@ html.gw-lock,html.gw-lock body{overflow:hidden}
 
 /* ---------- shared footer ---------- */
 .gw-foot{border-top:1px solid var(--gw-line);padding:30px 0 44px;font-family:var(--gw-font);background:#fff}
-.gw-foot .in{max-width:1040px;margin:0 auto;padding:0 22px;display:grid;gap:16px;font-size:12.5px;color:var(--gw-muted);line-height:1.6}
+.gw-foot .in{max-width:var(--gw-shell-w,1040px);margin:0 auto;padding:0 var(--gw-gutter,22px);display:grid;gap:16px;font-size:12.5px;color:var(--gw-muted);line-height:1.6}
 .gw-foot .top{display:flex;justify-content:space-between;gap:30px;align-items:flex-start;flex-wrap:wrap}
 .gw-foot .who{display:flex;gap:14px;align-items:center}
 .gw-foot .who img{width:56px;height:56px;border-radius:50%;object-fit:cover;flex:none}
@@ -98,7 +98,7 @@ html.gw-lock,html.gw-lock body{overflow:hidden}
 
 /* ---------- Ken band ---------- */
 .gw-ken{background:var(--gw-grey);padding:80px 0;font-family:var(--gw-font)}
-.gw-ken .in{max-width:1040px;margin:0 auto;padding:0 22px;display:grid;grid-template-columns:160px 1fr;gap:36px;align-items:center}
+.gw-ken .in{max-width:var(--gw-shell-w,1040px);margin:0 auto;padding:0 var(--gw-gutter,22px);display:grid;grid-template-columns:160px 1fr;gap:36px;align-items:center}
 .gw-ken img{width:160px;height:160px;border-radius:50%;object-fit:cover}
 .gw-ken .t{display:grid;gap:12px}
 .gw-ken h2{font-size:38px;line-height:1.08;margin:0;letter-spacing:-.025em;color:var(--gw-ink)}
@@ -109,7 +109,7 @@ html.gw-lock,html.gw-lock body{overflow:hidden}
 body.gw-page{--serif:var(--gw-font);--bg:#fff;margin:0;background:#fff;color:var(--gw-ink);font-family:var(--gw-font);font-size:17px;line-height:1.47;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
 body.gw-page a{color:var(--gw-blue);text-decoration:none}body.gw-page a:hover{text-decoration:underline}
 .gw h1,.gw h2,.gw h3{margin:0;font-weight:700;letter-spacing:-.025em;text-wrap:balance;color:var(--gw-ink)}.gw p{margin:0}
-.gw-wrap{max-width:1040px;margin:0 auto;padding:0 22px}
+.gw-wrap{max-width:var(--gw-shell-w,1040px);margin:0 auto;padding:0 var(--gw-gutter,22px)}
 .gw-kicker{font-size:15px;font-weight:600;color:var(--gw-gold)}
 .gw-h1{font-size:74px;line-height:1;letter-spacing:-.045em !important}
 .gw-h2{font-size:42px;line-height:1.08}
@@ -434,7 +434,7 @@ body.gw-has-pin{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
 @media (min-width:720px){.gw-pin{display:none !important}}
 .gw-calc-out{scroll-margin-top:70px}
 /* the "Upgrading from HDB" step strip */
-.gw-strip-host{max-width:1040px;margin:14px auto 0;padding:0 22px;font-family:var(--gw-font)}
+.gw-strip-host{max-width:var(--gw-shell-w,1040px);margin:14px auto 0;padding:0 var(--gw-gutter,22px);font-family:var(--gw-font)}
 body.gw-legacy .gw-strip-host{max-width:760px;padding:0}
 .gw-strip{border:1px solid var(--gw-line);border-radius:16px;padding:12px 14px;display:grid;gap:10px;background:#FAFAFC;color:var(--gw-ink)}
 .gw-strip-h{display:flex;justify-content:space-between;align-items:center;font-size:14px}
@@ -563,7 +563,7 @@ body.gw-legacy .gw-strip-host{max-width:760px;padding:0}
 
 /* ---- four ways in — Buy, Sell, Research, Tools (R2.1, package 2) — named the same in the header, menu, homepage, footer and search ---- */
 /* Menu: search, then the four sections with everything in each (side by side on a wide screen), then Home, Ken's sites, Ask Ken. */
-@media (min-width:900px){.gw-drop{width:min(1040px,calc(100vw - 48px))}}
+@media (min-width:900px){.gw-drop{width:min(var(--gw-shell,1040px),calc(100vw - 2*var(--gw-gutter,24px)))}}
 .gw-mcols{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
 .gw-ms{display:grid;gap:4px;align-content:start;min-width:0}
 .gw-msh{display:flex;align-items:center;gap:6px;min-height:36px;color:var(--gw-ink) !important;text-decoration:none !important}
@@ -676,7 +676,7 @@ body[data-view="directory"] .kpe-hero .kpt-lede{font-size:17px;max-width:56ch}
 .gw-ken h2{font-size:24px;line-height:1.15}
 .gw-ken .gw-sub{font-size:16px}
 /* Property values & market prices: the entry is the search itself, in the same flat column as Buyer Search */
-.gw-jwrap,.gw-tdir{max-width:1040px}   /* content lines up with the heading above it */
+.gw-jwrap,.gw-tdir{max-width:var(--gw-shell,1040px)}   /* content lines up with the heading above it */
 .gw-jres{text-align:left}
 body[data-view="worth"] .gw-jsec{padding:6px 0 48px}
 body[data-view="worth"] .gw-vx{border:0;border-radius:0;padding:0;background:none;max-width:720px}
@@ -689,7 +689,7 @@ body[data-view="worth"] .gw-vx{border:0;border-radius:0;padding:0;background:non
 }
 
 /* ---- Unified Research: one page, two ways in (research a property, or what a budget buys) ---- */
-.gw-rhome{max-width:1040px;margin:0 auto;padding:28px 0 56px;font-family:var(--gw-font);text-align:left}
+.gw-rhome{max-width:var(--gw-shell,1040px);margin:0 auto;padding:28px 0 56px;font-family:var(--gw-font);text-align:left}
 .gw-rhead{display:grid;gap:10px;margin:0 0 26px}
 .gw-rhead h1{font-size:44px;line-height:1.08;letter-spacing:-.03em;margin:0;color:var(--gw-ink);font-family:var(--gw-font);font-weight:700}
 .gw-rlede{font-size:18px;line-height:1.45;color:var(--gw-muted);margin:0}
@@ -914,7 +914,7 @@ main:has(.gw-tcs){background:#fff}
 /* V3.9 (Ken 27 Oct 2026, Claude D's approved proposal): New launches. Compact white entries, name and location on the left, "Explore project"
    on the right; the whole entry is the one link. Two columns on a desktop, one on a phone. No descriptions, chips or decoration. */
 main:has(.gw-nls){background:#fff}
-.gw-nls{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;max-width:1040px}
+.gw-nls{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;max-width:var(--gw-shell,1040px)}
 .gw-nls>li{display:flex;min-width:0}
 .gw-nl{flex:1;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:12px 20px;padding:18px 22px;background:#fff;border:1px solid #E6E7EB;border-radius:12px;color:var(--gw-ink) !important;text-decoration:none !important;transition:border-color .15s,box-shadow .15s}
 .gw-nl>span:first-child{display:grid;gap:2px;min-width:0}
