@@ -3,7 +3,7 @@
    First development indigo (--gw-a), second teal (--gw-b), as on the comparison pages. Light only, like the rest of the site.
    ========================================================================== */
 body.gr{--gr-a-soft:#EFEEFB;--gr-b-soft:#E8F2F5;--gr-warm:#FBF8F2}
-.gr-wrap{max-width:960px;margin:0 auto;padding:0 22px;display:grid;gap:18px;min-width:0}
+.gr-wrap{max-width:var(--gw-shell-w,960px);margin:0 auto;padding:0 var(--gw-gutter,22px);display:grid;gap:18px;min-width:0}
 .gr .pa{color:var(--gw-a)}.gr .pb{color:#286A81}
 .gr-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 

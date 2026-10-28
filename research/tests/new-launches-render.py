@@ -6,7 +6,7 @@ from playwright.sync_api import sync_playwright
  - opening a project is tracked as microsite_clicked (placement new-launches) and carries the referral parameters, never anything typed.
  - V3.9 navigation (Ken, 15:14): "New Launches" in the desktop header between Map and Calculators on every page (from 960px; on 900-959px it
    steps back to avoid crowding); a full "New launches" entry in the menu's Research column (desktop and phone), after Map, styled like the
-   others; on the page, New Launches is current in the header and Research in the phone row; "All new launches" on the Research page; search finds it."""
+   others; on the page, New Launches is current in the header (the phone row was removed in Design Standard R1); "All new launches" on the Research page; search finds it."""
 SITE = pathlib.Path(__file__).resolve().parents[2]
 def port():
     s = socket.socket(); s.bind(('127.0.0.1', 0)); p = s.getsockname()[1]; s.close(); return p
@@ -57,7 +57,9 @@ try:
             cols = len(set(round(r['r']['x']) for r in rows))
             check(f'{tag}: {"two columns" if tag == "desktop" else "one column"}; no sideways scrolling', cols == (2 if tag == 'desktop' else 1) and pg.evaluate("document.documentElement.scrollWidth<=innerWidth"), cols)
             cur = pg.evaluate("()=>[...document.querySelectorAll('[aria-current=page]')].filter(a=>a.offsetParent).map(a=>a.textContent.trim())")
-            check(f'{tag}: the current section shown is ' + ('New Launches (header)' if tag == 'desktop' else 'Research (phone row)'), cur == (['New Launches'] if tag == 'desktop' else ['Research']), cur)
+            # Design Standard R1 (Ken, 28 Oct 2026, D2): the phone section row is removed, so on a phone nothing visible is marked; the header link still carries aria-current
+            hdr = pg.evaluate("()=>[...document.querySelectorAll('.gw-nav .gw-links a[aria-current=page]')].map(a=>a.textContent.trim())")
+            check(f'{tag}: the current section is New Launches (header' + (')' if tag == 'desktop' else ', no phone section row)'), cur == (['New Launches'] if tag == 'desktop' else []) and hdr == ['New Launches'] and pg.locator('.gw-secs').count() == 0, [cur, hdr])
             pg.click('.gw-menu summary'); pg.wait_for_selector('.gw-ms-research a[data-gw-nav-to="new-launches"]', state='visible')
             st = pg.evaluate("()=>{const a=document.querySelector('.gw-ms-research a[data-gw-nav-to=new-launches]'),m=document.querySelector('.gw-ms-research a[data-gw-nav-to=map]');const f=(e)=>{const c=getComputedStyle(e.querySelector('b'));return [c.fontSize,c.fontWeight,c.color,getComputedStyle(e).outlineStyle,getComputedStyle(e).backgroundColor]};return {nl:f(a),map:f(m),t:a.innerText.replace(/\\s+/g,' ').trim()}}")
             check(f'{tag}: the menu entry looks exactly like Map\'s (same type, colour, no outline or highlight) and reads "New launches"', st['nl'] == st['map'] and st['t'].startswith('New launches'), st)

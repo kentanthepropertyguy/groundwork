@@ -67,11 +67,12 @@ try:
             mw = pg.evaluate("document.querySelector('.kd-main').getBoundingClientRect().width"); lw = pg.evaluate("document.querySelector('.kd-lead').getBoundingClientRect().width")
             th = pg.evaluate("getComputedStyle(document.querySelector('.kd-th')).display"); out[w] = (round(mw), round(lw), th)
             ok(no_hscroll(pg), f'{w}: no horizontal scroll')
-            if w > 900: ok(mw >= min(1356, w - 44) - 2 and abs(lw - mw) < 2 and th == 'table-header-group', f'{w}: header and results use the width, as a table: {out[w]}')
+            if w > 900: ok(mw >= min(1360, w - 2 * min(40, max(16, 0.028 * w))) - 2 and   # Design Standard R1: the shared shell (1,360 content, gutter clamp(16px, 2.8vw, 40px))
+                   abs(lw - mw) < 2 and th == 'table-header-group', f'{w}: header and results use the width, as a table: {out[w]}')
             else: ok(mw >= w - 32 - 2 and th == 'none', f'{w}: full-width cards: {out[w]}')
             ok(not errs, str(errs)); ctx.close()
         print('       widths', out)
-    t('container: 1,356 px at 1440, the full width at 1280 and 1024 (header and results alike), a table on a desktop and cards at 390; no horizontal scroll', widths)
+    t('container: the shared 1,360 px shell at 1440, the full width at 1280 and 1024 (header and results alike), a table on a desktop and cards at 390; no horizontal scroll', widths)
     for w in (1440, 390):
         vn = 'desktop' if w > 600 else 'phone'
         print(f'Results, {vn}')

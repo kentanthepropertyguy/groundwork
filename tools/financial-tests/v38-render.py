@@ -46,7 +46,9 @@ try:
             check(f'{tag} D1: seven cards, in Ken\'s order, with his names and lines', [(c['id'], c['t'], c['s']) for c in cards] == SEVEN, [(c['id'], c['t']) for c in cards])
             check(f'{tag} D2: no Upgrade from HDB card, and no separate "advanced" or one-figure section', pg.locator('.gw-tcs [data-tool="hdb-upgrade"]').count() == 0 and 'Looking for one figure' not in pg.inner_text('main') and 'Advanced' not in pg.inner_text('main'))
             cols = len(set(round(c['r']['x']) for c in cards)); hs = [round(c['r']['height']) for c in cards]
-            check(f'{tag} D3: {"two columns" if tag != "phone" else "one column"}, every card the same height' + (' (one column)' if tag == 'phone' else ''), (cols == (1 if tag == 'phone' else 2)) and (tag == 'phone' or len(set(hs)) == 1), [cols, hs])
+            # Design Standard R1 (Ken, 28 Oct 2026): the Calculators grid spans the shared shell, three across from 1280px
+            want_cols = {'desktop': 3, 'tablet': 2, 'phone': 1}[tag]
+            check(f'{tag} D3: {["one column", "two columns", "three columns"][want_cols - 1]}, every card the same height' + (' (one column)' if tag == 'phone' else ''), cols == want_cols and (tag == 'phone' or len(set(hs)) == 1), [cols, hs])
             check(f'{tag} D4: each card has an icon and an arrow, and the whole card is the link', pg.evaluate("()=>[...document.querySelectorAll('.gw-tcs a.gw-tc')].every(a=>a.querySelectorAll('svg').length===2&&a.parentElement.tagName==='LI')"))
             check(f'{tag} D5: no sideways scrolling, no text clipped', overflow(pg) <= 0 and pg.evaluate("()=>[...document.querySelectorAll('.gw-tc b,.gw-tc span,.gw-pmm *')].every(e=>e.scrollWidth<=e.clientWidth+1)"), overflow(pg))
             pm = pg.locator('.gw-pmm')
