@@ -75,7 +75,21 @@ try:
         new = {k: money(n[k]) for k in ('budget', 'cap', 'mon', 'cash', 'cpf')}
         lim_old = 'funds' if 'cash and CPF' in (o['limited'] or '') else 'income' if 'income' in (o['limited'] or '') else 'other'
         lim_new = 'funds' if 'cash and CPF are the limit' in n['fact'] else 'income' if 'The loan is the limit' in n['fact'] else 'other'
-        same = all(old[k] == new[k] for k in old) and lim_old == lim_new
+        # 28 Oct 2026 (Claude E audit F1): a new launch's monthly mortgage is now the one from TOP, the tenure counted from the bank's first release. The old pages
+        # spread the loan over the whole tenure from TOP, so the baseline's figure gives the loan (L = old x annuity factor); the buyer pays price - L first, the bank's
+        # first release is the stage where that runs out, at its usual point of a 48-month build (foundation 8, frame 16, walls 24, roof 29, fittings 35, roads 41,
+        # TOP 48); from TOP, L is repaid over the months left. Worked out here independently; every other figure must still equal the old page's.
+        if s['raw'].get('akind', 'new') != 'completed' and old['mon']:
+            tm = re.search(r'over (\d+) years at ([\d.]+)%', o['text']); N = int(tm.group(1)) * 12; i = float(tm.group(2)) / 1200
+            af = lambda n: (1 - (1 + i) ** -n) / i
+            L = old['mon'] * af(N); own = o['budget_n'] - L; cum = 0; f = 48
+            for pct, mo in ((.05, 0), (.15, 2), (.10, 8), (.10, 16), (.05, 24), (.05, 29), (.05, 35), (.05, 41), (.25, 48), (.15, 60)):
+                cum += pct * o['budget_n']
+                if cum > own + 0.5: f = mo; break
+            want = L / af(N - (48 - f)) if f <= 48 else L / af(N)
+            old = dict(old, mon=round(want)); mon_ok = abs(new['mon'] - want) <= 2
+        else: mon_ok = old['mon'] == new['mon']
+        same = all(old[k] == new[k] for k in old if k != 'mon') and mon_ok and lim_old == lim_new
         check(s['id'] + ' ' + s['name'], same, [old, new, lim_old, lim_new, n['text'][:160]])
         table['afford'].append({'id': s['id'], 'name': s['name'], 'old': old, 'new': new, 'limit_old': lim_old, 'limit_new': lim_new, 'same': same})
     for s in SC['msr']:

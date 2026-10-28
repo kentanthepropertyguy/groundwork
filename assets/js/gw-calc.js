@@ -514,6 +514,58 @@
     return { ok: true, scenario: sc, B, rate: sr, tenure: t, msrCap, tdsrCap, prop, other, forNewMsr, forNewTdsr, forNew, maxLoan: loan, ltv: row.ltv, minCash: row.minCash, priceAtLtv: loan / row.ltv, binding: forNewMsr <= forNewTdsr ? 'msr' : 'tdsr', flat: sc === 'hdb-bank' ? flatCheck(i, loan, row.ltv, row.minCash) : null, notes, longer: longerOf(t, forNew, sr, i.loans) };
   }
 
+  /* ---------------- 7a. Bank instalments on a home under construction (Claude E calculator audit F1, 28 Oct 2026; CPF buffer methodology v1.1 §2) ----------------
+     The tenure runs from the first instalment, in the month after the bank's first release, and the maturity is fixed then (OCBC Private Home Loan T&C, TC/PHL/DEC24,
+     cl. 1.2, 4.1.3, 6.3.3(e)). Before TOP the instalment is worked out on what has been released, over the months left to that maturity, and reworked after each
+     release (cl. 6.3.3(b), (c)). From the month after TOP it is worked out on the full loan in the letter of offer, over the months left (cl. 6.3.1, 6.3.3(d)): the
+     figure shown. Some banks keep progressive instalments until CSC; that reading is returned beside it (`progressive`) and never replaces it. A release is first
+     charged the month after it is made. There is no interest-only phase (MAS Notice 632 para 3).
+     bankMonths(top, csc): the month of each stage's release, counted from the option, when the developer has given no stage dates (R.plannerConventions.newLaunch).
+     bankPath({ releases: [{ id, month, amount }], rate (a year, decimal), years, top, csc, horizon }): top and csc are months from the option; horizon, optional,
+     the last month worked out month by month (the CPF buffer runs to it). */
+  function bankMonths(top, csc) {
+    const NL = R.plannerConventions.newLaunch, F = NL.bankStageFractions, T = Math.max(0, round(top)), s = Math.min(T, NL.snpMonths);
+    const m = { otp: 0, snp: s, top: T, csc: num(csc) !== null ? Math.max(T, round(csc)) : T + (NL.cscMonths - NL.topMonths) };
+    Object.keys(F).forEach((id) => { m[id] = Math.min(T, Math.max(s + 1, floor(F[id] * T + 0.5))); });
+    return m;
+  }
+  function bankPath(i) {
+    const rel = {}, ids = {};
+    (i.releases || []).forEach((x) => { if (x && x.amount > 0.005 && num(x.month) !== null) { const k = Math.max(0, round(x.month)); rel[k] = (rel[k] || 0) + x.amount; if (x.id) ids[x.id] = k; } });
+    const ms = Object.keys(rel).map(Number).sort((a, b) => a - b), N = round(i.years * 12), r = i.rate / 12;
+    if (!ms.length || !(N > 0) || !(i.rate >= 0)) return null;
+    const T = round(i.top), Tc = Math.max(T, round(num(i.csc) !== null ? i.csc : T + 12)), f = ms[0], c0 = f + 1, mat = c0 + N, L = ms.reduce((s, k) => s + rel[k], 0);
+    // a tenure so short that, counted from the first release, it would end before TOP (an older buyer's default): no bank would run it that way, and how a bank would set it
+    // is not known, so the path is worked out as if the whole loan started at TOP (the old reading), flagged `endsBeforeTop` for the page to say so (Ken, 28 Oct 2026)
+    if (mat <= Math.max(T + 1, c0) && !i._ends) {
+      const x = bankPath(Object.assign({}, i, { releases: [{ id: 'top', month: Math.max(T, f), amount: L }], _ends: true }));
+      if (x) { x.endsBeforeTop = true; const ids0 = {}; (i.releases || []).forEach((r) => { if (r && r.id && r.amount > 0.005) ids0[r.id] = Math.max(0, round(r.month)); }); x.months = ids0; x.firstId = Object.keys(ids0).filter((id) => ids0[id] === f)[0] || null; Object.keys(ids0).forEach((id) => { x.after[id] = x.dueAt(ids0[id] + 1); }); }
+      return x;
+    }
+    const pmt = (b, n) => (n <= 0 ? b : r > 0 ? b * r / (1 - Math.pow(1 + r, -n)) : b / n);
+    const full = Math.max(T + 1, c0), fullInst = pmt(L, mat - full), end = Math.min(mat, Math.max(ms[ms.length - 1], Tc, num(i.horizon) !== null ? round(i.horizon) : 0) + 2);
+    const run = (atTop) => {
+      let out = 0; const due = {};
+      for (let m = f; m <= end; m++) {
+        let d = 0;
+        if (m >= c0 && out > 0.005) { const inst = atTop && m >= full ? fullInst : pmt(out, mat - m), int = out * r; d = Math.min(inst, out + int); out += int - d; }
+        if (rel[m]) out += rel[m];
+        due[m] = d;
+      }
+      return due;
+    };
+    const A = run(true), B = run(false);
+    // the instalment due in month m: the default reading (whole loan from TOP), or with 'progressive' the reading that keeps progressive instalments until CSC
+    const dueAt = (m, reading) => { const D = reading === 'progressive' ? B : A; return m < c0 || m >= mat ? 0 : m <= end ? D[m] : D[end]; };
+    const after = {}; Object.keys(ids).forEach((id) => { after[id] = dueAt(ids[id] + 1); });
+    const firstId = Object.keys(ids).filter((id) => ids[id] === f)[0] || null;
+    return {
+      loan: L, months: ids, firstId, firstMonth: f, commencement: c0, maturity: mat, top: T, csc: Tc,
+      endsBeforeTop: false, first: dueAt(c0), beforeTop: c0 <= T ? dueAt(T) : null, fromTop: fullInst, fromMonth: full, yearsLeft: (mat - full) / 12,
+      progressive: { topToCsc: T + 1 <= Tc && c0 <= T + 1 ? dueAt(T + 1, 'progressive') : null, afterCsc: dueAt(Tc + 1, 'progressive') }, after, dueAt,
+    };
+  }
+
   /* ---------------- 7. Progressive payments (uncompleted private home or EC) ---------------- */
   // i: { price, kind: 'private'|'ec', age, buyers, entity, loans: 0|1|2, ratePct, years, cpf }
   //   age = the borrower's age (the income-weighted average for joint borrowers); needed for individuals, not for a company
@@ -555,6 +607,31 @@
       o.loan = amt; drawn += amt; o.drawn = drawn; o.monthly = instal(drawn, rate, years);
       return o;
     });
+    // a home under construction (build: true): the bank's instalments count the tenure from its first release (7a). topMonths / cscMonths: months from the option to TOP
+    // and CSC when the developer has given them (else the planning convention); releaseMonths: { stageId: month } for stages with a developer's date. A completed
+    // home (build absent) is drawn in full at completion, so the tenure starts then and nothing below changes.
+    let bank = null;
+    if (i.build) {
+      const mo = Object.assign(bankMonths(pos(i.topMonths) ? i.topMonths : R.plannerConventions.newLaunch.topMonths, num(i.cscMonths)), i.releaseMonths || {});
+      bank = bankPath({ releases: stages.map((s) => ({ id: s.id, month: mo[s.id], amount: s.loan })), rate, years, top: mo.top, csc: mo.csc });
+      if (bank) { bank.stageMonths = mo; bank.firstStage = bank.firstId; bank.stageLoans = {}; stages.forEach((s) => { if (s.loan > 0.005) bank.stageLoans[s.id] = s.loan; }); stages.forEach((s) => { s.monthly = bank.dueAt(mo[s.id] + 1); }); }
+    }
+    // A tenure that, counted from the bank's first release, would end before TOP (Ken, 28 Oct 2026). The standard limit needs the loan to end by 65 (MAS Notice 632); a loan
+    // repaid from TOP would run past 65, so it takes the lower limit. With no tenure given, the consistent scenario is the longest tenure a bank usually allows (to 75) at the
+    // lower limit (`shortStd` records the standard one that could not work); with a tenure typed, it is kept, its repayments start at TOP (an illustration) and the lower limit
+    // applies. Either way the loan, the minimum cash, the instalment and the income test describe one scenario.
+    if (bank && bank.endsBeforeTop && !i.entity && !i._shortSwitch) {
+      if (!pos(i.years) && allowed > years) {
+        const x = progressive(Object.assign({}, i, { years: allowed, _shortSwitch: true, _noLonger: true }));
+        if (x.ok) Object.assign(x, { shortStd: { years: years, ltv: row.ltv }, defaulted: true, tenureAsked: null });
+        return x;
+      }
+      if (!lower) {
+        const x = progressive(Object.assign({}, i, { lowerLtv: true, _shortSwitch: true }));
+        if (x.ok) Object.assign(x, { lowerWhy: 'age', autoLower: true, startsAtTop: true });
+        return x;
+      }
+    }
     const sum = (k) => stages.reduce((s, x) => s + x[k], 0);
     const upfront = stages[0].amount + stages[1].amount + (duty.ok ? duty.total : 0);
     // tenure left blank and a longer one allowed: what it would give, at the lower limit (one line on the result; not applied)
@@ -563,7 +640,7 @@
       ok: true, price: P, ltv: row.ltv, minCash: row.minCash, loanMax, ruleLoanMax, loanCapped, cashMin, cpfOrCash, valuation: V, base, cov, dutyBase, rate, years, stages, duty, lower, entity: !!i.entity, tenureCapped: wanted > years, tenureCappedBy: wanted > years ? (ageCap < R.bankLtv.maxTenure.private ? 'age' : 'max') : null, tenureAllowed: allowed, maturityAge: R.bankLtv.maturityAge, tenureAsked: pos(i.years) ? i.years : null, defaulted: !pos(i.years), longer, autoLower: !i.lowerLtv && lower,
       lowerWhy: !lower ? null : longTenure ? 'tenure' : pastAge ? 'age' : (i.lowerLtv ? 'chosen' : null), age: i.entity ? null : i.age, stdYears,
       totals: { cash: sum('cash'), cpf: sum('cpf'), flex: sum('flex'), loan: sum('loan') }, upfront8wk: upfront,
-      finalMonthly: instal(loanMax, rate, years), cpfGiven: cpfLeft !== null,
+      finalMonthly: bank ? bank.fromTop : instal(loanMax, rate, years), bank, cpfGiven: cpfLeft !== null,
     };
   }
 
@@ -652,5 +729,5 @@
   };
   const ASK = (tool) => 'Hi Ken, I’m using the ' + tool + ' on Groundwork and have a question.';
 
-  return { assetIncome, flatCheck, mortgage, stampDuty, bsdLines, ssd, saleProceeds, saleEstimate, cpfInterestEstimate, cpfSecondHome, tdsr, msr, progressive, borrowers, bankTenure, tenureNote, tenureMaxText, tenureTierText, tenureLimit, messages, ASK, instal, parseDate: D, parseMoney, parseNum, LIMITS, dutyAt };
+  return { assetIncome, flatCheck, mortgage, stampDuty, bsdLines, ssd, saleProceeds, saleEstimate, cpfInterestEstimate, cpfSecondHome, tdsr, msr, progressive, bankMonths, bankPath, borrowers, bankTenure, tenureNote, tenureMaxText, tenureTierText, tenureLimit, messages, ASK, instal, parseDate: D, parseMoney, parseNum, LIMITS, dutyAt };
 });

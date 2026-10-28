@@ -133,7 +133,8 @@ try:
         want = [('Booking fee', P0 * .05, 'booking'), ('At the S&P', P0 * .15, 'snp'), ('Buyer’s stamp duty', b, 'snp'), ('ABSD', ab, 'snp'), ('Upfront, in all', 1427100, 'snp'), ('Foundation stage, your share', P0 * .05, 'build'), ('From you, in all', 1559600, ''), ('The bank pays', P0 * .75, 'bank')]
         check(f'{tag} B1: the stages: booking; S&P with BSD and ABSD apart; the upfront subtotal; the foundation share; the total; the bank', all(any(x[0].startswith(w[0]) and amt(x[1]) == w[1] and x[3] == w[2] for x in r) for w in want), r)
         check(f'{tag} B1: stamp duty is due within 14 days of the S&P', all('Within 14 days of signing the S&P' in x[2] for x in r if x[0] in ('Buyer’s stamp duty', 'ABSD')), r)
-        check(f'{tag} B1: the instalment is said once fully drawn ($9,489)', '$9,489' in o and 'once fully drawn' in o)
+        # 28 Oct 2026 (Claude E audit F1): the instalment is the one from TOP, the tenure counted from the foundation release: $1,987,500 over 320 months at 4% = $10,111
+        check(f'{tag} B1: the instalment is said from TOP ($10,111)', '$10,111' in o and ('TOP (estimated' in o or '(estimated TOP)' in o or '(after TOP)' in o))
         sh = pg.evaluate(SHEET)
         check(f'{tag} B1: Save as PDF leads with the same upfront figure, shows the stages, fits one page, nothing cut, with Ken\'s photograph', sh['f1'] == 'S$1,427,100' and 'Upfront, in all' in sh['txt'] and sh['fits'] and sh['clipped'] == 0 and sh['photo'] and sh['photoSrc'].endswith('assets/img/ken-circle-600.jpg'), {k: v for k, v in sh.items() if k != 'txt'})
         # B2. 55% loan limit: the buyer's share runs over several construction stages; nothing is hard-coded

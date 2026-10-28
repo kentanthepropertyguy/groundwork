@@ -137,12 +137,14 @@ try:
             check(vn + ' J4: then the later milestones, in order, with no grand total', sc.upper().index('UPFRONT PAYMENTS') < sc.upper().index('DURING CONSTRUCTION') and 'Total to pay' not in pg.inner_text('body'))
             check(vn + ' J4: the funding check and comparisons stay closed and optional', not pg.locator('[data-fund]').evaluate('d=>d.open') and not pg.locator('[data-cmp]').evaluate('d=>d.open') and (pg.is_hidden('[data-scn]') or not pg.locator('[data-scn]').evaluate('d=>d.open')))
             typ(pg, 'price', '2,000,000'); typ(pg, 'loanAmt', '1,500,000'); typ(pg, 'ratePct', '3'); typ(pg, 'years', '30'); typ(pg, 'cpf', '300,000')
-            check(vn + ' J4: $2M, $1.5M loan, 3% over 30 years, $300k CPF: $469,600 upfront first (V3.7), then $269,600 cash in all, CPF used $300,000, $6,324 a month, about $13,000 of income', until(pg, "()=>{const a=document.querySelector('[data-answer]');const t=document.querySelector('[data-out]').textContent;return a&&a.textContent==='$469,600'&&/Cash you’ll need[\\s\\S]{0,400}?\\$269,600/.test(t)&&/CPFused\\$300,000/.test(t.replace(/\\s/g,''))&&/\\$6,324/.test(t)&&/\\$13,000/.test(t)}"), out(pg)[:400])
+            # 28 Oct 2026 (Claude E audit F1): the instalment is the one from TOP, with the 30 years counted from the bank's first release (foundation, month 8 of 48):
+            # $1.5m over 320 months at 3% = $6,815 (hand: 1,500,000 x 0.0025 / (1 - 1.0025^-320)); at $1.8m the $1.35m loan gives $6,134. Before: $6,324 and $5,692.
+            check(vn + ' J4: $2M, $1.5M loan, 3% over 30 years, $300k CPF: $469,600 upfront first (V3.7), then $269,600 cash in all, CPF used $300,000, $6,815 a month, about $13,000 of income', until(pg, "()=>{const a=document.querySelector('[data-answer]');const t=document.querySelector('[data-out]').textContent;return a&&a.textContent==='$469,600'&&/Cash you’ll need[\\s\\S]{0,400}?\\$269,600/.test(t)&&/CPFused\\$300,000/.test(t.replace(/\\s/g,''))&&/\\$6,815/.test(t)&&/\\$13,000/.test(t)}"), out(pg)[:400])
             check(vn + ' J4: the chips show what is assumed', pg.inner_text('[data-chip="rate"]') == '3% · 30 years' and pg.inner_text('[data-chip="cpf"]') == 'CPF $300k' and pg.inner_text('[data-chip="loan"]') == 'Loan $1.5m', [pg.inner_text('[data-chip="rate"]'), pg.inner_text('[data-chip="cpf"]'), pg.inner_text('[data-chip="loan"]')])
             check(vn + ' J4: the age assumption is said, not hidden; below 4% the income is said to be tested at 4%', 'loan to 65' in out(pg) and 'tested at 4%' in out(pg), out(pg)[:500])
             if vn == 'phone':
                 pg.evaluate("document.querySelector('[data-schsec]').scrollIntoView()")
-                check(vn + ' J4: once the card has scrolled away, the bar shows the upfront sum, what follows and the monthly', until(pg, "()=>document.querySelector('[data-bar]').classList.contains('f3-bar-on')&&/\\$469,600/.test(document.querySelector('[data-bar]').textContent)&&/\\$6,324/.test(document.querySelector('[data-bar]').textContent)"))
+                check(vn + ' J4: once the card has scrolled away, the bar shows the upfront sum, what follows and the monthly', until(pg, "()=>document.querySelector('[data-bar]').classList.contains('f3-bar-on')&&/\\$469,600/.test(document.querySelector('[data-bar]').textContent)&&/\\$6,815/.test(document.querySelector('[data-bar]').textContent)"))
                 pg.evaluate('window.scrollTo(0,0)')
             check(vn + ' J4: the schedule reads “As construction progresses · earliest …”', '· earliest' in pg.inner_text('[data-sched]'))
             check(vn + ' J4: the schedule follows the new price', until(pg, "()=>/\\$100,000/.test(document.querySelector('[data-sched]').textContent)"))
@@ -151,7 +153,7 @@ try:
             check(vn + ' J4: “Where the $569,600 goes” is a receipt with the combined upfront total: 5% cash, cash or CPF, stamp duty, upfront = cash + CPF, the loan', all(x in rc for x in ['Cash, at least', '$100,000', 'Cash or CPF', '$400,000', '$69,600', 'From you, cash and CPF', 'Cash $269,600 + CPF $300,000', '$569,600', '$1,500,000']), rc[:300])
             pg.click('[data-bd] summary')
             pg.click('[data-cmp] summary'); typ(pg, 'price2', '1,800,000')
-            check(vn + ' J4: compare another price side by side (cash $209,600, $5,692 a month at $1.8M)', until(pg, "()=>/\\$209,600/.test((document.querySelector('[data-cmp-out]')||{}).textContent||'')&&/\\$5,692/.test(document.querySelector('[data-cmp-out]').textContent)"))
+            check(vn + ' J4: compare another price side by side (cash $209,600, $6,134 a month at $1.8M)', until(pg, "()=>/\\$209,600/.test((document.querySelector('[data-cmp-out]')||{}).textContent||'')&&/\\$6,134/.test(document.querySelector('[data-cmp-out]').textContent)"))
             pick(pg, 'who', 'Second home')
             check(vn + ' J4: “Second home” shows its ABSD before it is picked, applies it, and the home’s card asks whether its loan is still being paid (V3.12)', until(pg, "()=>/ABSD 20%/.test(document.querySelector('[data-duty-line]').textContent)") and pg.is_visible('[data-chp="who"] [data-home="0"] [data-hk="mort"]'), pg.inner_text('[data-optl="who"]')[:300])
             pg.locator('[data-optl="who"] .f3-opt', has_text='First home').first.click(); close_chip(pg)
@@ -206,6 +208,7 @@ try:
                 # V3.7 (Ken, 27 Oct 2026): a new launch leads with the upfront sum and lists its stages in groups (booking; S&P and stamp duty, BSD and ABSD apart,
                 # with the upfront subtotal; construction; the bank), each row with room for when and how it is paid. That is about 2,150px and 260 words at $2M
                 # on a phone, so the limits are now 2,300px and 290 words. Tighten them again if the stage list is folded away.
+                # 28 Oct 2026 (Ken): the mortgage disclosures (before TOP, the estimated TOP, the term left) fit within these limits; the bank alternatives sit in the breakdown.
                 check('phone V3.3/V3.7: $2,000,000 and nothing tapped: under 2,300px tall, under 290 words in main, one Ask Ken', m['h'] < 2300 and m['w'] < 290 and m['ask'] == 1, m)
                 REPORT.append(('phone', 'V3.3 cost page at $2M: height px / words', m['h'], m['w']))
                 ctx.close()

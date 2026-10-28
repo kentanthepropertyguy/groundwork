@@ -72,7 +72,9 @@ function judged(s, price) { const r = A.assess(s); if (price) { const q = r.quot
   const e = dc(base(), 2500000, { otpEntered: false });
   ok(e.result === 'short' && e.first && e.first.amount === 25000 && /First short on/.test(plain(e.summary)), 'dates: a date that fails is a shortfall on a named date; at $2.5m the exercise is $25,000 short (option 25,000, exercise 100,000, cash 100,000)', e);
   // timing only: the price is covered in total, a LATER payment is not -> a projection, never a shortfall today
-  const s = base({ kind: 'new', cash: 400000, cpf: 300000, saveMo: 500, cpfMo: 500 }), r = judged(s, 1800000), v = V.build(r, {});
+  // (28 Oct 2026: the bank's instalments now start the month after its first release, at the foundation stage, not straight after the S&P, so $500 + $500 a month
+  // no longer leaves a gap within the plan; $300 + $300 does, from Oct 2032. The case it tests is unchanged.)
+  const s = base({ kind: 'new', cash: 400000, cpf: 300000, saveMo: 300, cpfMo: 300 }), r = judged(s, 1800000), v = V.build(r, {});
   ok(r.at.gap <= 0.5 && r.at.covered === false, 'projected: the scenario is covered in total but a later payment is not (engine)', [r.at.gap, r.at.covered]);
   ok(v.projected === true && v.headline === 'Projected shortfall' && v.dates.result === 'projected' && /Projected shortfall from/.test(plain(v.dates.summary)) && /not a shortfall today/.test(plain(v.dates.summary)), 'projected: a future shortfall is labelled as projected, in the headline and the dates line', [v.headline, plain(v.dates.summary)]);
   ok(!/\bshort\b$/.test(v.headline), 'projected: the headline is not a plain "$X short"', v.headline);

@@ -174,12 +174,12 @@
     const loansForLtv = nn(n.otherLoans) + (flatCounts ? 1 : 0);
     const buyersP = n.duty.map((b, k) => ({ res: b.res, fta: b.fta, owned: ownAt[k] }));
     const V = n.kind === 'completed' && nn(over.valuation) > 0 ? over.valuation : undefined;   // a valuation belongs to ONE price (the buyer's own), never to the search
-    const prelim = C.progressive({ price: P, age: B.iwaaUse, years: n.years, ratePct: n.ratePct, loans: loansForLtv, kind: 'private', buyers: buyersP, couple: n.couple, valuation: V });
+    const prelim = C.progressive({ price: P, age: B.iwaaUse, years: n.years, ratePct: n.ratePct, loans: loansForLtv, kind: 'private', buyers: buyersP, couple: n.couple, valuation: V, build: n.kind === 'new' });
     if (!prelim.ok) return { ok: false, why: 'rules', prog: prelim };
     // the loan taken is the buyer's preferred loan when it is below what the numbers allow; never above it
     const incomeCap = over.noIncomeCap ? prelim.loanMax : (n.prefLoan === null ? t.maxLoan : Math.min(t.maxLoan, n.prefLoan));   // noIncomeCap: what the cash and CPF support if income were no limit
     const capped = incomeCap < prelim.loanMax - 0.5;
-    const prog = capped ? C.progressive({ price: P, age: B.iwaaUse, years: n.years, ratePct: n.ratePct, loans: loansForLtv, kind: 'private', buyers: buyersP, couple: n.couple, loanCap: incomeCap, valuation: V }) : prelim;
+    const prog = capped ? C.progressive({ price: P, age: B.iwaaUse, years: n.years, ratePct: n.ratePct, loans: loansForLtv, kind: 'private', buyers: buyersP, couple: n.couple, loanCap: incomeCap, valuation: V, build: n.kind === 'new' }) : prelim;
     if (!prog.ok) return { ok: false, why: 'rules', prog: prog };
     const loan = prog.loanMax, duty = prog.duty.total, absd = prog.duty.absd || 0, bsd = prog.duty.bsd;
     const sale = mode === 'sell' && n.sale && n.sale.counted ? n.sale : null;
@@ -193,7 +193,8 @@
     const gap = cashShort + flexShort;
     const cpfUsed = Math.min(cpf, flexNeed), cashForFlex = Math.max(0, flexNeed - cpfUsed);
     const leftCash = Math.max(0, cash - cashOnly - cashForFlex);   // cash in hand after buying, statically; CPF left is not counted
-    const monthly = C.instal(loan, prog.rate, n.years);
+    // a new launch: the instalment from TOP, with the tenure counted from the bank's first release (GW_CALC 7a; Claude E audit F1, 28 Oct 2026)
+    const monthly = prog.bank ? prog.finalMonthly : C.instal(loan, prog.rate, n.years);
     const res = { ok: true, P: P, mode: mode, owned: owned, years: n.years, loan: loan, maxLoan: Math.min(prelim.loanMax, t.maxLoan), ruleLoan: prog.ruleLoanMax, incomeLoan: t.maxLoan, prefLoan: n.prefLoan, assessRate: t.rate, limit: capped ? (n.prefLoan !== null && n.prefLoan < t.maxLoan - 0.5 ? 'choice' : 'income') : 'rule', ltv: prog.ltv, minCash: prog.minCash, cashMin: prog.cashMin, lower: prog.lower, lowerWhy: prog.lowerWhy,
       valuation: V === undefined ? null : V, cov: cov, base: prog.base, dutyBase: prog.dutyBase, bsd: bsd, absd: absd, absdRate: prog.duty.absdRate, duty: duty, dutyNotes: prog.duty.notes, down: P - loan, upfront: P - loan + duty, have: cash + cpf, haveCash: cash, haveCpf: cpf, cashOnly: cashOnly, flexNeed: flexNeed,
       gap: gap, cashShort: cashShort, flexShort: flexShort, leftCash: leftCash, monthly: monthly, monthlyPct: B.gross > 0 ? monthly / B.gross : null, debts: debts, flatInstal: instal, loans: loansForLtv, prog: prog, t: t, sale: sale,

@@ -97,13 +97,22 @@ const addM = (iso, m) => T.iso(T.addMonths(new Date(iso + 'T00:00:00Z'), m));
   ok(near(snp.cpfUsed, 270000) && near(c.events.filter((e) => e.id === 'otp')[0].cashUsed, 90000), '7: CPF pays the S&P instalment (cash or CPF), cash the booking fee', [snp.cpfUsed]);
   ok(near(bsd.uncovered, 59600 - 10000), '7: stamp duty is cash first: with $10,000 cash left, $49,600 is short although CPF remains', [bsd.cashUsed, bsd.uncovered]);
 }
-// ---- 8. progressive drawdown: the instalment after each release is the level payment on everything released so far ----
+// ---- 8. progressive drawdown (28 Oct 2026, Claude E audit F1): the tenure counts from the month after the first release; before TOP each instalment repays what has
+// been released over the months left; from the month after TOP it is on the whole loan. Recomputed here independently, month by month, with the stages at their
+// usual point between the option and TOP (48 months: foundation 8, frame 16, walls 24, roofing 29, fittings 35, roads 41) and CSC at 60 months.
 {
   const r = T.timeline(base({ cash: 500000, cpf: 300000 })), pays = r.events.filter((e) => e.type === 'pay' && e.bank > 0);
-  let drawn = 0, good = true;
-  pays.forEach((e) => { drawn += e.bank; if (!near(e.drawn, drawn) || !near(e.instalment, instal(drawn, 4, r.loan.years), 0.02)) good = false; });
-  ok(pays.length >= 5 && good, '8: ' + pays.length + ' releases, each instalment = amortised payment on the amount drawn (4%, ' + r.loan.years + ' years)', pays.map((e) => [e.drawn, e.instalment]));
-  ok(near(pays[pays.length - 1].instalment, instal(1350000, 4, 30), 0.02), '8: fully released: $1.35m over 30 years at 4% = about $6,445 a month', pays[pays.length - 1].instalment);
+  const M = { foundation: 8, frame: 16, walls: 24, roof: 29, fittings: 35, roads: 41, top: 48, csc: 60 }, i = 0.04 / 12, N = r.loan.years * 12;
+  const pmt = (P, n) => P * i / (1 - Math.pow(1 + i, -n)), L = pays.reduce((a, e) => a + e.bank, 0);
+  const f = M[pays[0].id], mat = f + 1 + N, rel = {}; pays.forEach((e) => { rel[M[e.id]] = (rel[M[e.id]] || 0) + e.bank; });
+  let out = 0, inst = 0, good = true; const after = {};
+  for (let m = f; m <= 61; m++) {
+    if (m > f && out > 0) { inst = m > 48 ? pmt(L, mat - 49) : pmt(out, mat - m); out = out * (1 + i) - inst; }
+    if (rel[m]) { out += rel[m]; after[m] = m + 1 > 48 ? pmt(L, mat - 49) : pmt(out, mat - m - 1); }
+  }
+  pays.forEach((e) => { if (!near(e.instalment, after[M[e.id]], 0.02)) good = false; });
+  ok(pays.length >= 5 && good, '8: ' + pays.length + ' releases, each instalment = the bank’s level payment from the first release (4%, ' + r.loan.years + ' years)', pays.map((e) => [e.id, e.instalment, Math.round(after[M[e.id]] * 100) / 100]));
+  ok(near(r.instalment.final, pmt(1350000, N - (48 - 8)), 0.02) && near(pays[pays.length - 1].instalment, r.instalment.final, 0.01), '8: from TOP, $1.35m over the 320 months left at 4% = about $6,868 a month', r.instalment.final);
   ok(pays.every((e, k) => k === 0 || e.instalment >= pays[k - 1].instalment), '8: the instalment only rises during construction');
 }
 // ---- 9. property types ----

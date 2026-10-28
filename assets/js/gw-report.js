@@ -113,7 +113,7 @@
     // typed. Left blank, both choices are shown: the longer of the two with the 75% limit, and 30 years at the lower limit.
     var tenP = C.parseNum($('grTenure').value, '25');
     if (tenP.error || (tenP.value !== undefined && (tenP.value < 1 || tenP.value > 35))) return h + '<p class="gr-fine">Check the loan tenure: between 1 and 35 years, or leave it blank.</p>';
-    var base = { price: price, kind: 'private', age: ageP.value, buyers: buyers, loans: +$('grLoans').value, ratePct: rateP.value };
+    var base = { price: price, kind: 'private', age: ageP.value, buyers: buyers, loans: +$('grLoans').value, ratePct: rateP.value, build: true };
     var p, alt = null, why;
     if (tenP.value) { p = C.progressive(Object.assign({}, base, { years: tenP.value })); why = p.ok && p.tenureCappedBy === 'age' ? 'cut from ' + tenP.value + ': banks usually end a loan by age ' + p.maturityAge : 'the tenure you entered'; }
     else {
@@ -126,12 +126,12 @@
     var first = p.stages.filter(function (s) { return s.loan >= 1; })[0];
     h += '<h4>When the money goes out</h4><div class="gr-figs"><div><span>Within 8 weeks (20%)</span><b>' + money(p.stages[0].amount + p.stages[1].amount) + '</b><small>plus stamp duty; ' + money(p.cashMin) + ' of the price must be cash</small></div>' +
       '<div><span>Loan limit (' + Math.round(p.ltv * 100) + '%)</span><b>' + money(p.loanMax) + '</b><small>' + p.years + ' years (' + why + ') at ' + (Math.round(p.rate * 1000) / 10) + '%' + (p.lower ? '; the lower limit applies because ' + (p.lowerWhy === 'age' ? 'the loan runs past age 65' : 'the tenure is over 30 years') : '') + '</small></div>' +
-      '<div><span>' + esc(G.a) + ': first instalment</span><b>' + (first ? money(first.monthly) + '/mo' : '—') + '</b><small>rising to ' + money(p.finalMonthly) + '/mo once fully drawn' + (G.vpYear ? ', by about ' + esc(G.vpYear) : '') + '</small></div>' +
+      '<div><span>' + esc(G.a) + ': first instalment</span><b>' + (first ? money(first.monthly) + '/mo' : '—') + '</b><small>rising to ' + money(p.finalMonthly) + '/mo from TOP' + (G.vpYear ? ', about ' + esc(G.vpYear) : '') + ', on the whole loan</small></div>' +
       '<div><span>A resale at this price</span><b>' + (m.ok ? money(m.monthly) + '/mo' : '—') + '</b><small>the whole loan from the first month, after completion in about 8–12 weeks</small></div></div>';
-    if (alt) h += '<p class="gr-fine">Or a ' + alt.years + '-year loan, which would run past age 65: allowed, with a limit of ' + Math.round(alt.ltv * 100) + '% (' + money(alt.loanMax) + ') and ' + money(alt.finalMonthly) + '/mo once fully drawn. For joint borrowers, banks use the income-weighted average age. Type a tenure above to see another choice.</p>';
+    if (alt) h += '<p class="gr-fine">Or a ' + alt.years + '-year loan, which would run past age 65: allowed, with a limit of ' + Math.round(alt.ltv * 100) + '% (' + money(alt.loanMax) + ') and ' + money(alt.finalMonthly) + '/mo from TOP. For joint borrowers, banks use the income-weighted average age. Type a tenure above to see another choice.</p>';
     h += '<div class="gr-tw"><table class="gr-t"><caption class="gr-sr">Progressive payments at this price</caption><thead><tr><th scope="col">Stage</th><th scope="col" class="r">Payment</th><th scope="col" class="r">Loan drawn</th><th scope="col" class="r">Instalment after</th></tr></thead><tbody>' +
       p.stages.map(function (s) { return '<tr><td>' + esc(s.name) + ' <small>' + Math.round(s.pct * 100) + '%</small></td><td class="r">' + money(s.amount) + '</td><td class="r">' + money(s.drawn) + '</td><td class="r">' + (s.monthly ? money(s.monthly) : '—') + '</td></tr>'; }).join('') + '</tbody></table></div>' +
-      '<p class="gr-src">Standard progressive payment schedule, paid from cash first, then cash or CPF, then the loan; the sale and purchase agreement, your bank and CPF Board decide the actual funding. Interest ' + ($('grRate').value.trim() ? 'at the rate you entered' : 'at 4% a year, the rate banks must test affordability at, not a quote') + '. Loan limits under MAS Notice 632; your bank decides. Stamp duty from IRAS rates.</p>';
+      '<p class="gr-src">Standard progressive payment schedule, paid from cash first, then cash or CPF, then the loan; the sale and purchase agreement, your bank and CPF Board decide the actual funding. Interest ' + ($('grRate').value.trim() ? 'at the rate you entered' : 'at 4% a year, the rate banks must test affordability at, not a quote') + '. The tenure counts from the bank’s first payment, and from TOP the instalment is on the whole loan, as OCBC’s terms set out; some banks charge less until CSC. Loan limits under MAS Notice 632; your bank decides. Stamp duty from IRAS rates.</p>';
     completed('payments');
     return h;
   }

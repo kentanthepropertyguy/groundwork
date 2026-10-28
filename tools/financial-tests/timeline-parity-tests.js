@@ -15,7 +15,8 @@ const loansOf = (b) => Math.min(2, Math.max.apply(null, b.map((x) => x.owned)));
 let n = 0;
 function compareOne(label, pin, kind, undated, cpf) {
   n++;
-  const P = C.progressive(Object.assign({}, pin, { kind: kind === 'ec' ? 'ec' : 'private' }, cpf ? { cpf } : {}));
+  // 28 Oct 2026 (Claude E audit F1): a home under construction counts the tenure from the bank's first release, in both engines (build: true; the planning TOP, 48 months)
+  const P = C.progressive(Object.assign({}, pin, { kind: kind === 'ec' ? 'ec' : 'private', build: true }, cpf ? { cpf } : {}));
   const tin = { kind, price: pin.price, otp: '2027-03-01', undated, age: pin.age, years: pin.years, ratePct: pin.ratePct, loansOther: 0, buyers: pin.buyers, entity: pin.entity, cash: 9e7, cpf: cpf || 0, order: 'none' };
   // the timeline counts housing loans from its own flat-loan inputs; for the second/third-home profiles the loans count comes from `loansOther`
   tin.loansOther = pin.loans || 0;

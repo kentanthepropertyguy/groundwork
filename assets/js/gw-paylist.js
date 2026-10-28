@@ -77,16 +77,16 @@
   function split(o) {
     o = o || {}; if (!(o.price > 0) || (o.kind !== 'new' && o.kind !== 'ec')) return { ok: false };
     const aged = !o.entity && o.age > 0;
-    const r = C.progressive({ kind: o.kind === 'ec' ? 'ec' : 'private', price: o.price, age: aged ? o.age : 35, ratePct: o.ratePct, years: o.years, cpf: o.cpf, loans: o.loans || 0, entity: !!o.entity, buyers: o.buyers });
+    const r = C.progressive({ kind: o.kind === 'ec' ? 'ec' : 'private', price: o.price, age: aged ? o.age : 35, ratePct: o.ratePct, years: o.years, cpf: o.cpf, loans: o.loans || 0, entity: !!o.entity, buyers: o.buyers, build: true });
     if (!r.ok) return { ok: false, invalid: r.invalid || [] };
     const by = (x) => [x.cash ? 'cash ' + $(x.cash) : '', x.cpf ? 'CPF ' + $(x.cpf) : '', x.flex ? 'cash or CPF ' + $(x.flex) : '', x.loan ? 'bank loan ' + $(x.loan) : ''].filter(Boolean).join(' · ');
     const rows = r.stages.map((x) => ({ label: x.name, pct: pc(x.pct), amount: $(x.amount), when: esc(by(x)), tag: '', basis: '', note: x.monthly ? 'Monthly instalment after this stage: ' + $(x.monthly) : '' }));
     const foot = [(r.entity ? 'A company can borrow up to 15% and has no CPF, so the rest is cash.' : (aged ? '' : 'Shown at the standard loan limit. Add the borrower’s age in the funding check to confirm it.')),
       r.lower && !r.entity ? 'The lower loan limit applies (' + (r.lowerWhy === 'age' ? 'a loan running past age 65' : 'a tenure over 30 years') + ').' : '',
       r.cpfGiven ? '' : 'Cash or CPF is shown together until you add the CPF you plan to use.',
-      'Instalments assume ' + pc(r.rate) + ' over ' + r.years + ' years, on what has been drawn so far. Your bank sets the actual amounts.'].filter(Boolean);
+      'Instalments assume ' + pc(r.rate) + ' and a ' + r.years + '-year tenure counted from the bank’s first payment, on the whole loan from TOP. Some banks charge less until CSC. Your bank sets the actual amounts.'].filter(Boolean);
     return { ok: true, price: r.price, rows, foot, stampDuty: r.duty && r.duty.ok ? r.duty.total : 0,
-      lines: [['Minimum cash', $(r.cashMin) + ' (' + pc(r.minCash) + ')'], ['Cash or CPF', $(r.cpfOrCash)], ['Bank loan, at most', $(r.loanMax) + ' (' + pc(r.ltv) + ')'], ['Instalment once fully drawn', $(r.finalMonthly) + ' a month']] };
+      lines: [['Minimum cash', $(r.cashMin) + ' (' + pc(r.minCash) + ')'], ['Cash or CPF', $(r.cpfOrCash)], ['Bank loan, at most', $(r.loanMax) + ' (' + pc(r.ltv) + ')'], ['Instalment from TOP', $(r.finalMonthly) + ' a month']] };
   }
   function splitHtml(m) {
     if (!m || !m.ok) return '';

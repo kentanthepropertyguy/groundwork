@@ -202,7 +202,7 @@
     const si = L.findIndex((h) => h.act === 'sell'), pi = si >= 0 ? si : 0, prim = L[pi] || null;
     const order = L.map((h, i) => i).sort((a, b) => (a === pi ? -1 : b === pi ? 1 : a - b));
     // V3.12 Stage 2: each row says whose loan it is (joint: a home owned by both, its loan in both names) and whether it is the home kept or sold (prim)
-    const rows = order.filter((i) => L[i].mort === 'yes').map((i) => ({ type: 'home', who: ownersOf(L[i])[0], joint: ownersOf(L[i]).length === 2, prim: i === pi, amt: has(L[i].amt) ? L[i].amt : null }));
+    const rows = order.filter((i) => L[i].mort === 'yes').map((i) => ({ type: 'home', who: ownersOf(L[i])[0], joint: ownersOf(L[i]).length === 2, prim: i === pi, amt: has(L[i].amt) ? L[i].amt : null, htype: L[i].type || undefined }));
     const homes = Math.min(2, Math.max.apply(null, [0].concat(owned)));
     const whose = n !== 2 ? 'both' : owned[0] === 0 ? '1' : owned[1] === 0 ? '0' : 'both';
     return { owned: owned, homes: homes, whose: whose, homeJoint: n === 2 && prim ? ownersOf(prim).length === 2 : undefined, soldOwners: si >= 0 ? ownersOf(L[si]) : null,
@@ -319,6 +319,15 @@
   // The cash, the CPF and the monthly instalment for one price, from GW_CALC.progressive (the loan limit, the minimum cash, stamp duty and the instalment).
   // The loan is the one typed, never above the limit at that price; blank, the most allowed (and, once the borrowers' incomes are in, what the income supports).
   // With no age entered the loan is taken to end by age 65 (the standard limit), and the answer says so until an age is entered.
+  // A home under construction: the bank's instalments count the tenure from its first release (GW_CALC 7a, Claude E audit F1). The developer's TOP and CSC dates, when
+  // entered with an option date, set the months; otherwise the planning convention does, the same one the payment schedule uses.
+  const monthsTo = (a, b) => { const x = C.parseDate(a), y = C.parseDate(b); return x && y && y > x ? (y.getUTCFullYear() - x.getUTCFullYear()) * 12 + (y.getUTCMonth() - x.getUTCMonth()) : undefined; };
+  function buildOf(st, kind) {
+    if (kind === 'completed') return {};
+    const dated = !st.noDate && st.otp, top = dated && st.top ? monthsTo(st.otp, st.top) : undefined, csc = dated && st.csc ? monthsTo(st.otp, st.csc) : undefined;
+    // as the schedule does: a developer's TOP with no CSC date keeps the conventional CSC month
+    return { build: true, topMonths: top, cscMonths: csc !== undefined ? csc : (top !== undefined ? R.plannerConventions.newLaunch.cscMonths : undefined) };
+  }
   function cost(st, over) {
     st = Object.assign({}, st, over || {});
     if (st.pkind === 'hdb') return { state: 'hdb' };
@@ -331,7 +340,8 @@
     const ageAssumed = age === null;
     if (ageAssumed) age = Math.max(21, R.bankLtv.endAge - (years0 || std));   // the oldest age at which this tenure still ends by 65: the standard limit, said on the page
     const ratePct = has(st.ratePct) ? st.ratePct : 4;
-    const P = st.price, base = { price: P, age: age, years: years0, ratePct: ratePct, loans: L.home, kind: kind === 'ec' ? 'ec' : 'private', buyers: dutyBuyers(st), couple: st.couple, valuation: kind === 'completed' && has(st.valuation) ? st.valuation : undefined };
+    // a home under construction: the monthly figure is rounded to the cent, as the funding check rounds it, so both show the same dollar
+    const P = st.price, base = Object.assign({ price: P, age: age, years: years0, ratePct: ratePct, loans: L.home, kind: kind === 'ec' ? 'ec' : 'private', buyers: dutyBuyers(st), couple: st.couple, valuation: kind === 'completed' && has(st.valuation) ? st.valuation : undefined }, buildOf(st, kind));
     const rule = C.progressive(base);
     if (!rule.ok) return { state: 'invalid', errors: rule.invalid || [], need: rule.missing || [] };
     // what the income supports, once the borrowers' ages and incomes are in (TDSR; MSR with it for a new EC); it limits a blank loan and flags a typed one above it
@@ -342,10 +352,20 @@
     const prog = want < rule.loanMax - 0.5 ? C.progressive(Object.assign({}, base, { loanCap: want })) : rule;
     if (!prog.ok) return { state: 'invalid', errors: prog.invalid || [] };
     const loan = prog.loanMax, flex = prog.cpfOrCash, cov = prog.cov || 0;
-    const cpfIn = has(st.cpf) ? st.cpf : 0, cpfUsed = Math.min(cpfIn, flex), downCash = prog.cashMin + cov + (flex - cpfUsed), duty = prog.duty;
+    // CPF while a buyer still owns another home: only the OA above the retirement-sum set-aside can be used (CPF Board), the same check the funding check makes
+    // (Claude E audit F7). With the balances entered, that usable figure is used; without them the CPF is shown as entered and labelled "before any set-aside".
+    const cpfIn0 = has(st.cpf) ? st.cpf : 0, subj = dutyBuyers(st).map((d) => d.owned >= 1);
+    let cpfIn = cpfIn0, setAside = null;
+    if (cpfIn0 > 0 && subj.some(Boolean)) {
+      const bal = st.cpfBal || [], yr = !st.noDate && /^\d{4}/.test(String(st.otp || '')) ? +String(st.otp).slice(0, 4) : new Date().getFullYear();
+      const chk = C.cpfSecondHome({ year: yr, cover95: st.cover95 === true ? true : st.cover95 === false ? false : null, members: people(st).map((x, k) => ({ oa: bal[k] ? bal[k].oa : undefined, sa: bal[k] ? bal[k].sa : undefined, age: x.age, subject: subj[k] })) });
+      setAside = chk.ok ? { known: true, usable: chk.usable } : { known: false };
+      if (chk.ok) cpfIn = Math.min(cpfIn0, chk.usable);
+    }
+    const cpfUsed = Math.min(cpfIn, flex), downCash = prog.cashMin + cov + (flex - cpfUsed), duty = prog.duty;
     return { state: 'ok', kind: kind, price: P, loan: loan, ltv: prog.ltv, ruleLoan: rule.loanMax, lower: prog.lower, lowerWhy: prog.lowerWhy, years: prog.years, ratePct: ratePct,
-      down: P - loan, cashMin: prog.cashMin, minCash: prog.minCash, cov: cov, flex: flex, cpfUsed: cpfUsed, cpfLeft: Math.max(0, cpfIn - cpfUsed), downCash: downCash,
-      bsd: duty.bsd, absd: duty.absd, absdRate: duty.absdRate, duty: duty.total, dutyNotes: duty.notes || [], cash: downCash + duty.total, monthly: prog.finalMonthly,
+      down: P - loan, cashMin: prog.cashMin, minCash: prog.minCash, cov: cov, flex: flex, cpfUsed: cpfUsed, cpfLeft: Math.max(0, cpfIn - cpfUsed), cpfSetAside: setAside, downCash: downCash,
+      bsd: duty.bsd, absd: duty.absd, absdRate: duty.absdRate, duty: duty.total, dutyNotes: duty.notes || [], cash: downCash + duty.total, monthly: prog.bank ? Math.round(prog.finalMonthly * 100) / 100 : prog.finalMonthly, bank: prog.bank, longer: prog.longer, defaulted: prog.defaulted, shortStd: prog.shortStd || null, startsAtTop: !!prog.startsAtTop,
       typed: typed, overLimit: typed !== null && typed > rule.loanMax + 0.5, incomeCap: incomeCap, aboveIncome: incomeCap !== null && loan > incomeCap + 0.5, homeLoans: L.home, homeRows: L.rows, ageAssumed: ageAssumed, age: age,
       // V3.12 Stage 2: sold first with its loan running, the conditional result's fallback (the sold home's loan counted); bought first with its loan running, the limit may rise
       // once the bank has the sale evidence (never assumed); with the conservative count, what the per-borrower reading would give at the same price
@@ -370,7 +390,16 @@
     let lo = 0, hi = 500000;
     if (run(hi) < c.loan - 0.5) return { state: 'out' };
     for (let k = 0; k < 40; k++) { const mid = (lo + hi) / 2; if (run(mid) >= c.loan - 0.5) hi = mid; else lo = mid; }
-    return { state: 'ok', income: hi, rule: st.pkind === 'ec' ? 'msr' : 'tdsr', debts: L.total, ageAssumed: c.ageAssumed, age: c.age };
+    // A home under construction (Claude E audit; Ken, 28 Oct 2026): the bank's test above is MAS Notice 645's: the whole loan, assumed fully disbursed (footnote 9), over the
+    // actual tenure of the facility applied for (para 10(a), 11), at the stress rate. That is the qualification. Separately, the projection: the instalment from TOP at the
+    // same stress rate, over the months left of that tenure, and the income the same rule would need for it. Said beside the test, never instead of it.
+    let atTop = null;
+    if (c.bank) {
+      const sr = Math.max(R.stressRate, c.ratePct / 100), n = Math.round(c.bank.yearsLeft * 12), i = sr / 12, full = C.instal(c.loan, sr, c.years);
+      const top = n > 0 ? (i > 0 ? c.loan * i / (1 - Math.pow(1 + i, -n)) : c.loan / n) : 0, dl = st.pkind === 'ec' ? L.homeAmt : L.total;
+      atTop = { ratePct: sr * 100, monthsLeft: n, instalment: top, instalmentTest: full, income: full > 0 ? hi * (dl + top) / (dl + full) : null };
+    }
+    return { state: 'ok', income: hi, rule: st.pkind === 'ec' ? 'msr' : 'tdsr', debts: L.total, ageAssumed: c.ageAssumed, age: c.age, atTop: atTop };
   }
 
   /* ---------------- 4. What will I get from selling? (V3.4) ---------------- */
@@ -511,5 +540,65 @@
     return res;
   }
 
-  return { assetLoan, assetRun, costHdb, flat, sell, incomeNeeded, cost, borrowersOf, loansOf, needOf, borrow, priceLoan, ownedOf, toAssess, afford, dutyBuyers, schedule, timelineInput, incomeLoan, funding, engineKind, fromHomes, withHomes, CFG, loanCount };
+  /* ---------------- 3b. Mortgage during construction and the CPF OA buffer (28 Oct 2026; Claude E methodology v1.1; optional) ----------------
+     A new launch or new EC only. Everything is read from what the page already has: the loan, its minimum cash, the rate, the tenure and the bank's timing from cost()
+     (the V3.12 Stage 2 LTV engine and GW_CALC.bankPath); the CPF from the CPF entered (each person's OA balance, if given for the set-aside); the existing homes'
+     loans and the sale (when, and the CPF it returns) from the funding check's own reading (timelineInput); each person's age (turning 55 before TOP).
+     The one new, optional entry: st.oaMo[k], what goes into each person's Ordinary Account each month. GW_CPFBUF runs the month-by-month ledger. Adds no rule. */
+  function cpfBuffer(st, c, BUF) {
+    BUF = BUF || (typeof self !== 'undefined' ? self.GW_CPFBUF : null);
+    if (!BUF || !c || c.state !== 'ok' || !c.bank || engineKind(st.pkind) === 'completed') return null;
+    const ppl = people(st), oaMo = ppl.map((x) => (has((st.oaMo || [])[x.k]) ? Math.max(0, st.oaMo[x.k]) : null)), given = oaMo.some((x) => x !== null);
+    const out = { state: given ? 'ok' : 'need', bank: c.bank, monthly: c.monthly, years: c.years, ratePct: c.ratePct, notes: [] };
+    if (!given) return out;
+    const bal = st.cpfBal || [], balGiven = ppl.every((x) => bal[x.k] && has(bal[x.k].oa)), mo = oaMo.map((x) => x || 0), tot = mo.reduce((a, x) => a + x, 0);
+    const cpf0 = has(st.cpf) ? st.cpf : 0;
+    // each person's OA now: the balances, when entered (asked for the set-aside); otherwise the CPF entered, split by the monthly contributions (A10's shares)
+    const oa = ppl.map((x, j) => (balGiven ? bal[x.k].oa : (ppl.length > 1 ? (tot > 0 ? cpf0 * mo[j] / tot : cpf0 / ppl.length) : cpf0)));
+    if (!balGiven && ppl.length > 1 && cpf0 > 0) out.notes.push('split');
+    if (!(cpf0 > 0) && !balGiven) out.notes.push('nocpf');
+    // the existing homes' loans (paid from CPF, until a sale completes) and the sale's CPF refund, as the funding check reads them
+    let i = null; try { i = timelineInput(st); } catch (e) { i = null; }
+    const order = i ? i.order : 'none', T = c.bank.top;
+    let saleM = null;
+    if (order === 'sell') saleM = -1;
+    else if (order === 'buy' && i && !i.sale.undecided) saleM = i.sale.date && st.otp && !st.noDate ? Math.max(0, monthsTo(st.otp, i.sale.date) || 0) : has(i.sale.afterKeys) ? T + i.sale.afterKeys : (has(i.sale.month) ? i.sale.month : 5);
+    const L = loansOf(st), HL = homeRows(L), selling = order === 'buy' || order === 'sell', soldRow = selling ? HL.flat : null, keptRows = selling ? HL.other : (HL.flat ? [HL.flat] : []).concat(HL.other);
+    const ownersOfRow = (l) => (st.n === 2 && l.joint ? [0, 1] : [l.who || 0]).filter((k) => k < ppl.length);
+    const persons = ppl.map((x, j) => ({ name: 'P' + (j + 1), oa: oa[j], oaMonthly: mo[j], existingCpfMonthly: 0, existingUntil: null, existingLoanType: 'hdb_loan', refund: 0, refundMonth: null, reserve: 0, turn55Month: null, saAt55: bal[x.k] && has(bal[x.k].sa) ? bal[x.k].sa : 0 }));
+    keptRows.concat(soldRow ? [soldRow] : []).forEach((l) => {
+      if (!(l.amt > 0)) return;
+      const ow = ownersOfRow(l), sold = l === soldRow, type = sold ? (st.sale && st.sale.type === 'private' ? 'private' : 'hdb') : (l.htype || 'hdb');
+      ow.forEach((k) => { const p = persons[k]; p.existingCpfMonthly += l.amt / ow.length; p.existingLoanType = type === 'hdb' ? 'hdb_loan' : 'private_bank_loan'; if (sold) p.existingUntil = saleM === null ? null : saleM; });
+    });
+    if (persons.some((p) => p.existingCpfMonthly > 0)) out.notes.push('existing');
+    // the sale's CPF refund (what the funding check counts; 55 and over, what remains after the Retirement Account): credited the month after the sale (A6)
+    const refund = selling && i && i.sale && i.sale.cpf > 0 ? i.sale.cpf : 0;
+    if (refund > 0 && saleM !== null) { const ow = soldRow ? ownersOfRow(soldRow) : [0]; ow.forEach((k) => { persons[k].refund = refund / ow.length; persons[k].refundMonth = saleM + 1; }); out.notes.push(order === 'sell' ? 'refund-first' : 'refund'); }
+    // a home kept for good: the OA up to the set-aside is not for this home (R9; the whole retirement sum when the balances are not entered, A7). A home being sold: the
+    // grace period runs from TOP, so nothing is set aside (a sale not yet dated is still a sale)
+    const keptOwned = ppl.map((x) => { const o = Array.isArray(st.owned) ? +st.owned[x.k] || 0 : (st.n === 2 && st.whose !== 'both' && String(x.k) !== st.whose ? 0 : st.homes || 0), sold = selling && (Array.isArray(st.soldOwners) ? st.soldOwners : [0]).indexOf(x.k) >= 0 ? 1 : 0; return o - sold >= 1; });
+    if (keptOwned.some(Boolean)) {
+      const yr = !st.noDate && /^\d{4}/.test(String(st.otp || '')) ? +String(st.otp).slice(0, 4) : new Date().getFullYear();
+      const chk = C.cpfSecondHome({ year: yr, cover95: st.cover95 === true ? true : st.cover95 === false ? false : null, members: ppl.map((x, j) => ({ oa: oa[j], sa: bal[x.k] ? bal[x.k].sa : undefined, age: x.age, subject: keptOwned[j] })) });
+      ppl.forEach((x, j) => { if (keptOwned[j]) persons[j].reserve = chk.ok ? chk.members[j].need : chk.setAside; });
+      out.notes.push(chk.ok ? 'setaside' : 'setaside-full'); out.setAside = { sum: chk.sumName, amount: chk.setAside };
+    }
+    // turning 55 before TOP (R11, A8): the OA moves to the Retirement Account, after the SA; the month is counted from the age entered
+    ppl.forEach((x, j) => { if (has(x.age) && x.age < 55 && (55 - x.age) * 12 <= T) { persons[j].turn55Month = Math.max(1, Math.round((55 - x.age) * 12)); out.notes.push('turn55'); } });
+    const start = !st.noDate && /^\d{4}-\d{2}/.test(String(st.otp || '')) ? String(st.otp).slice(0, 7) : new Date().toISOString().slice(0, 7);
+    if (st.noDate || !st.otp) out.notes.push('nodate');
+    const base = { price: c.price, loan: c.loan, ratePct: c.ratePct, years: c.years, top: T, csc: c.bank.csc, minCashPct: c.minCash, start: start, persons: persons, months: c.bank.stageMonths };
+    out.main = BUF.run(base);
+    out.prog = BUF.run(Object.assign({}, base, { reading: 'progressive_to_csc' }));
+    // sold first: the result is the conditional 75%; its 45% fallback is worked out beside it (Stage 2's ifNot)
+    if (c.ifNot) out.fallback = BUF.run(Object.assign({}, base, { loan: c.ifNot.loan, minCashPct: c.ifNot.minCash }));
+    // timing: the card above assumes the CPF entered is there when each stage falls due; the first stage at which the OA doesn't yet hold it (paid in cash then)
+    let cardCum = 0, ledCum = 0; out.timingShort = null;
+    out.main.stages.forEach((s) => { cardCum = Math.min(c.cpfUsed || 0, cardCum + s.eligible); ledCum += s.cpf; if (!out.timingShort && cardCum - ledCum > 500) out.timingShort = { stage: s.stage, m: s.month, amount: cardCum - ledCum }; });
+    out.oaMonthly = tot; out.dated = !st.noDate && !!st.otp;
+    return out;
+  }
+
+  return { cpfBuffer, assetLoan, assetRun, costHdb, flat, sell, incomeNeeded, cost, borrowersOf, loansOf, needOf, borrow, priceLoan, ownedOf, toAssess, afford, dutyBuyers, schedule, timelineInput, incomeLoan, funding, engineKind, fromHomes, withHomes, CFG, loanCount };
 });

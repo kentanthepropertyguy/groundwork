@@ -155,7 +155,10 @@
     if (order === 'sell' && removes) assumptions.push({ id: 'sold-ownership', text: sellersCautious ? 'Sold first: not said whose home is being sold, so it is counted as one buyer’s only, the choice with the higher ABSD (the cautious view). Say who owns it to be exact.' : 'Sold first: the home being sold is no longer owned by ' + (rows.length > 1 && sellers.length === 1 ? 'its owner' : 'its owners') + ' when the new home is bought, so it is not counted for their ABSD' + (rows.length > 1 && sellers.length < rows.filter((b) => +b.owned >= 1).length ? '; a buyer’s other home still counts' : '') + '.' });
 
     // --- the stage split and duty come from the live engine, unchanged ---
-    const prog = C.progressive({ price: P, age: entity ? undefined : i.age, years: years0, ratePct: num(i.ratePct) === null ? undefined : i.ratePct, loans, cpf: undefined, kind: kind === 'ec' ? 'ec' : 'private', buyers, couple: entity ? undefined : i.couple, loanCap: loanCapIn, entity, valuation: kind === 'completed' && pos(i.valuation) ? i.valuation : undefined });
+    // a home under construction: the same tenure and limit as the cost card (GW_CALC 7a), including a short tenure that would end before TOP (Ken, 28 Oct 2026)
+    const dd0 = i.dates || {}, topD0 = kind !== 'completed' ? D(dd0.top) : null, cscD0 = kind !== 'completed' ? D(dd0.csc) : null;
+    const build0 = kind !== 'completed' ? { build: true, topMonths: topD0 ? monthsBetween(otp, topD0) : undefined, cscMonths: cscD0 ? monthsBetween(otp, cscD0) : (topD0 ? CONVENTIONS.newLaunch.cscMonths : undefined) } : {};
+    const prog = C.progressive({ ...build0, price: P, age: entity ? undefined : i.age, years: years0, ratePct: num(i.ratePct) === null ? undefined : i.ratePct, loans, cpf: undefined, kind: kind === 'ec' ? 'ec' : 'private', buyers, couple: entity ? undefined : i.couple, loanCap: loanCapIn, entity, valuation: kind === 'completed' && pos(i.valuation) ? i.valuation : undefined });
     if (!prog.ok) return prog;
     const years = prog.years;
     const duty = prog.duty; if (!duty.ok) return duty;
@@ -255,6 +258,19 @@
     const rentUntil = rentMo ? (D(i.rent.until) || keysDate) : null;
     if (rentMo) assumptions.push({ id: 'rent', text: 'Interim rent of ' + Math.round(rentMo) + ' a month from the option until ' + iso(rentUntil) + ', paid in cash.' });
 
+    // --- the bank's instalments on a home under construction (GW_CALC.bankPath; Claude E calculator audit F1, 28 Oct 2026): the tenure runs from the first release and the
+    // full-loan instalment applies from the month after TOP. A stage with the developer's date is released in that month; a stage tested above at its EARLIEST date
+    // (or an illustration) is released at its usual point between the option and TOP (GW_CALC.bankMonths), so the cash test's caution never moves the loan's timing. ---
+    let bankP = null;
+    if (kind !== 'completed') {
+      const stEv = ev.filter((e) => e.type === 'pay' && e.pct !== undefined), mo = (d) => monthsBetween(otp, d);
+      const topE = stEv.filter((e) => e.id === 'top')[0], lastE = stEv[stEv.length - 1];
+      const T = topE ? mo(topE.date) : CONVENTIONS.newLaunch.topMonths, Tc = lastE && lastE !== topE ? mo(lastE.date) : T + 12, def = C.bankMonths(T, Tc);
+      const dated = (e) => e.confidence === 'developer' || e.id === 'otp' || e.id === 'snp' || e === topE || e === lastE || def[e.id] === undefined;
+      bankP = C.bankPath({ releases: stEv.map((e) => ({ id: e.id, month: dated(e) ? mo(e.date) : def[e.id], amount: e.bank })), rate, years, top: T, csc: Tc });
+    }
+    const dueAt = (m) => (bankP ? bankP.dueAt(m) : 0);
+
     // --- simulate: events in date order; same-date payments before inflows before the month tick ---
     const horizon = pos(i.horizonMonths) ? i.horizonMonths : monthsBetween(otp, lastDate) + CONVENTIONS.horizonMonthsAfterLast;
     for (let m = 1; m <= horizon; m++) ev.push({ type: 'month', date: addMonths(otp, m), m });
@@ -274,7 +290,7 @@
         const fc = Math.min(cash, needFlex); cash -= fc; needFlex -= fc;        // then cash
         const uc = Math.min(cash, needCash); cash -= uc; needCash -= uc;        // cash-only parts: cash
         e.cpfUsed = round2(u); e.cashUsed = round2(fc + uc); e.uncovered = round2(needFlex + needCash);
-        owedFlex += needFlex; owedCash += needCash; drawn += e.bank; e.drawn = drawn; instalNow = C.instal(drawn, rate, years); e.instalment = round2(instalNow);
+        owedFlex += needFlex; owedCash += needCash; drawn += e.bank; e.drawn = drawn; instalNow = C.instal(drawn, rate, years); e.instalment = round2(bankP ? (bankP.after[e.id] !== undefined ? bankP.after[e.id] : dueAt(monthsBetween(otp, e.date) + 1)) : instalNow);
         if (e.uncovered > 0) { if (!firstGap) firstGap = e.date; coveredOn = null; coveredBy = null; }
         bump(e.date, e.label);
       } else if (e.type === 'in') {
@@ -282,13 +298,13 @@
       } else {
         cash += nn(i.saveMo); if (!entity) cpf += nn(i.cpfMo);
         const rent = rentMo && e.date < rentUntil ? rentMo : 0; // rent for the months before the keys
-        const oldMo = flatMo && (!saleDate || e.date <= saleDate) ? flatMo : 0, due = instalNow + oldMo;   // the home being sold, until its sale completes
+        const oldMo = flatMo && (!saleDate || e.date <= saleDate) ? flatMo : 0, mNow = bankP ? dueAt(e.m) : instalNow, due = mNow + oldMo;   // the home being sold, until its sale completes
         const a = cpfForInstal ? Math.min(cpf, due) : 0; cpf -= a; const b = Math.min(cash, due - a); cash -= b;
         const rc = Math.min(cash, rent); cash -= rc;
         const short = (due - a - b) + (rent - rc);
         if (short > 1e-6) { owedCash += short; if (!firstGap) firstGap = e.date; coveredOn = null; coveredBy = null; bump(e.date, 'Monthly instalment' + (oldMo ? 's on both homes' : '') + (rent ? ' and rent' : '')); }
         if (owedCash + owedFlex > 0) settle('your monthly savings', e.date);
-        series.push({ date: iso(e.date), cash: round2(cash), cpf: round2(cpf), uncovered: round2(owedCash + owedFlex), drawn, instalment: round2(instalNow), rent, oldInstalment: oldMo || undefined });
+        series.push({ date: iso(e.date), cash: round2(cash), cpf: round2(cpf), uncovered: round2(owedCash + owedFlex), drawn, instalment: round2(mNow), rent, oldInstalment: oldMo || undefined });
       }
     }
     const events = ev.filter((e) => e.type !== 'month').map((e) => { const o = Object.assign({}, e); o.date = iso(e.date); delete o.k; return o; });
@@ -300,8 +316,11 @@
     const out = {
       ok: true, version: VERSION, kind, order, entity, undated, price: P, otp: iso(otp), saleDate: saleDate && iso(saleDate), ...(saleUndecided ? { saleUndecided: true } : {}), keysDate: iso(keysDate), horizonMonths: horizon, ...(order === 'sell' ? { sellers, sellersCautious } : {}), ...(flatMo ? { flatInstal: flatMo } : {}),
       loan: Object.assign({}, ltvRow, { loanMax, cashMin, cpfOrCash: prog.cpfOrCash, valuation: prog.valuation === undefined ? null : prog.valuation, base: prog.base, cov, years, ratePct: rate * 100, stressRatePct: R.stressRate * 100, tenureCapped: prog.tenureCapped, tenureCappedBy: prog.tenureCappedBy, tenureAsked: prog.tenureAsked, tenureAllowed: prog.tenureAllowed }),
-      instalment: { final: round2(prog.finalMonthly), finalStress: round2(C.instal(loanMax, Math.max(R.stressRate, rate), years)), basis: 'Instalment at the quoted rate once the loan is fully drawn; the stress figure uses the higher of ' + (R.stressRate * 100) + '% and the quoted rate (MAS Notice 645), for TDSR only.' },
+      instalment: { final: round2(bankP ? bankP.fromTop : prog.finalMonthly), finalStress: round2(C.instal(loanMax, Math.max(R.stressRate, rate), years)), basis: 'Instalment at the quoted rate once the loan is fully drawn; the stress figure uses the higher of ' + (R.stressRate * 100) + '% and the quoted rate (MAS Notice 645), for TDSR only.' },
       duty: { bsd: duty.bsd, absd: duty.absd, absdRate: duty.absdRate, total: duty.total, notes: duty.notes, remissions: duty.remissions, date: iso(dutyDate) },
+      // the bank's instalments by phase (a home under construction): the first one, the one in TOP's month, the full-loan one from the month after TOP, and the
+      // progressive-until-CSC reading some banks use (shown beside the figure, never instead of it). Dates are the first of the month the instalment is due in.
+      ...(bankP ? { bank: { endsBeforeTop: !!bankP.endsBeforeTop, firstStage: bankP.firstId, first: round2(bankP.first), firstDate: iso(addMonths(otp, bankP.commencement)), beforeTop: bankP.beforeTop === null ? null : round2(bankP.beforeTop), fromTop: round2(bankP.fromTop), fromDate: iso(addMonths(otp, bankP.fromMonth)), yearsLeft: bankP.yearsLeft, progressive: { topToCsc: bankP.progressive.topToCsc === null ? null : round2(bankP.progressive.topToCsc), afterCsc: round2(bankP.progressive.afterCsc) } } } : {}),
       events, series, headline, totals: { amount: sum('amount'), cash: sum('cashUsed'), cpf: sum('cpfUsed'), bank: sum('bank'), uncovered: sum('uncovered') },
       assumptions, warnings, conventions: CONVENTIONS, rulesChecked: R.checked,
     };

@@ -295,13 +295,15 @@
   function instalSteps(r) {
     return stageMark(root.GW_SCHEDULE.annotate(r)).filter((e) => e.type === 'pay' && e.bank > 0).map((e) => ({ date: e.date, basis: e.basis, id: e.id, label: e.label, undated: e.undated === true, firstUndated: e.firstUndated === true, instalment: e.instalment, drawn: e.drawn, bank: e.bank }));
   }
-  // the one other documented way to count the instalments (tenure from the first release); null when it makes no material difference
-  function otherConvention(r) {
-    const pays = r.events.filter((e) => e.type === 'pay' && e.bank > 0), S = root.GW_SCHEDULE; if (!pays.length || !S.tenureFromFirstRelease) return null;
-    const alt = S.tenureFromFirstRelease(pays.map((e) => ({ date: e.date, amount: e.bank })), r.loan.ratePct, r.loan.years), mine = pays[pays.length - 1].instalment;
-    if (!alt || !(mine > 0)) return null; const up = alt.final / mine - 1;
-    return up >= 0.005 ? { final: alt.final, pct: Math.round(up * 100) } : null;
-  }
+  // Claude E calculator audit (28 Oct 2026): a home under construction has one instalment convention on every screen, the engine's (GW_CALC.bankPath): the tenure counts from
+  // the bank's first payment, the instalment follows what is paid out until TOP, and from the month after TOP it is on the whole loan, as OCBC's terms set out. What a bank that
+  // keeps progressive instalments until CSC would charge is said beside it, never instead of it.
+  const STG_W = { foundation: 'foundation', frame: 'framework', walls: 'partition walls', roof: 'roofing', fittings: 'fittings', roads: 'roads and drains', top: 'TOP', csc: 'CSC' };
+  const preTopOf = (b) => (b.beforeTop === null ? 'Nothing is due monthly before TOP: you pay your share of the price first.' : 'Before TOP: <b>' + $(b.first) + '</b>' + (b.beforeTop > b.first + 1 ? ' rising to <b>' + $(b.beforeTop) + '</b>' : '') + ' a month, as the bank pays each stage.');
+  const topMonthsOf = (r) => { const e = r.events.filter((x) => x.id === 'top')[0]; if (!e) return 48; const a = /^(\d{4})-(\d{2})/.exec(r.otp), z = /^(\d{4})-(\d{2})/.exec(e.date); return a && z ? (+z[1] - +a[1]) * 12 + (+z[2] - +a[2]) : 48; };
+  const ymOf = (y) => { const m = Math.round(y * 12), a = Math.floor(m / 12), b = m % 12; return a + (a === 1 ? ' year' : ' years') + (b ? ' ' + b + (b === 1 ? ' month' : ' months') : ''); };
+  const leftOf = (b, years) => (Math.abs(b.yearsLeft - years) < 1 / 24 ? years + ' years' : ymOf(b.yearsLeft) + ' left of ' + years + ' years at TOP');
+  const bankAltOf = (b) => { const p = b.progressive; return p.topToCsc !== null && p.topToCsc < b.fromTop - 1 ? ' Some banks charge about ' + $(p.topToCsc) + ' until CSC' + (Math.abs(p.afterCsc - b.fromTop) >= 1 ? ', then about ' + $(p.afterCsc) : '') + '.' : ''; };
   function sumHtml(r, v, scn, carried) {
     const L = r.loan, steps = instalSteps(r), last = steps[steps.length - 1];
     const used = L.loanMax, req = typeof v.prefLoan === 'number' && v.prefLoan >= 0 ? v.prefLoan : null;
@@ -318,7 +320,10 @@
     else basis = req < 0.5 ? 'Your choice · no bank loan' : 'Your choice' + (req < limit - 0.5 ? ' · the estimated limit is ' + $(limit) : ' · the same as the estimated limit');
     const loanBlock = t('pl-sf-loan', 'Estimated bank loan', $(used), esc(basis) + adj);
     const first = steps[0], startTail = first && !first.undated ? ' The first is ' + esc(onDay(first.date)) + '.' : '';
-    const mo = last ? t('pl-sf-w', 'Estimated monthly mortgage after full disbursement', $(last.instalment) + '<small>/month</small>', '<span class="pl-sf-rt">' + pc(L.ratePct / 100, 2) + ' interest · ' + L.years + ' years</span>' + (steps.length > 1 ? 'Starts at about <b>' + $(first.instalment) + '</b>/month after the bank’s first release and rises with each release as construction progresses.' + startTail : 'From ' + esc(day(last.date)) + '.') + '<span class="pl-sf-l">Estimate, not a bank instalment.</span>') : '';
+    // Ken (28 Oct 2026): compact; the bank alternatives and the method are in "How the monthly mortgage is worked out" below
+    const B = r.bank, topE = (r.events.filter((e) => e.id === 'top')[0] || {}).confidence !== 'developer';
+    const moB = B && last ? t('pl-sf-w', 'Estimated monthly mortgage from TOP', $(B.fromTop) + '<small>/month</small>', '<span class="pl-sf-rt">' + pc(L.ratePct / 100, 2) + ' interest · ' + leftOf(B, L.years) + '</span>' + preTopOf(B) + ' The whole loan is charged from ' + (UND ? 'the month after TOP' : esc(mon(B.fromDate))) + (topE ? ' (estimated TOP)' : ', the month after TOP') + '.' + (B.yearsLeft < 10 ? (B.endsBeforeTop ? ' <b>Illustration:</b> ' : ' <b>Depends on your bank:</b> ') + (B.endsBeforeTop ? 'counted from the bank’s first payment, this tenure would end before TOP, so repayments are assumed to start at TOP. Not a confirmed arrangement.' : 'few years of the term are left by TOP, and banks set the tenure differently.') : '') + '<span class="pl-sf-l" data-bank-cond>Estimate, not a bank instalment. Banks differ in what they charge from TOP.</span>') : null;
+    const mo = moB || (last ? t('pl-sf-w', 'Estimated monthly mortgage after full disbursement', $(last.instalment) + '<small>/month</small>', '<span class="pl-sf-rt">' + pc(L.ratePct / 100, 2) + ' interest · ' + L.years + ' years</span>' + (steps.length > 1 ? 'Starts at about <b>' + $(first.instalment) + '</b>/month after the bank’s first release and rises with each release as construction progresses.' + startTail : 'From ' + esc(day(last.date)) + '.') + '<span class="pl-sf-l">Estimate, not a bank instalment.</span>') : '');
     // a $0 the buyer typed is "No bank loan selected": it says nothing about whether cash and CPF cover the purchase, so any shortfall above still stands.
     // "No mortgage needed" is said only when the calculation confirms there is no shortfall to borrow for.
     const chosenZero = req !== null && req < 0.5, covered = !r.headline.firstGap;
@@ -476,12 +481,13 @@
   // monthly repayments: how the instalment builds up as the bank releases the loan (a closed section; the answer itself is the Monthly mortgage figure above)
   function instalHtml(r, v) {
     const steps = instalSteps(r); if (!steps.length) return '';
-    const L = r.loan, oc = otherConvention(r);
+    const L = r.loan, B = r.bank;
     const from = v.payInstalmentFromCpf !== false ? 'Instalments are paid from CPF OA first, then cash.' : 'Instalments are paid from cash.';
     const items = [
-      'Interest: <b>' + pc(L.ratePct / 100, 2) + '</b> a year, as you entered it (it starts at 4%). It stays the same for the whole period; a floating rate that changes is not modelled.',
+      'Interest: <b>' + pc(L.ratePct / 100, 2) + '</b> a year, as you entered it. It starts at 4%, a cautious planning rate (MAS’s stress-test floor); today’s packages are lower. It stays the same for the whole period; a floating rate that changes is not modelled.',
       'Tenure: <b>' + L.years + ' years</b>, ' + (L.tenureCapped && L.tenureCappedBy === 'age' ? 'the most a bank usually lends at your age (banks usually end a loan by age ' + root.GW_RULES.bankLtv.maturityAge + ', a lender policy and not a MAS rule), not the ' + L.tenureAsked + ' you entered.' : 'from your age (the longest that keeps the standard loan limit, or from age 65 the longest a bank usually lends) unless you entered one.'),
-      'Illustrative, not confirmed bank instalments. How this is counted: after each release, the level monthly amount (principal and interest) on the total released so far, over the full tenure. This is the audited engine’s convention.' + (oc ? ' <b>It is not the only one.</b> If your bank counts the tenure from your first release and recalculates on the balance still owed, it would be about <b>' + $(oc.final) + '</b> a month once fully released here (' + oc.pct + '% more). We could not confirm either convention from a bank’s own document, so treat these as estimates and ask your bank for its schedule.' : ' Your bank’s own schedule may differ.'),
+      B ? 'Illustrative, not confirmed bank instalments. How this is counted: the tenure starts with the first instalment, the month after the bank’s first payment, so ' + ymOf(B.yearsLeft) + ' of the ' + L.years + ' years are left at TOP. Until TOP, each instalment repays what has been paid out so far over the months left; from the month after TOP it is on the whole loan, as OCBC’s home loan terms set out.' + (bankAltOf(B) ? ' <b>Banks differ here.</b>' + bankAltOf(B) : '') + ((r.events.filter((e) => e.id === 'top')[0] || {}).confidence !== 'developer' ? ' TOP is an estimate (' + topMonthsOf(r) + ' months after the option) until you add the developer’s date.' : '') + ' Ask your bank for its schedule.'
+        : 'Illustrative, not confirmed bank instalments: the level monthly amount (principal and interest) on the loan from completion, over the full tenure. Your bank’s own schedule may differ.',
       'Not modelled: an interest-only period, fees and rate changes.',
       'The loan is an estimate of what a bank could lend. The bank decides what it actually lends.'];
     return '<details class="pl-det pl-instal-d" data-instal-d><summary><span>How the monthly mortgage is worked out</span><em>rate, tenure and method</em></summary><div class="pl-more-in"><p class="gw-fine">' + from + '</p><ul class="pl-assm">' + items.map((x) => '<li>' + x + '</li>').join('') + '</ul></div></details>';

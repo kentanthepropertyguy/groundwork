@@ -36,7 +36,7 @@ for (const age of AGES) {
       same(tag + ' msr ' + sc + ': loan = loan at applied tenure', [x.maxLoan, x.ltv], [y.maxLoan, y.ltv]);
     }
     // ---- New launch payments and the Payment Timeline use the same tenure, loan and instalment
-    const pg = (y) => C.progressive({ price: 1800000, age, kind: 'private', loans: 0, years: y, buyers: [SC] });
+    const pg = (y) => C.progressive({ price: 1800000, age, kind: 'private', loans: 0, years: y, buyers: [SC], build: true });   // a new launch (build: tenure from the first release, 28 Oct 2026)
     const p1 = typed === 40 ? pg(allowed) : pg(typed), p2 = pg(applied);
     ok(tag + ': new launch tenure', p1.ok && p1.years === applied, [p1.years, p1.error]);
     same(tag + ': new launch loan, instalment = at applied tenure', [p1.loanMax, p1.finalMonthly, p1.ltv], [p2.loanMax, p2.finalMonthly, p2.ltv]);
