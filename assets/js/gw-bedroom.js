@@ -10,6 +10,9 @@
    psf. Price movement is never a bedroom-wide median: it is the Market Pulse reading for the type's most-sold size (gw-pulse.js bedroomText).
    Nothing is chosen for the visitor: no type is shown until one is picked, and a type kept from another development is shown only where it
    exists, never swapped for another.
+   "Matched sales only" (V2, Ken 27 Oct 2026): a type withheld from the figures (too ambiguous, or too few for a typical price) but with at least 3
+   matched resales in the last 2 years is still offered, with counts only (resale.matched in the data). It never feeds a price statistic, trend,
+   budget comparison, asking-price check or Budget Search, and every word shown for it must pass assertMatchedOnlyCopy.
    UMD: window.GW_BED and Node.
    ========================================================================== */
 (function (root, factory) {
@@ -44,16 +47,25 @@
   }
   // What the page needs for the sale type on show: the types with figures, the types too few to show, and the chosen one if it is here.
   // want: the type the visitor chose (here or on another development). missing: they chose one this development cannot show.
+  // V2: matched (every type with enough matched resales, figured or not, by bedroom count) and only (the matched-only ones, figures:false).
+  // t: the chosen type with figures; m: the chosen type when it is matched-only (counts only). A type in "only" is no longer listed as "few".
   function view(rec, sale, want) {
-    const s = rec && rec[sale];
-    if (!s || !s.types || !s.types.length) return want ? { types: [], few: [], g: null, missing: want } : null;
-    const types = s.types.slice().sort((a, b) => ORDER(a.g) - ORDER(b.g)), t = want ? types.find((x) => x.g === want) || null : null;
-    return { types, few: (s.few || []).slice().sort((a, b) => ORDER(a) - ORDER(b)), coverage: s.coverage, g: t ? t.g : null, t, missing: want && !t ? want : null, sale, meta: rec.meta };
+    const s = rec && rec[sale], types = s && s.types ? s.types.slice().sort((a, b) => ORDER(a.g) - ORDER(b.g)) : [];
+    const matched = s && s.matched ? s.matched.slice().sort((a, b) => ORDER(a.g) - ORDER(b.g)) : [], only = matched.filter((x) => !x.figures);
+    if (!types.length && !only.length) return want ? { types: [], few: [], matched: [], only: [], g: null, missing: want } : null;
+    const t = want ? types.find((x) => x.g === want) || null : null, m = want && !t ? only.find((x) => x.g === want) || null : null, og = only.map((x) => x.g);
+    return { types, few: (s.few || []).filter((g) => og.indexOf(g) < 0).sort((a, b) => ORDER(a) - ORDER(b)), matched, only, of: s.of, unknown: s.unknown, coverage: s.coverage,
+      g: t ? t.g : m ? m.g : null, t, m, missing: want && !t && !m ? want : null, sale, meta: rec.meta };
   }
+  const anyType = (V) => !!(V && ((V.types && V.types.length) || (V.only && V.only.length)));   // the bedroom question is asked
 
   /* ---------- the choice ---------- */
+  // Figured types and matched-only types together, in bedroom order. A matched-only chip says so on the chip itself.
   function chipsHtml(V) {
-    return '<div class="lg-chips gwb-chips" role="group" aria-label="Bedrooms">' + V.types.map((t) => '<button type="button" data-bed="' + esc(t.g) + '" aria-pressed="' + (V.g === t.g) + '">' + esc(label(t.g)) + '</button>').join('') + '</div>';
+    const all = V.types.map((t) => ({ g: t.g, m: false })).concat((V.only || []).map((x) => ({ g: x.g, m: true }))).sort((a, b) => ORDER(a.g) - ORDER(b.g));
+    return '<div class="lg-chips gwb-chips" role="group" aria-label="Bedrooms">' + all.map((c) => c.m
+      ? '<button type="button" class="gwb-mchip" data-bed="' + esc(c.g) + '" data-gwb-tier="matched" aria-pressed="' + (V.g === c.g) + '" aria-label="' + esc(label(c.g)) + ', matched sales only">' + esc(label(c.g)) + '<span class="gwb-mtag" aria-hidden="true">' + MATCHED_TAG + '</span></button>'
+      : '<button type="button" data-bed="' + esc(c.g) + '" aria-pressed="' + (V.g === c.g) + '">' + esc(label(c.g)) + '</button>').join('') + '</div>';
   }
   function lineHtml(V) {
     if (V.g) return 'Showing ' + esc(label(V.g)) + ' homes, the type you chose.';
@@ -115,6 +127,60 @@
       (b != null ? '<button type="button" class="lg-btn" data-bin="' + b + '">See its price history</button>' : '<button type="button" class="lg-btn" data-lg-scroll="lgPick">Choose a size</button>') + '</div>';
   }
 
+  /* ---------- a matched-only type: counts, never a price (V2) ---------- */
+  const MATCHED_TAG = 'Matched sales only';
+  // The panel in place of the answer, price movement and numbers blocks. Exactly the approved copy (Claude C's handover, section 3).
+  // opt.tx: the development's transactions are on the page, so "See these sales" can show them.
+  function matchedLines(V) {
+    const m = V.m, L = label(m.g), unk = V.unknown || 0, rs = (n) => plural(n, WORDS.resale);
+    const one = rs(m.n24) + ' in the last 2 years ' + (m.n24 === 1 ? 'was' : 'were') + ' matched as ' + L + '. ' + basisText(m.basis);
+    const two = m.couldBe > 0 ? num(m.couldBe) + ' other ' + WORDS.resale[m.couldBe === 1 ? 0 : 1] + ' here could also be ' + L + ' but could not be matched, so this is not every ' + L + ' sale.'
+      : unk > 0 ? num(unk) + ' other ' + WORDS.resale[unk === 1 ? 0 : 1] + ' here could not be matched to a bedroom count, and ' + (unk === 1 ? 'it' : 'some') + ' may be ' + L + ', so this is not every ' + L + ' sale.' : '';
+    const three = m.why === 'ambiguous' ? 'Because too many unmatched sales could be ' + L + ', no typical price or price movement is shown.' : 'There are too few matched sales to show a typical price or price movement.';
+    return { one, two, three };
+  }
+  function matchedHtml(V, opt) {
+    opt = opt || {};
+    const m = V.m, L = matchedLines(V), first = L.one.indexOf('. ') + 1, lab = esc(label(m.g));
+    const nw = (t) => esc(t).split(lab).join('<span class="gwb-nw">' + lab + '</span>');   // "3-bedroom" never breaks at its hyphen
+    return '<div class="lg-ans gwb-m" data-gwb-matched data-gwb-g="' + esc(m.g) + '" data-gwb-why="' + esc(m.why) + '">' +
+      '<p class="lg-ans-k gwb-m-k">' + esc(label(m.g)) + ' · <span class="gwb-mtag" data-gwb-mtag>' + MATCHED_TAG + '</span></p>' +
+      '<p class="gwb-m1" data-gwb-m1><b>' + nw(L.one.slice(0, first)) + '</b> <span>' + esc(L.one.slice(first + 1)) + '</span></p>' +
+      (L.two ? '<p class="gwb-l" data-gwb-m2>' + nw(L.two) + '</p>' : '') +
+      '<p class="gwb-l gwb-m3" data-gwb-m3>' + nw(L.three) + '</p>' +
+      (opt.tx ? '<p class="gwb-m-act"><button type="button" class="lg-btn" data-gwr-mbed="' + esc(m.g) + '">See these sales</button></p>' : '') + '</div>';
+  }
+
+  // Copy validation (handover section 4): block price statistics and misleading claims; allow explaining why a statistic is absent.
+  // text: what a visitor reads for a matched-only type; record: the matched entry plus the development's of / unknown (or, for the Transactions
+  // notice, { N, M }); opt.part: 'panel' (default, also checks the required content), 'line' or 'notice'. Throws with every problem found.
+  const MATCHED_ONLY_ALLOWED = ['no typical price or price movement is shown', 'too few matched sales to show a typical price or price movement', 'so this is not every {label} sale', 'Matched sales only'];
+  const BLOCKED = [/\$\s?\d/i, /\bS\$/i, /\b\d+(\.\d+)?\s?[km]\b/i, /psf/i, /per\s+sq(uare)?\.?\s*f(oo)?t/i, /sq\s?ft/i, /sqft/i, /\b(median|average|mean|typical|representative|usual)\b/i,
+    /\b(price range|middle half|lowest|highest|cheapest|most expensive|ranged? from)\b/i, /\b(trend|trending|rose|rise|rising|fell|fall|falling|increase[ds]?|decrease[ds]?|appreciat\w*|higher|lower)\b/i, /\d+\s?%/i,
+    /\b(budget|afford\w*|within your|above your|below your)\b/i, /\b(all|every|each|whole|entire|complete|total|represent\w*)\b/i];
+  function assertMatchedOnlyCopy(text, record, opt) {
+    opt = opt || {};
+    const part = opt.part || 'panel', recs = [].concat(record || []), bad = [];
+    const lab = (r) => (r && r.g ? label(r.g) : '');
+    let rest = String(text == null ? '' : text).replace(/\s+/g, ' ');
+    MATCHED_ONLY_ALLOWED.forEach((ph) => { recs.concat([{}]).forEach((r) => { const p = ph.replace('{label}', lab(r) || '\u0000'); rest = rest.split(new RegExp(p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')).join(' '); }); });
+    BLOCKED.forEach((re) => { const x = re.exec(rest); if (x) bad.push('blocked "' + x[0] + '"'); });
+    const allowed = new Set(); recs.forEach((r) => ['n12', 'n24', 'couldBe', 'unknown', 'of', 'N', 'M'].forEach((k) => { if (r && r[k] != null) allowed.add(Number(r[k])); }));
+    const nums = rest.replace(/\b[1-5]-bedroom\b|\bStudio\b|\bPenthouse\b/gi, ' ').replace(/last 2 years/gi, ' ').match(/\d[\d,]*/g) || [];
+    nums.forEach((n) => { const v = Number(n.replace(/,/g, '')); if (!allowed.has(v)) bad.push('number ' + n + ' is not in the record'); });
+    if (part === 'panel') {
+      const r = recs[0] || {}, L = lab(r), t = String(text);
+      if (!(new RegExp('\\b' + r.n24 + ' resales?\\b').test(t))) bad.push('no matched count');
+      if (t.indexOf('last 2 years') < 0) bad.push('no "last 2 years" window');
+      if (t.indexOf(basisText(r.basis)) < 0) bad.push('no basis sentence');
+      if ((r.couldBe > 0 || r.unknown > 0) && t.indexOf('so this is not every ' + L + ' sale') < 0) bad.push('no "not every ' + L + ' sale" sentence');
+      const three = r.why === 'ambiguous' ? 'Because too many unmatched sales could be ' + L + ', no typical price or price movement is shown.' : 'There are too few matched sales to show a typical price or price movement.';
+      if (t.indexOf(three) < 0) bad.push('wrong or missing reason for ' + r.why);
+    }
+    if (bad.length) throw new Error('matched-only copy: ' + bad.join('; ') + ' in: ' + text);
+    return true;
+  }
+
   /* ---------- what leaves the page ---------- */
   // WhatsApp: the type and its typical price from past sales (a chosen category, never anything typed).
   function finding(V) {
@@ -136,5 +202,5 @@
     return 'Bedroom types: inferred by Groundwork, not recorded by URA, from developers’ floor plans where checked, otherwise from the bedroom counts declared in URA rental contracts for homes of the same size' + (m.rentalWindow ? ' (' + q(m.rentalWindow.from) + ' to ' + qEnd(m.rentalWindow.to) + ')' : '') + '. Sales whose size fits more than one bedroom count are left out.';
   }
 
-  return { sourceText, pick, view, chipsHtml, lineHtml, answerHtml, trendHtml, numbersHtml, basisText, sizeText, budgetText, finding, typical, short, label };
+  return { MATCHED_TAG, MATCHED_ONLY_ALLOWED, assertMatchedOnlyCopy, anyType, matchedLines, matchedHtml, sourceText, pick, view, chipsHtml, lineHtml, answerHtml, trendHtml, numbersHtml, basisText, sizeText, budgetText, finding, typical, short, label };
 });

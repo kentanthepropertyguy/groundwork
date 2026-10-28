@@ -43,7 +43,7 @@ body.kpr main.kpt-shell,body.kpr main.kpt-shell#app,:root body.kpr.kpt-w-wide .k
 body.lg #app > :not(.lg-page):not(script){max-width:var(--gw-shell-w);padding-left:var(--gw-gutter);padding-right:var(--gw-gutter)}
 body.kpr #app > .kpr-sec{max-width:var(--gw-shell-w);padding-left:var(--gw-gutter);padding-right:var(--gw-gutter);margin-left:auto;margin-right:auto;box-sizing:border-box}
 /* project, HDB block and comparison views: each band carries the gutter, the content inside it is one shell wide */
-body.lg .lg-wrap,body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov){max-width:var(--gw-shell)}
+body.lg .lg-wrap,body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m){max-width:var(--gw-shell)}
 .gw-launch .gw-wrap{max-width:var(--gw-shell-w)}
 body.kpr[data-view="compare"] main.kpt-shell{max-width:var(--gw-shell-w)}
 .gw-rhome{max-width:none}

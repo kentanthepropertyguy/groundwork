@@ -322,21 +322,22 @@ body.kpr .lg-pc .big{ font-size:48px; }
 body.kpr .lg-hero--ans{ text-align:left; padding-top:24px; padding-bottom:36px; }
 body.kpr .lg-hero--ans .lg-wrap{ justify-items:stretch; gap:16px; max-width:760px; }
 /* Desktop (24 Oct 2026): the overview takes the same width as the sections below it (--kpt-wrap). From 980px the size question, price answer, actions and
-   facts sit in the left column, and the Market pulse (or, before a size is chosen, the at-a-glance card) beside them in the right column. Paragraphs keep 62ch.
+   facts sit in the left column, and the Market pulse (or, before a size is chosen, the at-a-glance card; for a matched-sales-only bedroom type, its
+   counts panel) beside them in the right column. Paragraphs keep 62ch.
    Without either block the single 760px column stays. */
 @media (min-width:980px){
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov){ max-width:var(--kpt-wrap); grid-template-columns:minmax(0,1fr) minmax(0,400px); column-gap:56px; row-gap:0; align-items:start; }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > *:not(.mp):not(.lg-ov){ margin-bottom:16px; }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > *{ grid-column:1; }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > .lg-back{ grid-column:1 / -1; }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > .mp, body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > .lg-ov{ grid-column:2; grid-row:2 / span 20; margin-top:0; }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > .mp{ border-top:0; padding-top:8px; }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > .mp .mp-f{ grid-template-columns:1fr; gap:0; }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > .mp .mp-f div{ grid-template-columns:minmax(0,1fr) auto; column-gap:14px; align-items:baseline; padding:9px 0; border-bottom:1px solid var(--gw-line,#E3E6EC); }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > .mp .mp-f dt{ grid-column:1; grid-row:1; }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > .mp .mp-f .mp-n{ grid-column:1; grid-row:2; }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > .mp .mp-f .mp-v{ grid-column:2; grid-row:1 / span 2; font-size:22px; text-align:right; align-self:center; }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov) > .mp .mp-h{ font-size:21px; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m){ max-width:var(--kpt-wrap); grid-template-columns:minmax(0,1fr) minmax(0,400px); column-gap:56px; row-gap:0; align-items:start; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > *:not(.mp):not(.lg-ov):not(.gwb-m){ margin-bottom:16px; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > *{ grid-column:1; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .lg-back{ grid-column:1 / -1; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .mp, body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .lg-ov, body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .gwb-m{ grid-column:2; grid-row:2 / span 20; margin-top:0; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .mp{ border-top:0; padding-top:8px; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .mp .mp-f{ grid-template-columns:1fr; gap:0; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .mp .mp-f div{ grid-template-columns:minmax(0,1fr) auto; column-gap:14px; align-items:baseline; padding:9px 0; border-bottom:1px solid var(--gw-line,#E3E6EC); }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .mp .mp-f dt{ grid-column:1; grid-row:1; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .mp .mp-f .mp-n{ grid-column:1; grid-row:2; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .mp .mp-f .mp-v{ grid-column:2; grid-row:1 / span 2; font-size:22px; text-align:right; align-self:center; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .mp .mp-h{ font-size:21px; }
 }
 body.kpr .lg-hero--ans .lg-back{ justify-self:start; }
 body.kpr .lg-hero--ans .lg-id{ display:grid; gap:6px; }

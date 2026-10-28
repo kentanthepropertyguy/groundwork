@@ -109,8 +109,11 @@ try:
             # 6. incomplete classification: a type withheld (ambiguous) and one too few to show; a kept type that is missing here
             ctx = b.new_context(**kw); sail = rec('the-sail-at-marina-bay')['resale']
             pg, errs = page(ctx, 'the-sail-at-marina-bay', "sessionStorage.setItem('kpt.research.bed','4')")
-            got = pg.eval_on_selector_all('[data-bed]', 'e => e.map(x => x.dataset.bed)')
-            ok(got == [t['g'] for t in sail['types']] and '3' not in got, vn + ': only the types the data supports (3-bedroom withheld)', got)
+            got = pg.eval_on_selector_all('[data-bed]:not([data-gwb-tier])', 'e => e.map(x => x.dataset.bed)')
+            ok(got == [t['g'] for t in sail['types']] and '3' not in got, vn + ': only the types the data supports have figure chips (3-bedroom withheld)', got)
+            # V2 (27 Oct 2026): the withheld 3-bedroom has enough matched resales, so it is offered as "Matched sales only", never with figures
+            mo = pg.eval_on_selector_all('[data-bed][data-gwb-tier="matched"]', 'e => e.map(x => [x.dataset.bed, x.getAttribute("aria-label")])')
+            ok(mo == [[m['g'], m['label'] + ', matched sales only'] for m in sail.get('matched', []) if not m['figures']], vn + ': the withheld type is a matched-sales-only chip', mo)
             ok('4-bedroom' in text(pg, '[data-gwb-few]') and '3-bedroom' not in text(pg, '[data-gwb-few]'), vn + ': a type with too few resales is named, without figures')
             ok('No reliable 4-bedroom figures here' in text(pg, '[data-gwb-line]') and pg.locator('[data-bed][aria-pressed="true"]').count() == 0 and pg.locator('[data-gwb-ans]').count() == 0, vn + ': a kept type missing here is said, never swapped for another')
             ok(not errs, vn + ': no script errors', errs[:2])
