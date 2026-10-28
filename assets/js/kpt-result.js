@@ -136,7 +136,7 @@
     });
     if (v.hero === null && res.insights.length > 1) v.also = [];
     // Audit A3-14: the budget was not tested against EC rules, so the note says what they are.
-    if (res.ec && res.ec.shown && res.ec.view) v.ec = { label: res.ec.view.label, text: 'Around ' + fmt(res.ec.view.median) + ' sq ft at this budget. Eligibility conditions apply, including a household income ceiling, and loan repayments are limited to 30% of income (MSR). This budget wasn’t checked against those rules.' };
+    if (res.ec && res.ec.shown && res.ec.view) v.ec = { label: res.ec.view.label, text: 'Around ' + fmt(res.ec.view.median) + ' sq ft at this budget. Eligibility conditions apply, including a household income ceiling and a cap on monthly repayments at 30% of income (MSR). This budget wasn’t checked against those rules.' };
     // Ken's Take: an Active authored note matching the selected hero insight (else a budget-wide note). Otherwise nothing.
     if (v.hero && res.ken) {
       const shown = (res.ken.insightNotes || []).filter((n) => n.shown && n.note);

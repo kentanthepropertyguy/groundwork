@@ -50,7 +50,9 @@
       if (i > 0 && SMALL[w]) return w.toLowerCase();
       if (w.length <= 2 && /^[A-Z]+$/.test(w)) return w;
       return w.toLowerCase().replace(/(^|[-'(])([a-z])/g, (_, x, y) => x + y.toUpperCase());
-    }).join(' ');
+    }).join(' ').replace(/([A-Za-z])'S\b/g, "$1's")   // 28 Oct 2026 (Ken): "People's", not "People'S"
+      // a name joined with @ is written in its parts: "3@Phillips", "448@East Coast", "Citylife@Tampines" (a 2-3 letter part after @ stays upper-case, as an initialism)
+      .replace(/@([A-Za-z][A-Za-z-]*)/g, (m, q) => '@' + (/^[A-Z]{2,3}$/.test(q) ? q : q.charAt(0).toUpperCase() + q.slice(1).toLowerCase().replace(/-([a-z])/g, (x, b) => '-' + b.toUpperCase())));
   }
 
   /* ---------------------------------------------------------------- index */

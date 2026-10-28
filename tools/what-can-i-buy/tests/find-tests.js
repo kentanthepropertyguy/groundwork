@@ -172,9 +172,10 @@ t('analytics are bucketed: only the five allowed keys, no names, text or exact f
   const a = F.analytics(r, '1.8-2.0m'); assert.deepStrictEqual(Object.keys(a).sort(), F.ANALYTICS_KEYS.slice().sort());
   const s = JSON.stringify(a); assert.ok(!/secret|1834567|1,834/.test(s)); assert.ok(['0', '1-2', '3-4', '5+'].indexOf(a.result_bucket) > -1);
 });
-t('page tracks only find_shown, find_research_click and (V10) find_ask_click (project slugs only); typed text never reaches analytics or WhatsApp', () => {
+// Baseline clean-up (28 Oct 2026): the inline find_ analytics check asserted the V10 page; tools/what-can-i-buy/ is now Budget Search (kpt-discover-ui.js),
+// whose analytics privacy is checked in discover-tests.js. Kept here: typed text never reaches a WhatsApp link from that page.
+t('Budget Search page: typed text never reaches a WhatsApp link built in the page', () => {
   const html = fs.readFileSync(path.join(root, 'tools/what-can-i-buy/index.html'), 'utf8');
-  const tr = html.match(/KPT\.track\('find_[a-z_]+'[^)]*\)/g); assert.deepStrictEqual(tr.sort(), ["KPT.track('find_ask_click', ev)", "KPT.track('find_ask_click', ev)", "KPT.track('find_research_click', { project_id: t.dataset.id })", "KPT.track('find_shown', pl)"].sort());
   assert.ok(!/waLink\([^)]*FS\./.test(html));
 });
 t('displayName parity with Research across every project name', () => {
@@ -343,49 +344,36 @@ t('Pinery is not in the verified Huttons inventory file, and the inventory loade
   assert.ok(iv2.slugs.indexOf('pinery-residences') < 0); assert.strictEqual(iv2.slugs.length, invP.slugs.length);
 });
 
-console.log('Brand hierarchy (V10.4.1)');
-['index.html', 'own/index.html', 'buy/index.html', 'research/index.html', 'tools/hdb-upgrade/index.html', 'tools/what-can-i-buy/index.html'].forEach((f) => {
-  const h = fs.readFileSync(path.join(root, f), 'utf8');
-  t(f + ': header = KEN PROPERTY TOOLS / by Ken Tan · The Property Guy; footer identity; credentials and TikTok kept', () => {
-    const hd = /<header class="kpt-header[^>]*>[\s\S]*?<\/header>/.exec(h)[0];
-    assert.ok(/class="brand"[^>]*>KEN PROPERTY TOOLS<\/a>/.test(hd)); assert.ok(/<span class="kpt-tagline">by Ken Tan · The Property Guy<\/span>/.test(hd)); assert.ok(!/Property decisions, analysed/.test(hd));
-    assert.ok(/<p class="kpt-f-name">Ken Tan · The Property Guy<\/p>/.test(h)); assert.ok(/CEA R007903D/.test(h)); assert.ok(/tiktok\.com\/@kennx8898/.test(h)); assert.ok(/Since 2007/.test(h));
+// Baseline clean-up (28 Oct 2026, Ken): the V10.4.1 brand and V11.0 Tools-hub checks asserted the pre-Groundwork site (KEN PROPERTY TOOLS header, the
+// "Guided journey / Explore tools" home, a three-card Tools hub, own/ and buy/ pages, inline find_ analytics). All were replaced by approved Groundwork releases.
+// They now assert what is live and approved: the GROUNDWORK header and the agent's credentials on every page, the home headline and its three doors, and
+// the old buy/ page redirecting to Budget Search. The seven-card calculator directory and the header menu are covered by nav-tests.js and v38-render.py;
+// Budget Search's analytics privacy by discover-tests.js ("budget, place text and requirements never reach analytics, links or storage").
+console.log('Brand and credentials (Groundwork)');
+const rd = (f) => fs.readFileSync(path.join(root, f), 'utf8');
+['index.html', 'research/index.html', 'tools/index.html', 'tools/hdb-upgrade/index.html', 'tools/what-can-i-buy/index.html'].forEach((f) => {
+  t(f + ': GROUNDWORK header; footer keeps Ken Tan · The Property Guy, Property agent since 2007, CEA R007903D, Huttons Asia and TikTok', () => {
+    const h = rd(f), hd = /<header class="gw-nav"[^>]*>[\s\S]*?<\/header>/.exec(h);
+    assert.ok(hd, 'Groundwork header'); assert.ok(/<b>GROUNDWORK<\/b>/.test(hd[0]), 'wordmark'); assert.ok(!/KEN PROPERTY TOOLS/.test(hd[0]));
+    ['Ken Tan · The Property Guy', 'Property agent since 2007', 'CEA R007903D', 'Huttons Asia Pte Ltd (L3008899K)', 'tiktok.com/@kennx8898'].forEach((x) => assert.ok(h.indexOf(x) > -1, x));
   });
 });
-t('Home keeps its headline and the product positioning', () => { const h = fs.readFileSync(path.join(root, 'index.html'), 'utf8'); assert.ok(/Make sense of your next property move\./.test(h)); assert.ok(/Property decisions, analysed\./.test(h)); });
-
-console.log('V11.0 two paths, Tools link and Tools hub');
-const rd = (f) => fs.readFileSync(path.join(root, f), 'utf8');
-const NAVHREF = { 'index.html': 'tools/', 'own/index.html': '../tools/', 'buy/index.html': '../tools/', 'research/index.html': '../tools/', 'tools/hdb-upgrade/index.html': '../', 'tools/what-can-i-buy/index.html': '../' };
-Object.keys(NAVHREF).forEach((f) => t(f + ': header has one Tools link to the hub, wordmark and by-line intact', () => {
-  const hd = /<header class="kpt-header[^>]*>[\s\S]*?<\/header>/.exec(rd(f))[0];
-  assert.strictEqual((hd.match(/<nav class="kpt-nav"/g) || []).length, 1); assert.ok(new RegExp('<a href="' + NAVHREF[f].replace(/\./g, '\\.') + '" data-kpt-nav="tools">Tools</a>').test(hd));
-  assert.ok(/>KEN PROPERTY TOOLS<\/a>/.test(hd) && /by Ken Tan · The Property Guy/.test(hd));
-  const fs2 = require('path'); assert.ok(fs.existsSync(path.join(root, path.dirname(f), NAVHREF[f], 'index.html')), 'link target exists');
-}));
-t('Home: Guided journey and Explore tools paths; three journey cards keep their links and data-journey; buy description updated', () => {
+t('Home keeps its headline and its three doors (buy, sell, research), each to a page that exists', () => {
   const h = rd('index.html');
-  assert.ok(/Not sure where to start\?/.test(h) && /Already know what you need\?/.test(h) && /Make sense of your next property move\./.test(h));
-  [['own/', 'own'], ['buy/', 'buy'], ['research/', 'research']].forEach(([href, j]) => assert.ok(new RegExp('<a href="' + href + '" data-journey="' + j + '">').test(h), j));
-  assert.ok(/Explore properties that fit your budget, priorities and preferred locations\./.test(h)); assert.ok(!/comfortably afford/.test(h));
-  ['tools/hdb-upgrade/', 'tools/what-can-i-buy/', 'research/', 'tools/'].forEach((l) => assert.ok(h.indexOf('href="' + l + '" data-tool=') > -1, l));
-  assert.ok(h.indexOf('Guided journey') < h.indexOf('Explore tools'), 'guided first');
+  assert.ok(/<h1 class="gw-h1[^"]*">Make sense of your next property move\.<\/h1>/.test(h));
+  [['journey/#buy', 'data-journey="buy"'], ['journey/#sell', 'data-journey="sell"'], ['research/', 'data-gw-nav-to="research"']].forEach(([href, a]) => {
+    assert.ok(new RegExp('<a class="gw-door gw-door3" href="' + href.replace(/[/#]/g, '\\$&') + '" ' + a).test(h), href);
+    assert.ok(fs.existsSync(path.join(root, href.split('#')[0], 'index.html')), href);
+  });
 });
-t('Tools hub: categories hold live tools only, every link resolves, canonical + description + title present', () => {
-  const h = rd('tools/index.html'); const links = [...h.matchAll(/<a class="kps-card" href="([^"]+)" data-tool="([^"]+)"/g)];
-  assert.strictEqual(links.length, 3); assert.ok((h.match(/<section class="kps-cat"/g) || []).length >= 3);
-  links.forEach((m) => assert.ok(fs.existsSync(path.join(root, 'tools', m[1], 'index.html')), m[1]));
-  assert.ok(!/coming soon|placeholder|under construction/i.test(h.replace(/<!--[\s\S]*?-->/g, '')));
-  assert.ok(/<link rel="canonical" href="https:\/\/tools\.kentanthepropertyguy\.com\/tools\/">/.test(h) && /<meta name="description" content="[^"]{40,}/.test(h) && /<title>Tools — Ken Property Tools<\/title>/.test(h));
-  assert.ok(/aria-current="page"/.test(h));
+t('the old buy/ page sends visitors to Budget Search, keeping the query and hash', () => {
+  const h = rd('buy/index.html');
+  assert.ok(/http-equiv="refresh" content="0; url=\.\.\/tools\/what-can-i-buy\/"/.test(h) && /location\.replace\('\.\.\/tools\/what-can-i-buy\/' \+ location\.search \+ location\.hash\)/.test(h));
+  assert.ok(fs.existsSync(path.join(root, 'tools/what-can-i-buy/index.html')));
 });
-t('analytics: tool_selected and nav_click carry only a tool/target and a placement; journey_started unchanged', () => {
-  const h = rd('index.html') + rd('tools/index.html');
-  assert.ok(/KPT\.track\('journey_started', \{ journey: a\.dataset\.journey \}\)/.test(rd('index.html')));
-  [...h.matchAll(/KPT\.track\('(tool_selected|nav_click)', (\{[^}]*\})/g)].forEach((m) => assert.ok(/^\{ (tool|target): a\.dataset\.\w+, placement: '(home|hub|header)' \}$/.test(m[2]), m[2]));
-});
-t('Home and the Tools hub load no new script (only analytics and components)', () => {
-  ['index.html', 'tools/index.html'].forEach((f) => (rd(f).match(/<script src="([^"]+)"/g) || []).forEach((m) => assert.ok(/kpt-analytics\.js|kpt-components\.js/.test(m), m)));
+t('journeys are tracked as journey_started with the journey and a placement only', () => {
+  const j = rd('assets/js/gw-journey.js'); const m = j.match(/track\('journey_started', (\{[^}]*\})\)/g) || [];
+  assert.ok(m.length >= 1); m.forEach((x) => assert.ok(/\{ journey: \w+, placement: '\w+' \}/.test(x), x));
 });
 
 console.log('\nDevelopment classes (shared register): ECs and cluster housing are matched with the same rules but never pooled with condominiums');

@@ -8,12 +8,19 @@ const t = async (n, f) => { try { await f(); pass++; console.log('  ok   ' + n);
 if (!fs.existsSync(path.join(root, 'data/projects/manifest.json'))) { console.log('  skip no data/projects'); process.exit(0); }
 
 const html = fs.readFileSync(path.join(root, 'research/index.html'), 'utf8');
-const inline = html.match(/<script>\s*([\s\S]*?)<\/script>/)[1];
+// Baseline clean-up (28 Oct 2026): the page now has small data scripts (GW_SAMPLE, GW_NOT_COVERED) before its main inline script, and this harness took
+// the FIRST inline script, so it ran a data line and rendered nothing (every check failed and each waited ~3 s, hence the time-out). It now runs the data
+// scripts first, then the page's main script (the one that renders: "Presentation only…").
+const inlines = [...html.matchAll(/<script>\s*([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+const inline = inlines.filter((x) => /^\/\/ Presentation only/.test(x))[0];
+const dataInline = inlines.filter((x) => x !== inline && /^window\.GW_[A-Z_]+ = /.test(x));
+if (!inline) { console.log('  FAIL research/index.html: the main page script was not found'); process.exit(1); }
 const lib = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 
 function el(store) {
   const e = { innerHTML: '', textContent: '', value: '', href: '', dataset: {}, style: {}, children: [], classList: { add() {}, remove() {}, toggle() {}, contains: () => false },
     addEventListener() {}, removeEventListener() {}, focus() {}, scrollIntoView() {}, setAttribute() {}, getAttribute: () => null, appendChild() {}, remove() {},
+    insertAdjacentHTML(pos, h) { this.innerHTML = /^after|^beforeend/.test(pos) ? this.innerHTML + h : h + this.innerHTML; },   // used by the page since this harness was written
     querySelector: () => el(), querySelectorAll: () => [], closest: () => null };
   return e;
 }
@@ -34,6 +41,7 @@ async function render(hash, opts) {
   ['assets/js/kpt-project.js', 'assets/js/kpt-research.js', 'assets/js/kpt-intel.js', 'data/research/config.js'].forEach((f) => vm.runInContext(lib(f), ctx, { filename: f }));
   if (opts.breakIntel) ctx.KPTIntel.analyse = () => { throw new Error('boom'); };
   if (opts.staleScript) ctx.KPT_RESEARCH.BUILD = opts.staleScript;
+  dataInline.forEach((x) => vm.runInContext(x, ctx, { filename: 'research/index.html (data)' }));
   vm.runInContext(inline, ctx, { filename: 'research/index.html' });
   for (let i = 0; i < 200; i++) { await new Promise((r) => setTimeout(r, 15)); if (app.innerHTML && !/kpr-skel/.test(app.innerHTML)) break; }
   await new Promise((r) => setTimeout(r, 30));
@@ -69,7 +77,13 @@ const CANT = /couldn’t load|couldn't load|couldn’t find/;
   });
   await t('page and script carry the same build stamp, and assets and data requests are versioned with it', async () => {
     const R = require(path.join(root, 'assets/js/kpt-research.js')), m = html.match(/const BUILD = '([^']+)'/); assert.ok(m && m[1] === R.BUILD, 'page ' + (m && m[1]) + ' vs script ' + R.BUILD);
-    ['kpt-research.css', 'kpt-project.js', 'kpt-research.js', 'kpt-intel.js', 'config.js'].forEach((f) => assert.ok(new RegExp(f.replace('.', '\\.') + '\\?v=' + R.BUILD.replace(/\./g, '\\.')).test(html), f + ' not versioned'));
+    // baseline clean-up (28 Oct 2026): static assets are now versioned by their content (?v= = the first 10 hex of the file's SHA-256, set by the release
+    // build), not by BUILD; data requests still carry BUILD (below). A stale or mismatched ?v= fails here.
+    const crypto = require('crypto');
+    [['../assets/css/kpt-research.css', 'assets/css/kpt-research.css'], ['../assets/js/kpt-project.js', 'assets/js/kpt-project.js'], ['../assets/js/kpt-research.js', 'assets/js/kpt-research.js'], ['../assets/js/kpt-intel.js', 'assets/js/kpt-intel.js'], ['../data/research/config.js', 'data/research/config.js']].forEach(([ref, f]) => {
+      const v = (html.match(new RegExp(ref.replace(/[./]/g, '\\$&') + '\\?v=([0-9a-f]{10})')) || [])[1];
+      assert.strictEqual(v, crypto.createHash('sha256').update(fs.readFileSync(path.join(root, f))).digest('hex').slice(0, 10), f + ' versioned with its content');
+    });
     assert.ok(/'v=' \+ BUILD/.test(html));
   });
 
@@ -170,8 +184,13 @@ const CANT = /couldn’t load|couldn't load|couldn’t find/;
     const P = require(path.join(root, 'assets/js/kpt-project.js')), idx = JSON.parse(fs.readFileSync(path.join(root, 'data/projects/index.json'), 'utf8')), rows = idx.rows.map((x, k) => P.rowObject(idx, k));
     const pick = (f, k) => rows.filter(f).sort((a, b) => b.n - a.n).slice(0, k).map((x) => x.id);
     const ids = [].concat(pick((x) => x.new > 0 && !x.resale && !x.sub, 4), pick((x) => x.sub > 0, 3), pick((x) => x.resale > 0 && !x.new && !x.sub, 4), pick((x) => x.n <= 2, 2)); let n = 0;
-    for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j += 2) { for (const h of ['#/compare/' + ids[i] + '/' + ids[j], '#/compare/' + ids[j] + '/' + ids[i]]) { const r = await render(h); n++; assert.ok(!CANT.test(r.html) && /id="verdict"/.test(r.html), h + ' ' + r.errors.join('|')); } }
-    assert.ok(n >= 40, 'only ' + n);
+    // baseline clean-up (28 Oct 2026): a condominium and an EC are never set side by side (they sell under different rules); such a pair shows the
+    // "These are different property types" page with links to both, which is a valid result, not the load-error page. Same-type pairs show the verdict.
+    let cross = 0;
+    for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j += 2) { for (const h of ['#/compare/' + ids[i] + '/' + ids[j], '#/compare/' + ids[j] + '/' + ids[i]]) { const r = await render(h); n++;
+      const diff = /These are different property types/.test(r.html); if (diff) cross++;
+      assert.ok(!CANT.test(r.html) && (/id="verdict"/.test(r.html) || (diff && /executive condominium \(EC\)/.test(r.html))), h + ' ' + r.errors.join('|')); } }
+    assert.ok(n >= 40, 'only ' + n); assert.ok(cross >= 2, 'the sample includes condominium vs EC pairs (' + cross + ')');
   });
   console.log('\n' + pass + ' passed, ' + fail + ' failed'); process.exit(fail ? 1 : 0);
 })();

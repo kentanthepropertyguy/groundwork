@@ -71,7 +71,8 @@ t('$1.32m: EC own stats shown, both cross-references fail for the stated reasons
 t('$1.32m: generated wording matches the spec example and passes the lint', () => {
   const r = run();
   assert.strictEqual(r.lead.text, 'At around $1.32m, the biggest difference in what buyers got was age: older homes had more space.');
-  assert.ok(/OCR resale homes over 25 years old typically sold at about 1,150 sqft, against about 800 sqft for OCR resale homes 10–25 years old/.test(r.insights[0].sentences[0]), r.insights[0].sentences[0]);
+  // baseline clean-up (28 Oct 2026): the engine now says whose age it is (the lease's: a lease start is not TOP or building age); the figures are the spec's
+  assert.ok(/OCR resale homes with a lease 25 or more years old typically sold at about 1,150 sqft, against about 800 sqft for OCR resale homes with a lease 10–24 years old/.test(r.insights[0].sentences[0]), r.insights[0].sentences[0]);
   assert.ok(r.insights[1].sentences.some((s) => /Most RCR new launches sold above \$1\.32m/.test(s)));
   assert.ok(r.insights[1].sentences.some((s) => /RCR new launches that sold near this budget came from only 6 projects/.test(s)));
   assert.ok(r.insights[2].sentences.some((s) => /at the low end of what OCR freehold or 999-year resale homes and CCR freehold or 999-year resale homes normally cost/.test(s)));

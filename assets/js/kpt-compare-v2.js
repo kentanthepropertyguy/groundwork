@@ -446,7 +446,9 @@
     const ex = E.projectExperience(raw, m);
     if (ex.experience === 'directory') {
       const R = hooks.R, last = raw.last ? R.fmtMonth(raw.last) : null, tot = raw.sale ? (raw.sale.new || 0) + (raw.sale.sub || 0) + (raw.sale.resale || 0) : 0;
-      app.innerHTML = quietPage({ kind: 'directory', title: M.name, meta: [M.street, M.districtLabel, M.region, M.tenure.mixed ? 'Mixed tenure in these records' : M.tenure.label].filter(Boolean).join(' · '),
+      // 28 Oct 2026 (Ken): the street as every other page writes it ("Phillips Avenue", not URA's capitals); the name is already Research's display name
+      const street = M.street && root.KPTLG && root.KPTLG.titleCase ? root.KPTLG.titleCase(M.street) : M.street;
+      app.innerHTML = quietPage({ kind: 'directory', title: M.name, meta: [street, M.districtLabel, M.region, M.tenure.mixed ? 'Mixed tenure in these records' : M.tenure.label].filter(Boolean).join(' · '),
         lead: (last ? 'The last recorded sale was in ' + esc(last) + ', and there ' + (tot === 1 ? 'has' : 'have') + ' been ' + plural(tot, 'sale') + ' in the data we hold, none in the last ' + E.CONFIG.project.recentMonths + ' months. ' : 'There are no transactions for this development in the data we hold. ') + 'Without recent sales we cannot give a fair read of what it transacts at, so we do not draw one.',
         pill: 'Nothing recent to analyse' });
       mountQuiet(app, hooks);
