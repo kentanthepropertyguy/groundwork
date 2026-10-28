@@ -359,7 +359,7 @@ body.kpr .lg-hero--ans .lg-sizeform .err, body.kpr .lg-hero--ans #sizeNote{ text
 body.kpr .lg-hero--ans .lg-acts{ margin:0; max-width:none; display:flex; flex-wrap:wrap; gap:8px; }
 body.kpr .lg-hero--ans .lg-act{ display:inline-flex; flex-direction:row; align-items:center; justify-items:initial; padding:0 16px; min-height:44px; border-radius:var(--kpt-pill); gap:8px; font-size:14px; white-space:nowrap; }
 body.kpr .lg-hero--ans .lg-run{ margin:0 !important; text-align:left; max-width:62ch; }
-body.kpr .lg-hero--ans .lg-facts{ max-width:62ch; }
+body.kpr .lg-hero--ans .lg-facts{ max-width:760px; }
 body.kpr .lg-hero--ans .kpr-onmap{ margin:0; }
 @media (max-width:719px){
   body.kpr .lg-hero h1, body.kpr .lg-hero h1.lg-name, body.kpr .lg-hero h1.md, body.kpr .lg-hero h1.xl{ font-size:32px; line-height:1.1; }
@@ -377,7 +377,7 @@ body.kpr .lg-hero--ans .kpr-onmap{ margin:0; }
 /* Size first (25 Oct 2026): "What size home are you looking at?" comes before any size-specific price or reading. */
 body.kpr .lg-pick{ display:grid; gap:10px; justify-items:start; width:100%; min-width:0; }
 body.kpr .lg-pick-h{ font-size:22px; line-height:1.25; letter-spacing:-.02em; margin:0; }
-body.kpr .lg-pick .lbl{ font-size:14.5px; line-height:1.5; color:var(--kpt-muted); margin:0; max-width:62ch; }
+body.kpr .lg-pick .lbl{ font-size:14.5px; line-height:1.5; color:var(--kpt-muted); margin:0; max-width:760px; }
 body.kpr .lg-pick-row{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 18px; width:100%; }
 body.kpr .lg-selwrap{ position:relative; display:inline-block; width:min(100%, 360px); }
 body.kpr .lg-select{ appearance:none; -webkit-appearance:none; width:100%; min-height:52px; padding:0 48px 0 20px; border:1.5px solid var(--kpt-ink); border-radius:var(--kpt-pill); background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1.5l6 6 6-6' fill='none' stroke='%2316213E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 20px center; color:var(--kpt-ink); font:600 16.5px/1.2 var(--kpt-font); letter-spacing:-.01em; cursor:pointer; }
@@ -419,7 +419,8 @@ body.kpr .mp-near button .lg-n{ margin-left:8px; padding-left:8px; border-left:1
 .gwl-sw button[aria-pressed="true"]{ border-color:var(--kpt-ink); color:var(--kpt-ink); box-shadow:inset 0 0 0 1px var(--kpt-ink); }
 .gwl-sw button[aria-pressed="true"] i{ opacity:1; }
 .gwl-map{ height:380px; border-radius:var(--kpt-radius); overflow:hidden; border:1px solid var(--kpt-line); background:var(--kpt-grey); z-index:0; }
-.gwl-near{ display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:10px 22px; margin:0; }
+.gwl-near{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px 22px; margin:0; }   /* R1.1: two by two on a tablet, so no name wraps and none is left alone on a row */
+@media (min-width:1280px){ .gwl-near{ grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); } }
 .gwl-near div{ display:grid; gap:2px; align-content:start; padding:10px 0; border-top:1px solid var(--kpt-line); min-width:0; }
 .gwl-near dt{ font-size:13px; color:var(--kpt-muted); }
 .gwl-near dd{ margin:0; font-size:15.5px; color:var(--kpt-ink); font-weight:500; line-height:1.35; }
@@ -439,9 +440,9 @@ body.kpr .gwr-band{ padding:44px var(--gw-gutter,22px); border-top:1px solid var
 .gwr-wrap{ gap:16px !important; }
 .gwr-head{ display:grid; gap:6px; }
 .gwr-head h2{ font-size:30px; line-height:1.15; letter-spacing:-.02em; margin:0; }
-.gwr-head .lg-sub{ font-size:16px; max-width:70ch; margin:0; }
+.gwr-head .lg-sub{ font-size:16px; max-width:900px; margin:0; }
 .gwr-rows{ display:grid; gap:8px; }
-.gwr-row{ font:inherit; text-align:left; width:100%; display:grid; grid-template-columns:minmax(110px,150px) minmax(120px,170px) minmax(150px,210px) minmax(0,1fr); align-items:center; gap:4px 18px;
+.gwr-row{ font:inherit; text-align:left; width:100%; display:grid; grid-template-columns:minmax(118px,1fr) minmax(112px,1fr) minmax(150px,1.25fr) minmax(0,2fr); align-items:center; gap:4px 18px;
   background:#fff; border:1px solid var(--kpt-line); border-radius:16px; padding:14px 18px; color:var(--kpt-ink); box-sizing:border-box; }
 button.gwr-row{ cursor:pointer; }
 button.gwr-row:hover{ border-color:#B9BDC9; }

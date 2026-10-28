@@ -134,7 +134,7 @@ try:
         # ---- 4. the Calculators page and the header menu ----
         pg.goto(B + '/tools/'); pg.wait_for_timeout(300)
         # V3.8 (Ken 27 Oct 2026): seven equal calculator cards replace the four questions and the text links; the menu lists the same seven (v38-render covers the rest)
-        SEVEN = [['Purchase Costs & Timeline', 'payment-planner/'], ['How Much Can I Borrow?', 'tdsr/'], ['Pledged & Unpledged Assets', 'pledged-assets/'], ['Mortgage Instalment', 'mortgage/'], ['Sale Proceeds', 'sale-proceeds/'], ['Buyer’s Stamp Duty', 'stamp-duty/'], ['Seller’s Stamp Duty', 'ssd/']]
+        SEVEN = [['Purchase Costs & Timeline', 'payment-planner/'], ['How Much Can I Borrow?', 'tdsr/'], ['Pledged & Unpledged Assets', 'pledged-assets/'], ['Mortgage Instalment', 'mortgage/'], ['Sale Proceeds', 'sale-proceeds/'], ['Buyer’s Stamp Duty (BSD\u00a0&\u00a0ABSD)', 'stamp-duty/'], ['Seller’s Stamp Duty', 'ssd/']]
         cards = pg.evaluate("[...document.querySelectorAll('.gw-tdir .gw-tc')].map(a=>[a.querySelector('b').textContent,a.getAttribute('href')])")
         check(f'{tag} calculators: the seven, in order', cards == SEVEN, cards)
         check(f'{tag} calculators: no Upgrade card and no text links underneath', pg.locator('.gw-tdir .gw-mone').count() == 0 and not any(c[1] == 'hdb-upgrade/' for c in cards))

@@ -25,9 +25,9 @@ def M(s):
     m = re.search(r'\$([\d,]+)', s or ''); return int(m.group(1).replace(',', '')) if m else None
 AF = lambda r, n: (1 - (1 + r / 12) ** (-n * 12)) / (r / 12)
 rd = lambda x: int(x // 1000 * 1000)
-SEVEN = [('payment-planner', 'Purchase Costs & Timeline', 'How much to pay, and when.'), ('tdsr', 'How Much Can I Borrow?', 'Housing loan estimate and TDSR.'),
-         ('pledged-assets', 'Pledged & Unpledged Assets', 'Use financial assets to support your housing loan.'), ('mortgage', 'Mortgage Instalment', 'Monthly repayments and interest.'),
-         ('sale-proceeds', 'Sale Proceeds', 'Cash and CPF after selling.'), ('stamp-duty', 'Buyer’s Stamp Duty', 'BSD and ABSD calculation.'), ('ssd', 'Seller’s Stamp Duty', 'Calculate SSD when selling.')]
+SEVEN = [('payment-planner', 'Purchase Costs & Timeline', 'How much will this home cost me, and when do I pay?'), ('tdsr', 'How Much Can I Borrow?', 'How much could a bank lend me?'),
+         ('pledged-assets', 'Pledged & Unpledged Assets', 'Could my savings and investments help me borrow more?'), ('mortgage', 'Mortgage Instalment', 'What will my monthly instalment be?'),
+         ('sale-proceeds', 'Sale Proceeds', 'What will I get back when I sell?'), ('stamp-duty', 'Buyer’s Stamp Duty (BSD\u00a0&\u00a0ABSD)', 'How much stamp duty will I pay when buying a property?'), ('ssd', 'Seller’s Stamp Duty', 'Will I pay Seller’s Stamp Duty when I sell?')]
 def settled(pg): pg.wait_for_function("()=>window.__f3Settled&&window.__f3Settled()")
 def page_ok(pg): pg.wait_for_selector('[data-out]'); settled(pg)
 def typed(pg, k, text):   # key by key, at a person's pace, and the cursor never leaves the field
