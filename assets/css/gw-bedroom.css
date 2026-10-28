@@ -22,3 +22,30 @@ body.kpr .gwb-area-t[aria-expanded="true"]::after{ transform:translateY(2px) rot
 body.kpr .gwb-area-t:hover{ color:var(--kpt-blue,#0B63CE); text-decoration:underline; }
 body.kpr .gwb-area{ display:grid; gap:10px; justify-items:start; padding-top:4px; }
 body.kpr .gwb-area[hidden]{ display:none; }
+/* V2 (Ken, 27 Oct 2026): "Matched sales only" bedroom types. The chip is the same chip with its tag on a second line; the panel is a counts-only
+   card where a price answer would be, and it never carries a price, a size or a trend. */
+body.kpr .gwb-chips .gwb-mchip{ display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; padding-top:5px; padding-bottom:5px; }
+body.kpr .gwb-chips .gwb-mtag{ font-size:11.5px; font-weight:500; line-height:1.15; color:var(--kpt-muted); letter-spacing:.01em; }
+body.kpr .gwb-chips .gwb-mchip[aria-pressed="true"] .gwb-mtag{ color:rgba(255,255,255,.8); }
+body.kpr .gwb-m{ background:var(--kpt-grey); border-radius:var(--kpt-radius); padding:22px 24px; display:grid; gap:10px; align-content:start; justify-items:start; min-width:0; }
+body.kpr .gwb-m .gwb-m-k{ font-size:12.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+body.kpr .gwb-m .gwb-m-k .gwb-mtag{ color:var(--kpt-ink); }
+body.kpr .gwb-m .gwb-m1{ margin:0; display:grid; gap:6px; max-width:62ch; }
+body.kpr .gwb-m .gwb-m1 b{ font-size:22px; line-height:1.25; letter-spacing:-.015em; font-weight:700; color:var(--kpt-ink); text-wrap:balance; }
+body.kpr .gwb-m .gwb-m1 > span{ font-size:14.5px; line-height:1.5; color:var(--kpt-muted); }
+body.kpr .gwb-m .gwb-l{ margin:0; font-size:15.5px; line-height:1.5; color:var(--kpt-ink); max-width:62ch; }
+body.kpr .gwb-m .gwb-m3{ color:var(--kpt-muted); font-size:14.5px; }
+body.kpr .gwb-m .gwb-m-act{ margin:4px 0 0; }
+body.kpr .gwb-m .gwb-m-act .lg-btn{ min-height:44px; }
+body.kpr .gwb-nw{ white-space:nowrap; }
+body.kpr .gwr-also{ margin:0; }
+body.kpr .gwr-also .kpr-link{ font:inherit; font-weight:600; color:var(--gw-blue,#0B63CE); background:none; border:0; padding:0; min-height:32px; cursor:pointer; }
+body.kpr .gwr-also .kpr-link:hover{ text-decoration:underline; }
+body.kpr .gwr-bednote{ margin:0 0 6px; max-width:none; }   /* one line on a laptop: it reads with the count under it */
+@media (max-width:640px){
+  body.kpr .gwb-m{ padding:16px; border-radius:18px; }
+  body.kpr .gwb-chips button{ padding-left:12px; padding-right:12px; }   /* three types, one of them matched-only, fit a 390px row without scrolling */
+  body.kpr .gwb-chips .gwb-mtag{ font-size:11px; }
+  body.kpr .gwb-m .gwb-m1 b{ font-size:20px; }
+  body.kpr .gwb-m .gwb-l{ font-size:15px; }
+}

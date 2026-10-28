@@ -41,7 +41,7 @@
   const FLOOR_NOTE = 'URA floor bands only. This does not show an exact floor.';
   const HEADLINE = { good: 'Good recent overlap for comparison', limited: 'Limited recent overlap', none: 'No like-for-like transaction evidence found' };
   const ANALYTICS_EVENTS = ['research_search', 'research_project_selected', 'research_size_focus', 'research_compare_started', 'research_comparison_viewed', 'research_whatsapp_clicked', 'research_option_selected', 'research_map_opened', 'research_pulse_viewed', 'research_pulse_shared', 'research_bedroom_selected'];
-  const ANALYTICS_KEYS = ['results', 'project_id', 'project_a', 'project_b', 'sale_type', 'window', 'overlap', 'has_evidence', 'context', 'sale_types', 'option', 'from', 'trend', 'evidence', 'intent', 'bedroom'];
+  const ANALYTICS_KEYS = ['results', 'project_id', 'project_a', 'project_b', 'sale_type', 'window', 'overlap', 'has_evidence', 'context', 'sale_types', 'option', 'from', 'trend', 'evidence', 'intent', 'bedroom', 'tier'];
 
   /* ---------- small helpers ---------- */
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -555,6 +555,7 @@
     if (['strong', 'limited', 'none'].indexOf(d.evidence) > -1) out.evidence = d.evidence;
     if (['buy', 'sell'].indexOf(d.intent) > -1) out.intent = d.intent;
     if (typeof d.bedroom === 'string' && /^(PH|[0-9])$/.test(d.bedroom)) out.bedroom = d.bedroom;   // a bedroom type chosen on a development page (a category, never typed)
+    if (event === 'research_bedroom_selected' && ['figures', 'matched'].indexOf(d.tier) > -1) out.tier = d.tier;   // V2: a type with figures, or a matched-sales-only type
     if (Number.isInteger(d.sale_types) && d.sale_types >= 0 && d.sale_types <= 3) out.sale_types = d.sale_types;
     return out;
   }

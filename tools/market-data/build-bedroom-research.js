@@ -32,10 +32,15 @@ const fs = require('fs'), path = require('path');
 const E = require('./bedroom-engine.js'), RW = require('./rental-window.js'), B = require('./bench-rental.js'), RE = require('./rental-engine.js'), H = require('./bedroom-hybrid.js');
 const P = require('../../assets/js/kpt-project.js');
 
-const VERSION = 'bedroom-research-v1.1';   // v1.1: Claude C's completeness gate
+const VERSION = 'bedroom-research-v1.2';   // v1.1: Claude C's completeness gate; v1.2: "matched sales only" counts (resale.matched, of, unknown)
 const RULES = { minCoverage: 0.7, maxAmbiguousShare: 0.2, minSales: 5, gateMonths: 24, maxCoverageGap: 0.15, typical: { n: 5, months: 3 }, windows: [12, 24] };   // never beyond the gate's 24 months
 const SALES = ['resale'], SALE_CODE = { new: 1, sub: 2, resale: 3 };   // V1: resales (the completeness gate is defined on resales)
 const SQFT = E.SQFT_PER_SQM;
+// "Matched sales only" (Ken, 27 Oct 2026): a bedroom type withheld from the figures is still named, with counts only, when at least this many
+// resales in the last 24 months already have a decision in the accepted snapshot. The development must meet RULES.minCoverage. No new
+// classification: the counts are the tx rows the figures already use. Never a price, size, trend or budget for such a type.
+const MIN_MATCHED = 3;
+const MATCHED_GROUPS = ['1', '2', '3', '4', '5'];   // bedroom counts only: never Penthouse, never a studio
 const ymToInt = (ym) => (ym == null ? null : Math.floor(ym / 12) * 100 + (ym % 12) + 1);
 const ymToS = (ym) => Math.floor(ym / 12) + '-' + String((ym % 12) + 1).padStart(2, '0');
 const sToYm = (s) => Number(s.slice(0, 4)) * 12 + Number(s.slice(5, 7)) - 1;
@@ -87,6 +92,22 @@ function typeFigures(tx, g, sale, latest, gate) {
   const wb = { verified: rows.filter((t) => t.tier === 'verified').length, inferred: rows.filter((t) => t.tier === 'inferred').length };
   Object.assign(out, { figures: true, win, n: c.n, act: c.act, last: ymToInt(c.last), from: ymToS(latest - win + 1), to: ymToS(latest), price: c.price, psf: c.psf, sqft: [sq[0], sq[sq.length - 1]], basis: wb });
   return out;
+}
+
+// The "matched" list for one development's resales: every bedroom type with at least MIN_MATCHED matched resales in the last 24 months,
+// figured or not. types: the typeFigures results (figures / why); gate: completeness() for the development; coverage: the share of its resales
+// in the gate's 24 months matched to a bedroom count (none below RULES.minCoverage). Counts only for figures:false.
+function matchedTypes(tx, latest, types, gate, coverage) {
+  if (!(coverage >= RULES.minCoverage)) return [];
+  const byG = {}; types.forEach((x) => { byG[x.g] = x; });
+  return MATCHED_GROUPS.map((g) => {
+    const mine = tx.filter((t) => t.group === g && t.sale === SALE_CODE.resale && t.ym > latest - 24);
+    if (mine.length < MIN_MATCHED) return null;
+    const x = byG[g] || {}, figures = !!x.figures, gt = (gate.types || {})[g] || { ambiguous: 0 };
+    return { g, label: E.groupLabel(g), n12: mine.filter((t) => t.ym > latest - 12).length, n24: mine.length, last: ymToInt(Math.max.apply(null, mine.map((t) => t.ym))),
+      basis: { verified: mine.filter((t) => t.tier === 'verified').length, inferred: mine.filter((t) => t.tier === 'inferred').length },
+      figures, why: figures ? null : x.why === 'ambiguous' ? 'ambiguous' : 'few', couldBe: gt.ambiguous };
+  }).filter(Boolean);
 }
 
 // Price movement for a type: the Market Pulse reading on the type's most-sold 100 sq ft band (resales of that type only).
@@ -145,9 +166,13 @@ function build(o) {
       r.periodCoverage = per.map((v) => (v == null ? null : round(v, 3)));
       r.types = types.map((x) => ({ g: x.g, figures: x.figures, why: x.why || null, ambiguous: x.ambiguous, n36: x.n36 }));
       rec.sale[sale] = r;
-      const shown = types.filter((x) => x.figures);
-      if (!shown.length) return;
-      pub[sale] = { coverage: round(cov, 3), types: shown.map((x) => { const o = Object.assign({}, x); delete o.figures; delete o.why; delete o.ambiguous; delete o.n36; delete o.kept24; return o; }), few: types.filter((x) => !x.figures && x.why === 'few').map((x) => x.g) };   // named only (no figures); a type withheld as ambiguous is not named
+      const shown = types.filter((x) => x.figures), matched = sale === 'resale' ? matchedTypes(tx, latest, types, gate, cov) : [];
+      r.matched = matched.map((m) => ({ g: m.g, n24: m.n24, figures: m.figures, why: m.why, couldBe: m.couldBe }));
+      if (!shown.length && !matched.length) return;
+      pub[sale] = { coverage: round(cov, 3) };
+      if (matched.length) Object.assign(pub[sale], { of: gate.recent, unknown: gate.unclassified });
+      Object.assign(pub[sale], { types: shown.map((x) => { const o = Object.assign({}, x); delete o.figures; delete o.why; delete o.ambiguous; delete o.n36; delete o.kept24; return o; }), few: types.filter((x) => !x.figures && x.why === 'few').map((x) => x.g) });   // named only (no figures); a type withheld as ambiguous is not named here (matched names it, counts only)
+      if (matched.length) pub[sale].matched = matched;
     });
     devs++;
     if (Object.keys(pub).length) {
@@ -157,7 +182,7 @@ function build(o) {
     }
     report.push(rec);
   });
-  const meta = { v: 1, kind: 'gw-bedroom-research', version: VERSION, asOf: man.asOf, latestMonth: man.latestMonth, classifiedAsOf: snap.asOf, rentalWindow: snap.rentalWindow, shards: man.shards, rules: RULES,
+  const meta = { v: 1, kind: 'gw-bedroom-research', version: VERSION, asOf: man.asOf, latestMonth: man.latestMonth, classifiedAsOf: snap.asOf, rentalWindow: snap.rentalWindow, shards: man.shards, rules: Object.assign({}, RULES, { minMatched: MIN_MATCHED }),
     basis: 'Bedroom type is inferred by Groundwork, never recorded by URA: from the developer\'s floor-plan areas where a checked layout table exists ("floor plans"), otherwise from the bedroom counts declared in URA rental contracts for homes of the same size in the latest 12 quarters ("rental records"). Sales whose size fits more than one bedroom count are left out. Prices are URA caveated transaction prices.',
     counts: { developments: devs, withTypes } };
   return { meta, shards, report };
@@ -171,7 +196,7 @@ function write(o, r) {
   if (o.report) { fs.mkdirSync(o.report, { recursive: true }); fs.writeFileSync(path.join(o.report, 'bedroom-research-report.json'), JSON.stringify({ meta: r.meta, developments: r.report }, null, 1)); }
 }
 
-module.exports = { VERSION, RULES, decider, possibleFor, typeFigures, typeTrend, build };
+module.exports = { VERSION, RULES, MIN_MATCHED, decider, matchedTypes, possibleFor, typeFigures, typeTrend, build };
 
 if (require.main === module) {
   const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > -1 ? process.argv[i + 1] : d; };

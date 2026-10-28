@@ -100,10 +100,12 @@
         '<span class="gwr-r">' + range + '<small>' + (t.n >= 4 ? 'middle half' : 'lowest – highest') + '</small></span>' +
         '<span class="gwr-m">' + plural(t.n, w) + (t.win === 12 ? '' : ' in 2 years') + ' · ' + size + ' · ' + money(t.psf[2]) + ' psf</span></button>';
     };
+    // V2: types with matched resales but no figures, counts only, each opening its sales below (never a price here).
+    const also = BV.only && BV.only.length ? '<p class="lg-fine gwr-also" data-gwr-also>Also matched (matched sales only): ' + BV.only.map((m) => '<button type="button" class="kpr-link" data-gwr-mbed="' + esc(m.g) + '">' + esc(lab(m.g)) + ' ' + num(m.n24) + '</button>').join(', ') + '</p>' : '';
     const few = BV.few && BV.few.length ? '<p class="lg-fine" data-gwr-few>' + BV.few.map((g) => esc(lab(g))).join(' and ') + ': too few recent resales to show a typical price.</p>' : '';
     return '<section class="lg-band gwr-band" id="lgTypes" aria-labelledby="lgTypesH"><div class="lg-wrap gwr-wrap"><div class="gwr-head"><p class="lg-kicker">By home type</p><h2 id="lgTypesH">What each home type sells for</h2>' +
       '<p class="lg-sub">Resales here in the last 12 months: the typical (median) total price, and the range most of them sold within. Choose one to see its sales.</p></div>' +
-      '<div class="gwr-rows" role="group" aria-label="Home types">' + BV.types.map(row).join('') + '</div>' + few +
+      '<div class="gwr-rows" role="group" aria-label="Home types">' + BV.types.map(row).join('') + '</div>' + also + few +
       '<p class="lg-fine">' + esc(o.basis || 'Bedroom types are inferred by Groundwork from developer floor plans or URA rental records for the same size; URA doesn’t record bedrooms with a sale.') + ' Past sales, not a valuation.</p></div></section>';
   }
   // The same rows by size, where bedroom types aren't shown. sale: 'resale' | 'new' | 'sub'.
@@ -151,7 +153,14 @@
     if (!n) return '<p class="gwr-none" data-gwr-count="0">No sales match these filters. <button type="button" class="kpr-link" data-gwr-reset>Show all sales</button></p>';
     const span = ymLabel(Math.min.apply(null, list.map((r) => r[0]))) + ' – ' + ymLabel(Math.max.apply(null, list.map((r) => r[0])));
     const same = list.slice(0, k).some((r) => r[7] & 4);
-    return '<p class="gwr-count" data-gwr-count="' + n + '"><b>' + plural(n, WORD.all) + '</b> · ' + span + (n > k ? ' · showing ' + k : '') + '</p>' +
+    // V2: with a home type chosen, how many sales are that type and how many here (same other filters) have no bedroom count and could be it.
+    let note = '';
+    if (f.bed !== 'all' && f.bed !== 'u' && f.bed != null) {
+      const u = filter(rec.rows, Object.assign({}, f, { bed: 'u' }), rec.latest).length;
+      note = '<p class="lg-fine gwr-bednote" data-gwr-bednote data-n="' + n + '" data-m="' + u + '">Showing the ' + plural(n, WORD.all) + ' matched as ' + esc(bedLabel(Number(f.bed))) + '.' +
+        (u ? ' ' + num(u) + ' other ' + WORD.all[u === 1 ? 0 : 1] + ' here could not be matched to a bedroom count and ' + (u === 1 ? 'may be one more.' : 'may include more.') : '') + '</p>';
+    }
+    return note + '<p class="gwr-count" data-gwr-count="' + n + '"><b>' + plural(n, WORD.all) + '</b> · ' + span + (n > k ? ' · showing ' + k : '') + '</p>' +
       '<div class="gwr-scroll"><table class="gwr-table"><thead><tr><th scope="col">Month</th><th scope="col">Home type</th><th scope="col">Size</th><th scope="col">Floor</th><th scope="col">Sale</th><th scope="col">Price</th></tr></thead><tbody>' +
       list.slice(0, k).map((r) => rowHtml(r, M)).join('') + '</tbody></table></div>' +
       (n > k ? '<button type="button" class="lg-btn gwr-more" data-gwr-more>Show ' + Math.min(PAGE, n - k) + ' more</button>' : '') +
@@ -186,8 +195,11 @@
     if (!app.__gwrShow) {
       app.__gwrShow = true;
       app.addEventListener('click', (e) => {
-        const b = e.target.closest && e.target.closest('[data-gwr-show]'), s = app.querySelector('#lgTx'), cur = app.__gwrSt; if (!b || !s || !cur || !s.__gwrDraw) return;
-        const p = b.dataset.gwrShow.split('|'); cur.f = { bed: 'all', bin: p[0], sale: p[1], period: '12', sort: 'new' }; cur.shown = cur.page || PAGE; s.__gwrDraw();
+        const b = e.target.closest && e.target.closest('[data-gwr-show],[data-gwr-mbed]'), s = app.querySelector('#lgTx'), cur = app.__gwrSt; if (!b || !s || !cur || !s.__gwrDraw) return;
+        // V2 "See these sales" for a matched-only type: its matched resales of the last 2 years (the same rows as its count).
+        if (b.dataset.gwrMbed != null) cur.f = { bed: String(b.dataset.gwrMbed), bin: 'all', sale: '3', period: '24', sort: 'new' };
+        else { const p = b.dataset.gwrShow.split('|'); cur.f = { bed: 'all', bin: p[0], sale: p[1], period: '12', sort: 'new' }; }
+        cur.shown = cur.page || PAGE; s.__gwrDraw();
         s.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     }

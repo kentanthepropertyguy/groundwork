@@ -264,7 +264,7 @@
   // development that this one cannot show is said plainly, never swapped for another.
   function sizePicker(M, S, BV) {
     if (!(M.bands || []).length) return '';
-    const ch = chosen(M), B = GLOBAL.GW_BED, bed = !!(B && BV && BV.types && BV.types.length);
+    const ch = chosen(M), B = GLOBAL.GW_BED, bed = !!(B && BV && ((BV.types && BV.types.length) || (BV.only && BV.only.length)));   // V2: matched-only types are offered too
     // A size the visitor chose keeps the size question as it was (the price and the Market Pulse stay on a phone's first screen), with one link back to the types.
     if (bed && !ch) {
       const line = B.lineHtml(BV) + (BV.g ? ' <button type="button" class="kpr-link lg-clear" id="bedClear">Clear</button>' : '');
@@ -394,7 +394,7 @@
       else if (TX) h += REC.sizesHtml(TX, sale, { bin: chosen(M) ? f.bin : null });
       if (TX) h += REC.txHtml(TX, (ctx.txSt && ctx.txSt.f) || REC.startFilter({ sale }), { shown: ctx.txSt && ctx.txSt.shown });
     }
-    if (RENT && ctx && ctx.RENT) h += RENT.sectionHtml(ctx.RENT, { bed: BV && BV.g ? BV.g : '', bin: chosen(M) ? f.bin : null, ask: ASKM() });
+    if (RENT && ctx && ctx.RENT) h += RENT.sectionHtml(ctx.RENT, { bed: BV && BV.t ? BV.g : '', bin: chosen(M) ? f.bin : null, ask: ASKM() });
     return h;
   }
   // CX V2 (26 Oct 2026): one row of shortcuts under the answer, kept in view while scrolling. It names the development and the home type or size on
@@ -413,6 +413,8 @@
   function projectHtml(M, ctx) {
     const S = (ctx && ctx.S) || {}, IN = ctx && ctx.IN, root = (ctx && ctx.root) || '../', f = M.focus || {}, A = M.answer || {}, mf = S.rawM || null;
     const BV = ctx && ctx.BED && GLOBAL.GW_BED ? ctx.BED : null, bedOn = !!(BV && BV.t) && !chosen(M), bedAny = !!(BV && BV.types && BV.types.length);
+    // V2: a matched-only type chosen: its counts panel replaces the answer, and nothing priced (price movement, numbers, budget, rent) is drawn for it.
+    const bedM = !!(BV && BV.m) && !chosen(M), bedAsk = bedAny || !!(BV && BV.only && BV.only.length);
     if (S.rawP && S.rawP.id === M.id && Array.isArray(S.rawP.districts)) M.districtsAll = S.rawP.districts;
     const kick = [clsOf(M) === 'condo' ? '' : CLS[clsOf(M)].label, M.street ? titleCase(M.street) : '', district(M)].filter(Boolean).join(' · ');
     const chartPts = M.history && M.history.band && M.history.band.points ? M.history.band.points : [];
@@ -430,13 +432,13 @@
     const stripKen = '<div class="lg-kenstrip" data-lg-ask-ken><div class="who">' + ICO('<path d="M20 12a8 8 0 0 1-11.8 7L4 20l1-4.2A8 8 0 1 1 20 12z"/><path d="M9 11h6M9 14h4"/>') + '<div><b>Want a second opinion?</b><span>Ken can look at a particular unit, its floor and facing, and the homes competing with it.</span></div></div>' +
       '<div class="lg-kacts">' + (own ? lnk('waOwn', 'Ask Ken about my unit', true) + lnk('wa', 'or about an asking price') : lnk('wa', 'Ask Ken about an asking price', true) + lnk('waOwn', 'or about my unit')) + '</div></div>';
     const strips = forWho ? [stripKen, stripBudget] : [stripBudget, stripKen];
-    const ev = evidenceHtml(M, ctx, BV, bedAny), ovOn = !bedOn && !chosen(M);
+    const ev = evidenceHtml(M, ctx, BV, bedAny), ovOn = !bedOn && !bedM && !chosen(M);
     // Market Pulse (gw-pulse.js, or the bedroom view's own) gets an id so the shortcut row can reach it; its markup and wording are unchanged.
     let pulse = bedOn ? GLOBAL.GW_BED.trendHtml(BV, { forWho, mapHref: 'map/#p=' + encodeURIComponent(M.id) }) : chosen(M) ? (f.bin == null ? noSizeHtml(M, forWho) : ctx && ctx.PU && GLOBAL.GW_PULSE ? GLOBAL.GW_PULSE.html(ctx.PU, { forWho, mapHref: 'map/#p=' + encodeURIComponent(M.id) }) : '') : '';
     if (/^<section class="mp\b/.test(pulse) && pulse.indexOf('id="lgPulse"') < 0) pulse = pulse.replace(/^<section /, '<section id="lgPulse" ');
-    const ctxLabel = bedOn && BV.g ? GLOBAL.GW_BED.label(BV.g) : chosen(M) && f.label ? sqft(f.label) : '';
+    const ctxLabel = (bedOn || bedM) && BV.g ? GLOBAL.GW_BED.label(BV.g) : chosen(M) && f.label ? sqft(f.label) : '';
     const canAsk = !!ASKM() && (M.bands || []).some((b) => b.recent && b.recent.n);
-    const jump = jumpHtml(M, ctxLabel, bedAny, [['lgTypes', 'Prices', ev.indexOf('id="lgTypes"') > -1], ['lgTx', 'Sales history', ev.indexOf('id="lgTx"') > -1], ['lgRent', 'Rents', ev.indexOf('id="lgRent"') > -1],
+    const jump = jumpHtml(M, ctxLabel, bedAsk, [['lgTypes', 'Prices', ev.indexOf('id="lgTypes"') > -1], ['lgTx', 'Sales history', ev.indexOf('id="lgTx"') > -1], ['lgRent', 'Rents', ev.indexOf('id="lgRent"') > -1],
       ['lgPulse', 'Market Pulse', pulse.indexOf('id="lgPulse"') > -1], ['ask', 'Price check', canAsk], ['lgCompare', 'Compare', true]]);
     return '<div class="lg-page" data-lg="project" data-state="' + esc(A.state || '') + '">' +
       '<header class="lg-hero lg-hero--ans"><div class="lg-wrap">' +
@@ -444,7 +446,7 @@
         '<div class="lg-id"><p class="lg-kicker lg-idline"><span class="lg-cls" data-lg-cls="' + clsOf(M) + '">' + esc(CLS[clsOf(M)].label) + '</span>' + [M.street ? esc(titleCase(M.street)) : '', esc(district(M))].filter(Boolean).join(' · ') + '</p>' +
         '<h1 class="lg-name" tabindex="-1">' + esc(M.name) + '</h1></div>' +
         sizePicker(M, S, BV) +
-        (bedOn ? GLOBAL.GW_BED.answerHtml(BV, { budget: ctx.budget, fresh: freshLine(mf, undefined, 'lg-fine'), rent: rentLine(ctx, BV.g, null) }) : chosen(M) ? answerBlock(M, mf, rentLine(ctx, null, f.bin)) : overviewHtml(M, mf, bedAny, ev.indexOf('id="lgTypes"') > -1)) +
+        (bedOn ? GLOBAL.GW_BED.answerHtml(BV, { budget: ctx.budget, fresh: freshLine(mf, undefined, 'lg-fine'), rent: rentLine(ctx, BV.g, null) }) : bedM ? GLOBAL.GW_BED.matchedHtml(BV, { tx: !!(ctx && ctx.TX && ctx.TX.rows && ctx.TX.rows.length) }) : chosen(M) ? answerBlock(M, mf, rentLine(ctx, null, f.bin)) : overviewHtml(M, mf, bedAny, ev.indexOf('id="lgTypes"') > -1)) +
         pulse +
         actions(M, bedOn, ctx && ctx.TX) +
         '<p class="lg-fine lg-facts" data-lg-lead>' + projectFacts(M, ovOn) + '</p>' +
@@ -460,7 +462,7 @@
           '<div class="lg-tile"><span class="lg-fine">Before you decide, check</span><span style="font-size:15.5px;line-height:1.5">' + (M.notMeasured || []).slice(0, 4).map(esc).join(' · ') + '</span></div>' + ken + '</div>' +
         '</div>' +
         '<div class="lg-folds"><details class="lg-fold"><summary>Every size, in a table<small>' + plural((M.bands || []).length, 'size') + '</small></summary><div class="in">' + sizesTable(M) + '</div></details>' + saleTypes(M) + methodHtml(M, IN) +
-        '<details class="lg-fold" id="lgSources"><summary>Sources</summary><div class="in" data-lg-sources><p>Prices and sales: ' + esc(dataSpan(mf)) + (M.recent && M.recent.latestLabel ? ' Latest ' + esc(words(M)[0]) + ' here: ' + esc(M.recent.latestLabel) + '.' : '') + esc(newNote(M)) + ' Small numbers next to a fact link to its source.</p>' + (bedAny ? '<p data-gwb-source>' + esc(GLOBAL.GW_BED.sourceText(BV)) + '</p>' : '') + '</div></details></div>' +
+        '<details class="lg-fold" id="lgSources"><summary>Sources</summary><div class="in" data-lg-sources><p>Prices and sales: ' + esc(dataSpan(mf)) + (M.recent && M.recent.latestLabel ? ' Latest ' + esc(words(M)[0]) + ' here: ' + esc(M.recent.latestLabel) + '.' : '') + esc(newNote(M)) + ' Small numbers next to a fact link to its source.</p>' + (bedAsk ? '<p data-gwb-source>' + esc(GLOBAL.GW_BED.sourceText(BV)) + '</p>' : '') + '</div></details></div>' +
       '</div></section>' +
       '<section class="lg-band tight" style="padding-top:0"><div class="lg-wrap"><div class="lg-kenstrips" id="next" data-lg-for="' + esc(forWho) + '">' + strips.join('') + '</div><p class="lg-fine">The message names this development and what this report found, nothing you typed. You can edit it in WhatsApp before you send it.</p></div></section>' +
       '<section class="lg-band gwl-band" id="lgLoc" data-lg-loc="' + esc(M.id) + '" aria-labelledby="lgLocH"><div class="lg-wrap" style="gap:18px"><div class="lg-head"><p class="lg-kicker">Location</p><h2 id="lgLocH">Location &amp; amenities</h2>' +
