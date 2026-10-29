@@ -446,7 +446,7 @@
         '<div class="lg-id"><p class="lg-kicker lg-idline"><span class="lg-cls" data-lg-cls="' + clsOf(M) + '">' + esc(CLS[clsOf(M)].label) + '</span>' + [M.street ? esc(titleCase(M.street)) : '', esc(district(M))].filter(Boolean).join(' · ') + '</p>' +
         '<h1 class="lg-name" tabindex="-1">' + esc(M.name) + '</h1></div>' +
         sizePicker(M, S, BV) +
-        (bedOn ? GLOBAL.GW_BED.answerHtml(BV, { budget: ctx.budget, fresh: freshLine(mf, undefined, 'lg-fine'), rent: rentLine(ctx, BV.g, null) }) : bedM ? GLOBAL.GW_BED.matchedHtml(BV, { tx: !!(ctx && ctx.TX && ctx.TX.rows && ctx.TX.rows.length) }) : chosen(M) ? answerBlock(M, mf, rentLine(ctx, null, f.bin)) : overviewHtml(M, mf, bedAny, ev.indexOf('id="lgTypes"') > -1)) +
+        (bedOn ? GLOBAL.GW_BED.answerHtml(BV, { budget: ctx.budget, fresh: freshLine(mf, undefined, 'lg-fine'), rent: rentLine(ctx, BV.g, null) }) : bedM ? GLOBAL.GW_BED.matchedHtml(BV, { tx: !!(ctx && ctx.TX && ctx.TX.rows && ctx.TX.rows.length), rows: GLOBAL.GW_REC && ctx && ctx.TX ? GLOBAL.GW_REC.matchedRowsHtml(GLOBAL.GW_REC.matchedRows(ctx.TX, BV.g, GLOBAL.GW_BED.MATCHED_ROWS)) : '' }) : chosen(M) ? answerBlock(M, mf, rentLine(ctx, null, f.bin)) : overviewHtml(M, mf, bedAny, ev.indexOf('id="lgTypes"') > -1)) +
         pulse +
         actions(M, bedOn, ctx && ctx.TX) +
         '<p class="lg-fine lg-facts" data-lg-lead>' + projectFacts(M, ovOn) + '</p>' +

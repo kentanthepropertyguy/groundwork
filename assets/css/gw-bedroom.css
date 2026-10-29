@@ -38,6 +38,17 @@ body.kpr .gwb-m .gwb-m3{ color:var(--kpt-muted); font-size:14.5px; }
 body.kpr .gwb-m .gwb-m-act{ margin:4px 0 0; }
 body.kpr .gwb-m .gwb-m-act .lg-btn{ min-height:44px; }
 body.kpr .gwb-nw{ white-space:nowrap; }
+/* V2.1 (Amendment 1): the type's latest matched resales, one sale per line: month, size, price. A list of sales, never a summary. */
+body.kpr .gwb-m .gwb-mrows{ width:100%; max-width:560px; display:grid; gap:2px; padding:12px 0 2px; border-top:1px solid var(--gw-line,#E3E3E8); }
+body.kpr .gwb-m .gwb-mrows-h{ margin:0; font-size:14px; font-weight:700; color:var(--kpt-ink); }
+body.kpr .gwb-m .gwb-mrows-n{ margin:0 0 4px; font-size:13.5px; line-height:1.4; color:var(--kpt-muted); }
+body.kpr .gwr-mrows{ list-style:none; margin:0; padding:0; display:grid; }
+body.kpr .gwr-mrow{ display:grid; grid-template-columns:minmax(0,6.5em) minmax(0,1fr) auto; column-gap:12px; align-items:baseline; padding:7px 0; border-bottom:1px solid var(--gw-line,#E3E3E8); font-size:15px; line-height:1.35; font-variant-numeric:tabular-nums; }
+body.kpr .gwr-mrow:last-child{ border-bottom:0; }
+body.kpr .gwr-mrow-mo{ color:var(--kpt-ink); white-space:nowrap; }
+body.kpr .gwr-mrow-sz{ color:var(--kpt-muted); white-space:nowrap; }
+body.kpr .gwr-mrow-pr{ font-weight:600; color:var(--kpt-ink); text-align:right; white-space:nowrap; }   /* plain weight: no sale is picked out */
+body.kpr .gwr-mrow .gwr-flag{ grid-column:1 / -1; font-size:12.5px; color:var(--kpt-muted); }
 body.kpr .gwr-also{ margin:0; }
 body.kpr .gwr-also .kpr-link{ font:inherit; font-weight:600; color:var(--gw-blue,#0B63CE); background:none; border:0; padding:0; min-height:32px; cursor:pointer; }
 body.kpr .gwr-also .kpr-link:hover{ text-decoration:underline; }
@@ -48,4 +59,5 @@ body.kpr .gwr-bednote{ margin:0 0 6px; max-width:none; }   /* one line on a lapt
   body.kpr .gwb-chips .gwb-mtag{ font-size:11px; }
   body.kpr .gwb-m .gwb-m1 b{ font-size:20px; }
   body.kpr .gwb-m .gwb-l{ font-size:15px; }
+  body.kpr .gwr-mrow{ column-gap:10px; font-size:14.5px; }
 }

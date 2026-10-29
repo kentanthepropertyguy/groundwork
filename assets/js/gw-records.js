@@ -124,6 +124,25 @@
       (o.why ? '<p class="lg-fine">' + esc(o.why) + '</p>' : '') + '<p class="lg-fine">Past sales, not a valuation.</p></div></section>';
   }
 
+  /* ---------------- V2.1: a matched-only type's latest matched resales (Amendment 1, Ken 29 Oct 2026) ---------------- */
+  // Exactly the first k rows "See these sales" lists (that bedroom count, resales, last 2 years, newest first). Never sorted by price.
+  function matchedRows(rec, g, k) {
+    if (!rec || !rec.rows || g == null || !(k > 0)) return [];
+    return filter(rec.rows, { bed: String(g), bin: 'all', sale: 3, period: 24, sort: 'new' }, rec.latest).slice(0, k);
+  }
+  // One line per sale: contract month, approximate size and the URA price, with the Transactions flags. Nothing computed across them.
+  function matchedRowsHtml(rows) {
+    if (!rows || !rows.length) return '';
+    return '<ul class="gwr-mrows" role="list">' + rows.map((r) => {
+      const tags = [];
+      if (r[7] & 1) tags.push('before the developer’s discount');
+      if (r[7] & 2) tags.push('unusual price for this development');
+      if (r[7] & 8 && r[5] != null) tags.push('unusual size for a ' + bedLabel(r[5]));
+      return '<li class="gwr-mrow" data-gwr-mrow data-ym="' + r[0] + '"><span class="gwr-mrow-mo">' + ymLabel(r[0]) + '</span><span class="gwr-mrow-sz">≈ ' + num(sqftOf(r[3])) + ' sq ft</span>' +
+        '<b class="gwr-mrow-pr">' + money(r[4]) + '</b>' + (tags.length ? '<small class="gwr-flag">' + esc(tags.join(' · ')) + '</small>' : '') + '</li>';
+    }).join('') + '</ul>';
+  }
+
   /* ---------------- 2. recent sales ---------------- */
   const sel = (k, label, opts, v) => '<label class="gwr-f"><span>' + label + '</span><select data-gwr-f="' + k + '">' + opts.map((o) => '<option value="' + esc(o[0]) + '"' + (String(o[0]) === String(v) ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('') + '</select></label>';
   function filtersHtml(rec, f) {
@@ -205,5 +224,5 @@
     }
   }
 
-  return { SQFT, CODE, SALE, PAGE, PHONE_PAGE, pick, filter, options, bandPsf, sizeRows, quantile, typesHtml, sizesHtml, txHtml, listHtml, filtersHtml, startFilter, wire, binOf, psfOf, ymAdd, ymLabel, short, bedLabel, bandLabel };
+  return { SQFT, CODE, SALE, PAGE, PHONE_PAGE, pick, filter, options, bandPsf, sizeRows, quantile, typesHtml, sizesHtml, txHtml, matchedRows, matchedRowsHtml, listHtml, filtersHtml, startFilter, wire, binOf, psfOf, ymAdd, ymLabel, short, bedLabel, bandLabel };
 });

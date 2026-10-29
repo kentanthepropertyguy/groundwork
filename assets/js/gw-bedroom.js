@@ -129,8 +129,11 @@
 
   /* ---------- a matched-only type: counts, never a price (V2) ---------- */
   const MATCHED_TAG = 'Matched sales only';
+  // V2.1 (Amendment 1, Ken 29 Oct 2026): the panel lists up to this many of the type's own matched resales, newest first (GW_REC.matchedRows).
+  const MATCHED_ROWS = 5, ROWS_HEAD = 'Latest matched resales', ROWS_NOTE = 'Individual sales, newest first, not a typical price.';
   // The panel in place of the answer, price movement and numbers blocks. Exactly the approved copy (Claude C's handover, section 3).
-  // opt.tx: the development's transactions are on the page, so "See these sales" can show them.
+  // opt.tx: the development's transactions are on the page, so "See the N matched resales" can show them. opt.rows: their latest matched
+  // resales as HTML (GW_REC.matchedRowsHtml of GW_REC.matchedRows), shown under the count; none without the transactions.
   function matchedLines(V) {
     const m = V.m, L = label(m.g), unk = V.unknown || 0, rs = (n) => plural(n, WORDS.resale);
     const one = rs(m.n24) + ' in the last 2 years ' + (m.n24 === 1 ? 'was' : 'were') + ' matched as ' + L + '. ' + basisText(m.basis);
@@ -146,9 +149,31 @@
     return '<div class="lg-ans gwb-m" data-gwb-matched data-gwb-g="' + esc(m.g) + '" data-gwb-why="' + esc(m.why) + '">' +
       '<p class="lg-ans-k gwb-m-k">' + esc(label(m.g)) + ' · <span class="gwb-mtag" data-gwb-mtag>' + MATCHED_TAG + '</span></p>' +
       '<p class="gwb-m1" data-gwb-m1><b>' + nw(L.one.slice(0, first)) + '</b> <span>' + esc(L.one.slice(first + 1)) + '</span></p>' +
+      (opt.tx && opt.rows ? '<div class="gwb-mrows" data-gwb-mrows><p class="gwb-mrows-h">' + ROWS_HEAD + '</p><p class="gwb-mrows-n">' + ROWS_NOTE + '</p>' + opt.rows + '</div>' : '') +
       (L.two ? '<p class="gwb-l" data-gwb-m2>' + nw(L.two) + '</p>' : '') +
       '<p class="gwb-l gwb-m3" data-gwb-m3>' + nw(L.three) + '</p>' +
-      (opt.tx ? '<p class="gwb-m-act"><button type="button" class="lg-btn" data-gwr-mbed="' + esc(m.g) + '">See these sales</button></p>' : '') + '</div>';
+      (opt.tx ? '<p class="gwb-m-act"><button type="button" class="lg-btn" data-gwr-mbed="' + esc(m.g) + '">See the ' + num(m.n24) + ' matched ' + WORDS.resale[m.n24 === 1 ? 0 : 1] + '</button></p>' : '') + '</div>';
+  }
+  // V2.1: the rows block checked on its own (the panel's sentences still go through assertMatchedOnlyCopy without it). html: the block
+  // ([data-gwb-mrows]); rows: the transaction rows it must be, in order (GW_REC.matchedRows). Each line is exactly one sale's month, size and
+  // price (and its flags); the only other words are the heading and the note; newest first; nothing else, no statistic. Throws on any problem.
+  function assertMatchedRows(html, rows) {
+    const bad = [], t = (h) => String(h).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    const items = (String(html).match(/<li[^>]*data-gwr-mrow[^>]*>[\s\S]*?<\/li>/g) || []).map(t);
+    const MO = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], FL = ['before the developer’s discount', 'unusual price for this development', 'unusual size for a [1-9]-bedroom'];
+    if (!rows || items.length !== rows.length || items.length > MATCHED_ROWS) bad.push(items.length + ' lines for ' + (rows ? rows.length : 0) + ' sales');
+    (rows || []).forEach((r, i) => {
+      const want = MO[(r[0] % 100) - 1] + ' ' + Math.floor(r[0] / 100) + ' ≈ ' + num(r[3] * 10.7639) + ' sq ft $' + num(r[4]), got = items[i] || '';
+      if (got.indexOf(want) !== 0 || !new RegExp('^(\\s*(' + FL.join('|') + ')( · )?)*$').test(got.slice(want.length))) bad.push('line ' + (i + 1) + ' "' + got + '" is not the sale "' + want + '"');
+      if (i && r[0] > rows[i - 1][0]) bad.push('not newest first');
+    });
+    let rest = t(String(html).replace(/<li[^>]*data-gwr-mrow[^>]*>[\s\S]*?<\/li>/g, ' ')).split(ROWS_HEAD).join(' ').split(ROWS_NOTE).join(' ').trim();
+    if (rest) bad.push('other text: "' + rest + '"');
+    const words = t(html).split(ROWS_NOTE).join(' ');
+    [BLOCKED[3]].concat(BLOCKED.slice(7)).forEach((re) => {   // psf, statistics, ranges, movement, budget, completeness (sizes and prices are the point)
+      const x = re.exec(words); if (x) bad.push('blocked "' + x[0] + '"'); });
+    if (bad.length) throw new Error('matched rows: ' + bad.join('; '));
+    return true;
   }
 
   // Copy validation (handover section 4): block price statistics and misleading claims; allow explaining why a statistic is absent.
@@ -202,5 +227,5 @@
     return 'Bedroom types: inferred by Groundwork, not recorded by URA, from developers’ floor plans where checked, otherwise from the bedroom counts declared in URA rental contracts for homes of the same size' + (m.rentalWindow ? ' (' + q(m.rentalWindow.from) + ' to ' + qEnd(m.rentalWindow.to) + ')' : '') + '. Sales whose size fits more than one bedroom count are left out.';
   }
 
-  return { MATCHED_TAG, MATCHED_ONLY_ALLOWED, assertMatchedOnlyCopy, anyType, matchedLines, matchedHtml, sourceText, pick, view, chipsHtml, lineHtml, answerHtml, trendHtml, numbersHtml, basisText, sizeText, budgetText, finding, typical, short, label };
+  return { MATCHED_TAG, MATCHED_ROWS, ROWS_HEAD, ROWS_NOTE, assertMatchedRows, MATCHED_ONLY_ALLOWED, assertMatchedOnlyCopy, anyType, matchedLines, matchedHtml, sourceText, pick, view, chipsHtml, lineHtml, answerHtml, trendHtml, numbersHtml, basisText, sizeText, budgetText, finding, typical, short, label };
 });
