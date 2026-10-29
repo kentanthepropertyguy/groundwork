@@ -1,0 +1,32 @@
+{
+ "v": 1,
+ "kind": "kpt-catalogue-classes",
+ "note": "Reviewed development classes for New Launches catalogue developments the Groundwork registry does not hold yet. Used only where data/registry/index.json has no entry for the slug; the registry (URA transactions) always wins. cls: condo (Condominium or Apartment) or ec. Each entry states its basis.",
+ "asOf": "2026-10-29",
+ "classes": {
+  "eden-residences-at-capitol": {
+   "cls": "condo",
+   "basis": "The same development as the URA register entry EDEN RESIDENCES CAPITOL (Stamford Road, D06, 99 yrs from 2011), class condo."
+  },
+  "lucerne-grand": {
+   "cls": "condo",
+   "basis": "URA Sale Site, Lakeside Drive, awarded June 2025 to CDL Polaris (a URA private residential site; EC sites are tendered by HDB). 99 yrs from 2025."
+  },
+  "seascape-at-sentosa": {
+   "cls": "condo",
+   "basis": "The same development as the URA register entry SEASCAPE (Cove Way, D04, 99 yrs from 2007), class condo."
+  },
+  "sophia-meadow": {
+   "cls": "condo",
+   "basis": "103-year lease from 2024 (an EC lease is always 99 years); homes on several storeys in one block (OneMap building record; developer listing levels reviewed privately)."
+  },
+  "the-ritz-carlton-residences": {
+   "cls": "condo",
+   "basis": "The same development as the URA register entry THE RITZ-CARLTON RESIDENCES SINGAPORE CAIRNHILL (Cairnhill Road, D09, Freehold), class condo."
+  },
+  "the-serra-residences": {
+   "cls": "condo",
+   "basis": "Freehold (an EC is always 99-year leasehold); 133 homes in one 28-storey tower (Far East Organization media release, 2 Oct 2026)."
+  }
+ }
+}

@@ -25,6 +25,7 @@
 .gw-cat-money{display:flex;align-items:center;gap:6px}.gw-cat-money>span{color:var(--gw-muted)}
 .gw-cat-fs{border:0;margin:0;padding:0;display:grid;gap:6px;min-width:0}
 .gw-cat-fs legend{padding:0;margin-bottom:6px}
+.gw-cat-fs[hidden]{display:none}   /* r4.2: Property Type stays hidden until the development classes have loaded */
 .gw-cat-seg{display:flex;flex-wrap:wrap;gap:6px}
 .gw-cat-seg label{position:relative}
 .gw-cat-seg input{position:absolute;opacity:0;width:1px;height:1px}
