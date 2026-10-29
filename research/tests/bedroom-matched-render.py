@@ -1,7 +1,7 @@
 # "Matched sales only" bedroom types (V2, Ken 27 Oct 2026; Claude C's handover section 6, UI tests 17, 20, 21, 23, 24, 26, 27).
 # The real Research page, desktop 1440 and phone 390, on Bartley Ridge, Waterbank at Dakota and Kovan Melody (no figured type).
 #   python3 research/tests/bedroom-matched-render.py
-import json, os, pathlib, socket, subprocess, time, urllib.parse
+import json, os, pathlib, re, socket, subprocess, time, urllib.parse
 from playwright.sync_api import sync_playwright
 SITE = pathlib.Path(__file__).resolve().parents[2]
 def port():
@@ -28,6 +28,15 @@ def page(ctx, dev, pre=None):
     pg = ctx.new_page(); errs = []
     pg.on('pageerror', lambda e: errs.append(str(e))); pg.on('console', lambda m: errs.append(m.text) if m.type == 'error' and 'favicon' not in m.text else None)
     pg.route('**/*googletagmanager*', lambda r: r.fulfill(status=200, body=''))
+    # Pricing tiers r2 (29 Oct 2026): this suite keeps testing the V2 / V2.1 rules on bedroom-research-v1.2 data, so the r2 keys (groups, other,
+    # range) are taken out of the shards it is served (also r2 test 14 on the page); research/tests/bedroom-tiers-render.py tests the tiers.
+    def v12(route):
+        r = route.fetch(); d = r.json()
+        for v in d.get('projects', {}).values():
+            for m in (v.get('resale') or {}).get('matched', []):
+                for k in ('groups', 'other', 'range'): m.pop(k, None)
+        route.fulfill(response=r, body=json.dumps(d), headers={**r.headers, 'content-type': 'application/json'})
+    pg.route(re.compile(r'/data/projects/bedroom/s\d+\.json'), v12)
     if pre is not None: pg.add_init_script('(() => { try { ' + pre + ' } catch (e) {} })()')
     pg.goto(B + '/research/#/p/' + dev); pg.wait_for_selector('#lgPick'); pg.wait_for_timeout(450)
     pg.evaluate("window.__ev=[]; if (window.KPT) { const t = KPT.track; KPT.track = (n, p) => { window.__ev.push([n, p]); try { t(n, p); } catch (e) {} }; }")

@@ -57,7 +57,50 @@ body.kpr .gwr-bednote{ margin:0 0 6px; max-width:none; }   /* one line on a lapt
   body.kpr .gwb-m{ padding:16px; border-radius:18px; }
   body.kpr .gwb-chips button{ padding-left:12px; padding-right:12px; }   /* three types, one of them matched-only, fit a 390px row without scrolling */
   body.kpr .gwb-chips .gwb-mtag{ font-size:11px; }
+  /* three or more types with matched-only ones among them (e.g. Kovan Melody) wrap to a second line rather than run off the screen */
+  body.kpr .gwb-chips:has(.gwb-mchip){ flex-wrap:wrap; overflow:visible; margin:0; padding:0; max-width:none; }
   body.kpr .gwb-m .gwb-m1 b{ font-size:20px; }
   body.kpr .gwb-m .gwb-l{ font-size:15px; }
   body.kpr .gwr-mrow{ column-gap:10px; font-size:14.5px; }
 }
+
+/* Bedroom pricing tiers (Claude C r2, 29 Oct 2026): a matched-only type's median of past matched resales for a size group (Tier B), or its
+   historical matched transactions (Tier C). The median leads, smaller than a typical price, always with its sizes, period and range. */
+body.kpr .gwb-t .gwb-grp{ width:100%; display:grid; gap:2px; padding:2px 0 8px; }
+body.kpr .gwb-t .gwb-grp + .gwb-grp{ border-top:1px solid var(--gw-line,#E3E3E8); padding-top:10px; }
+body.kpr .gwb-t .gwb-g-h{ margin:0; font-size:20px; line-height:1.25; letter-spacing:-.01em; color:var(--kpt-ink); }
+body.kpr .gwb-t .gwb-g-h b{ font-weight:700; }
+body.kpr .gwb-t .gwb-g-d{ margin:0; font-size:14px; color:var(--kpt-muted); font-variant-numeric:tabular-nums; }
+body.kpr .gwb-t .gwb-g-r{ margin:0; font-size:15px; color:var(--kpt-ink); font-variant-numeric:tabular-nums; }
+body.kpr .gwb-t .gwb-bnote, body.kpr .gwb-t .gwb-m3{ font-size:14px; color:var(--kpt-muted); }
+body.kpr .gwb-t .gwb-other{ font-size:14.5px; }
+body.kpr .gwb-t .gwb-m1t{ font-size:15px; } body.kpr .gwb-t .gwb-m1t .gwb-basis{ color:var(--kpt-muted); font-size:14px; }
+body.kpr .gwb-t .gwb-cmp{ width:100%; display:grid; gap:4px; padding-top:8px; border-top:1px solid var(--gw-line,#E3E3E8); }
+body.kpr .gwb-t .gwb-cmp .gwb-l{ font-size:14.5px; }
+@media (max-width:640px){ body.kpr .gwb-t .gwb-g-h{ font-size:18px; } }
+
+/* Answer first (Ken, 29 Oct 13:33): size-group medians as tiles side by side, one qualification and the material warning visible, the rest in
+   two disclosures. On a laptop the card takes the wider column (kpt-lg.css), so it is never a tall narrow strip. */
+body.kpr .gwb-t{ gap:12px; }
+body.kpr .gwb-t .gwb-tiles{ width:100%; display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); gap:10px; }
+body.kpr .gwb-t .gwb-tile{ background:#fff; border:1px solid var(--gw-line,#E3E3E8); border-radius:14px; padding:12px 14px; display:grid; gap:2px; align-content:start; }
+body.kpr .gwb-t .gwb-t-k{ margin:0; font-size:13px; font-weight:600; color:var(--kpt-muted); }
+body.kpr .gwb-t .gwb-t-k b{ display:block; margin-top:2px; font-size:26px; font-weight:700; letter-spacing:-.02em; color:var(--kpt-ink); font-variant-numeric:tabular-nums; }
+body.kpr .gwb-t .gwb-t-v{ margin:0; } body.kpr .gwb-t .gwb-t-v b{ font-size:30px; font-weight:700; letter-spacing:-.03em; color:var(--kpt-ink); font-variant-numeric:tabular-nums; }
+body.kpr .gwb-t .gwb-t-d{ margin:0; font-size:13.5px; color:var(--kpt-muted); font-variant-numeric:tabular-nums; }
+body.kpr .gwb-t .gwb-qual{ margin:0; font-size:13.5px; font-weight:600; color:var(--kpt-muted); }
+body.kpr .gwb-t .gwb-warn{ margin:0; font-size:14.5px; line-height:1.45; color:var(--kpt-ink); }
+body.kpr .gwb-t .gwb-m-act{ margin:0; }
+body.kpr .gwb-det{ width:100%; border-top:1px solid var(--gw-line,#E3E3E8); }
+body.kpr .gwb-det > summary{ cursor:pointer; list-style:none; min-height:44px; display:flex; align-items:center; justify-content:space-between; font-size:14.5px; font-weight:600; color:var(--kpt-ink); }
+body.kpr .gwb-det > summary::-webkit-details-marker{ display:none; }
+body.kpr .gwb-det > summary::after{ content:""; width:7px; height:7px; border-right:1.8px solid currentColor; border-bottom:1.8px solid currentColor; transform:rotate(45deg); margin:-4px 4px 0 12px; flex:none; }
+body.kpr .gwb-det[open] > summary::after{ transform:rotate(225deg); margin-top:4px; }
+body.kpr .gwb-det-in{ display:grid; gap:10px; padding:0 0 12px; }
+body.kpr .gwb-det .gwb-sec{ display:grid; gap:4px; }
+body.kpr .gwb-det .gwb-sec-h{ margin:0; font-size:12.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--kpt-muted); }
+body.kpr .gwb-det .gwb-l{ font-size:14.5px; margin:0; } body.kpr .gwb-det .gwb-dim{ color:var(--kpt-muted); }
+body.kpr .gwb-ans .gwb-det{ margin-top:2px; }
+body.kpr .gwb-det .gwb-l, body.kpr .gwb-det .gwb-mrows{ max-width:none; }   /* the disclosures use the card's full width */
+body.kpr .gwb-det .gwb-cmp-k{ margin:4px 0 0; font-size:13px; font-weight:600; color:var(--kpt-muted); }
+body.kpr .gwb-t .gwb-diff{ margin:-2px 0 0; font-size:13.5px; color:var(--kpt-muted); }   /* two medians: different sizes, not a change over time */

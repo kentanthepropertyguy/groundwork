@@ -67,7 +67,8 @@ try:
             ok(short(t2['price'][2]) in a and 'typical price' in a, vn + ': the typical total price, from the data', (a[:120], short(t2['price'][2])))
             ok(('Half of the %d resales' % t2['n']) in a and short(t2['price'][1]) in a and short(t2['price'][3]) in a, vn + ': the middle half and the count')
             ok(('$%s psf' % format(t2['psf'][2], ',')) in a and a.index(short(t2['price'][2])) < a.index('psf'), vn + ': median psf, after the total price')
-            ok('floor plans' in a and 'rental records' not in a, vn + ': layout-verified basis said as floor plans')
+            bs = pg.evaluate("(() => { const e = document.querySelector('[data-gwb-ans] [data-gwb-how] [data-gwb-basis]'); return e ? e.textContent : ''; })()")   # answer first: in "How these prices are calculated"
+            ok('floor plans' in bs and 'rental records' not in bs, vn + ': layout-verified basis said as floor plans (in How these prices are calculated)', bs)
             mp = text(pg, '[data-gwb-trend]'); bandl = '%s–%s sq ft' % (format(t2['trend']['bin'], ','), format(t2['trend']['bin'] + 99, ','))
             ok(bandl in mp and '2-bedroom' in mp, vn + ': price movement names the comparable size of this type', mp[:140])
             ok(pg.locator('[data-mp]').count() == 0, vn + ': no size Market Pulse while a type is shown (one reading, of comparable homes)')
@@ -99,7 +100,8 @@ try:
             ctx = b.new_context(**kw); pg, errs = page(ctx, 'parc-esta', "sessionStorage.setItem('kpt.research.bed','1')")
             t1 = typ('parc-esta', '1'); a = text(pg, '[data-gwb-ans]')
             ok(pg.locator('[data-bed="1"][aria-pressed="true"]').count() == 1 and 'wide spread' in a and ('%s to %s sq ft' % (format(t1['sqft'][0], ','), format(t1['sqft'][1], ','))) in a, vn + ': several sizes in one type: the range and a plain warning', a[:200])
-            ok('floor plans and, for some sizes, URA rental records' in a or 'floor plans' in a, vn + ': basis said')
+            bs = pg.evaluate("(() => { const e = document.querySelector('[data-gwb-ans] [data-gwb-how] [data-gwb-basis]'); return e ? e.textContent : ''; })()")
+            ok('floor plans' in bs, vn + ': basis said (in How these prices are calculated)', bs)
             # 5. a type kept from the previous development (3-bedroom), shown here because it exists
             click(pg, '[data-bed="3"]'); pg.goto(B + '/research/#/p/jadescape'); pg.wait_for_selector('[data-gwb-ans]'); pg.wait_for_timeout(300)
             ok(pg.locator('[data-bed="3"][aria-pressed="true"]').count() == 1 and short(typ('jadescape', '3')['price'][2]) in text(pg, '[data-gwb-ans]'), vn + ': the type chosen on one development is kept on the next')

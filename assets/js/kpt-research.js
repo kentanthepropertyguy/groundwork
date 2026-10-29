@@ -555,7 +555,7 @@
     if (['strong', 'limited', 'none'].indexOf(d.evidence) > -1) out.evidence = d.evidence;
     if (['buy', 'sell'].indexOf(d.intent) > -1) out.intent = d.intent;
     if (typeof d.bedroom === 'string' && /^(PH|[0-9])$/.test(d.bedroom)) out.bedroom = d.bedroom;   // a bedroom type chosen on a development page (a category, never typed)
-    if (event === 'research_bedroom_selected' && ['figures', 'matched'].indexOf(d.tier) > -1) out.tier = d.tier;   // V2: a type with figures, or a matched-sales-only type
+    if (event === 'research_bedroom_selected' && ['figures', 'matched', 'median', 'historical'].indexOf(d.tier) > -1) out.tier = d.tier;   // V2: a type with figures, or a matched-sales-only type; pricing tiers (r2): its median tier or historical transactions
     if (Number.isInteger(d.sale_types) && d.sale_types >= 0 && d.sale_types <= 3) out.sale_types = d.sale_types;
     return out;
   }

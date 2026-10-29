@@ -104,7 +104,8 @@
       '<p class="gwb-l" data-gwb-range>' + range + '</p>' +
       '<p class="gwb-l" data-gwb-size>' + esc(sizeText(t)) + ' Median ' + full(t.psf[2]) + ' psf.</p>' + win +
       (bud ? '<p class="gwb-l gwb-bud" data-gwb-budget>' + esc(bud) + '</p>' : '') + (opt.rent || '') +
-      '<p class="lg-fine lg-ans-basis" data-gwb-basis>Past sales, not a valuation. ' + esc(basisText(t.basis)) + '</p>' + (opt.fresh || '') + '</div>';
+      // answer first (Ken, 29 Oct 13:33): one short qualification visible; where the bedrooms come from and the data dates in the disclosure
+      '<p class="lg-fine lg-ans-basis">Past sales, not a valuation.</p><details class="gwb-det" data-gwb-how><summary>How these prices are calculated</summary><div class="gwb-det-in"><p class="gwb-l" data-gwb-basis>' + esc(basisText(t.basis)) + '</p>' + (opt.fresh || '') + '</div></details></div>';
   }
   // Price movement: the Market Pulse reading for the type's most-sold size; with no reading, why, and the way to the size trend.
   function trendHtml(V, opt) {
@@ -144,6 +145,7 @@
   }
   function matchedHtml(V, opt) {
     opt = opt || {};
+    if (tierOf(V.m)) return pricedMatchedHtml(V, opt);   // bedroom-research-v1.3 (pricing tiers); without groups/range: V2.1 exactly
     const m = V.m, L = matchedLines(V), first = L.one.indexOf('. ') + 1, lab = esc(label(m.g));
     const nw = (t) => esc(t).split(lab).join('<span class="gwb-nw">' + lab + '</span>');   // "3-bedroom" never breaks at its hyphen
     return '<div class="lg-ans gwb-m" data-gwb-matched data-gwb-g="' + esc(m.g) + '" data-gwb-why="' + esc(m.why) + '">' +
@@ -154,6 +156,111 @@
       '<p class="gwb-l gwb-m3" data-gwb-m3>' + nw(L.three) + '</p>' +
       (opt.tx ? '<p class="gwb-m-act"><button type="button" class="lg-btn" data-gwr-mbed="' + esc(m.g) + '">See the ' + num(m.n24) + ' matched ' + WORDS.resale[m.n24 === 1 ? 0 : 1] + '</button></p>' : '') + '</div>';
   }
+  /* ---------- Bedroom pricing tiers (Claude C r2, approved 29 Oct 2026) ----------
+     A matched-only entry with groups/range (bedroom-research-v1.3): Tier B (groups[]: a median of past matched resales for one or two size groups
+     within 10% passing RULES.typical, each with its sizes, period and historical range; then other sizes) or Tier C (its historical matched
+     transactions only). The live V2.1 latest five stay. Never "typical", a valuation, budget or a Market Pulse head for it. */
+  const tierOf = (m) => (m && m.range ? (m.groups && m.groups.length ? 'B' : 'C') : null);
+  const sqftT = (a) => '≈ ' + (a[0] === a[1] ? num(a[0]) : num(a[0]) + '–' + num(a[1])) + ' sq ft';
+  const moneyR = (lo, hi) => (lo === hi ? short(lo) : short(lo) + ' to ' + short(hi));
+  const plR = (n) => num(n) + ' ' + WORDS.resale[n === 1 ? 0 : 1];
+  const B_NOTE = (L) => 'Past URA transaction prices for these sizes only. Not a typical price for every ' + L + ' here, and not a valuation.';
+  const C_NOTE = 'Past URA transaction prices, not a valuation. Too few matched sales of a comparable size to show a median.';
+  const CMP_FOOT = 'Past sales only. Not a forecast.';
+  const pctT = (p) => Math.abs(p).toFixed(1);
+  function cmpText(c) {
+    if (!c || c.evidence === 'none') return '';
+    const rel = c.dir === 'stable' ? 'broadly the same as' : pctT(c.pct) + '% ' + (c.pct > 0 ? 'above' : 'below');
+    const t = 'At these sizes, the median price per sq ft of matched resales in the last 12 months (' + num(c.a) + ' ' + (c.a === 1 ? 'sale' : 'sales') + ') was ' + rel + ' the 12 months before (' + num(c.b) + ' ' + (c.b === 1 ? 'sale' : 'sales') + ').';
+    return c.evidence === 'strong' ? t : 'A first look, from few sales: ' + t;
+  }
+  // The tier's lines, exactly the r2 §4 templates (tests compare them word for word)
+  function tierLines(V) {
+    const m = V.m, L = label(m.g), T = tierOf(m);
+    if (T === 'B') return { tier: 'B', groups: m.groups.map((q) => ({ head: 'Median of ' + plR(q.n).replace(/resales?$/, 'past matched $&') + ': ' + short(q.med), detail: sqftT(q.sqft) + ' · ' + ym(q.from) + ' to ' + ym(q.to), range: 'Historical matched transactions: ' + moneyR(q.lo, q.hi), cmp: cmpText(q.cmp) })),
+      note: B_NOTE(L), other: m.other ? 'Historical matched transactions at other sizes: ' + moneyR(m.other.lo, m.other.hi) + ' (' + plR(m.other.n) + ', ' + sqftT(m.other.sqft) + ', ' + ym(m.other.from) + ' to ' + ym(m.other.to) + ')' : '' };
+    const r = m.range;
+    return { tier: 'C', head: 'Historical matched transactions: ' + moneyR(r.lo, r.hi), detail: num(r.n) + ' past ' + WORDS.resale[r.n === 1 ? 0 : 1] + ' · ' + sqftT(r.sqft) + ' · ' + ym(r.from) + ' to ' + ym(r.to), note: C_NOTE };
+  }
+  // Answer first (Ken, 29 Oct 13:33): the median of each size group large, with its sizes, sales and period; one short qualification and the
+  // material warning visible; the historical ranges, comparisons and latest five in "Sales history & price movement"; the method and caveats
+  // in "How these prices are calculated". Same r2 rules, data and wording; only the order and what is folded change.
+  const QUAL = 'Past sales at these sizes only · Not a valuation.';
+  const DIFF_SIZES = 'Different home sizes — these prices are not a comparison over time.';   // under two medians (Ken, 29 Oct 14:12)
+  const NO_TREND = 'Price movement: not enough comparable sales at these sizes for a reliable trend.';
+  const METHOD = 'Each median is for homes within 10% of each other in size, with at least 5 matched resales over at least 3 months, in the last 12 months where there are enough, otherwise the last 2 years. Sales at other sizes are listed separately.';
+  function warnText(V) {   // why there is no typical price for the whole bedroom type (visible: it changes how the prices read)
+    const m = V.m, L = label(m.g), unk = V.unknown || 0;
+    const head = 'No typical price for all ' + L + ' homes here: ';
+    if (m.couldBe > 0) return head + num(m.couldBe) + ' other ' + WORDS.resale[m.couldBe === 1 ? 0 : 1] + ' could also be ' + L + ' but couldn’t be matched.';
+    return head + 'too few matched sales.' + (unk > 0 ? ' ' + num(unk) + ' other ' + WORDS.resale[unk === 1 ? 0 : 1] + ' here couldn’t be matched to a bedroom count.' : '');
+  }
+  function pricedMatchedHtml(V, opt) {
+    opt = opt || {};
+    const m = V.m, T = tierLines(V), L1 = matchedLines(V), lab = esc(label(m.g));
+    const nw = (t) => esc(t).split(lab).join('<span class="gwb-nw">' + lab + '</span>');
+    let main = '', hist = '';
+    if (T.tier === 'B') {
+      main = '<div class="gwb-tiles">' + m.groups.map((q, i) => { const g = T.groups[i];
+        return '<div class="gwb-tile" data-gwb-group="' + (i + 1) + '"><p class="gwb-t-k" data-gwb-median>' + esc(g.head.replace(/: .*$/, '')) + '</p><p class="gwb-t-v"><b>' + esc(short(q.med)) + '</b></p><p class="gwb-t-d">' + esc(sqftT(q.sqft)) + '<span class="gwb-t-sep"> · </span><span class="gwb-t-p">' + esc(ym(q.from) + ' to ' + ym(q.to)) + '</span></p></div>'; }).join('') + '</div>' +
+        (m.groups.length > 1 ? '<p class="gwb-diff" data-gwb-diffsizes>' + esc(DIFF_SIZES) + '</p>' : '');
+      const cs = T.groups.map((q) => q.cmp).filter(Boolean), two = T.groups.length > 1;   // two groups: each sentence under its sizes, so it is clear which it is
+      hist = '<div class="gwb-sec" data-gwb-cmp><p class="gwb-sec-h">Price movement</p>' + (cs.length ? T.groups.map((g, i) => (two ? '<p class="gwb-cmp-k">' + esc(sqftT(m.groups[i].sqft)) + '</p>' : '') + (g.cmp ? '<p class="gwb-l">' + esc(g.cmp) + '</p>' : '<p class="gwb-l" data-gwb-notrend>' + esc(NO_TREND) + '</p>')).join('') + '<p class="lg-fine">' + CMP_FOOT + '</p>' : '<p class="gwb-l" data-gwb-notrend>' + esc(NO_TREND) + '</p>') + '</div>' +
+        '<div class="gwb-sec"><p class="gwb-sec-h">Historical matched transactions</p>' + T.groups.map((g, i) => '<p class="gwb-l" data-gwb-range>' + esc(g.range) + ' <span class="gwb-dim">(' + esc(g.detail) + ')</span></p>').join('') +
+        (T.other ? '<p class="gwb-l" data-gwb-range data-gwb-other>' + esc(T.other) + '</p>' : '') + '</div>';
+    } else {
+      main = '<div class="gwb-tiles"><div class="gwb-tile gwb-tile-c" data-gwb-group="c"><p class="gwb-t-k" data-gwb-range>Historical matched transactions <b>' + esc(T.head.replace('Historical matched transactions: ', '')) + '</b></p><p class="gwb-t-d">' + esc(T.detail) + '</p></div></div>';
+      hist = '<div class="gwb-sec" data-gwb-cmp><p class="gwb-sec-h">Price movement</p><p class="gwb-l" data-gwb-notrend>' + esc(NO_TREND) + '</p></div>';
+    }
+    const rows = opt.tx && opt.rows ? '<div class="gwb-mrows" data-gwb-mrows><p class="gwb-mrows-h">' + ROWS_HEAD + '</p><p class="gwb-mrows-n">' + ROWS_NOTE + '</p>' + opt.rows + '</div>' : '';
+    const how = '<p class="gwb-l">' + nw(L1.one) + '</p>' + (T.tier === 'B' ? '<p class="gwb-l" data-gwb-bnote>' + nw(T.note) + '</p><p class="gwb-l">' + METHOD + '</p>' : '<p class="gwb-l gwb-m3" data-gwb-m3>' + esc(T.note) + '</p>') +
+      (L1.two ? '<p class="gwb-l" data-gwb-m2>' + nw(L1.two) + '</p>' : '');
+    return '<div class="lg-ans gwb-m gwb-t" data-gwb-matched data-gwb-tier="' + T.tier + '" data-gwb-g="' + esc(m.g) + '" data-gwb-why="' + esc(m.why) + '">' +
+      '<p class="lg-ans-k gwb-m-k">' + lab + ' · <span class="gwb-mtag" data-gwb-mtag>' + MATCHED_TAG + '</span></p>' + main +
+      '<p class="gwb-qual" data-gwb-qual>' + esc(QUAL) + '</p>' +
+      '<p class="gwb-warn" data-gwb-warn>' + nw(warnText(V)) + '</p>' +
+      (opt.tx ? '<p class="gwb-m-act"><button type="button" class="lg-btn" data-gwr-mbed="' + esc(m.g) + '">See the ' + num(m.n24) + ' matched ' + WORDS.resale[m.n24 === 1 ? 0 : 1] + '</button></p>' : '') +
+      '<details class="gwb-det" data-gwb-hist><summary>Sales history &amp; price movement</summary><div class="gwb-det-in">' + hist + rows + '</div></details>' +
+      '<details class="gwb-det" data-gwb-how><summary>How these prices are calculated</summary><div class="gwb-det-in">' + how + '</div></details></div>';
+  }
+  // "Also matched" index line part (typesHtml): Tier B's first median with its sizes, or Tier C's historical range; '' for v1.2 data
+  function alsoText(m) {
+    const T = tierOf(m); if (!T) return '';
+    if (T === 'B') { const q = m.groups[0]; return 'Median of ' + plR(q.n).replace(/resales?$/, 'past matched $&') + ' ' + short(q.med) + ' (' + sqftT(q.sqft) + ')'; }
+    return 'historical matched transactions ' + (m.range.lo === m.range.hi ? short(m.range.lo) : short(m.range.lo) + '–' + short(m.range.hi));
+  }
+  /* assertPricedMatchedCopy (r2 §4): replaces assertMatchedOnlyCopy for entries with groups/range. text: what a visitor reads; record: the
+     matched entry plus the development's of / unknown; opt.rows: the latest-five tx rows on screen (their prices, sizes and months are allowed).
+     Throws with every problem found. */
+  const PRICED_BLOCKED = /\b(typical|representative|average|mean|valuation|valued?|worth|market value|appreciat\w*|gains?|profit|guarantee\w*|expect\w*|forecast|will (rise|fall|increase|decrease)|budget|afford\w*|cheapest|bargain|undervalued|price range|recorded)\b/i;
+  function assertPricedMatchedCopy(text, record, opt) {
+    opt = opt || {};
+    const r = record || {}, L = r.g ? label(r.g) : '', bad = [], rows = opt.rows || [];
+    let t = String(text == null ? '' : text).replace(/\s+/g, ' ');
+    [B_NOTE(L), C_NOTE, CMP_FOOT, MATCHED_TAG, ROWS_NOTE, QUAL, DIFF_SIZES, NO_TREND, METHOD, 'No typical price for all ' + L + ' homes here'].forEach((ph) => { t = t.split(ph).join(' '); });
+    const x = PRICED_BLOCKED.exec(t); if (x) bad.push('blocked "' + x[0] + '"');
+    const MONEY = /\$\d[\d,]*(\.\d+)?[mk]?/g;
+    t.split(/(?<=\.)\s+(?=[A-Z])|\(/).forEach((sen) => { const re = /(\$\d[\d,]*(?:\.\d+)?[mk]?) to (\$\d[\d,]*(?:\.\d+)?[mk]?)/g; let mm; while ((mm = re.exec(sen))) { if (sen.slice(0, mm.index).indexOf('Historical matched transactions') < 0) bad.push('unlabelled range ' + mm[0]); } });
+    const gs = r.groups || [], money = new Set(), counts = new Set(), sq = new Set(), pcts = new Set();
+    gs.forEach((q) => { [q.med, q.lo, q.hi].forEach((v) => money.add(short(v))); [q.n, q.act].forEach((v) => counts.add(v)); q.sqft.forEach((v) => sq.add(v)); if (q.cmp) { counts.add(q.cmp.a); counts.add(q.cmp.b); if (q.cmp.pct != null) pcts.add(Math.abs(q.cmp.pct)); } });
+    [r.other, r.range].forEach((o) => { if (o) { money.add(short(o.lo)); money.add(short(o.hi)); counts.add(o.n); o.sqft.forEach((v) => sq.add(v)); } });
+    rows.forEach((w) => { money.add('$' + num(w[4])); sq.add(Math.round(w[3] * 10.7639)); });
+    ['n12', 'n24', 'couldBe', 'unknown', 'of'].forEach((k) => { if (r[k] != null) counts.add(r[k]); });
+    (t.match(MONEY) || []).forEach((v) => { if (!money.has(v)) bad.push('money ' + v + ' is not in the record'); });
+    let rest = t.replace(MONEY, ' ');
+    rest = rest.replace(/≈ ([\d,]+)(?:–([\d,]+))? sq ft/g, (all, a, b) => { [a, b].filter(Boolean).forEach((v) => { if (!sq.has(Number(v.replace(/,/g, '')))) bad.push('size ' + v + ' is not in the record'); }); return ' '; });
+    rest = rest.replace(/([\d.]+)%/g, (all, v) => { if (!pcts.has(Number(v))) bad.push('percentage ' + v + ' is not in the record'); return ' '; });
+    rest = rest.replace(/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4}\b/g, ' ').replace(/\b[1-5]-bedroom\b|last 2 years|12 months/gi, ' ');
+    (rest.match(/\d[\d,]*/g) || []).forEach((v) => { if (!counts.has(Number(v.replace(/,/g, '')))) bad.push('count ' + v + ' is not in the record'); });
+    if (opt.part !== 'line') {
+      const T = r.range ? (gs.length ? 'B' : 'C') : null, raw = String(text);
+      if (T === 'B') { gs.forEach((q) => { if (raw.indexOf(sqftT(q.sqft) + ' · ' + ym(q.from) + ' to ' + ym(q.to)) < 0) bad.push('a median without its sizes and period'); }); if (raw.indexOf(B_NOTE(L)) < 0) bad.push('no B note'); }
+      if (T === 'C') { if (raw.indexOf(C_NOTE) < 0) bad.push('no C note'); if (raw.indexOf(sqftT(r.range.sqft)) < 0) bad.push('a range without its sizes'); }
+    }
+    if (bad.length) throw new Error('priced matched copy: ' + bad.join('; ') + ' in: ' + text);
+    return true;
+  }
+
   // V2.1: the rows block checked on its own (the panel's sentences still go through assertMatchedOnlyCopy without it). html: the block
   // ([data-gwb-mrows]); rows: the transaction rows it must be, in order (GW_REC.matchedRows). Each line is exactly one sale's month, size and
   // price (and its flags); the only other words are the heading and the note; newest first; nothing else, no statistic. Throws on any problem.
@@ -227,5 +334,5 @@
     return 'Bedroom types: inferred by Groundwork, not recorded by URA, from developers’ floor plans where checked, otherwise from the bedroom counts declared in URA rental contracts for homes of the same size' + (m.rentalWindow ? ' (' + q(m.rentalWindow.from) + ' to ' + qEnd(m.rentalWindow.to) + ')' : '') + '. Sales whose size fits more than one bedroom count are left out.';
   }
 
-  return { MATCHED_TAG, MATCHED_ROWS, ROWS_HEAD, ROWS_NOTE, assertMatchedRows, MATCHED_ONLY_ALLOWED, assertMatchedOnlyCopy, anyType, matchedLines, matchedHtml, sourceText, pick, view, chipsHtml, lineHtml, answerHtml, trendHtml, numbersHtml, basisText, sizeText, budgetText, finding, typical, short, label };
+  return { QUAL, DIFF_SIZES, NO_TREND, METHOD, warnText, tierOf, tierLines, pricedMatchedHtml, alsoText, assertPricedMatchedCopy, B_NOTE, C_NOTE, CMP_FOOT, MATCHED_TAG, MATCHED_ROWS, ROWS_HEAD, ROWS_NOTE, assertMatchedRows, MATCHED_ONLY_ALLOWED, assertMatchedOnlyCopy, anyType, matchedLines, matchedHtml, sourceText, pick, view, chipsHtml, lineHtml, answerHtml, trendHtml, numbersHtml, basisText, sizeText, budgetText, finding, typical, short, label };
 });

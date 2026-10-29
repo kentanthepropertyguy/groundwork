@@ -12,9 +12,9 @@
 <link rel="stylesheet" href="../assets/css/kpt-research.css?v=491ebef781">
 <link rel="stylesheet" href="../assets/css/kpt-shell.css?v=ec3f361afb">
 <link rel="stylesheet" href="../assets/css/kpt-compare-v2.css?v=f779cfb080">
-<link rel="stylesheet" href="../assets/css/kpt-lg.css?v=6199156981">
+<link rel="stylesheet" href="../assets/css/kpt-lg.css?v=10caad48ef">
 <link rel="stylesheet" href="../assets/css/gw-pulse.css?v=3387a27e04">
-<link rel="stylesheet" href="../assets/css/gw-bedroom.css?v=62c4de3ae3">
+<link rel="stylesheet" href="../assets/css/gw-bedroom.css?v=0056450493">
 <link rel="canonical" href="https://tools.kentanthepropertyguy.com/research/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Groundwork">
@@ -50,7 +50,7 @@
 <script src="../assets/js/kpt-analytics.js?v=3b78ef5642"></script>
 <script src="../assets/js/kpt-components.js?v=597f0bf0d3"></script>
 <script src="../assets/js/kpt-project.js?v=c9def7da05"></script>
-<script src="../assets/js/kpt-research.js?v=1c6a9b26f8"></script>
+<script src="../assets/js/kpt-research.js?v=941103d30a"></script>
 <script src="../assets/js/kpt-intel.js?v=9474e171b4"></script>
 <script src="../assets/js/kpt-evidence.js?v=913139e3ad"></script>
 <script>window.GW_SAMPLE = {"a":"Jadescape","b":"Thomson Three","psf":[2323,2152],"band":"700–799 sqft","period":"Oct 2025 to Sep 2026"};</script>
@@ -59,11 +59,11 @@
 <script src="../assets/js/gw-pulse.js?v=6b170dca99"></script>
 <template id="gwLazy-loc"><script src="../assets/js/kpt-map-core.js?v=2026-10-27.1"></script></template>
 <script src="../assets/js/gw-locmap.js?v=c31f9e5e97"></script>
-<script src="../assets/js/gw-records.js?v=6f35d08389"></script>
+<script src="../assets/js/gw-records.js?v=a189c98891"></script>
 <script src="../assets/js/gw-rent.js?v=1d72b69f47"></script>
-<script src="../assets/js/gw-bedroom.js?v=4178203a5f"></script>
+<script src="../assets/js/gw-bedroom.js?v=a1e9b12acb"></script>
 <script src="../assets/js/gw-overview.js?v=d2d4cac1fb"></script>
-<script src="../assets/js/kpt-lg.js?v=cffe84ef48"></script>
+<script src="../assets/js/kpt-lg.js?v=da9627c31d"></script>
 <script src="../assets/js/kpt-compare-v2.js?v=271d97d3bb"></script>
 <script src="../data/research/config.js?v=df6f3c6908"></script>
 <script>
@@ -515,7 +515,7 @@
       const cl = document.getElementById('sizeClear'); if (cl) cl.addEventListener('click', () => { S.size = ''; saveSize(); rerender(); });
     }
     if (kind === 'project') {
-      $app.querySelectorAll('[data-bed]').forEach((b) => b.addEventListener('click', () => { const g = b.dataset.bed; chooseBed(S.bed === g ? '' : g); rerender(); if (S.bed) track('research_bedroom_selected', { project_id: M.id, bedroom: S.bed, sale_type: M.sale.selected, tier: S.bv && S.bv.m ? 'matched' : 'figures' }); const n = $app.querySelector('[data-bed="' + g + '"]'); if (n) n.focus({ preventScroll: true }); }));
+      $app.querySelectorAll('[data-bed]').forEach((b) => b.addEventListener('click', () => { const g = b.dataset.bed; chooseBed(S.bed === g ? '' : g); rerender(); if (S.bed) track('research_bedroom_selected', { project_id: M.id, bedroom: S.bed, sale_type: M.sale.selected, tier: S.bv && S.bv.m ? ({ B: 'median', C: 'historical' }[GW_BED.tierOf && GW_BED.tierOf(S.bv.m)] || 'matched') : 'figures' }); const n = $app.querySelector('[data-bed="' + g + '"]'); if (n) n.focus({ preventScroll: true }); }));
       const bc = document.getElementById('bedClear'); if (bc) bc.addEventListener('click', () => { chooseBed(''); rerender(); });
       const bs = document.getElementById('bedSwitch'); if (bs) bs.addEventListener('click', () => { S.size = ''; saveSize(); rerender(); const c = $app.querySelector('[data-bed]'); if (c) c.focus({ preventScroll: true }); });
     }
@@ -558,7 +558,7 @@
           // page keeps its place (the row is focused again after the redraw).
           if (window.GW_REC && S.txSt) GW_REC.wire($app, S.txSt, { track: (k) => track('research_option_selected', { project_id: id, option: 'sales-' + k }) });
           if (window.GW_RENT && d.rent) { GW_RENT.wire($app, d.rent); const ra = $app.querySelector('[data-gwrent-ask]'); if (ra) ra.addEventListener('click', () => once('rent-ask:' + id, () => track('research_option_selected', { project_id: id, option: 'asking-rent' }))); }
-          $app.querySelectorAll('[data-gwr-bed]').forEach((b) => b.addEventListener('click', () => { const g = b.dataset.gwrBed; chooseBed(S.bed === g ? '' : g); rerender(); if (S.bed) track('research_bedroom_selected', { project_id: M.id, bedroom: S.bed, sale_type: M.sale.selected, tier: S.bv && S.bv.m ? 'matched' : 'figures' }); const n = $app.querySelector('[data-gwr-bed="' + g + '"]'); if (n) n.focus({ preventScroll: true }); }));
+          $app.querySelectorAll('[data-gwr-bed]').forEach((b) => b.addEventListener('click', () => { const g = b.dataset.gwrBed; chooseBed(S.bed === g ? '' : g); rerender(); if (S.bed) track('research_bedroom_selected', { project_id: M.id, bedroom: S.bed, sale_type: M.sale.selected, tier: S.bv && S.bv.m ? ({ B: 'median', C: 'historical' }[GW_BED.tierOf && GW_BED.tierOf(S.bv.m)] || 'matched') : 'figures' }); const n = $app.querySelector('[data-gwr-bed="' + g + '"]'); if (n) n.focus({ preventScroll: true }); }));
           $app.querySelectorAll('[data-gwr-bin]').forEach((b) => b.addEventListener('click', () => { const v = b.dataset.gwrBin, on = M.focus && M.focus.userChosen && String(M.focus.bin) === v; S.size = on ? '' : v; saveSize(); rerender(); const n = $app.querySelector('[data-gwr-bin="' + v + '"]'); if (n) n.focus({ preventScroll: true }); }));
           if (window.KPTV2) KPTV2.afterProject(M, $app, d.p, d.m, { R, searchBox, track, bedTypical: S.bedWa ? GW_BED.typical(S.bv) : null, onPick: (x) => { location.hash = '#/p/' + x; }, onCompare: (x) => { S.win = null; location.hash = '#/compare/' + id + '/' + x; } });
           const evd = document.getElementById('evidence'); if (evd) evd.addEventListener('toggle', () => { S.evOpen = evd.open; });
