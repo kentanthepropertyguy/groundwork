@@ -1,0 +1,534 @@
+{
+ "v": 1,
+ "note": "Subset of data/projects/find.json (URA, as at 2026-10-05): location facts only, for the roster projects",
+ "projects": [
+  {
+   "id": "21-anderson",
+   "d": "10",
+   "seg": "CCR",
+   "tl": "Freehold",
+   "tg": 4,
+   "street": "ANDERSON ROAD"
+  },
+  {
+   "id": "26-newton",
+   "d": "11",
+   "seg": "CCR",
+   "tl": "Freehold",
+   "tg": 4,
+   "street": "NEWTON ROAD"
+  },
+  {
+   "id": "8-at-bt",
+   "d": "21",
+   "seg": "RCR",
+   "tl": "99 yrs from 2023",
+   "tg": 1,
+   "street": "BUKIT TIMAH LINK"
+  },
+  {
+   "id": "altura",
+   "d": "23",
+   "seg": "OCR",
+   "tl": "99 yrs from 2022",
+   "tg": 1,
+   "street": "BUKIT BATOK WEST AVENUE 8"
+  },
+  {
+   "id": "amberwood-at-holland",
+   "d": "10",
+   "seg": "CCR",
+   "tl": "99 yrs (start year not given)",
+   "tg": 0,
+   "street": "HOLLAND LINK"
+  },
+  {
+   "id": "ardor-residence",
+   "d": "15",
+   "seg": "RCR",
+   "tl": "Freehold",
+   "tg": 4,
+   "street": "HAIG ROAD"
+  },
+  {
+   "id": "arina-east-residences",
+   "d": "15",
+   "seg": "RCR",
+   "tl": "Freehold",
+   "tg": 4,
+   "street": "TANJONG RHU ROAD"
+  },
+  {
+   "id": "aurea",
+   "d": "07",
+   "seg": "CCR",
+   "tl": "99 yrs from 2024",
+   "tg": 1,
+   "street": "BEACH ROAD"
+  },
+  {
+   "id": "aurelle-of-tampines",
+   "d": "18",
+   "seg": "OCR",
+   "tl": "99 yrs from 2024",
+   "tg": 1,
+   "street": "TAMPINES STREET 62"
+  },
+  {
+   "id": "bagnall-haus",
+   "d": "16",
+   "seg": "OCR",
+   "tl": "Freehold",
+   "tg": 4,
+   "street": "UPPER EAST COAST ROAD"
+  },
+  {
+   "id": "canberra-crescent-residences",
+   "d": "27",
+   "seg": "OCR",
+   "tl": "99 yrs from 2024",
+   "tg": 1,
+   "street": "CANBERRA CRESCENT"
+  },
+  {
+   "id": "canninghill-piers",
+   "d": "06",
+   "seg": "RCR",
+   "tl": "99 yrs from 2021",
+   "tg": 1,
+   "street": "CLARKE QUAY"
+  },
+  {
+   "id": "chuan-park",
+   "d": "19",
+   "seg": "OCR",
+   "tl": "99 yrs from 2024",
+   "tg": 1,
+   "street": "LORONG CHUAN"
+  },
+  {
+   "id": "coastal-cabana",
+   "d": "17",
+   "seg": "OCR",
+   "tl": "99 yrs from 2024",
+   "tg": 1,
+   "street": "JALAN LOYANG BESAR"
+  },
+  {
+   "id": "dunearn-house",
+   "d": "11",
+   "seg": "CCR",
+   "tl": "99 yrs from 2025",
+   "tg": 1,
+   "street": "DUNEARN ROAD"
+  },
+  {
+   "id": "elta",
+   "d": "05",
+   "seg": "OCR",
+   "tl": "99 yrs from 2024",
+   "tg": 1,
+   "street": "CLEMENTI AVENUE 1"
+  },
+  {
+   "id": "faber-residence",
+   "d": "05",
+   "seg": "OCR",
+   "tl": "99 yrs from 2025",
+   "tg": 1,
+   "street": "FABER WALK"
+  },
+  {
+   "id": "grand-dunman",
+   "d": "15",
+   "seg": "RCR",
+   "tl": "99 yrs from 2022",
+   "tg": 1,
+   "street": "DUNMAN ROAD"
+  },
+  {
+   "id": "grange-1866",
+   "d": "10",
+   "seg": "CCR",
+   "tl": "Freehold",
+   "tg": 4,
+   "street": "GRANGE ROAD"
+  },
+  {
+   "id": "hudson-place-residences",
+   "d": "05",
+   "seg": "RCR",
+   "tl": "99 yrs from 2025",
+   "tg": 1,
+   "street": "MEDIA CIRCLE"
+  },
+  {
+   "id": "j-den",
+   "d": "22",
+   "seg": "OCR",
+   "tl": "99 yrs from 2023",
+   "tg": 1,
+   "street": "JURONG EAST CENTRAL 1"
+  },
+  {
+   "id": "jansen-house",
+   "d": "19",
+   "seg": "OCR",
+   "tl": "999 yrs from 1876",
+   "tg": 4,
+   "street": "JANSEN ROAD"
+  },
+  {
+   "id": "kallang-riverside",
+   "d": "12",
+   "seg": "RCR",
+   "tl": "Freehold",
+   "tg": 4,
+   "street": "KAMPONG BUGIS"
+  },
+  {
+   "id": "kassia",
+   "d": "17",
+   "seg": "OCR",
+   "tl": "Freehold",
+   "tg": 4,
+   "street": "FLORA DRIVE"
+  },
+  {
+   "id": "koon-seng-house",
+   "d": "15",
+   "seg": "RCR",
+   "tl": "Freehold",
+   "tg": 4,
+   "street": "KOON SENG ROAD"
+  },
+  {
+   "id": "lentor-gardens-residences",
+   "d": "26",
+   "seg": "OCR",
+   "tl": "99 yrs from 2025",
+   "tg": 1,
+   "street": "LENTOR GARDENS"
+  },
+  {
+   "id": "lentoria",
+   "d": "26",
+   "seg": "OCR",
+   "tl": "99 yrs from 2022",
+   "tg": 1,
+   "street": "LENTOR HILLS ROAD"
+  },
+  {
+   "id": "lyndenwoods",
+   "d": "05",
+   "seg": "RCR",
+   "tl": "99 yrs from 2025",
+   "tg": 1,
+   "street": "SCIENCE PARK DRIVE"
+  },
+  {
+   "id": "meyer-blue",
+   "d": "15",
+   "seg": "RCR",
+   "tl": "Freehold",
+   "tg": 4,
+   "street": "MEYER ROAD"
+  },
+  {
+   "id": "midtown-bay",
+   "d": "07",
+   "seg": "CCR",
+   "tl": "99 yrs from 2018",
+   "tg": 1,
+   "street": "BEACH ROAD"
+  },
+  {
+   "id": "narra-residences",
+   "d": "23",
+   "seg": "OCR",
+   "tl": "99 yrs from 2025",
+   "tg": 1,
+   "street": "DAIRY FARM WALK"
+  },
+  {
+   "id": "nava-grove",
+   "d": "21",
+   "seg": "RCR",
+   "tl": "99 yrs from 2024",
+   "tg": 1,
+   "street": "PINE GROVE"
+  },
+  {
+   "id": "newport-residences",
+   "d": "02",
+   "seg": "CCR",
+   "tl": "Freehold",
+   "tg": 4,
+   "street": "ANSON ROAD"
+  },
+  {
+   "id": "norwood-grand",
+   "d": "25",
+   "seg": "OCR",
+   "tl": "99 yrs from 2023",
+   "tg": 1,
+   "street": "CHAMPIONS WAY"
+  },
+  {
+   "id": "one-marina-gardens",
+   "d": "01",
+   "seg": "RCR",
+   "tl": "99 yrs from 2023",
+   "tg": 1,
+   "street": "MARINA GARDENS LANE"
+  },
+  {
+   "id": "parktown-residence",
+   "d": "18",
+   "seg": "OCR",
+   "tl": "99 yrs from 2023",
+   "tg": 1,
+   "street": "TAMPINES STREET 62"
+  },
+  {
+   "id": "penrith",
+   "d": "03",
+   "seg": "RCR",
+   "tl": "99 yrs from 2024",
+   "tg": 1,
+   "street": "MARGARET DRIVE"
+  },
+  {
+   "id": "pinetree-hill",
+   "d": "21",
+   "seg": "RCR",
+   "tl": "99 yrs from 2022",
+   "tg": 1,
+   "street": "PINE GROVE"
+  },
+  {
+   "id": "promenade-peak",
+   "d": "03",
+   "seg": "RCR",
+   "tl": "99 yrs from 2024",
+   "tg": 1,
+   "street": "ZION PROMENADE"
+  },
+  {
+   "id": "river-green",
+   "d": "09",
+   "seg": "CCR",
+   "tl": "99 yrs from 2024",
+   "tg": 1,
+   "street": "RIVER VALLEY GREEN"
+  },
+  {
+   "id": "river-modern",
+   "d": "09",
+   "seg": "CCR",
+   "tl": "99 yrs from 2025",
+   "tg": 1,
+   "street": "RIVER VALLEY GREEN"
+  },
+  {
+   "id": "skies-miltonia",
+   "d": "27",
+   "seg": "OCR",
+   "tl": "99 yrs from 2012",
+   "tg": 2,
+   "street": "MILTONIA CLOSE"
+  },
+  {
+   "id": "skye-at-holland",
+   "d": "10",
+   "seg": "CCR",
+   "tl": "99 yrs from 2024",
+   "tg": 1,
+   "street": "HOLLAND VILLAGE WAY"
+  },
+  {
+   "id": "sora",
+   "d": "22",
+   "seg": "OCR",
+   "tl": "99 yrs from 2023",
+   "tg": 1,
+   "street": "YUAN CHING ROAD"
+  },
+  {
+   "id": "springleaf-residence",
+   "d": "26",
+   "seg": "OCR",
+   "tl": "99 yrs from 2024",
+   "tg": 1,
+   "street": "UPPER THOMSON ROAD"
+  },
+  {
+   "id": "tembusu-grand",
+   "d": "15",
+   "seg": "RCR",
+   "tl": "99 yrs from 2022",
+   "tg": 1,
+   "street": "JALAN TEMBUSU"
+  },
+  {
+   "id": "terra-hill",
+   "d": "05",
+   "seg": "RCR",
+   "tl": "Freehold",
+   "tg": 4,
+   "street": "YEW SIANG ROAD"
+  },
+  {
+   "id": "the-arcady-at-boon-keng",
+   "d": "12",
+   "seg": "RCR",
+   "tl": "Freehold",
+   "tg": 4,
+   "street": "SAINT BARNABAS LANE"
+  },
+  {
+   "id": "the-collective-at-one-sophia",
+   "d": "09",
+   "seg": "CCR",
+   "tl": "99 yrs from 2023",
+   "tg": 1,
+   "street": "SOPHIA ROAD"
+  },
+  {
+   "id": "the-continuum",
+   "d": "15",
+   "seg": "RCR",
+   "tl": "Freehold",
+   "tg": 4,
+   "street": "THIAM SIEW AVENUE"
+  },
+  {
+   "id": "the-hillshore",
+   "d": "05",
+   "seg": "RCR",
+   "tl": "Freehold",
+   "tg": 4,
+   "street": "PASIR PANJANG ROAD"
+  },
+  {
+   "id": "the-lakegarden-residences",
+   "d": "22",
+   "seg": "OCR",
+   "tl": "99 yrs from 2023",
+   "tg": 1,
+   "street": "YUAN CHING ROAD"
+  },
+  {
+   "id": "the-line-at-tanjong-rhu",
+   "d": "15",
+   "seg": "RCR",
+   "tl": "Freehold",
+   "tg": 4,
+   "street": "TANJONG RHU ROAD"
+  },
+  {
+   "id": "the-myst",
+   "d": "23",
+   "seg": "OCR",
+   "tl": "99 yrs from 2023",
+   "tg": 1,
+   "street": "UPPER BUKIT TIMAH ROAD"
+  },
+  {
+   "id": "the-orie",
+   "d": "12",
+   "seg": "RCR",
+   "tl": "99 yrs from 2024",
+   "tg": 1,
+   "street": "LORONG 1 TOA PAYOH"
+  },
+  {
+   "id": "the-residences-at-w-singapore-sentosa-cove",
+   "d": "04",
+   "seg": "CCR",
+   "tl": "99 yrs from 2006",
+   "tg": 2,
+   "street": "OCEAN WAY"
+  },
+  {
+   "id": "the-robertson-opus",
+   "d": "09",
+   "seg": "CCR",
+   "tl": "999 yrs from 1841",
+   "tg": 4,
+   "street": "UNITY STREET"
+  },
+  {
+   "id": "the-sen",
+   "d": "21",
+   "seg": "RCR",
+   "tl": "99 yrs from 2025",
+   "tg": 1,
+   "street": "JALAN JURONG KECHIL"
+  },
+  {
+   "id": "the-shorefront",
+   "d": "17",
+   "seg": "OCR",
+   "tl": "999 yrs from 1937",
+   "tg": 4,
+   "street": "JALAN LOYANG BESAR"
+  },
+  {
+   "id": "union-square-residences",
+   "d": "01",
+   "seg": "RCR",
+   "tl": "99 yrs from 2024",
+   "tg": 1,
+   "street": "HAVELOCK ROAD"
+  },
+  {
+   "id": "upperhouse-at-orchard-boulevard",
+   "d": "10",
+   "seg": "CCR",
+   "tl": "99 yrs from 2024",
+   "tg": 1,
+   "street": "ORCHARD BOULEVARD"
+  },
+  {
+   "id": "v-on-shenton",
+   "d": "01",
+   "seg": "CCR",
+   "tl": "99 yrs from 2011",
+   "tg": 2,
+   "street": "SHENTON WAY"
+  },
+  {
+   "id": "vela-bay",
+   "d": "16",
+   "seg": "OCR",
+   "tl": "99 yrs from 2025",
+   "tg": 1,
+   "street": "BAYSHORE WALK"
+  },
+  {
+   "id": "verd-joo-chiat",
+   "d": "15",
+   "seg": "RCR",
+   "tl": "Freehold",
+   "tg": 4,
+   "street": "JOO CHIAT TERRACE"
+  },
+  {
+   "id": "w-residences-marina-view-singapore",
+   "d": "01",
+   "seg": "CCR",
+   "tl": "99 yrs from 2021",
+   "tg": 1,
+   "street": "MARINA VIEW"
+  },
+  {
+   "id": "zyon-grand",
+   "d": "03",
+   "seg": "RCR",
+   "tl": "99 yrs from 2024",
+   "tg": 1,
+   "street": "KIM SENG ROAD"
+  }
+ ]
+}

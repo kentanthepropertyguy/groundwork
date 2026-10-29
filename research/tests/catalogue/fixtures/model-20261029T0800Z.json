@@ -1,0 +1,5894 @@
+{
+ "now": "2026-10-29T08:00:00Z",
+ "projects": [
+  {
+   "slug": "21-anderson",
+   "name": "21 Anderson",
+   "district": "10",
+   "districtName": "Bukit Timah, Holland, Tanglin",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": "ANDERSON ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 10000000,
+     "upper": 10000000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 3000,
+       "end": null,
+       "from": 10000000
+      }
+     ],
+     "review": [
+      "size:3100"
+     ],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "26-newton",
+   "name": "26 Newton",
+   "district": "11",
+   "districtName": "Novena, Thomson",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": "NEWTON ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1700000,
+     "upper": 1750000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 1700000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 2650000,
+     "upper": 2750000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1400,
+       "end": 1500,
+       "from": 2650000
+      },
+      {
+       "start": 1500,
+       "end": 1600,
+       "from": 2700000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "8-at-bt",
+   "name": "8@BT",
+   "district": "21",
+   "districtName": "Upper Bukit Timah, Clementi Park",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "99 yrs from 2023",
+   "tenureBucket": "99",
+   "street": "BUKIT TIMAH LINK",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1450000,
+     "upper": 1550000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1450000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1900000,
+     "upper": 2250000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 600,
+       "end": 700,
+       "from": 1900000
+      },
+      {
+       "start": 700,
+       "end": 800,
+       "from": 1950000
+      },
+      {
+       "start": 800,
+       "end": 900,
+       "from": 2100000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 3700000,
+     "upper": 5350000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1300,
+       "end": 1400,
+       "from": 3700000
+      },
+      {
+       "start": 1500,
+       "end": 1600,
+       "from": 3950000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "altura",
+   "name": "Altura",
+   "district": "23",
+   "districtName": "Bukit Batok, Bukit Panjang, Choa Chu Kang",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "99 yrs from 2022",
+   "tenureBucket": "99",
+   "street": "BUKIT BATOK WEST AVENUE 8",
+   "classTag": "Executive Condominium",
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "none_shown",
+   "types": []
+  },
+  {
+   "slug": "amberwood-at-holland",
+   "name": "Amberwood at Holland",
+   "district": "10",
+   "districtName": "Bukit Timah, Holland, Tanglin",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "99 yrs (start year not given)",
+   "tenureBucket": "99",
+   "street": "HOLLAND LINK",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2500000,
+     "upper": 3100000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 800,
+       "end": 900,
+       "from": 2500000
+      },
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 2800000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 3100000,
+     "upper": 4100000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1000,
+       "end": 1100,
+       "from": 3100000
+      },
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 3300000
+      },
+      {
+       "start": 1200,
+       "end": 1300,
+       "from": 3600000
+      },
+      {
+       "start": 1300,
+       "end": 1400,
+       "from": 3950000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 3950000,
+     "upper": 4900000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1300,
+       "end": 1400,
+       "from": 3950000
+      },
+      {
+       "start": 1400,
+       "end": 1500,
+       "from": 4500000
+      },
+      {
+       "start": 1500,
+       "end": 1600,
+       "from": 4650000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "ardor-residence",
+   "name": "Ardor Residence",
+   "district": "15",
+   "districtName": "Katong, Joo Chiat",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": "HAIG ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 3450000,
+     "upper": 3500000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1200,
+       "end": 1300,
+       "from": 3450000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "arina-east-residences",
+   "name": "Arina East Residences",
+   "district": "15",
+   "districtName": "Katong, Joo Chiat",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": "TANJONG RHU ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-07",
+   "freshness": "hidden",
+   "state": "prices_hidden",
+   "types": []
+  },
+  {
+   "slug": "artisan-8",
+   "name": "Artisan 8",
+   "district": "20",
+   "districtName": "Bishan, Ang Mo Kio",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1250000,
+     "upper": 1350000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 400,
+       "end": 500,
+       "from": 1250000
+      },
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1250000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1850000,
+     "upper": 1900000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 700,
+       "end": 800,
+       "from": 1850000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2450000,
+     "upper": 2500000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1000,
+       "end": 1100,
+       "from": 2450000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 3150000,
+     "upper": 5050000,
+     "about": false,
+     "wide": true,
+     "bands": [
+      {
+       "start": 1300,
+       "end": 1400,
+       "from": 3150000
+      },
+      {
+       "start": 1700,
+       "end": 1800,
+       "from": 4000000
+      },
+      {
+       "start": 1800,
+       "end": 1900,
+       "from": 4050000
+      },
+      {
+       "start": 2100,
+       "end": 2200,
+       "from": 5000000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 4450000,
+     "upper": 4500000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1800,
+       "end": 1900,
+       "from": 4450000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "atlassia",
+   "name": "Atlassia",
+   "district": "15",
+   "districtName": "Katong, Joo Chiat",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2550000,
+     "upper": 2600000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1200,
+       "end": 1300,
+       "from": 2550000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "aurea",
+   "name": "Aurea",
+   "district": "07",
+   "districtName": "Bugis, Golden Mile",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "99 yrs from 2024",
+   "tenureBucket": "99",
+   "street": "BEACH ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1750000,
+     "upper": 2200000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 600,
+       "end": 700,
+       "from": 1750000
+      },
+      {
+       "start": 700,
+       "end": 800,
+       "from": 1950000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2650000,
+     "upper": 3250000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1000,
+       "end": 1100,
+       "from": 2650000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 4050000,
+     "upper": 6200000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1400,
+       "end": 1500,
+       "from": 4050000
+      },
+      {
+       "start": 1700,
+       "end": 1800,
+       "from": 5150000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 9700000,
+     "upper": 11800000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2800,
+       "end": 2900,
+       "from": 9700000
+      },
+      {
+       "start": 3000,
+       "end": null,
+       "from": 11700000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "aurelle-of-tampines",
+   "name": "Aurelle of Tampines",
+   "district": "18",
+   "districtName": "Tampines, Pasir Ris",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "99 yrs from 2024",
+   "tenureBucket": "99",
+   "street": "TAMPINES STREET 62",
+   "classTag": "Executive Condominium",
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "none_shown",
+   "types": []
+  },
+  {
+   "slug": "bagnall-haus",
+   "name": "Bagnall Haus",
+   "district": "16",
+   "districtName": "Bedok, Upper East Coast",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": "UPPER EAST COAST ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1350000,
+     "upper": 1400000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 400,
+       "end": 500,
+       "from": 1350000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 3350000,
+     "upper": 3400000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1200,
+       "end": 1300,
+       "from": 3350000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "canberra-crescent-residences",
+   "name": "Canberra Crescent Residences",
+   "district": "27",
+   "districtName": "Yishun, Sembawang",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "99 yrs from 2024",
+   "tenureBucket": "99",
+   "street": "CANBERRA CRESCENT",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 1950000,
+     "upper": 2150000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 1950000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 2250000,
+     "upper": 2700000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 2250000
+      },
+      {
+       "start": 1200,
+       "end": 1300,
+       "from": 2350000
+      },
+      {
+       "start": 1300,
+       "end": 1400,
+       "from": 2650000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "canninghill-piers",
+   "name": "Canninghill Piers",
+   "district": "06",
+   "districtName": "City Hall, High Street",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "99 yrs from 2021",
+   "tenureBucket": "99",
+   "street": "CLARKE QUAY",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1300000,
+     "upper": 1750000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 400,
+       "end": 500,
+       "from": 1300000
+      },
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1700000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 8950000,
+     "upper": 9000000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2700,
+       "end": 2800,
+       "from": 8950000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "cape-royale",
+   "name": "Cape Royale",
+   "district": "04",
+   "districtName": "Telok Blangah, Harbourfront",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "99 yrs from 2008",
+   "tenureBucket": "99",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 3450000,
+     "upper": null,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1600,
+       "end": 1700,
+       "from": 3450000
+      },
+      {
+       "start": 1700,
+       "end": 1800,
+       "from": 3500000
+      },
+      {
+       "start": 1800,
+       "end": 1900,
+       "from": 3600000
+      },
+      {
+       "start": 1900,
+       "end": 2000,
+       "from": 3600000
+      },
+      {
+       "start": 2000,
+       "end": 2100,
+       "from": 4050000
+      },
+      {
+       "start": 2900,
+       "end": 3000,
+       "from": 6200000
+      },
+      {
+       "start": 3000,
+       "end": null,
+       "from": 7150000
+      }
+     ],
+     "review": [
+      "size:2900",
+      "size:3300"
+     ],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 5300000,
+     "upper": 6050000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2500,
+       "end": 2600,
+       "from": 5300000
+      },
+      {
+       "start": 2600,
+       "end": 2700,
+       "from": 5300000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "chuan-park",
+   "name": "Chuan Park",
+   "district": "19",
+   "districtName": "Hougang, Punggol, Serangoon Gardens",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "99 yrs from 2024",
+   "tenureBucket": "99",
+   "street": "LORONG CHUAN",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 3200000,
+     "upper": 3350000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1200,
+       "end": 1300,
+       "from": 3200000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "claydence",
+   "name": "Claydence",
+   "district": "15",
+   "districtName": "Katong, Joo Chiat",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1650000,
+     "upper": 1750000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 600,
+       "end": 700,
+       "from": 1650000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 2700000,
+     "upper": 2750000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 2700000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 3400000,
+     "upper": 4000000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1300,
+       "end": 1400,
+       "from": 3400000
+      },
+      {
+       "start": 1400,
+       "end": 1500,
+       "from": 3950000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 5600000,
+     "upper": 5700000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2100,
+       "end": 2200,
+       "from": 5600000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "coastal-cabana",
+   "name": "Coastal Cabana",
+   "district": "17",
+   "districtName": "Changi, Loyang",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "99 yrs from 2024",
+   "tenureBucket": "99",
+   "street": null,
+   "classTag": "Executive Condominium",
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 1500000,
+     "upper": 1700000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 800,
+       "end": 900,
+       "from": 1500000
+      },
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 1550000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 2400000,
+     "upper": 2450000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1300,
+       "end": 1400,
+       "from": 2400000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "duet-at-emily",
+   "name": "Duet at Emily",
+   "district": "09",
+   "districtName": "Orchard, River Valley",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1000000,
+     "upper": 1300000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 400,
+       "end": 500,
+       "from": 1000000
+      },
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1250000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1350000,
+     "upper": null,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1350000
+      },
+      {
+       "start": 600,
+       "end": 700,
+       "from": 1650000
+      },
+      {
+       "start": 800,
+       "end": 900,
+       "from": 2250000
+      },
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 2400000
+      },
+      {
+       "start": 1300,
+       "end": 1400,
+       "from": 3350000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "dunearn-house",
+   "name": "Dunearn House",
+   "district": "11",
+   "districtName": "Novena, Thomson",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "99 yrs from 2025",
+   "tenureBucket": "99",
+   "street": "DUNEARN ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1500000,
+     "upper": 2100000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1500000
+      },
+      {
+       "start": 600,
+       "end": 700,
+       "from": 1800000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 3050000,
+     "upper": 3400000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1000,
+       "end": 1100,
+       "from": 3050000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 3550000,
+     "upper": 4700000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 3550000
+      },
+      {
+       "start": 1300,
+       "end": 1400,
+       "from": 4000000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "eden-residences-at-capitol",
+   "name": "Eden Residences at Capitol",
+   "district": "06",
+   "districtName": "City Hall, High Street",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "99 yrs (start year not given)",
+   "tenureBucket": "99",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 11250000,
+     "upper": 11300000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 3000,
+       "end": null,
+       "from": 11250000
+      }
+     ],
+     "review": [
+      "size:3000"
+     ],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "elta",
+   "name": "Elta",
+   "district": "05",
+   "districtName": "Pasir Panjang, Clementi",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "99 yrs from 2024",
+   "tenureBucket": "99",
+   "street": "CLEMENTI AVENUE 1",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1400000,
+     "upper": 1450000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1400000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2650000,
+     "upper": 2750000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 2650000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 3300000,
+     "upper": 4100000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 3300000
+      },
+      {
+       "start": 1300,
+       "end": 1400,
+       "from": 3400000
+      },
+      {
+       "start": 1500,
+       "end": 1600,
+       "from": 3700000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 4100000,
+     "upper": 4650000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1700,
+       "end": 1800,
+       "from": 4100000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "faber-residence",
+   "name": "Faber Residence",
+   "district": "05",
+   "districtName": "Pasir Panjang, Clementi",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "99 yrs from 2025",
+   "tenureBucket": "99",
+   "street": "FABER WALK",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 2750000,
+     "upper": 2950000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1200,
+       "end": 1300,
+       "from": 2750000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 3300000,
+     "upper": 3500000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1400,
+       "end": 1500,
+       "from": 3300000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "gems-ville",
+   "name": "Gems Ville",
+   "district": "14",
+   "districtName": "Geylang, Eunos",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1550000,
+     "upper": 1650000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 700,
+       "end": 800,
+       "from": 1550000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2100000,
+     "upper": 2450000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 2100000
+      },
+      {
+       "start": 1200,
+       "end": 1300,
+       "from": 2400000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "grand-dunman",
+   "name": "Grand Dunman",
+   "district": "15",
+   "districtName": "Katong, Joo Chiat",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "99 yrs from 2022",
+   "tenureBucket": "99",
+   "street": "DUNMAN ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1350000,
+     "upper": 1600000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1350000
+      },
+      {
+       "start": 700,
+       "end": 800,
+       "from": 1550000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 5600000,
+     "upper": 7500000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2200,
+       "end": 2300,
+       "from": 5600000
+      },
+      {
+       "start": 2400,
+       "end": 2500,
+       "from": 6200000
+      },
+      {
+       "start": 2600,
+       "end": 2700,
+       "from": 6450000
+      },
+      {
+       "start": 2700,
+       "end": 2800,
+       "from": 7450000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "grange-1866",
+   "name": "Grange 1866",
+   "district": "10",
+   "districtName": "Bukit Timah, Holland, Tanglin",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": "GRANGE ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "none_shown",
+   "types": []
+  },
+  {
+   "slug": "hudson-place-residences",
+   "name": "Hudson Place Residences",
+   "district": "05",
+   "districtName": "Pasir Panjang, Clementi",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "99 yrs from 2025",
+   "tenureBucket": "99",
+   "street": "MEDIA CIRCLE",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1700000,
+     "upper": 1900000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 600,
+       "end": 700,
+       "from": 1700000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2550000,
+     "upper": 2850000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1000,
+       "end": 1100,
+       "from": 2550000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 3500000,
+     "upper": 3950000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1400,
+       "end": 1500,
+       "from": 3500000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 4600000,
+     "upper": 6000000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1700,
+       "end": 1800,
+       "from": 4600000
+      },
+      {
+       "start": 2100,
+       "end": 2200,
+       "from": 5950000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "j-den",
+   "name": "J'Den",
+   "district": "22",
+   "districtName": "Jurong",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "99 yrs from 2023",
+   "tenureBucket": "99",
+   "street": "JURONG EAST CENTRAL 1",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 3050000,
+     "upper": 3100000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 3050000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 3800000,
+     "upper": 3900000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1400,
+       "end": 1500,
+       "from": 3800000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "jansen-house",
+   "name": "Jansen House",
+   "district": "19",
+   "districtName": "Hougang, Punggol, Serangoon Gardens",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "999 yrs from 1876",
+   "tenureBucket": "freehold999",
+   "street": "JANSEN ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2000000,
+     "upper": 2050000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1000,
+       "end": 1100,
+       "from": 2000000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "kallang-riverside",
+   "name": "Kallang Riverside",
+   "district": "12",
+   "districtName": "Balestier, Toa Payoh",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": "KAMPONG BUGIS",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1250000,
+     "upper": 1350000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1250000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 6950000,
+     "upper": 7000000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2500,
+       "end": 2600,
+       "from": 6950000
+      }
+     ],
+     "review": [
+      "size:2500"
+     ],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 9050000,
+     "upper": 9050000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 3000,
+       "end": null,
+       "from": 9050000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "kassia",
+   "name": "Kassia",
+   "district": "17",
+   "districtName": "Changi, Loyang",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": "FLORA DRIVE",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1550000,
+     "upper": 1650000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 700,
+       "end": 800,
+       "from": 1550000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2100000,
+     "upper": 2250000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1000,
+       "end": 1100,
+       "from": 2100000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 2650000,
+     "upper": 2750000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1300,
+       "end": 1400,
+       "from": 2650000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "koon-seng-house",
+   "name": "Koon Seng House",
+   "district": "15",
+   "districtName": "Katong, Joo Chiat",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": "KOON SENG ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "none_shown",
+   "types": []
+  },
+  {
+   "slug": "kovan-jewel",
+   "name": "Kovan Jewel",
+   "district": "19",
+   "districtName": "Hougang, Punggol, Serangoon Gardens",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1400000,
+     "upper": 1650000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 600,
+       "end": 700,
+       "from": 1400000
+      },
+      {
+       "start": 700,
+       "end": 800,
+       "from": 1600000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2700000,
+     "upper": 2750000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1200,
+       "end": 1300,
+       "from": 2700000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 4050000,
+     "upper": 4300000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1900,
+       "end": 2000,
+       "from": 4050000
+      },
+      {
+       "start": 2100,
+       "end": 2200,
+       "from": 4250000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "lentor-gardens-residences",
+   "name": "Lentor Gardens Residences",
+   "district": "26",
+   "districtName": "Upper Thomson, Springleaf",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "99 yrs from 2025",
+   "tenureBucket": "99",
+   "street": "LENTOR GARDENS",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1550000,
+     "upper": 1900000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 600,
+       "end": 700,
+       "from": 1550000
+      },
+      {
+       "start": 700,
+       "end": 800,
+       "from": 1700000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2200000,
+     "upper": 2350000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 2200000
+      },
+      {
+       "start": 1000,
+       "end": 1100,
+       "from": 2250000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 2700000,
+     "upper": 3400000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 2700000
+      },
+      {
+       "start": 1300,
+       "end": 1400,
+       "from": 3100000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 3500000,
+     "upper": 3550000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1400,
+       "end": 1500,
+       "from": 3500000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "lentoria",
+   "name": "Lentoria",
+   "district": "26",
+   "districtName": "Upper Thomson, Springleaf",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "99 yrs from 2022",
+   "tenureBucket": "99",
+   "street": "LENTOR HILLS ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1250000,
+     "upper": 1300000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1250000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1800000,
+     "upper": 1850000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 700,
+       "end": 800,
+       "from": 1800000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2250000,
+     "upper": 2400000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 2250000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "lloyd-sixtyfive",
+   "name": "Lloyd Sixtyfive",
+   "district": "09",
+   "districtName": "Orchard, River Valley",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 6600000,
+     "upper": 6600000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1800,
+       "end": 1900,
+       "from": 6600000
+      }
+     ],
+     "review": [
+      "size:1800"
+     ],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 9200000,
+     "upper": 9250000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2400,
+       "end": 2500,
+       "from": 9200000
+      }
+     ],
+     "review": [
+      "size:2400"
+     ],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "lucerne-grand",
+   "name": "Lucerne Grand",
+   "district": "22",
+   "districtName": "Jurong",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "99 yrs from 2025",
+   "tenureBucket": "99",
+   "street": "LAKESIDE DRIVE",
+   "classTag": null,
+   "microsite": "https://lucernegrand.kentanthepropertyguy.com/",
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1500000,
+     "upper": 1900000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 600,
+       "end": 700,
+       "from": 1500000
+      },
+      {
+       "start": 700,
+       "end": 800,
+       "from": 1750000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2000000,
+     "upper": 2550000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 800,
+       "end": 900,
+       "from": 2000000
+      },
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 2150000
+      },
+      {
+       "start": 1000,
+       "end": 1100,
+       "from": 2300000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 2800000,
+     "upper": 3650000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 2800000
+      },
+      {
+       "start": 1300,
+       "end": 1400,
+       "from": 3200000
+      },
+      {
+       "start": 1400,
+       "end": 1500,
+       "from": 3400000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "lucida",
+   "name": "Lucida",
+   "district": "11",
+   "districtName": "Novena, Thomson",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 5750000,
+     "upper": 5800000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 3000,
+       "end": null,
+       "from": 5750000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "lyndenwoods",
+   "name": "Lyndenwoods",
+   "district": "05",
+   "districtName": "Pasir Panjang, Clementi",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "99 yrs from 2025",
+   "tenureBucket": "99",
+   "street": "SCIENCE PARK DRIVE",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "none_shown",
+   "types": []
+  },
+  {
+   "slug": "meyer-blue",
+   "name": "Meyer Blue",
+   "district": "15",
+   "districtName": "Katong, Joo Chiat",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": "MEYER ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 3550000,
+     "upper": 3600000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 3550000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 4550000,
+     "upper": 5850000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1500,
+       "end": 1600,
+       "from": 4550000
+      },
+      {
+       "start": 1700,
+       "end": 1800,
+       "from": 5350000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 5750000,
+     "upper": 6050000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1900,
+       "end": 2000,
+       "from": 5750000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "midtown-bay",
+   "name": "Midtown Bay",
+   "district": "07",
+   "districtName": "Bugis, Golden Mile",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "99 yrs from 2018",
+   "tenureBucket": "99",
+   "street": "BEACH ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1450000,
+     "upper": 2000000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 400,
+       "end": 500,
+       "from": 1450000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 2450000,
+     "upper": 4150000,
+     "about": false,
+     "wide": true,
+     "bands": [
+      {
+       "start": 700,
+       "end": 800,
+       "from": 2450000
+      },
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 2800000
+      },
+      {
+       "start": 1000,
+       "end": 1100,
+       "from": 3050000
+      },
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 3250000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 5050000,
+     "upper": 5500000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1300,
+       "end": 1400,
+       "from": 5050000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "narra-residences",
+   "name": "Narra Residences",
+   "district": "23",
+   "districtName": "Bukit Batok, Bukit Panjang, Choa Chu Kang",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "99 yrs from 2025",
+   "tenureBucket": "99",
+   "street": "DAIRY FARM WALK",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1300000,
+     "upper": 1850000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1300000
+      },
+      {
+       "start": 600,
+       "end": 700,
+       "from": 1400000
+      },
+      {
+       "start": 700,
+       "end": 800,
+       "from": 1450000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2050000,
+     "upper": 2700000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 800,
+       "end": 900,
+       "from": 2050000
+      },
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 2100000
+      },
+      {
+       "start": 1000,
+       "end": 1100,
+       "from": 2050000
+      },
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 2500000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 2400000,
+     "upper": 3400000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 2400000
+      },
+      {
+       "start": 1300,
+       "end": 1400,
+       "from": 3150000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 3850000,
+     "upper": 4150000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1600,
+       "end": 1700,
+       "from": 3850000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "nava-grove",
+   "name": "Nava Grove",
+   "district": "21",
+   "districtName": "Upper Bukit Timah, Clementi Park",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "99 yrs from 2024",
+   "tenureBucket": "99",
+   "street": "PINE GROVE",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 2150000,
+     "upper": 2200000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 700,
+       "end": 800,
+       "from": 2150000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "newport-residences",
+   "name": "Newport Residences",
+   "district": "02",
+   "districtName": "Tanjong Pagar",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": "ANSON ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1400000,
+     "upper": 1850000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 400,
+       "end": 500,
+       "from": 1400000
+      },
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1750000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 3500000,
+     "upper": 3800000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 3500000
+      },
+      {
+       "start": 1200,
+       "end": 1300,
+       "from": 3700000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 8250000,
+     "upper": null,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2000,
+       "end": 2100,
+       "from": 8250000
+      },
+      {
+       "start": 3000,
+       "end": null,
+       "from": 103650000
+      }
+     ],
+     "review": [
+      "psf:12900"
+     ],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "north-gaia",
+   "name": "North Gaia",
+   "district": "27",
+   "districtName": "Yishun, Sembawang",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "99 yrs (start year not given)",
+   "tenureBucket": "99",
+   "street": null,
+   "classTag": "Executive Condominium",
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 1500000,
+     "upper": 1550000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 1500000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "norwood-grand",
+   "name": "Norwood Grand",
+   "district": "25",
+   "districtName": "Woodlands, Kranji",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "99 yrs from 2023",
+   "tenureBucket": "99",
+   "street": "CHAMPIONS WAY",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 2600000,
+     "upper": 2900000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1300,
+       "end": 1400,
+       "from": 2600000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "ocho",
+   "name": "Ocho",
+   "district": "14",
+   "districtName": "Geylang, Eunos",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1450000,
+     "upper": 1600000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 700,
+       "end": 800,
+       "from": 1450000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 1850000,
+     "upper": 2300000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 800,
+       "end": 900,
+       "from": 1850000
+      },
+      {
+       "start": 1000,
+       "end": 1100,
+       "from": 1950000
+      },
+      {
+       "start": 1200,
+       "end": 1300,
+       "from": 2150000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 2200000,
+     "upper": 2250000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1200,
+       "end": 1300,
+       "from": 2200000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "one-marina-gardens",
+   "name": "One Marina Gardens",
+   "district": "01",
+   "districtName": "Raffles Place, Marina",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "99 yrs from 2023",
+   "tenureBucket": "99",
+   "street": "MARINA GARDENS LANE",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1850000,
+     "upper": 2300000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 600,
+       "end": 700,
+       "from": 1850000
+      },
+      {
+       "start": 700,
+       "end": 800,
+       "from": 2000000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2550000,
+     "upper": 3750000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 2550000
+      },
+      {
+       "start": 1000,
+       "end": 1100,
+       "from": 2800000
+      },
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 3400000
+      },
+      {
+       "start": 1200,
+       "end": 1300,
+       "from": 3600000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 4750000,
+     "upper": 5200000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1600,
+       "end": 1700,
+       "from": 4750000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "parktown-residence",
+   "name": "Parktown Residence",
+   "district": "18",
+   "districtName": "Tampines, Pasir Ris",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "99 yrs from 2023",
+   "tenureBucket": "99",
+   "street": "TAMPINES STREET 62",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 3300000,
+     "upper": 3700000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1400,
+       "end": 1500,
+       "from": 3300000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 3850000,
+     "upper": 4200000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1600,
+       "end": 1700,
+       "from": 3850000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "penrith",
+   "name": "Penrith",
+   "district": "03",
+   "districtName": "Queenstown, Tiong Bahru",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "99 yrs from 2024",
+   "tenureBucket": "99",
+   "street": "MARGARET DRIVE",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1750000,
+     "upper": 1800000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 600,
+       "end": 700,
+       "from": 1750000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "pinetree-hill",
+   "name": "Pinetree Hill",
+   "district": "21",
+   "districtName": "Upper Bukit Timah, Clementi Park",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "99 yrs from 2022",
+   "tenureBucket": "99",
+   "street": "PINE GROVE",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "none_shown",
+   "types": []
+  },
+  {
+   "slug": "promenade-peak",
+   "name": "Promenade Peak",
+   "district": "03",
+   "districtName": "Queenstown, Tiong Bahru",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "99 yrs from 2024",
+   "tenureBucket": "99",
+   "street": "ZION PROMENADE",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1450000,
+     "upper": 1700000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1450000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 2050000,
+     "upper": 2550000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 600,
+       "end": 700,
+       "from": 2050000
+      },
+      {
+       "start": 700,
+       "end": 800,
+       "from": 2200000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 3200000,
+     "upper": 4250000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1000,
+       "end": 1100,
+       "from": 3200000
+      },
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 4050000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 4600000,
+     "upper": 5000000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1400,
+       "end": 1500,
+       "from": 4600000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 6400000,
+     "upper": 6900000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1800,
+       "end": 1900,
+       "from": 6400000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "reignwood-hamilton-scotts",
+   "name": "Reignwood Hamilton Scotts",
+   "district": "09",
+   "districtName": "Orchard, River Valley",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 10000000,
+     "upper": 10450000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2700,
+       "end": 2800,
+       "from": 10000000
+      }
+     ],
+     "review": [
+      "size:2700"
+     ],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "residences-at-emerald-hill",
+   "name": "Residences at Emerald Hill",
+   "district": "09",
+   "districtName": "Orchard, River Valley",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 4300000,
+     "upper": 5200000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1600,
+       "end": 1700,
+       "from": 4300000
+      },
+      {
+       "start": 1800,
+       "end": 1900,
+       "from": 4700000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 5650000,
+     "upper": 6450000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2100,
+       "end": 2200,
+       "from": 5650000
+      },
+      {
+       "start": 2200,
+       "end": 2300,
+       "from": 6000000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 11900000,
+     "upper": 13950000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 3000,
+       "end": null,
+       "from": 11900000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "river-green",
+   "name": "River Green",
+   "district": "09",
+   "districtName": "Orchard, River Valley",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "99 yrs from 2024",
+   "tenureBucket": "99",
+   "street": "RIVER VALLEY GREEN",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1350000,
+     "upper": 1550000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 400,
+       "end": 500,
+       "from": 1350000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 2150000,
+     "upper": 2350000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 600,
+       "end": 700,
+       "from": 2150000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 3100000,
+     "upper": 3200000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 800,
+       "end": 900,
+       "from": 3100000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "river-modern",
+   "name": "River Modern",
+   "district": "09",
+   "districtName": "Orchard, River Valley",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "99 yrs from 2025",
+   "tenureBucket": "99",
+   "street": "RIVER VALLEY GREEN",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1850000,
+     "upper": 2300000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1850000
+      },
+      {
+       "start": 600,
+       "end": 700,
+       "from": 2250000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 3350000,
+     "upper": 3450000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 3350000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 6150000,
+     "upper": 7100000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1800,
+       "end": 1900,
+       "from": 6150000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "seascape-at-sentosa",
+   "name": "Seascape at Sentosa",
+   "district": "04",
+   "districtName": "Telok Blangah, Harbourfront",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "99 yrs (start year not given)",
+   "tenureBucket": "99",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 4400000,
+     "upper": 5050000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2100,
+       "end": 2200,
+       "from": 4400000
+      },
+      {
+       "start": 2300,
+       "end": 2400,
+       "from": 5000000
+      }
+     ],
+     "review": [
+      "size:2300"
+     ],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 5550000,
+     "upper": 9950000,
+     "about": false,
+     "wide": true,
+     "bands": [
+      {
+       "start": 2600,
+       "end": 2700,
+       "from": 5550000
+      },
+      {
+       "start": 2800,
+       "end": 2900,
+       "from": 6100000
+      },
+      {
+       "start": 2900,
+       "end": 3000,
+       "from": 6600000
+      },
+      {
+       "start": 3000,
+       "end": null,
+       "from": 6900000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "skies-miltonia",
+   "name": "Skies Miltonia",
+   "district": "27",
+   "districtName": "Yishun, Sembawang",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "99 yrs from 2012",
+   "tenureBucket": "99",
+   "street": "MILTONIA CLOSE",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 3300000,
+     "upper": 3300000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2700,
+       "end": 2800,
+       "from": 3300000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": [
+    {
+     "bedrooms": 0,
+     "why": "studio-size"
+    }
+   ]
+  },
+  {
+   "slug": "skye-at-holland",
+   "name": "Skye at Holland",
+   "district": "10",
+   "districtName": "Bukit Timah, Holland, Tanglin",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "99 yrs from 2024",
+   "tenureBucket": "99",
+   "street": "HOLLAND VILLAGE WAY",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "none_shown",
+   "types": []
+  },
+  {
+   "slug": "sophia-meadow",
+   "name": "Sophia Meadow",
+   "district": "09",
+   "districtName": "Orchard, River Valley",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "103 yrs from 2024",
+   "tenureBucket": "other",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1250000,
+     "upper": 1450000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 400,
+       "end": 500,
+       "from": 1250000
+      },
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1350000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1700000,
+     "upper": 1850000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 600,
+       "end": 700,
+       "from": 1700000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2450000,
+     "upper": 2600000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 800,
+       "end": 900,
+       "from": 2450000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "sora",
+   "name": "Sora",
+   "district": "22",
+   "districtName": "Jurong",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "99 yrs from 2023",
+   "tenureBucket": "99",
+   "street": "YUAN CHING ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1650000,
+     "upper": 2100000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 600,
+       "end": 700,
+       "from": 1650000
+      },
+      {
+       "start": 700,
+       "end": 800,
+       "from": 1750000
+      },
+      {
+       "start": 800,
+       "end": 900,
+       "from": 1750000
+      },
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 2000000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2100000,
+     "upper": 3150000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 2100000
+      },
+      {
+       "start": 1000,
+       "end": 1100,
+       "from": 2250000
+      },
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 2500000
+      },
+      {
+       "start": 1300,
+       "end": 1400,
+       "from": 2750000
+      },
+      {
+       "start": 1400,
+       "end": 1500,
+       "from": 3050000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 3100000,
+     "upper": 3900000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1500,
+       "end": 1600,
+       "from": 3100000
+      },
+      {
+       "start": 1700,
+       "end": 1800,
+       "from": 3850000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 3400000,
+     "upper": 4200000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1600,
+       "end": 1700,
+       "from": 3400000
+      },
+      {
+       "start": 1900,
+       "end": 2000,
+       "from": 4150000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "springleaf-residence",
+   "name": "Springleaf Residence",
+   "district": "26",
+   "districtName": "Upper Thomson, Springleaf",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "99 yrs from 2024",
+   "tenureBucket": "99",
+   "street": "UPPER THOMSON ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2700000,
+     "upper": 2850000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1200,
+       "end": 1300,
+       "from": 2700000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 3200000,
+     "upper": 3550000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1400,
+       "end": 1500,
+       "from": 3200000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "tembusu-grand",
+   "name": "Tembusu Grand",
+   "district": "15",
+   "districtName": "Katong, Joo Chiat",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "99 yrs from 2022",
+   "tenureBucket": "99",
+   "street": "JALAN TEMBUSU",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "none_shown",
+   "types": []
+  },
+  {
+   "slug": "terra-hill",
+   "name": "Terra Hill",
+   "district": "05",
+   "districtName": "Pasir Panjang, Clementi",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": "YEW SIANG ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 4000000,
+     "upper": 4750000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1800,
+       "end": 1900,
+       "from": 4000000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 4700000,
+     "upper": 7300000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2100,
+       "end": 2200,
+       "from": 4700000
+      },
+      {
+       "start": 3000,
+       "end": null,
+       "from": 7250000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "the-arcady-at-boon-keng",
+   "name": "The Arcady at Boon Keng",
+   "district": "12",
+   "districtName": "Balestier, Toa Payoh",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": "SAINT BARNABAS LANE",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1400000,
+     "upper": 1450000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1400000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1900000,
+     "upper": 2200000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 600,
+       "end": 700,
+       "from": 1900000
+      },
+      {
+       "start": 700,
+       "end": 800,
+       "from": 1950000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2850000,
+     "upper": 3550000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1000,
+       "end": 1100,
+       "from": 2850000
+      },
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 3000000
+      },
+      {
+       "start": 1200,
+       "end": 1300,
+       "from": 3250000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 3850000,
+     "upper": 6900000,
+     "about": false,
+     "wide": true,
+     "bands": [
+      {
+       "start": 1400,
+       "end": 1500,
+       "from": 3850000
+      },
+      {
+       "start": 2400,
+       "end": 2500,
+       "from": 6500000
+      },
+      {
+       "start": 2500,
+       "end": 2600,
+       "from": 6850000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "the-collective-at-one-sophia",
+   "name": "The Collective at One Sophia",
+   "district": "09",
+   "districtName": "Orchard, River Valley",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "99 yrs from 2023",
+   "tenureBucket": "99",
+   "street": "SOPHIA ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1150000,
+     "upper": 1550000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 400,
+       "end": 500,
+       "from": 1150000
+      },
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1350000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1700000,
+     "upper": 2200000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 600,
+       "end": 700,
+       "from": 1700000
+      },
+      {
+       "start": 700,
+       "end": 800,
+       "from": 1850000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2750000,
+     "upper": 3550000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1000,
+       "end": 1100,
+       "from": 2750000
+      },
+      {
+       "start": 1200,
+       "end": 1300,
+       "from": 3350000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "the-continuum",
+   "name": "The Continuum",
+   "district": "15",
+   "districtName": "Katong, Joo Chiat",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": "THIAM SIEW AVENUE",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "none_shown",
+   "types": []
+  },
+  {
+   "slug": "the-giverny-residences",
+   "name": "The Giverny Residences",
+   "district": "10",
+   "districtName": "Bukit Timah, Holland, Tanglin",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 5950000,
+     "upper": 6000000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1800,
+       "end": 1900,
+       "from": 5950000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 9550000,
+     "upper": 10000000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2500,
+       "end": 2600,
+       "from": 9550000
+      },
+      {
+       "start": 2700,
+       "end": 2800,
+       "from": 9950000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "the-hillshore",
+   "name": "The Hillshore",
+   "district": "05",
+   "districtName": "Pasir Panjang, Clementi",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": "PASIR PANJANG ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1850000,
+     "upper": 2550000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 700,
+       "end": 800,
+       "from": 1900000
+      },
+      {
+       "start": 800,
+       "end": 900,
+       "from": 1850000
+      },
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 2150000
+      },
+      {
+       "start": 1000,
+       "end": 1100,
+       "from": 2400000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2550000,
+     "upper": 3150000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1000,
+       "end": 1100,
+       "from": 2550000
+      },
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 2550000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 3900000,
+     "upper": 4250000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1400,
+       "end": 1500,
+       "from": 3900000
+      },
+      {
+       "start": 1700,
+       "end": 1800,
+       "from": 4050000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "the-lakegarden-residences",
+   "name": "The Lakegarden Residences",
+   "district": "22",
+   "districtName": "Jurong",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "99 yrs from 2023",
+   "tenureBucket": "99",
+   "street": "YUAN CHING ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "none_shown",
+   "types": []
+  },
+  {
+   "slug": "the-line-at-tanjong-rhu",
+   "name": "The Line @ Tanjong Rhu",
+   "district": "15",
+   "districtName": "Katong, Joo Chiat",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": "TANJONG RHU ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1800000,
+     "upper": 1850000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 800,
+       "end": 900,
+       "from": 1800000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 4850000,
+     "upper": 5000000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2800,
+       "end": 2900,
+       "from": 4850000
+      },
+      {
+       "start": 2900,
+       "end": 3000,
+       "from": 5000000
+      }
+     ],
+     "review": [
+      "size:2800",
+      "size:2900"
+     ],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 5750000,
+     "upper": 5800000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 3000,
+       "end": null,
+       "from": 5750000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "the-lumos",
+   "name": "The Lumos",
+   "district": "09",
+   "districtName": "Orchard, River Valley",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 3400000,
+     "upper": 3500000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 3400000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 6900000,
+     "upper": 7450000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2400,
+       "end": 2500,
+       "from": 6900000
+      },
+      {
+       "start": 2500,
+       "end": 2600,
+       "from": 7100000
+      }
+     ],
+     "review": [
+      "size:2400",
+      "size:2500"
+     ],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 6950000,
+     "upper": 10950000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2400,
+       "end": 2500,
+       "from": 6950000
+      },
+      {
+       "start": 3000,
+       "end": null,
+       "from": 9750000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "the-myst",
+   "name": "The Myst",
+   "district": "23",
+   "districtName": "Bukit Batok, Bukit Panjang, Choa Chu Kang",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "99 yrs from 2023",
+   "tenureBucket": "99",
+   "street": "UPPER BUKIT TIMAH ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 3250000,
+     "upper": 3750000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1500,
+       "end": 1600,
+       "from": 3250000
+      },
+      {
+       "start": 1800,
+       "end": 1900,
+       "from": 3700000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 3600000,
+     "upper": 4100000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1600,
+       "end": 1700,
+       "from": 3600000
+      },
+      {
+       "start": 2000,
+       "end": 2100,
+       "from": 4050000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "the-oliv",
+   "name": "The Oliv",
+   "district": "10",
+   "districtName": "Bukit Timah, Holland, Tanglin",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 13050000,
+     "upper": 13100000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 3000,
+       "end": null,
+       "from": 13050000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "the-orie",
+   "name": "The Orie",
+   "district": "12",
+   "districtName": "Balestier, Toa Payoh",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "99 yrs from 2024",
+   "tenureBucket": "99",
+   "street": "LORONG 1 TOA PAYOH",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1450000,
+     "upper": 1600000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1450000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 3000000,
+     "upper": 3150000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 3000000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "the-residences-at-w-singapore-sentosa-cove",
+   "name": "The Residences at W Singapore Sentosa Cove",
+   "district": "04",
+   "districtName": "Telok Blangah, Harbourfront",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "99 yrs from 2006",
+   "tenureBucket": "99",
+   "street": "OCEAN WAY",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 4050000,
+     "upper": 4100000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2200,
+       "end": 2300,
+       "from": 4050000
+      }
+     ],
+     "review": [
+      "size:2200"
+     ],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2900000,
+     "upper": 4750000,
+     "about": false,
+     "wide": true,
+     "bands": [
+      {
+       "start": 1600,
+       "end": 1700,
+       "from": 2900000
+      },
+      {
+       "start": 1900,
+       "end": 2000,
+       "from": 3300000
+      },
+      {
+       "start": 2400,
+       "end": 2500,
+       "from": 4000000
+      },
+      {
+       "start": 2500,
+       "end": 2600,
+       "from": 4450000
+      },
+      {
+       "start": 2600,
+       "end": 2700,
+       "from": 4250000
+      }
+     ],
+     "review": [
+      "size:2400",
+      "size:2500",
+      "size:2600"
+     ],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 3550000,
+     "upper": null,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2000,
+       "end": 2100,
+       "from": 3550000
+      },
+      {
+       "start": 2100,
+       "end": 2200,
+       "from": 3550000
+      },
+      {
+       "start": 2400,
+       "end": 2500,
+       "from": 4000000
+      },
+      {
+       "start": 3000,
+       "end": null,
+       "from": 5750000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 8550000,
+     "upper": 10900000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 3000,
+       "end": null,
+       "from": 8550000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "the-ritz-carlton-residences",
+   "name": "The Ritz-Carlton Residences",
+   "district": "09",
+   "districtName": "Orchard, River Valley",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 13850000,
+     "upper": 13900000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2800,
+       "end": 2900,
+       "from": 13850000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "the-robertson-opus",
+   "name": "The Robertson Opus",
+   "district": "09",
+   "districtName": "Orchard, River Valley",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "999 yrs from 1841",
+   "tenureBucket": "freehold999",
+   "street": "UNITY STREET",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1250000,
+     "upper": 1750000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 400,
+       "end": 500,
+       "from": 1250000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 2150000,
+     "upper": 2650000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 600,
+       "end": 700,
+       "from": 2300000
+      },
+      {
+       "start": 700,
+       "end": 800,
+       "from": 2150000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 3200000,
+     "upper": 3500000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 3200000
+      },
+      {
+       "start": 1000,
+       "end": 1100,
+       "from": 3250000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "the-sen",
+   "name": "The Sen",
+   "district": "21",
+   "districtName": "Upper Bukit Timah, Clementi Park",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "99 yrs from 2025",
+   "tenureBucket": "99",
+   "street": "JALAN JURONG KECHIL",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1500000,
+     "upper": 2000000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 600,
+       "end": 700,
+       "from": 1500000
+      },
+      {
+       "start": 700,
+       "end": 800,
+       "from": 1650000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2200000,
+     "upper": 3250000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 800,
+       "end": 900,
+       "from": 2200000
+      },
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 2400000
+      },
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 2650000
+      },
+      {
+       "start": 1200,
+       "end": 1300,
+       "from": 2950000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 3450000,
+     "upper": 3800000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1400,
+       "end": 1500,
+       "from": 3450000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "the-serra-residences",
+   "name": "The Serra Residences",
+   "district": "11",
+   "districtName": "Novena, Thomson",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 2250000,
+     "upper": 2500000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 700,
+       "end": 800,
+       "from": 2250000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2400000,
+     "upper": 3200000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 700,
+       "end": 800,
+       "from": 2400000
+      },
+      {
+       "start": 800,
+       "end": 900,
+       "from": 2850000
+      },
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 3000000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 3100000,
+     "upper": 5600000,
+     "about": false,
+     "wide": true,
+     "bands": [
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 3100000
+      },
+      {
+       "start": 1200,
+       "end": 1300,
+       "from": 4350000
+      },
+      {
+       "start": 1300,
+       "end": 1400,
+       "from": 4700000
+      },
+      {
+       "start": 1500,
+       "end": 1600,
+       "from": 5500000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 6300000,
+     "upper": 6450000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1700,
+       "end": 1800,
+       "from": 6300000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "the-shorefront",
+   "name": "The Shorefront",
+   "district": "17",
+   "districtName": "Changi, Loyang",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "999 yrs from 1937",
+   "tenureBucket": "freehold999",
+   "street": "JALAN LOYANG BESAR",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1550000,
+     "upper": 1650000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 700,
+       "end": 800,
+       "from": 1550000
+      },
+      {
+       "start": 800,
+       "end": 900,
+       "from": 1600000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 1800000,
+     "upper": 1950000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 900,
+       "end": 1000,
+       "from": 1800000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 2900000,
+     "upper": 2950000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1500,
+       "end": 1600,
+       "from": 2900000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "tmw-maxwell",
+   "name": "Tmw Maxwell",
+   "district": "02",
+   "districtName": "Tanjong Pagar",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "99 yrs (start year not given)",
+   "tenureBucket": "99",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1300000,
+     "upper": 2350000,
+     "about": false,
+     "wide": true,
+     "bands": [
+      {
+       "start": 400,
+       "end": 500,
+       "from": 1300000
+      },
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1500000
+      },
+      {
+       "start": 800,
+       "end": 900,
+       "from": 2250000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 2200000,
+     "upper": 2850000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 700,
+       "end": 800,
+       "from": 2200000
+      },
+      {
+       "start": 800,
+       "end": 900,
+       "from": 2400000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "turquoise",
+   "name": "Turquoise",
+   "district": "04",
+   "districtName": "Telok Blangah, Harbourfront",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "99 yrs (start year not given)",
+   "tenureBucket": "99",
+   "street": null,
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "under_review",
+   "types": [],
+   "held": [
+    {
+     "bedrooms": 0,
+     "why": "studio-size"
+    }
+   ]
+  },
+  {
+   "slug": "union-square-residences",
+   "name": "Union Square Residences",
+   "district": "01",
+   "districtName": "Raffles Place, Marina",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "99 yrs from 2024",
+   "tenureBucket": "99",
+   "street": "HAVELOCK ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1300000,
+     "upper": 1700000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 400,
+       "end": 500,
+       "from": 1300000
+      },
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1400000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1900000,
+     "upper": 2150000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 700,
+       "end": 800,
+       "from": 1900000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 4150000,
+     "upper": 4700000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1500,
+       "end": 1600,
+       "from": 4150000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 9500000,
+     "upper": 9500000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2400,
+       "end": 2500,
+       "from": 9500000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "upperhouse-at-orchard-boulevard",
+   "name": "Upperhouse at Orchard Boulevard",
+   "district": "10",
+   "districtName": "Bukit Timah, Holland, Tanglin",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "99 yrs from 2024",
+   "tenureBucket": "99",
+   "street": "ORCHARD BOULEVARD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1550000,
+     "upper": 1750000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 400,
+       "end": 500,
+       "from": 1550000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 2500000,
+     "upper": 2600000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 700,
+       "end": 800,
+       "from": 2500000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 7100000,
+     "upper": 7750000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2000,
+       "end": 2100,
+       "from": 7100000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "v-on-shenton",
+   "name": "V on Shenton",
+   "district": "01",
+   "districtName": "Raffles Place, Marina",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "99 yrs from 2011",
+   "tenureBucket": "99",
+   "street": "SHENTON WAY",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 16000000,
+     "upper": 16000000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 3000,
+       "end": null,
+       "from": 16000000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "vela-bay",
+   "name": "Vela Bay",
+   "district": "16",
+   "districtName": "Bedok, Upper East Coast",
+   "region": "OCR",
+   "regionLabel": "Outside Central",
+   "tenure": "99 yrs from 2025",
+   "tenureBucket": "99",
+   "street": "BAYSHORE WALK",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1450000,
+     "upper": 1600000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 400,
+       "end": 500,
+       "from": 1450000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 1650000,
+     "upper": 2100000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1650000
+      },
+      {
+       "start": 600,
+       "end": 700,
+       "from": 1850000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2300000,
+     "upper": 3100000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 800,
+       "end": 900,
+       "from": 2300000
+      },
+      {
+       "start": 1000,
+       "end": 1100,
+       "from": 2800000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 3150000,
+     "upper": 4400000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 3150000
+      },
+      {
+       "start": 1300,
+       "end": 1400,
+       "from": 3800000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 4500000,
+     "upper": 5750000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1500,
+       "end": 1600,
+       "from": 4500000
+      },
+      {
+       "start": 1700,
+       "end": 1800,
+       "from": 5700000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "verd-joo-chiat",
+   "name": "Verde Joo Chiat",
+   "district": "15",
+   "districtName": "Katong, Joo Chiat",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "Freehold",
+   "tenureBucket": "freehold",
+   "street": "JOO CHIAT TERRACE",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 2050000,
+     "upper": 2100000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 800,
+       "end": 900,
+       "from": 2050000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 2950000,
+     "upper": 3950000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1200,
+       "end": 1300,
+       "from": 2950000
+      },
+      {
+       "start": 1500,
+       "end": 1600,
+       "from": 3900000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 3850000,
+     "upper": 3950000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1400,
+       "end": 1500,
+       "from": 3850000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "w-residences-marina-view-singapore",
+   "name": "W Residences Marina View",
+   "district": "01",
+   "districtName": "Raffles Place, Marina",
+   "region": "CCR",
+   "regionLabel": "Core Central",
+   "tenure": "99 yrs from 2021",
+   "tenureBucket": "99",
+   "street": "MARINA VIEW",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1750000,
+     "upper": 2450000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 500,
+       "end": 600,
+       "from": 1750000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 2150000,
+     "upper": 3550000,
+     "about": false,
+     "wide": true,
+     "bands": [
+      {
+       "start": 700,
+       "end": 800,
+       "from": 2150000
+      },
+      {
+       "start": 800,
+       "end": 900,
+       "from": 2450000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 3450000,
+     "upper": 5200000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1100,
+       "end": 1200,
+       "from": 3450000
+      },
+      {
+       "start": 1200,
+       "end": 1300,
+       "from": 4200000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 8700000,
+     "upper": 10750000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2200,
+       "end": 2300,
+       "from": 8700000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 11350000,
+     "upper": 14300000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 2800,
+       "end": 2900,
+       "from": 11350000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  },
+  {
+   "slug": "zyon-grand",
+   "name": "Zyon Grand",
+   "district": "03",
+   "districtName": "Queenstown, Tiong Bahru",
+   "region": "RCR",
+   "regionLabel": "Rest of Central",
+   "tenure": "99 yrs from 2024",
+   "tenureBucket": "99",
+   "street": "KIM SENG ROAD",
+   "classTag": null,
+   "microsite": null,
+   "lastChecked": "2026-10-27T05:20:33.429Z",
+   "freshness": "current",
+   "state": "listed",
+   "types": [
+    {
+     "bedrooms": 1,
+     "label": "1 bedroom",
+     "from": 1450000,
+     "upper": 1550000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 400,
+       "end": 500,
+       "from": 1450000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 2,
+     "label": "2 bedrooms",
+     "from": 2350000,
+     "upper": 2450000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 700,
+       "end": 800,
+       "from": 2350000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 3,
+     "label": "3 bedrooms",
+     "from": 2750000,
+     "upper": 2850000,
+     "about": true,
+     "wide": false,
+     "bands": [
+      {
+       "start": 800,
+       "end": 900,
+       "from": 2750000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 4,
+     "label": "4 bedrooms",
+     "from": 5350000,
+     "upper": 5750000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1600,
+       "end": 1700,
+       "from": 5350000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    },
+    {
+     "bedrooms": 5,
+     "label": "5+ bedrooms",
+     "from": 6000000,
+     "upper": 6400000,
+     "about": false,
+     "wide": false,
+     "bands": [
+      {
+       "start": 1800,
+       "end": 1900,
+       "from": 6000000
+      }
+     ],
+     "review": [],
+     "quarantine": null
+    }
+   ],
+   "held": []
+  }
+ ]
+}

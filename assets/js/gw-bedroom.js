@@ -99,18 +99,34 @@
     const range = t.n >= 4 ? 'Half of the ' + plural(t.n, w) + ' sold between ' + short(t.price[1]) + ' and ' + short(t.price[3]) + '.' : plural(t.n, w) + ', from ' + short(t.price[0]) + ' to ' + short(t.price[4]) + '.';
     const win = recent ? '' : '<p class="lg-fine" data-gwb-win>Too few in the last 12 months, so this covers ' + span(t.win) + '.</p>';
     const bud = budgetText(t, opt.budget);
-    return '<div class="lg-ans gwb-ans" data-gwb-ans data-gwb-g="' + esc(t.g) + '"><p class="lg-ans-k">' + k + '</p>' +
+    // no reliable price movement (Ken, 29 Oct 2026): no movement panel beside the answer, so the answer takes that column (gwb-side) and the reason sits in opt.move
+    return '<div class="lg-ans gwb-ans' + (opt.move ? ' gwb-side' : '') + '" data-gwb-ans data-gwb-g="' + esc(t.g) + '"><p class="lg-ans-k">' + k + '</p>' +
       '<p class="lg-ans-main"><span class="lg-ans-v" title="' + esc(full(t.price[2])) + '">' + short(t.price[2]) + '<small> typical price</small></span></p>' +
       '<p class="gwb-l" data-gwb-range>' + range + '</p>' +
       '<p class="gwb-l" data-gwb-size>' + esc(sizeText(t)) + ' Median ' + full(t.psf[2]) + ' psf.</p>' + win +
       (bud ? '<p class="gwb-l gwb-bud" data-gwb-budget>' + esc(bud) + '</p>' : '') + (opt.rent || '') +
       // answer first (Ken, 29 Oct 13:33): one short qualification visible; where the bedrooms come from and the data dates in the disclosure
-      '<p class="lg-fine lg-ans-basis">Past sales, not a valuation.</p><details class="gwb-det" data-gwb-how><summary>How these prices are calculated</summary><div class="gwb-det-in"><p class="gwb-l" data-gwb-basis>' + esc(basisText(t.basis)) + '</p>' + (opt.fresh || '') + '</div></details></div>';
+      '<p class="lg-fine lg-ans-basis">Past sales, not a valuation.</p>' + (opt.move || '') + '<details class="gwb-det" data-gwb-how><summary>How these prices are calculated</summary><div class="gwb-det-in"><p class="gwb-l" data-gwb-basis>' + esc(basisText(t.basis)) + '</p>' + (opt.fresh || '') + '</div></details></div>';
   }
-  // Price movement: the Market Pulse reading for the type's most-sold size; with no reading, why, and the way to the size trend.
+  // Price movement is secondary to the price (Ken, 29 Oct 2026): the Market Pulse panel shows only a reliable reading ('strong', same thresholds);
+  // otherwise its head and reason (the same bedroomText wording) sit in a closed "Sales history & price movement" under the answer.
+  const trendReliable = (V) => !!(V && V.t && V.sale === 'resale' && V.t.trend && V.t.trend.evidence === 'strong' && V.t.trend.why !== 'coverage');
+  function moveHtml(V, opt) {
+    opt = opt || {};
+    const t = V.t; if (!t || V.sale !== 'resale' || trendReliable(V)) return '';
+    const R = PULSE && PULSE.bedroomText ? PULSE.bedroomText(t) : null; if (!R) return '';
+    const r = t.trend || {}, acts = [r.bin != null ? '<button type="button" class="kpr-link" data-bin="' + r.bin + '" data-gwb-size-trend>See how prices moved by size ›</button>' : '',
+      opt.tx ? '<button type="button" class="kpr-link" data-lg-scroll="lgTx" data-gwb-sales>See the individual sales ›</button>' : '',
+      opt.mapHref ? '<a class="kpr-link" href="' + esc(opt.mapHref) + '" data-mp-sales>See the sales on the Map ›</a>' : ''].filter(Boolean);
+    return '<details class="gwb-det" data-gwb-hist data-gwb-move="' + esc(r.evidence || 'none') + '"><summary>Sales history &amp; price movement</summary><div class="gwb-det-in">' +
+      '<div class="gwb-sec"><p class="gwb-sec-h">Price movement' + (R.band ? ' · ' + esc(R.band) : '') + '</p><p class="gwb-l" data-gwb-head>' + esc(R.head) + '.</p>' + (R.sub ? '<p class="gwb-l gwb-dim" data-gwb-sub>' + esc(R.sub) + '</p>' : '') + '</div>' +
+      (acts.length ? '<p class="gwb-acts">' + acts.join('') + '</p>' : '') + '</div></details>';
+  }
+  // Price movement: the Market Pulse reading for the type's most-sold size, shown as a panel only when it is reliable (moveHtml otherwise).
   function trendHtml(V, opt) {
     opt = opt || {};
     const t = V.t;
+    if (V.sale === 'resale' && !trendReliable(V)) return '';
     if (V.sale !== 'resale') return '<section class="mp gwb-mp" data-gwb-trend data-mp-state="other" aria-label="Price movement"><p class="mp-k">Price movement</p><h2 class="mp-h">Shown for resales only</h2><p class="mp-s">' + esc(words(V.sale)[1].charAt(0).toUpperCase() + words(V.sale)[1].slice(1)) + ' are priced by the developer or the seller’s purchase date, so a price direction isn’t read from them.</p></section>';
     const R = PULSE && PULSE.bedroomText ? PULSE.bedroomText(t) : null;
     if (!R) return '';
@@ -202,7 +218,7 @@
     let main = '', hist = '';
     if (T.tier === 'B') {
       main = '<div class="gwb-tiles">' + m.groups.map((q, i) => { const g = T.groups[i];
-        return '<div class="gwb-tile" data-gwb-group="' + (i + 1) + '"><p class="gwb-t-k" data-gwb-median>' + esc(g.head.replace(/: .*$/, '')) + '</p><p class="gwb-t-v"><b>' + esc(short(q.med)) + '</b></p><p class="gwb-t-d">' + esc(sqftT(q.sqft)) + '<span class="gwb-t-sep"> · </span><span class="gwb-t-p">' + esc(ym(q.from) + ' to ' + ym(q.to)) + '</span></p></div>'; }).join('') + '</div>' +
+        return '<div class="gwb-tile" data-gwb-group="' + (i + 1) + '"><p class="gwb-t-k" data-gwb-median>' + esc(g.head.replace(/: .*$/, '')) + '</p><p class="gwb-t-v"><b>' + esc(short(q.med)) + '</b></p><p class="gwb-t-d">' + esc(sqftT(q.sqft)) + '<span class="gwb-t-sep"> · </span><span class="gwb-t-p">' + esc(ym(q.from) + ' to ' + ym(q.to)) + '</span></p>' + (opt.grp ? opt.grp(m.g, q) : '') + '</div>'; }).join('') + '</div>' +
         (m.groups.length > 1 ? '<p class="gwb-diff" data-gwb-diffsizes>' + esc(DIFF_SIZES) + '</p>' : '');
       const cs = T.groups.map((q) => q.cmp).filter(Boolean), two = T.groups.length > 1;   // two groups: each sentence under its sizes, so it is clear which it is
       hist = '<div class="gwb-sec" data-gwb-cmp><p class="gwb-sec-h">Price movement</p>' + (cs.length ? T.groups.map((g, i) => (two ? '<p class="gwb-cmp-k">' + esc(sqftT(m.groups[i].sqft)) + '</p>' : '') + (g.cmp ? '<p class="gwb-l">' + esc(g.cmp) + '</p>' : '<p class="gwb-l" data-gwb-notrend>' + esc(NO_TREND) + '</p>')).join('') + '<p class="lg-fine">' + CMP_FOOT + '</p>' : '<p class="gwb-l" data-gwb-notrend>' + esc(NO_TREND) + '</p>') + '</div>' +
@@ -222,6 +238,18 @@
       (opt.tx ? '<p class="gwb-m-act"><button type="button" class="lg-btn" data-gwr-mbed="' + esc(m.g) + '">See the ' + num(m.n24) + ' matched ' + WORDS.resale[m.n24 === 1 ? 0 : 1] + '</button></p>' : '') +
       '<details class="gwb-det" data-gwb-hist><summary>Sales history &amp; price movement</summary><div class="gwb-det-in">' + hist + rows + '</div></details>' +
       '<details class="gwb-det" data-gwb-how><summary>How these prices are calculated</summary><div class="gwb-det-in">' + how + '</div></details></div>';
+  }
+  /* "Recent resale prices by home type" (GW_REC.typesHtml, Ken 29 Oct 2026): a matched-only type's cells, at most two, from the approved r2 data and
+     the panel's own templates; never a whole-type price. Tier B: each size group's median (up to two), else one group and its other-size
+     historical range; Tier C: the historical range. Each cell: { k: what the price is, v: the price, d: sizes / sales / period }. [] for v1.2 data. */
+  function tierCells(m) {
+    const T = tierOf(m); if (!T) return [];
+    const per = (o) => ym(o.from) + ' to ' + ym(o.to);
+    const rng = (o, k) => ({ k, v: moneyR(o.lo, o.hi), d: plR(o.n) + ' · ' + sqftT(o.sqft) + ' · ' + per(o), range: true });
+    if (T === 'C') return [rng(m.range, 'Historical matched transactions')];
+    const c = m.groups.slice(0, 2).map((q) => ({ k: 'Median of ' + plR(q.n).replace(/resales?$/, 'past matched $&'), v: short(q.med), d: sqftT(q.sqft) + ' · ' + per(q) }));
+    if (c.length === 1 && m.other) c.push(rng(m.other, 'Historical matched transactions at other sizes'));
+    return c;
   }
   // "Also matched" index line part (typesHtml): Tier B's first median with its sizes, or Tier C's historical range; '' for v1.2 data
   function alsoText(m) {
@@ -334,5 +362,5 @@
     return 'Bedroom types: inferred by Groundwork, not recorded by URA, from developers’ floor plans where checked, otherwise from the bedroom counts declared in URA rental contracts for homes of the same size' + (m.rentalWindow ? ' (' + q(m.rentalWindow.from) + ' to ' + qEnd(m.rentalWindow.to) + ')' : '') + '. Sales whose size fits more than one bedroom count are left out.';
   }
 
-  return { QUAL, DIFF_SIZES, NO_TREND, METHOD, warnText, tierOf, tierLines, pricedMatchedHtml, alsoText, assertPricedMatchedCopy, B_NOTE, C_NOTE, CMP_FOOT, MATCHED_TAG, MATCHED_ROWS, ROWS_HEAD, ROWS_NOTE, assertMatchedRows, MATCHED_ONLY_ALLOWED, assertMatchedOnlyCopy, anyType, matchedLines, matchedHtml, sourceText, pick, view, chipsHtml, lineHtml, answerHtml, trendHtml, numbersHtml, basisText, sizeText, budgetText, finding, typical, short, label };
+  return { trendReliable, moveHtml, tierCells, QUAL, DIFF_SIZES, NO_TREND, METHOD, warnText, tierOf, tierLines, pricedMatchedHtml, alsoText, assertPricedMatchedCopy, B_NOTE, C_NOTE, CMP_FOOT, MATCHED_TAG, MATCHED_ROWS, ROWS_HEAD, ROWS_NOTE, assertMatchedRows, MATCHED_ONLY_ALLOWED, assertMatchedOnlyCopy, anyType, matchedLines, matchedHtml, sourceText, pick, view, chipsHtml, lineHtml, answerHtml, trendHtml, numbersHtml, basisText, sizeText, budgetText, finding, typical, short, label };
 });

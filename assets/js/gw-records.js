@@ -46,14 +46,35 @@
     const r = shard.projects ? shard.projects[id] : null;
     return r && r.rows ? { id, name: r.name, rows: r.rows, meta, latest: ymInt(meta.latestMonth), start: ymInt(meta.monthStart) } : null;
   }
-  // f: { bed: 'all' | 'u' | '2', bin: 'all' | 600, sale: 'all' | 1..3, period: 'all' | 12 | 24, sort: 'new' | 'old' | 'high' | 'low' }
+  // f: { bed: 'all' | 'u' | '2', bin: 'all' | 600, sale: 'all' | 1..3, period: 'all' | 12 | 24, sort: 'new' | 'old' | 'high' | 'low' | 'psfHigh' | 'psfLow',
+  //      size: null | [loSqft, hiSqft] } (Research Filters, Claude C FINAL §3.1: size is a group link's exact range, in the list's own rounded sq ft,
+  //      inclusive; with size set, bin is 'all'). A missing size is null, so earlier callers (matchedRows, the Map) are unchanged.
+  const DEFAULT = { bed: 'all', bin: 'all', sale: 'all', period: 'all', sort: 'new', size: null };
+  const sqftR = (r) => Math.round(r[3] * SQFT);   // the size each row shows
+  function test(f, latest) {
+    const from = f.period && f.period !== 'all' ? ymAdd(latest, -(Number(f.period) - 1)) : 0, z = f.size;
+    return (r) => (f.sale === 'all' || r[1] === Number(f.sale)) && (f.bed === 'all' || (f.bed === 'u' ? r[5] == null : r[5] === Number(f.bed))) &&
+      (f.bin === 'all' || f.bin === 'range' || binOf(r[3]) === Number(f.bin)) && r[0] >= from && (!z || (sqftR(r) >= z[0] && sqftR(r) <= z[1]));
+  }
   function filter(rows, f, latest) {
-    const from = f.period && f.period !== 'all' ? ymAdd(latest, -(Number(f.period) - 1)) : 0;
-    const out = rows.filter((r) => (f.sale === 'all' || r[1] === Number(f.sale)) && (f.bed === 'all' || (f.bed === 'u' ? r[5] == null : r[5] === Number(f.bed))) &&
-      (f.bin === 'all' || binOf(r[3]) === Number(f.bin)) && r[0] >= from);
-    const by = { new: (a, b) => b[0] - a[0], old: (a, b) => a[0] - b[0], high: (a, b) => b[4] - a[4], low: (a, b) => a[4] - b[4] }[f.sort] || ((a, b) => b[0] - a[0]);
+    const out = rows.filter(test(f, latest));
+    const by = { new: (a, b) => b[0] - a[0], old: (a, b) => a[0] - b[0], high: (a, b) => b[4] - a[4], low: (a, b) => a[4] - b[4], psfHigh: (a, b) => psfOf(b) - psfOf(a), psfLow: (a, b) => psfOf(a) - psfOf(b) }[f.sort] || ((a, b) => b[0] - a[0]);
     return out.map((r, i) => [r, i]).sort((a, b) => by(a[0], b[0]) || a[1] - b[1]).map((x) => x[0]);   // stable: equal keys keep URA's order
   }
+  const count = (rows, f, latest) => { const t = test(f, latest); let n = 0; for (let i = 0; i < rows.length; i++) if (t(rows[i])) n++; return n; };
+  // §3.2: each option's N is the list's length were it chosen, every other filter as it is. A group's range is kept for Home type, Sale type and
+  // Period; the Size options other than the range itself are counted without it (choosing one removes it).
+  function facetCounts(rows, f, latest, O) {
+    O = O || options(rows);
+    const c = (k, v, drop) => count(rows, Object.assign({}, f, { [k]: v }, drop ? { size: null } : {}), latest), out = { bed: {}, bin: {}, sale: {}, period: {} };
+    ['all'].concat(O.beds.map(String), O.unknown ? ['u'] : []).forEach((v) => { out.bed[v] = c('bed', v); });
+    ['all'].concat(O.bins.map(String)).forEach((v) => { out.bin[v] = c('bin', v, true); });
+    if (f.size) out.bin.range = count(rows, f, latest);
+    ['all'].concat(O.sales.map(String)).forEach((v) => { out.sale[v] = c('sale', v); });
+    ['all', '24', '12'].forEach((v) => { out.period[v] = c('period', v); });
+    return out;
+  }
+  const isDefault = (f) => Object.keys(DEFAULT).every((k) => (k === 'size' ? !f.size : String(f[k]) === String(DEFAULT[k])));
   // What the filters can offer: only values that occur.
   function options(rows) {
     const beds = new Set(), bins = new Set(), sales = new Set(); let unknown = false;
@@ -87,28 +108,40 @@
 
   /* ---------------- 1. what each home type (or size) sells for ---------------- */
   // BV: GW_BED.view(...) for the sale type on show (resales). Each row selects the type for the whole report (the page wires [data-gwr-bed]).
+  // "Recent resale prices by home type" (Ken, 29 Oct 2026): one row per bedroom type, typical-price types and (with o.cells = GW_BED.tierCells) the
+  // matched-only types with an approved r2 tier, in bedroom order. Each row has at most two cells that say what their price is: a typical price
+  // and the middle half (or lowest – highest), a size group's median, or historical matched transactions. Never a whole-type price for a
+  // matched-only type. A row selects its type (the page wires [data-gwr-bed]; in the search preview it opens the full research on that type).
+  const BORD = (g) => (g === '0' ? 0 : g === 'PH' ? 9 : Number(g) || 8);
+  function typeRows(BV, o) {
+    if (!BV) return [];
+    const cells = o && o.cells, out = (BV.types || []).map((t) => ({ g: t.g, t }));
+    if (cells) (BV.only || []).forEach((m) => { const c = cells(m); if (c.length) out.push({ g: m.g, m, c }); });
+    return out.sort((a, b) => BORD(a.g) - BORD(b.g));
+  }
   function typesHtml(BV, o) {
     o = o || {};
-    if (!BV || !BV.types || !BV.types.length) return '';
+    const R = typeRows(BV, o);
+    if (!R.length) return '';
     const w = WORD[3], lab = o.label || ((g) => (g === 'PH' ? 'Penthouse' : g === '0' ? 'Studio' : g + '-bedroom'));
-    const row = (t) => {
-      const sel = BV.g === t.g, range = t.n >= 4 ? short(t.price[1]) + ' – ' + short(t.price[3]) : short(t.price[0]) + ' – ' + short(t.price[4]);
+    const cell = (c) => '<span class="gwr-c' + (c.range ? ' gwr-c-r' : '') + '"' + (c.range ? ' data-gwr-range' : '') + '><small class="gwr-ck">' + esc(c.k) + '</small><b' + (c.title ? ' title="' + esc(c.title) + '"' : '') + '>' + esc(c.v) + '</b><small class="gwr-cd">' + esc(c.d) + '</small></span>';
+    const aCells = (t) => {
       const size = t.sqft[0] === t.sqft[1] ? num(t.sqft[0]) + ' sq ft' : num(t.sqft[0]) + '–' + num(t.sqft[1]) + ' sq ft';
-      return '<button type="button" class="gwr-row" data-gwr-bed="' + esc(t.g) + '" aria-pressed="' + sel + '">' +
-        '<span class="gwr-t">' + esc(lab(t.g)) + '</span>' +
-        '<span class="gwr-p"><b title="' + esc(money(t.price[2])) + '">' + short(t.price[2]) + '</b><small>typical</small></span>' +
-        '<span class="gwr-r">' + range + '<small>' + (t.n >= 4 ? 'middle half' : 'lowest – highest') + '</small></span>' +
-        '<span class="gwr-m">' + plural(t.n, w) + (t.win === 12 ? '' : ' in 2 years') + ' · ' + size + ' · ' + money(t.psf[2]) + ' psf</span></button>';
+      return [{ k: 'Typical price', v: short(t.price[2]), title: money(t.price[2]), d: plural(t.n, w) + ' · ' + (t.win === 12 ? 'last 12 months' : 'last 2 years') },
+        { k: t.n >= 4 ? 'Middle half' : 'Lowest – highest', v: t.n >= 4 ? short(t.price[1]) + ' – ' + short(t.price[3]) : short(t.price[0]) + ' – ' + short(t.price[4]), d: size + ' · ' + money(t.psf[2]) + ' psf' }];
     };
-    // V2: types with matched resales but no figures, counts only, each opening its sales below (never a price here).
-    // Pricing tiers (r2 §3): each may carry its first median with its sizes (Tier B) or its historical range (Tier C); o.alsoText is GW_BED.alsoText
-    const at = (m) => (o.alsoText ? o.alsoText(m) : ''), sep = BV.only && BV.only.some((m) => at(m)) ? '; ' : ', ';
-    const also = BV.only && BV.only.length ? '<p class="lg-fine gwr-also" data-gwr-also>Also matched (matched sales only): ' + BV.only.map((m) => '<button type="button" class="kpr-link" data-gwr-mbed="' + esc(m.g) + '">' + esc(lab(m.g)) + ' ' + num(m.n24) + '</button>' + (at(m) ? ': ' + esc(at(m)) : '')).join(sep) + '</p>' : '';
+    const row = (r) => '<button type="button" class="gwr-row gwr-row2" data-gwr-bed="' + esc(r.g) + '" data-gwr-tier="' + (r.t ? 'typical' : r.c[0].range ? 'historical' : 'median') + '" aria-pressed="' + (BV.g === r.g) + '">' +
+      '<span class="gwr-t">' + esc(lab(r.g)) + (r.m ? '<small>Matched sales only</small>' : '') + '</span>' +
+      '<span class="gwr-cs">' + (r.t ? aCells(r.t) : r.c).map(cell).join('') + '</span></button>';
+    // matched-only types without a tier (v1.2 data, or no o.cells): counts only, as before (never a price here)
+    const shown = new Set(R.map((r) => r.g)), rest = (BV.only || []).filter((m) => !shown.has(m.g));
+    const also = rest.length ? '<p class="lg-fine gwr-also" data-gwr-also>Also matched (matched sales only): ' + rest.map((m) => '<button type="button" class="kpr-link" data-gwr-mbed="' + esc(m.g) + '">' + esc(lab(m.g)) + ' ' + num(m.n24) + '</button>').join(', ') + '</p>' : '';
     const few = BV.few && BV.few.length ? '<p class="lg-fine" data-gwr-few>' + BV.few.map((g) => esc(lab(g))).join(' and ') + ': too few recent resales to show a typical price.</p>' : '';
-    return '<section class="lg-band gwr-band" id="lgTypes" aria-labelledby="lgTypesH"><div class="lg-wrap gwr-wrap"><div class="gwr-head"><p class="lg-kicker">By home type</p><h2 id="lgTypesH">What each home type sells for</h2>' +
-      '<p class="lg-sub">Resales here in the last 12 months: the typical (median) total price, and the range most of them sold within. Choose one to see its sales.</p></div>' +
-      '<div class="gwr-rows" role="group" aria-label="Home types">' + BV.types.map(row).join('') + '</div>' + also + few +
-      '<p class="lg-fine">' + esc(o.basis || 'Bedroom types are inferred by Groundwork from developer floor plans or URA rental records for the same size; URA doesn’t record bedrooms with a sale.') + ' Past sales, not a valuation.</p></div></section>';
+    const anyM = R.some((r) => r.m);
+    return '<section class="lg-band gwr-band" id="lgTypes" aria-labelledby="lgTypesH"><div class="lg-wrap gwr-wrap"><div class="gwr-head"><p class="lg-kicker">By home type</p><h2 id="lgTypesH">Recent resale prices by home type</h2>' +
+      '<p class="lg-sub">From past URA resales here. Choose a home type for its details.</p></div>' +
+      '<div class="gwr-rows" role="group" aria-label="Home types">' + R.map(row).join('') + '</div>' + also + few +
+      '<p class="lg-fine" data-gwr-qual>' + 'Past resales, not valuations. Bedroom types are matched from floor plans or URA rental records' + (anyM ? '; a median or historical price covers only the sizes shown.' : '.') + '</p></div></section>';
   }
   // The same rows by size, where bedroom types aren't shown. sale: 'resale' | 'new' | 'sub'.
   function sizesHtml(rec, sale, o) {
@@ -120,7 +153,8 @@
       '<span class="gwr-p"><b title="' + esc(money(x.price[2])) + '">' + short(x.price[2]) + '</b><small>typical</small></span>' +
       '<span class="gwr-r">' + short(x.price[1]) + ' – ' + short(x.price[3]) + '<small>middle half</small></span>' +
       '<span class="gwr-m">' + plural(x.n, w) + ' · ' + money(x.psf) + ' psf</span></button>';
-    return '<section class="lg-band gwr-band" id="lgTypes" aria-labelledby="lgTypesH"><div class="lg-wrap gwr-wrap"><div class="gwr-head"><p class="lg-kicker">By size</p><h2 id="lgTypesH">What each size sells for</h2>' +
+    const id = o.id || 'lgTypes';   // 'lgSizes' when it follows the home types
+    return '<section class="lg-band gwr-band" id="' + id + '" aria-labelledby="' + id + 'H"><div class="lg-wrap gwr-wrap"><div class="gwr-head"><p class="lg-kicker">By size</p><h2 id="' + id + 'H">What each size sells for</h2>' +
       '<p class="lg-sub">' + esc(w[1].charAt(0).toUpperCase() + w[1].slice(1)) + ' here in the last 12 months, by size: the typical (median) total price and the range most of them sold within. Sizes with fewer than 5 sales over 3 months aren’t shown; their sales are listed below.</p></div>' +
       '<div class="gwr-rows" role="group" aria-label="Sizes">' + S.rows.map(row).join('') + '</div>' +
       (o.why ? '<p class="lg-fine">' + esc(o.why) + '</p>' : '') + '<p class="lg-fine">Past sales, not a valuation.</p></div></section>';
@@ -146,15 +180,19 @@
   }
 
   /* ---------------- 2. recent sales ---------------- */
-  const sel = (k, label, opts, v) => '<label class="gwr-f"><span>' + label + '</span><select data-gwr-f="' + k + '">' + opts.map((o) => '<option value="' + esc(o[0]) + '"' + (String(o[0]) === String(v) ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('') + '</select></label>';
+  // Research Filters (Claude C FINAL §2): the same five selects; each option with its count, an option with no sales disabled (never the one chosen).
+  const sel = (k, label, opts, v, N) => '<label class="gwr-f"><span>' + label + '</span><select data-gwr-f="' + k + '">' + opts.map((o) => {
+    const on = String(o[0]) === String(v), n = N ? N[String(o[0])] : null;
+    return '<option value="' + esc(o[0]) + '"' + (on ? ' selected' : '') + (n === 0 && !on ? ' disabled' : '') + '>' + esc(o[1]) + (n != null ? ' (' + num(n) + ')' : '') + '</option>'; }).join('') + '</select></label>';
+  const sizeLabel = (z) => '≈ ' + (z[0] === z[1] ? num(z[0]) : num(z[0]) + '–' + num(z[1])) + ' sq ft';
   function filtersHtml(rec, f) {
-    const O = options(rec.rows);
+    const O = options(rec.rows), N = facetCounts(rec.rows, f, rec.latest, O);
     return '<div class="gwr-fs" role="group" aria-label="Filter the sales">' +
-      sel('bed', 'Home type', [['all', 'All types']].concat(O.beds.map((b) => [b, bedLabel(b)]), O.unknown ? [['u', 'Type unknown']] : []), f.bed) +
-      sel('bin', 'Size', [['all', 'All sizes']].concat(O.bins.map((b) => [b, bandLabel(b)])), f.bin) +
-      sel('sale', 'Sale type', [['all', 'All sale types']].concat(O.sales.map((s) => [s, SALE[s] + 's'])), f.sale) +
-      sel('period', 'Period', [['all', 'Since ' + ymLabel(rec.start)], [24, 'Last 2 years'], [12, 'Last 12 months']], f.period) +
-      sel('sort', 'Order', [['new', 'Newest first'], ['old', 'Oldest first'], ['high', 'Highest price'], ['low', 'Lowest price']], f.sort) + '</div>';
+      sel('bed', 'Home type', [['all', 'All types']].concat(O.beds.map((b) => [b, bedLabel(b)]), O.unknown ? [['u', 'Type unknown']] : []), f.bed, N.bed) +
+      sel('bin', 'Size', (f.size ? [['range', sizeLabel(f.size)]] : []).concat([['all', 'All sizes']], O.bins.map((b) => [b, bandLabel(b)])), f.size ? 'range' : f.bin, N.bin) +
+      sel('sale', 'Sale type', [['all', 'All sale types']].concat(O.sales.map((s) => [s, SALE[s] + 's'])), f.sale, N.sale) +
+      sel('period', 'Period', [['all', 'Since ' + ymLabel(rec.start)], [24, 'Last 2 years'], [12, 'Last 12 months']], f.period, N.period) +
+      sel('sort', 'Order', [['new', 'Newest first'], ['old', 'Oldest first'], ['high', 'Highest price'], ['low', 'Lowest price'], ['psfHigh', 'Highest psf'], ['psfLow', 'Lowest psf']], f.sort) + '</div>';
   }
   function rowHtml(r, M) {
     const fb = M.floorBands[r[2]], beds = r[5], basis = r[6] === 'v' ? 'floor plans' : r[6] === 'i' ? 'rental records' : '';
@@ -171,8 +209,8 @@
   }
   function listHtml(rec, f, shown) {
     const list = filter(rec.rows, f, rec.latest), n = list.length, k = Math.min(n, shown || PAGE), M = rec.meta;
-    if (!n) return '<p class="gwr-none" data-gwr-count="0">No sales match these filters. <button type="button" class="kpr-link" data-gwr-reset>Show all sales</button></p>';
-    const span = ymLabel(Math.min.apply(null, list.map((r) => r[0]))) + ' – ' + ymLabel(Math.max.apply(null, list.map((r) => r[0])));
+    if (!n) return '<p class="gwr-none" data-gwr-count="0">No sales match these filters. <button type="button" class="kpr-link" data-gwr-reset>Show all sales</button></p>';   // also when the chosen option has reached 0
+    const m0 = Math.min.apply(null, list.map((r) => r[0])), m1 = Math.max.apply(null, list.map((r) => r[0])), span = m0 === m1 ? ymLabel(m0) : ymLabel(m0) + ' – ' + ymLabel(m1);
     const same = list.slice(0, k).some((r) => r[7] & 4);
     // V2: with a home type chosen, how many sales are that type and how many here (same other filters) have no bedroom count and could be it.
     let note = '';
@@ -181,10 +219,17 @@
       note = '<p class="lg-fine gwr-bednote" data-gwr-bednote data-n="' + n + '" data-m="' + u + '">Showing the ' + plural(n, WORD.all) + ' matched as ' + esc(bedLabel(Number(f.bed))) + '.' +
         (u ? ' ' + num(u) + ' other ' + WORD.all[u === 1 ? 0 : 1] + ' here could not be matched to a bedroom count and ' + (u === 1 ? 'may be one more.' : 'may include more.') : '') + '</p>';
     }
-    return note + '<p class="gwr-count" data-gwr-count="' + n + '"><b>' + plural(n, WORD.all) + '</b> · ' + span + (n > k ? ' · showing ' + k : '') + '</p>' +
+    // §3.5: Type unknown explained where it is chosen
+    if (f.bed === 'u') note = '<p class="lg-fine gwr-unote" data-gwr-unote>URA doesn’t record bedrooms. These sales are at sizes Groundwork couldn’t match to one bedroom count, so no home type is shown. They could be any type.</p>';
+    // §3.4: the answer line, from the complete filtered set (never the rows on screen): the actual lowest and highest sale and psf
+    const ps = list.map((r) => r[4]), pf = list.map(psfOf), lo = Math.min.apply(null, ps), hi = Math.max.apply(null, ps), plo = Math.min.apply(null, pf), phi = Math.max.apply(null, pf);
+    const ans = n === 1 ? money(list[0][4]) + ' · ' + money(psfOf(list[0])) + ' psf' : 'lowest to highest ' + money(lo) + ' to ' + money(hi) + ' · ' + money(plo) + ' to ' + money(phi) + ' psf';
+    const clear = isDefault(f) ? '' : '<button type="button" class="kpr-link gwr-clear" data-gwr-clear>Clear filters</button>';
+    return note + '<div class="gwr-ans"><p class="gwr-count" data-gwr-count="' + n + '"><b>' + num(n) + ' past ' + WORD.all[n === 1 ? 0 : 1] + '</b> · ' + span + ' · <span data-gwr-ans>' + ans + '</span></p>' + clear + '</div>' +
+      '<p class="lg-fine gwr-ansfine" data-gwr-ansfine>Individual URA transactions, not a typical price or a valuation.</p>' +
       '<div class="gwr-scroll"><table class="gwr-table"><thead><tr><th scope="col">Month</th><th scope="col">Home type</th><th scope="col">Size</th><th scope="col">Floor</th><th scope="col">Sale</th><th scope="col">Price</th></tr></thead><tbody>' +
       list.slice(0, k).map((r) => rowHtml(r, M)).join('') + '</tbody></table></div>' +
-      (n > k ? '<button type="button" class="lg-btn gwr-more" data-gwr-more>Show ' + Math.min(PAGE, n - k) + ' more</button>' : '') +
+      (n > k ? '<p class="lg-fine gwr-showing" data-gwr-showing>Showing ' + num(k) + ' of ' + num(n) + '.</p><button type="button" class="lg-btn gwr-more" data-gwr-more>Show ' + Math.min(PAGE, n - k) + ' more</button>' : '') +
       (same ? '<p class="lg-fine" data-gwr-same-note>Some sales share the same month, size, floor band and price. URA gives no unit numbers, so each is listed as URA records it.</p>' : '');
   }
   function txHtml(rec, f, o) {
@@ -195,6 +240,19 @@
       filtersHtml(rec, f) + '<div data-gwr-list aria-live="polite">' + listHtml(rec, f, o.shown) + '</div>' +
       '<details class="lg-finedet gwr-notes"><summary>Past sales, not a valuation. <span>How URA records these</span></summary><p class="lg-fine">URA gives the contract month (not the day), a floor band (not the floor) and the area in whole square metres, so sq ft is approximate. There are no unit numbers. Home type is shown only where Groundwork could match the size to a bedroom count, from floor plans or URA rental records; otherwise it is “unknown”, never guessed.</p></details></div></section>';
   }
+  /* Research Filters Part 2 (Claude C FINAL §4): "See these {n} sales" for an R2 size group, read-only from its published { sqft, win, n }. Rendered only
+     when the list would show exactly the group's n sales (otherwise nothing, and one console note on a local copy). */
+  const grpOf = (v) => { const p = String(v).split('|'); return { g: p[0], lo: Number(p[1]), hi: Number(p[2]), win: Number(p[3]), n: Number(p[4]) }; };
+  const grpState = (g, q) => ({ bed: String(g), bin: 'all', sale: '3', period: String(q.win), sort: 'new', size: [q.sqft[0], q.sqft[1]] });
+  let grpWarned = false;
+  function groupLink(rec, g, q) {
+    if (!rec || !rec.rows || !q || !q.sqft) return '';
+    if (count(rec.rows, grpState(g, q), rec.latest) !== q.n) {
+      if (!grpWarned && typeof location !== 'undefined' && /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && typeof console !== 'undefined') { grpWarned = true; console.warn('gw-records: a size group does not match its sales', g, q); }
+      return '';
+    }
+    return '<button type="button" class="kpr-link gwr-grp" data-gwr-grp="' + esc([g, q.sqft[0], q.sqft[1], q.win, q.n].join('|')) + '">See these ' + num(q.n) + ' ' + WORD.all[q.n === 1 ? 0 : 1] + '</button>';
+  }
   // The filters a visitor starts with: the type or size chosen at the top of the report, and the sale type on show.
   function startFilter(o) { return { bed: o.bed != null && o.bed !== '' && /^\d+$/.test(String(o.bed)) ? String(o.bed) : 'all', bin: o.bin != null ? String(o.bin) : 'all', sale: o.sale ? String(CODE[o.sale] || 'all') : 'all', period: 'all', sort: 'new' }; }
 
@@ -204,11 +262,22 @@
     o = o || {};
     const sec = app.querySelector('#lgTx'); if (!sec || !st || !st.rec) return;
     const list = sec.querySelector('[data-gwr-list]');
-    const draw = () => { list.innerHTML = listHtml(st.rec, st.f, st.shown); sec.querySelectorAll('[data-gwr-f]').forEach((s) => { s.value = String(st.f[s.dataset.gwrF]); }); };
-    sec.addEventListener('change', (e) => { const s = e.target.closest && e.target.closest('[data-gwr-f]'); if (!s) return; st.f[s.dataset.gwrF] = s.value; st.shown = st.page || PAGE; draw(); if (o.track) o.track(s.dataset.gwrF); });
+    // every change redraws the filters too (their counts and the group's range option, §3.2-3.3), keeping keyboard focus on the select used
+    const draw = (focusK) => {
+      const fs = sec.querySelector('.gwr-fs'); if (fs) fs.outerHTML = filtersHtml(st.rec, st.f);
+      list.innerHTML = listHtml(st.rec, st.f, st.shown);
+      if (focusK) { const s = sec.querySelector('[data-gwr-f="' + focusK + '"]'); if (s) s.focus({ preventScroll: true }); }
+    };
+    sec.addEventListener('change', (e) => {
+      const s = e.target.closest && e.target.closest('[data-gwr-f]'); if (!s) return;
+      const k = s.dataset.gwrF;
+      if (k === 'bin') { if (s.value !== 'range') { st.f.size = null; st.f.bin = s.value; } }   // another size removes a group's range
+      else st.f[k] = s.value;
+      st.shown = st.page || PAGE; draw(k); if (o.track) o.track(k);
+    });
     sec.addEventListener('click', (e) => {
       if (e.target.closest('[data-gwr-more]')) { st.shown = (st.shown || PAGE) + PAGE; draw(); }
-      if (e.target.closest('[data-gwr-reset]')) { st.f = { bed: 'all', bin: 'all', sale: 'all', period: 'all', sort: 'new' }; st.shown = st.page || PAGE; draw(); }
+      if (e.target.closest('[data-gwr-reset],[data-gwr-clear]')) { st.f = Object.assign({}, DEFAULT); st.shown = st.page || PAGE; draw(); const fs = sec.querySelector('[data-gwr-f="bed"]'); if (fs) fs.focus({ preventScroll: true }); }
     });
     sec.__gwrDraw = draw;
     // "See these sales" in the asking-price result: the exact sales its dots are. One listener per report element, whatever the redraws.
@@ -216,15 +285,17 @@
     if (!app.__gwrShow) {
       app.__gwrShow = true;
       app.addEventListener('click', (e) => {
-        const b = e.target.closest && e.target.closest('[data-gwr-show],[data-gwr-mbed]'), s = app.querySelector('#lgTx'), cur = app.__gwrSt; if (!b || !s || !cur || !s.__gwrDraw) return;
+        const b = e.target.closest && e.target.closest('[data-gwr-show],[data-gwr-mbed],[data-gwr-grp]'), s = app.querySelector('#lgTx'), cur = app.__gwrSt; if (!b || !s || !cur || !s.__gwrDraw) return;
         // V2 "See these sales" for a matched-only type: its matched resales of the last 2 years (the same rows as its count).
-        if (b.dataset.gwrMbed != null) cur.f = { bed: String(b.dataset.gwrMbed), bin: 'all', sale: '3', period: '24', sort: 'new' };
-        else { const p = b.dataset.gwrShow.split('|'); cur.f = { bed: 'all', bin: p[0], sale: p[1], period: '12', sort: 'new' }; }
+        if (b.dataset.gwrMbed != null) cur.f = { bed: String(b.dataset.gwrMbed), bin: 'all', sale: '3', period: '24', sort: 'new', size: null };
+        // Research Filters Part 2 (§4): a size group's exact sales: its type, resales, its window, its sizes
+        else if (b.dataset.gwrGrp != null) { const q = grpOf(b.dataset.gwrGrp); cur.f = { bed: q.g, bin: 'all', sale: '3', period: String(q.win), sort: 'new', size: [q.lo, q.hi] }; }
+        else { const p = b.dataset.gwrShow.split('|'); cur.f = { bed: 'all', bin: p[0], sale: p[1], period: '12', sort: 'new', size: null }; }
         cur.shown = cur.page || PAGE; s.__gwrDraw();
         s.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     }
   }
 
-  return { SQFT, CODE, SALE, PAGE, PHONE_PAGE, pick, filter, options, bandPsf, sizeRows, quantile, typesHtml, sizesHtml, txHtml, matchedRows, matchedRowsHtml, listHtml, filtersHtml, startFilter, wire, binOf, psfOf, ymAdd, ymLabel, short, bedLabel, bandLabel };
+  return { SQFT, CODE, SALE, PAGE, PHONE_PAGE, DEFAULT, pick, filter, facetCounts, groupLink, grpState, isDefault, options, bandPsf, sizeRows, quantile, typesHtml, sizesHtml, txHtml, matchedRows, matchedRowsHtml, listHtml, filtersHtml, startFilter, wire, binOf, psfOf, ymAdd, ymLabel, short, bedLabel, bandLabel };
 });

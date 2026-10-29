@@ -91,13 +91,14 @@ Object.keys(WANT).forEach((k) => {
   ok(B.tierOf(V.m) === null && h.indexOf('data-gwb-tier') < 0 && txt(h).indexOf('Because too many unmatched sales could be 3-bedroom, no typical price or price movement is shown.') > -1 && !throws(() => B.assertMatchedOnlyCopy(txt(h), Object.assign({}, V.m, { of: V.of, unknown: V.unknown }))), 'v1.2 data: the V2.1 panel exactly, still passing assertMatchedOnlyCopy');
   ok(B.alsoText(V.m) === '', 'v1.2 data: no tier text on the index line');
 }
-/* ---------- "What each home type sells for": the Also matched line ---------- */
+/* ---------- "Recent resale prices by home type" (Ken, 29 Oct 2026; was the "Also matched" line): tiered types are rows (research/tests/prices-ux-tests.js) ---------- */
 {
-  const V = B.view(recOf('bartley-ridge'), 'resale', ''), h = REC.typesHtml(V, { label: B.label, alsoText: B.alsoText }), also = txt(/<p class="lg-fine gwr-also" data-gwr-also>[\s\S]*?<\/p>/.exec(h)[0]);
-  ok(also === 'Also matched (matched sales only): 2-bedroom 23: Median of 8 past matched resales $1.48m (≈ 721–764 sq ft); 3-bedroom 14: Median of 6 past matched resales $2.17m (≈ 1,033–1,044 sq ft)', 'Tier B types carry their first median with its sizes', also);
-  const K = REC.typesHtml(B.view(recOf('simsville'), 'resale', ''), { label: B.label, alsoText: B.alsoText }), ka = txt(/data-gwr-also>[\s\S]*?<\/p>/.exec(K)[0].replace(/^data-gwr-also>/, ''));
-  ok(ka === 'Also matched (matched sales only): 4-bedroom 4: historical matched transactions $2.1m–$2.42m', 'a Tier C type carries its historical range', ka);
-  ok(REC.typesHtml(V, { label: B.label }).indexOf('Median of') < 0, 'without alsoText (the V2.1 call), the line is as before');
+  const V = B.view(recOf('bartley-ridge'), 'resale', ''), h = REC.typesHtml(V, { label: B.label, cells: B.tierCells });
+  ok(h.indexOf('data-gwr-also') < 0 && /data-gwr-bed="2" data-gwr-tier="median"/.test(h) && /data-gwr-bed="3" data-gwr-tier="median"/.test(h), 'Tier B types are rows with their medians, not an Also matched line');
+  const K = REC.typesHtml(B.view(recOf('simsville'), 'resale', ''), { label: B.label, cells: B.tierCells });
+  ok(/data-gwr-bed="4" data-gwr-tier="historical"/.test(K) && txt(K).indexOf('Historical matched transactions $2.1m to $2.42m') > -1, 'a Tier C type is a row with its historical range', txt(K).slice(0, 400));
+  const o = REC.typesHtml(V, { label: B.label }), also = txt(/<p class="lg-fine gwr-also" data-gwr-also>[\s\S]*?<\/p>/.exec(o)[0]);
+  ok(also === 'Also matched (matched sales only): 2-bedroom 23, 3-bedroom 14' && o.indexOf('Median of') < 0, 'without cells (the V2.1 call), counts only, as before', also);
 }
 /* ---------- analytics ---------- */
 ok(['median', 'historical', 'matched', 'figures'].every((t) => R.analytics('research_bedroom_selected', { bedroom: '3', tier: t }).tier === t) && R.analytics('research_bedroom_selected', { bedroom: '3', tier: 'typical' }).tier === undefined, 'analytics: tier median, historical (and matched for v1.2 data, figures)');

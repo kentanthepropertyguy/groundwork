@@ -111,16 +111,16 @@
     return [esc(M.name) + ' is <span data-lg-what>' + CLS[clsOf(M)].what + '</span>' + (where ? ' ' + esc(where) : '') + (ten ? ', ' + esc(ten) : '') + '.', noActivity ? '' : esc(activitySentence(M))].filter(Boolean).join(' ');
   }
   // The answer: the median price for the size on show, with its sample size and price basis right beside it (never further down the page).
-  function answerBlock(M, mf, rent) {
+  function answerBlock(M, mf, rent, move) {
     const A = M.answer || {}, f = A.facts || {}, w = words(M), sz = A.size && A.size.label ? sqft(A.size.label) : '';
     const priced = (A.state === 'recent' || A.state === 'recent-thin') && f.recentMedian != null;
     const k = priced ? 'Median price per sq ft (PSF)' + (sz ? ' · ' + sz : '') + ' · ' + w[1] + ', last 12 months' : (A.price && A.price.label ? A.price.label : 'Recent sales') + (sz ? ' · ' + sz : '');
     const v = priced ? '<span class="lg-ans-v">' + money(f.recentMedian) + '<small> psf</small></span>' : '<span class="lg-ans-v txt">' + esc(A.price && A.price.value ? A.price.value : 'not available yet') + '</span>';
     const lines = A.lines && A.state !== 'recent' ? A.lines.map((l) => l.text).join(' ') : '';
     const basis = ((strong(M) ? '' : 'Past sales, not a valuation.') + newNote(M) + (lines ? ' ' + lines : '')).trim();
-    return '<div class="lg-ans" data-lg-ans="' + esc(A.state || '') + '"><p class="lg-ans-k">' + k + '</p><p class="lg-ans-main">' + v + '</p>' + projectPill(M) +
+    return '<div class="lg-ans' + (move ? ' gwb-side' : '') + '" data-lg-ans="' + esc(A.state || '') + '"><p class="lg-ans-k">' + k + '</p><p class="lg-ans-main">' + v + '</p>' + projectPill(M) +
       (basis ? '<p class="lg-fine lg-ans-basis" data-lg-basis>' + esc(basis) + '</p>' : '') +
-      (M.tenure && M.tenure.mixed ? '<p class="lg-fine" data-lg-mixed>' + esc(mixedLine(M.tenure)) + '</p>' : '') + (rent || '') + freshLine(mf, undefined, 'lg-fine') + '</div>';
+      (M.tenure && M.tenure.mixed ? '<p class="lg-fine" data-lg-mixed>' + esc(mixedLine(M.tenure)) + '</p>' : '') + (rent || '') + freshLine(mf, undefined, 'lg-fine') + (move || '') + '</div>';
   }
 
   /* ---------- the five-year line (handoff §6.1) ---------- */
@@ -299,7 +299,7 @@
     } else { head = 'No sales recorded'; sub = 'URA records no sale of this type here in the period we hold.'; }
     return '<section class="lg-ov" data-lg-ov aria-label="Recent sales at a glance"><p class="lg-ov-k">At a glance · ' + esc(M.sale && M.sale.label ? M.sale.label.charAt(0).toUpperCase() + M.sale.label.slice(1) + 's' : 'Sales') + '</p>' +
       '<h2 class="lg-ov-h" data-lg-ov-head>' + esc(head) + '</h2><p class="lg-ov-s">' + sub + '</p>' +
-      (rows ? '<p class="lg-ov-n" data-lg-ov-rows>No single price fits the whole development. <button type="button" class="kpr-link" data-lg-scroll="lgTypes">See what each ' + (bed ? 'home type' : 'size') + ' sells for ›</button></p>' : '<p class="lg-ov-n">' + (bed ? 'Prices are different for every home type and size, so there is no single price for the whole development. Choose a type or a size to see what it sold for and how prices have moved.' : 'Price per sq ft is different for every size, so there is no single price for the whole development. Choose a size to see its price, how it has moved and what is behind it.') + '</p>') +
+      (rows ? '<p class="lg-ov-n" data-lg-ov-rows>No single price fits the whole development. <button type="button" class="kpr-link" data-lg-scroll="lgTypes">' + (bed ? 'See recent resale prices by home type' : 'See what each size sells for') + ' ›</button></p>' : '<p class="lg-ov-n">' + (bed ? 'Prices are different for every home type and size, so there is no single price for the whole development. Choose a type or a size to see what it sold for and how prices have moved.' : 'Price per sq ft is different for every size, so there is no single price for the whole development. Choose a size to see its price, how it has moved and what is behind it.') + '</p>') +
       freshLine(mf, undefined, 'lg-fine') +
       '</section>';
   }
@@ -390,8 +390,10 @@
     const REC = GLOBAL.GW_REC, RENT = GLOBAL.GW_RENT, TX = ctx && ctx.TX, f = M.focus || {}, sale = M.sale && M.sale.selected;
     let h = '';
     if (REC) {
-      if (bedAny && BV.sale === 'resale') h += REC.typesHtml(BV, { label: GLOBAL.GW_BED.label, alsoText: GLOBAL.GW_BED.alsoText });
-      else if (TX) h += REC.sizesHtml(TX, sale, { bin: chosen(M) ? f.bin : null });
+      // every bedroom type with a price (typical, or a matched type's approved tier); without a typical-price type the sizes' typical prices follow
+      const types = BV && BV.sale === 'resale' ? REC.typesHtml(BV, { label: GLOBAL.GW_BED.label, cells: GLOBAL.GW_BED.tierCells }) : '';
+      h += types;
+      if (TX && !(bedAny && BV.sale === 'resale')) h += REC.sizesHtml(TX, sale, { bin: chosen(M) ? f.bin : null, id: types ? 'lgSizes' : '' });
       if (TX) h += REC.txHtml(TX, (ctx.txSt && ctx.txSt.f) || REC.startFilter({ sale }), { shown: ctx.txSt && ctx.txSt.shown });
     }
     if (RENT && ctx && ctx.RENT) h += RENT.sectionHtml(ctx.RENT, { bed: BV && BV.t ? BV.g : '', bin: chosen(M) ? f.bin : null, ask: ASKM() });
@@ -435,6 +437,10 @@
     const ev = evidenceHtml(M, ctx, BV, bedAny), ovOn = !bedOn && !bedM && !chosen(M);
     // Market Pulse (gw-pulse.js, or the bedroom view's own) gets an id so the shortcut row can reach it; its markup and wording are unchanged.
     let pulse = bedOn ? GLOBAL.GW_BED.trendHtml(BV, { forWho, mapHref: 'map/#p=' + encodeURIComponent(M.id) }) : chosen(M) ? (f.bin == null ? noSizeHtml(M, forWho) : ctx && ctx.PU && GLOBAL.GW_PULSE ? GLOBAL.GW_PULSE.html(ctx.PU, { forWho, mapHref: 'map/#p=' + encodeURIComponent(M.id) }) : '') : '';
+    // Price movement is secondary (Ken, 29 Oct 2026): a chosen size's Market Pulse stays beside the answer only for a reliable trend (same thresholds);
+    // otherwise the same panel, unchanged, sits in a closed "Sales history & price movement" under the answer, which takes the wider column.
+    let moveIn = '';
+    if (chosen(M) && f.bin != null && /^<section class="mp\b/.test(pulse) && !(ctx.PU.state === 'trend' && ctx.PU.evidence === 'strong')) { moveIn = '<details class="gwb-det lg-move" data-lg-move><summary>Sales history &amp; price movement</summary><div class="gwb-det-in">' + pulse + '</div></details>'; pulse = ''; }
     if (/^<section class="mp\b/.test(pulse) && pulse.indexOf('id="lgPulse"') < 0) pulse = pulse.replace(/^<section /, '<section id="lgPulse" ');
     const ctxLabel = (bedOn || bedM) && BV.g ? GLOBAL.GW_BED.label(BV.g) : chosen(M) && f.label ? sqft(f.label) : '';
     const canAsk = !!ASKM() && (M.bands || []).some((b) => b.recent && b.recent.n);
@@ -446,7 +452,7 @@
         '<div class="lg-id"><p class="lg-kicker lg-idline"><span class="lg-cls" data-lg-cls="' + clsOf(M) + '">' + esc(CLS[clsOf(M)].label) + '</span>' + [M.street ? esc(titleCase(M.street)) : '', esc(district(M))].filter(Boolean).join(' · ') + '</p>' +
         '<h1 class="lg-name" tabindex="-1">' + esc(M.name) + '</h1></div>' +
         sizePicker(M, S, BV) +
-        (bedOn ? GLOBAL.GW_BED.answerHtml(BV, { budget: ctx.budget, fresh: freshLine(mf, undefined, 'lg-fine'), rent: rentLine(ctx, BV.g, null) }) : bedM ? GLOBAL.GW_BED.matchedHtml(BV, { tx: !!(ctx && ctx.TX && ctx.TX.rows && ctx.TX.rows.length), rows: GLOBAL.GW_REC && ctx && ctx.TX ? GLOBAL.GW_REC.matchedRowsHtml(GLOBAL.GW_REC.matchedRows(ctx.TX, BV.g, GLOBAL.GW_BED.MATCHED_ROWS)) : '' }) : chosen(M) ? answerBlock(M, mf, rentLine(ctx, null, f.bin)) : overviewHtml(M, mf, bedAny, ev.indexOf('id="lgTypes"') > -1)) +
+        (bedOn ? GLOBAL.GW_BED.answerHtml(BV, { budget: ctx.budget, fresh: freshLine(mf, undefined, 'lg-fine'), rent: rentLine(ctx, BV.g, null), move: GLOBAL.GW_BED.moveHtml ? GLOBAL.GW_BED.moveHtml(BV, { tx: !!(ctx && ctx.TX && ctx.TX.rows && ctx.TX.rows.length), mapHref: 'map/#p=' + encodeURIComponent(M.id) }) : '' }) : bedM ? GLOBAL.GW_BED.matchedHtml(BV, { tx: !!(ctx && ctx.TX && ctx.TX.rows && ctx.TX.rows.length), grp: GLOBAL.GW_REC && GLOBAL.GW_REC.groupLink && ctx && ctx.TX ? (g, q) => GLOBAL.GW_REC.groupLink(ctx.TX, g, q) : null, rows: GLOBAL.GW_REC && ctx && ctx.TX ? GLOBAL.GW_REC.matchedRowsHtml(GLOBAL.GW_REC.matchedRows(ctx.TX, BV.g, GLOBAL.GW_BED.MATCHED_ROWS)) : '' }) : chosen(M) ? answerBlock(M, mf, rentLine(ctx, null, f.bin), moveIn) : overviewHtml(M, mf, bedAny, ev.indexOf('id="lgTypes"') > -1)) +
         pulse +
         actions(M, bedOn, ctx && ctx.TX) +
         '<p class="lg-fine lg-facts" data-lg-lead>' + projectFacts(M, ovOn) + '</p>' +

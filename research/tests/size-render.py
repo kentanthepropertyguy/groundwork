@@ -55,7 +55,7 @@ try:
         check(f'{vn}: it says plainly there is no single price for the whole development', 'no single price' in ov.lower() and 'whole development' in ov)
         check(f'{vn}: the drop-down lists each size with how many sold ({len(counts)} sizes)', len(counts) >= 5 and all('sq ft' in t for v, t in o if v), o[:3])
         # ---------- 1 and 2. choose a size: price, pulse, chart and text follow it together
-        pg.select_option('#sizeSel', '900'); pg.wait_for_selector('[data-mp]'); pg.wait_for_timeout(300)
+        pg.select_option('#sizeSel', '900'); pg.wait_for_selector('[data-mp]', state='attached'); pg.wait_for_timeout(300)
         r = PULSE['1-canberra']; mp = pg.inner_text('[data-mp]')
         check(f'{vn}: 1 Canberra 900–999 keeps its supported reading: higher than a year earlier', 'higher than a year earlier' in mp and 'Resale prices for this size' in mp and '900–999 sq ft' in mp, mp[:200])
         check(f'{vn}: ... with the change {r["c"]:g}%, the 34 resales and Sep 2026 from the data', f'{r["c"]:g}%' in mp and str(r['a']) in mp and 'Sep 2026' in mp, mp[:300])
@@ -70,6 +70,9 @@ try:
         check(f'{vn}: no sideways scroll after choosing', pg.evaluate('document.documentElement.scrollWidth <= innerWidth'))
         # ---------- 3. limited data: say so, and give next steps
         pg.select_option('#sizeSel', '1300'); pg.wait_for_timeout(400)
+        # price movement is secondary (Ken, 29 Oct 2026): without a reliable trend the same panel is folded, closed, under the answer; opened here
+        check(f'{vn}: one resale of the size: the panel is folded under the answer, closed', pg.query_selector('#lgPulse') is None and pg.evaluate("(() => { const d = document.querySelector('.lg-ans details[data-lg-move]'); return !!d && !d.open && !!d.querySelector('[data-mp]'); })()"))
+        pg.evaluate("document.querySelectorAll('details[data-lg-move]').forEach((d) => d.open = true)")
         mp = pg.query_selector('[data-mp]'); t = pg.inner_text('[data-mp]')
         check(f'{vn}: one resale of the size: the block says there is not enough to show a trend, for THAT size', mp.get_attribute('data-mp-sized') == '1' and 'Too few sales of this size to show a trend' in t and 'Only 1 resale of 1,300–1,399 sq ft in the last 12 months' in t and 'reliable price trend' in t, t[:300])
         check(f'{vn}: ... with no direction word and no valuation wording', not re.search(r'higher than|lower than|broadly the same|apprecia|forecast of|bargain', t.replace('Not a valuation or a forecast', ''), re.I), t[:300])
@@ -84,17 +87,19 @@ try:
         check(f'{vn}: the WhatsApp message names the development and that this size had only 1 resale', 'only 1 resale of 1,300–1,399 sq ft in the last 12 months, too few to show a price trend' in msg(pg, '#wa') and 'at 1 Canberra' in msg(pg, '#wa') and 'KPT-PULSE-BUY' in msg(pg, '#wa'), msg(pg, '#wa'))
         pg.evaluate('scrollTo(0,0)')
         pg.select_option('#sizeSel', '1400') if any(v == '1400' for v, _ in opts(pg)) else None
+        pg.evaluate("document.querySelectorAll('details[data-lg-move]').forEach((d) => d.open = true)")
         if pg.input_value('#sizeSel') != '1400':   # a size with older sales only is reached by typing it
-            pg.click('[data-lg-size]'); pg.fill('#sizeIn', '1,432'); pg.click('#sizeGo'); pg.wait_for_selector('[data-mp]'); pg.wait_for_timeout(400)
+            pg.click('[data-lg-size]'); pg.fill('#sizeIn', '1,432'); pg.click('#sizeGo'); pg.wait_for_selector('[data-mp]', state='attached'); pg.wait_for_timeout(400)
+        pg.evaluate("document.querySelectorAll('details[data-lg-move]').forEach((d) => d.open = true)")
         t = pg.inner_text('[data-mp]')
         check(f'{vn}: a size with none in the last 12 months says so and gives the latest sale of that size', 'No resales of 1,400–1,499 sq ft in the last 12 months' in t and 'The latest was Jun 2025' in t, t[:300])
         check(f'{vn}: the number typed is not in the page address, the WhatsApp text or any request', '1432' not in pg.url and '1,432' not in msg(pg, '#wa') and '1432' not in msg(pg, '#waOwn') and not any('1432' in u or '1%2C432' in u for u in reqs), pg.url)
-        pg.click('[data-lg-size]'); pg.fill('#sizeIn', '3,540'); pg.click('#sizeGo'); pg.wait_for_selector('[data-mp-state="nosize"]'); pg.wait_for_timeout(300)
+        pg.click('[data-lg-size]'); pg.fill('#sizeIn', '3,540'); pg.click('#sizeGo'); pg.wait_for_selector('[data-mp-state="nosize"]', state='attached'); pg.wait_for_timeout(300); pg.evaluate("document.querySelectorAll('details[data-lg-move]').forEach((d) => d.open = true)")
         t = pg.inner_text('[data-mp]'); near = pg.eval_on_selector_all('.mp-near button', 'e => e.map(x => x.getAttribute("data-bin"))')
         check(f'{vn}: a size with no sales at all: "No resales of 3,500–3,599 sq ft recorded here", with the closest sizes', 'No resales of 3,500–3,599 sq ft recorded here' in t and 'no price or trend to show' in t and len(near) >= 1, t[:300])
         check(f'{vn}: ... and the same three next steps', pg.locator('[data-mp-acts] a').count() == 3)
         check(f'{vn}: the price answer does not borrow another size\'s price', '$' not in pg.inner_text('.lg-ans').replace('psf', '') or 'none recorded' in pg.inner_text('.lg-ans'), pg.inner_text('.lg-ans')[:160])
-        pg.click('.mp-near button'); pg.wait_for_selector('[data-mp]:not([data-mp-state="nosize"])'); pg.wait_for_timeout(300)
+        pg.click('.mp-near button'); pg.wait_for_selector('[data-mp]:not([data-mp-state="nosize"])', state='attached'); pg.wait_for_timeout(300)
         check(f'{vn}: choosing a closest size updates the page to that size', pg.input_value('#sizeSel') == near[0], (pg.input_value('#sizeSel'), near))
         # ---------- exact size, clear
         pg.click('[data-lg-size]'); pg.fill('#sizeIn', '950'); pg.click('#sizeGo'); pg.wait_for_timeout(500)
@@ -102,7 +107,7 @@ try:
         pg.click('#sizeClear'); pg.wait_for_selector('[data-lg-ov]'); pg.wait_for_timeout(300)
         check(f'{vn}: Clear size goes back to the neutral start (no price, no pulse), and forgets the size for this tab', pg.query_selector('.lg-ans-v') is None and pg.query_selector('[data-mp]') is None and pg.evaluate("sessionStorage.getItem('kpt.research.size')") is None)
         # ---------- 4. a size chosen earlier is reused (this tab only), including on another development
-        pg.select_option('#sizeSel', '1000'); pg.wait_for_selector('[data-mp]')
+        pg.select_option('#sizeSel', '1000'); pg.wait_for_selector('[data-mp]', state='attached')
         pg.goto(B + '/research/#/p/parc-clematis'); pg.wait_for_selector('#sizeSel', state='attached'); pg.reload(); pg.wait_for_selector('#sizeSel', state='attached'); pg.wait_for_timeout(500)
         check(f'{vn}: a size chosen earlier in this tab is reused on the next development (1,000–1,099 sq ft)', pg.input_value('#sizeSel') == '1000' and 'the size you chose' in pg.inner_text('#lgPick') and '1,000–1,099' in pg.inner_text('.lg-ans'), pg.inner_text('#lgPick')[:200])
         check(f'{vn}: it is kept in this tab only (sessionStorage), never in localStorage or the address', pg.evaluate("sessionStorage.getItem('kpt.research.size')") == '1000' and pg.evaluate("localStorage.getItem('kpt.research.size')") is None and 'size' not in pg.url)
@@ -114,12 +119,12 @@ try:
         mb, mo = msg(pg, '#wa'), msg(pg, '#waOwn')
         check(f'{vn}: before a size is chosen the buyer message names the development, offers no finding, and keeps its reference', 'considering a property at 1 Canberra' in mb and 'KPT-PULSE-BUY' in mb and 'It shows' not in mb and '/research/#/p/1-canberra' in mb, mb)
         check(f'{vn}: ... and so does the homeowner message', 'own a home at 1 Canberra' in mo and 'KPT-PULSE-SELL' in mo and 'It shows' not in mo, mo)
-        pg.select_option('#sizeSel', '900'); pg.wait_for_selector('[data-mp]'); pg.wait_for_timeout(300)
+        pg.select_option('#sizeSel', '900'); pg.wait_for_selector('[data-mp]', state='attached'); pg.wait_for_timeout(300)
         mb, mo = msg(pg, '#wa'), msg(pg, '#waOwn')
         check(f'{vn}: with a size chosen the buyer message carries the development, the size and the finding', 'considering a property at 1 Canberra' in mb and 'resale prices for 900–999 sq ft higher than a year earlier' in mb and 'KPT-PULSE-BUY' in mb, mb)
         check(f'{vn}: ... and the homeowner message does too', 'own a home at 1 Canberra' in mo and '900–999 sq ft' in mo and 'KPT-PULSE-SELL' in mo, mo)
         check(f'{vn}: neither message holds money, income, CPF or the number typed', not re.search(r'budget|income|cpf|loan|\$', (mb + mo).split('/research/')[0], re.I))
-        pg.evaluate("sessionStorage.setItem('kpt.pulse.for','sell')"); pg.reload(); pg.wait_for_selector('[data-mp]'); pg.wait_for_timeout(400)
+        pg.evaluate("sessionStorage.setItem('kpt.pulse.for','sell')"); pg.reload(); pg.wait_for_selector('[data-mp]', state='attached'); pg.wait_for_timeout(400)
         check(f'{vn}: an owner who came from Sell still sees the owner\'s card first, with the size kept', pg.evaluate("document.querySelector('[data-lg-for] > *').querySelector('a').id") == 'waOwn' and pg.input_value('#sizeSel') == '900')
         pg.evaluate("sessionStorage.removeItem('kpt.pulse.for')")
         # ---------- Map -> Research

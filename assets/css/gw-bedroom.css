@@ -104,3 +104,11 @@ body.kpr .gwb-ans .gwb-det{ margin-top:2px; }
 body.kpr .gwb-det .gwb-l, body.kpr .gwb-det .gwb-mrows{ max-width:none; }   /* the disclosures use the card's full width */
 body.kpr .gwb-det .gwb-cmp-k{ margin:4px 0 0; font-size:13px; font-weight:600; color:var(--kpt-muted); }
 body.kpr .gwb-t .gwb-diff{ margin:-2px 0 0; font-size:13.5px; color:var(--kpt-muted); }   /* two medians: different sizes, not a change over time */
+body.kpr .gwb-det .gwb-acts{ margin:0; display:flex; flex-wrap:wrap; gap:6px 18px; font-size:14.5px; }   /* price movement's ways on (Ken, 29 Oct 2026) */
+body.kpr .gwb-ans.gwb-side .gwb-l, body.kpr .gwb-ans.gwb-side .gwr-rentline, body.kpr .gwb-ans.gwb-side .gwb-det .lg-fine{ max-width:none; }   /* the answer in the wider column uses its width */
+/* a chosen size's Market Pulse, folded under the answer when its trend isn't reliable (kpt-lg.js moveIn): the same panel, sized for the fold */
+body.kpr .lg-move .mp{ border:0; padding:0; margin:0; background:none; max-width:none; }
+body.kpr .lg-move .mp .mp-h{ font-size:17px; }
+body.kpr .lg-move .mp .mp-f{ grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr)); }
+body.kpr .lg-ans.gwb-side .lg-ans-basis, body.kpr .lg-ans.gwb-side .lg-fine{ max-width:none; }
+body.kpr .lg-ans.gwb-side .gwr-rentline{ max-width:none; }

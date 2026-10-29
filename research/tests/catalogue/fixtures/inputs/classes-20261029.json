@@ -1,0 +1,10 @@
+{
+ "v": 1,
+ "note": "Registry classes (EC only) for the roster projects, data/registry/index.json as at 29 Oct 2026",
+ "classes": {
+  "altura": "ec",
+  "aurelle-of-tampines": "ec",
+  "coastal-cabana": "ec",
+  "north-gaia": "ec"
+ }
+}
