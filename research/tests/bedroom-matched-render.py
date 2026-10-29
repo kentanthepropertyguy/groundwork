@@ -37,8 +37,13 @@ def text(pg, sel): return pg.inner_text(sel) if pg.locator(sel).count() else ''
 def cnt(pg, sel): return pg.locator(sel).count()
 def wa(pg, sel): return urllib.parse.unquote(pg.get_attribute(sel, 'href') or '') if cnt(pg, sel) else ''
 PRICED = '[data-gwb-ans], [data-gwb-trend], [data-gwb-numbers], [data-gwb-budget], .gwr-rentline, [data-mp], [data-lg-ov], [data-gwb-size], [data-gwb-range]'
-def copy_ok(pg, dev, g):
-    return pg.evaluate("([t, r]) => { try { return GW_BED.assertMatchedOnlyCopy(t, r); } catch (e) { return e.message; } }", [text(pg, '[data-gwb-matched]').replace('\n', ' '), dict(mo(dev, g), of=ALL[dev]['resale']['of'], unknown=ALL[dev]['resale']['unknown'])])
+def copy_ok(pg, dev, g):   # V2.1: the panel's sentences (the sales list is checked on its own, rows_ok)
+    t = pg.evaluate("() => { const p = document.querySelector('[data-gwb-matched]').cloneNode(true); p.querySelectorAll('[data-gwb-mrows]').forEach((x) => x.remove()); document.body.appendChild(p); const t = p.innerText; p.remove(); return t; }")
+    return pg.evaluate("([t, r]) => { try { return GW_BED.assertMatchedOnlyCopy(t, r); } catch (e) { return e.message; } }", [t.replace('\n', ' '), dict(mo(dev, g), of=ALL[dev]['resale']['of'], unknown=ALL[dev]['resale']['unknown'])])
+def rows_ok(pg, g):   # V2.1: the list is exactly the first sales of "See the N matched resales", newest first
+    return pg.evaluate("""(g) => { const el = document.querySelector('[data-gwb-mrows]'); if (!el) return 'no list';
+      const st = document.querySelector('#lgTx') ? document.querySelector('[data-lg="project"]').parentElement.__gwrSt : null; const rec = st && st.rec; if (!rec) return 'no transactions';
+      const rows = GW_REC.matchedRows(rec, g, GW_BED.MATCHED_ROWS); try { return GW_BED.assertMatchedRows(el.outerHTML, rows) && rows.length; } catch (e) { return e.message; } }""", g)
 
 try:
     with sync_playwright() as p:
@@ -58,6 +63,8 @@ try:
             ok(cnt(pg, '.lg-numgrid svg, .lg-numgrid canvas, [data-gwb-matched] svg') == 0, vn + ': no chart')
             ok(pg.evaluate('window.__calls') == [], vn + ': no figure function is called (spy)', pg.evaluate('window.__calls'))
             ok(copy_ok(pg, dev, '3') is True, vn + ': the panel passes assertMatchedOnlyCopy', copy_ok(pg, dev, '3'))
+            ok(rows_ok(pg, '3') == 5, vn + ': V2.1: the latest 5 matched resales, exactly the first sales of the full list', rows_ok(pg, '3'))
+            ok(text(pg, '[data-gwb-matched] [data-gwr-mbed]') == 'See the 14 matched resales', vn + ': the button names the full list', text(pg, '[data-gwb-matched] [data-gwr-mbed]'))
             pt = text(pg, '[data-gwb-matched]')
             ok('14 resales in the last 2 years were matched as 3-bedroom.' in pt and '19 other resales here could also be 3-bedroom' in pt and 'no typical price or price movement is shown' in pt, vn + ': the fixture counts on the page', pt[:200])
             run = text(pg, '[data-lg-run-line]') if pg.locator('[data-lg-run-line]').count() and pg.locator('[data-lg-run-line]').is_visible() else ''
@@ -97,7 +104,7 @@ try:
                 got = 'matched' if cnt(pg, '[data-gwb-matched]') else 'figures' if cnt(pg, '[data-gwb-ans]') else 'missing' if 'No reliable 3-bedroom figures here' in text(pg, '[data-gwb-line]') else '?'
                 ok(got == want, vn + ': 3-bedroom kept from another development: ' + d2 + ' shows ' + want, got)
                 if d2 == 'waterbank-at-dakota':
-                    ok(copy_ok(pg, d2, '3') is True and '10 resales in the last 2 years were matched as 3-bedroom.' in text(pg, '[data-gwb-matched]'), vn + ': Waterbank 3-bedroom panel')
+                    ok(copy_ok(pg, d2, '3') is True and '10 resales in the last 2 years were matched as 3-bedroom.' in text(pg, '[data-gwb-matched]') and rows_ok(pg, '3') == 5, vn + ': Waterbank 3-bedroom panel, with its latest 5 matched resales')
                     f = pg.evaluate("Object.fromEntries([...document.querySelectorAll('#lgTx [data-gwr-f]')].map(s => [s.dataset.gwrF, s.value]))")
                     ok(f.get('bed') == '3', vn + ': the Transactions start on the type chosen above', f)
                 ok(not errs, vn + ': ' + d2 + ' no script errors', errs[:2]); ctx.close()
@@ -108,6 +115,7 @@ try:
             ok(cnt(pg, '#lgTypes [data-gwr-bed]') == 0 and 'What each size sells for' in text(pg, '#lgTypesH'), vn + ': prices by size, as before (no figured type)', text(pg, '#lgTypesH'))
             click(pg, '[data-bed="4"]')
             ok(cnt(pg, '[data-gwb-matched]') == 1 and 'There are too few matched sales to show a typical price or price movement.' in text(pg, '[data-gwb-matched]') and copy_ok(pg, dev, '4') is True, vn + ': its panel (few)')
+            ok(rows_ok(pg, '4') == 3, vn + ': n24 = 3: all 3 matched resales listed', rows_ok(pg, '4'))
             click(pg, '[data-bed="4"]')
             pg.click('[data-gwb-area]'); pg.wait_for_selector('#gwbArea:not([hidden]) #sizeSel')
             v = pg.evaluate("(()=>{const o=[...document.querySelectorAll('#sizeSel optgroup option')];return o[0]&&o[0].value})()")

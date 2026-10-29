@@ -60,11 +60,12 @@ const panelOf = (id, g) => { const V = B.view(recOf(id), 'resale', g); return { 
   ok(c.L.two === '' && c.h.indexOf('data-gwb-m2') < 0, 'line 2 omitted when unknown = 0');
   [a, b, c, panelOf('waterbank-at-dakota', '2'), panelOf('bartley-ridge', '2'), panelOf('bartley-ridge', '3'), panelOf('kovan-melody', '4')].forEach((x) => {
     const t = txt(x.h);
-    ok(t === [x.V.m.label + ' · Matched sales only', x.L.one, x.L.two, x.L.three, 'See these sales'].filter(Boolean).join(' '), 'panel text is exactly the templates (' + x.V.m.label + ', ' + x.V.m.why + ')', t);
+    ok(t === [x.V.m.label + ' · Matched sales only', x.L.one, x.L.two, x.L.three, 'See the ' + x.V.m.n24 + ' matched resales'].filter(Boolean).join(' '), 'panel text is exactly the templates (' + x.V.m.label + ', ' + x.V.m.why + ')', t);
     ok(!throws(() => B.assertMatchedOnlyCopy(t, recFor(x.V))), 'assertMatchedOnlyCopy passes the rendered panel', t);
     ok(!/data-gwb-ans|data-gwb-trend|data-gwb-numbers|data-gwb-budget|gwr-rentline|data-gwb-size|data-gwb-range|<svg|lg-ans-v/.test(x.h), 'panel: no answer, price movement, numbers, budget, rent, size, range or chart markup');
   });
-  ok(panelOf('waterbank-at-dakota', '3').h.indexOf('data-gwr-mbed="3"') > -1 && B.matchedHtml(B.view(recOf('waterbank-at-dakota'), 'resale', '3'), {}).indexOf('See these sales') < 0, '"See these sales" only where the transactions are on the page');
+  ok(panelOf('waterbank-at-dakota', '3').h.indexOf('data-gwr-mbed="3"') > -1 && B.matchedHtml(B.view(recOf('waterbank-at-dakota'), 'resale', '3'), { rows: '<ul></ul>' }).indexOf('matched resales</button>') < 0, '"See the N matched resales" and the sales list only where the transactions are on the page');
+  ok(B.matchedHtml(B.view(recOf('waterbank-at-dakota'), 'resale', '3'), { rows: '<ul></ul>' }).indexOf('data-gwb-mrows') < 0, 'no transactions: no sales list');
 }
 {
   // section 4 self-test: must pass / must fail
@@ -78,6 +79,36 @@ const panelOf = (id, g) => { const V = B.view(recOf(id), 'resale', g); return { 
   ok(throws(() => B.assertMatchedOnlyCopy([L.one, L.two, 'There are too few matched sales to show a typical price or price movement.'].join(' '), r)), 'must fail: the wrong reason for an ambiguous type');
   ok(throws(() => B.assertMatchedOnlyCopy(L.one.replace(' in the last 2 years', ''), r, { part: 'panel' })), 'must fail: without the "last 2 years" window');
   ok(B.MATCHED_ONLY_ALLOWED.length === 4 && B.MATCHED_ONLY_ALLOWED.indexOf('no typical price or price movement is shown') > -1, 'the allowed explanations are exactly the four approved phrases');
+}
+
+/* ---------- V2.1 (Amendment 1, Ken 29 Oct 2026): the latest matched resales in the panel ---------- */
+{
+  const tm = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/projects/tx/manifest.json'), 'utf8')), cache = {};
+  const txOf = (id) => { const k = P.shardName(P.shardOf(id, tm.shards)); return REC.pick(cache[k] || (cache[k] = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/projects/tx', k + '.json'), 'utf8'))), tm, id, man); };
+  const full = (id, g) => { const T = txOf(id), V = B.view(recOf(id), 'resale', g), rows = REC.matchedRows(T, g, B.MATCHED_ROWS), h = B.matchedHtml(V, { tx: true, rows: REC.matchedRowsHtml(rows) }); return { T, V, rows, h, blk: (/<div class="gwb-mrows" data-gwb-mrows>[\s\S]*?<\/ul><\/div>/.exec(h) || [''])[0] }; };
+  ok(B.MATCHED_ROWS === 5 && (fs.readFileSync(path.join(ROOT, 'assets/js/gw-bedroom.js'), 'utf8').match(/MATCHED_ROWS = /g) || []).length === 1, 'MATCHED_ROWS is 5, defined once');
+  [['bartley-ridge', '3', 5], ['waterbank-at-dakota', '2', 5], ['28-shelford', '3', 3], ['kovan-grandeur', '2', 5], ['parvis', '4', 4]].forEach(([id, g, k]) => {
+    const x = full(id, g), list = REC.filter(x.T.rows, { bed: g, bin: 'all', sale: 3, period: 24, sort: 'new' }, x.T.latest);
+    ok(x.rows.length === k && x.rows.length === Math.min(5, x.V.m.n24) && JSON.stringify(x.rows) === JSON.stringify(list.slice(0, k)), id + ' ' + g + '-bedroom: the first ' + k + ' sales of "See the ' + x.V.m.n24 + ' matched resales", in its order', x.rows.length);
+    ok(x.rows.every((r, i) => !i || r[0] <= x.rows[i - 1][0]), id + ': newest first, never by price');
+    ok(!throws(() => B.assertMatchedRows(x.blk, x.rows)), id + ': assertMatchedRows passes the list', (() => { try { B.assertMatchedRows(x.blk, x.rows); } catch (e) { return e.message; } })());
+    const prose = txt(x.h.replace(x.blk, ''));
+    ok(!throws(() => B.assertMatchedOnlyCopy(prose, recFor(x.V))), id + ': the panel’s sentences still pass assertMatchedOnlyCopy', prose);
+    ok(txt(x.blk).indexOf('Latest matched resales Individual sales, newest first, not a typical price.') === 0 && x.h.indexOf(x.blk) < x.h.indexOf('data-gwb-m3'), id + ': headed as individual sales, and above the "not every" and "no typical price" lines');
+    ok(!/data-gwb-ans|data-gwb-trend|data-gwb-numbers|data-gwb-budget|psf|median|average/i.test(x.h), id + ': still no answer, price movement, numbers, budget, psf, median or average');
+  });
+  const fl = full('kovan-grandeur', '2');
+  ok(/unusual size for a 2-bedroom/.test(fl.blk) && fl.rows.filter((r) => r[7] & 8).length === (fl.blk.match(/gwr-flag/g) || []).length, 'a flagged sale keeps its Transactions flag');
+  // assertMatchedRows self-test: must fail
+  const b = full('bartley-ridge', '3'), byPrice = b.rows.slice().sort((p, q) => q[4] - p[4]);
+  ok(throws(() => B.assertMatchedRows(REC.matchedRowsHtml(byPrice), b.rows)) && throws(() => B.assertMatchedRows(REC.matchedRowsHtml(byPrice), byPrice)), 'must fail: rows sorted by price');
+  ok(throws(() => B.assertMatchedRows(b.blk.replace('</ul>', '</ul><p>Typical $2.2m</p>'), b.rows)), 'must fail: a typical price added to the list');
+  ok(throws(() => B.assertMatchedRows(b.blk.replace('</ul>', '</ul><p>Median 2,200,000</p>'), b.rows)), 'must fail: a median added');
+  ok(throws(() => B.assertMatchedRows(b.blk.replace(/<li[\s\S]*?<\/li>/, ''), b.rows)), 'must fail: a sale left out');
+  ok(throws(() => B.assertMatchedRows(REC.matchedRowsHtml(REC.matchedRows(b.T, '2', 5)), b.rows)), 'must fail: another type’s sales');
+  ok(throws(() => B.assertMatchedRows(b.blk.replace('$2,350,000', '$2,350,000 · $2,003 psf'), b.rows)), 'must fail: psf on a row');
+  ok(throws(() => B.assertMatchedRows(REC.matchedRowsHtml(REC.filter(b.T.rows, { bed: '3', bin: 'all', sale: 3, period: 24, sort: 'new' }, b.T.latest).slice(0, 6)), REC.filter(b.T.rows, { bed: '3', bin: 'all', sale: 3, period: 24, sort: 'new' }, b.T.latest).slice(0, 6))), 'must fail: more than 5 sales');
+  ok(REC.matchedRows(null, '3', 5).length === 0 && REC.matchedRowsHtml([]) === '', 'no transactions: no rows');
 }
 
 /* ---------- "What each home type sells for" and Transactions (tests 21, 22) ---------- */
