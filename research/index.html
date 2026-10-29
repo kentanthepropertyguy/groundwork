@@ -12,9 +12,9 @@
 <link rel="stylesheet" href="../assets/css/kpt-research.css?v=491ebef781">
 <link rel="stylesheet" href="../assets/css/kpt-shell.css?v=ec3f361afb">
 <link rel="stylesheet" href="../assets/css/kpt-compare-v2.css?v=f779cfb080">
-<link rel="stylesheet" href="../assets/css/kpt-lg.css?v=10caad48ef">
+<link rel="stylesheet" href="../assets/css/kpt-lg.css?v=4fe1c576e5">
 <link rel="stylesheet" href="../assets/css/gw-pulse.css?v=3387a27e04">
-<link rel="stylesheet" href="../assets/css/gw-bedroom.css?v=0056450493">
+<link rel="stylesheet" href="../assets/css/gw-bedroom.css?v=23b82e11df">
 <link rel="canonical" href="https://tools.kentanthepropertyguy.com/research/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Groundwork">
@@ -59,11 +59,11 @@
 <script src="../assets/js/gw-pulse.js?v=6b170dca99"></script>
 <template id="gwLazy-loc"><script src="../assets/js/kpt-map-core.js?v=2026-10-27.1"></script></template>
 <script src="../assets/js/gw-locmap.js?v=c31f9e5e97"></script>
-<script src="../assets/js/gw-records.js?v=a189c98891"></script>
+<script src="../assets/js/gw-records.js?v=1969b79e59"></script>
 <script src="../assets/js/gw-rent.js?v=1d72b69f47"></script>
-<script src="../assets/js/gw-bedroom.js?v=a1e9b12acb"></script>
+<script src="../assets/js/gw-bedroom.js?v=506605b31a"></script>
 <script src="../assets/js/gw-overview.js?v=d2d4cac1fb"></script>
-<script src="../assets/js/kpt-lg.js?v=da9627c31d"></script>
+<script src="../assets/js/kpt-lg.js?v=016ec3ffc1"></script>
 <script src="../assets/js/kpt-compare-v2.js?v=271d97d3bb"></script>
 <script src="../data/research/config.js?v=df6f3c6908"></script>
 <script>
@@ -297,7 +297,8 @@
     store.manifest().then((m) => store.index().then((ix) => { const r = P.findById(ix, id); if (!r) throw new Error('nf'); return Promise.all([bedFor(id, m), txFor(id, m).catch(() => null), rentFor(id).catch(() => null)]).then((y) => ({ r, bed: y[0], tx: y[1], rent: y[2] })); }))
       .then((d) => {
         const BV = d.bed && window.GW_BED ? GW_BED.view(d.bed, 'resale', null) : null, hasBed = !!(BV && BV.types && BV.types.length);
-        let body = hasBed && window.GW_REC ? GW_REC.typesHtml(BV, { label: GW_BED.label }) : '';
+        // every bedroom type with a price to show: typical prices and the matched types' approved tiers (Ken, 29 Oct 2026)
+        let body = BV && window.GW_REC ? GW_REC.typesHtml(BV, { label: GW_BED.label, cells: GW_BED.tierCells }) : '';
         if (!body && d.tx && window.GW_REC) body = GW_REC.sizesHtml(d.tx, 'resale', {}) || GW_REC.sizesHtml(d.tx, 'new', {});
         const nm = /[a-z]/.test(d.r.name) ? d.r.name : R.displayName(d.r.name);
         ovPut(GW_OVERVIEW.devHtml({ id, name: nm, kicker: P.classInfo(d.r).label, meta: [d.r.street ? KPTLG.titleCase(d.r.street) : '', d.r.district ? 'District ' + Number(d.r.district) : '', d.r.seg, d.r.tenure && d.r.tenure !== '–' ? d.r.tenure : ''].filter(Boolean).join(' · '),

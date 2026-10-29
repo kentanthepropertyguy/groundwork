@@ -48,9 +48,10 @@ with sync_playwright() as p:
         pg.click('.lg-jl:has-text("Price check")'); pg.wait_for_timeout(300)
         chk(vn + ': and a second tap keeps it open', pg.is_visible('#lgAsk'))
         # choose a type: the row names it, Market Pulse joins, the sales start on it
-        report(pg); pg.click('[data-bed="3"]'); pg.wait_for_selector('#lgPulse', timeout=15000); pg.wait_for_timeout(600)
+        report(pg); pg.click('[data-bed="3"]'); pg.wait_for_selector('[data-gwb-ans]', timeout=15000); pg.wait_for_timeout(600)
         bar = pg.inner_text('[data-lg-jump-bar]')
-        chk(vn + ': the row names the chosen home type and offers Market Pulse', '3-bedroom' in bar and 'Market Pulse' in bar, bar)
+        # price movement is secondary (Ken, 29 Oct 2026): Market Pulse is offered when its panel is on the page (a reliable reading)
+        chk(vn + ': the row names the chosen home type and offers Market Pulse only when its panel shows', '3-bedroom' in bar and (('Market Pulse' in bar) == (pg.locator('#lgPulse').count() == 1)), bar)
         chk(vn + ': the sales list starts on that type', pg.locator('#lgTx [data-gwr-f="bed"]').input_value() == '3')
         pg.click('.lg-jctx'); pg.wait_for_timeout(900)
         chk(vn + ': the named type takes you back to the chooser', -5 < pg.evaluate("document.getElementById('lgPick').getBoundingClientRect().top") < 220)

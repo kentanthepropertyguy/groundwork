@@ -51,7 +51,11 @@ try:
         for pid, (state, d, ev, txt) in CASES.items():
             pg.goto(base + '#/p/' + pid); pg.wait_for_selector('[data-lg-cls]', timeout=15000); forget_size(pg); pg.reload(); pg.wait_for_selector('#sizeSel', state='attached', timeout=15000)
             check(f'{vn}: {pid}: before a size is chosen there is no Market pulse (and no price) for a size', pg.query_selector('[data-mp]') is None and pg.query_selector('.lg-ans-v') is None and pg.query_selector('[data-lg-ov]') is not None)
-            pick_dominant(pg); pg.wait_for_selector('[data-mp]', timeout=5000)
+            pick_dominant(pg); pg.wait_for_selector('[data-mp]', state='attached', timeout=5000)
+            # price movement is secondary (Ken, 29 Oct 2026): only a reliable trend keeps its panel beside the answer; any other reading is the same
+            # panel folded, closed, in "Sales history & price movement" under the answer. Opened here so its content is checked as before.
+            folded = pg.evaluate("(() => { const d = document.querySelector('details[data-lg-move]'); if (!d) return false; const was = d.open; d.open = true; return !was && !!d.querySelector('[data-mp]'); })()")
+            check(f'{vn}: {pid}: the panel is beside the answer only for a reliable trend, otherwise folded and closed', folded == (not (state == 'trend' and ev == 'strong')) and (pg.query_selector('#lgPulse') is None) == folded)
             mp = pg.query_selector('[data-mp]'); h = pg.inner_text('.mp-h'); hs = h + ' ' + pg.inner_text('.mp-s')
             check(f'{vn}: {pid}: pulse state is {state}/{d or "-"}/{ev}', mp.get_attribute('data-mp-state') == state and (mp.get_attribute('data-mp-dir') or '') == d and mp.get_attribute('data-mp-evidence') == ev, [mp.get_attribute('data-mp-state'), mp.get_attribute('data-mp-dir'), mp.get_attribute('data-mp-evidence')])
             check(f'{vn}: {pid}: summary says "{txt}" ({h})', txt.lower() in hs.lower() and len(h) <= 80, hs)

@@ -326,20 +326,20 @@ body.kpr .lg-hero--ans .lg-wrap{ justify-items:stretch; gap:16px; max-width:760p
    counts panel) beside them in the right column. Paragraphs keep 62ch.
    Without either block the single 760px column stays. */
 @media (min-width:980px){
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m){ max-width:var(--kpt-wrap); grid-template-columns:minmax(0,1fr) minmax(0,400px); column-gap:56px; row-gap:0; align-items:start; }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > *:not(.mp):not(.lg-ov):not(.gwb-m){ margin-bottom:16px; }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > *{ grid-column:1; }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .lg-back{ grid-column:1 / -1; }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .mp, body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .lg-ov, body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .gwb-m{ grid-column:2; grid-row:2 / span 20; margin-top:0; }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .mp{ border-top:0; padding-top:8px; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m, > .gwb-side){ max-width:var(--kpt-wrap); grid-template-columns:minmax(0,1fr) minmax(0,400px); column-gap:56px; row-gap:0; align-items:start; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m, > .gwb-side) > *:not(.mp):not(.lg-ov):not(.gwb-m):not(.gwb-side){ margin-bottom:16px; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m, > .gwb-side) > *{ grid-column:1; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m, > .gwb-side) > .lg-back{ grid-column:1 / -1; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m, > .gwb-side) > .mp, body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m, > .gwb-side) > .lg-ov, body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m, > .gwb-side) > .gwb-m, body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m, > .gwb-side) > .gwb-side{ grid-column:2; grid-row:2 / span 20; margin-top:0; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m, > .gwb-side) > .mp{ border-top:0; padding-top:8px; }
   /* a matched-only type's priced card (Bedroom pricing tiers) takes the wider column, so its size groups sit side by side, never a tall strip */
-  body.kpr .lg-hero--ans .lg-wrap:has(> .gwb-t){ grid-template-columns:minmax(0,1fr) minmax(0,1.3fr); }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .mp .mp-f{ grid-template-columns:1fr; gap:0; }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .mp .mp-f div{ grid-template-columns:minmax(0,1fr) auto; column-gap:14px; align-items:baseline; padding:9px 0; border-bottom:1px solid var(--gw-line,#E3E6EC); }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .mp .mp-f dt{ grid-column:1; grid-row:1; }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .mp .mp-f .mp-n{ grid-column:1; grid-row:2; }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .mp .mp-f .mp-v{ grid-column:2; grid-row:1 / span 2; font-size:22px; text-align:right; align-self:center; }
-  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .mp .mp-h{ font-size:21px; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .gwb-t), body.kpr .lg-hero--ans .lg-wrap:has(> .gwb-side){ grid-template-columns:minmax(0,1fr) minmax(0,1.3fr); }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m, > .gwb-side) > .mp .mp-f{ grid-template-columns:1fr; gap:0; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m, > .gwb-side) > .mp .mp-f div{ grid-template-columns:minmax(0,1fr) auto; column-gap:14px; align-items:baseline; padding:9px 0; border-bottom:1px solid var(--gw-line,#E3E6EC); }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m, > .gwb-side) > .mp .mp-f dt{ grid-column:1; grid-row:1; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m, > .gwb-side) > .mp .mp-f .mp-n{ grid-column:1; grid-row:2; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m, > .gwb-side) > .mp .mp-f .mp-v{ grid-column:2; grid-row:1 / span 2; font-size:22px; text-align:right; align-self:center; }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m, > .gwb-side) > .mp .mp-h{ font-size:21px; }
 }
 body.kpr .lg-hero--ans .lg-back{ justify-self:start; }
 body.kpr .lg-hero--ans .lg-id{ display:grid; gap:6px; }
@@ -497,7 +497,12 @@ button.gwr-row:hover{ border-color:#B9BDC9; }
   .gwr-table td{ display:inline; padding:0; border:0; font-size:14px; color:var(--kpt-body); }
   .gwr-table td small{ display:none; }
   .gwr-table td.gwr-mo{ display:block; font-weight:600; color:var(--kpt-ink); font-size:14.5px; margin-bottom:2px; }
+  /* Research Filters §3.6: month; type · basis; size · floors · sale. A separator goes before an item, never after, so no line ends in "·" */
+  .gwr-tx .gwr-table td.gwr-ty{ display:block; }
+  .gwr-tx .gwr-table td.gwr-ty small:not(.gwr-flag){ display:inline; font-size:14px; color:var(--kpt-muted); }
+  .gwr-tx .gwr-table td.gwr-ty small:not(.gwr-flag)::before, .gwr-tx .gwr-table td.gwr-fl::before, .gwr-tx .gwr-table td.gwr-sa::before{ content:" ·\00a0"; color:var(--kpt-muted); }   /* the dot stays with the item after it */
   .gwr-table td.gwr-ty::after, .gwr-table td.gwr-sz::after, .gwr-table td.gwr-fl::after{ content:" · "; color:var(--kpt-muted); }
+  .gwr-tx .gwr-table td.gwr-ty::after, .gwr-tx .gwr-table td.gwr-sz::after, .gwr-tx .gwr-table td.gwr-fl::after{ content:none; }
   .gwr-rt td.gwr-sz::after{ content:""; }
   .gwr-table td.gwr-pr{ position:absolute; right:0; top:11px; text-align:right; }
   .gwr-table td.gwr-pr small{ display:block; }
@@ -564,11 +569,50 @@ body.kpr .gwr-band{ padding-top:36px; padding-bottom:36px; }
 .lg-klink:hover{ text-decoration:underline; }
 @media (max-width:719px){ .lg-kacts{ width:100%; } .lg-kacts .lg-btn{ width:100%; } }
 @media (min-width:980px) and (max-width:1279px){   /* a laptop: the two median tiles keep each line whole */
-  body.kpr .lg-hero--ans .lg-wrap:has(> .gwb-t){ grid-template-columns:minmax(0,1fr) minmax(0,1.4fr); }
+  body.kpr .lg-hero--ans .lg-wrap:has(> .gwb-t), body.kpr .lg-hero--ans .lg-wrap:has(> .gwb-side){ grid-template-columns:minmax(0,1fr) minmax(0,1.4fr); }
   /* two medians side by side: each line kept whole; the sizes, then the period on its own line (still read as "sizes · period") */
   body.kpr .gwb-t .gwb-tiles:has(> .gwb-tile + .gwb-tile){ gap:8px; }
   body.kpr .gwb-t .gwb-tiles:has(> .gwb-tile + .gwb-tile) > .gwb-tile{ padding:12px 10px; }
   body.kpr .gwb-t .gwb-tiles:has(> .gwb-tile + .gwb-tile) .gwb-t-k{ font-size:12px; }
   body.kpr .gwb-t .gwb-tiles:has(> .gwb-tile + .gwb-tile) .gwb-t-sep{ font-size:0; }
   body.kpr .gwb-t .gwb-tiles:has(> .gwb-tile + .gwb-tile) .gwb-t-p{ display:block; }
+}
+/* "Recent resale prices by home type" (Ken, 29 Oct 2026): the type, then at most two cells, each saying what its price is (typical, middle half,
+   a size group's median, historical matched transactions). Full-width rows on a laptop; on a phone the type sits above its two cells. */
+.gwr-row.gwr-row2{ grid-template-columns:minmax(130px,200px) minmax(0,1fr); grid-template-areas:none; align-items:start; gap:6px 24px; padding:14px 18px; }
+.gwr-row2 .gwr-t{ padding-top:2px; } .gwr-row2 .gwr-t small{ display:block; font-size:12.5px; font-weight:500; color:var(--kpt-muted); margin-top:2px; }
+.gwr-cs{ display:grid; grid-template-columns:repeat(2,minmax(0,400px)); gap:8px 32px; min-width:0; }
+.gwr-row2 .gwr-t, .gwr-row2 .gwr-cs{ grid-area:auto; text-align:left; }
+.gwr-c{ display:grid; gap:1px; min-width:0; align-content:start; }
+.gwr-c .gwr-ck{ font-size:12.5px; font-weight:600; color:var(--kpt-muted); }
+.gwr-c b{ font-size:22px; letter-spacing:-.02em; font-variant-numeric:tabular-nums; line-height:1.25; }
+.gwr-c-r b{ font-size:19px; }
+.gwr-c .gwr-cd{ font-size:13px; color:var(--kpt-muted); font-variant-numeric:tabular-nums; }
+@media (max-width:719px){
+  .gwr-row.gwr-row2{ grid-template-columns:minmax(0,1fr); gap:8px; padding:12px 14px; }
+  .gwr-cs{ grid-template-columns:minmax(0,1fr); gap:0; }   /* a phone: the cells one under the other, each line whole */
+  .gwr-cs .gwr-c + .gwr-c{ border-top:1px solid var(--kpt-line); margin-top:8px; padding-top:8px; }
+  .gwr-c b{ font-size:19px; } .gwr-c-r b{ font-size:16.5px; }
+  .gwr-c .gwr-ck, .gwr-c .gwr-cd{ font-size:12px; }
+}
+@media (min-width:980px){   /* the answer beside the left column takes the page shell width, as the Market Pulse layout does (gw-standard.css) */
+  body.kpr .lg-hero--ans .lg-wrap:has(> .gwb-side){ max-width:var(--gw-shell, var(--kpt-wrap)); }
+}
+/* Research Filters (Claude C FINAL, Ken 29 Oct 2026): the answer line over the sales, Clear filters, disabled options, a size group's link */
+.gwr-ans{ display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 16px; }
+.gwr-ans .gwr-count{ margin:4px 0 0; }
+.gwr-ans .gwr-count [data-gwr-ans]{ font-variant-numeric:tabular-nums; }
+.gwr-clear{ font-size:14.5px; }
+.gwr-ansfine{ margin:-6px 0 0; }
+.gwr-unote{ max-width:80ch; margin:0; }
+.gwr-showing{ margin:0; }
+.gwr-f select option:disabled{ color:#9AA0AC; }
+.gwr-f select:focus-visible, .gwr-clear:focus-visible, .gwr-grp:focus-visible{ outline:2px solid var(--kpt-ink); outline-offset:2px; }
+body.kpr .gwb-t .gwb-tile .gwr-grp{ justify-self:start; margin-top:4px; font-size:13.5px; font-weight:600; }
+@media (max-width:719px){
+  /* a phone: each filter on its own line, its name beside it, so no option (Since Sep 2021 (1,168), a group's ≈ 721–764 sq ft (8)) is cut off */
+  .gwr-tx .gwr-fs{ grid-template-columns:minmax(0,1fr); gap:8px; }
+  .gwr-tx .gwr-f{ grid-template-columns:84px minmax(0,1fr); align-items:center; gap:10px; }
+  .gwr-tx .gwr-f select{ min-height:44px; }
+  .gwr-tx .gwr-table td.gwr-sa{ white-space:nowrap; }
 }
