@@ -1,11 +1,9 @@
 {
- "v": 1,
+ "v": 2,
  "kind": "kpt-launch-roster",
- "note": "Every developer-listing project Groundwork has seen. No prices, sizes, counts or availability. Append-only: entries are never removed without a recorded decision.",
- "builtFrom": [
-  "2026-10-07T13:57:06.908Z",
-  "2026-10-27T05:20:33.429Z"
- ],
+ "scope": "active",
+ "note": "The developer-listing projects the New Launches catalogue may show now. Names, locations and dates only. A project that leaves the developer listings is removed from this list; nothing here describes availability.",
+ "asOf": "2026-10-27T05:20:33.429Z",
  "projects": [
   {
    "slug": "21-anderson",
@@ -50,20 +48,6 @@
    "lastListed": "2026-10-27"
   },
   {
-   "slug": "altura",
-   "name": "Altura",
-   "displayName": "Altura",
-   "district": "23",
-   "region": "OCR",
-   "tenure": "99 yrs from 2022",
-   "tenureGroup": 1,
-   "street": "BUKIT BATOK WEST AVENUE 8",
-   "locSource": "ura",
-   "firstSeen": "2026-10-27",
-   "lastChecked": "2026-10-27",
-   "lastListed": null
-  },
-  {
    "slug": "amberwood-at-holland",
    "name": "AMBERWOOD AT HOLLAND",
    "displayName": "Amberwood at Holland",
@@ -90,20 +74,6 @@
    "firstSeen": "2026-10-07",
    "lastChecked": "2026-10-27",
    "lastListed": "2026-10-27"
-  },
-  {
-   "slug": "arina-east-residences",
-   "name": "ARINA EAST RESIDENCES",
-   "displayName": "Arina East Residences",
-   "district": "15",
-   "region": "RCR",
-   "tenure": "Freehold",
-   "tenureGroup": 4,
-   "street": "TANJONG RHU ROAD",
-   "locSource": "ura",
-   "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-07",
-   "lastListed": "2026-10-07"
   },
   {
    "slug": "artisan-8",
@@ -146,20 +116,6 @@
    "firstSeen": "2026-10-07",
    "lastChecked": "2026-10-27",
    "lastListed": "2026-10-27"
-  },
-  {
-   "slug": "aurelle-of-tampines",
-   "name": "Aurelle of Tampines",
-   "displayName": "Aurelle of Tampines",
-   "district": "18",
-   "region": "OCR",
-   "tenure": "99 yrs from 2024",
-   "tenureGroup": 1,
-   "street": "TAMPINES STREET 62",
-   "locSource": "ura",
-   "firstSeen": "2026-10-27",
-   "lastChecked": "2026-10-27",
-   "lastListed": null
   },
   {
    "slug": "bagnall-haus",
@@ -358,20 +314,6 @@
    "lastListed": "2026-10-27"
   },
   {
-   "slug": "grange-1866",
-   "name": "GRANGE 1866",
-   "displayName": "Grange 1866",
-   "district": "10",
-   "region": "CCR",
-   "tenure": "Freehold",
-   "tenureGroup": 4,
-   "street": "GRANGE ROAD",
-   "locSource": "ura",
-   "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-07"
-  },
-  {
    "slug": "hudson-place-residences",
    "name": "HUDSON PLACE RESIDENCES",
    "displayName": "Hudson Place Residences",
@@ -440,20 +382,6 @@
    "firstSeen": "2026-10-07",
    "lastChecked": "2026-10-27",
    "lastListed": "2026-10-27"
-  },
-  {
-   "slug": "koon-seng-house",
-   "name": "KOON SENG HOUSE",
-   "displayName": "Koon Seng House",
-   "district": "15",
-   "region": "RCR",
-   "tenure": "Freehold",
-   "tenureGroup": 4,
-   "street": "KOON SENG ROAD",
-   "locSource": "ura",
-   "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": null
   },
   {
    "slug": "kovan-jewel",
@@ -538,20 +466,6 @@
    "firstSeen": "2026-10-07",
    "lastChecked": "2026-10-27",
    "lastListed": "2026-10-27"
-  },
-  {
-   "slug": "lyndenwoods",
-   "name": "LYNDENWOODS",
-   "displayName": "Lyndenwoods",
-   "district": "05",
-   "region": "RCR",
-   "tenure": "99 yrs from 2025",
-   "tenureGroup": 1,
-   "street": "SCIENCE PARK DRIVE",
-   "locSource": "ura",
-   "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": null
   },
   {
    "slug": "meyer-blue",
@@ -708,20 +622,6 @@
    "lastListed": "2026-10-27"
   },
   {
-   "slug": "pinetree-hill",
-   "name": "PINETREE HILL",
-   "displayName": "Pinetree Hill",
-   "district": "21",
-   "region": "RCR",
-   "tenure": "99 yrs from 2022",
-   "tenureGroup": 1,
-   "street": "PINE GROVE",
-   "locSource": "ura",
-   "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": null
-  },
-  {
    "slug": "promenade-peak",
    "name": "PROMENADE PEAK",
    "displayName": "Promenade Peak",
@@ -820,20 +720,6 @@
    "lastListed": "2026-10-27"
   },
   {
-   "slug": "skye-at-holland",
-   "name": "SKYE AT HOLLAND",
-   "displayName": "Skye at Holland",
-   "district": "10",
-   "region": "CCR",
-   "tenure": "99 yrs from 2024",
-   "tenureGroup": 1,
-   "street": "HOLLAND VILLAGE WAY",
-   "locSource": "ura",
-   "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": null
-  },
-  {
    "slug": "sophia-meadow",
    "name": "Sophia Meadow",
    "displayName": "Sophia Meadow",
@@ -874,20 +760,6 @@
    "firstSeen": "2026-10-07",
    "lastChecked": "2026-10-27",
    "lastListed": "2026-10-27"
-  },
-  {
-   "slug": "tembusu-grand",
-   "name": "TEMBUSU GRAND",
-   "displayName": "Tembusu Grand",
-   "district": "15",
-   "region": "RCR",
-   "tenure": "99 yrs from 2022",
-   "tenureGroup": 1,
-   "street": "JALAN TEMBUSU",
-   "locSource": "ura",
-   "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": null
   },
   {
    "slug": "terra-hill",
@@ -932,20 +804,6 @@
    "lastListed": "2026-10-27"
   },
   {
-   "slug": "the-continuum",
-   "name": "THE CONTINUUM",
-   "displayName": "The Continuum",
-   "district": "15",
-   "region": "RCR",
-   "tenure": "Freehold",
-   "tenureGroup": 4,
-   "street": "THIAM SIEW AVENUE",
-   "locSource": "ura",
-   "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": null
-  },
-  {
    "slug": "the-giverny-residences",
    "name": "The Giverny Residences",
    "displayName": "The Giverny Residences",
@@ -972,20 +830,6 @@
    "firstSeen": "2026-10-07",
    "lastChecked": "2026-10-27",
    "lastListed": "2026-10-27"
-  },
-  {
-   "slug": "the-lakegarden-residences",
-   "name": "THE LAKEGARDEN RESIDENCES",
-   "displayName": "The Lakegarden Residences",
-   "district": "22",
-   "region": "OCR",
-   "tenure": "99 yrs from 2023",
-   "tenureGroup": 1,
-   "street": "YUAN CHING ROAD",
-   "locSource": "ura",
-   "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": null
   },
   {
    "slug": "the-line-at-tanjong-rhu",

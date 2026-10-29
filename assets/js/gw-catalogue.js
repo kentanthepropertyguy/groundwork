@@ -1,10 +1,15 @@
 /* ==========================================================================
-   GROUNDWORK — New Launches catalogue ("Developer listings" on /research/new-launches/), V1 (Claude C FINAL r3, approved 29 Oct 2026).
-   Part 1 is Claude C's reference rules (gw-catalogue-core.js), ported unchanged; part 2 (below) is the page renderer.
-   Pure functions only (UMD), no file access. Inputs: the approved public inventory (data/projects/inventory.json v2), the permanent
-   roster (data/projects/launch-roster.json), optional registry classes (EC tag) and featured microsite links, and "now".
-   A consumer research view, not a live availability system: indicative developer listing prices with their last-checked date,
-   shown for up to 60 days, then the project stays listed without prices. No sold-out labels in V1.
+   GROUNDWORK — New Launches catalogue ("Developer listings" on /research/new-launches/), r4.2 (Claude C r4.1 removal rule + Property Type + budget typing,
+   approved 29 Oct 2026). Part 1 is Claude C's reference rules (gw-catalogue-core.js r4.2), ported unchanged; part 2 (below) is the page renderer.
+   Pure functions only (UMD), no file access. Inputs: the approved public inventory (data/projects/inventory.json v2), the ACTIVE
+   catalogue list (data/projects/launch-roster.json v2, scope "active"), optional registry classes (EC tag) and featured microsite
+   links, and "now".
+   A consumer research view, not a live availability system: indicative developer listing prices with their last-checked date.
+   r4: the catalogue shows only developments with a current listing. A development the latest complete, approved read no longer
+   lists leaves the active list (the private refresh toolkit removes it; it is kept in a private history, never called sold out);
+   a development whose latest check shows no units is never shown; bedroom types and bands come from the latest check only.
+   The 60-day dated-price rule stays for listings no newer check has superseded: after 60 days prices are hidden and the development
+   stays until a complete refresh confirms it is gone (r4.1). No sold-out labels in V1.
    ========================================================================== */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
@@ -31,6 +36,31 @@
     '24': 'Lim Chu Kang, Tengah', '25': 'Woodlands, Kranji', '26': 'Upper Thomson, Springleaf', '27': 'Yishun, Sembawang', '28': 'Seletar',
   };
   const REGION = { CCR: 'Core Central', RCR: 'Rest of Central', OCR: 'Outside Central' };
+  // r4.2: the Property Type filter. "all" shows every development; a type shows only developments reliably classified as that type.
+  const PTYPES = [['all', 'All Residential'], ['condo', 'Condo & Apartment'], ['ec', 'Executive Condominium (EC)']];
+  /* The class of each development: the Groundwork registry (data/registry/index.json, URA transactions: condo = Condominium or Apartment,
+     ec, cluster) first; the reviewed file (data/projects/catalogue-classes.json) only for slugs the registry does not hold.
+     A development in neither is unclassified: shown under All Residential only. Never guessed from names or unit types. */
+  function classMap(registry, reviewed) {
+    const out = {};
+    if (reviewed && reviewed.classes) Object.keys(reviewed.classes).forEach((k) => { const c = reviewed.classes[k] && reviewed.classes[k].cls; if (c === 'condo' || c === 'ec') out[k] = c; });
+    if (registry && Array.isArray(registry.fields) && Array.isArray(registry.rows)) {
+      const i = registry.fields.indexOf('id'), c = registry.fields.indexOf('cls');
+      if (i > -1 && c > -1) registry.rows.forEach((r) => { if (r[c] === 'condo' || r[c] === 'ec' || r[c] === 'cluster') out[r[i]] = r[c]; });
+    }
+    return out;
+  }
+  /* r4.2: the Maximum budget field formats commas while typing. Digits only (whole dollars); the caret stays after the same digit.
+     Returns the new text, caret and the numeric value (null when empty). The value equals what the digits say, so filtering is unchanged. */
+  function typingFormat(raw, caret) {
+    raw = String(raw == null ? '' : raw); caret = caret == null ? raw.length : Math.max(0, Math.min(caret, raw.length));
+    let digits = raw.replace(/[^0-9]/g, ''), before = raw.slice(0, caret).replace(/[^0-9]/g, '').length;
+    const lead = /^0+(?=\d)/.exec(digits); if (lead) { digits = digits.slice(lead[0].length); before = Math.max(0, before - lead[0].length); }
+    if (digits.length > 12) { digits = digits.slice(0, 12); before = Math.min(before, 12); }
+    const text = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    let pos = 0, seen = 0; while (pos < text.length && seen < before) { if (/\d/.test(text[pos])) seen++; pos++; }
+    return { text, caret: pos, value: digits ? Number(digits) : null };
+  }
 
   function tenureBucket(tl) {
     if (tl === 'Freehold') return 'freehold';
@@ -58,20 +88,35 @@
     return { bedrooms: t.bedrooms, label: t.label, from, upper, about: upper != null && t.ceiling - from <= CFG.narrow, wide: ratio > CFG.wide && ratio <= CFG.noUpper, bands, review, quarantine };
   }
 
-  // o: { inventory, roster, classes: {slug: 'ec'|...}, microsites: {slug: url}, now }
-  function build(o) {
-    const inv = {}; (o.inventory && o.inventory.projects || []).forEach((p) => { inv[p.slug] = p; });
-    return o.roster.projects.map((r) => {
-      const p = inv[r.slug], fr = p ? freshness(p.checkedAt, o.now) : 'hidden';
-      const base = { slug: r.slug, name: r.displayName, district: r.district, districtName: DISTRICT_AREAS[r.district] || null, region: r.region, regionLabel: REGION[r.region] || null,
-        tenure: r.tenure, tenureBucket: tenureBucket(r.tenure), street: r.street || null, classTag: o.classes && o.classes[r.slug] === 'ec' ? 'Executive Condominium' : null,
-        microsite: (o.microsites && o.microsites[r.slug]) || null, lastChecked: p ? p.checkedAt : r.lastChecked, freshness: fr };
-      if (fr === 'hidden') return Object.assign(base, { state: 'prices_hidden', types: [] });   // stays listed, without prices
-      if (p.status !== 'ok') return Object.assign(base, { state: 'none_shown', types: [] });
-      const all = p.byBedrooms.map(deriveType), shown = all.filter((t) => !t.quarantine);
-      return Object.assign(base, { state: shown.length ? 'listed' : 'under_review', types: shown, held: all.filter((t) => t.quarantine).map((t) => ({ bedrooms: t.bedrooms, why: t.quarantine })) });
+  /* o: { inventory, list (the active list, v2; a v1 roster is read with the same display rule), classes: {slug: 'ec'|...}, microsites: {slug: url}, now }
+     Returns { shown: [records], excluded: [{ slug, why }] }. Only "shown" is ever rendered or counted; "excluded" is for tests and audits. */
+  function explain(o) {
+    const inv = {}, list = o.list || o.roster, shown = [], excluded = []; (o.inventory && o.inventory.projects || []).forEach((p) => { inv[p.slug] = p; });
+    list.projects.forEach((r) => {
+      const p = inv[r.slug];
+      // r4.1: an active development whose last listing is over 60 days old is no longer in the inventory file: shown without prices until a
+      // complete refresh confirms it is gone. Any other entry without a record is inconsistent and never shown.
+      if (!p) {
+        const ls = r.lastListed ? Date.parse(r.lastListed + 'T00:00:00+08:00') : NaN;
+        if (isFinite(ls) && o.now - ls > CFG.priceLimitDays * DAY) return shown.push(Object.assign(baseOf(r, o, r.lastListed, 'hidden'), { state: 'prices_hidden', types: [] }));
+        return excluded.push({ slug: r.slug, why: 'not in the inventory file' });
+      }
+      if (p.status !== 'ok' || !p.byBedrooms || !p.byBedrooms.length) return excluded.push({ slug: r.slug, why: 'no units shown in the latest check' });   // r4: no longer "none shown"
+      const fr = freshness(p.checkedAt, o.now), base = baseOf(r, o, p.checkedAt, fr);
+      // the 60-day rule, for a listing no newer check has superseded: after 60 days its prices are hidden; the development stays
+      // until a complete refresh confirms it is gone (r4.1)
+      if (fr === 'hidden') return shown.push(Object.assign(base, { state: 'prices_hidden', types: [] }));
+      const all = p.byBedrooms.map(deriveType), ok = all.filter((t) => !t.quarantine);
+      shown.push(Object.assign(base, { state: ok.length ? 'listed' : 'under_review', types: ok, held: all.filter((t) => t.quarantine).map((t) => ({ bedrooms: t.bedrooms, why: t.quarantine })) }));
     });
+    return { shown, excluded };
   }
+  function baseOf(r, o, lastChecked, fr) {
+    return { slug: r.slug, name: r.displayName, district: r.district, districtName: DISTRICT_AREAS[r.district] || null, region: r.region, regionLabel: REGION[r.region] || null,
+      tenure: r.tenure, tenureBucket: tenureBucket(r.tenure), street: r.street || null, cls: (o.classes && o.classes[r.slug]) || null, classTag: o.classes && o.classes[r.slug] === 'ec' ? 'Executive Condominium' : null,
+      microsite: (o.microsites && o.microsites[r.slug]) || null, lastChecked, freshness: fr };
+  }
+  const build = (o) => explain(o).shown;
   // Budget tier for one type's matched "from" price F (rounded DOWN to $50k). B = maximum budget. allowance 0, 0.10 or 0.15.
   function tier(F, B, allowance) {
     if (F + CFG.step <= B) return 'within';
@@ -83,10 +128,11 @@
   const RANK = { within: 0, around: 1, over10: 2, over15: 3 };
   // Size overlap with [sizeMin, sizeMax] sq ft. The 3,000+ band is one broad category: it matches any range that reaches 3,000 sq ft.
   const bandIn = (b, f) => (f.sizeMax == null || b.start <= f.sizeMax) && (f.sizeMin == null || b.end == null || b.end > f.sizeMin);
-  /* f: { beds: null | 0..5 (5 = 5+), max: null | number, allowance: 0 | 0.10 | 0.15, sizeMin, sizeMax, regions: [], districts: [], tenure: [], q }
+  /* f: { ptype: 'all' | 'condo' | 'ec' (r4.2; missing = all), beds: null | 0..5 (5 = 5+), max: null | number, allowance: 0 | 0.10 | 0.15, sizeMin, sizeMax, regions: [], districts: [], tenure: [], q }
      Returns null, or { tier, types: [{ bedrooms, from, upper, bands }] } where every figure comes from the SAME type's matched bands:
      "from" is the lowest matched band of that type; "upper" is shown only when all of that type's bands matched (the ceiling belongs to the whole type). */
   function matches(rec, f) {
+    if (f.ptype && f.ptype !== 'all' && rec.cls !== f.ptype) return null;   // r4.2: unclassified developments only under All Residential
     if (f.regions && f.regions.length && f.regions.indexOf(rec.region) < 0) return null;
     if (f.districts && f.districts.length && f.districts.indexOf(rec.district) < 0) return null;
     if (f.tenure && f.tenure.length) { const b = rec.tenureBucket === 'freehold999' ? 'freehold' : rec.tenureBucket; if (f.tenure.indexOf(b) < 0) return null; }
@@ -104,7 +150,7 @@
     });
     return best ? { tier: best, types: hit } : null;
   }
-  return { CFG, DISTRICT_AREAS, REGION, tenureBucket, freshness, deriveType, build, tier, matches };
+  return { CFG, DISTRICT_AREAS, REGION, PTYPES, classMap, typingFormat, tenureBucket, freshness, deriveType, explain, build, tier, matches };
 });
 
 /* ==========================================================================
@@ -139,7 +185,6 @@
   function stateLine(r) {
     const d = sgDate(r.lastChecked);
     if (r.state === 'prices_hidden') return 'Prices not shown: last checked ' + d;
-    if (r.state === 'none_shown') return 'No units currently shown · Last checked ' + d;
     if (r.state === 'under_review') return 'Listing details are being verified';
     return 'Indicative developer listing price · Last checked ' + d + (r.freshness === 'older' ? ' · older listing' : '');
   }
@@ -183,7 +228,7 @@
       '<div class="gw-cat-tw"><table class="gw-cat-t"><caption class="gw-cat-cap">Indicative developer listing prices: from-price by bedroom type</caption><thead><tr><th scope="col">Development</th>' + COLS.map((b) => '<th scope="col" class="gw-cat-p">' + colHead(b) + '</th>').join('') + '<th scope="col" class="gw-cat-ck">Last checked</th></tr></thead><tbody>' +
       xs.map((x) => rowHtml(x, o)).join('') + '</tbody></table></div><ul class="gw-cat-cards" role="list">' + xs.map((x) => cardHtml(x, o)).join('') + '</ul></section>';
   }
-  const STATE_ORDER = { listed: 0, none_shown: 1, under_review: 2, prices_hidden: 3 };
+  const STATE_ORDER = { listed: 0, under_review: 1, prices_hidden: 2 };   // r4: no "none shown" state
   const typed = (f) => f.beds != null || f.max != null || f.sizeMin != null || f.sizeMax != null;
   // The results for a filter: { main, over10, over15, n } (n = developments shown). Price filters apply only to listed projects (C.matches).
   function results(model, f) {
@@ -207,12 +252,13 @@
   }
   const TENURES = [['freehold', 'Freehold or 999-year'], ['99', '99-year'], ['other', 'Other leasehold']], REGIONS = [['CCR', 'Core Central'], ['RCR', 'Rest of Central'], ['OCR', 'Outside Central']];
   const BEDS = [['', 'Any'], ['0', 'Studio'], ['1', '1'], ['2', '2'], ['3', '3'], ['4', '4'], ['5', '5+']];
-  function filtersHtml(f, idp) {
-    const p = idp || 'cat';
+  // opt.ptype: show the Property Type control (r4.2: only once the development classes have loaded)
+  function filtersHtml(f, opt) {
     const chk = (name, v, label, on) => '<label class="gw-cat-ck2"><input type="checkbox" name="' + name + '" value="' + esc(v) + '"' + (on ? ' checked' : '') + '><span>' + esc(label) + '</span></label>';
     const ds = Object.keys(C.DISTRICT_AREAS);
     return '<form class="gw-cat-f" data-cat-form novalidate onsubmit="return false">' +
       '<label class="gw-cat-fl"><span>Search</span><input type="search" name="q" autocomplete="off" placeholder="Name, street or D19" value="' + esc(f.q || '') + '"></label>' +
+      '<fieldset class="gw-cat-fs" data-cat-ptype' + (opt && opt.ptype ? '' : ' hidden') + '><legend>Property type</legend>' + C.PTYPES.map((t) => '<label class="gw-cat-ck2"><input type="radio" name="ptype" value="' + t[0] + '"' + ((f.ptype || 'all') === t[0] ? ' checked' : '') + '><span>' + esc(t[1]) + '</span></label>').join('') + '</fieldset>' +
       '<label class="gw-cat-fl"><span>Maximum budget</span><span class="gw-cat-money"><span aria-hidden="true">$</span><input type="text" inputmode="numeric" name="max" autocomplete="off" placeholder="e.g. 2,000,000" value="' + (f.max != null ? num(f.max) : '') + '"></span></label>' +
       '<label class="gw-cat-ck2 gw-cat-over"><input type="checkbox" name="over"' + (f.allowance >= 0.10 ? ' checked' : '') + '><span>Also show slightly over budget (up to 10%)</span></label>' +
       '<fieldset class="gw-cat-fs"><legend>Bedrooms</legend><div class="gw-cat-seg">' + BEDS.map((b) => '<label><input type="radio" name="beds" value="' + b[0] + '"' + (String(f.beds == null ? '' : f.beds) === b[0] ? ' checked' : '') + '><span>' + b[1] + '</span></label>').join('') + '</div></fieldset>' +
@@ -225,18 +271,20 @@
       '</form>';
   }
   // the form's values as a filter (numbers parsed from "2,000,000"); nothing typed here leaves the page
-  const DEFAULT = () => ({ q: '', max: null, allowance: 0, beds: null, sizeMin: null, sizeMax: null, big: false, regions: [], districts: [], tenure: [] });
+  const DEFAULT = () => ({ q: '', ptype: 'all', max: null, allowance: 0, beds: null, sizeMin: null, sizeMax: null, big: false, regions: [], districts: [], tenure: [] });
   function readForm(form, prev) {
     const n = (v) => { const x = Number(String(v || '').replace(/[^0-9.]/g, '')); return String(v || '').trim() && isFinite(x) && x > 0 ? x : null; };
     const all = (k) => Array.from(form.querySelectorAll('input[name="' + k + '"]:checked')).map((i) => i.value);
     const big = !!form.querySelector('input[name="big"]:checked'), b = (form.querySelector('input[name="beds"]:checked') || {}).value;
     const max = n(form.max.value), over = !!form.querySelector('input[name="over"]:checked');
-    return { q: form.q.value.trim(), max, allowance: max == null || !over ? 0 : prev && prev.allowance >= 0.15 ? 0.15 : 0.10, beds: b === '' || b == null ? null : Number(b),
+    const pt = (form.querySelector('input[name="ptype"]:checked') || {}).value;
+    return { q: form.q.value.trim(), ptype: pt === 'condo' || pt === 'ec' ? pt : 'all', max, allowance: max == null || !over ? 0 : prev && prev.allowance >= 0.15 ? 0.15 : 0.10, beds: b === '' || b == null ? null : Number(b),
       sizeMin: big ? 3000 : n(form.sizeMin.value), sizeMax: big ? null : n(form.sizeMax.value), big, regions: all('regions'), districts: all('districts'), tenure: all('tenure') };
   }
   function chipsHtml(f) {
     const c = [];
     if (f.q) c.push('“' + f.q + '”');
+    if (f.ptype && f.ptype !== 'all') c.push((C.PTYPES.find((t) => t[0] === f.ptype) || [])[1]);
     if (f.max != null) c.push('Up to ' + money(f.max));
     if (f.beds != null) c.push(colLabel(f.beds));
     if (f.big) c.push('3,000 sq ft and above'); else if (f.sizeMin != null || f.sizeMax != null) c.push((f.sizeMin != null ? num(f.sizeMin) : 'Any') + '–' + (f.sizeMax != null ? num(f.sizeMax) : 'any') + ' sq ft');
@@ -267,7 +315,7 @@
     const put = (h) => { const d = document.createElement('div'); d.innerHTML = h; const s = d.firstElementChild; host.parentNode.insertBefore(s, host.nextSibling); return s; };
     return Promise.all([get('data/projects/launch-roster.json'), get('data/projects/inventory.json')]).then(([roster, inv]) => {
       if (!roster || roster.kind !== 'kpt-launch-roster' || !Array.isArray(roster.projects) || !roster.projects.length || !inv || inv.v !== 2 || !Array.isArray(inv.projects)) throw new Error('data');
-      const st = { f: DEFAULT(), o: { model: null, updated: inv.checkedAt, research: {}, root } };
+      const st = { f: DEFAULT(), o: { model: null, updated: inv.checkedAt, research: {}, root }, ptype: false };
       const build = (classes) => { st.o.model = C.build({ inventory: inv, roster, classes: classes || {}, microsites: opt.microsites || {}, now: Date.now() }); };
       build({});
       const sec = put(html(st.o, st.f)), res = sec.querySelector('[data-cat-res]'), sheet = sec.querySelector('[data-cat-sheet]'), rail = sec.querySelector('.gw-cat-rail');
@@ -284,28 +332,32 @@
         const dd = form.querySelector('.gw-cat-dd summary'); if (dd) dd.textContent = 'District' + (st.f.districts.length ? ': ' + st.f.districts.map(Number).slice(0, 3).join(', ') + (st.f.districts.length > 3 ? ' +' + (st.f.districts.length - 3) : '') : '');
         draw(); if (opt.track && key) opt.track('catalogue_filter', { filter: key, placement: 'new-launches' }); };
       const wireForm = (form) => {
-        let t = null; form.addEventListener('input', (e) => { const k = e.target.name; clearTimeout(t); t = setTimeout(() => onForm(form, k), e.target.type === 'text' || e.target.type === 'search' ? 250 : 0); });
+        let t = null; form.addEventListener('input', (e) => { const k = e.target.name; clearTimeout(t);
+          // r4.2: commas while typing in Maximum budget; the caret stays after the same digit; the value is the digits typed
+          if (k === 'max') { const el = e.target, r = C.typingFormat(el.value, el.selectionStart); if (r.text !== el.value) { el.value = r.text; try { el.setSelectionRange(r.caret, r.caret); } catch (x) {} } } t = setTimeout(() => onForm(form, k), e.target.type === 'text' || e.target.type === 'search' ? 250 : 0); });
         form.addEventListener('change', (e) => { const k = e.target.name; if (k === 'max' || k === 'sizeMin' || k === 'sizeMax') { const v = Number(String(e.target.value).replace(/[^0-9]/g, '')); if (v > 0) e.target.value = num(v); } onForm(form, k); });
       };
       wireForm(rail.querySelector('form'));
       // phones and tablets: the same filters in a full-height sheet with a sticky "Show N developments"
       let opener = null;
-      const openSheet = () => { sheet.querySelector('.gw-cat-sb').innerHTML = filtersHtml(st.f); wireForm(sheet.querySelector('form')); sheet.hidden = false; document.body.classList.add('gw-cat-lock'); opener = document.activeElement; const x = sheet.querySelector('[data-cat-close]'); if (x) x.focus(); };
-      const closeSheet = () => { sheet.hidden = true; document.body.classList.remove('gw-cat-lock'); rail.innerHTML = filtersHtml(st.f); wireForm(rail.querySelector('form')); if (opener && opener.focus) opener.focus(); };
+      const openSheet = () => { sheet.querySelector('.gw-cat-sb').innerHTML = filtersHtml(st.f, st); wireForm(sheet.querySelector('form')); sheet.hidden = false; document.body.classList.add('gw-cat-lock'); opener = document.activeElement; const x = sheet.querySelector('[data-cat-close]'); if (x) x.focus(); };
+      const closeSheet = () => { sheet.hidden = true; document.body.classList.remove('gw-cat-lock'); rail.innerHTML = filtersHtml(st.f, st); wireForm(rail.querySelector('form')); if (opener && opener.focus) opener.focus(); };
       sec.addEventListener('click', (e) => {
         if (e.target.closest('[data-cat-open]')) openSheet();
         else if (e.target.closest('[data-cat-close]')) closeSheet();
-        else if (e.target.closest('[data-cat-clear]')) { st.f = DEFAULT(); rail.innerHTML = filtersHtml(st.f); wireForm(rail.querySelector('form')); draw(); }
+        else if (e.target.closest('[data-cat-clear]')) { st.f = DEFAULT(); rail.innerHTML = filtersHtml(st.f, st); wireForm(rail.querySelector('form')); draw(); }
         else if (e.target.closest('[data-cat-15]')) { st.f.allowance = 0.15; draw(); }
         const lk = e.target.closest('[data-cat-link]'); if (lk && opt.track) opt.track('catalogue_link', { target: lk.dataset.catLink, project_id: lk.dataset.catSlug, placement: 'new-launches' });
       });
       sheet.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
       draw();
-      // the registry (EC tags, "Past transactions" links): after the first draw, never blocking it
+      // the registry ("Past transactions" links, EC tags) and the reviewed classes (r4.2 Property Type): after the first draw, never blocking it.
+      // The Property Type control appears only when both have loaded; otherwise it stays hidden and every development is shown.
       get('data/registry/index.json').then((reg) => {
-        const F = reg.fields, i = F.indexOf('id'), c = F.indexOf('cls'), classes = {}; reg.rows.forEach((r) => { st.o.research[r[i]] = true; if (r[c] === 'ec') classes[r[i]] = 'ec'; });
-        build(classes); draw();
-      }).catch(() => {});
+        const i = reg.fields.indexOf('id'); reg.rows.forEach((r) => { st.o.research[r[i]] = true; });
+        return get('data/projects/catalogue-classes.json').then((rev) => { if (!rev || rev.kind !== 'kpt-catalogue-classes') throw new Error('classes'); build(C.classMap(reg, rev)); st.ptype = true; },
+          () => { build(C.classMap(reg, null)); });
+      }).then(() => { sec.querySelectorAll('[data-cat-ptype]').forEach((x) => { x.hidden = !st.ptype; }); draw(); }).catch(() => {});
       return sec;
     }).catch(() => { put(QUIET); return null; });
   }

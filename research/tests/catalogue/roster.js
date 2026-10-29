@@ -1,6 +1,7 @@
 'use strict';
 /* ==========================================================================
-   The permanent New Launches roster (data/projects/launch-roster.json), kept up to date by the fortnightly refresh (4.6, 29 Oct 2026).
+   The New Launches HISTORY roster, kept up to date by the fortnightly refresh (4.6; 4.7, 29 Oct 2026: kept privately in
+   private/roster/launch-roster-history.json; the public data/projects/launch-roster.json is now the ACTIVE list, see catalogue.js).
 
    Every developer-listing project Groundwork has ever shown, with its location facts and three dates:
    firstSeen, lastChecked (newest approved file that contained it) and lastListed (newest approved file in which it had units).
