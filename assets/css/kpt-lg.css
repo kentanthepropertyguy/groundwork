@@ -332,6 +332,8 @@ body.kpr .lg-hero--ans .lg-wrap{ justify-items:stretch; gap:16px; max-width:760p
   body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .lg-back{ grid-column:1 / -1; }
   body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .mp, body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .lg-ov, body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .gwb-m{ grid-column:2; grid-row:2 / span 20; margin-top:0; }
   body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .mp{ border-top:0; padding-top:8px; }
+  /* a matched-only type's priced card (Bedroom pricing tiers) takes the wider column, so its size groups sit side by side, never a tall strip */
+  body.kpr .lg-hero--ans .lg-wrap:has(> .gwb-t){ grid-template-columns:minmax(0,1fr) minmax(0,1.3fr); }
   body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .mp .mp-f{ grid-template-columns:1fr; gap:0; }
   body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .mp .mp-f div{ grid-template-columns:minmax(0,1fr) auto; column-gap:14px; align-items:baseline; padding:9px 0; border-bottom:1px solid var(--gw-line,#E3E6EC); }
   body.kpr .lg-hero--ans .lg-wrap:has(> .mp, > .lg-ov, > .gwb-m) > .mp .mp-f dt{ grid-column:1; grid-row:1; }
@@ -561,3 +563,12 @@ body.kpr .gwr-band{ padding-top:36px; padding-bottom:36px; }
 .lg-klink{ font-size:15px; color:var(--kpt-blue); text-decoration:none; font-weight:500; }
 .lg-klink:hover{ text-decoration:underline; }
 @media (max-width:719px){ .lg-kacts{ width:100%; } .lg-kacts .lg-btn{ width:100%; } }
+@media (min-width:980px) and (max-width:1279px){   /* a laptop: the two median tiles keep each line whole */
+  body.kpr .lg-hero--ans .lg-wrap:has(> .gwb-t){ grid-template-columns:minmax(0,1fr) minmax(0,1.4fr); }
+  /* two medians side by side: each line kept whole; the sizes, then the period on its own line (still read as "sizes · period") */
+  body.kpr .gwb-t .gwb-tiles:has(> .gwb-tile + .gwb-tile){ gap:8px; }
+  body.kpr .gwb-t .gwb-tiles:has(> .gwb-tile + .gwb-tile) > .gwb-tile{ padding:12px 10px; }
+  body.kpr .gwb-t .gwb-tiles:has(> .gwb-tile + .gwb-tile) .gwb-t-k{ font-size:12px; }
+  body.kpr .gwb-t .gwb-tiles:has(> .gwb-tile + .gwb-tile) .gwb-t-sep{ font-size:0; }
+  body.kpr .gwb-t .gwb-tiles:has(> .gwb-tile + .gwb-tile) .gwb-t-p{ display:block; }
+}

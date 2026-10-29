@@ -11,7 +11,10 @@ const REC = require(path.join(ROOT, 'assets/js/gw-records.js')), P = require(pat
 let pass = 0, fail = 0;
 const ok = (c, name, info) => { if (c) pass++; else { fail++; console.log('FAIL', name, info === undefined ? '' : JSON.stringify(info).slice(0, 400)); } };
 const sha = (s) => crypto.createHash('sha256').update(s).digest('hex');
-const KEYS = ['g', 'label', 'n12', 'n24', 'last', 'basis', 'figures', 'why', 'couldBe'];
+const KEYS0 = ['g', 'label', 'n12', 'n24', 'last', 'basis', 'figures', 'why', 'couldBe'];
+// Pricing tiers r2 (29 Oct 2026) amends test 4: a figures:false entry also carries groups, other and range (prices of past matched resales,
+// never per-sale rows); a figures:true entry keeps exactly the V2 keys. bedroom-tiers-tests.js tests the new keys themselves.
+const KEYS = KEYS0.concat(['groups', 'other', 'range']), keysOf = (m) => (m.figures ? KEYS0 : KEYS);
 
 /* ---------- synthetic: the list itself ---------- */
 const YM = (s) => Number(s.slice(0, 4)) * 12 + Number(s.slice(5, 7)) - 1, latest = YM('2026-09');
@@ -27,7 +30,7 @@ const gateOf = (types) => ({ types });
   ok((src.match(/MIN_MATCHED\s*=/g) || []).length === 1 && !/n24\s*[<>]=?\s*3\b|length\s*[<>]=?\s*3\b/.test(src), 'the floor is defined once and never written as a bare 3');
   ok(m[0].n24 === 3 && m[0].n12 === 1 && m[0].last === 202602 && m[0].basis.verified === 1 && m[0].basis.inferred === 2, 'counts, windows, latest month and basis', m[0]);
   ok(m[0].figures === false && m[0].why === 'few' && m[0].couldBe === 0, 'a type not in types is figures:false; why defaults to few; couldBe from the gate', m[0]);
-  ok(JSON.stringify(Object.keys(m[0])) === JSON.stringify(KEYS), 'a figures:false entry has exactly the approved keys (test 4)', Object.keys(m[0]));
+  ok(JSON.stringify(Object.keys(m[0])) === JSON.stringify(KEYS), 'a figures:false entry has exactly the approved keys (test 4, amended by r2)', Object.keys(m[0]));
   // the windows are the same as the transactions': 24 months back from the data month, inclusive of it
   const edge = BR.matchedTypes([row('1', '2024-10'), row('1', '2024-10'), row('1', '2024-10'), row('1', '2024-09')], latest, [], gateOf({}), 0.9);
   ok(edge.length === 1 && edge[0].n24 === 3 && edge[0].n12 === 0, 'Oct 2024 is inside the last 24 months to Sep 2026, Sep 2024 is not', edge);
@@ -73,7 +76,7 @@ const dir = path.join(ROOT, 'data/projects/bedroom'), meta = JSON.parse(fs.readF
 const all = {}; let bytes = 0;
 fs.readdirSync(dir).forEach((f) => { bytes += fs.statSync(path.join(dir, f)).size; if (/^s\d+\.json$/.test(f)) Object.assign(all, JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')).projects); });
 const ids = Object.keys(all).sort();
-ok(meta.rules && meta.rules.minMatched === 3 && sha(JSON.stringify(Object.assign({}, meta.rules, { minMatched: undefined }))) === sha(JSON.stringify(BR.RULES)), 'meta.rules adds minMatched: 3 and nothing else changes');
+ok(meta.rules && meta.rules.minMatched === 3 && meta.rules.groupSpan === 1.1 && meta.rules.maxGroups === 2 && sha(JSON.stringify(Object.assign({}, meta.rules, { minMatched: undefined, groupSpan: undefined, maxGroups: undefined }))) === sha(JSON.stringify(BR.RULES)), 'meta.rules adds minMatched: 3 (and r2 groupSpan 1.1, maxGroups 2) and nothing else changes');
 {
   // test 1: types and few are byte-identical to the live V1.1 data for every development it published (golden from commit c5b6bd3)
   const h = crypto.createHash('sha256'); let n = 0;
@@ -89,12 +92,15 @@ const entries = []; ids.forEach((id) => (all[id].resale.matched || []).forEach((
     if (tg.join() !== mt.join()) bad.push([id, tg, mt]); });
   ok(!bad.length, 'every figured type is in matched with figures:true, and every figures:true entry is in types', bad.slice(0, 3));
   // tests 4, 5, 9, 10: keys, why, groups; counts only (no area, size, price, psf, layout code or unit-like string)
-  const leak = entries.filter(([, m]) => JSON.stringify(Object.keys(m)) !== JSON.stringify(KEYS) || ['1', '2', '3', '4', '5'].indexOf(m.g) < 0 || m.label !== E.groupLabel(m.g) ||
+  const leak = entries.filter(([, m]) => JSON.stringify(Object.keys(m)) !== JSON.stringify(keysOf(m)) || ['1', '2', '3', '4', '5'].indexOf(m.g) < 0 || m.label !== E.groupLabel(m.g) ||
     (m.figures ? m.why !== null : ['ambiguous', 'few'].indexOf(m.why) < 0) || !(Number.isInteger(m.n12) && Number.isInteger(m.n24) && m.n12 <= m.n24 && m.n24 >= 3) ||
     !/^20\d{2}(0[1-9]|1[0-2])$/.test(String(m.last)) || JSON.stringify(Object.keys(m.basis)) !== '["verified","inferred"]' || m.basis.verified + m.basis.inferred !== m.n24 || !Number.isInteger(m.couldBe));
   ok(entries.length > 1000 && !leak.length, 'every matched entry: approved keys only, a bedroom count 1-5, why only ambiguous/few, integer counts with n24 >= 3', leak.slice(0, 3));
   const s = JSON.stringify(entries.map((e) => e[1]));
-  ok(!/sqft|sqm|area|price|psf|"coverage"|#\d|\b\d{2}-\d{2,3}\b/.test(s), 'privacy scan: no area, size, price, psf, coverage, layout code or unit-like string in any matched entry');
+  // r2: prices and ≈ sq ft bounds of past matched resales are now published (groups/other/range), never square metres, areas, layout codes,
+  // per-sale rows or unit-like strings; the V2 counts-only scan still holds for the V2 keys
+  const v2 = JSON.stringify(entries.map((e) => KEYS0.map((k) => e[1][k])));
+  ok(!/sqft|sqm|area|price|psf|"coverage"|#\d|\b\d{2}-\d{2,3}\b/.test(v2) && !/sqm|area|psf|"coverage"|#\d|rows|units?\b/.test(s), 'privacy scan: no area, square metres, psf, coverage, layout code, per-sale rows or unit-like string in any matched entry');
   ok(ids.every((id) => { const r = all[id].resale; return !r.matched || (Number.isInteger(r.of) && Number.isInteger(r.unknown) && r.unknown <= r.of && r.of - r.unknown >= r.matched.reduce((a, m) => a + m.n24, 0)); }), 'of and unknown: counts, unknown within of, and the matched resales fit inside of minus unknown');
   ok(ids.every((id) => Object.keys(all[id]).join() === 'name,resale' && Object.keys(all[id].resale).join() === (all[id].resale.matched ? 'coverage,of,unknown,types,few,matched' : 'coverage,types,few')), 'record shape: resale only, fields in the approved order');
 }
@@ -124,8 +130,9 @@ const entries = []; ids.forEach((id) => (all[id].resale.matched || []).forEach((
   // test 14: a record from another data month is ignored
   const sh = { projects: { x: { name: 'X', resale: { coverage: 0.8, of: 10, unknown: 2, types: [], few: [], matched: [{ g: '3', n24: 4, figures: false }] } } } };
   ok(BED.pick(sh, { latestMonth: '2026-08' }, 'x', { latestMonth: '2026-09' }) === null && BED.pick(sh, meta, 'x', { latestMonth: meta.latestMonth }) !== null, 'a record whose latestMonth differs from the Research data is ignored');
-  // test 15: shard growth within the stated budget (V1.1: 331,478 bytes, 88,023 gzipped). Proposed in the handover: 15%. Measured: about +70% raw, +35% gzipped.
-  ok(bytes <= 331478 * 1.75, 'bedroom data stays within the stated budget (+75% raw)', bytes);
+  // test 15: shard growth within the stated budget. V1.1: 331,478 bytes; V2 (v1.2, +70% approved by Ken 29 Oct): 564,642; pricing tiers r2 (v1.3):
+  // 667,352 (+18% on v1.2; 141,742 gzipped). Budget: +20% on v1.2.
+  ok(bytes <= 564642 * 1.2, 'bedroom data stays within the stated budget (+20% on v1.2)', bytes);
 }
 
 /* ---------- private: rebuild and check against the completeness gate ---------- */
@@ -136,8 +143,11 @@ if (process.env.GW_BEDS_RAW && process.env.GW_BEDS_SNAPSHOT) {
   const bad = [];
   r.report.filter((x) => x.published).forEach((x) => {
     const pub = built[x.id].resale, gt = x.gate.types;
-    if (pub.of !== x.gate.recent || pub.unknown !== x.gate.unclassified) bad.push([x.id, 'of/unknown']);
-    if (pub.unknown !== pub.of - Object.keys(gt).reduce((a, g) => a + gt[g].kept, 0)) bad.push([x.id, 'unknown is not of minus every matched group (Penthouse included)']);
+    // r2 (R2): unknown = of minus the resales with a bedroom count (Transactions' "Type unknown"); a penthouse-layout sale is unknown. Only
+    // Hundred Palms Residences differs from the gate's unclassified count on 5 Oct data (4 -> 8).
+    const withBeds = Object.keys(gt).filter((g) => /^\d+$/.test(g)).reduce((a, g) => a + gt[g].kept, 0);
+    if (pub.of !== x.gate.recent || pub.unknown !== pub.of - withBeds) bad.push([x.id, 'of/unknown', pub.unknown, pub.of - withBeds]);
+    if (pub.unknown !== x.gate.unclassified && x.id !== 'hundred-palms-residences') bad.push([x.id, 'unknown differs from the gate other than at Hundred Palms Residences']);
     pub.matched.forEach((m) => {
       const t = gt[m.g]; if (!t || t.ambiguous !== m.couldBe || t.kept !== m.n24) { bad.push([x.id, m.g, 'couldBe/kept', t, m]); return; }
       const want = t.ok ? null : t.kept < BR.RULES.minSales ? 'few' : t.share > BR.RULES.maxAmbiguousShare ? 'ambiguous' : 'other';

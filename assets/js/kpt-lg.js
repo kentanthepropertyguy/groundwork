@@ -390,7 +390,7 @@
     const REC = GLOBAL.GW_REC, RENT = GLOBAL.GW_RENT, TX = ctx && ctx.TX, f = M.focus || {}, sale = M.sale && M.sale.selected;
     let h = '';
     if (REC) {
-      if (bedAny && BV.sale === 'resale') h += REC.typesHtml(BV, { label: GLOBAL.GW_BED.label });
+      if (bedAny && BV.sale === 'resale') h += REC.typesHtml(BV, { label: GLOBAL.GW_BED.label, alsoText: GLOBAL.GW_BED.alsoText });
       else if (TX) h += REC.sizesHtml(TX, sale, { bin: chosen(M) ? f.bin : null });
       if (TX) h += REC.txHtml(TX, (ctx.txSt && ctx.txSt.f) || REC.startFilter({ sale }), { shown: ctx.txSt && ctx.txSt.shown });
     }

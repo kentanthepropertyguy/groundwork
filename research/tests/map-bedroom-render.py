@@ -93,7 +93,7 @@ try:
             # the link opens Research on that type (the V2.1 panel)
             pg.click('[data-bx="3"]'); pg.wait_for_selector('[data-ldb-rc="3"] a[data-m-bed]')
             pg.click('[data-ldb-rc="3"] a[data-m-bed]'); pg.wait_for_selector('[data-gwb-matched]', timeout=20000); pg.wait_for_timeout(600)
-            ok(pg.get_attribute('[data-gwb-matched]', 'data-gwb-g') == '3' and '14 resales in the last 2 years were matched as 3-bedroom.' in text(pg, '[data-gwb-matched]'), vn + ': "See the 14 matched resales in Research" opens Research on 3-bedroom')
+            ok(pg.get_attribute('[data-gwb-matched]', 'data-gwb-g') == '3' and '14 resales in the last 2 years were matched as 3-bedroom.' in pg.text_content('[data-gwb-matched]') and 'See the 14 matched resales' in text(pg, '[data-gwb-matched]'), vn + ': "See the 14 matched resales in Research" opens Research on 3-bedroom')
             ok(not errs, vn + ': no script errors', errs[:2]); ctx.close()
             ctx = b.new_context(**kw); pg, errs, req = page(ctx, dev)
             pg.click('[data-lead="beds"] a[data-m-bed="1"]'); pg.wait_for_selector('[data-gwb-ans]', timeout=20000)

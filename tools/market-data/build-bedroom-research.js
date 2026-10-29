@@ -32,7 +32,7 @@ const fs = require('fs'), path = require('path');
 const E = require('./bedroom-engine.js'), RW = require('./rental-window.js'), B = require('./bench-rental.js'), RE = require('./rental-engine.js'), H = require('./bedroom-hybrid.js');
 const P = require('../../assets/js/kpt-project.js');
 
-const VERSION = 'bedroom-research-v1.2';   // v1.1: Claude C's completeness gate; v1.2: "matched sales only" counts (resale.matched, of, unknown)
+const VERSION = 'bedroom-research-v1.3';   // v1.1: Claude C's completeness gate; v1.2: "matched sales only" counts (resale.matched, of, unknown); v1.3: pricing tiers (Claude C r2: groups, other, range; unknown as Transactions)
 const RULES = { minCoverage: 0.7, maxAmbiguousShare: 0.2, minSales: 5, gateMonths: 24, maxCoverageGap: 0.15, typical: { n: 5, months: 3 }, windows: [12, 24] };   // never beyond the gate's 24 months
 const SALES = ['resale'], SALE_CODE = { new: 1, sub: 2, resale: 3 };   // V1: resales (the completeness gate is defined on resales)
 const SQFT = E.SQFT_PER_SQM;
@@ -41,6 +41,42 @@ const SQFT = E.SQFT_PER_SQM;
 // classification: the counts are the tx rows the figures already use. Never a price, size, trend or budget for such a type.
 const MIN_MATCHED = 3;
 const MATCHED_GROUPS = ['1', '2', '3', '4', '5'];   // bedroom counts only: never Penthouse, never a studio
+// Bedroom pricing tiers (Claude C r2, approved 29 Oct 2026): a matched-only type may show a median for a size group whose sizes are within 10%
+// and which passes RULES.typical (5 sales over 3 months, RULES.windows); at most two groups. Tier B: one or two groups; Tier C: none (its
+// historical matched transactions only). The group test reuses RULES.typical and RULES.windows; never copied.
+const GROUP = { span: 1.10, maxGroups: 2 };
+const sqftOf = (sqm) => Math.round(sqm * SQFT);   // as the Transactions list shows it (≈), never the bands' floor
+const cmpKey = (a, b) => { for (let i = 0; i < a.length; i++) { if (a[i] !== b[i]) return a[i] > b[i] ? 1 : -1; } return 0; };
+// The first of RULES.windows in which the rows meet the typical-price test, or null.
+function firstWindow(rows, latest) {
+  for (const m of RULES.windows) { const l = rows.filter((t) => t.ym > latest - m), c = E.cell(l); if (c.n >= RULES.typical.n && c.act >= RULES.typical.months) return { rows: l, win: m }; }
+  return null;
+}
+const spanOf = (rows) => { const s = rows.map((t) => t.sqm); return [sqftOf(Math.min.apply(null, s)), sqftOf(Math.max.apply(null, s))]; };
+const minmax = (rows) => { const p = rows.map((t) => t.price); return { n: rows.length, lo: Math.min.apply(null, p), hi: Math.max.apply(null, p), sqft: spanOf(rows), from: ymToS(Math.min.apply(null, rows.map((t) => t.ym))), to: ymToS(Math.max.apply(null, rows.map((t) => t.ym))) }; };
+// sales: this type's matched resales in the latest 24 months (exactly the rows Transactions lists for bed = g, resale, last 2 years).
+// tx: all of the development's rows (for the same-size comparison). At most GROUP.maxGroups attempts, passing or not (spec r2 §2, §7).
+function sizeGroups(sales, latest, tx, g) {
+  let left = sales.slice(); const out = [];
+  for (let k = 0; k < GROUP.maxGroups && left.length; k++) {
+    const sizes = Array.from(new Set(left.map((t) => t.sqm))).sort((a, b) => a - b);
+    let best = null;
+    sizes.forEach((a) => {
+      const win = sizes.filter((x) => x >= a && x <= a * GROUP.span), l = left.filter((t) => win.indexOf(t.sqm) > -1);
+      const key = [l.length, l.filter((t) => t.ym > latest - 12).length, -a];   // most sales; then most in 12 months; then smaller sizes
+      if (!best || cmpKey(key, best.key) > 0) best = { key, win, l };
+    });
+    left = left.filter((t) => best.win.indexOf(t.sqm) < 0);
+    const pass = firstWindow(best.l, latest);
+    if (pass) {
+      const c = E.cell(pass.rows), at = (p) => tx.filter((t) => t.group === g && t.sale === SALE_CODE.resale && t.period === p && best.win.indexOf(t.sqm) > -1);
+      const A = E.cell(at(0)), Bc = E.cell(at(1)), r = E.reading(A, Bc, latest);
+      out.push({ sqft: spanOf(pass.rows), win: pass.win, from: ymToS(latest - pass.win + 1), to: ymToS(latest), n: c.n, act: c.act, med: c.price[2], lo: c.price[0], hi: c.price[4],
+        cmp: r.evidence === 'none' ? { evidence: 'none', a: A.n, b: Bc.n } : { evidence: r.evidence, dir: r.dir, pct: r.pct, a: A.n, b: Bc.n }, sizes: best.win });
+    }
+  }
+  return out;
+}
 const ymToInt = (ym) => (ym == null ? null : Math.floor(ym / 12) * 100 + (ym % 12) + 1);
 const ymToS = (ym) => Math.floor(ym / 12) + '-' + String((ym % 12) + 1).padStart(2, '0');
 const sToYm = (s) => Number(s.slice(0, 4)) * 12 + Number(s.slice(5, 7)) - 1;
@@ -104,9 +140,16 @@ function matchedTypes(tx, latest, types, gate, coverage) {
     const mine = tx.filter((t) => t.group === g && t.sale === SALE_CODE.resale && t.ym > latest - 24);
     if (mine.length < MIN_MATCHED) return null;
     const x = byG[g] || {}, figures = !!x.figures, gt = (gate.types || {})[g] || { ambiguous: 0 };
-    return { g, label: E.groupLabel(g), n12: mine.filter((t) => t.ym > latest - 12).length, n24: mine.length, last: ymToInt(Math.max.apply(null, mine.map((t) => t.ym))),
+    const o = { g, label: E.groupLabel(g), n12: mine.filter((t) => t.ym > latest - 12).length, n24: mine.length, last: ymToInt(Math.max.apply(null, mine.map((t) => t.ym))),
       basis: { verified: mine.filter((t) => t.tier === 'verified').length, inferred: mine.filter((t) => t.tier === 'inferred').length },
       figures, why: figures ? null : x.why === 'ambiguous' ? 'ambiguous' : 'few', couldBe: gt.ambiguous };
+    if (!figures) {   // pricing tiers (r2): groups (Tier B), other, range; prices of past matched resales only, never per-sale rows
+      const gs = sizeGroups(mine, latest, tx, g), inG = (t) => gs.some((q) => q.sizes.indexOf(t.sqm) > -1), rest = mine.filter((t) => !inG(t));
+      o.groups = gs.map((q) => { const c = Object.assign({}, q); delete c.sizes; return c; });
+      o.other = gs.length && rest.length ? minmax(rest) : null;
+      o.range = minmax(mine);
+    }
+    return o;
   }).filter(Boolean);
 }
 
@@ -170,7 +213,8 @@ function build(o) {
       r.matched = matched.map((m) => ({ g: m.g, n24: m.n24, figures: m.figures, why: m.why, couldBe: m.couldBe }));
       if (!shown.length && !matched.length) return;
       pub[sale] = { coverage: round(cov, 3) };
-      if (matched.length) Object.assign(pub[sale], { of: gate.recent, unknown: gate.unclassified });
+      // r2 (R2): unknown = the 24-month resales with no bedroom count, exactly Transactions' "Type unknown" rows (a penthouse-layout sale counts as unknown)
+      if (matched.length) Object.assign(pub[sale], { of: gate.recent, unknown: gate.recent - tx.filter((t) => t.sale === SALE_CODE.resale && t.ym > latest - 24 && /^\d+$/.test(String(t.group))).length });
       Object.assign(pub[sale], { types: shown.map((x) => { const o = Object.assign({}, x); delete o.figures; delete o.why; delete o.ambiguous; delete o.n36; delete o.kept24; return o; }), few: types.filter((x) => !x.figures && x.why === 'few').map((x) => x.g) });   // named only (no figures); a type withheld as ambiguous is not named here (matched names it, counts only)
       if (matched.length) pub[sale].matched = matched;
     });
@@ -182,7 +226,7 @@ function build(o) {
     }
     report.push(rec);
   });
-  const meta = { v: 1, kind: 'gw-bedroom-research', version: VERSION, asOf: man.asOf, latestMonth: man.latestMonth, classifiedAsOf: snap.asOf, rentalWindow: snap.rentalWindow, shards: man.shards, rules: Object.assign({}, RULES, { minMatched: MIN_MATCHED }),
+  const meta = { v: 1, kind: 'gw-bedroom-research', version: VERSION, asOf: man.asOf, latestMonth: man.latestMonth, classifiedAsOf: snap.asOf, rentalWindow: snap.rentalWindow, shards: man.shards, rules: Object.assign({}, RULES, { minMatched: MIN_MATCHED, groupSpan: GROUP.span, maxGroups: GROUP.maxGroups }),
     basis: 'Bedroom type is inferred by Groundwork, never recorded by URA: from the developer\'s floor-plan areas where a checked layout table exists ("floor plans"), otherwise from the bedroom counts declared in URA rental contracts for homes of the same size in the latest 12 quarters ("rental records"). Sales whose size fits more than one bedroom count are left out. Prices are URA caveated transaction prices.',
     counts: { developments: devs, withTypes } };
   return { meta, shards, report };
@@ -196,7 +240,7 @@ function write(o, r) {
   if (o.report) { fs.mkdirSync(o.report, { recursive: true }); fs.writeFileSync(path.join(o.report, 'bedroom-research-report.json'), JSON.stringify({ meta: r.meta, developments: r.report }, null, 1)); }
 }
 
-module.exports = { VERSION, RULES, MIN_MATCHED, decider, matchedTypes, possibleFor, typeFigures, typeTrend, build };
+module.exports = { VERSION, RULES, MIN_MATCHED, GROUP, decider, matchedTypes, sizeGroups, firstWindow, possibleFor, typeFigures, typeTrend, build };
 
 if (require.main === module) {
   const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > -1 ? process.argv[i + 1] : d; };

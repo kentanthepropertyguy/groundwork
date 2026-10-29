@@ -12,7 +12,10 @@ const txt = (h) => h.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').replace(/ ([.
 const throws = (f) => { try { f(); return false; } catch (e) { return true; } };
 
 const dir = path.join(ROOT, 'data/projects/bedroom'), meta = JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8')), man = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/projects/manifest.json'), 'utf8'));
-const recOf = (id) => { const f = path.join(dir, P.shardName(P.shardOf(id, meta.shards)) + '.json'); return B.pick(JSON.parse(fs.readFileSync(f, 'utf8')), meta, id, man); };
+// The V2 / V2.1 rules, on the published records as bedroom-research-v1.2 wrote them: the r2 pricing-tier keys (groups, other, range) are left
+// out, which is also r2 test 14 (a shard without them renders exactly as V2.1). The tiers have their own suite (research/tests/bedroom-tiers-ui-tests.js).
+const v12 = (r) => { if (r && r.resale && r.resale.matched) r.resale.matched = r.resale.matched.map((m) => { const c = Object.assign({}, m); delete c.groups; delete c.other; delete c.range; return c; }); return r; };
+const recOf = (id) => { const f = path.join(dir, P.shardName(P.shardOf(id, meta.shards)) + '.json'), sh = JSON.parse(fs.readFileSync(f, 'utf8')); Object.keys(sh.projects).forEach((k) => v12(sh.projects[k])); return B.pick(sh, meta, id, man); };
 const recFor = (V) => Object.assign({}, V.m, { of: V.of, unknown: V.unknown });
 const INF = 'Bedrooms matched from URA rental records for homes of the same size. URA doesn’t record bedrooms with a sale.';
 

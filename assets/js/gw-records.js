@@ -101,7 +101,9 @@
         '<span class="gwr-m">' + plural(t.n, w) + (t.win === 12 ? '' : ' in 2 years') + ' · ' + size + ' · ' + money(t.psf[2]) + ' psf</span></button>';
     };
     // V2: types with matched resales but no figures, counts only, each opening its sales below (never a price here).
-    const also = BV.only && BV.only.length ? '<p class="lg-fine gwr-also" data-gwr-also>Also matched (matched sales only): ' + BV.only.map((m) => '<button type="button" class="kpr-link" data-gwr-mbed="' + esc(m.g) + '">' + esc(lab(m.g)) + ' ' + num(m.n24) + '</button>').join(', ') + '</p>' : '';
+    // Pricing tiers (r2 §3): each may carry its first median with its sizes (Tier B) or its historical range (Tier C); o.alsoText is GW_BED.alsoText
+    const at = (m) => (o.alsoText ? o.alsoText(m) : ''), sep = BV.only && BV.only.some((m) => at(m)) ? '; ' : ', ';
+    const also = BV.only && BV.only.length ? '<p class="lg-fine gwr-also" data-gwr-also>Also matched (matched sales only): ' + BV.only.map((m) => '<button type="button" class="kpr-link" data-gwr-mbed="' + esc(m.g) + '">' + esc(lab(m.g)) + ' ' + num(m.n24) + '</button>' + (at(m) ? ': ' + esc(at(m)) : '')).join(sep) + '</p>' : '';
     const few = BV.few && BV.few.length ? '<p class="lg-fine" data-gwr-few>' + BV.few.map((g) => esc(lab(g))).join(' and ') + ': too few recent resales to show a typical price.</p>' : '';
     return '<section class="lg-band gwr-band" id="lgTypes" aria-labelledby="lgTypesH"><div class="lg-wrap gwr-wrap"><div class="gwr-head"><p class="lg-kicker">By home type</p><h2 id="lgTypesH">What each home type sells for</h2>' +
       '<p class="lg-sub">Resales here in the last 12 months: the typical (median) total price, and the range most of them sold within. Choose one to see its sales.</p></div>' +
