@@ -23,8 +23,25 @@
       return (bedShards[k] || (bedShards[k] = fetch(bedBase + k + '.json?v=' + BUILD).then((r) => (r.ok ? r.json() : null)).catch(() => null)));
     }).then((sh) => {
       const r = sh && sh.projects && sh.projects[p.id], t = r && r.resale && r.resale.types ? r.resale.types.filter((x) => x.price && x.n) : [];
-      if (t.length) { BEDS[p.id] = { types: t, basis: t.reduce((a, x) => ({ v: a.v + (x.basis ? x.basis.verified : 0), i: a.i + (x.basis ? x.basis.inferred : 0) }), { v: 0, i: 0 }) }; if (S.proj === name) refreshCard(); }
+      // Map Bedroom Pricing (Ken, 29 Oct 2026): the "Matched sales only" types too (Bedroom V2/V2.1): counts, and their individual sales on request
+      const only = r && r.resale && r.resale.matched ? r.resale.matched.filter((x) => !x.figures) : [];
+      if (t.length || only.length) { BEDS[p.id] = { types: t, only, unknown: r.resale.unknown || 0, basis: t.reduce((a, x) => ({ v: a.v + (x.basis ? x.basis.verified : 0), i: a.i + (x.basis ? x.basis.inferred : 0) }), { v: 0, i: 0 }) }; if (S.proj === name) refreshCard(); }
     });
+    return null;
+  }
+  /* A matched-only type's latest matched resales: the Research transactions (data/projects/tx), fetched only when a visitor opens them, and only
+     beside figures of the same data month. The rows are GW_REC.matchedRows, exactly the first sales of Research's "See the N matched resales". */
+  const txBase = new URL('../../data/projects/tx/', location.href).href, TXS = {}, txShards = {}; let txMeta = null;
+  const canRows = () => !!(window.GW_REC && window.GW_BED && window.KPT_PROJECT);
+  function txFor(name) {
+    const p = M.BY[name], P = window.KPT_PROJECT; if (!p || !canRows()) return false;
+    if (TXS[p.id] !== undefined) return TXS[p.id];
+    TXS[p.id] = null;   // loading
+    (txMeta || (txMeta = fetch(txBase + 'manifest.json?v=' + BUILD).then((r) => (r.ok ? r.json() : null)).catch(() => null))).then((tm) => {
+      if (!tm || tm.latestMonth !== M.latestMonth) return [tm, null];
+      const k = P.shardName(P.shardOf(p.id, tm.shards));
+      return (txShards[k] || (txShards[k] = fetch(txBase + k + '.json?v=' + BUILD).then((r) => (r.ok ? r.json() : null)).catch(() => null))).then((sh) => [tm, sh]);
+    }).then((x) => { TXS[p.id] = x && x[1] ? window.GW_REC.pick(x[1], x[0], p.id, { latestMonth: M.latestMonth }) || false : false; if (S.proj === name) refreshCard(); });
     return null;
   }
   const LY = window.KPT_MAP_VIEW.layers;
@@ -51,7 +68,7 @@
   }
   let lastHash = location.hash;
   function go(push) { const h = addr(); history[push ? 'pushState' : 'replaceState'](null, '', h); lastHash = location.hash; render(); }
-  function loadProject(name) { S.proj = name; S.sec = {}; S.more = false; S.min = false; S.band = null; S.rc = {}; S.hl = null; S.am = false; S.place = null; S.pr = 1000; S.nall = false; S.radius = M.BY[name].pos ? M.defaultRadius(name) : 2000; }
+  function loadProject(name) { S.proj = name; S.sec = {}; S.more = false; S.min = false; S.band = null; S.rc = {}; S.bx = null; S.hl = null; S.am = false; S.place = null; S.pr = 1000; S.nall = false; S.radius = M.BY[name].pos ? M.defaultRadius(name) : 2000; }
   const onNav = () => { if (location.hash === lastHash) return; lastHash = location.hash; parseHash(); render(); };
   addEventListener('popstate', onNav); addEventListener('hashchange', onNav);
 
@@ -98,11 +115,27 @@
     } else link = `<a class="lnk" href="../${esc(window.GW_POSTAL.hdbHash({ town: h.town, block: h.block, street: h.street }))}" data-gw-go="hdb-research" data-m-hdb>Open full HDB research ›</a>`;
     return `<div class="sec hdbs" data-hdb-panel="ok"><div class="sh"><b>Recent HDB resales</b><span>last 2 years</span></div><div class="hfts" role="group" aria-label="Flat type">${chips}</div>${body}<div class="hact">${link}</div></div>`;
   };
+  /* Postal code -> development (Ken, 29 Oct 2026): a postal code whose OneMap building name is exactly one development in the register
+     (gw-postal.js devMatch, the same rule the site search and Research use; every block of a development carries its name) opens that
+     development's own panel. A near name, two possible developments, no building name (HDB blocks are "NIL") or a development the Map
+     does not hold all keep the postal-code panel. Never the nearest development. The register is read once, only when a postal code is used. */
+  let REG = null, regP = null;
+  const loadReg = () => regP || (regP = fetch(new URL('../../data/registry/index.json', location.href).href).then((r) => (r.ok ? r.json() : null)).then((d) => { REG = d && Array.isArray(d.rows) ? d.rows : []; return REG; }).catch(() => { REG = []; return REG; }));
+  // -> the development's Map name, null for none, undefined while the register is still loading
+  function postalDev(pl) {
+    if (!pl || pl.t !== 'postal' || !window.GW_POSTAL) return null;
+    const a = M.PC[pl.n]; if (!a || !a.building) return null;
+    if (!REG) { loadReg().then(() => { if (S.place === pl) render(); }); return undefined; }
+    const m = window.GW_POSTAL.devMatch(a, REG, []); if (m.kind !== 'exact') return null;
+    const ids = Array.from(new Set(m.list.map((x) => x[0]))); if (ids.length !== 1) return null;
+    const p = M.BYID[ids[0]]; return p ? p.n : null;
+  }
   // a postal code that is an HDB block with a position on the layer: one row to its resale prices
   const hdbOfAddr = (a) => { if (!a || !M.HDBM || !a.blk) return null; const rk = window.GW_POSTAL.roadKey(a.road), b = String(a.blk).toUpperCase(); return M.HDBM.pts.find((p) => p.block === b && window.GW_POSTAL.roadKey(p.street) === rk) || null; };
   /* what the search box offers for what is typed: names from the map's own data, or (for a six-digit number) the address OneMap finds for that postal code */
   function suggestions() {
-    const code = M.postalCode(S.q); if (!code) { if (!M.HDBM && /^\s*(blk|block)?\s*\d{1,4}[a-z]?\b/i.test(S.q)) loadHdb().then(() => { if (S.suggOpen) refreshSugg(); }); return { list: M.places(S.q), msg: '' }; }
+    const code = M.postalCode(S.q); if (code) loadReg();   // ready by the time a postal code is chosen
+    if (!code) { if (!M.HDBM && /^\s*(blk|block)?\s*\d{1,4}[a-z]?\b/i.test(S.q)) loadHdb().then(() => { if (S.suggOpen) refreshSugg(); }); return { list: M.places(S.q), msg: '' }; }
     const r = PCR[code];
     if (!r) { PCR[code] = { state: 'loading', list: [] }; M.lookupPostal(code).then((x) => { PCR[code] = x; if (M.postalCode(S.q) === code && S.suggOpen) refreshSugg(); }); return { list: [], msg: PCMSG.loading(code) }; }
     if (r.state === 'ok') return { list: r.list.map((o) => ({ t: 'postal', n: o.n, label: o.title, sub: o.sub })), msg: '' };
@@ -146,17 +179,47 @@
   const stepK = (v) => (v >= 1e6 ? fmtM(v) : '$' + Math.round(v / 1e4) * 10 + 'K');
   const priceM = (v) => (v >= 1e6 ? fmtM(v) : '$' + Math.round(v / 1000) + 'K');   // $810K, $1.15M: prices as people say them
   /* Bedroom types: up to 4 (3 on a phone), each its typical total price, psf secondary. The difference to the type before is shown only where both
-     are from the same 12 months (an observed difference in typical prices, nothing more). */
+     are from the same 12 months (an observed difference in typical prices, nothing more).
+     Map Bedroom Pricing (Ken, 29 Oct 2026): each priced type links to its Research; a "Matched sales only" type (Bedroom V2) shows its matched count
+     and, opened (one at a time), its latest matched resales: 3 on a laptop, 2 on a phone. Never a typical price, psf, step or trend for it. */
+  const MO_TIP = 'Types marked “Matched sales only” have matched resales, but too few, or too many unmatched sales that could be the same type, for a typical price. Their individual sales are listed instead, newest first. Past sales, not a valuation.';
+  const bedLink = (id, g, t) => `<a class="lnk2" href="../#/p/${esc(id)}" data-m-bed="${esc(g)}" data-m-id="${esc(id)}">${t}</a>`;   // never data-m-full: that stays the one View Full Research button
+  // Refinement (Ken, 29 Oct 11:25): the collapsed row shows the latest matched resale itself (its full URA price and month, labelled a single sale),
+  // so there is a price reference without a typical price. The transactions are fetched with the card when it has matched-only types.
+  function moRow(name, m, mobile, B) {
+    const id = M.BY[name].id, open = S.bx === m.g, lab = esc(bedName(m.g)), n = m.n24, T = canRows() ? txFor(name) : false;
+    const last = T ? window.GW_REC.matchedRows(T, m.g, 1)[0] : null;
+    const ls = last ? `<span class="ldb-ls" data-ldb-last="${last[0]}"><b class="num">${fmt(last[4])}</b><small>latest sale, ${esc(ym(last[0]))}</small></span>` : '<span class="ldb-ls"></span>';
+    let h = `<div class="ldb-r ldb-mo" data-ldb-mo="${esc(m.g)}"><span class="ldb-t">${lab}</span>${ls}<span class="ldb-m"><span class="ldb-tag">Matched sales only</span> · ${n} sale${n === 1 ? '' : 's'} in 2 yrs` +
+      (canRows() ? ` · <button type="button" class="lnk2 ldb-x" data-bx="${esc(m.g)}" aria-expanded="${open}">${open ? 'Hide sales ⌃' : 'Recent sales ⌄'}</button>` : ` · ${bedLink(id, m.g, 'Sales in Research ›')}`) + '</span></div>';
+    if (!open) return h;
+    const k = mobile ? 2 : 3;
+    const rows = T ? window.GW_REC.matchedRows(T, m.g, k) : [], two = window.GW_BED.matchedLines({ m, unknown: B.unknown }).two;
+    h += `<div class="ldb-rc" data-ldb-rc="${esc(m.g)}">` + (T === null ? '<p class="basis">Loading the sales…</p>' : rows.length ? `<p class="ldb-rh">${esc(window.GW_BED.ROWS_NOTE)}</p>${window.GW_REC.matchedRowsHtml(rows)}` : '<p class="basis">The individual sales aren’t available here just now.</p>') +
+      (two ? `<p class="basis">${esc(two)}</p>` : '') + `<p class="ldb-go">${bedLink(id, m.g, `See the ${n} matched resales in Research ›`)}</p></div>`;
+    return h;
+  }
   function bedLead(name, mobile) {
-    const B = bedsFor(name); if (!B) return '';
-    const max = mobile ? 3 : 4, list = B.types.slice(0, max), more = B.types.length - list.length;
-    const rows = list.map((t, i) => {
-      const prev = list[i - 1], step = prev && prev.win === 12 && t.win === 12 && t.price[2] > prev.price[2] ? `<span class="ldb-st">+${stepK(t.price[2] - prev.price[2])} vs ${esc(bedName(prev.g))}</span>` : '';
+    const B = bedsFor(name); if (!B || !B.types.length) return '';   // no priced type: the prices by size lead, with any matched-only types under them (moLead)
+    const id = M.BY[name].id, mo = B.only || [];
+    const all = B.types.map((t) => ({ g: t.g, t })).concat(mo.map((m) => ({ g: m.g, m }))).sort((a, b) => (a.g === 'PH' ? 99 : +a.g) - (b.g === 'PH' ? 99 : +b.g));
+    const max = mobile ? 3 : 4, list = all.slice(0, max), more = all.length - list.length;
+    const rows = list.map((x, i) => {
+      if (x.m) return moRow(name, x.m, mobile, B);
+      const t = x.t, pv = list[i - 1], prev = pv && pv.t, step = prev && prev.win === 12 && t.win === 12 && t.price[2] > prev.price[2] ? `<span class="ldb-st">+${stepK(t.price[2] - prev.price[2])} vs ${esc(bedName(prev.g))}</span>` : '';   // only between two priced types side by side
+      const typ = mo.length ? '<small class="ldb-ty">typical</small>' : '';
       // a phone's short sheet keeps one line per type (the map above it stays framed); the counts and steps are in "More about this home" and the report
-      if (mobile) return `<div class="ldb-r ldb-1"><span class="ldb-t">${esc(bedName(t.g))} <small>${fmt(t.psf[2])} psf${t.win === 12 ? '' : ', 2 yrs'}</small></span><b class="num" title="${esc(fmt(t.price[2]))}">${priceM(t.price[2])}</b></div>`;
-      return `<div class="ldb-r"><span class="ldb-t">${esc(bedName(t.g))}</span><b class="num" title="${esc(fmt(t.price[2]))}">${priceM(t.price[2])}</b><span class="ldb-m">${fmt(t.psf[2])} psf · ${t.n} sale${t.n === 1 ? '' : 's'}${t.win === 12 ? '' : ', 2 yrs'}${step ? ' · ' : ''}${step}</span></div>`;
+      if (mobile) return `<div class="ldb-r ldb-1"><span class="ldb-t">${esc(bedName(t.g))} <small>${fmt(t.psf[2])} psf${t.win === 12 ? '' : ', 2 yrs'}</small> ${bedLink(id, t.g, 'Research ›')}</span><b class="num" title="${esc(fmt(t.price[2]))}">${priceM(t.price[2])}${typ}</b></div>`;
+      return `<div class="ldb-r"><span class="ldb-t">${esc(bedName(t.g))}</span><b class="num" title="${esc(fmt(t.price[2]))}">${priceM(t.price[2])}${typ}</b><span class="ldb-m">${fmt(t.psf[2])} psf · ${t.n} sale${t.n === 1 ? '' : 's'}${t.win === 12 ? '' : ', 2 yrs'}${step ? ' · ' : ''}${step} · ${bedLink(id, t.g, 'Research ›')}</span></div>`;
     }).join('');
-    return `<div class="lead lead-b" data-lead="beds"><div class="ld-k">Typical prices · resales, last 12 months${help(BED_TIP, 'About these prices')}</div><div class="ldb">${rows}</div>${more > 0 ? `<p class="ld-s">And ${more} more type${more === 1 ? '' : 's'} in the full research.</p>` : ''}<p class="basis">Past sales, not a valuation.${mobile ? '' : ' Sizes and counts in the full research.'}</p></div>`;
+    const k = mo.length ? `Resale prices by bedroom${help(BED_TIP + ' ' + MO_TIP, 'About these prices')}` : `Typical prices · resales, last 12 months${help(BED_TIP, 'About these prices')}`;
+    return `<div class="lead lead-b" data-lead="beds"><div class="ld-k">${k}</div><div class="ldb">${rows}</div>${more > 0 ? `<p class="ld-s">And ${more} more type${more === 1 ? '' : 's'} in the full research.</p>` : ''}<p class="basis">Past sales, not a valuation.${mobile ? '' : ' Sizes and counts in the full research.'}</p></div>`;
+  }
+  // No priced bedroom type: the prices by size stay as they are, and the matched-only types follow in their own short block.
+  function moLead(name, mobile) {
+    const B = bedsFor(name); if (!B || B.types.length || !(B.only || []).length) return '';
+    const list = B.only.slice(0, mobile ? 3 : 4), more = B.only.length - list.length;
+    return `<div class="lead lead-b lead-mo" data-lead="beds-mo"><div class="ld-k">By bedroom · matched sales only${help(MO_TIP, 'About these sales')}</div><div class="ldb">${list.map((m) => moRow(name, m, mobile, B)).join('')}</div>${more > 0 ? `<p class="ld-s">And ${more} more type${more === 1 ? '' : 's'} in the full research.</p>` : ''}</div>`;
   }
   /* Sizes: the supported sizes of the lead market (up to 3), each its typical total price; psf secondary. Only psf where no price is held. */
   function sizeLead(name, l, mobile) {
@@ -166,7 +229,8 @@
       : `<div class="ldb-r"><span class="ldb-t">${band(c.bin)}</span><b class="num" title="${esc(fmt(c.pmed))}">${priceM(c.pmed)}</b><span class="ldb-m">${fmt(c.med)} psf · ${c.n} sale${c.n === 1 ? '' : 's'}</span></div>`);
     return `<div class="lead lead-b" data-lead="sizes"><div class="ld-k">Typical prices by size${help(SIZE_TIP, 'About these prices')}</div><p class="ld-s ld-w">${MKT[l.mk][0]}${sub} · ${WINL[l.mm.win]}</p><div class="ldb">${rows.map(row).join('')}</div><p class="basis">Past sales, not a valuation.</p></div>`;
   }
-  function leadHtml(name, mobile) {
+  function leadHtml(name, mobile) { return leadHtml0(name, mobile) + moLead(name, mobile); }
+  function leadHtml0(name, mobile) {
     const l = M.lead(name), tip = help(PRICE_TIP, 'About this price');
     const bl = bedLead(name, mobile); if (bl) return bl;
     if (l) { const sl = sizeLead(name, l, mobile); if (sl) return sl; }
@@ -236,7 +300,7 @@
     // Market pulse: under the price on a desktop; on a phone it opens first in "More about this home", so the short sheet (and the map framed above it) does not change.
     if (!mobile) return `<aside class="dp" aria-label="Selected development"><div class="dp-in">${head}${leadHtml(name)}${pulseHtml(name)}${pos ? keyHtml(name) : nopos}<div class="sxs">${secs}</div></div><div class="dp-foot">${open}</div></aside>`;
     const tog = `<button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">More about this home ${S.more ? '⌄' : '⌃'}</button>`;
-    return `<aside class="bs${S.more ? ' open' : ''}" aria-label="Selected development"><div class="bs-hd"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}${pos ? radStrip(name) : ''}</div>${top}${S.more ? `${pulseHtml(name)}<div class="sxs">${secs}</div>` : ''}<div class="bs-act">${open}${tog}</div></aside>`;
+    return `<aside class="bs${S.more ? ' open' : ''}${BEDS[p.id] && BEDS[p.id].only && BEDS[p.id].only.length ? ' bx' : ''}" aria-label="Selected development"><div class="bs-hd"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}${pos ? radStrip(name) : ''}</div>${top}${S.more ? `${pulseHtml(name)}<div class="sxs">${secs}</div>` : ''}<div class="bs-act">${open}${tog}</div></aside>`;
   }
 
   /* ---------------- explore nearby: the same optional radius on every located selection ----------------
@@ -284,12 +348,13 @@
   }
   const upRow = (x) => `<button type="button" class="nb" data-pick="dev|${esc(x.p.n)}"><b>${esc(x.p.n)}</b><span class="m">${esc(M.upTag(x.p))} · ${distA(x.d)}</span><i aria-hidden="true">›</i></button>`;
   // a postal code that has not been resolved (an old link, or OneMap not answering): said simply, with the way out
-  function postalMiss(pl, mobile) {
-    const code = String(pl.n).split('~')[0], st = M.postalState(pl.n), msg = st === 'loading' ? PCMSG.loading(code) : (PCMSG[st] || PCMSG.error)(code);
+  function postalMiss(pl, mobile, wait) {
+    const code = String(pl.n).split('~')[0], st = M.postalState(pl.n), msg = st === 'loading' || wait ? PCMSG.loading(code) : (PCMSG[st] || PCMSG.error)(code);
     const inner = `<div class="dp-top"><div style="min-width:0"><h2>Postal code ${esc(code)}</h2><p class="meta" role="status">${esc(msg)}</p></div>${closeBtn}</div>`;
     return mobile ? `<aside class="bs" aria-label="Postal code">${inner}</aside>` : `<aside class="dp dp-start" aria-label="Postal code"><div class="dp-in">${inner}</div></aside>`;
   }
   function placeCard(pl, mobile) {
+    if (pl.t === 'postal' && postalDev(pl) === undefined) return postalMiss(pl, mobile, true);   // still finding out whether it is one development
     const d = M.placeData(pl, S.pr); if (!d) return pl.t === 'postal' ? postalMiss(pl, mobile) : startCard(mobile);
     const head = `<div class="dp-top"><div style="min-width:0"><h2>${esc(d.title)}</h2><p class="meta">${esc(d.meta)}</p></div>${topBtns(mobile)}</div>`;
     if (mobile && S.min) return minBar(d.title, d.meta, d.t === 'area' ? '' : `<div class="bs-rad">${radHtml()}</div>`);
@@ -332,6 +397,8 @@
   }
   const postalAsked = {};
   function render() {
+    // a postal code that is one development (a search pick or a shared link) opens that development, in place of the postal code in the address
+    if (S.place && S.place.t === 'postal') { const dn = postalDev(S.place); if (dn) { loadProject(dn); S.start = false; history.replaceState(null, '', addr()); lastHash = location.hash; } }
     const app = $('#app'); const focusId = document.activeElement && document.activeElement.id; const selStart = document.activeElement && document.activeElement.selectionStart;
     view.destroy(); app.innerHTML = stage();
     document.title = (S.place ? (S.place.t === 'postal' && M.PC[S.place.n] ? M.PC[S.place.n].title : S.place.n) + ' · ' : mode() === 'dev' ? S.proj + ' · ' : '') + 'Map · Groundwork';
@@ -418,6 +485,10 @@
   /* ---------------- events ---------------- */
   document.addEventListener('click', (e) => {
     const fl = e.target.closest && e.target.closest('a[data-m-full]');
+    // Map Bedroom Pricing: a bedroom type's link opens Research on that type (this tab only, a category, never a typed value), never on a size,
+    // with the same way Back to Map as View Full Research
+    const fb = e.target.closest && e.target.closest('a[data-m-bed]');
+    if (fb) { try { sessionStorage.setItem('kpt.research.bed', fb.dataset.mBed); sessionStorage.removeItem('kpt.research.size'); sessionStorage.setItem('kpt.map.out', JSON.stringify({ id: fb.dataset.mId, h: location.hash, n: history.length })); } catch (x) { /* storage blocked: Research opens on the overview */ } }
     // A size the visitor selected on the Map goes with them (this tab only, as a 100 sq ft band start, never a typed number) so the full analysis opens on the same size.
     // With none selected, nothing is passed: Research asks which size rather than choosing one.
     if (fl && S.band && M && S.proj && M.BY[S.proj] && M.BY[S.proj].id === fl.dataset.mFull) { const bp = String(S.band).split(':'); if (/^\d{3,5}$/.test(bp[1] || '')) { try { sessionStorage.setItem('kpt.research.size', bp[1]); } catch (x) { /* storage blocked */ } fl.setAttribute('href', '../#/p/' + fl.dataset.mFull + '/' + (bp[0] === 'new' ? 'new' : 'resale')); } }   // the same market: new sales, or resales (a sale type the development lacks falls back to its own default)
@@ -426,7 +497,7 @@
     if (fl) { try { sessionStorage.setItem('kpt.map.out', JSON.stringify({ id: fl.dataset.mFull, h: location.hash, n: history.length })); } catch (x) { /* Back to Map then opens the Map for that development */ } }
     if (SP.open && !(e.target.closest && (e.target.closest('#sources') || e.target.closest('.m-src')))) closeSources(false);
     if (!M) return;
-    const t = e.target.closest('[data-lyr],[data-dpclose],[data-dpmin],[data-dpshow],[data-dpmore],[data-nall],[data-dot],[data-radius],[data-pr],[data-am-more],[data-pick],[data-zoom],[data-band],[data-rc],[data-am],[data-sources],[data-hft]');
+    const t = e.target.closest('[data-lyr],[data-dpclose],[data-dpmin],[data-dpshow],[data-dpmore],[data-nall],[data-dot],[data-radius],[data-pr],[data-am-more],[data-pick],[data-zoom],[data-band],[data-rc],[data-am],[data-sources],[data-hft],[data-bx]');
     if (!t) { if (S.lyrOpen && !e.target.closest('.lyr')) { S.lyrOpen = false; drawLayers(); } if (!e.target.closest('.srch') && S.suggOpen) { S.suggOpen = false; render(); } return; }
     if (S.lyrOpen && !t.hasAttribute('data-lyr') && !e.target.closest('.lyr')) { S.lyrOpen = false; drawLayers(); }
     const d = t.dataset;
@@ -444,6 +515,7 @@
     if (t.hasAttribute('data-am-more')) { S.am = !S.am; refreshCard(); return; }
     if (d.band) { S.band = S.band === d.band ? null : d.band; refreshCard(); return; }
     if (d.rc) { S.rc[d.rc] = !S.rc[d.rc]; refreshCard(); return; }
+    if (d.bx) { S.bx = S.bx === d.bx ? null : d.bx; refreshCard(); const b = document.querySelector('[data-bx="' + d.bx + '"]'); if (b) b.focus({ preventScroll: true }); return; }   // one bedroom type open at a time
     if (d.am) { S.hl = S.hl === d.am ? null : d.am; view.hl(S.hl, true, narrow() ? { tl: [28, 84], br: [28, sheetH()] } : { tl: [48, 84], br: [420, 70] }); return; }
     if (d.hft) { S.hft = d.hft; history.replaceState(null, '', addr()); lastHash = location.hash; refreshCard(); return; }
     if (d.pick) { pickItem(d.pick); return; }

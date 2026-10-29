@@ -1,5 +1,5 @@
 {
- "_note": "Real answers from OneMap's address search for these postal codes, retrieved 2026-10-21 (Singapore Land Authority, Singapore Open Data Licence v1.0). Used only by the tests, which never call OneMap. A code not listed here is answered with no result.",
+ "_note": "Real answers from OneMap's address search for these postal codes, retrieved 2026-10-21 (Singapore Land Authority, Singapore Open Data Licence v1.0). Used only by the tests, which never call OneMap. A code not listed here is answered with no result. 29 Oct 2026: added real answers for multi-block developments (Bartley Ridge 368055/368063, Treasure at Tampines 528482, Kovan Melody 545021/548189, The Sail @ Marina Bay 018986, Waterbank at Dakota 399941), for the Map's postal-code-to-development test.",
  "answers": {
   "159016": {
    "found": 1,
@@ -495,6 +495,139 @@
    "totalNumPages": 0,
    "pageNum": 1,
    "results": []
+  },
+  "368063": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "BARTLEY RIDGE",
+     "BLK_NO": "46",
+     "ROAD_NAME": "MOUNT VERNON ROAD",
+     "BUILDING": "BARTLEY RIDGE",
+     "ADDRESS": "46 MOUNT VERNON ROAD BARTLEY RIDGE SINGAPORE 368063",
+     "POSTAL": "368063",
+     "X": "33357.34991593193",
+     "Y": "35916.62837553583",
+     "LATITUDE": "1.341091275004298",
+     "LONGITUDE": "103.8814575643396"
+    }
+   ]
+  },
+  "368055": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "BARTLEY RIDGE",
+     "BLK_NO": "30",
+     "ROAD_NAME": "MOUNT VERNON ROAD",
+     "BUILDING": "BARTLEY RIDGE",
+     "ADDRESS": "30 MOUNT VERNON ROAD BARTLEY RIDGE SINGAPORE 368055",
+     "POSTAL": "368055",
+     "X": "33257.31928449962",
+     "Y": "35872.19255400077",
+     "LATITUDE": "1.340689430961911",
+     "LONGITUDE": "103.8805587219405"
+    }
+   ]
+  },
+  "528482": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "TREASURE AT TAMPINES",
+     "BLK_NO": "1",
+     "ROAD_NAME": "TAMPINES LANE",
+     "BUILDING": "TREASURE AT TAMPINES",
+     "ADDRESS": "1 TAMPINES LANE TREASURE AT TAMPINES SINGAPORE 528482",
+     "POSTAL": "528482",
+     "X": "40624.27090102714",
+     "Y": "36355.21593926102",
+     "LATITUDE": "1.345055528986302",
+     "LONGITUDE": "103.9467553067352"
+    }
+   ]
+  },
+  "545021": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "KOVAN MELODY",
+     "BLK_NO": "31",
+     "ROAD_NAME": "KOVAN ROAD",
+     "BUILDING": "KOVAN MELODY",
+     "ADDRESS": "31 KOVAN ROAD KOVAN MELODY SINGAPORE 545021",
+     "POSTAL": "545021",
+     "X": "33559.89684615564",
+     "Y": "37923.97257349268",
+     "LATITUDE": "1.359244938386472",
+     "LONGITUDE": "103.8832779393733"
+    }
+   ]
+  },
+  "548189": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "KOVAN MELODY",
+     "BLK_NO": "15",
+     "ROAD_NAME": "KOVAN ROAD",
+     "BUILDING": "KOVAN MELODY",
+     "ADDRESS": "15 KOVAN ROAD KOVAN MELODY SINGAPORE 548189",
+     "POSTAL": "548189",
+     "X": "33531.96521783341",
+     "Y": "37958.44826096669",
+     "LATITUDE": "1.359556729310957",
+     "LONGITUDE": "103.8830269616062"
+    }
+   ]
+  },
+  "018986": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "THE SAIL @ MARINA BAY",
+     "BLK_NO": "4",
+     "ROAD_NAME": "MARINA BOULEVARD",
+     "BUILDING": "THE SAIL @ MARINA BAY",
+     "ADDRESS": "4 MARINA BOULEVARD THE SAIL @ MARINA BAY SINGAPORE 018986",
+     "POSTAL": "018986",
+     "X": "30152.3828112809",
+     "Y": "29246.50500889122",
+     "LATITUDE": "1.280769435042204",
+     "LONGITUDE": "103.8526585621513"
+    }
+   ]
+  },
+  "399941": {
+   "found": 1,
+   "totalNumPages": 1,
+   "pageNum": 1,
+   "results": [
+    {
+     "SEARCHVAL": "WATERBANK AT DAKOTA",
+     "BLK_NO": "70",
+     "ROAD_NAME": "DAKOTA CRESCENT",
+     "BUILDING": "WATERBANK AT DAKOTA",
+     "ADDRESS": "70 DAKOTA CRESCENT WATERBANK AT DAKOTA SINGAPORE 399941",
+     "POSTAL": "399941",
+     "X": "34095.31441391073",
+     "Y": "32109.20496207289",
+     "LATITUDE": "1.306658159962222",
+     "LONGITUDE": "103.888087858364"
+    }
+   ]
   }
  }
 }

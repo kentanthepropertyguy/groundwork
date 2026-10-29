@@ -314,3 +314,33 @@ body.kpm > .gw-nav{flex:none}
 .kpm .ldb-st{color:var(--m-mut)}
 .kpm .ld-w{margin-top:2px}
 @media (max-width:760px){.kpm .ldb{gap:0;margin-top:2px}.kpm .ldb-r{padding:3px 0}.kpm .ldb-r b{font-size:17px}.kpm .ldb-1 .ldb-t{font-size:13.5px}.kpm .ldb-1 small{font-weight:500;color:var(--m-mut);font-size:12px;margin-left:4px}}
+
+/* Map Bedroom Pricing (Ken, 29 Oct 2026): priced types link to their Research; "Matched sales only" types show their count, and opened (one at a
+   time) their latest matched resales, the same rows as Research. A list of individual sales, never a typical price. */
+.kpm .ldb-r b .ldb-ty{font-size:11.5px;font-weight:600;color:var(--m-mut);margin-left:4px;letter-spacing:0}
+.kpm .ldb-mo{grid-template-columns:minmax(0,1fr) auto}
+.kpm .ldb-tag{font-size:11px;font-weight:800;color:var(--m-ink);letter-spacing:.02em;white-space:nowrap}
+/* the latest matched resale: its full price (never rounded like a typical price), smaller and lighter, with "latest sale, month" under it */
+.kpm .ldb-ls{display:grid;justify-items:end;text-align:right;line-height:1.15}
+.kpm .ldb-r .ldb-ls b{font-size:15px;font-weight:700;letter-spacing:0}
+.kpm .ldb-ls small{font-size:11px;font-weight:600;color:var(--m-mut);white-space:nowrap}
+.kpm .ldb-m .lnk2,.kpm .ldb-t .lnk2,.kpm .ldb-go .lnk2{text-decoration:none}
+.kpm .ldb-x{background:none;border:0;padding:0;cursor:pointer;font:inherit;font-weight:700;font-size:12px;color:var(--m-sig);min-height:28px}
+.kpm .ldb-rc{padding:0 0 8px}
+.kpm .ldb-rh{margin:0 0 2px;font-size:11.5px;color:var(--m-mut)}
+.kpm .ldb-rc .basis{margin:4px 0 0}
+.kpm .ldb-go{margin:4px 0 0;font-size:12px}
+.kpm .ldb-go .lnk2{font-size:12px;display:inline-flex;align-items:center;min-height:28px}
+.kpm .gwr-mrows{list-style:none;margin:0;padding:0}
+.kpm .gwr-mrow{display:grid;grid-template-columns:70px minmax(0,1fr) auto;gap:8px;align-items:baseline;font-size:12.5px;padding:6px 0;border-top:1px solid var(--m-line);color:var(--m-text);font-variant-numeric:tabular-nums}
+.kpm .gwr-mrow-mo{color:var(--m-ink)} .kpm .gwr-mrow-sz{color:var(--m-mut);white-space:nowrap}
+.kpm .gwr-mrow-pr{font-weight:800;color:var(--m-ink);text-align:right;white-space:nowrap}
+.kpm .gwr-mrow .gwr-flag{grid-column:1/-1;font-size:11.5px;color:var(--m-mut)}
+.kpm .lead-mo{margin-top:10px}
+@media (max-width:760px){
+  .kpm .ldb-1 .lnk2{font-size:12px;font-weight:700;margin-left:4px}
+  .kpm .ldb-mo{padding:5px 0}
+  .kpm .gwr-mrow{grid-template-columns:62px minmax(0,1fr) auto;font-size:12px;padding:5px 0}
+  /* a sheet with matched-only bedroom types is taller: View Full Research stays in view at the bottom of it */
+  .kpm .bs.bx .bs-act{position:sticky;bottom:calc(-12px - env(safe-area-inset-bottom,0px));z-index:3;background:#fff;margin:12px -16px 0;padding:8px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--m-line)}
+}
