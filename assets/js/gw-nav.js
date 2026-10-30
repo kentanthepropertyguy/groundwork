@@ -17,6 +17,23 @@
   const ASK_MSG = 'Hi Ken, I’m on Groundwork and would like to talk through my property plans. My situation is ____. (Ref KPT-HOME)';
   const ASK = 'https://wa.me/6590908898?text=' + encodeURIComponent(ASK_MSG);
 
+  /* ---------------- R3 postal districts (Ken, 30 Oct 2026): the ONE definition Research, the site search and the Map's search use ----------------
+     An explicit district search ("D19", "d 19", "D-19", "District 19", "district19", "Dist 19", "D01"); "19" alone, "D19 condo" and names such as
+     Dover are not. The names are FIND's (kpt-find.js DISTRICT_AREAS; a test keeps them identical). Never a boundary or a district-wide price. */
+  const DISTRICTS = {
+    '01': 'Raffles Place, Marina', '02': 'Tanjong Pagar', '03': 'Queenstown, Tiong Bahru', '04': 'Telok Blangah, Harbourfront', '05': 'Pasir Panjang, Clementi', '06': 'City Hall, High Street',
+    '07': 'Bugis, Golden Mile', '08': 'Little India', '09': 'Orchard, River Valley', '10': 'Bukit Timah, Holland, Tanglin', '11': 'Novena, Thomson', '12': 'Balestier, Toa Payoh',
+    '13': 'Macpherson, Potong Pasir', '14': 'Geylang, Eunos', '15': 'Katong, Joo Chiat', '16': 'Bedok, Upper East Coast', '17': 'Changi, Loyang', '18': 'Tampines, Pasir Ris',
+    '19': 'Hougang, Punggol, Serangoon Gardens', '20': 'Bishan, Ang Mo Kio', '21': 'Upper Bukit Timah, Clementi Park', '22': 'Jurong', '23': 'Bukit Batok, Bukit Panjang, Choa Chu Kang',
+    '24': 'Lim Chu Kang, Tengah', '25': 'Woodlands, Kranji', '26': 'Upper Thomson, Springleaf', '27': 'Yishun, Sembawang', '28': 'Seletar',
+  };
+  const DISTRICT_RE = /^\s*(?:d|dist\.?|district|postal\s+district)\s*-?\s*(\d{1,2})\s*$/i;
+  // { d: '19', n: 19 } for D01–D28; { bad: true, n } for a district number outside 1–28; null when the query is not a district search
+  function districtOf(q) {
+    const m = DISTRICT_RE.exec(String(q == null ? '' : q)); if (!m) return null;
+    const n = Number(m[1]); return n >= 1 && n <= 28 ? { d: String(n).padStart(2, '0'), n } : { bad: true, n };
+  }
+
   /* ---------------- icons (line icons, inline, no requests) ---------------- */
   const ICON = {
     mortgage: '<path d="M4 11 12 4l8 7v9H4z"/><path d="M9 20v-5h6v5"/>',
@@ -443,7 +460,7 @@
       const items = () => [].slice.call(res.querySelectorAll('[role="option"]'));
       const setActive = (k) => { const it = items(); active = it.length ? (k + it.length) % it.length : -1; it.forEach((a, j) => a.setAttribute('aria-selected', String(j === active))); if (active >= 0) { inp.setAttribute('aria-activedescendant', it[active].id); it[active].scrollIntoView({ block: 'nearest' }); } else inp.removeAttribute('aria-activedescendant'); };
       const opt = (k, h, inner, extra) => '<a role="option" id="' + res.id + '-' + k + '" class="gw-sx-r" href="' + esc(h) + '"' + (extra || '') + '>' + inner + '</a>';
-      function render(q, devs, sites, loading, failed, roads, ups, pc) {
+      function render(q, devs, sites, loading, failed, roads, ups, pc, dist) {
         const st = devsOnly ? [] : scoredTools(q, devs && devs.length ? 4 : 6), tools = st.map((x) => x.e);
         const all = (sites || []).map((s) => ({ site: s })).concat(devs || []);
         // A development whose name starts with what was typed comes first, unless a tool matches the words exactly (ABSD, mortgage…).
@@ -452,6 +469,8 @@
         // Audit A5-27: the listbox holds only options, in labelled groups; the group headings are visual only.
         const group = (label, inner) => '<div role="group" aria-label="' + label + '" style="display:grid;gap:1px"><p class="gw-sx-h" aria-hidden="true">' + label + '</p>' + inner + '</div>';
         const toolsHtml = () => (tools.length ? group('Pages', tools.map((e) => opt(k++, href(e, base), svg(e.icon) + '<span><b>' + esc(nameOf(e)) + (e.ext ? ' <i aria-hidden="true">↗</i>' : '') + '</b><small>' + (e.sec ? '<em class="gw-sec gw-sec-' + e.sec + '">' + SECTIONS[e.sec].name + '</em> ' : '') + esc(tagOf(e)) + '</small></span>', ' data-gw-nav-to="' + e.id + '"' + (e.ext ? ' target="_blank" rel="noopener"' : ''))).join('')) : '');
+        if (dist) h += group('Postal district', opt(k++, base + 'research/#/district/' + dist, svg('research') + '<span><b>District ' + dist + '</b><small>' + esc('Generally ' + DISTRICTS[String(dist).padStart(2, '0')] + ' · its developments in Research') + '</small></span>', ' data-gw-nav-to="district"') +
+          opt(k++, base + 'research/map/#pl=district:' + dist, svg('map') + '<span><b>District ' + dist + ' on the Map</b><small>Developments recorded in this postal district</small></span>', ' data-gw-nav-to="district-map"'));
         if (!devFirst) h += toolsHtml();
         if (all.length) h += group('Developments · Research', all.map((d) => d.site
           ? opt(k++, d.site.url, svg('ext') + '<span><b>' + esc(d.site.name) + ' <i aria-hidden="true">↗</i></b><small>Ken’s site for this development</small></span>', ' data-gw-nav-to="site-' + esc(d.site.id) + '" target="_blank" rel="noopener"')
@@ -465,7 +484,7 @@
         // Audit A5-11: if the development list couldn't load, say so instead of quietly showing tools only.
         if (failed) after += '<p class="gw-sx-note" data-gw-sx-failed>Development search didn’t load. Check your connection and try again, or <a href="' + base + 'research/#/browse" data-gw-nav-to="directory">browse every development</a>.</p>';
         if (loading) after += '<p class="gw-sx-note">Searching developments…</p>';
-        else if (!tools.length && !all.length && !(roads && roads.length) && !(ups && ups.length) && !pc && !failed) after += '<p class="gw-sx-note">Nothing matches “' + esc(q.slice(0, 40)) + '”. ' + (devsOnly ? 'Try part of the development’s name.' : 'Try a development name, or words like stamp duty, ABSD, mortgage, valuation or HDB upgrade.') + '</p>';
+        else if (!tools.length && !all.length && !(roads && roads.length) && !(ups && ups.length) && !pc && !failed && !dist) after += '<p class="gw-sx-note">Nothing matches “' + esc(q.slice(0, 40)) + '”. ' + (devsOnly ? 'Try part of the development’s name.' : 'Try a development name, or words like stamp duty, ABSD, mortgage, valuation or HDB upgrade.') + '</p>';
         else if (all.length) after += '<a class="gw-sx-more" href="' + base + 'research/#/browse" data-gw-nav-to="directory">Not listed? Browse every development ›</a>';
         res.innerHTML = (h ? '<div role="listbox" id="' + inp.getAttribute('aria-controls') + '" aria-label="Search results" style="display:grid;gap:1px">' + h + '</div>' : '') + after;
         res.hidden = false; inp.setAttribute('aria-expanded', 'true'); if (body) body.hidden = true;
@@ -496,6 +515,7 @@
         const q = inp.value.trim(), my = ++seq;
         if (!q) { clear(); return; }
         const pcm = devsOnly ? null : PC_RE.exec(q); if (pcm) { runPostal(q, pcm[1]); return; }
+        const dq = devsOnly ? null : districtOf(q); if (dq && !dq.bad) { render(q, [], [], false, false, [], [], null, dq.n); return; }   // R3: a postal district
         const needDevs = dnorm(q).length >= 2;
         if (!needDevs) { render(q, [], [], false); return; }
         if (ixP && ixP.__v) {
@@ -629,5 +649,5 @@
 
   }
   if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount(); }
-  return { ONE_FIGURE, oneFigureHtml, upDone, finStamp, clearJourney, oneEdit, deaccent, ENTRIES, SECTIONS, SEC_ORDER, NAV_ORDER, doorHtml, researchRows, row, MENU_TOOLS, QUICK, UP, MAIN, LAUNCHES, ASK, ICON, svg, norm, matchTools, scoredTools, matchDevs, matchSites, matchRoads, roadList, roadTitle, roadKey, roadLandedHref, roadMapHref, findRoads, roadsNow, displayName, menuHtml, searchHtml, quickHtml, stripHtml, href, esc };
+  return { DISTRICTS, districtOf, ONE_FIGURE, oneFigureHtml, upDone, finStamp, clearJourney, oneEdit, deaccent, ENTRIES, SECTIONS, SEC_ORDER, NAV_ORDER, doorHtml, researchRows, row, MENU_TOOLS, QUICK, UP, MAIN, LAUNCHES, ASK, ICON, svg, norm, matchTools, scoredTools, matchDevs, matchSites, matchRoads, roadList, roadTitle, roadKey, roadLandedHref, roadMapHref, findRoads, roadsNow, displayName, menuHtml, searchHtml, quickHtml, stripHtml, href, esc };
 });

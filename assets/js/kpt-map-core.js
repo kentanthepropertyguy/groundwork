@@ -231,7 +231,11 @@
     // new launches and GLS sites: by name or by any other name the register lists (so "One Chuan Grove" and "Chuan Grove" both find it)
     const upPick = (t) => m.UP.map((p) => { const names = [p.n].concat(p.up.aliases || []); let r = null; names.forEach((x) => { const k = rankIn(x, t); if (k !== null && (r === null || k < r)) r = k; }); return r === null ? null : { r, p }; }).filter(Boolean).sort((a, b) => a.r - b.r || a.p.n.length - b.p.n.length).slice(0, 3)
       .map((o) => ({ t: 'dev', g: 'up', n: o.p.n, sub: [o.p.up.kind === 'launch' ? 'New launch' : 'GLS site', o.p.pos ? '' : 'not on the map yet'].filter(Boolean).join(' · ') + (o.p.district ? ' · D' + Number(o.p.district) : '') }));
+    // R3 (Ken, 30 Oct 2026): "D19" or "District 19" offers the district view (developments recorded in that postal district; never a boundary)
+    // the site's one definition (gw-nav.js, GWN.districtOf), loaded before the Map on its page
+    m.districtQuery = (q) => { const G = typeof self !== 'undefined' ? self : globalThis, x = G.GWN && G.GWN.districtOf ? G.GWN.districtOf(q) : null; return x && !x.bad ? x.n : null; };
     m.places = (q) => {
+      const dn = m.districtQuery(q); if (dn) return [{ t: 'district', n: String(dn), label: 'District ' + dn, sub: 'Developments recorded here' }];
       const t = NORM(q); if (!t) return [];
       const pick = (arr, name, mapper, cap, tie) => arr.map((x) => { const r = rankIn(name(x), t); return r === null ? null : { r, x }; }).filter(Boolean).sort((a, b) => a.r - b.r || (tie ? tie(b.x) - tie(a.x) : 0) || name(a.x).length - name(b.x).length).slice(0, cap).map((o) => mapper(o.x));
       return [

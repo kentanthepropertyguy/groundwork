@@ -571,6 +571,8 @@
     if (s[0] === 'prices') return { view: 'home', opt: 'prices' };
     if (s[0] === 'budget') return { view: 'home', opt: 'budget' };
     if (s[0] === 'browse') return { view: 'home', opt: 'dev', az: true };
+    // R3 (30 Oct 2026): a postal district from the site search or the Map, #/district/19: the Research home with that district's list open
+    if (s[0] === 'district' && /^\d{1,2}$/.test(s[1] || '') && +s[1] >= 1 && +s[1] <= 28) return { view: 'home', opt: 'dev', district: +s[1] };
     return { view: 'home', opt: 'dev' };
   }
   const buildHash = (v) => (v.view === 'hdb' ? '#/hdb/' + v.town + '/' + String(v.block).toLowerCase() + '/' + v.street + (v.type ? '/' + v.type : '') : v.view === 'project' ? '#/p/' + v.id + (v.sale ? '/' + v.sale : '') : v.view === 'compare' ? '#/compare/' + v.a + '/' + v.b + (v.sale ? '/' + v.sale : '') : v.view === 'pick' ? '#/compare/' + v.a : '#/');
