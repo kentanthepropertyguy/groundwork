@@ -139,6 +139,22 @@ body.lg .lg-sb .kpr-results button b{ display:block; font-size:18px; letter-spac
 body.lg .lg-sb .kpr-results button .m{ display:block; font-size:13.5px; color:var(--kpt-muted); margin-top:3px; font-weight:400; }
 body.lg .lg-sb .kpr-results button .r{ display:grid; justify-items:end; gap:5px; font-size:12px; color:var(--kpt-muted); white-space:nowrap; min-width:110px; }
 body.lg .lg-sb .kpr-results button .r i{ display:block; height:6px; border-radius:3px; background:var(--kpt-blue); }
+/* R3 District search (30 Oct 2026): the district panel in the Research search results; the rows are the usual result rows */
+body.lg .lg-sb .lg-dist{ margin-top:14px; }
+body.lg .lg-sb .lg-dist-h{ padding:4px 6px 0; }
+body.lg .lg-sb .lg-dist-k{ margin:0; font-size:12px; letter-spacing:.06em; text-transform:uppercase; font-weight:600; color:var(--kpt-muted); }
+body.lg .lg-sb .lg-dist-t{ margin:4px 0 0; font-size:17px; line-height:1.35; color:var(--kpt-body); text-wrap:balance; }
+body.lg .lg-sb .lg-dist-t b{ color:var(--kpt-ink); font-size:19px; letter-spacing:-.02em; }
+body.lg .lg-sb .lg-dist-s{ margin:4px 0 0; font-size:14.5px; line-height:1.45; color:var(--kpt-muted); }
+body.lg .lg-sb .lg-dist .kpr-results{ margin-top:12px; }
+body.lg .lg-sb .lg-dist .kpr-results button[aria-current="true"]{ box-shadow:inset 3px 0 0 var(--kpt-blue); }
+body.lg .lg-sb .lg-dist-more{ margin:10px 0 0; text-align:center; }
+body.lg .lg-sb .lg-dist-map{ margin:8px 0 0; }
+body.lg .lg-sb .lg-dist-map .kpr-link{ font-size:15px; font-weight:600; }
+body.lg .lg-sb .lg-dist-more .kpr-link{ min-height:44px; font-size:15px; font-weight:600; }
+body.lg .lg-sb .lg-dist-more .lg-n{ margin-left:8px; font-weight:400; color:var(--kpt-muted); }
+body.lg .lg-sb .lg-dist-note{ margin:12px 6px 0; text-align:left; }
+@media (max-width:420px){ body.lg .lg-sb .lg-dist-t{ font-size:16px; } body.lg .lg-sb .lg-dist-t b{ font-size:18px; } }
 body.lg .lg-sb .kpr-empty{ padding:18px 20px; background:#fff; border-radius:18px; color:var(--kpt-body); font-size:15px; }
 body.lg .lg-sb .v2-sites{ margin-top:8px; padding:8px; background:var(--kpt-grey); border-radius:22px; }
 body.lg .lg-sb .v2-sites-h{ font-size:12.5px; color:var(--kpt-muted); font-weight:600; margin:6px 12px 8px; }
@@ -442,6 +458,14 @@ body.kpr .mp-near button .lg-n{ margin-left:8px; padding-left:8px; border-left:1
 body.kpr .gwr-band{ padding:44px var(--gw-gutter,22px); border-top:1px solid var(--kpt-line); }
 .gwr-wrap{ gap:16px !important; }
 .gwr-head{ display:grid; gap:6px; }
+/* R3 (30 Oct 2026): on a report, the later sections ("Often compared with", "How the price has moved", "Location & amenities") use the same left-aligned
+   heading as the sections above them; phones were already the same. The comparison page keeps its own centred headings. */
+@media (min-width:720px){
+  body.kpr [data-lg="project"] .lg-head{ text-align:left; justify-items:start; gap:6px; }
+  body.kpr [data-lg="project"] .lg-head h2{ font-size:30px; line-height:1.15; letter-spacing:-.02em; }
+  body.kpr [data-lg="project"] .lg-head .lg-sub{ font-size:16px; max-width:900px; margin:0; }
+  body.kpr [data-lg="project"] #lgCompare .lg-center{ text-align:left; justify-self:start; }   /* "Or search for any other development" follows its heading */
+}
 .gwr-head h2{ font-size:30px; line-height:1.15; letter-spacing:-.02em; margin:0; }
 .gwr-head .lg-sub{ font-size:16px; max-width:900px; margin:0; }
 .gwr-rows{ display:grid; gap:8px; }

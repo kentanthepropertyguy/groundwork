@@ -224,6 +224,9 @@ body[data-kd-view=list] .kd-wrap{max-width:var(--gw-shell-w,1400px)}
 .kd.is-results .kd-chips{margin:0;flex:0 1 auto;min-width:0;gap:2px}
 .kd.is-results .kd-chip{border:0;background:transparent;padding:7px 10px;border-radius:10px;font-weight:500;font-size:14.5px;color:var(--ink)}
 .kd.is-results .kd-chip:hover{background:var(--grey)}
+/* R3 (30 Oct 2026): on every width the results' chips wrap, whole, as on phones; in the desktop map panel they were cut off behind Edit search */
+.kd.is-results .kd-barrow{flex-wrap:wrap}
+.kd.is-results .kd-chips{flex-wrap:wrap;overflow:visible}
 .kd-editb{flex:none;display:inline-flex;align-items:center;gap:8px;border:1px solid #CFCFD6;background:#fff;border-radius:980px;padding:7px 14px;font:inherit;font-size:14.5px;font-weight:600;color:var(--ink);cursor:pointer;white-space:nowrap;min-height:38px}
 .kd-editb:hover{border-color:var(--ink)}.kd-editb[aria-expanded=true]{border-color:var(--ink);background:var(--grey)}
 .kd.is-results .kd-quick2{margin:2px 0 0}.kd.is-results .kd-quick2 .kd-tick{margin-top:4px;font-size:13.5px}

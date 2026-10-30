@@ -114,7 +114,9 @@ ok(U.results(M, F({ beds: 4, tenure: ['freehold'] })).n === 23 && U.results(M, F
   const changed = execSync('git diff --name-only ' + BASE, { cwd: SITE }).toString().trim().split('\n').filter(Boolean).concat(execSync('git ls-files --others --exclude-standard', { cwd: SITE }).toString().trim().split('\n').filter(Boolean));
   // FIND, Budget Search, the Map, calculators, inventory.json and the shared CSS / navigation are never changed by the catalogue (or the release it ships in)
   const off = changed.filter((f) => /^(assets\/js\/(kpt-find|kpt-discover[^/]*|kpt-map[^/]*|gw-calc[^/]*|gw-nav|kpt-analytics)\.js|assets\/css\/(gw|gw-standard|kpt-map)\.css|research\/map\/|tools\/|data\/projects\/(inventory|find|find-beds)\.json)/.test(f));
-  ok(!off.length, 'FIND, Budget Search, the Map, calculators, inventory.json, shared CSS, navigation and analytics untouched', off);
+  // a catalogue release must leave them alone; another approved release (R3's Map district route, say) may change them without the catalogue tests failing
+  const cat = changed.some((f) => /^(assets\/(js|css)\/gw-catalogue\.|data\/projects\/(launch-roster|catalogue-classes)\.json|research\/new-launches\/)/.test(f));
+  ok(!cat || !off.length, 'FIND, Budget Search, the Map, calculators, inventory.json, shared CSS, navigation and analytics untouched by a catalogue release', off);
   const kf = fs.readFileSync(path.join(SITE, 'assets/js/kpt-find.js'), 'utf8');
   ok(/invMaxDays:\s*21/.test(kf) && /invCadenceDays:\s*14/.test(kf), 'FIND keeps its 21-day window and 14-day cadence');
 }

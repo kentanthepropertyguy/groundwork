@@ -63,7 +63,7 @@
   }
   function addr() {
     const q = new URLSearchParams();
-    if (S.place) { q.set('pl', S.place.t + ':' + S.place.n); if (S.place.t !== 'area' && S.pr !== 1000) q.set('r', S.pr); if ((S.place.t === 'hdb' || S.place.t === 'postal') && S.hft) q.set('ft', S.hft); } else if (!S.start && S.proj) { q.set('p', M.BY[S.proj].id); if (!M.BY[S.proj].up) q.set('r', S.radius); if (S.pr !== 1000 && M.BY[S.proj].pos) q.set('nr', S.pr); }
+    if (S.place) { q.set('pl', S.place.t + ':' + S.place.n); if (S.place.t !== 'area' && S.place.t !== 'district' && S.pr !== 1000) q.set('r', S.pr); if ((S.place.t === 'hdb' || S.place.t === 'postal') && S.hft) q.set('ft', S.hft); } else if (!S.start && S.proj) { q.set('p', M.BY[S.proj].id); if (!M.BY[S.proj].up) q.set('r', S.radius); if (S.pr !== 1000 && M.BY[S.proj].pos) q.set('nr', S.pr); }
     return q.toString() ? '#' + q : location.pathname + location.search;
   }
   let lastHash = location.hash;
@@ -357,9 +357,14 @@
     if (pl.t === 'postal' && postalDev(pl) === undefined) return postalMiss(pl, mobile, true);   // still finding out whether it is one development
     const d = M.placeData(pl, S.pr); if (!d) return pl.t === 'postal' ? postalMiss(pl, mobile) : startCard(mobile);
     const head = `<div class="dp-top"><div style="min-width:0"><h2>${esc(d.title)}</h2><p class="meta">${esc(d.meta)}</p></div>${topBtns(mobile)}</div>`;
-    if (mobile && S.min) return minBar(d.title, d.meta, d.t === 'area' ? '' : `<div class="bs-rad">${radHtml()}</div>`);
+    if (mobile && S.min) return minBar(d.title, d.meta, d.t === 'area' || d.t === 'district' ? '' : `<div class="bs-rad">${radHtml()}</div>`);
     let body = '';
-    if (d.t === 'area') {
+    if (d.t === 'district') {   // R3: the developments recorded in a postal district; the Map draws no district boundary
+      const n = mobile && !S.more ? 0 : 8;
+      body = `<p class="basis" style="margin:10px 0 0" data-dist-note>Marked on the map. Not a district boundary, and not every home in the district.</p>`;
+      body += `<div class="sec"><div class="sh"><b>Developments${help('Most active in the last 12 months first. Select one to see prices by size.', 'How developments are ordered')}</b><span>${d.devs.length} with recorded sales</span></div>${n ? d.devs.slice(0, n).map((p) => devRow({ p, e: M.EV[p.n] }, false)).join('') : ''}</div>`;
+      if (d.ups.length && n) body += `<div class="sec"><div class="sh"><b>New launches and sites</b><span>${d.ups.length} with no recorded sales</span></div>${d.ups.slice(0, 3).map((p) => `<button type="button" class="nb" data-pick="dev|${esc(p.n)}"><b>${esc(p.n)}</b><span class="m">${esc(M.upTag(p))}</span><i aria-hidden="true">›</i></button>`).join('')}</div>`;
+    } else if (d.t === 'area') {
       const row = (k, label, txt) => `<div class="ag"><span class="agi k-${k}">${icon(k, 13)}</span><div class="agb"><b>${label}</b><p class="ai2">${txt}</p></div></div>`;
       const nm = (arr, n) => arr.slice(0, n).map((x) => esc(x.n)).join(', ') + (arr.length > n ? ` and ${arr.length - n} more` : '');
       const cnt = (f) => d.sch.filter(f).length, np = cnt(M.isPri), ns = cnt(M.isSec);
@@ -374,7 +379,7 @@
       body = (d.t === 'hdb' ? hdbSection(d) : hb ? hdbSection({ hdb: hb }) : '') + (hideDevs ? '' : `<div class="sec" style="margin-top:14px;padding-top:0;border:0"><div class="sh"><b>Developments within ${radText(d.r)}${help(d.t === 'mrt' ? 'Straight-line distance from the nearest exit, not walking time.' : d.t === 'road' ? 'Straight-line distance from the middle of the road, not walking time. The road’s position is approximate, and no house is placed on it.' : 'Straight-line distance, not walking time. Living near a school does not decide admission; check the MOE registration rules.', 'How distances are measured')}</b><span>${d.list.length} with recorded sales</span></div>${radHtml()}${d.list.length ? d.list.slice(0, mobile && !S.more ? 3 : 6).map((x) => devRow(x)).join('') : `<p class="basis" style="margin:8px 0 0">None with recorded sales within ${radText(d.r)}.</p>${nx ? `<button type="button" class="lnk" data-pr="${nx}">Look within ${radText(nx)} ›</button>` : ''}`}</div>${d.ups && d.ups.length && (!mobile || S.more) ? `<div class="sec"><div class="sh"><b>New launches and sites${help('Launches and awarded government land sale sites with a verified location. They have no recorded sales, so no prices are shown.', 'About these')}</b><span>${d.ups.length} within ${radText(d.r)}</span></div>${d.ups.slice(0, 3).map(upRow).join('')}</div>` : ''}${d.t === 'road' ? roadLanded(d) : ''}`);
     }
     if (!mobile) return `<aside class="dp" aria-label="${esc(d.title)}"><div class="dp-in">${head}${body}</div></aside>`;
-    const more = (d.t === 'area' ? d.devs.length : d.list.length + (d.ups ? d.ups.length : 0)) > (d.isBlk ? 0 : 3) ? `<div class="bs-act"><button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">${d.t === 'area' ? 'Developments' : d.isBlk ? 'Developments nearby' : 'More developments'} ${S.more ? '⌄' : '⌃'}</button></div>` : '';
+    const more = (d.t === 'area' || d.t === 'district' ? d.devs.length : d.list.length + (d.ups ? d.ups.length : 0)) > (d.isBlk ? 0 : 3) ? `<div class="bs-act"><button type="button" class="btn g" data-dpmore aria-expanded="${!!S.more}">${d.t === 'area' || d.t === 'district' ? 'Developments' : d.isBlk ? 'Developments nearby' : 'More developments'} ${S.more ? '⌄' : '⌃'}</button></div>` : '';
     return `<aside class="bs${S.more ? ' open' : ''}" aria-label="${esc(d.title)}"><div class="bs-hd"><button type="button" class="grab" data-dpmore aria-label="${S.more ? 'Collapse' : 'Expand'}"></button>${head}</div>${body}${more}</aside>`;
   }
   function startCard(mobile) {
@@ -401,7 +406,7 @@
     if (S.place && S.place.t === 'postal') { const dn = postalDev(S.place); if (dn) { loadProject(dn); S.start = false; history.replaceState(null, '', addr()); lastHash = location.hash; } }
     const app = $('#app'); const focusId = document.activeElement && document.activeElement.id; const selStart = document.activeElement && document.activeElement.selectionStart;
     view.destroy(); app.innerHTML = stage();
-    document.title = (S.place ? (S.place.t === 'postal' && M.PC[S.place.n] ? M.PC[S.place.n].title : S.place.n) + ' · ' : mode() === 'dev' ? S.proj + ' · ' : '') + 'Map · Groundwork';
+    document.title = (S.place ? (S.place.t === 'postal' && M.PC[S.place.n] ? M.PC[S.place.n].title : S.place.t === 'district' ? 'District ' + Number(S.place.n) : S.place.n) + ' · ' : mode() === 'dev' ? S.proj + ' · ' : '') + 'Map · Groundwork';
     const mapEl = $('#map'); if (mapEl) mountMap(mapEl);
     // a shared link to a postal code: look it up once, then draw it
     if (S.place && S.place.t === 'postal' && !M.PC[S.place.n] && M.postalState(S.place.n) === 'loading' && !postalAsked[S.place.n]) { postalAsked[S.place.n] = 1; M.lookupPostal(String(S.place.n).split('~')[0]).then(() => render()); }
@@ -424,6 +429,7 @@
     if (md === 'start' || (md === 'dev' && !M.BY[S.proj].pos)) return { keep: md === 'dev', key: 'start|' + (m ? 'm' : 'd'), projects: M.PM, selected: null, cmp: [], amen: [], world: true, fit, minZoom: 11, pad: m ? { tl: [20, 84], br: [20, (($('.bs') || {}).offsetHeight || 150) + 16] } : { tl: [20, 76], br: [360, 60] } };
     if (md === 'place') {
       const d = M.placeData(S.place, S.pr); if (!d) return { keep: false, key: 'start|' + (m ? 'm' : 'd'), projects: M.PM, selected: null, cmp: [], amen: [], world: true, fit, minZoom: 11, pad: m ? { tl: [20, 84], br: [20, (($('.bs') || {}).offsetHeight || 150) + 16] } : { tl: [20, 76], br: [360, 60] } };   // a place not found (an old link, or the road files still loading): the whole island, never an error
+      if (d.t === 'district') return d.bounds ? { key: 'dt|' + S.place.n + '|' + (m ? 'm' + (S.more ? 'x' : '') + (S.min ? 'n' : '') : 'd') + (evOK() ? '' : '|wait'), ready: evOK(), projects: M.PM, selected: null, cmp: d.devs.map((p) => p.n), amen: [], bounds: d.bounds, fit, minZoom: 11, pad } : { keep: false, key: 'start|' + (m ? 'm' : 'd'), projects: M.PM, selected: null, cmp: [], amen: [], world: true, fit, minZoom: 11, pad: m ? { tl: [20, 84], br: [20, (($('.bs') || {}).offsetHeight || 150) + 16] } : { tl: [20, 76], br: [360, 60] } };
       if (d.t === 'area') return { key: 'a|' + S.place.n + '|' + (m ? 'm' + (S.more ? 'x' : '') + (S.min ? 'n' : '') : 'd') + (evOK() ? '' : '|wait'), ready: evOK(), projects: M.PM, selected: null, cmp: [], amen: [], bounds: d.bounds, areaRings: d.a.rings, place: { lat: null, chipAt: d.centre, label: d.title, sub: 'Neighbourhood' }, fit, minZoom: 11, pad };
       const list = d.list.slice(0, m && !S.more ? 3 : 6), cmp = list.map((x) => x.p.n), dl = d.r / 111320, dn = d.r / (111320 * Math.cos(d.lat * Math.PI / 180));
       return { key: 'p|' + S.place.t + S.place.n + '|' + d.r + '|' + (m ? 'm' + (S.more ? 'x' : '') + (S.min ? 'n' : '') : 'd') + (evOK() ? '' : '|wait'), ready: evOK(), projects: M.PM, selected: null, cmp, amen: [], circle: { lat: d.lat, lon: d.lon, r: d.r }, place: { lat: d.lat, lon: d.lon, label: d.title, sub: d.t === 'mrt' ? 'MRT station' : d.s.lab, keep: d.t === 'hdb' }, fitPts: [[d.lat, d.lon], [d.lat + dl, d.lon], [d.lat - dl, d.lon], [d.lat, d.lon + dn], [d.lat, d.lon - dn]], zoom: 15, minZoom: 11, fit, pad };
