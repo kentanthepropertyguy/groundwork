@@ -261,6 +261,17 @@
         const ups = m.UP.filter((p) => p.pos && AREAOF[p.n] === pl.n);
         return { t: 'area', title: a.n, meta: `Neighbourhood · ${a.region}`, a, stn, sch, pk, devs, ups, bounds: [[a.b[0], a.b[1]], [a.b[2], a.b[3]]], centre: [(a.b[0] + a.b[2]) / 2, (a.b[1] + a.b[3]) / 2] };
       }
+      // R3 (Ken, 30 Oct 2026): a postal district. Only the developments (and positioned launches) whose recorded district is that number; never a boundary,
+      // never a district-wide price. The view is fitted to where those developments are.
+      if (pl.t === 'district') {
+        const dn = Number(pl.n); if (!/^\d{1,2}$/.test(String(pl.n)) || !(dn >= 1 && dn <= 28)) return null;
+        const dd = String(dn).padStart(2, '0');
+        const devs = PM.filter((p) => !p.up && p.district === dd && EV[p.n]).sort((x, y) => y.t12 - x.t12 || x.n.localeCompare(y.n));
+        const ups = m.UP.filter((p) => p.pos && p.district === dd);
+        const pts = devs.concat(ups);
+        const bounds = pts.length ? [[Math.min.apply(null, pts.map((p) => p.lat)), Math.min.apply(null, pts.map((p) => p.lon))], [Math.max.apply(null, pts.map((p) => p.lat)), Math.max.apply(null, pts.map((p) => p.lon))]] : null;
+        return { t: 'district', title: 'District ' + dn, meta: 'Developments recorded in postal District ' + dn, d: dd, devs, ups, bounds };
+      }
       if (pl.t === 'postal') {
         const pc = m.PC[pl.n]; if (!pc) return null;
         const list = devsNear(pc.lat, pc.lon, r);

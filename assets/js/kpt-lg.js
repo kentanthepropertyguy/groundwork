@@ -177,11 +177,11 @@
       ws(RESEARCH_OPTS[0], dev) + ws(RESEARCH_OPTS[1], '<div id="rwBudget" class="gw-rhost"><p class="lg-fine">Loading…</p></div>') + '</div>';
   }
   // One search result row (the page's searchBox keeps its own events and keyboard handling).
-  function resultRow(r, i, max, R) {
+  function resultRow(r, i, max, R, inDistrict) {   // inDistrict (R3): a row in a district list, which names the district and the period once, above
     const w = max ? Math.max(6, Math.round(110 * r.n / max)) : 0;
-    const meta = [clsOf(r) === 'condo' ? '' : CLS[clsOf(r)].label, titleCase(r.street), 'District ' + Number(r.district), r.last ? 'latest sale ' + R.fmtMonth(r.last) : ''].filter(Boolean).join(' · ');
+    const meta = [clsOf(r) === 'condo' ? '' : CLS[clsOf(r)].label, titleCase(r.street), inDistrict ? '' : 'District ' + Number(r.district), r.last ? 'latest sale ' + R.fmtMonth(r.last) : ''].filter(Boolean).join(' · ');
     return '<li role="option"><button type="button" data-id="' + esc(r.id) + '"' + (i === 0 ? ' aria-selected="true"' : '') + '><span><b>' + esc(R.displayName(r.name)) + '</b><span class="m">' + esc(meta) + '</span></span>' +
-      '<span class="r"><span>' + plural(r.n, 'sale') + ' in 5 years</span><i style="width:' + w + 'px"></i></span></button></li>';
+      '<span class="r"><span>' + plural(r.n, 'sale') + (inDistrict ? '' : ' in 5 years') + '</span><i style="width:' + w + 'px"></i></span></button></li>';
   }
 
   // The register of launches and awarded sites (data/map/upcoming.json, the file the Map and the site search read), matched by name or any name it is known by.
@@ -210,6 +210,43 @@
     return '<div data-lg-launches>' + (hasSales ? '<p class="lg-fine" style="margin:14px 0 4px;text-align:left">New launches and sites, with no sales recorded yet</p>' : '') +
       '<ul class="kpr-results" role="listbox" aria-label="New launches and sites">' + rows + '</ul>' +
       '<p class="lg-fine" data-lg-launch-note style="margin-top:8px">Research shows prices once sales are recorded. The Map shows where ' + (list.length === 1 ? 'it is' : 'they are') + ', what is nearby and the confirmed project facts.</p></div>';
+  }
+
+  /* ---------- R3 District search (Ken, 30 Oct 2026; Master Planning approved scope) ----------
+     An explicit Singapore postal-district search ("D19", "d 19", "D-19", "District 19", "district19", "Dist 19", "D01") lists the developments Research
+     holds in that district, each with its own recorded sales and its own price preview. Nothing district-wide is computed: no boundary, no averaged
+     price, no district statistic. The district names are the same table FIND and the catalogue use (a test keeps them identical). */
+  const DISTRICT_AREAS = {
+    '01': 'Raffles Place, Marina', '02': 'Tanjong Pagar', '03': 'Queenstown, Tiong Bahru', '04': 'Telok Blangah, Harbourfront', '05': 'Pasir Panjang, Clementi', '06': 'City Hall, High Street',
+    '07': 'Bugis, Golden Mile', '08': 'Little India', '09': 'Orchard, River Valley', '10': 'Bukit Timah, Holland, Tanglin', '11': 'Novena, Thomson', '12': 'Balestier, Toa Payoh',
+    '13': 'Macpherson, Potong Pasir', '14': 'Geylang, Eunos', '15': 'Katong, Joo Chiat', '16': 'Bedok, Upper East Coast', '17': 'Changi, Loyang', '18': 'Tampines, Pasir Ris',
+    '19': 'Hougang, Punggol, Serangoon Gardens', '20': 'Bishan, Ang Mo Kio', '21': 'Upper Bukit Timah, Clementi Park', '22': 'Jurong', '23': 'Bukit Batok, Bukit Panjang, Choa Chu Kang',
+    '24': 'Lim Chu Kang, Tengah', '25': 'Woodlands, Kranji', '26': 'Upper Thomson, Springleaf', '27': 'Yishun, Sembawang', '28': 'Seletar',
+  };
+  const DISTRICT_RE = /^\s*(?:d|dist\.?|district|postal\s+district)\s*-?\s*(\d{1,2})\s*$/i;
+  // { d: '19', n: 19 } for D01–D28; { bad: true, n } for a district number outside 1–28; null when the query is not a district search
+  function districtOf(q) {
+    const m = DISTRICT_RE.exec(String(q == null ? '' : q)); if (!m) return null;
+    const n = Number(m[1]); return n >= 1 && n <= 28 ? { d: String(n).padStart(2, '0'), n } : { bad: true, n };
+  }
+  // index: the Research search index ({ fields, rows }); the developments with sales in that district, most recorded sales first (as the search ranks)
+  function districtRows(index, d) {
+    if (!index || !index.fields || !index.rows) return [];
+    const F = {}; index.fields.forEach((f, i) => { F[f] = i; });
+    const out = []; index.rows.forEach((r, i) => { if (r[F.district] === d) { const o = {}; index.fields.forEach((f, k) => { o[f] = r[k]; }); o.row = i; out.push(o); } });
+    return out.sort((a, b) => b.n - a.n || (a.name < b.name ? -1 : 1));
+  }
+  const DSTEP = 12;
+  // The panel that replaces "No transactions found" for a district search. shown: how many rows to list (Show more adds DSTEP); mapHref: the Map's district view, once it exists
+  function districtHtml(dq, rows, R, shown, mapHref) {
+    if (dq.bad) return '<div class="kpr-results"><div class="kpr-empty" role="status" data-lg-district="bad">Singapore’s postal districts run from D01 to D28.</div></div>';
+    const n = rows.length, k = Math.min(n, shown || DSTEP), mx = Math.max.apply(null, rows.slice(0, k).map((r) => r.n).concat([1]));
+    const map = mapHref ? '<p class="lg-dist-map"><a class="kpr-link" href="' + esc(mapHref) + '" data-lg-dmap>Explore District ' + dq.n + ' on Map ›</a></p>' : '';   // under the heading, before the list
+    const head = '<div class="lg-dist-h" data-lg-district="' + dq.d + '"><p class="lg-dist-k">Postal district</p><p class="lg-dist-t"><b>District ' + dq.n + '</b> · generally ' + esc(DISTRICT_AREAS[dq.d]) + '</p>' +
+      '<p class="lg-dist-s">' + (n ? plural(n, 'development') + ' with sales in the last 5 years, most sales first. Choose one for its own prices.' : 'Research holds no private development with sales here in the last 5 years.') + '</p>' + map + '</div>';
+    const list = n ? '<ul class="kpr-results" role="listbox" aria-label="Developments in District ' + dq.n + '" data-lg-dlist>' + rows.slice(0, k).map((r, i) => resultRow(r, i, mx, R, true)).join('') + '</ul>' : '';
+    const more = k < n ? '<p class="lg-dist-more"><button type="button" class="kpr-link" data-lg-dmore>Show ' + Math.min(DSTEP, n - k) + ' more <span class="lg-n">' + k + ' of ' + n + ' shown</span></button></p>' : '';
+    return '<div class="lg-dist">' + head + list + more + '<p class="lg-fine lg-dist-note">Districts are postal districts. Each price is a development’s own; Research doesn’t average prices across a district.</p></div>';
   }
 
   /* ---------- A4-03: names Research leaves out (window.GW_NOT_COVERED, written into the page at build time) ---------- */
@@ -460,7 +497,7 @@
       '</div></header>' + jump + ev +
       '<section class="lg-band grey" id="lgCompare"><div class="lg-wrap" style="gap:22px"><div class="lg-head"><p class="lg-kicker">Compare</p><h2>Often compared with ' + esc(M.name) + '</h2><p class="lg-sub" data-lg-sugg-sub>Developments that share enough recent sales in the same sizes for a fair comparison.</p></div>' +
         '<div class="lg-sugg" data-lg-sugg></div><p class="lg-fine lg-center">Or <a href="#/compare/' + esc(M.id) + '" data-lg-pick>search for any other development</a>.</p></div></section>' +
-      '<section class="lg-band" id="numbers"><div class="lg-wrap" style="gap:26px"><div class="lg-head"><p class="lg-kicker">The numbers</p><h2>How the price has moved.</h2>' +
+      '<section class="lg-band" id="numbers"><div class="lg-wrap" style="gap:26px"><div class="lg-head"><p class="lg-kicker">The numbers</p><h2>How the price has moved</h2>' +
         '<p class="lg-sub">' + (!chosen(M) ? 'Price per sq ft is different for every size, so how it has moved is shown for one size at a time. Past sales, not a forecast.' : chart ? 'Median ' + esc(words(M)[0]) + ' PSF of ' + esc(sqft(f.label)) + ' homes in each 12-month period, however many sold. Past sales, not a forecast.' : esc((M.history && M.history.note) || 'Historical transactions only.')) + '</p></div>' +
         '<div class="lg-g2 lg-numgrid">' +
           (bedOn ? GLOBAL.GW_BED.numbersHtml(BV) : !chosen(M) ? '<div class="lg-tile lg-pickprompt" data-lg-pickprompt><b>Choose a size to see how its price has moved</b><p>Homes of different sizes can sell at very different prices per sq ft, so there is no one chart for the whole development.</p><button type="button" class="lg-btn" data-lg-scroll="lgPick">Choose a size</button></div>' : chart ? '<div class="lg-tile" style="padding:26px 28px">' + chart + '<span class="lg-fine">Hollow dot: fewer than 3 sales. ' + esc(M.history.band.text || '') + '</span></div>' : '<div class="lg-tile">' + (M.read || []).map((r) => '<p>' + esc(r.text) + '</p>').join('') + '</div>') +
@@ -567,5 +604,5 @@
     }
   });
 
-  return { launchRows, launchMeta, matchLaunches, findLaunches, lnorm, strong, STRONG, freshness, freshLine, dataSpan, mixedLine, emptySearch, notCoveredNote, notCoveredMatches, runWhat, district, askData, typicalPrice, landingHtml, resultRow, projectHtml, afterProject, fillFacts, lineChart, projectLead, projectPill, activitySentence, priceSentence, tenurePhrase, titleCase, sqft, esc, money, num, plural };
+  return { DISTRICT_AREAS, districtOf, districtRows, districtHtml, DSTEP, launchRows, launchMeta, matchLaunches, findLaunches, lnorm, strong, STRONG, freshness, freshLine, dataSpan, mixedLine, emptySearch, notCoveredNote, notCoveredMatches, runWhat, district, askData, typicalPrice, landingHtml, resultRow, projectHtml, afterProject, fillFacts, lineChart, projectLead, projectPill, activitySentence, priceSentence, tenurePhrase, titleCase, sqft, esc, money, num, plural };
 });

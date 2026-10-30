@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="../assets/css/kpt-research.css?v=491ebef781">
 <link rel="stylesheet" href="../assets/css/kpt-shell.css?v=ec3f361afb">
 <link rel="stylesheet" href="../assets/css/kpt-compare-v2.css?v=f779cfb080">
-<link rel="stylesheet" href="../assets/css/kpt-lg.css?v=4fe1c576e5">
+<link rel="stylesheet" href="../assets/css/kpt-lg.css?v=a7388ecdb6">
 <link rel="stylesheet" href="../assets/css/gw-pulse.css?v=3387a27e04">
 <link rel="stylesheet" href="../assets/css/gw-bedroom.css?v=23b82e11df">
 <link rel="canonical" href="https://tools.kentanthepropertyguy.com/research/">
@@ -44,7 +44,7 @@
 <template id="gwLazy-postal"><script src="../assets/js/gw-postal.js?v=d497db9fdd"></script></template>
 <template id="gwLazy-prices"><script src="../assets/js/gw-wa.js?v=7a6cf4f1be"></script><script src="../assets/js/gw-journey.js?v=2b3a3a10d2"></script><script src="../assets/js/gw-landed-near.js?v=81ba4c3373"></script><script src="../assets/js/gw-value.js?v=3d11e1c67d"></script></template>
 <template id="gwLazy-hdb"><script src="../assets/js/gw-hdb.js?v=ff7e6ae643"></script></template>
-<template id="gwLazy-budget"><link rel="stylesheet" href="../assets/css/kpt-discover.css?v=fcd70e2467"><script src="../assets/js/kpt-market.js?v=f2c5f82332"></script><script src="../assets/js/kpt-find.js?v=e88bca722f"></script><script src="../assets/js/kpt-discover.js?v=204eac6fe7"></script><script src="../assets/js/kpt-discover-beds.js?v=8a9a8b8867"></script></template>
+<template id="gwLazy-budget"><link rel="stylesheet" href="../assets/css/kpt-discover.css?v=1ba1378ce6"><script src="../assets/js/kpt-market.js?v=f2c5f82332"></script><script src="../assets/js/kpt-find.js?v=e88bca722f"></script><script src="../assets/js/kpt-discover.js?v=204eac6fe7"></script><script src="../assets/js/kpt-discover-beds.js?v=8a9a8b8867"></script></template>
 <template id="gwLazy-budget-ui"><script src="../assets/js/kpt-discover-ui.js?v=c8d3c5cc61"></script></template>
 <template id="gwLazy-az"><script src="../assets/js/kpt-registry-core.js?v=f702981cf5"></script></template>
 <script src="../assets/js/kpt-analytics.js?v=3b78ef5642"></script>
@@ -63,7 +63,7 @@
 <script src="../assets/js/gw-rent.js?v=1d72b69f47"></script>
 <script src="../assets/js/gw-bedroom.js?v=506605b31a"></script>
 <script src="../assets/js/gw-overview.js?v=d2d4cac1fb"></script>
-<script src="../assets/js/kpt-lg.js?v=016ec3ffc1"></script>
+<script src="../assets/js/kpt-lg.js?v=f93a9e0a1e"></script>
 <script src="../assets/js/kpt-compare-v2.js?v=271d97d3bb"></script>
 <script src="../data/research/config.js?v=df6f3c6908"></script>
 <script>
@@ -216,8 +216,21 @@
     }
     // Not a development: the Map finds MRT stations, roads, neighbourhoods and schools. What was typed goes with the visitor to the Map in this tab only, never in an address.
     const mapRow = (q) => (home && q.trim().length >= 3 ? `<ul class="kpr-results" role="listbox" aria-label="Search the Map" data-pc-maprow><li role="option"><button type="button" data-mapq="${esc(q.trim().slice(0, 80))}"><span><b>Search the Map for “${esc(q.trim().slice(0, 40))}”</b><span class="m">MRT stations, roads, neighbourhoods and schools</span></span><span class="r"><span>Open Map ›</span></span></button></li></ul>` : '');
+    // R3 (30 Oct 2026): an explicit postal-district search ("D19", "District 19") lists that district's developments, each opening its own price preview.
+    // The list stays while a development's preview opens below it, so Back from its full report returns to the district. Nothing is computed across a district.
+    let dst = null;
+    function districtShow(q, dq, ix) {
+      const rows = dq.bad ? [] : KPTLG.districtRows(ix, dq.d);
+      dst = { dq, rows, shown: KPTLG.DSTEP };
+      res.innerHTML = KPTLG.districtHtml(dq, rows, R, dst.shown, dq.bad ? null : 'map/#pl=district:' + dq.n);
+      input.setAttribute('aria-expanded', String(rows.length > 0));
+      clearTimeout(timer); timer = setTimeout(() => track('research_search', { results: rows.length }), 1200);
+    }
     function show(q) {
+      dst = null;
       if (home) { const pm = PCM.exec(q); pseq++; if (pm) { postalShow(q, pm[1]); return; } if (/^\s*\d{4,5}\s*$/.test(q) || /^\s*\d{7,}\s*$/.test(q)) { res.innerHTML = pcMsg('A postal code has six digits.'); input.setAttribute('aria-expanded', 'false'); return; } }
+      const dq = home && window.KPTLG && KPTLG.districtOf ? KPTLG.districtOf(q) : null;
+      if (dq) { ready().then(([ix]) => { if (input.value === q) districtShow(q, dq, ix); }).catch(() => { res.innerHTML = `<div class="kpr-results"><div class="kpr-empty">Search is unavailable right now. Please refresh.</div></div>`; }); return; }
       ready().then(([ix, sd]) => {
         const found = q.trim() ? P.search(ix, sd, q, { limit: cls ? 40 : 8 }).filter((r) => r.id !== excludeId) : [], rows = cls ? found.filter((r) => P.classOf(r) === cls).slice(0, 8) : found, otherCls = cls ? found.filter((r) => P.classOf(r) !== cls).slice(0, 3) : [];
         input.setAttribute('aria-expanded', rows.length ? 'true' : 'false');
@@ -242,7 +255,7 @@
     }
     input.addEventListener('focus', ready);
     input.addEventListener('input', () => show(input.value));
-    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const b = res.querySelector('button'); if (b) { e.preventDefault(); act(b); } } if (e.key === 'ArrowDown') { const b = res.querySelector('button'); if (b) { e.preventDefault(); b.focus(); } } });
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const b = res.querySelector('button'); if (b && dst) { e.preventDefault(); b.focus(); return; } if (b) { e.preventDefault(); act(b); } } if (e.key === 'ArrowDown') { const b = res.querySelector('button'); if (b) { e.preventDefault(); b.focus(); } } });
     // what a result does: a launch or place opens the Map, a road its landed sales, an HDB block its research, a development its Research page
     function act(b) {
       const d = b.dataset;
@@ -251,11 +264,21 @@
       else if (d.road) { if (hooks && hooks.street && d.street) { hooks.street(d.street); done(); } else location.href = d.road; }
       else if (d.hdb) { if (hooks && hooks.hdb) { hooks.hdb(d.hdb); done(); } else location.hash = d.hdb; }
       else if (d.pcprices) { if (hooks && hooks.postal) { hooks.postal(d.pcprices); done(); } else location.hash = '#/'; }
-      else if (d.id) { if (hooks && hooks.dev) { hooks.dev(d.id); done(); } else onPick(d.id); }
+      else if (d.id) { if (hooks && hooks.dev) { hooks.dev(d.id); if (b.closest('[data-lg-dlist]')) { res.querySelectorAll('[data-lg-dlist] button').forEach((x) => { x.setAttribute('aria-selected', String(x === b)); if (x === b) x.setAttribute('aria-current', 'true'); else x.removeAttribute('aria-current'); }); } else done(); } else onPick(d.id); }
     }
     // a recognised property is chosen: the list gives way to its overview
     function done() { res.innerHTML = ''; input.setAttribute('aria-expanded', 'false'); }
-    res.addEventListener('click', (e) => { const b = e.target.closest('button[data-launch],button[data-road],button[data-id],button[data-hdb],button[data-pcprices],button[data-mapq]'); if (b) act(b); });
+    res.addEventListener('click', (e) => { const b = e.target.closest('button[data-launch],button[data-road],button[data-id],button[data-hdb],button[data-pcprices],button[data-mapq]'); if (b) act(b);
+      // R3: Show more in a district list (the next rows, focus on the first new one)
+      if (e.target.closest('[data-lg-dmore]') && dst) { const k = dst.shown; dst.shown += KPTLG.DSTEP; res.innerHTML = KPTLG.districtHtml(dst.dq, dst.rows, R, dst.shown, 'map/#pl=district:' + dst.dq.n); const nb = res.querySelectorAll('[data-lg-dlist] button')[k]; if (nb) nb.focus(); }
+    });
+    // R3: arrow keys move through a district list; Escape returns to the search box
+    res.addEventListener('keydown', (e) => {
+      if (!dst || ['ArrowDown', 'ArrowUp', 'Escape'].indexOf(e.key) < 0) return;
+      e.preventDefault(); if (e.key === 'Escape') { input.focus(); return; }
+      const bs = Array.from(res.querySelectorAll('button')), i = bs.indexOf(document.activeElement); if (i < 0) return;
+      const j = e.key === 'ArrowDown' ? Math.min(bs.length - 1, i + 1) : i - 1; if (j < 0) input.focus(); else bs[j].focus();
+    });
     return wrap;
   }
   // Home: three ways in, one open at a time (a development, prices & past sales, a budget). The page is built once and put back as it was
