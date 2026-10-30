@@ -42,6 +42,9 @@
       tenure: r.tenure === 'free' || r.tenure === 'lease' ? r.tenure : 'any',
       beds: T.beds.indexOf(Number(r.beds)) > -1 ? Number(r.beds) : null,
       near: r.near && r.near.dist && r.near.pos && T.radii.indexOf(Number(r.near.radius)) > -1 ? r.near : null,
+      // R3c (Ken, 30 Oct 2026): a postal district the buyer chose. Developments whose recorded district is that one (FIND's own district rule); never a
+      // centre point or a radius, so it and `near` are never both set (a radius place wins)
+      district: !(r.near && r.near.dist) && /^(0[1-9]|1\d|2[0-8])$/.test(String(r.district || '')) ? String(r.district) : null,
     };
   }
 
@@ -94,6 +97,7 @@
       if (req.type !== 'any' && req.type !== cls) return;
       if (req.tenure === 'free' && rec.tg !== 4) return;
       if (req.tenure === 'lease' && rec.tg === 4) return;
+      if (req.district && rec.d !== req.district) return;   // R3c: the recorded postal district only
       let placed = true;
       if (near) { if (!near.pos[rec.id]) placed = false; else if (!(dist(rec.id) != null && dist(rec.id) <= near.radius)) return; }
       sales.forEach((sale) => {
@@ -148,7 +152,7 @@
     if (req.beds) tryIt('beds', 'Show any bedroom', { beds: null });
     if (req.type !== 'any') tryIt('type', 'Include every property type', { type: 'any' });
     if (req.sale !== 'either') tryIt('sale', 'Include new launch and resale', { sale: 'either' });
-    if (req.near) tryIt('place', 'Look across all of Singapore', { near: null });
+    if (req.near || req.district) tryIt('place', 'Look across all of Singapore', { near: null, district: null });
     return out.slice(0, 4);
   }
 

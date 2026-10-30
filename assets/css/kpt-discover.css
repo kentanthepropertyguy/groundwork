@@ -62,7 +62,8 @@ body.kdp{margin:0;background:#fff;color:var(--gw-body,#3B4256);font-family:var(-
 .kd-cols{display:block;padding-top:20px}
 .kd-main{min-width:0;max-width:680px;margin:0 auto}
 .kd-lead{margin-top:2px}
-.kd-sub{margin:8px 0 0;font-size:14px;color:var(--muted)}.kd-tiers{margin-top:2px}
+.kd-sub{margin:8px 0 0;font-size:14px;color:var(--muted)}
+.kd-sub a{color:var(--blue);font-weight:600;text-decoration:none;white-space:nowrap}.kd-sub a:hover{text-decoration:underline}   /* R3c: "See it on the Map" for a postal district */.kd-tiers{margin-top:2px}
 .kd-bar{margin-top:8px;position:sticky;top:var(--nav);z-index:20;background:#fff;padding:8px 0 10px;border-bottom:1px solid transparent;display:grid;gap:10px}
 .kd-chips{margin-top:14px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.kd-chips::-webkit-scrollbar{display:none}
 .kd-chip{flex:none;display:inline-flex;align-items:center;border:1px solid var(--line);background:var(--grey);border-radius:980px;padding:7px 12px;font:inherit;font-size:13.5px;color:var(--ink);font-weight:600;white-space:nowrap;cursor:pointer}
