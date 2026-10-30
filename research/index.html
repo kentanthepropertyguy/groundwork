@@ -44,8 +44,8 @@
 <template id="gwLazy-postal"><script src="../assets/js/gw-postal.js?v=d497db9fdd"></script></template>
 <template id="gwLazy-prices"><script src="../assets/js/gw-wa.js?v=7a6cf4f1be"></script><script src="../assets/js/gw-journey.js?v=2b3a3a10d2"></script><script src="../assets/js/gw-landed-near.js?v=81ba4c3373"></script><script src="../assets/js/gw-value.js?v=3d11e1c67d"></script></template>
 <template id="gwLazy-hdb"><script src="../assets/js/gw-hdb.js?v=ff7e6ae643"></script></template>
-<template id="gwLazy-budget"><link rel="stylesheet" href="../assets/css/kpt-discover.css?v=1ba1378ce6"><script src="../assets/js/kpt-market.js?v=f2c5f82332"></script><script src="../assets/js/kpt-find.js?v=e88bca722f"></script><script src="../assets/js/kpt-discover.js?v=204eac6fe7"></script><script src="../assets/js/kpt-discover-beds.js?v=8a9a8b8867"></script></template>
-<template id="gwLazy-budget-ui"><script src="../assets/js/kpt-discover-ui.js?v=c8d3c5cc61"></script></template>
+<template id="gwLazy-budget"><link rel="stylesheet" href="../assets/css/kpt-discover.css?v=8d0ad26e1e"><script src="../assets/js/kpt-market.js?v=f2c5f82332"></script><script src="../assets/js/kpt-find.js?v=e88bca722f"></script><script src="../assets/js/kpt-discover.js?v=bdf69efa8d"></script><script src="../assets/js/kpt-discover-beds.js?v=8a9a8b8867"></script></template>
+<template id="gwLazy-budget-ui"><script src="../assets/js/kpt-discover-ui.js?v=bb58e094b2"></script></template>
 <template id="gwLazy-az"><script src="../assets/js/kpt-registry-core.js?v=f702981cf5"></script></template>
 <script src="../assets/js/kpt-analytics.js?v=3b78ef5642"></script>
 <script src="../assets/js/kpt-components.js?v=597f0bf0d3"></script>
@@ -444,7 +444,10 @@
     // Forward through a development's report return to the list, as a typed search does
     if (v && v.district) {
       const q = HOME.el.querySelector('#q');
-      if (q) { q.value = 'District ' + v.district; q.dispatchEvent(new Event('input')); }
+      // R3b fix (30 Oct 2026): gw-nav.js (the shared district definition) is a deferred script and can arrive just after this page script runs; wait for it
+      // (up to 4 s), so the box is never searched as a plain name ("No transactions found")
+      const t0 = Date.now(), fill = () => { if (!window.GWN && Date.now() - t0 < 4000) { setTimeout(fill, 25); return; } if (q) { q.value = 'District ' + v.district; q.dispatchEvent(new Event('input')); } };
+      fill();
       try { history.replaceState(null, '', location.pathname + location.search + '#/'); } catch (e) { /* the list is shown either way */ }
       const sb = HOME.el.querySelector('#sb'); if (sb) try { sb.scrollIntoView({ block: 'start' }); } catch (e) { /* ignore */ }
     }

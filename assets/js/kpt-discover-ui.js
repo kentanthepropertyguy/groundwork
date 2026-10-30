@@ -87,11 +87,16 @@
       }).catch((e) => { nmLoad = null; throw e; });
     return nmLoad;
   }
+  // R3c (Ken, 30 Oct 2026): a postal district ("D19", "District 19": the Map's search, which uses the site's one district definition in gw-nav.js) is a place with
+  // NO centre point and NO radius: the developments whose recorded district it is. Every radius place (road, MRT, address…) works as before.
+  const isDist = (n) => !!(n && n.t === 'district');
+  const PICK_TYPES = NEAR_TYPES.concat(['district']);
   const NEAR_BASIS = { dev: 'the development', mrt: 'the station', area: 'the centre of the neighbourhood', road: 'one point on the road', school: 'the school', postal: 'the address' };
   /** One chosen place -> its point and the straight-line distance to every mapped development within the widest radius (the Map's haversine). */
   function resolveNear(n) {
     if (!NM) return null;
     let o = null;
+    if (isDist(n)) { const pd = NM.placeData({ t: 'district', n: n.n }); return pd ? { key: 'district|' + n.n, label: pd.title, sub: 'Postal district', district: pd.d } : null; }   // no point, no distances
     if (n.t === 'dev') { const p = NM.BY[n.n]; if (p && p.pos) o = { label: p.n, sub: 'Development', lat: p.lat, lon: p.lon }; }
     else { const pd = NM.placeData({ t: n.t, n: n.n }); if (pd) o = n.t === 'area' ? { label: pd.title, sub: 'Neighbourhood', lat: pd.centre[0], lon: pd.centre[1], rings: pd.a.rings, bounds: pd.bounds } : { label: pd.title, sub: pd.meta, lat: pd.lat, lon: pd.lon }; }
     if (!o) return null;
@@ -99,7 +104,9 @@
     NM.PM.forEach((p) => { pos[p.id] = 1; const d = window.KPT_MAP.hav(c, p); if (d <= far) dist[p.id] = d; });
     return Object.assign(o, { key: n.t + '|' + n.n, basis: NEAR_BASIS[n.t] || 'the place', dist, pos });
   }
-  const nearInput = () => (S.near && NR && NR.key === S.near.t + '|' + S.near.n ? { dist: NR.dist, pos: NR.pos, radius: S.near.r, label: NR.label } : null);
+  const nearInput = () => (S.near && !isDist(S.near) && NR && NR.key === S.near.t + '|' + S.near.n ? { dist: NR.dist, pos: NR.pos, radius: S.near.r, label: NR.label } : null);
+  const districtInput = () => (isDist(S.near) && NR && NR.key === 'district|' + S.near.n ? NR.district : null);
+  const distMapHref = () => (districtInput() ? BASE + 'research/map/#pl=district:' + Number(districtInput()) : '');
   const subParts = (label, sub) => { const p = String(sub || '').split(' · '); let type = p[0] || '', area = p[1] || ''; if (area && String(label).indexOf(area) > -1) area = ''; if (type && (String(label).trim().split(/\s+/).pop().toLowerCase() === type.split(/\s+/)[0].toLowerCase() || String(label).toLowerCase().indexOf(type.toLowerCase()) > -1)) type = ''; return { type, area }; };
   const sugSub = (x) => { const q = subParts(x.label || x.n, x.sub); return [q.type, q.area].filter(Boolean).join(' · '); };
   let nearErr = '';
@@ -116,7 +123,7 @@
         b.innerHTML = r.state === 'ok' ? r.list.map((x, k) => `<button type="button" role="option" class="kd-sg" id="kdSg${k}" data-f="pick" data-t="postal" data-n="${esc(x.n)}"><b>${esc(x.title)}</b><span>${esc(x.sub)}</span></button>`).join('') : '<p class="kd-sgn" role="status">' + esc(NM.postalMsg(r.state, code)) + '</p>'; });
       return;
     }
-    const list = NM.places(t).filter((x) => NEAR_TYPES.indexOf(x.t) > -1 && (x.t !== 'dev' || (NM.BY[x.n] && NM.BY[x.n].pos)));
+    const list = NM.places(t).filter((x) => PICK_TYPES.indexOf(x.t) > -1 && (x.t !== 'dev' || (NM.BY[x.n] && NM.BY[x.n].pos)));
     box.innerHTML = list.length ? list.map((x, i) => `<button type="button" role="option" class="kd-sg" id="kdSg${i}" data-f="pick" data-t="${esc(x.t)}" data-n="${esc(x.n)}"><b>${esc(x.label || x.n)}</b><span>${esc(sugSub(x))}</span></button>`).join('') : '<p class="kd-sgn">No match. Try a postal code, road, MRT station, neighbourhood or development.</p>';
   }
   function typedPlace(v) {
@@ -126,7 +133,7 @@
   }
   function pickPlace(t, n) {
     return loadNear().then(() => {
-      const next = { t, n, r: S.near ? S.near.r : 1000 }, nr = resolveNear(next);
+      const next = isDist({ t }) ? { t, n, r: null } : { t, n, r: S.near && S.near.r ? S.near.r : 1000 }, nr = resolveNear(next);
       if (!nr) { nearErr = 'We couldn’t place that on the map. Please try another.'; renderAll(); return; }
       NR = nr; S.near = next; S.pendingWhere = ''; nearErr = ''; S.sel = null; commit(true);
     }).catch(() => { nearErr = 'Place search isn’t available just now. You can still search all of Singapore.'; renderAll(); });
@@ -294,7 +301,7 @@
      Missing values go last whichever way. It is order only: never which developments match. Lowest price first by default; nearest first with a place. */
   const SORT_OPTS = [['price', 'asc', 'price, low to high'], ['price', 'desc', 'price, high to low'], ['name', 'asc', 'name, A to Z'], ['name', 'desc', 'name, Z to A'], ['district', 'asc', 'district, low to high'], ['district', 'desc', 'district, high to low'],
     ['size', 'asc', 'size, small to large'], ['size', 'desc', 'size, large to small'], ['tenure', 'asc', 'tenure, freehold first'], ['tenure', 'desc', 'tenure, freehold last'], ['match', 'asc', 'best match'], ['near', 'asc', 'distance, nearest first']];
-  const sortNow = () => (S.sort && (S.sort !== 'near' || (S.near && NR)) ? S.sort : (S.near && NR ? 'near' : 'price'));
+  const sortNow = () => (S.sort && (S.sort !== 'near' || nearInput()) ? S.sort : (nearInput() ? 'near' : 'price'));
   const dirNow = () => (S.sort && sortNow() === S.sort && S.dir === 'desc' ? 'desc' : 'asc');
   /* tenure order: Freehold, then 999-year, then 99-year, then other leases; within each, the later lease start first and no start year last. Lease start is never TOP or age. */
   function tenureKey(it) { const t = tenureText(it); if (t === 'Freehold') return [0, 0]; const m = /^(\d+)-year lease(?: from (\d{4})|hold)$/.exec(t); if (!m) return null; const y = Number(m[1]); return [y === 999 ? 1 : y === 99 ? 2 : 3, m[2] ? -Number(m[2]) : null]; }
@@ -337,7 +344,7 @@
   /* ------------------------------------------------------------------ the requirements form (one component: the entry screen, the desktop panel and the phone sheet) */
   const seg = (k, opts, cur, extra) => `<div class="kd-seg" role="radiogroup" data-k="${k}"${extra || ''}>${opts.map((o) => `<button type="button" role="radio" aria-checked="${String(o[0]) === String(cur)}" data-f="seg" data-k="${k}" data-v="${o[0]}"${o[2] ? ' disabled' : ''}>${esc(o[1])}</button>`).join('')}</div>`;
   const help = (k, text) => `<button type="button" class="kd-i" data-f="help" data-k="${k}" aria-expanded="${!!S.helps[k]}" aria-label="More about this">ⓘ</button><p class="kd-hp" data-hp="${k}"${S.helps[k] ? '' : ' hidden'}>${esc(text)}</p>`;
-  const radChips = () => (S.near ? `<div class="kd-rad" role="radiogroup" aria-label="Distance">${RADII.map((x) => `<button type="button" role="radio" aria-checked="${x === S.near.r}" data-f="rad" data-r="${x}">${esc(FI.radiusText(x))}</button>`).join('')}</div>` : '');
+  const radChips = () => (S.near && !isDist(S.near) ? `<div class="kd-rad" role="radiogroup" aria-label="Distance">${RADII.map((x) => `<button type="button" role="radio" aria-checked="${x === S.near.r}" data-f="rad" data-r="${x}">${esc(FI.radiusText(x))}</button>`).join('')}</div>` : '');
   function bedsBlock(inv) {
     const r = S.req, usable = D.inventoryUsable(inv), loading = !invLoaded;
     let note, off = false;
@@ -362,7 +369,7 @@
     const r = S.req, inv = inventory(), counts = lastRes && lastRes.counts;
     const bud = `<div class="kd-f"><label class="kd-l" for="kdBudget">Maximum budget</label><div class="kd-in"><span class="kd-pre">$</span><input id="kdBudget" type="text" inputmode="numeric" autocomplete="off" placeholder="${entry ? 'e.g. 1,800,000' : ''}" value="${esc(S.draftBudget)}" aria-describedby="kdBudgetErr"></div><p class="kd-err" id="kdBudgetErr" role="alert">${esc(S.errBudget)}</p>${entry ? '<p class="kd-note">The most you’d spend.</p>' : ''}${entry ? '' : overToggle(counts)}</div>`;
     const placeVal = S.near && NR ? NR.label : S.pendingWhere;
-    const where = `<div class="kd-f"><label class="kd-l" for="kdPlace">Where? <small>optional</small></label><div class="kd-in kd-place"><span class="kd-pre" aria-hidden="true">⌕</span><input id="kdPlace" type="search" autocomplete="off" maxlength="60" role="combobox" aria-expanded="false" aria-controls="kdSugg" aria-autocomplete="list" placeholder="${entry ? 'Road, MRT, neighbourhood, development or postal code' : 'Road, MRT, area, development or postal code'}" value="${esc(placeVal)}">${S.near ? '<button type="button" class="kd-x" data-f="clearplace" aria-label="Clear place">✕</button>' : ''}</div><div class="kd-sugg" id="kdSugg" role="listbox" hidden></div>${nearErr ? `<p class="kd-err" role="status">${esc(nearErr)}</p>` : ''}${S.near ? `<p class="kd-radl">Distance from ${esc(NR ? NR.label : 'the place')}</p>${radChips()}` : (entry ? '<p class="kd-note">Choose a place to search within 500 m, 1 km, 2 km or 3 km of it.</p>' : '')}</div>`;
+    const where = `<div class="kd-f"><label class="kd-l" for="kdPlace">Where? <small>optional</small></label><div class="kd-in kd-place"><span class="kd-pre" aria-hidden="true">⌕</span><input id="kdPlace" type="search" autocomplete="off" maxlength="60" role="combobox" aria-expanded="false" aria-controls="kdSugg" aria-autocomplete="list" placeholder="${entry ? 'Road, MRT, neighbourhood, development or postal code' : 'Road, MRT, area, development or postal code'}" value="${esc(placeVal)}">${S.near ? '<button type="button" class="kd-x" data-f="clearplace" aria-label="Clear place">✕</button>' : ''}</div><div class="kd-sugg" id="kdSugg" role="listbox" hidden></div>${nearErr ? `<p class="kd-err" role="status">${esc(nearErr)}</p>` : ''}${S.near ? (isDist(S.near) ? '<p class="kd-radl">Every development recorded in this postal district</p>' : `<p class="kd-radl">Distance from ${esc(NR ? NR.label : 'the place')}</p>${radChips()}`) : (entry ? '<p class="kd-note">Choose a place to search within 500 m, 1 km, 2 km or 3 km of it.</p>' : '')}</div>`;
     const typ = `<div class="kd-f"><span class="kd-l">Property type ${help('type', 'Condominiums, ECs and cluster housing are different property types with their own rules and prices, so each is shown on its own and never mixed.')}</span>${seg('type', [['any', 'Any'], ['condo', 'Condo'], ['ec', 'EC'], ['cluster', 'Cluster']], r.type)}</div>`;
     const sale = `<div class="kd-f"><span class="kd-l">New launch or resale</span>${seg('sale', [['new', 'New launch'], ['resale', 'Resale'], ['either', 'Either']], r.sale)}</div>`;
     const more = `<details class="kd-more" data-more${S.moreOpen || r.minSize || r.tenure !== 'any' || r.beds ? ' open' : ''}><summary data-f="moresum">More requirements <small>size, tenure, bedrooms</small></summary><div class="kd-fgrid">
@@ -378,12 +385,12 @@
   const invUsable = () => D.inventoryUsable(inventory());
   /* new launches asked for, but the listings can't be used (missing, or past the 21-day window): said once, plainly; past developer sales are never put in their place */
   const invGone = (res) => (res.req.sale !== 'resale' && invLoaded && !invUsable() ? `<p class="kd-gn kd-invgone">New launches are listed only from recent developer listings, which couldn’t be loaded just now${res.req.sale === 'either' ? ', so only resale is shown' : ''}. Past developer sales are on each development’s <a href="${BASE}research/">Research page</a>.</p>` : '');
-  const placeLine = () => (S.near && NR ? 'Within ' + FI.radiusText(S.near.r) + ' of ' + NR.label : '');
+  const placeLine = () => (districtInput() ? 'In ' + NR.label + ' · developments recorded in this postal district' : S.near && NR ? 'Within ' + FI.radiusText(S.near.r) + ' of ' + NR.label : '');
   function chips() {
     const r = S.req, out = [];
     if (r.beds) out.push([r.beds === 4 ? '4+ bedrooms' : r.beds === 1 ? '1 bedroom' : r.beds + ' bedrooms', 'more']);
     out.push(['Up to ' + M2(r.budget).replace(/\.00M$/, 'M').replace(/(\.\d)0M$/, '$1M'), 'budget']);
-    if (S.near && NR) out.push([NR.label + ' · ' + FI.radiusText(S.near.r), 'place']);
+    if (districtInput()) out.push([NR.label, 'place']); else if (S.near && NR) out.push([NR.label + ' · ' + FI.radiusText(S.near.r), 'place']);
     out.push([{ any: 'All property types', condo: 'Condo', ec: 'EC', cluster: 'Cluster housing' }[r.type] || 'All property types', 'type']);
     out.push([r.sale === 'new' ? 'New launch' : r.sale === 'resale' ? 'Resale' : 'New launch and resale', 'sale']);
     if (r.minSize) out.push([money(r.minSize) + '+ sq ft', 'size']);
@@ -397,7 +404,7 @@
     if (!N) return 'No developments match your search';
     return N + (N === 1 ? ' development matches your search' : ' developments match your search');
   }
-  function subLine(res) { return S.near && NR ? `<p class="kd-sub">${esc(placeLine())}${sortNow() === 'near' ? ' · nearest first' : ''}</p>` : ''; }
+  function subLine(res) { return S.near && NR ? `<p class="kd-sub">${esc(placeLine())}${sortNow() === 'near' ? ' · nearest first' : ''}${districtInput() ? ` · <a href="${esc(distMapHref())}" data-kd-dmap>See it on the Map ›</a>` : ''}</p>` : ''; }
   /* the breakdown that used to sit under the headline: kept, in the method note */
   function breakdown(res) {
     const c = res.counts, t = [];
@@ -467,7 +474,7 @@
     return `<details class="kd-unp"><summary>${list.length} more fit${list.length === 1 ? 's' : ''} your maximum but ${list.length === 1 ? 'has' : 'have'} no verified map position</summary><p class="kd-gn">Not confirmed to be within ${esc(FI.radiusText(S.near.r))} of ${esc(NR.label)}, so not sorted by distance.</p><ul>${list.map((i) => `<li>${i.ura ? `<a data-f="go" data-id="${esc(i.id)}" href="../../research/#/p/${esc(i.id)}/${i.sale}">${esc(nice(i.name))}</a>` : `<b>${esc(nice(i.name))}</b>`}<span>${i.sale === 'new' ? 'New launch' : 'Resale'}${i.beds && i.beds.state === 'insufficient' ? ' · bedrooms not confirmed' : ''}</span></li>`).join('')}</ul></details>`;
   }
   function upcomingHtml(res) {
-    if (!(S.near && NR && NM) || res.req.sale === 'resale') return '';
+    if (!(S.near && NR && NM) || isDist(S.near) || res.req.sale === 'resale') return '';
     const have = {}; res.items.concat(res.unplaced).forEach((i) => { have[i.id] = 1; });
     const self = S.near.t === 'dev' && NM.BY[S.near.n] ? NM.BY[S.near.n].id : '', ids = {}, rows = [];
     (sitesDoc || []).forEach((x) => { if (x.id === self || have[x.id] || typeof x.lat !== 'number' || typeof x.lon !== 'number') return; const d = window.KPT_MAP.hav({ lat: NR.lat, lon: NR.lon }, x); if (d <= S.near.r) { ids[x.id] = 1; rows.push({ name: x.name, d, url: x.url, ext: true, tag: x.tagline || '' }); } });
@@ -493,7 +500,7 @@
     const body = res.state === 'ok' ? listHtml(res) : emptyHtml(res);
     return `<div class="kd-lead"><h1 class="kd-h1" id="kdH">${esc(headline(res))}</h1>${subLine(res)}${invGone(res)}</div>
       <div class="kd-bar"><div class="kd-barrow">${chips()}<button type="button" class="kd-editb" data-f="edit" aria-expanded="${S.edit}">Edit search <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 6h9M15 6h2M3 14h3M9 14h8"/><circle cx="13.5" cy="6" r="1.8"/><circle cx="7.5" cy="14" r="1.8"/></svg></button></div>${S.near ? `<div class="kd-radin">${radChips()}</div>` : ''}</div>
-      ${S.near ? `<div class="kd-quick">${radChips()}</div>` : ''}<div class="kd-quick2">${overToggle(res.counts)}</div>
+      ${S.near && !isDist(S.near) ? `<div class="kd-quick">${radChips()}</div>` : ''}<div class="kd-quick2">${overToggle(res.counts)}</div>
       ${body}${unconfHtml(res)}${res.state === 'ok' || (res.beds && res.counts.insufficient) ? unplacedHtml(res) + upcomingHtml(res) : ''}
       <details class="kd-meth"><summary>How these are matched</summary><div class="inner">${method(res).map((t) => `<p>${esc(t)}</p>`).join('')}</div></details>`;
   }
@@ -557,7 +564,7 @@
   }
 
   /* ------------------------------------------------------------------ rendering */
-  function reqNow() { return Object.assign({}, S.req, { near: nearInput() }); }
+  function reqNow() { return Object.assign({}, S.req, { near: nearInput(), district: districtInput() }); }
   function compute() {
     if (!S.req.budget || !ix) { lastRes = null; return null; }
     if (bedsState === 'off' && CFG.BEDS_URL && S.req.sale === 'resale' && S.req.beds) S.req.beds = null;   // resale bedroom data unavailable: never show a bedroom chip that isn't applied
@@ -721,7 +728,7 @@
     if (f === 'reset') { S.req = Object.assign({}, BLANK, { budget: S.req.budget }); S.near = null; NR = null; S.pendingWhere = ''; S.sel = null; S.view = 'list'; commit(true); return; }
     if (f === 'alt') {
       const id = t.dataset.id, r = S.req;
-      if (id === 'over') r.over = true; else if (id === 'radius') { const next = RADII.find((x) => x > S.near.r); if (next) S.near.r = next; }
+      if (id === 'over') r.over = true; else if (id === 'radius' && S.near && S.near.r) { const next = RADII.find((x) => x > S.near.r); if (next) S.near.r = next; }
       else if (id === 'size') r.minSize = null; else if (id === 'tenure') r.tenure = 'any'; else if (id === 'beds') r.beds = null; else if (id === 'type') r.type = 'any'; else if (id === 'sale') r.sale = 'either';
       else if (id === 'place') { S.near = null; NR = null; S.view = 'list'; }
       commit(true); return;
@@ -731,14 +738,17 @@
 
   /* ------------------------------------------------------------------ start */
   function restorePlace(near, where) {
+    if (near && isDist(near) && /^\d{1,2}$/.test(String(near.n)) && +near.n >= 1 && +near.n <= 28) {
+      return loadNear().then(() => { const nr = resolveNear({ t: 'district', n: String(+near.n) }); if (nr) { NR = nr; S.near = { t: 'district', n: String(+near.n), r: null }; } else nearErr = 'We couldn’t find that district again, so this covers all of Singapore.'; }).catch(() => { nmLoad = null; });
+    }
     if (near && NEAR_TYPES.indexOf(near.t) > -1 && RADII.indexOf(Number(near.r)) > -1 && typeof near.n === 'string') {
       return loadNear().then(() => (near.t === 'postal' ? NM.lookupPostal(String(near.n).split('~')[0]) : null)).then(() => { const nr = resolveNear(near); if (nr) { NR = nr; S.near = { t: near.t, n: near.n, r: Number(near.r) }; } else nearErr = 'We couldn’t find that place again, so this covers all of Singapore.'; }).catch(() => { nmLoad = null; nearErr = 'Place search isn’t available just now, so this covers all of Singapore.'; });
     }
     if (where) {   // an answer from the earlier Buy journey: placed only when exactly one place matches; otherwise the buyer chooses from the suggestions
       S.pendingWhere = where;
       return loadNear().then(() => {
-        const list = NM.places(where).filter((x) => NEAR_TYPES.indexOf(x.t) > -1 && (x.t !== 'dev' || (NM.BY[x.n] && NM.BY[x.n].pos)));
-        if (list.length === 1) { const nr = resolveNear({ t: list[0].t, n: list[0].n, r: 1000 }); if (nr) { NR = nr; S.near = { t: list[0].t, n: list[0].n, r: 1000 }; S.pendingWhere = ''; } }
+        const list = NM.places(where).filter((x) => PICK_TYPES.indexOf(x.t) > -1 && (x.t !== 'dev' || (NM.BY[x.n] && NM.BY[x.n].pos)));
+        if (list.length === 1) { const nx = isDist(list[0]) ? { t: 'district', n: list[0].n, r: null } : { t: list[0].t, n: list[0].n, r: 1000 }, nr = resolveNear(nx); if (nr) { NR = nr; S.near = nx; S.pendingWhere = ''; } }
       }).catch(() => { nmLoad = null; });
     }
     return Promise.resolve();
