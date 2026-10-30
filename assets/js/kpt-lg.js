@@ -215,20 +215,11 @@
   /* ---------- R3 District search (Ken, 30 Oct 2026; Master Planning approved scope) ----------
      An explicit Singapore postal-district search ("D19", "d 19", "D-19", "District 19", "district19", "Dist 19", "D01") lists the developments Research
      holds in that district, each with its own recorded sales and its own price preview. Nothing district-wide is computed: no boundary, no averaged
-     price, no district statistic. The district names are the same table FIND and the catalogue use (a test keeps them identical). */
-  const DISTRICT_AREAS = {
-    '01': 'Raffles Place, Marina', '02': 'Tanjong Pagar', '03': 'Queenstown, Tiong Bahru', '04': 'Telok Blangah, Harbourfront', '05': 'Pasir Panjang, Clementi', '06': 'City Hall, High Street',
-    '07': 'Bugis, Golden Mile', '08': 'Little India', '09': 'Orchard, River Valley', '10': 'Bukit Timah, Holland, Tanglin', '11': 'Novena, Thomson', '12': 'Balestier, Toa Payoh',
-    '13': 'Macpherson, Potong Pasir', '14': 'Geylang, Eunos', '15': 'Katong, Joo Chiat', '16': 'Bedok, Upper East Coast', '17': 'Changi, Loyang', '18': 'Tampines, Pasir Ris',
-    '19': 'Hougang, Punggol, Serangoon Gardens', '20': 'Bishan, Ang Mo Kio', '21': 'Upper Bukit Timah, Clementi Park', '22': 'Jurong', '23': 'Bukit Batok, Bukit Panjang, Choa Chu Kang',
-    '24': 'Lim Chu Kang, Tengah', '25': 'Woodlands, Kranji', '26': 'Upper Thomson, Springleaf', '27': 'Yishun, Sembawang', '28': 'Seletar',
-  };
-  const DISTRICT_RE = /^\s*(?:d|dist\.?|district|postal\s+district)\s*-?\s*(\d{1,2})\s*$/i;
-  // { d: '19', n: 19 } for D01–D28; { bad: true, n } for a district number outside 1–28; null when the query is not a district search
-  function districtOf(q) {
-    const m = DISTRICT_RE.exec(String(q == null ? '' : q)); if (!m) return null;
-    const n = Number(m[1]); return n >= 1 && n <= 28 ? { d: String(n).padStart(2, '0'), n } : { bad: true, n };
-  }
+     price, no district statistic. The district names and the matching rule are the shared definition in gw-nav.js. */
+  // The district names and the matching rule are the site's one definition, in gw-nav.js (GWN.DISTRICTS, GWN.districtOf), loaded first on every page.
+  const GWN_ = () => (GLOBAL && GLOBAL.GWN) || (typeof globalThis !== 'undefined' && globalThis.GWN) || null;   // read when used, never copied
+  const districtOf = (q) => { const G = GWN_(); return G && G.districtOf ? G.districtOf(q) : null; };
+  const districtName = (d) => { const G = GWN_(); return (G && G.DISTRICTS && G.DISTRICTS[d]) || ''; };
   // index: the Research search index ({ fields, rows }); the developments with sales in that district, most recorded sales first (as the search ranks)
   function districtRows(index, d) {
     if (!index || !index.fields || !index.rows) return [];
@@ -242,7 +233,7 @@
     if (dq.bad) return '<div class="kpr-results"><div class="kpr-empty" role="status" data-lg-district="bad">Singapore’s postal districts run from D01 to D28.</div></div>';
     const n = rows.length, k = Math.min(n, shown || DSTEP), mx = Math.max.apply(null, rows.slice(0, k).map((r) => r.n).concat([1]));
     const map = mapHref ? '<p class="lg-dist-map"><a class="kpr-link" href="' + esc(mapHref) + '" data-lg-dmap>Explore District ' + dq.n + ' on Map ›</a></p>' : '';   // under the heading, before the list
-    const head = '<div class="lg-dist-h" data-lg-district="' + dq.d + '"><p class="lg-dist-k">Postal district</p><p class="lg-dist-t"><b>District ' + dq.n + '</b> · generally ' + esc(DISTRICT_AREAS[dq.d]) + '</p>' +
+    const head = '<div class="lg-dist-h" data-lg-district="' + dq.d + '"><p class="lg-dist-k">Postal district</p><p class="lg-dist-t"><b>District ' + dq.n + '</b> · generally ' + esc(districtName(dq.d)) + '</p>' +
       '<p class="lg-dist-s">' + (n ? plural(n, 'development') + ' with sales in the last 5 years, most sales first. Choose one for its own prices.' : 'Research holds no private development with sales here in the last 5 years.') + '</p>' + map + '</div>';
     const list = n ? '<ul class="kpr-results" role="listbox" aria-label="Developments in District ' + dq.n + '" data-lg-dlist>' + rows.slice(0, k).map((r, i) => resultRow(r, i, mx, R, true)).join('') + '</ul>' : '';
     const more = k < n ? '<p class="lg-dist-more"><button type="button" class="kpr-link" data-lg-dmore>Show ' + Math.min(DSTEP, n - k) + ' more <span class="lg-n">' + k + ' of ' + n + ' shown</span></button></p>' : '';
@@ -604,5 +595,5 @@
     }
   });
 
-  return { DISTRICT_AREAS, districtOf, districtRows, districtHtml, DSTEP, launchRows, launchMeta, matchLaunches, findLaunches, lnorm, strong, STRONG, freshness, freshLine, dataSpan, mixedLine, emptySearch, notCoveredNote, notCoveredMatches, runWhat, district, askData, typicalPrice, landingHtml, resultRow, projectHtml, afterProject, fillFacts, lineChart, projectLead, projectPill, activitySentence, priceSentence, tenurePhrase, titleCase, sqft, esc, money, num, plural };
+  return { districtName, districtOf, districtRows, districtHtml, DSTEP, launchRows, launchMeta, matchLaunches, findLaunches, lnorm, strong, STRONG, freshness, freshLine, dataSpan, mixedLine, emptySearch, notCoveredNote, notCoveredMatches, runWhat, district, askData, typicalPrice, landingHtml, resultRow, projectHtml, afterProject, fillFacts, lineChart, projectLead, projectPill, activitySentence, priceSentence, tenurePhrase, titleCase, sqft, esc, money, num, plural };
 });

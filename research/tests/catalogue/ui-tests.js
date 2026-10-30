@@ -103,7 +103,8 @@ ok(U.results(M, F({ beds: 4, tenure: ['freehold'] })).n === 23 && U.results(M, F
   const page = fs.readFileSync(path.join(SITE, 'research/new-launches/index.html'), 'utf8'), live = execSync('git show ' + BASE + ':research/new-launches/index.html', { cwd: SITE }).toString();
   const feat = (s) => /<section class="gw-hero[\s\S]*?<\/ul><\/div><\/section>/.exec(s)[0];
   ok(feat(page) === feat(live), 'the four featured entries are byte-identical (text, links, data-kpt-ms, data-host, data-placement, order)');
-  ok(page.split('\n').filter((l) => live.split('\n').indexOf(l) < 0).every((l) => /gw-catalogue|GW_CAT_UI|New Launches catalogue V1|querySelectorAll\("a\[data-kpt-ms\]"\)\.forEach\(function \(a\) \{ ms\[|GW_CAT_UI\.mount/.test(l)), 'the page only adds the catalogue stylesheet, script and mount');
+  const nov0 = (x) => x.replace(/\?v=[0-9a-f]+/g, '?v=').split('\n');   // version tags change with any shared script
+  ok(nov0(page).filter((l) => nov0(live).indexOf(l) < 0).every((l) => /gw-catalogue|GW_CAT_UI|New Launches catalogue V1|querySelectorAll\("a\[data-kpt-ms\]"\)\.forEach\(function \(a\) \{ ms\[|GW_CAT_UI\.mount/.test(l)), 'the page only adds the catalogue stylesheet, script and mount');
   const nov = (x) => x.replace(/\?v=[0-9a-f]+/g, '?v=').split('\n');   // a release refreshes the catalogue's own version tags
   ok(nov(live).every((l) => nov(page).indexOf(l) > -1), 'nothing on the page is removed (page_view and microsite_clicked unchanged; version tags aside)');
   ok(U.QUIET.indexOf('Developer listings aren’t available right now.') > -1 && U.QUIET.indexOf('$') < 0, 'missing data: one quiet line, no figures');
@@ -115,7 +116,7 @@ ok(U.results(M, F({ beds: 4, tenure: ['freehold'] })).n === 23 && U.results(M, F
   // FIND, Budget Search, the Map, calculators, inventory.json and the shared CSS / navigation are never changed by the catalogue (or the release it ships in)
   const off = changed.filter((f) => /^(assets\/js\/(kpt-find|kpt-discover[^/]*|kpt-map[^/]*|gw-calc[^/]*|gw-nav|kpt-analytics)\.js|assets\/css\/(gw|gw-standard|kpt-map)\.css|research\/map\/|tools\/|data\/projects\/(inventory|find|find-beds)\.json)/.test(f));
   // a catalogue release must leave them alone; another approved release (R3's Map district route, say) may change them without the catalogue tests failing
-  const cat = changed.some((f) => /^(assets\/(js|css)\/gw-catalogue\.|data\/projects\/(launch-roster|catalogue-classes)\.json|research\/new-launches\/)/.test(f));
+  const cat = changed.some((f) => /^(assets\/(js|css)\/gw-catalogue\.|data\/projects\/(launch-roster|catalogue-classes)\.json)/.test(f));   // the catalogue's own code and data (its page's version tags change with any shared script)
   ok(!cat || !off.length, 'FIND, Budget Search, the Map, calculators, inventory.json, shared CSS, navigation and analytics untouched by a catalogue release', off);
   const kf = fs.readFileSync(path.join(SITE, 'assets/js/kpt-find.js'), 'utf8');
   ok(/invMaxDays:\s*21/.test(kf) && /invCadenceDays:\s*14/.test(kf), 'FIND keeps its 21-day window and 14-day cadence');

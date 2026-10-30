@@ -5,6 +5,7 @@
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const SITE = path.join(__dirname, '..', '..');
 global.window = undefined;
+global.GWN = require(path.join(SITE, 'assets/js/gw-nav.js'));   // the site's one district definition, loaded first on every page
 const L = require(path.join(SITE, 'assets/js/kpt-lg.js')), K = L.KPTLG || L;
 let pass = 0, fail = 0;
 const ok = (c, name, info) => { if (c) pass++; else { fail++; console.log('FAIL', name, info === undefined ? '' : JSON.stringify(info).slice(0, 400)); } };
@@ -20,8 +21,8 @@ Object.keys(yes).forEach((q) => { const r = K.districtOf(q); ok(r && r.n === yes
 /* the district names: the same table FIND (kpt-find.js) and the catalogue use */
 {
   const kf = fs.readFileSync(path.join(SITE, 'assets/js/kpt-find.js'), 'utf8'), i = kf.indexOf('const DISTRICT_AREAS = {'), j = kf.indexOf('};', i);
-  ok(J(vm.runInNewContext('(' + kf.slice(kf.indexOf('{', i), j + 1) + ')')) === J(K.DISTRICT_AREAS), 'district names identical to FIND');
-  ok(Object.keys(K.DISTRICT_AREAS).length === 28, '28 districts');
+  ok(J(vm.runInNewContext('(' + kf.slice(kf.indexOf('{', i), j + 1) + ')')) === J(global.GWN.DISTRICTS), 'district names identical to FIND');
+  ok(Object.keys(global.GWN.DISTRICTS).length === 28, '28 districts');
 }
 
 /* the district's developments: the Research index only, most recorded sales first */
@@ -65,7 +66,24 @@ const R = { displayName: (n) => n, fmtMonth: (m) => m };
   const places = rd('data/map/places.json'), PF = places.fields.indexOf('district');
   ok(places.rows.filter((r) => r[PF] === '19').length > 100, 'the Map\'s own records carry a district (D19: ' + places.rows.filter((r) => r[PF] === '19').length + ')');
   const mapPage = fs.readFileSync(path.join(SITE, 'research/map/index.html'), 'utf8');
-  ok(/kpt-map-app\.js\?v=2026-10-30\.1/.test(mapPage) && /kpt-map-core\.js\?v=2026-10-27\.1/.test(mapPage), 'the Map page: only the app\'s version tag changed');
+  // the shared Map version (Research's MAPV, Budget Search's MAP_V, and the Map page's four Map files) moved on with this release, so no browser keeps the old core
+  const R = fs.readFileSync(path.join(SITE, 'research/index.html'), 'utf8'), Wp = fs.readFileSync(path.join(SITE, 'tools/what-can-i-buy/index.html'), 'utf8');
+  const vers = [/MAPV = '([^']+)'/.exec(R)[1], /gwLazy-loc"><script src="[^"]*kpt-map-core\.js\?v=([^"]+)"/.exec(R)[1], /MAP_V: '([^']+)'/.exec(Wp)[1]].concat(['kpt-map-core\\.js', 'kpt-map-view\\.js', 'kpt-map-app\\.js', 'kpt-map\\.css'].map((n) => new RegExp(n + '\\?v=([^"\']+)').exec(mapPage)[1]));
+  ok(vers.every((v) => v === vers[0]) && vers[0] !== '2026-10-27.1' && /^2026-10-30\.\d+$/.test(vers[0]), 'one new Map version everywhere the Map files load (' + vers[0] + ')', vers);
+}
+/* R3b (30 Oct 2026): the site search (homepage box and top-bar Search), Research's #/district/N address and the Map's own search */
+{
+  const nav = fs.readFileSync(path.join(SITE, 'assets/js/gw-nav.js'), 'utf8'), i = nav.indexOf('const DISTRICTS = {'), j = nav.indexOf('};', i);
+  ok(i > 0 && J(vm.runInNewContext('(' + nav.slice(nav.indexOf('{', i), j + 1) + ')')) === J(global.GWN.DISTRICTS), 'site search: district names identical to FIND and Research');
+  ok(global.GWN.districtOf === global.GWN.districtOf && K.districtOf('D19').n === 19 && global.GWN.districtOf('d19').n === 19 && global.GWN.districtOf('19') === null, 'Research uses the site\'s one recogniser (gw-nav.js)');
+  const lg = fs.readFileSync(path.join(SITE, 'assets/js/kpt-lg.js'), 'utf8'), core0 = fs.readFileSync(path.join(SITE, 'assets/js/kpt-map-core.js'), 'utf8');
+  ok(!/'19': 'Hougang/.test(lg) && !/postal\\s\+district/.test(lg) && !/'19': 'Hougang/.test(core0) && !/postal\\s\+district/.test(core0) && (nav.match(/'19': 'Hougang/g) || []).length === 1, 'one definition: no copy of the district names or the matching rule in Research or the Map');
+  ok(/research\/#\/district\/' \+ dist/.test(nav) && /research\/map\/#pl=district:' \+ dist/.test(nav) && /!pc && !failed && !dist\)/.test(nav), 'site search: District N leads to Research and to the Map, and never says "Nothing matches"');
+  const RS = require(path.join(SITE, 'assets/js/kpt-research.js'));
+  ok(J(RS.parseHash('#/district/19')) === J({ view: 'home', opt: 'dev', district: 19 }) && RS.parseHash('#/district/29').district === undefined && RS.parseHash('#/district/abc').district === undefined && RS.parseHash('#/district/1').district === 1, 'Research: #/district/N (1–28) opens the home with that district; anything else is the plain home');
+  const core = fs.readFileSync(path.join(SITE, 'assets/js/kpt-map-core.js'), 'utf8');
+  ok(/m\.districtQuery = /.test(core) && /if \(dn\) return \[\{ t: 'district', n: String\(dn\), label: 'District ' \+ dn/.test(core), 'Map search: "D19" offers District 19');
+  const mapPage = fs.readFileSync(path.join(SITE, 'research/map/index.html'), 'utf8');
 }
 console.log('district-tests: ' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

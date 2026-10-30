@@ -73,9 +73,9 @@
   addEventListener('popstate', onNav); addEventListener('hashchange', onNav);
 
   /* ---------------- search ---------------- */
-  const SECH = { area: 'Neighbourhoods', mrt: 'MRT stations', dev: 'Developments', up: 'New launches and sites', school: 'Schools', road: 'Roads', postal: 'Postal code', hdb: 'HDB blocks' };
-  const SCOL = { area: '#14203F', mrt: '#C9372C', dev: '#2E4FD1', up: '#2E4FD1', school: '#6D4BC4', road: '#1F7A6B', postal: '#0E8C89', hdb: '#D9822B' };
-  const glyph = (k, sz = 13) => `<span class="gl" style="background:${SCOL[k] || '#6B7280'}">${icon({ up: 'dev', postal: 'area', hdb: 'dev' }[k] || k, sz)}</span>`;
+  const SECH = { district: 'Postal district', area: 'Neighbourhoods', mrt: 'MRT stations', dev: 'Developments', up: 'New launches and sites', school: 'Schools', road: 'Roads', postal: 'Postal code', hdb: 'HDB blocks' };
+  const SCOL = { district: '#0E8C89', area: '#14203F', mrt: '#C9372C', dev: '#2E4FD1', up: '#2E4FD1', school: '#6D4BC4', road: '#1F7A6B', postal: '#0E8C89', hdb: '#D9822B' };
+  const glyph = (k, sz = 13) => `<span class="gl" style="background:${SCOL[k] || '#6B7280'}">${icon({ up: 'dev', postal: 'area', hdb: 'dev', district: 'area' }[k] || k, sz)}</span>`;
   const what = () => `development, ${M.hasRoads() ? 'road, ' : ''}MRT station${M.hasSchools() ? ', school' : ''}, neighbourhood, HDB block or postal code`;
   const noMatch = () => `No match. Try a ${what()}.`;
   const PCMSG = new Proxy({}, { get: (_, st) => (c) => M.postalMsg(st, c) });
