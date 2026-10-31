@@ -1,0 +1,66 @@
+{
+ "schemaVersion": "prism-public-v1",
+ "datasetReleaseId": "prism-v1-release-2026-10-30-10911d7e2c92",
+ "status": "approved",
+ "engineBaseline": "prism-r6.1-baseline",
+ "researchRevision": "hougang-corrections-2026-10-30",
+ "rulesVersion": "prism-v1-prototype-6",
+ "dataPeriodsBySource": {
+  "URA_TRANSACTIONS": "2026-09",
+  "URA_RENTAL": "2026-09",
+  "URA_DEV_SALES": "2026-09",
+  "URA_PIPELINE": "2026-Q3",
+  "URA_DWELLING_UNITS": "URA states Q4 2022; file updated 2026-02-26",
+  "URA_SALE_SITES": "2026-06-18",
+  "HDB_PROPERTY": "2026-10-08",
+  "HDB_RESALE": "2026-09",
+  "SINGSTAT_RESIDENTS": "June 2021 and June 2026",
+  "AMENITIES": "2026-10-20"
+ },
+ "generatedAt": "2026-10-30T18:00:00Z",
+ "approvalRef": "GW-PRISM-V1-2026-10-31-A1",
+ "noScore": "No composite score in V1: score100 is null in every report.",
+ "attribution": [
+  "Contains information from URA private residential data (PMI_Resi_Transaction) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
+  "Contains information from URA private residential data (PMI_Resi_Rental) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
+  "Contains information from URA private residential data (PMI_Resi_Developer_Sales) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
+  "Contains information from URA private residential data (PMI_Resi_Pipeline) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
+  "Contains information from No of Dwelling Units (Urban Redevelopment Authority (URA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+  "Contains information from URA Sale Sites (Urban Redevelopment Authority (URA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+  "Contains information from Master Plan 2019 Subzone Boundary (No Sea) (Urban Redevelopment Authority (URA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+  "Contains information from HDB Property Information (Housing & Development Board (HDB)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+  "Contains information from Resale flat prices based on registration date from Jan-2017 onwards (Housing & Development Board (HDB)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+  "Source: Singapore Department of Statistics.",
+  "Contains information from LTA MRT Station Exit (Land Transport Authority (LTA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+  "Contains information from General information of schools (Ministry of Education (MOE)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+  "Contains information from List of Supermarket Licences (National Environment Agency (NEA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+  "Contains information from Hawker Centres (National Environment Agency (NEA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+  "Contains information from NParks Parks and Nature Reserves (National Parks Board (NParks)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+  "Positions: OneMap © contributors | Singapore Land Authority. Contains information from OneMap Search, used under the terms of the Singapore Open Data Licence version 1.0.",
+  "Bedroom classification by Groundwork from floor plans and URA rental records.",
+  "Named sites compiled by Groundwork from official URA Sale Sites, launch records and the sources cited for each site."
+ ],
+ "reports": [
+  {
+   "id": "kingsford-waterbay",
+   "slug": "kingsford-waterbay",
+   "path": "reports/kingsford-waterbay.json",
+   "sha256": "2d7266d31571169f2281a8aad3b31acb682de0229a6fd106cf47d2ff54ca1144",
+   "approved": true
+  },
+  {
+   "id": "hougang-central",
+   "slug": "hougang-central",
+   "path": "reports/hougang-central.json",
+   "sha256": "330f8e9f874bbf0e9e282b75d9e94b19a5e8d723be1f3ccb20faabfa306fc78f",
+   "approved": true
+  },
+  {
+   "id": "thomson-three",
+   "slug": "thomson-three",
+   "path": "reports/thomson-three.json",
+   "sha256": "56b6139e0f013ac17bf92ac18183e290cc46fdb617e7906dc2513ff14e948ce1",
+   "approved": true
+  }
+ ]
+}

@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="../assets/css/kpt-lg.css?v=a7388ecdb6">
 <link rel="stylesheet" href="../assets/css/gw-pulse.css?v=3387a27e04">
 <link rel="stylesheet" href="../assets/css/gw-bedroom.css?v=23b82e11df">
+<link rel="stylesheet" href="../assets/css/gw-prism.css?v=c2f9bb9615">
 <link rel="canonical" href="https://tools.kentanthepropertyguy.com/research/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Groundwork">
@@ -46,11 +47,12 @@
 <template id="gwLazy-hdb"><script src="../assets/js/gw-hdb.js?v=ff7e6ae643"></script></template>
 <template id="gwLazy-budget"><link rel="stylesheet" href="../assets/css/kpt-discover.css?v=8d0ad26e1e"><script src="../assets/js/kpt-market.js?v=f2c5f82332"></script><script src="../assets/js/kpt-find.js?v=e88bca722f"></script><script src="../assets/js/kpt-discover.js?v=bdf69efa8d"></script><script src="../assets/js/kpt-discover-beds.js?v=8a9a8b8867"></script></template>
 <template id="gwLazy-budget-ui"><script src="../assets/js/kpt-discover-ui.js?v=bb58e094b2"></script></template>
+<template id="gwLazy-prism"><script src="../assets/js/gw-prism.js?v=285fa27f34"></script></template>
 <template id="gwLazy-az"><script src="../assets/js/kpt-registry-core.js?v=f702981cf5"></script></template>
 <script src="../assets/js/kpt-analytics.js?v=3b78ef5642"></script>
 <script src="../assets/js/kpt-components.js?v=597f0bf0d3"></script>
 <script src="../assets/js/kpt-project.js?v=c9def7da05"></script>
-<script src="../assets/js/kpt-research.js?v=e1f0f5f193"></script>
+<script src="../assets/js/kpt-research.js?v=112a657835"></script>
 <script src="../assets/js/kpt-intel.js?v=9474e171b4"></script>
 <script src="../assets/js/kpt-evidence.js?v=913139e3ad"></script>
 <script>window.GW_SAMPLE = {"a":"Jadescape","b":"Thomson Three","psf":[2323,2152],"band":"700–799 sqft","period":"Oct 2025 to Sep 2026"};</script>
@@ -241,6 +243,7 @@
         if (otherCls.length) res.insertAdjacentHTML('beforeend', `<p class="lg-fine" data-lg-otherclass>Not offered: ${otherCls.map((r) => `${esc(R.displayName(r.name))} (${esc(P.classInfo(r).short === 'Condo' ? 'condominium' : P.classInfo(r).label.toLowerCase())})`).join(', ')}. Groundwork compares ${esc(P.CLASSES[cls].plural)} only with other ${esc(P.CLASSES[cls].plural)}, because ${cls === 'condo' ? 'ECs and cluster housing' : 'they'} sell under different rules and at different price levels.</p>`);
         if (rows.length && window.KPTLG && KPTLG.notCoveredNote) res.insertAdjacentHTML('beforeend', KPTLG.notCoveredNote(q, R));
         if (window.KPTV2) KPTV2.afterSearch(res, q, rows.length);
+        if (res.closest('#gwHome')) prismLoad().then(() => GW_PRISM.leadSites(res, { root: '../' })).catch(() => {});   // PRISM V1: the Research search leads with PRISM
         Promise.all([launchesHtml(q, rows), roadsHtml(q), hdbAddrHtml(q)]).then(([lh, rh, ah]) => {
           if (input.value !== q) return;
           if (ah) res.insertAdjacentHTML(rows.length ? 'beforeend' : 'afterbegin', ah);
@@ -317,7 +320,11 @@
   const ovFail = (my) => ovPut('<p class="lg-fine" data-ov-fail>This didn’t load. Please try again, or <a href="#/browse">browse the developments A–Z</a>.</p>', my);
   function overDev(id) {
     clearOver(); const my = OV.seq; ovEl().innerHTML = '<p class="lg-fine" data-ov-busy>Loading…</p>';
-    store.manifest().then((m) => store.index().then((ix) => { const r = P.findById(ix, id); if (!r) throw new Error('nf'); return Promise.all([bedFor(id, m), txFor(id, m).catch(() => null), rentFor(id).catch(() => null)]).then((y) => ({ r, bed: y[0], tx: y[1], rent: y[2] })); }))
+    // PRISM V1 (Ken, 31 Oct 2026): from this search, a development with a published PRISM assessment opens its PRISM Analysis page itself;
+    // every other development keeps its overview (Property Data). The global search, the Map and every #/p/ link are unchanged.
+    const pz = prismLoad().then(() => GW_PRISM.load('../', id)).catch(() => null);
+    pz.then((md) => { if (md && md.assessment && my === OV.seq) { clearOver(); location.hash = '#/prism/' + id; } });
+    store.manifest().then((m) => store.index().then((ix) => { const r = P.findById(ix, id); if (!r) throw new Error('nf'); return Promise.all([bedFor(id, m), txFor(id, m).catch(() => null), rentFor(id).catch(() => null), pz]).then((y) => ({ r, bed: y[0], tx: y[1], rent: y[2] })); }))
       .then((d) => {
         const BV = d.bed && window.GW_BED ? GW_BED.view(d.bed, 'resale', null) : null, hasBed = !!(BV && BV.types && BV.types.length);
         // every bedroom type with a price to show: typical prices and the matched types' approved tiers (Ken, 29 Oct 2026)
@@ -434,11 +441,43 @@
       if (q1) { inp.value = q1.slice(0, 80); inp.dispatchEvent(new Event('input')); }
     } catch (e) { /* no query */ }
   }
+  // The one search's explicit action (31 Oct 2026): "Search property" opens the development when the words name one (an exact name, or the
+  // only match); when several match it moves to the list so the visitor chooses; anything else (a road, a block) is what Enter does. Empty, it
+  // puts the cursor in the box. The placeholder is the longest wording that fits beside the button at this width.
+  const PLACEHOLDERS = ['Search a development, postal code, HDB block or road', 'Development, postal code, HDB block or road', 'Development, postcode or road', 'Search a development'];
+  function searchGo() {
+    const box = HOME.el && HOME.el.querySelector('#ws-dev #sb .kpr-search'), q = box && box.querySelector('#q');
+    if (!box || !q || box.querySelector('[data-search-go]')) return;
+    box.classList.add('has-go');
+    box.insertAdjacentHTML('beforeend', '<button type="button" class="lg-btn primary kpr-go" data-search-go aria-label="Search property"><span class="kpr-go-l">Search property</span><span class="kpr-go-s" aria-hidden="true">Search</span> <span aria-hidden="true">→</span></button>');
+    const go = box.querySelector('[data-search-go]'), res = box.querySelector('#res');
+    go.addEventListener('click', () => {
+      const t = q.value.trim(); if (!t) { q.focus(); return; }
+      const devs = res ? Array.from(res.querySelectorAll('button[data-id]')) : [], norm = (x) => String(x || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+      const exact = devs.filter((b) => { const n = b.querySelector('b'); return n && norm(n.textContent) === norm(t); });
+      if (exact.length === 1) { exact[0].click(); return; }
+      if (devs.length > 1) { devs[0].focus(); devs[0].scrollIntoView({ block: 'nearest' }); return; }
+      q.focus(); q.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    });
+    let cv = null;
+    const fit = () => {
+      const cs = getComputedStyle(q), room = q.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 4;
+      if (!(room > 0)) return;
+      cv = cv || document.createElement('canvas'); const c = cv.getContext('2d'); c.font = cs.fontSize + ' ' + cs.fontFamily;
+      const p = PLACEHOLDERS.find((x) => c.measureText(x).width <= room) || PLACEHOLDERS[PLACEHOLDERS.length - 1];
+      if (q.getAttribute('placeholder') !== p) q.setAttribute('placeholder', p);
+    };
+    fit(); let raf = 0; window.addEventListener('resize', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(fit); });
+    if (typeof ResizeObserver === 'function') new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(fit); }).observe(q);
+  }
   function renderHome(v) {
     document.body.dataset.view = 'home'; ssSet('kpt.map.out', null);
     if (!HOME.el) buildHome();
     if ($app.firstElementChild !== HOME.el || $app.childElementCount !== 1) $app.replaceChildren(HOME.el);
     setOpt(v && v.opt, false);
+    // PRISM V1: under the one search, the two ways to understand a property and the five PRISM questions (compact)
+    prismLoad().then(() => GW_PRISM.mountLanding(HOME.el, { root: '../', after: '#lgCount', picksAfter: '#lgCount' })).catch(() => {});
+    try { searchGo(); } catch (e) { /* the box works without its button */ }
     if (v && v.az && HOME.openAz && !HOME.el.querySelector('#azBtn').hidden) HOME.openAz();
     // R3: #/district/19 (from the site search or the Map) opens the district's list in the search box, then the address settles on #/ so Back and
     // Forward through a development's report return to the list, as a typed search does
@@ -595,6 +634,7 @@
           if (window.GW_RENT && d.rent) { GW_RENT.wire($app, d.rent); const ra = $app.querySelector('[data-gwrent-ask]'); if (ra) ra.addEventListener('click', () => once('rent-ask:' + id, () => track('research_option_selected', { project_id: id, option: 'asking-rent' }))); }
           $app.querySelectorAll('[data-gwr-bed]').forEach((b) => b.addEventListener('click', () => { const g = b.dataset.gwrBed; chooseBed(S.bed === g ? '' : g); rerender(); if (S.bed) track('research_bedroom_selected', { project_id: M.id, bedroom: S.bed, sale_type: M.sale.selected, tier: S.bv && S.bv.m ? ({ B: 'median', C: 'historical' }[GW_BED.tierOf && GW_BED.tierOf(S.bv.m)] || 'matched') : 'figures' }); const n = $app.querySelector('[data-gwr-bed="' + g + '"]'); if (n) n.focus({ preventScroll: true }); }));
           $app.querySelectorAll('[data-gwr-bin]').forEach((b) => b.addEventListener('click', () => { const v = b.dataset.gwrBin, on = M.focus && M.focus.userChosen && String(M.focus.bin) === v; S.size = on ? '' : v; saveSize(); rerender(); const n = $app.querySelector('[data-gwr-bin="' + v + '"]'); if (n) n.focus({ preventScroll: true }); }));
+          try { prismPreview(id); } catch (e) { /* PRISM never breaks the report */ }
           if (window.KPTV2) KPTV2.afterProject(M, $app, d.p, d.m, { R, searchBox, track, bedTypical: S.bedWa ? GW_BED.typical(S.bv) : null, onPick: (x) => { location.hash = '#/p/' + x; }, onCompare: (x) => { S.win = null; location.hash = '#/compare/' + id + '/' + x; } });
           const evd = document.getElementById('evidence'); if (evd) evd.addEventListener('toggle', () => { S.evOpen = evd.open; });
           $app.querySelectorAll('[data-sale]').forEach((b) => b.addEventListener('click', () => { location.hash = R.buildHash({ view: 'project', id, sale: b.dataset.sale }); }));
@@ -700,10 +740,31 @@
       });
     }).catch(() => { $app.innerHTML = '<div class="kpr-state"><h1 class="kpr-h">This didn’t load</h1><p class="kpr-lead">Please refresh, or <a href="#/prices">search property prices &amp; past sales</a>.</p></div>'; });
   }
+  // ---------------------------------------------------------------- PRISM V1 (31 Oct 2026): gw-prism.js, loaded when a development page opens
+  // never allowed to break the page it is added to: if the script cannot be loaded (or the page cannot load scripts this way), PRISM simply does not appear
+  function prismLoad() { try { return lazy('prism'); } catch (e) { return Promise.reject(e); } }
+  // A development with a published PRISM assessment gets a preview card under its opening section, and #/prism/<id> its investigation.
+  // Everything else (no report, no approved assessment, a failed check) shows exactly what it showed before.
+  const onRoute = (view, id) => () => { const v = R.parseHash(String(location.hash).toLowerCase()); return v.view === view && v.id === id; };
+  let lastRoute = '';
+  function prismPreview(id) {
+    prismLoad().then(() => GW_PRISM.mountPreview($app, id, { root: '../', still: onRoute('project', id), returning: true })).catch(() => {});
+  }
+  function showPrism(id, from, dim) {
+    $app.innerHTML = '<div class="kpr-state"><div class="kpr-skel"></div><div class="kpr-skel" style="width:60%"></div></div>';
+    document.body.dataset.view = 'prism';
+    const site = window.KPTV2 && KPTV2.sites && KPTV2.sites[id];   // a launch with its own site: its PRISM page offers that site (it has no resale report to compare)
+    prismLoad().then(() => GW_PRISM.show($app, id, { root: '../', still: onRoute('prism', id), cameFromReport: () => from === 'project:' + id, site: site && site.url ? { url: site.url } : null, compare: !site, dim: dim || null,
+      fallback: () => { location.replace('#/p/' + id); }, track: (k) => track('research_option_selected', { project_id: id, option: k === 'full' ? 'prism-full' : 'prism' }) }))
+      .then(() => { const h = $app.querySelector('h1'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } })
+      .catch(() => { location.replace('#/p/' + id); });
+  }
   function route() {
     const v = R.parseHash(String(location.hash).toLowerCase()); window.scrollTo(0, 0);
-    if (v.view === 'hdb') showHdb(v);
-    else if (v.view === 'project' && window.KPTV2 && KPTV2.sites[v.id]) KPTV2.showSite(v.id, $app, { searchBox, onPick: (x) => { location.hash = '#/p/' + x; } });
+    const was = lastRoute; lastRoute = v.view + ':' + (v.id || '');   // where the visitor came from (PRISM's Back returns there with the browser's Back)
+    if (v.view === 'prism') showPrism(v.id, was, v.dim);
+    else if (v.view === 'hdb') showHdb(v);
+    else if (v.view === 'project' && window.KPTV2 && KPTV2.sites[v.id]) { KPTV2.showSite(v.id, $app, { searchBox, onPick: (x) => { location.hash = '#/p/' + x; } }); prismPreview(v.id); }
     else if (v.view === 'project') showProject(v.id, v.sale);
     else if (v.view === 'compare' && window.KPTV2 && (KPTV2.sites[v.a] || KPTV2.sites[v.b])) KPTV2.showNoData(v.a, v.b, $app, { searchBox, onPick: (x) => { location.hash = '#/p/' + x; } });
     else if (v.view === 'compare') showCompare(v.a, v.b, v.sale);

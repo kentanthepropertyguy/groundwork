@@ -1,0 +1,2018 @@
+{
+ "schemaVersion": "prism-public-v1",
+ "reportId": "thomson-three",
+ "subject": {
+  "id": "thomson-three",
+  "name": "Thomson Three",
+  "kind": "completed-condo",
+  "planningArea": "Bishan",
+  "subzone": "Upper Thomson",
+  "district": "20",
+  "tenure": "99 yrs from 2012",
+  "stage": null
+ },
+ "provenance": {
+  "engineBaseline": "prism-r6.1-baseline",
+  "researchRevision": "hougang-corrections-2026-10-30",
+  "rulesVersion": "prism-v1-prototype-6",
+  "sourceAsOf": "2026-09",
+  "exportedAt": "2026-10-30T18:00:00Z",
+  "approvedAt": "2026-10-31T01:56:15+08:00",
+  "approvalRef": "GW-PRISM-V1-2026-10-31-A1"
+ },
+ "release": {
+  "status": "approved",
+  "approvedMetrics": [
+   "I.everydayAmenities",
+   "I.namedSites2km",
+   "I.primarySchools1km",
+   "I.railStations",
+   "M.marketPulse",
+   "M.paHdbResales12",
+   "M.paPrivateTransactions12",
+   "N.paHdbStock",
+   "N.paResidents",
+   "N.subzoneResidents",
+   "P.peerPosition.1br",
+   "P.peerPosition.2br",
+   "P.peerPosition.3br",
+   "P.resaleMedian.1br",
+   "P.resaleMedian.2br",
+   "P.resaleMedian.3br",
+   "R.bedroomResales24.1br",
+   "R.bedroomResales24.2br",
+   "R.bedroomResales24.3br",
+   "R.rentalContracts12",
+   "R.resales12",
+   "R.turnover12",
+   "S.newSaleDevelopments2km",
+   "S.recordedDwellingUnits2km"
+  ],
+  "allowPublicS3": false,
+  "allowPublicS4": false
+ },
+ "score100": null,
+ "reveal": {
+  "status": "withheld",
+  "uses": [
+   "S.pipeline2km"
+  ],
+  "approval": {
+   "state": "proposed",
+   "approvedAt": null,
+   "approvalRef": null
+  },
+  "reason": "Relies on S.pipeline2km, which is withheld until approval.",
+  "headline": null,
+  "caveat": null
+ },
+ "verdict": {
+  "status": "withheld",
+  "uses": [
+   "S.pipeline2km"
+  ],
+  "approval": {
+   "state": "proposed",
+   "approvedAt": null,
+   "approvalRef": null
+  },
+  "reason": "Relies on S.pipeline2km, which is withheld until approval.",
+  "headline": null,
+  "scope": null,
+  "tone": null,
+  "why": [],
+  "watchOut": []
+ },
+ "hiddenConnections": [],
+ "pillars": {
+  "P": [
+   {
+    "id": "P.peerPosition.1br",
+    "label": "1-bedroom psf vs comparable developments",
+    "engineIds": [
+     "P2.1"
+    ],
+    "researchIds": [],
+    "status": "verified",
+    "value": -4.5,
+    "unit": "pct_vs_peer_median_psf",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": null,
+     "end": "2026-09"
+    },
+    "geography": {
+     "type": "radius",
+     "id": "thomson-three",
+     "radiusKm": 3,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": null,
+     "peers": 3,
+     "classifiedShare": null
+    },
+    "evidenceTag": "computed_estimate",
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "GW_BEDROOM"
+    ],
+    "methodId": "prism-v1-prototype-6:P2",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:42:01+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31"
+    },
+    "detail": {
+     "subjectMedianPsf": 1848,
+     "peerMedianPsf": 1935,
+     "rank": 1,
+     "of": 4,
+     "tier": "within 3 km",
+     "peers": [
+      "Thomson Impressions",
+      "Sky Vue",
+      "Gem Residences"
+     ]
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": "Difference from the median psf of comparable developments of similar size; a position, not a valuation."
+   },
+   {
+    "id": "P.peerPosition.2br",
+    "label": "2-bedroom psf vs comparable developments",
+    "engineIds": [
+     "P2.2"
+    ],
+    "researchIds": [],
+    "status": "verified",
+    "value": 1.9,
+    "unit": "pct_vs_peer_median_psf",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": null,
+     "end": "2026-09"
+    },
+    "geography": {
+     "type": "radius",
+     "id": "thomson-three",
+     "radiusKm": 3,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": null,
+     "peers": 4,
+     "classifiedShare": null
+    },
+    "evidenceTag": "computed_estimate",
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "GW_BEDROOM"
+    ],
+    "methodId": "prism-v1-prototype-6:P2",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:42:01+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31"
+    },
+    "detail": {
+     "subjectMedianPsf": 2152,
+     "peerMedianPsf": 2111,
+     "rank": 4,
+     "of": 5,
+     "tier": "within 3 km",
+     "peers": [
+      "Thomson Impressions",
+      "The Panorama",
+      "Sky Vue",
+      "Gem Residences"
+     ]
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": "Difference from the median psf of comparable developments of similar size; a position, not a valuation."
+   },
+   {
+    "id": "P.peerPosition.3br",
+    "label": "3-bedroom psf vs comparable developments",
+    "engineIds": [
+     "P2.3"
+    ],
+    "researchIds": [],
+    "status": "verified",
+    "value": 4.7,
+    "unit": "pct_vs_peer_median_psf",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": null,
+     "end": "2026-09"
+    },
+    "geography": {
+     "type": "radius",
+     "id": "thomson-three",
+     "radiusKm": 3,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": null,
+     "peers": 6,
+     "classifiedShare": null
+    },
+    "evidenceTag": "computed_estimate",
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "GW_BEDROOM"
+    ],
+    "methodId": "prism-v1-prototype-6:P2",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:42:01+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31"
+    },
+    "detail": {
+     "subjectMedianPsf": 2305,
+     "peerMedianPsf": 2203,
+     "rank": 6,
+     "of": 7,
+     "tier": "within 3 km",
+     "peers": [
+      "Thomson Impressions",
+      "Thomson Grand",
+      "The Panorama",
+      "Sky Vue",
+      "Trevista",
+      "Gem Residences"
+     ]
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": "Difference from the median psf of comparable developments of similar size; a position, not a valuation."
+   },
+   {
+    "id": "P.resaleMedian.1br",
+    "label": "1-bedroom resale price (median)",
+    "engineIds": [
+     "P1.1"
+    ],
+    "researchIds": [],
+    "status": "verified",
+    "value": 915000,
+    "unit": "SGD",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": "2025-10",
+     "end": "2026-09"
+    },
+    "geography": {
+     "type": "development",
+     "id": "thomson-three",
+     "radiusKm": null,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": 5,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "computed_estimate",
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "GW_BEDROOM"
+    ],
+    "methodId": "prism-v1-prototype-6:P1",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:42:01+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31"
+    },
+    "detail": {
+     "medianPsf": 1848,
+     "typicalSqft": [
+      495,
+      495
+     ]
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": "Median of URA resale prices for this bedroom type; a position, not a valuation."
+   },
+   {
+    "id": "P.resaleMedian.2br",
+    "label": "2-bedroom resale price (median)",
+    "engineIds": [
+     "P1.2"
+    ],
+    "researchIds": [],
+    "status": "verified",
+    "value": 1575000,
+    "unit": "SGD",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": "2025-08",
+     "end": "2026-07"
+    },
+    "geography": {
+     "type": "development",
+     "id": "thomson-three",
+     "radiusKm": null,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": 7,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "computed_estimate",
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "GW_BEDROOM"
+    ],
+    "methodId": "prism-v1-prototype-6:P1",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:42:01+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31"
+    },
+    "detail": {
+     "medianPsf": 2152,
+     "typicalSqft": [
+      731,
+      731
+     ]
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": "Median of URA resale prices for this bedroom type; a position, not a valuation."
+   },
+   {
+    "id": "P.resaleMedian.3br",
+    "label": "3-bedroom resale price (median)",
+    "engineIds": [
+     "P1.3"
+    ],
+    "researchIds": [],
+    "status": "verified",
+    "value": 2460000,
+    "unit": "SGD",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": "2025-07",
+     "end": "2026-06"
+    },
+    "geography": {
+     "type": "development",
+     "id": "thomson-three",
+     "radiusKm": null,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": 11,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "computed_estimate",
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "GW_BEDROOM"
+    ],
+    "methodId": "prism-v1-prototype-6:P1",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:42:01+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31"
+    },
+    "detail": {
+     "medianPsf": 2305,
+     "typicalSqft": [
+      1044,
+      1259
+     ]
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": "Median of URA resale prices for this bedroom type; a position, not a valuation."
+   }
+  ],
+  "R": [
+   {
+    "id": "R.bedroomResales24.1br",
+    "label": "1-bedroom resales, latest 24 months",
+    "engineIds": [
+     "R3.1"
+    ],
+    "researchIds": [],
+    "status": "verified",
+    "value": 9,
+    "unit": "transactions",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": "2024-10",
+     "end": "2026-09"
+    },
+    "geography": {
+     "type": "development",
+     "id": "thomson-three",
+     "radiusKm": null,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": 9,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "verified",
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "GW_BEDROOM"
+    ],
+    "methodId": "prism-v1-prototype-6:R3",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:56:15+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31-A1"
+    },
+    "detail": {
+     "latest12": 5,
+     "lastMonth": "2026-09"
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": null
+   },
+   {
+    "id": "R.bedroomResales24.2br",
+    "label": "2-bedroom resales, latest 24 months",
+    "engineIds": [
+     "R3.2"
+    ],
+    "researchIds": [],
+    "status": "verified",
+    "value": 17,
+    "unit": "transactions",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": "2024-10",
+     "end": "2026-09"
+    },
+    "geography": {
+     "type": "development",
+     "id": "thomson-three",
+     "radiusKm": null,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": 17,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "verified",
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "GW_BEDROOM"
+    ],
+    "methodId": "prism-v1-prototype-6:R3",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:56:15+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31-A1"
+    },
+    "detail": {
+     "latest12": 7,
+     "lastMonth": "2026-07"
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": null
+   },
+   {
+    "id": "R.bedroomResales24.3br",
+    "label": "3-bedroom resales, latest 24 months",
+    "engineIds": [
+     "R3.3"
+    ],
+    "researchIds": [],
+    "status": "verified",
+    "value": 17,
+    "unit": "transactions",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": "2024-10",
+     "end": "2026-09"
+    },
+    "geography": {
+     "type": "development",
+     "id": "thomson-three",
+     "radiusKm": null,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": 17,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "verified",
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "GW_BEDROOM"
+    ],
+    "methodId": "prism-v1-prototype-6:R3",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:56:15+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31-A1"
+    },
+    "detail": {
+     "latest12": 11,
+     "lastMonth": "2026-06"
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": null
+   },
+   {
+    "id": "R.rentalContracts12",
+    "label": "Rental contracts, latest 12 months",
+    "engineIds": [
+     "R4.1",
+     "R4.2",
+     "R4.3",
+     "R4.4"
+    ],
+    "researchIds": [],
+    "status": "verified",
+    "value": 86,
+    "unit": "contracts",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": "2025-10",
+     "end": "2026-09"
+    },
+    "geography": {
+     "type": "development",
+     "id": "thomson-three",
+     "radiusKm": null,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": null,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "verified",
+    "sourceIds": [
+     "URA_RENTAL"
+    ],
+    "methodId": "prism-v1-prototype-6:R4",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:56:15+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31-A1"
+    },
+    "detail": {
+     "byDeclaredBedrooms": [
+      {
+       "bedrooms": 1,
+       "contracts": 21,
+       "medianRent": 3100
+      },
+      {
+       "bedrooms": 2,
+       "contracts": 44,
+       "medianRent": 3850
+      },
+      {
+       "bedrooms": 3,
+       "contracts": 18,
+       "medianRent": 5000
+      }
+     ]
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": "URA rental contracts by lease commencement; include renewals. Not occupancy, yield or tenant demand."
+   },
+   {
+    "id": "R.resales12",
+    "label": "Resales in this development, latest 12 months",
+    "engineIds": [
+     "R1"
+    ],
+    "researchIds": [],
+    "status": "verified",
+    "value": 24,
+    "unit": "transactions",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": "2025-10",
+     "end": "2026-09"
+    },
+    "geography": {
+     "type": "development",
+     "id": "thomson-three",
+     "radiusKm": null,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": 24,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "verified",
+    "sourceIds": [
+     "URA_TRANSACTIONS"
+    ],
+    "methodId": "prism-v1-prototype-6:R1",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:56:15+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31-A1"
+    },
+    "detail": {
+     "prior12": 20,
+     "monthsWithSales": 11
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": null
+   },
+   {
+    "id": "R.turnover12",
+    "label": "Resale turnover, latest 12 months",
+    "engineIds": [
+     "R2"
+    ],
+    "researchIds": [],
+    "status": "verified",
+    "value": 5.5,
+    "unit": "resales_per_100_homes_per_year",
+    "numerator": 24,
+    "denominator": 435,
+    "annualisationYears": 1,
+    "period": {
+     "start": "2025-10",
+     "end": "2026-09"
+    },
+    "geography": {
+     "type": "development",
+     "id": "thomson-three",
+     "radiusKm": null,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": 24,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "computed_estimate",
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "URA_DWELLING_UNITS"
+    ],
+    "methodId": "prism-v1-prototype-6:R2",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:56:15+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31-A1"
+    },
+    "detail": null,
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": "Resales per 100 recorded non-landed homes. Not selling time and not a chance of selling. The engine peer comparison (island-wide segment) is not exported; the public peer comparison is R.peerRank24."
+   }
+  ],
+  "I": [
+   {
+    "id": "I.everydayAmenities",
+    "label": "Everyday amenities",
+    "engineIds": [
+     "I3"
+    ],
+    "researchIds": [],
+    "status": "verified",
+    "value": 2,
+    "unit": "supermarkets_within_1km",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": null,
+     "end": null
+    },
+    "geography": {
+     "type": "radius",
+     "id": "thomson-three",
+     "radiusKm": 1,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": null,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "verified",
+    "sourceIds": [
+     "NEA_SUPERMARKETS",
+     "NEA_HAWKERS",
+     "NPARKS_PARKS",
+     "ONEMAP"
+    ],
+    "methodId": "prism-v1-prototype-6:I3",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:56:15+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31-A1"
+    },
+    "detail": {
+     "nearestSupermarketMetres": 310,
+     "nearestHawker": {
+      "name": "Shunfu Mart",
+      "metres": 860
+     },
+     "nearestPark": {
+      "name": "Windsor Nature Park",
+      "metres": 380
+     }
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": "Straight line; park distance to the nearest edge."
+   },
+   {
+    "id": "I.namedSites2km",
+    "label": "Named sites and launches within 2 km",
+    "engineIds": [
+     "I4"
+    ],
+    "researchIds": [],
+    "status": "verified",
+    "value": 1,
+    "unit": "sites",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": null,
+     "end": null
+    },
+    "geography": {
+     "type": "radius",
+     "id": "thomson-three",
+     "radiusKm": 2,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": null,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "verified",
+    "sourceIds": [
+     "GW_UPCOMING",
+     "URA_SALE_SITES",
+     "ONEMAP"
+    ],
+    "methodId": "prism-v1-prototype-6:I4",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:56:15+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31-A1"
+    },
+    "detail": {
+     "sites": [
+      {
+       "name": "Thomson Reserve",
+       "label": "Upcoming development",
+       "stageEvidence": "OneMap address records list 6 blocks named \"THOMSON RESERVE (U/C)\" (checked 30 Oct 2026)",
+       "metres": 100
+      }
+     ]
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": "Official URA Sale Sites and launch records only; no price uplift or completion date is implied."
+   },
+   {
+    "id": "I.primarySchools1km",
+    "label": "Primary schools within 1 km (straight line)",
+    "engineIds": [
+     "I2"
+    ],
+    "researchIds": [],
+    "status": "verified",
+    "value": 1,
+    "unit": "schools",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": null,
+     "end": null
+    },
+    "geography": {
+     "type": "radius",
+     "id": "thomson-three",
+     "radiusKm": 1,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": null,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "verified",
+    "sourceIds": [
+     "MOE_SCHOOLS",
+     "ONEMAP"
+    ],
+    "methodId": "prism-v1-prototype-6:I2",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:56:15+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31-A1"
+    },
+    "detail": {
+     "nearest": {
+      "name": "Ai Tong School",
+      "metres": 400
+     },
+     "within2km": 2
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": "Indicative only; MOE measures distance for admission differently. No admission eligibility is implied."
+   },
+   {
+    "id": "I.railStations",
+    "label": "Nearest rail stations (straight line to an exit)",
+    "engineIds": [
+     "I1"
+    ],
+    "researchIds": [],
+    "status": "verified",
+    "value": 190,
+    "unit": "metres",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": null,
+     "end": null
+    },
+    "geography": {
+     "type": "development",
+     "id": "thomson-three",
+     "radiusKm": null,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": null,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "verified",
+    "sourceIds": [
+     "LTA_RAIL_EXITS"
+    ],
+    "methodId": "prism-v1-prototype-6:I1",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:56:15+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31-A1"
+    },
+    "detail": {
+     "stations": [
+      {
+       "name": "Upper Thomson MRT",
+       "type": "MRT",
+       "metres": 190
+      },
+      {
+       "name": "Bright Hill MRT",
+       "type": "MRT",
+       "metres": 540
+      }
+     ]
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": "Straight-line distance, not walking time."
+   }
+  ],
+  "S": [
+   {
+    "id": "S.launchedUnsold2km",
+    "label": "Launched but unsold homes within 2 km (developer-reported to URA)",
+    "engineIds": [
+     "S3"
+    ],
+    "researchIds": [],
+    "status": "withheld",
+    "value": null,
+    "unit": "homes",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": "2026-09",
+     "end": "2026-09"
+    },
+    "geography": {
+     "type": "radius",
+     "id": "thomson-three",
+     "radiusKm": 2,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": null,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "unavailable_evidence",
+    "sourceIds": [
+     "URA_DEV_SALES",
+     "URA_TRANSACTIONS"
+    ],
+    "methodId": "prism-v1-prototype-6:S3",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "proposed",
+     "approvedAt": null,
+     "approvalRef": null
+    },
+    "detail": null,
+    "withheldDetail": null,
+    "nullReason": "Withheld: No per-locality S3 publication approval with an effective date. Metric not approved.",
+    "nullReasonCode": "supply_gate",
+    "note": "Developer-reported launched minus sold, other developments of the same kind; not live availability. Never added to S.pipeline2km."
+   },
+   {
+    "id": "S.newSaleDevelopments2km",
+    "label": "Other developments with recorded URA new sales within 2 km, latest 12 months",
+    "engineIds": [
+     "S2"
+    ],
+    "researchIds": [],
+    "status": "verified",
+    "value": 1,
+    "unit": "developments",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": "2025-10",
+     "end": "2026-09"
+    },
+    "geography": {
+     "type": "radius",
+     "id": "thomson-three",
+     "radiusKm": 2,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": null,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "verified",
+    "sourceIds": [
+     "URA_TRANSACTIONS"
+    ],
+    "methodId": "prism-v1-prototype-6:S2",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:56:15+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31-A1"
+    },
+    "detail": {
+     "newSales": 4,
+     "developmentsList": [
+      {
+       "name": "Artisan 8",
+       "newSales12": 4,
+       "metres": 670
+      }
+     ]
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": "Historical recorded activity: developments with URA new-sale caveats lodged in the 12 months shown. Not current unit availability and not unsold stock."
+   },
+   {
+    "id": "S.pipeline2km",
+    "label": "Private homes in the URA pipeline within 2 km",
+    "engineIds": [
+     "S4"
+    ],
+    "researchIds": [],
+    "status": "withheld",
+    "value": null,
+    "unit": "homes",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": "2026-07",
+     "end": "2026-09"
+    },
+    "geography": {
+     "type": "radius",
+     "id": "thomson-three",
+     "radiusKm": 2,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": null,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "unavailable_evidence",
+    "sourceIds": [
+     "URA_PIPELINE",
+     "URA_SALE_SITES",
+     "ONEMAP",
+     "URA_DEV_SALES"
+    ],
+    "methodId": "prism-v1-prototype-6:S4",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "proposed",
+     "approvedAt": null,
+     "approvalRef": null
+    },
+    "detail": null,
+    "withheldDetail": null,
+    "nullReason": "Withheld: Master Planning has not approved the r6.1 public supply release. Metric not approved.",
+    "nullReasonCode": "supply_gate",
+    "note": "Verified, located URA pipeline projects other than this one; expected completion only where URA discloses it. Not total supply; never added to S.launchedUnsold2km."
+   },
+   {
+    "id": "S.recordedDwellingUnits2km",
+    "label": "Recorded private dwelling units within 2 km (URA; non-landed and EC)",
+    "engineIds": [
+     "S1"
+    ],
+    "researchIds": [],
+    "status": "verified",
+    "value": 7427,
+    "unit": "homes",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": null,
+     "end": null
+    },
+    "geography": {
+     "type": "radius",
+     "id": "thomson-three",
+     "radiusKm": 2,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": null,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "verified",
+    "sourceIds": [
+     "URA_DWELLING_UNITS"
+    ],
+    "methodId": "prism-v1-prototype-6:S1",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:56:15+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31-A1"
+    },
+    "detail": {
+     "developments": 36,
+     "ecHomes": 0
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": "URA No of Dwelling Units as published. URA states Q4 2022; its totals match URA completed private stock of 2025. No exact as-at date is asserted. Landed homes are not counted."
+   }
+  ],
+  "M": [
+   {
+    "id": "M.marketPulse",
+    "label": "Market Pulse: this development’s resale prices, same size band, latest 12 months vs the 12 before",
+    "engineIds": [
+     "M2"
+    ],
+    "researchIds": [],
+    "status": "verified",
+    "value": 4.7,
+    "unit": "pct_change",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": "2025-10",
+     "end": "2026-09"
+    },
+    "geography": {
+     "type": "development",
+     "id": "thomson-three",
+     "radiusKm": null,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": 24,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "computed_estimate",
+    "sourceIds": [
+     "URA_TRANSACTIONS"
+    ],
+    "methodId": "prism-v1-prototype-6:M2",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:56:15+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31-A1"
+    },
+    "detail": {
+     "direction": "higher",
+     "sizeBand": "700–799 sq ft",
+     "strength": "limited"
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": "The approved Market Pulse rule (pulse-v1)."
+   },
+   {
+    "id": "M.paHdbResales12",
+    "label": "Observed HDB resales in the planning area, latest 12 months",
+    "engineIds": [
+     "M5"
+    ],
+    "researchIds": [],
+    "status": "verified",
+    "value": 410,
+    "unit": "transactions",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": "2025-10",
+     "end": "2026-09"
+    },
+    "geography": {
+     "type": "planning_area",
+     "id": "Bishan",
+     "radiusKm": null,
+     "boundaryVintage": "MP2019"
+    },
+    "sample": {
+     "transactions": 410,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "verified",
+    "sourceIds": [
+     "HDB_RESALE",
+     "URA_MP2019"
+    ],
+    "methodId": "prism-v1-prototype-6:M5",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:56:15+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31-A1"
+    },
+    "detail": {
+     "prior": 358,
+     "priorMonths": 11,
+     "latest4RoomPlus": 348,
+     "perMonthChangePct": 5
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": "Observed HDB transactions, not upgrader demand. HDB town is not the URA planning area."
+   },
+   {
+    "id": "M.paPrivateTransactions12",
+    "label": "Observed private resales in the planning area, latest 12 months",
+    "engineIds": [
+     "M4"
+    ],
+    "researchIds": [],
+    "status": "verified",
+    "value": 269,
+    "unit": "transactions",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": "2025-10",
+     "end": "2026-09"
+    },
+    "geography": {
+     "type": "planning_area",
+     "id": "Bishan",
+     "radiusKm": null,
+     "boundaryVintage": "MP2019"
+    },
+    "sample": {
+     "transactions": 269,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "verified",
+    "sourceIds": [
+     "URA_TRANSACTIONS"
+    ],
+    "methodId": "prism-v1-prototype-6:M4",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:56:15+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31-A1"
+    },
+    "detail": {
+     "developments": 34,
+     "resales": {
+      "latest12": 269,
+      "prior12": 351
+     },
+     "newSales": {
+      "latest12": 4,
+      "prior12": 18
+     },
+     "resaleChangePct": -23.4
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": "All condo, EC and cluster developments placed in the planning area. Observations, not buyer counts. New sales are historical recorded caveats, not current availability."
+   },
+   {
+    "id": "M.projectTransactions12",
+    "label": "Transactions in this development, latest 12 months",
+    "engineIds": [
+     "M1"
+    ],
+    "researchIds": [],
+    "status": "withheld",
+    "value": null,
+    "unit": "transactions",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": "2025-10",
+     "end": "2026-09"
+    },
+    "geography": {
+     "type": "development",
+     "id": "thomson-three",
+     "radiusKm": null,
+     "boundaryVintage": null
+    },
+    "sample": {
+     "transactions": null,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "unavailable_evidence",
+    "sourceIds": [
+     "URA_TRANSACTIONS"
+    ],
+    "methodId": "prism-v1-prototype-6:M1",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "proposed",
+     "approvedAt": null,
+     "approvalRef": null
+    },
+    "detail": null,
+    "withheldDetail": null,
+    "nullReason": "Not approved for this release.",
+    "nullReasonCode": "not_approved",
+    "note": "Observed transactions, not buyer counts."
+   },
+   {
+    "id": "N.paHdbStock",
+    "label": "HDB flats in the planning area",
+    "engineIds": [
+     "N3"
+    ],
+    "researchIds": [],
+    "status": "estimated",
+    "value": 21650,
+    "unit": "flats",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": null,
+     "end": null
+    },
+    "geography": {
+     "type": "planning_area",
+     "id": "Bishan",
+     "radiusKm": null,
+     "boundaryVintage": "MP2019"
+    },
+    "sample": {
+     "transactions": null,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "estimated_context",
+    "sourceIds": [
+     "HDB_PROPERTY",
+     "ONEMAP",
+     "URA_MP2019"
+    ],
+    "methodId": "prism-v1-prototype-6:N3",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:56:15+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31-A1"
+    },
+    "detail": {
+     "blocks": 238,
+     "soldByType": {
+      "1-room": null,
+      "2-room": 317,
+      "3-room": 2556,
+      "4-room": 10853,
+      "5-room": 5716,
+      "Executive": 1567,
+      "Multi-generation": 93,
+      "Studio apartment": 135
+     },
+     "flatsByCompletionDecade": {
+      "1970s": 772,
+      "1980s": 11617,
+      "1990s": 6223,
+      "2010s": 1064,
+      "2020s": 1974
+     },
+     "singstatHdbDwellingsSharePct": 100
+    },
+    "withheldDetail": {
+     "code": "unapproved_zero",
+     "paths": [
+      "soldByType.1-room"
+     ],
+     "reason": "Measured zeros inside an estimated-context metric are not shown (zeros are shown only on verified metrics)."
+    },
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": "Placed blocks only. Completion cohorts do not establish MOP eligibility. HDB stock is context, never a count of upgraders."
+   },
+   {
+    "id": "N.paResidents",
+    "label": "Residents, planning area, June 2026 (vs June 2021)",
+    "engineIds": [
+     "N1"
+    ],
+    "researchIds": [],
+    "status": "estimated",
+    "value": 88110,
+    "unit": "residents",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": "2021-06",
+     "end": "2026-06"
+    },
+    "geography": {
+     "type": "planning_area",
+     "id": "Bishan",
+     "radiusKm": null,
+     "boundaryVintage": "MP2019 (2021) / MP2025 (2026); boundary checked identical"
+    },
+    "sample": {
+     "transactions": null,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "estimated_context",
+    "sourceIds": [
+     "SINGSTAT_RESIDENTS",
+     "URA_MP2019"
+    ],
+    "methodId": "prism-v1-prototype-6:N1",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:56:15+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31-A1"
+    },
+    "detail": {
+     "residents2021": 84660,
+     "residentsChangePct": 4.1,
+     "condoResidents": {
+      "y2021": 16940,
+      "y2026": 19960
+     },
+     "aged65PlusPct": {
+      "y2021": 19.6,
+      "y2026": 23.6
+     }
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": "SingStat, rounded to 10. Population is context, never a count of buyers."
+   },
+   {
+    "id": "N.subzoneResidents",
+    "label": "Residents, subzone, June 2026 (vs June 2021)",
+    "engineIds": [
+     "N2"
+    ],
+    "researchIds": [],
+    "status": "estimated",
+    "value": 31010,
+    "unit": "residents",
+    "numerator": null,
+    "denominator": null,
+    "annualisationYears": null,
+    "period": {
+     "start": "2021-06",
+     "end": "2026-06"
+    },
+    "geography": {
+     "type": "subzone",
+     "id": "Upper Thomson",
+     "radiusKm": null,
+     "boundaryVintage": "MP2019 (2021) / MP2025 (2026); boundary checked identical"
+    },
+    "sample": {
+     "transactions": null,
+     "peers": null,
+     "classifiedShare": null
+    },
+    "evidenceTag": "estimated_context",
+    "sourceIds": [
+     "SINGSTAT_RESIDENTS",
+     "URA_MP2019"
+    ],
+    "methodId": "prism-v1-prototype-6:N2",
+    "coverage": {
+     "verified": true,
+     "reason": null
+    },
+    "approval": {
+     "state": "approved",
+     "approvedAt": "2026-10-31T01:56:15+08:00",
+     "approvalRef": "GW-PRISM-V1-2026-10-31-A1"
+    },
+    "detail": {
+     "residents2021": 28520,
+     "residentsChangePct": 8.7,
+     "condoResidents": {
+      "y2021": 9470,
+      "y2026": 11930
+     },
+     "aged65PlusPct": {
+      "y2021": 21.4,
+      "y2026": 23.1
+     }
+    },
+    "withheldDetail": null,
+    "nullReason": null,
+    "nullReasonCode": null,
+    "note": "SingStat, rounded to 10. Population is context, never a count of buyers."
+   }
+  ]
+ },
+ "nextBuyerQuestion": {
+  "status": "withheld",
+  "uses": [
+   "S.pipeline2km"
+  ],
+  "approval": {
+   "state": "proposed",
+   "approvedAt": null,
+   "approvalRef": null
+  },
+  "reason": "Relies on S.pipeline2km, which is withheld until approval.",
+  "text": null
+ },
+ "kenTake": {
+  "status": "not_reviewed",
+  "text": null
+ },
+ "sources": [
+  {
+   "id": "GW_BEDROOM",
+   "publisher": "Groundwork",
+   "dataset": "Groundwork bedroom classification (accepted; 12 quarters)",
+   "datasetId": "groundwork-bedroom",
+   "asAt": "2026-09",
+   "updated": null,
+   "accessed": null,
+   "licence": {
+    "name": "Groundwork derived data",
+    "url": null,
+    "status": "own",
+    "conditions": []
+   },
+   "attribution": "Bedroom classification by Groundwork from floor plans and URA rental records.",
+   "url": null
+  },
+  {
+   "id": "GW_UPCOMING",
+   "publisher": "Groundwork",
+   "dataset": "Groundwork upcoming register (URA Sale Sites, launch records, OneMap)",
+   "datasetId": "groundwork-upcoming",
+   "asAt": "2026-10-21",
+   "updated": null,
+   "accessed": null,
+   "licence": {
+    "name": "Groundwork derived data",
+    "url": null,
+    "status": "own",
+    "conditions": []
+   },
+   "attribution": "Named sites compiled by Groundwork from official URA Sale Sites, launch records and the sources cited for each site.",
+   "url": null,
+   "note": "A site stage is named only where a cited source states it; otherwise \"Upcoming development\"."
+  },
+  {
+   "id": "HDB_PROPERTY",
+   "publisher": "Housing & Development Board (HDB)",
+   "dataset": "HDB Property Information",
+   "datasetId": "d_17f5382f26140b1fdae0ba2ef6239d2f",
+   "asAt": null,
+   "updated": "2026-10-08",
+   "accessed": null,
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from HDB Property Information (Housing & Development Board (HDB)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_17f5382f26140b1fdae0ba2ef6239d2f/view",
+   "note": "Completed blocks; positions from OneMap."
+  },
+  {
+   "id": "HDB_RESALE",
+   "publisher": "Housing & Development Board (HDB)",
+   "dataset": "Resale flat prices based on registration date from Jan-2017 onwards",
+   "datasetId": "d_8b84c4ee58e3cfc0ece0d773c8ca6abc",
+   "asAt": null,
+   "updated": "2026-10-09",
+   "accessed": "2026-10-09",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from Resale flat prices based on registration date from Jan-2017 onwards (Housing & Development Board (HDB)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_8b84c4ee58e3cfc0ece0d773c8ca6abc/view"
+  },
+  {
+   "id": "LTA_RAIL_EXITS",
+   "publisher": "Land Transport Authority (LTA)",
+   "dataset": "LTA MRT Station Exit",
+   "datasetId": "d_b39d3a0871985372d7e1637193335da5",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from LTA MRT Station Exit (Land Transport Authority (LTA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_b39d3a0871985372d7e1637193335da5/view"
+  },
+  {
+   "id": "MOE_SCHOOLS",
+   "publisher": "Ministry of Education (MOE)",
+   "dataset": "General information of schools",
+   "datasetId": "d_688b934f82c1059ed0a6993d2a829089",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from General information of schools (Ministry of Education (MOE)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_688b934f82c1059ed0a6993d2a829089/view",
+   "note": "Positions from OneMap."
+  },
+  {
+   "id": "NEA_HAWKERS",
+   "publisher": "National Environment Agency (NEA)",
+   "dataset": "Hawker Centres",
+   "datasetId": "d_4a086da0a5553be1d89383cd90d07ecd",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from Hawker Centres (National Environment Agency (NEA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_4a086da0a5553be1d89383cd90d07ecd/view"
+  },
+  {
+   "id": "NEA_SUPERMARKETS",
+   "publisher": "National Environment Agency (NEA)",
+   "dataset": "List of Supermarket Licences",
+   "datasetId": "d_11edd0117280c5776651d7891114c88c",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from List of Supermarket Licences (National Environment Agency (NEA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_11edd0117280c5776651d7891114c88c/view",
+   "note": "Positions from OneMap."
+  },
+  {
+   "id": "NPARKS_PARKS",
+   "publisher": "National Parks Board (NParks)",
+   "dataset": "NParks Parks and Nature Reserves",
+   "datasetId": "d_77d7ec97be83d44f61b85454f844382f",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from NParks Parks and Nature Reserves (National Parks Board (NParks)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_77d7ec97be83d44f61b85454f844382f/view"
+  },
+  {
+   "id": "ONEMAP",
+   "publisher": "Singapore Land Authority (SLA)",
+   "dataset": "OneMap Search",
+   "datasetId": "onemap.gov.sg",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "OneMap Terms of Use and OneMap Open Data Licence (Singapore Open Data Licence v1.0), registered API access",
+    "url": "https://www.onemap.gov.sg/legal/opendatalicence.html",
+    "status": "confirmed",
+    "conditions": [
+     "Groundwork’s registered OneMap API access confirmed by Master Planning, 31 Oct 2026 (Terms of Use: https://www.onemap.gov.sg/legal/termsofuse.html).",
+     "Open Data Licence: commercial and non-commercial use with attribution; no implied official status; provided as is; terminable on breach.",
+     "Use is limited to derived straight-line distances and counts: no OneMap coordinates, address records, map tiles or bulk positions are published (Terms of Use clause 3).",
+     "The Developer Agreement text is not held in Groundwork’s records; no specific restriction from it has been identified. File a copy with the release record.",
+     "Keep SLA copyright notices and trademarks unaltered."
+    ]
+   },
+   "attribution": "Positions: OneMap © contributors | Singapore Land Authority. Contains information from OneMap Search, used under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://www.onemap.gov.sg/"
+  },
+  {
+   "id": "SINGSTAT_RESIDENTS",
+   "publisher": "Singapore Department of Statistics (SingStat)",
+   "dataset": "Singapore Residents by Planning Area / Subzone, Age Group, Sex and Type of Dwelling; Residential Dwellings by Planning Area / Subzone and Type of Dwelling (June)",
+   "datasetId": "respopagesextod; hsetod",
+   "asAt": "2026-06",
+   "updated": null,
+   "accessed": null,
+   "licence": {
+    "name": "SingStat Terms of Use and Singapore Open Data Licence version 1.0",
+    "url": "https://www.singstat.gov.sg/terms-of-use",
+    "status": "confirmed",
+    "conditions": [
+     "Confirmed by Groundwork Master Planning, 31 Oct 2026: SingStat Terms of Use and the Singapore Open Data Licence v1.0 (https://data.gov.sg/open-data-licence).",
+     "Credit the source: Singapore Department of Statistics.",
+     "Reproduce accurately; do not imply Government endorsement, and do not present Groundwork analysis as SingStat’s."
+    ]
+   },
+   "attribution": "Source: Singapore Department of Statistics.",
+   "url": "https://www.singstat.gov.sg/find-data/search-by-theme/population/geographic-distribution/latest-data",
+   "note": "Rounded to 10 by SingStat. June 2026 uses Master Plan 2025 boundaries; earlier years Master Plan 2019."
+  },
+  {
+   "id": "URA_DEV_SALES",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "PMI_Resi_Developer_Sales",
+   "datasetId": "PMI_Resi_Developer_Sales",
+   "asAt": "2026-09",
+   "updated": null,
+   "accessed": null,
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0 (URA Data Service grant of licence)",
+    "url": "https://www.ura.gov.sg/eservices-info/maps/acceptance-grant-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated, with the access date.",
+     "Analysis and derived statistics are Groundwork’s; not endorsed by URA."
+    ]
+   },
+   "attribution": "Contains information from URA private residential data (PMI_Resi_Developer_Sales) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
+   "url": "https://eservice.ura.gov.sg/maps/api/"
+  },
+  {
+   "id": "URA_DWELLING_UNITS",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "No of Dwelling Units",
+   "datasetId": "d_be71daeab5930f96b90ad2857454d876",
+   "asAt": null,
+   "updated": "2026-02-26",
+   "accessed": null,
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from No of Dwelling Units (Urban Redevelopment Authority (URA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_be71daeab5930f96b90ad2857454d876/view",
+   "note": "The dataset description states Q4 2022; its totals match URA completed private stock of 2025. Record edit dates are not a stock date, so no as-at date is asserted."
+  },
+  {
+   "id": "URA_MP2019",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "Master Plan 2019 Subzone Boundary (No Sea)",
+   "datasetId": "d_8594ae9ff96d0c708bc2af633048edfb",
+   "asAt": null,
+   "updated": null,
+   "accessed": null,
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from Master Plan 2019 Subzone Boundary (No Sea) (Urban Redevelopment Authority (URA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_8594ae9ff96d0c708bc2af633048edfb/view",
+   "note": "Planning-area and subzone boundaries (Master Plan 2019)."
+  },
+  {
+   "id": "URA_PIPELINE",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "PMI_Resi_Pipeline",
+   "datasetId": "PMI_Resi_Pipeline",
+   "asAt": "2026-Q3",
+   "updated": null,
+   "accessed": null,
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0 (URA Data Service grant of licence)",
+    "url": "https://www.ura.gov.sg/eservices-info/maps/acceptance-grant-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated, with the access date.",
+     "Analysis and derived statistics are Groundwork’s; not endorsed by URA."
+    ]
+   },
+   "attribution": "Contains information from URA private residential data (PMI_Resi_Pipeline) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
+   "url": "https://eservice.ura.gov.sg/maps/api/"
+  },
+  {
+   "id": "URA_RENTAL",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "PMI_Resi_Rental",
+   "datasetId": "PMI_Resi_Rental",
+   "asAt": "2026-09",
+   "updated": null,
+   "accessed": null,
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0 (URA Data Service grant of licence)",
+    "url": "https://www.ura.gov.sg/eservices-info/maps/acceptance-grant-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated, with the access date.",
+     "Analysis and derived statistics are Groundwork’s; not endorsed by URA."
+    ]
+   },
+   "attribution": "Contains information from URA private residential data (PMI_Resi_Rental) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
+   "url": "https://eservice.ura.gov.sg/maps/api/"
+  },
+  {
+   "id": "URA_SALE_SITES",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "URA Sale Sites",
+   "datasetId": "d_0e2b42f98535686282031a42c9c7b05a",
+   "asAt": "2026-06-18",
+   "updated": null,
+   "accessed": null,
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from URA Sale Sites (Urban Redevelopment Authority (URA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_0e2b42f98535686282031a42c9c7b05a/view",
+   "note": "Official site boundaries, used to place pipeline projects."
+  },
+  {
+   "id": "URA_TRANSACTIONS",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "PMI_Resi_Transaction",
+   "datasetId": "PMI_Resi_Transaction",
+   "asAt": "2026-09",
+   "updated": null,
+   "accessed": "2026-10-05",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0 (URA Data Service grant of licence)",
+    "url": "https://www.ura.gov.sg/eservices-info/maps/acceptance-grant-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated, with the access date.",
+     "Analysis and derived statistics are Groundwork’s; not endorsed by URA."
+    ]
+   },
+   "attribution": "Contains information from URA private residential data (PMI_Resi_Transaction) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
+   "url": "https://eservice.ura.gov.sg/maps/api/"
+  }
+ ],
+ "limitations": [
+  "Only approved metrics and copy carry values or text; everything else is withheld.",
+  "No composite score: score100 is null in V1 (no approved scoring method exists).",
+  "Straight-line distances only. Observed transactions are not counts of prospective buyers, and nothing here is a forecast.",
+  "Launched-but-unsold homes and pipeline homes are withheld until their local and release approvals exist, and are never added together.",
+  "The supply-specific reading depends on pipeline data that is withheld until release approval; no supply-based verdict is shown meanwhile."
+ ]
+}
