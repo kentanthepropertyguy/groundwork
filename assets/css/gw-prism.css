@@ -1,0 +1,292 @@
+/* PRISM V1 (gw-prism.js), Research page only. Groundwork colours only: white #FFFFFF, navy #16213E, blue actions #0B63CE,
+   restrained gold #85661F, borders #E3E3E8. No tinted page, no rating colours. Loaded with the page (not lazily), so the Research
+   landing's grid is set before anything is drawn and nothing moves when PRISM's explanation arrives. */
+:root{--gwp-ink:#16213E;--gwp-body:#3B4256;--gwp-muted:#5F6672;--gwp-blue:#0B63CE;--gwp-gold:#85661F;--gwp-line:#E3E3E8;--gwp-soft:#F6F7F9}
+.gwp-band,.gwp-page,.gwp-land,.gwp-tabs,.gwp-back2{font-family:var(--kpt-font,var(--gw-font,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif));color:var(--gwp-ink)}
+.gwp-mark{display:block;flex:none;border-radius:22%;background:#16213E}
+.gwp-k{margin:0;font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--gwp-gold)}
+.gwp-fine{margin:0;font-size:13.5px;line-height:1.5;color:var(--gwp-muted)}
+.gwp-center{text-align:center}
+
+/* ---------------------------------------------------------------- the Research landing: one grid
+   The two choices above are two equal columns 12px apart (gw.css .gw-ropts). From 1200px the "Research a property" workspace uses the
+   same two columns: the one search, its hint and the PRISM report links on the left, the PRISM explanation on the right, so every
+   block lines up with a choice card. Narrower, it is one column at the search's own width. */
+@media (min-width:1200px){
+  #ws-dev{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:12px;align-items:start}
+  #ws-dev>*{grid-column:1}
+  #ws-dev>[data-gwp-land]{grid-column:2;grid-row:1/span 12;max-width:none;margin:0}
+  #ws-dev:has(.gw-ov, .gw-rprop:not([hidden]))>:is(#rwOver,#rwLanded){grid-column:1/-1}
+  #ws-dev>.lg-sb,#ws-dev>p,#ws-dev>.gw-rex,#ws-dev>.gw-raz{max-width:none}
+}
+/* like the landing's other extras, it steps aside while a development's overview or a home's sales are open */
+#ws-dev:has(.gw-ov, .gw-rprop:not([hidden])) [data-gwp-land]{display:none}
+.gwp-land{display:grid;gap:12px;min-width:0;max-width:760px;margin:6px 0 4px}
+/* the one search's explicit action, inside the box at its right end (the results list still opens below it) */
+#ws-dev .kpr-search.has-go{position:relative}
+body #ws-dev .lg-sb .kpr-search.has-go>input{padding-right:196px}
+#ws-dev .kpr-go{position:absolute;top:6px;right:6px;min-height:44px;height:44px;padding:0 20px;font-size:16px;font-weight:600;gap:6px;white-space:nowrap}
+#ws-dev .kpr-go-s{display:none}
+/* the developments with a PRISM report, as plain links under the search */
+.gwp-picks{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0}
+.gwp-picks[hidden]{display:none}
+.gwp-pk{display:flex;align-items:center;gap:8px;margin:0;font-size:14.5px;font-weight:600;color:var(--gwp-ink)}
+.gwp-pk .gwp-mark{width:22px;height:22px;border-radius:6px}
+.gwp-pl2{display:flex;flex-wrap:wrap;gap:8px}
+.gwp-chip,.gwp-chip:visited{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 16px;border:1px solid #CDB98A;border-radius:999px;background:#fff;color:var(--gwp-ink)!important;font-size:15px;font-weight:600;text-decoration:none!important}
+.gwp-chip:hover{border-color:var(--gwp-gold);background:#FBF8F1}
+.gwp-chip span{color:var(--gwp-gold)}
+.gwp-chip:focus-visible{outline:2px solid var(--gwp-blue);outline-offset:2px}
+#ws-dev:has(.gw-ov, .gw-rprop:not([hidden])) [data-gwp-picks]{display:none}
+.gwp-ilead{margin:0;font-size:15.5px;line-height:1.5;color:var(--gwp-body);max-width:60ch}
+.gwp-ilead b{display:block;font-size:19px;line-height:1.3;color:var(--gwp-ink);margin-bottom:2px}
+.gwp-intro{position:relative;isolation:isolate;overflow:hidden;display:grid;gap:12px;padding:22px 22px 18px;border:1px solid var(--gwp-line);border-radius:18px;background:#fff}
+.gwp-intro:focus{outline:none}
+.gwp-imotif{position:absolute;z-index:-1;top:-30px;right:-40px;width:300px;height:auto;opacity:.6;pointer-events:none}
+.gwp-intro h3{margin:4px 0 0;font-size:17px;font-weight:700;letter-spacing:-.01em;color:var(--gwp-ink)}
+.gwp-qs{margin:0;padding:0;list-style:none;display:grid;gap:0}
+.gwp-qs li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;padding:10px 0;border-top:1px solid var(--gwp-line)}
+.gwp-qi{color:var(--gwp-gold);padding-top:2px}
+.gwp-qs b{display:block;font-size:15px;color:var(--gwp-ink)}
+.gwp-qs li>span>span{display:block;font-size:14px;line-height:1.45;color:var(--gwp-body)}
+@media (max-width:719px){
+  body #ws-dev .lg-sb .kpr-search.has-go>input{padding-right:112px}
+  #ws-dev .kpr-go{top:5px;right:5px;height:42px;min-height:42px;padding:0 16px;font-size:15px}
+  #ws-dev .kpr-go-l{display:none}
+  #ws-dev .kpr-go-s{display:inline}
+  .gwp-picks{gap:6px 8px}
+  .gwp-pk{flex-basis:100%;font-size:14px}
+  .gwp-pl2{gap:6px;flex-basis:100%}
+  .gwp-chip,.gwp-chip:visited{min-height:38px;padding:0 10px;font-size:14px;gap:4px}
+  .gwp-imotif{width:200px;top:-24px;right:-50px;opacity:.5}
+  .gwp-intro{padding:18px 16px 14px}
+}
+/* a launch with its own site in the search: PRISM Analysis leads */
+.gwp-sitev{margin:6px 0 0;font-size:14px;line-height:1.45;color:var(--gwp-ink);flex-basis:100%}
+.gwp-sitev .gwp-k{display:inline;margin:0 6px 0 0;font-size:11px}
+
+/* ---------------------------------------------------------------- PRISM Analysis | Property Data: tabs under the development's name
+   The same tabs, in the same place (directly under the name), on both views. */
+.gwp-tabs{display:flex;gap:4px;border-bottom:1px solid var(--gwp-line);width:100%;text-align:left;overflow-x:auto;scrollbar-width:none}
+.gwp-tabs::-webkit-scrollbar{display:none}
+.gwp-tab,.gwp-tab:visited{display:inline-flex;align-items:center;gap:8px;padding:10px 4px 12px;margin:0 14px -1px 0;border-bottom:2px solid transparent;font-size:16px;font-weight:600;white-space:nowrap;color:var(--gwp-muted)!important;text-decoration:none!important}
+.gwp-tab .gwp-mark{width:20px;height:20px;border-radius:5px}
+.gwp-tab:hover{color:var(--gwp-ink)!important}
+.gwp-tab[aria-current="page"]{color:var(--gwp-ink)!important;border-bottom-color:var(--gwp-ink)}
+.gwp-tab:focus-visible{outline:2px solid var(--gwp-blue);outline-offset:2px}
+.lg-hero .gwp-tabs{justify-self:stretch}
+.lg-hero:not(.lg-hero--ans) .gwp-tabs{justify-content:center;max-width:680px;justify-self:center}
+
+/* ---------------------------------------------------------------- Property Data: one compact verdict line, and links back to PRISM */
+.gwp-band{padding:0 var(--gw-gutter,22px) 26px}
+.gwp-band .lg-wrap{gap:0}
+.gwp-vl,.gwp-vl:visited{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--gwp-line);border-radius:14px;background:#fff;color:var(--gwp-ink)!important;text-decoration:none!important;min-width:0}
+.gwp-vl:hover{border-color:#C9CDD6}
+.gwp-vl:focus-visible{outline:2px solid var(--gwp-blue);outline-offset:3px}
+.gwp-vl .gwp-mark{width:28px;height:28px;border-radius:7px}
+.gwp-vlt{flex:1;min-width:0;font-size:15px;line-height:1.4}
+.gwp-vlr{color:var(--gwp-body);font-variant-numeric:tabular-nums}
+.gwp-vlgo{flex:none;font-size:15px;font-weight:600;color:var(--gwp-blue);white-space:nowrap}
+.gwp-back2,.gwp-back2:visited{display:inline-flex;align-items:center;gap:6px;margin-top:4px;font-size:14px;font-weight:600;color:var(--gwp-blue)!important;text-decoration:none!important;justify-self:start}
+.gwp-back2 .gwp-mark{width:18px;height:18px;border-radius:5px}
+.gwp-back2:hover span{text-decoration:underline}
+@media (max-width:719px){
+  .gwp-vl{flex-wrap:wrap;gap:8px 10px;padding:12px 14px}
+  .gwp-vlt{flex-basis:calc(100% - 40px);font-size:14.5px}
+  .gwp-vlgo{flex-basis:100%;padding-left:38px}
+}
+
+/* ---------------------------------------------------------------- the PRISM Analysis view: the site's own container width */
+.gwp-page{background:#fff;padding:18px var(--gw-gutter,22px) 72px;overflow-x:clip}
+.gwp-wrap{max-width:var(--kpt-wrap,1360px);margin:0 auto;display:grid;gap:24px;min-width:0}
+/* the shared header: breadcrumb, name and details, the actions, then the tabs; the facets sit lightly beside the name */
+.gwp-head{position:relative;isolation:isolate;display:grid;gap:14px;padding-top:2px}
+.gwp-hero{position:absolute;z-index:-1;top:-24px;right:400px;width:320px;height:auto;opacity:.75;pointer-events:none;-webkit-mask-image:radial-gradient(115% 115% at 32% 62%,#000 52%,transparent 86%);mask-image:radial-gradient(115% 115% at 32% 62%,#000 52%,transparent 86%)}
+.gwp-crumb{display:flex;flex-wrap:wrap;gap:6px;font-size:13.5px;color:var(--gwp-muted)}
+.gwp-crumb a{color:var(--gwp-blue);text-decoration:none}
+.gwp-crumb a:hover{text-decoration:underline}
+.gwp-ttl{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 24px}
+.gwp-ht{display:grid;gap:6px;min-width:0}
+.gwp-h1{margin:0;font-size:48px;line-height:1.04;font-weight:700;letter-spacing:-.028em;text-wrap:balance}
+.gwp-meta{margin:0;font-size:15.5px;color:var(--gwp-muted)}
+.gwp-acts{display:flex;flex-wrap:wrap;gap:8px}
+.gwp-acts .lg-btn{min-height:42px;padding:8px 18px;font-size:15px}
+.gwp-brand{display:flex;align-items:center;gap:14px}
+.gwp-bname{margin:0;font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.gwp-bname span{font-size:15px;font-weight:600;letter-spacing:0}
+.gwp-bline{margin:3px 0 0;font-size:14px;color:var(--gwp-muted)}
+.gwp-brand--sm{gap:10px}
+.gwp-brand--sm .gwp-mark{width:28px;height:28px;border-radius:7px}
+.gwp-brand--sm p{margin:0;font-size:15px;font-weight:600;color:var(--gwp-ink)}
+.gwp-brand--sm p b{font-weight:700}
+.gwp-brand--sm p span{font-weight:400;color:var(--gwp-muted)}
+.gwp-sumh{scroll-margin-top:120px}
+
+/* the section bar: Summary · P · R · I · S · M · Sources, held under the site header while scrolling (one line on phones) */
+.gwp-bar2{position:sticky;top:var(--gw-navh,58px);z-index:30;margin:18px calc(-1 * var(--gw-gutter,22px)) 22px;padding:0 var(--gw-gutter,22px);background:rgba(255,255,255,.96);-webkit-backdrop-filter:saturate(180%) blur(16px);backdrop-filter:saturate(180%) blur(16px);border-bottom:1px solid var(--gwp-line)}
+.gwp-bar2-in{max-width:var(--kpt-wrap,1360px);margin:0 auto;display:flex;align-items:center;gap:6px;padding:9px 0;overflow-x:auto;scrollbar-width:none}
+.gwp-bar2-in::-webkit-scrollbar{display:none}
+.gwp-bar2 button{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 14px;border:1px solid var(--gwp-line);border-radius:999px;background:#fff;font:inherit;font-size:14px;font-weight:500;color:var(--gwp-ink);cursor:pointer;white-space:nowrap}
+.gwp-bar2 button b{font-weight:700}
+.gwp-bar2 button.dim{color:var(--gwp-muted)}
+.gwp-bar2 button:hover{border-color:#C9CDD6}
+.gwp-bar2 button[aria-current="true"]{background:var(--gwp-ink);border-color:var(--gwp-ink);color:#fff}
+.gwp-bar2 button:focus-visible{outline:2px solid var(--gwp-blue);outline-offset:2px}
+
+/* the opening: Verdict, Why and Watch out beside the Reveal and its evidence */
+.gwp-card{border:1px solid var(--gwp-line);border-radius:22px;background:#fff;box-shadow:0 1px 2px rgba(22,33,62,.04),0 12px 32px rgba(22,33,62,.06);min-width:0}
+.gwp-open{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);grid-template-areas:"v r" "w r" "o r";grid-template-rows:auto auto 1fr;column-gap:40px;padding:32px 36px;align-items:start}
+.gwp-v{grid-area:v;display:grid;gap:10px}
+.gwp-why{grid-area:w;margin-top:24px}
+.gwp-wo{grid-area:o;margin-top:22px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;border-top:1px solid var(--gwp-line);padding-top:20px}
+.gwp-rvl{grid-area:r;min-width:0}
+.gwp-vk{margin:0;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gwp-muted)}
+.gwp-vh{margin:0;font-size:36px;line-height:1.12;font-weight:700;letter-spacing:-.022em;text-wrap:balance}
+.gwp-why h3,.gwp-wo h3{margin:0 0 8px;font-size:16px;font-weight:700;letter-spacing:-.005em}
+.gwp-why ul,.gwp-wo ul{margin:0;padding:0;list-style:none;display:grid;gap:7px}
+.gwp-why li,.gwp-wo li{font-size:16.5px;line-height:1.5;color:var(--gwp-body);padding-left:16px;position:relative;max-width:62ch}
+.gwp-why li::before,.gwp-wo li::before{content:"";position:absolute;left:0;top:.68em;width:6px;height:6px;border-radius:50%;background:var(--gwp-ink);opacity:.35}
+.gwp-wi{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--gwp-gold);color:var(--gwp-gold);font-weight:700;font-size:14px}
+.gwp-wo li::before{background:var(--gwp-gold);opacity:.7}
+.gwp-ev{display:grid;gap:14px;padding:22px 24px;border:1px solid var(--gwp-line);border-radius:18px;background:#fff}
+.gwp-rv{margin:-4px 0 0;font-size:22px;line-height:1.3;font-weight:700;letter-spacing:-.01em;color:var(--gwp-ink);font-variant-numeric:tabular-nums}
+.gwp-figs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.gwp-fig{display:grid;gap:3px;align-content:start;padding:14px 16px;border:1px solid var(--gwp-line);border-radius:14px;min-width:0}
+.gwp-fig b{font-size:40px;line-height:1.02;font-weight:700;letter-spacing:-.025em;color:var(--gwp-ink);font-variant-numeric:tabular-nums}
+.gwp-fig b em{font-style:normal;font-size:20px;font-weight:600;letter-spacing:0}
+.gwp-fig span{font-size:14.5px;color:var(--gwp-ink)}
+.gwp-fig small{font-size:12.5px;line-height:1.4;color:var(--gwp-muted)}
+.gwp-evk{margin:4px 0 0;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gwp-muted)}
+.gwp-bars{display:grid;gap:10px;min-width:0}
+.gwp-bar{display:grid;grid-template-columns:minmax(90px,150px) minmax(0,1fr) 3em;align-items:center;gap:14px}
+.gwp-bn{font-size:14px;font-weight:600;color:var(--gwp-ink);overflow-wrap:anywhere}
+.gwp-bar.peer .gwp-bn{font-weight:500;color:var(--gwp-body)}
+.gwp-bt{height:12px;border-radius:6px;background:var(--gwp-soft);overflow:hidden}
+.gwp-bt i{display:block;height:100%;border-radius:6px;background:var(--gwp-ink)}
+.gwp-bar.peer .gwp-bt i{background:#A3AAB8}
+.gwp-bv{font-size:20px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.gwp-bar.peer .gwp-bv{font-weight:600;color:var(--gwp-body)}
+.gwp-evn{margin:0;font-size:13px;line-height:1.45;color:var(--gwp-muted);border-top:1px solid var(--gwp-line);padding-top:10px}
+
+/* the other layers: Hidden connections, Supporting context and the Next buyer question */
+.gwp-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.gwp-box{border:1px solid var(--gwp-line);border-radius:18px;padding:20px 24px;background:#fff}
+.gwp-sec{display:grid;gap:10px;align-content:start}
+.gwp-hc{margin:0;padding:0;list-style:none;display:grid;gap:12px}
+.gwp-hc li{border-left:2px solid var(--gwp-gold);padding:2px 0 2px 14px}
+.gwp-hc p{margin:0;font-size:16px;line-height:1.5;color:var(--gwp-ink)}
+.gwp-hc small{display:block;font-size:13px;color:var(--gwp-muted);margin-top:2px}
+.gwp-q p:not(.gwp-k){margin:0;font-size:21px;line-height:1.35;font-weight:600;color:var(--gwp-ink);max-width:40ch;text-wrap:balance}
+.gwp-sizes,.gwp-sizes:visited{justify-self:start;margin-top:6px;display:inline-flex;align-items:center;gap:6px;min-height:40px;font-size:15.5px;font-weight:600;color:var(--gwp-blue)!important;text-decoration:none!important}
+.gwp-sizes:hover{text-decoration:underline!important}
+
+/* the five dimensions: one row each with its headline finding; each opens in place beneath its own row */
+.gwp-sech{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:6px 24px}
+.gwp-sech h2{margin:0;font-size:28px;font-weight:700;letter-spacing:-.02em}
+.gwp-all{margin:0;display:flex;align-items:center;gap:8px;color:var(--gwp-line)}
+.gwp-all button{border:0;background:none;padding:6px 2px;min-height:40px;font:inherit;font-size:15px;font-weight:600;color:var(--gwp-blue);cursor:pointer}
+.gwp-all button:hover{text-decoration:underline}
+.gwp-all button:focus-visible{outline:2px solid var(--gwp-blue);outline-offset:2px;border-radius:4px}
+.gwp-ds{display:grid;gap:10px}
+.gwp-dim{border:1px solid var(--gwp-line);border-radius:16px;background:#fff;scroll-margin-top:120px;overflow:hidden}
+.gwp-dim.open{border-color:#C7D3E6}
+.gwp-dimh{margin:0;font-size:inherit;font-weight:400}
+.gwp-dimb{font-weight:400;display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1.2fr) auto;align-items:center;gap:16px;width:100%;padding:16px 20px;border:0;background:#fff;font:inherit;text-align:left;color:var(--gwp-ink);cursor:pointer}
+.gwp-dim.open .gwp-dimb{background:#FAFBFD;border-bottom:1px solid var(--gwp-line)}
+.gwp-dimb:hover{background:#FAFBFD}
+.gwp-dimb:focus-visible{outline:2px solid var(--gwp-blue);outline-offset:-3px;border-radius:16px}
+.gwp-pl{display:grid;place-items:center;width:34px;height:34px;border-radius:9px;border:1px solid var(--gwp-line);background:var(--gwp-soft);font-size:15px;font-weight:700;color:var(--gwp-ink)}
+.gwp-dn{display:grid;gap:2px;min-width:0}
+.gwp-dn b{font-size:16.5px;font-weight:700}
+.gwp-dn small{font-size:13.5px;font-weight:400;line-height:1.35;color:var(--gwp-muted)}
+.gwp-hl{display:grid;gap:2px;min-width:0}
+.gwp-hl b{font-size:16px;font-weight:700;line-height:1.3;color:var(--gwp-ink);font-variant-numeric:tabular-nums}
+.gwp-hl small{font-size:13px;font-weight:400;line-height:1.35;color:var(--gwp-muted)}
+.gwp-dim--none .gwp-pl,.gwp-dim--none .gwp-dn b{color:var(--gwp-muted)}
+.gwp-dim--none .gwp-hl b{font-weight:600;color:var(--gwp-muted)}
+.gwp-chev{width:30px;height:30px;border-radius:50%;border:1px solid var(--gwp-line);display:grid;place-items:center}
+.gwp-chev::before{content:"";width:8px;height:8px;border-right:1.8px solid var(--gwp-ink);border-bottom:1.8px solid var(--gwp-ink);transform:translateY(-2px) rotate(45deg);transition:transform .15s}
+.gwp-dim.open .gwp-chev::before{transform:translateY(2px) rotate(225deg)}
+.gwp-dimp{display:grid;gap:14px;padding:18px 20px 22px 70px}
+.gwp-dimp[hidden]{display:none}
+.gwp-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.gwp-ml{margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 32px}
+.gwp-m{display:grid;gap:4px;min-width:0;align-content:start}
+.gwp-m dt{font-size:13.5px;line-height:1.4;color:var(--gwp-muted)}
+.gwp-m dd{margin:0;display:grid;gap:3px}
+.gwp-m b{font-size:19px;line-height:1.3;color:var(--gwp-ink);font-variant-numeric:tabular-nums}
+.gwp-md{font-size:14px;line-height:1.45;color:var(--gwp-body)}
+.gwp-ms,.gwp-mn{font-size:12.5px;line-height:1.4;color:var(--gwp-muted)}
+.gwp-evl,.gwp-evl:visited{justify-self:start;font-size:13.5px;font-weight:600;color:var(--gwp-blue)!important;text-decoration:none!important;margin-top:2px}
+.gwp-evl:hover{text-decoration:underline!important}
+.gwp-tag{display:inline-block;font-size:11.5px;font-weight:600;letter-spacing:.02em;border:1px solid var(--gwp-line);border-radius:999px;padding:0 7px;margin-left:4px;color:var(--gwp-body);vertical-align:1px}
+.gwp-d{border-bottom:1px solid var(--gwp-line)}
+.gwp-d>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px;min-height:60px;padding:8px 0}
+.gwp-d>summary::-webkit-details-marker{display:none}
+.gwp-d>summary::after{content:"+";font-size:22px;color:var(--gwp-muted);width:18px;text-align:center}
+.gwp-d[open]>summary::after{content:"–"}
+.gwp-d>summary:focus-visible{outline:2px solid var(--gwp-blue);outline-offset:2px;border-radius:4px}
+.gwp-pn{font-size:17px;font-weight:600;color:var(--gwp-ink)}
+.gwp-src{scroll-margin-top:120px}
+.gwp-din{display:grid;gap:14px;padding:4px 0 22px}
+.gwp-sl,.gwp-lim{margin:0;padding-left:18px;display:grid;gap:8px;font-size:13.5px;line-height:1.5;color:var(--gwp-body);max-width:110ch}
+.gwp-sl small{display:block;color:var(--gwp-muted);font-size:12.5px}
+.gwp-sl a{color:var(--gwp-blue)}
+.gwp-foot{margin:0;font-size:13.5px;line-height:1.5;color:var(--gwp-muted)}
+/* where next: Property Data and the calculator (a clean start) */
+.gwp-next{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.gwp-nx,.gwp-nx:visited{display:grid;gap:4px;padding:16px 20px;border:1px solid var(--gwp-line);border-radius:16px;background:#fff;text-decoration:none!important;color:var(--gwp-ink)!important}
+.gwp-nx:hover{border-color:#C9CDD6}
+.gwp-nx b{font-size:16.5px;color:var(--gwp-blue)}
+.gwp-nx span{font-size:14px;color:var(--gwp-muted)}
+.gwp-nx:focus-visible{outline:2px solid var(--gwp-blue);outline-offset:2px}
+
+@media (max-width:1023px){
+  .gwp-open{grid-template-columns:minmax(0,1fr);grid-template-areas:"v" "r" "w" "o";grid-template-rows:none;padding:28px}
+  .gwp-rvl{margin-top:22px}
+  .gwp-hero{right:-10px;width:280px;opacity:.6}
+}
+@media (max-width:719px){
+  .gwp-page{padding-top:12px}
+  .gwp-wrap{gap:20px}
+  .gwp-head{gap:10px}
+  .gwp-h1{font-size:34px}
+  .gwp-meta{font-size:14.5px}
+  .gwp-acts .lg-btn{min-height:38px;padding:6px 14px;font-size:14px}
+  .gwp-hero{width:170px;top:-10px;right:-30px;opacity:.5}
+  .gwp-tab,.gwp-tab:visited{font-size:15px;margin-right:10px}
+  .gwp-bar2{margin:12px calc(-1 * var(--gw-gutter,16px)) 16px;top:var(--gw-navh,52px)}
+  .gwp-bar2-in{padding:7px 0;gap:5px}
+  .gwp-bar2 button{min-height:32px;padding:0 11px;font-size:13.5px}
+  .gwp-bar2 button.dim{display:none}
+  .gwp-open{padding:20px 18px}
+  .gwp-vh{font-size:27px}
+  .gwp-why li,.gwp-wo li{font-size:16px}
+  .gwp-ev{padding:16px}
+  .gwp-rv{font-size:19px}
+  .gwp-fig{padding:12px}
+  .gwp-fig b{font-size:30px}
+  .gwp-fig b em{font-size:16px}
+  .gwp-bar{grid-template-columns:minmax(0,1fr) 2.6em;gap:6px 10px}
+  .gwp-bn{grid-column:1/-1;font-size:13.5px}
+  .gwp-bv{font-size:18px}
+  .gwp-two{grid-template-columns:minmax(0,1fr)}
+  .gwp-box{padding:18px}
+  .gwp-q p:not(.gwp-k){font-size:18px}
+  .gwp-sech h2{font-size:23px}
+  .gwp-sech{align-items:flex-start}
+  .gwp-dimb{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"l n c" "l h c";gap:4px 12px;padding:14px}
+  .gwp-pl{grid-area:l;align-self:start}
+  .gwp-dn{grid-area:n}
+  .gwp-dn small{display:none}
+  .gwp-hl{grid-area:h}
+  .gwp-chev{grid-area:c;align-self:center}
+  .gwp-dimp{padding:14px 14px 18px}
+  .gwp-ml{grid-template-columns:minmax(0,1fr)}
+  .gwp-next{grid-template-columns:minmax(0,1fr)}
+}
+/* print: the whole report, every dimension open */
+@media print{
+  .gwp-dimp[hidden]{display:grid!important}
+  .gwp-bar2,.gwp-hero,.gwp-all,.gwp-chev,.gwp-next,.gwp-tabs{display:none!important}
+}
