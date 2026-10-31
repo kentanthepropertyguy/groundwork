@@ -314,6 +314,10 @@
         const w = F.withHomes(st, list, o.order === 'sell' ? 'sell' : 'buy');
         ['homes', 'whose', 'owned', 'soldOwners', 'loans', 'plan', 'order', 'sale'].forEach((k) => { st[k] = w[k]; }); if (w.homeJoint !== undefined) st.homeJoint = w.homeJoint;
         st.homesL = list;
+        // Priority 1 (31 Oct 2026): the valuation is asked only for an HDB resale flat ("HDB valuation"). Typed there and then another property type chosen, the hidden
+        // entry was still counted (stamp duty and cash on a valuation the page no longer shows, and the payment stages fell back to two rows). It is kept, not cleared,
+        // so choosing HDB resale flat again brings it back.
+        if (st.pkind !== 'hdb') st.valuation = null;
       }
       return st;
     }
@@ -517,8 +521,19 @@
     root.__f3Settled = () => tmr === null;
     function changed(now) { if (!started) { started = true; track('tool_started', {}); } clearTimeout(tmr); tmr = setTimeout(recalc, now === true ? 0 : 120); }
     function showErrs() { $$('[data-err]').forEach((el) => { const t = errs[el.dataset.err] || ''; el.hidden = !t; el.textContent = t; const f = el.closest('.f3-f'); if (f) f.classList.toggle('bad', !!t); }); }
+    // Priority 1 (31 Oct 2026): a figure that can't be worked out never leaves the previous answer on screen. The card says so and the schedule and
+    // details are cleared, so nothing from an earlier set of entries can be read as this one's; the next change recalculates as usual.
     function recalc() {
       tmr = null;
+      try { recalc0(); } catch (e) {
+        try { root.console && root.console.error && root.console.error('Groundwork calculator', e); } catch (er) { /* ignore */ }
+        view = null; pdfBtn(false); setBar('');
+        out.innerHTML = '<p class="f3-eb">Check the figures</p><p class="f3-note" data-calc-err>These entries couldn’t be worked out. Change any figure to try again, or start a new calculation.</p>';
+        ['[data-sched]', '[data-bd-out]', '[data-fund-out]', '[data-buf-out]', '[data-cmp-out]'].forEach((s) => { const el = q(s); if (el) el.innerHTML = ''; });
+        ['[data-schsec]', '[data-bd]', '[data-cmp]', '[data-scn]'].forEach((s) => { const el = q(s); if (el) el.hidden = true; });
+      }
+    }
+    function recalc0() {
       raw = Object.assign({}, offPage, readAll()); const st = stOf(raw);
       if (page !== 'sell' && (raw['sale.oCash'] || raw['sale.oCpf']) && saleSig !== null && saleSig !== ['sale.price', 'sale.loan', 'sale.cpfRefund'].map((k) => raw[k] || '').join('|')) { raw['sale.oCash'] = ''; raw['sale.oCpf'] = ''; put('sale.oCash', ''); put('sale.oCpf', ''); }
       saleSig = ['sale.price', 'sale.loan', 'sale.cpfRefund'].map((k) => raw[k] || '').join('|');
@@ -1422,6 +1437,9 @@
     const allOpen = () => { const a = q('[data-allpay]'); return !!a && !a.hidden; };
     function allPay(o) { const a = q('[data-allpay]'); if (!a) return; a.hidden = !o; $$('[data-to-sched]').forEach((x) => { x.textContent = o ? 'Hide payments' : 'All payments'; x.classList.toggle('up', o); x.setAttribute('aria-expanded', String(o)); }); }
     root.__f3AllPay = allPay;
+    // the card's "All payments" link (it opens and closes the full schedule) and the schedule itself: one copy for the full answer and for the card waiting on a question
+    function wireSched() { $$('[data-to-sched]', out).forEach((x) => { x.textContent = allOpen() ? 'Hide payments' : 'All payments'; x.classList.toggle('up', allOpen()); x.setAttribute('aria-expanded', String(allOpen())); x.addEventListener('click', (e) => { e.preventDefault(); const o = !allOpen(); allPay(o); if (o) { try { q('[data-allpay]').scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (er) { /* ignore */ } } }); }); }
+    const schedHtml = (st, s) => (P ? P.scheduleTableHtml(s) : '') + '<p class="f3-fine">' + (F.engineKind(st.pkind) === 'completed' ? 'Option terms can differ; your option sets the actual amounts and dates.' : 'Construction stages fall due as building progresses; the developer’s notice sets each date.') + '</p>';
     // the judgement on the cost card: which hurdle most buyers meet at this price (upfront, or the income the instalment needs), and that stamp duty is in the cash
     function judgeCost(st, c, inc, mine, up) { const t = judgeCostText(st, c, inc, mine, up); return t ? '<p class="f3-fact">' + t + '</p>' : ''; }
     function judgeCostText(st, c, inc, mine, up) {
@@ -1438,7 +1456,8 @@
       const und = !!st.noDate || !st.otp;
       if (P && P.setUndated) P.setUndated(und, F.engineKind(st.pkind));
       const sched = q('[data-sched]'), bd = q('[data-bd]'), cmp = q('[data-cmp]'), lh = q('[data-loan-hint]'), ob = q('.f3-opts [data-open-borrow]');
-      const quiet = () => { view = null; pdfBtn(false); const sec0 = q('[data-schsec]'); if (sec0) sec0.hidden = true; [bd, cmp].forEach((x) => { x.hidden = true; }); if (ob) ob.hidden = true; if (lh) lh.textContent = ''; setBar(''); sched.innerHTML = ''; if (scnD) scnD.hidden = true; };
+      // the sections an answer fills are emptied as well as hidden, so nothing from the previous entries is left behind in the page (Priority 1, 31 Oct 2026)
+      const quiet = () => { view = null; pdfBtn(false); const sec0 = q('[data-schsec]'); if (sec0) sec0.hidden = true; [bd, cmp].forEach((x) => { x.hidden = true; }); ['[data-bd-out]', '[data-cmp-out]'].forEach((k) => { const el = q(k); if (el) el.innerHTML = ''; }); if (ob) ob.hidden = true; if (lh) lh.textContent = ''; setBar(''); sched.innerHTML = ''; if (scnD) scnD.hidden = true; };
       // V3.12 Stage 2 (Ken, 27 Oct 2026): whether an existing home still has a loan sets the loan limit (and the monthly commitments), so no cash, CPF or instalment is shown
       // until it is answered for every home; nothing is assumed (Stage 1 showed the figures with no loan counted, and said so)
       const un = st.price > 0 ? unanswered(st) : [];
@@ -1448,7 +1467,18 @@
         // stamp duty does not depend on the loan, so it is shown meanwhile (who owns what is already answered)
         const c0 = isHdb(st) ? F.costHdb(st) : F.cost(st), dutyRow = c0 && c0.state === 'ok' ? row('Stamp duty', $(c0.duty), '<span data-duty-line>' + (c0.absd > 0 ? $(c0.bsd) + ' BSD + ' + $(c0.absd) + ' ABSD ' + Math.round(c0.absdRate * 100) + '%' : 'Buyer’s stamp duty') + '</span>, whatever the loan') : '';
         out.innerHTML = '<p class="f3-eb">For a ' + $(st.price) + ' ' + KN[st.pkind] + '</p>' + row('Cash you’ll need', '<span class="f3-dash">—</span>', 'Waiting for one answer: is a home loan still being paid on ' + nm + '?') + row('CPF used', '<span class="f3-dash">—</span>', '') + row('Monthly instalment', '<span class="f3-dash">—</span>', 'On the ' + (isHdb(st) ? 'loan' : 'bank loan')) + dutyRow;
-        quiet(); paintFund(st); paintBuf(st, null); return;
+        quiet();
+        // Priority 1 (31 Oct 2026): the payment schedule depends only on the price, the property type and the dates, like the stamp duty, so it stays on screen
+        // while the loan question waits (it used to disappear). Which payments are yours and which the bank's follows the answer; no loan is assumed.
+        if (!isHdb(st) && c0 && c0.state === 'ok') {
+          const s0 = F.schedule(Object.assign({}, st, { noDate: und }));
+          if (s0.ok) {
+            out.insertAdjacentHTML('beforeend', nextHtml(st)); wireSched();
+            const sec = q('[data-schsec]'); if (sec) sec.hidden = false; const sn = q('[data-sch-note]'); if (sn) sn.textContent = (und ? 'Add the option date for exact dates.' : 'From the option on ' + day(st.otp) + '.') + ' Which payments are yours and which the bank’s follows once the home-loan question above is answered.';
+            sched.innerHTML = schedHtml(st, s0);
+          }
+        }
+        paintFund(st); paintBuf(st, null); return;
       }
       if (isHdb(st)) { paintHdb(st, quiet); return; }
       const c = F.cost(st); paintChips(st, c);
@@ -1496,7 +1526,7 @@
         (alerts.length ? '<ul class="f3-alert">' + alerts.map((x) => '<li>' + x + '</li>').join('') + '</ul>' : '') + stagesHtml(st, c);
       $$('[data-open-bd]', out).forEach((x) => x.addEventListener('click', () => { const d = q('[data-bd]'); if (!d) return; d.open = true; const m = q('[data-bd-mort]'); try { (m || d).scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { /* ignore */ } }));
       $$('[data-open-fund]', out).forEach((x) => x.addEventListener('click', () => { allPay(true); fundD.open = true; try { fundD.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { /* ignore */ } }));
-      $$('[data-to-sched]', out).forEach((x) => { x.textContent = allOpen() ? 'Hide payments' : 'All payments'; x.classList.toggle('up', allOpen()); x.setAttribute('aria-expanded', String(allOpen())); x.addEventListener('click', (e) => { e.preventDefault(); const o = !allOpen(); allPay(o); if (o) { try { q('[data-allpay]').scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (er) { /* ignore */ } } }); });
+      wireSched();
       bd.hidden = false; cmp.hidden = false; if (ob) ob.hidden = false;
       q('[data-bd-sum]').textContent = 'Where the ' + $(up) + ' goes' + (bucOf(st, c) ? ', and the instalment' : '');
       { const ln = (t, ctx, v, cls) => '<div class="f3-rl' + (cls ? ' ' + cls : '') + '"><div><span>' + t + '</span>' + (ctx ? '<small>' + ctx + '</small>' : '') + '</div><b>' + v + '</b></div>';
@@ -1508,7 +1538,7 @@
       // ---- the payment schedule: every payment and when it is due (counted from the option until a date is given) ----
       const s = F.schedule(Object.assign({}, st, { noDate: und }));
       const sec = q('[data-schsec]'); if (sec) sec.hidden = !s.ok; const sn = q('[data-sch-note]'); if (sn) sn.textContent = (und ? 'Add the option date for exact dates.' : 'From the option on ' + day(st.otp) + '.') + ' You pay the first ' + $(c.down) + ' of these (your down payment) and the stamp duty; the bank pays the remaining ' + $(c.loan) + ' as each stage falls due.';
-      sched.innerHTML = s.ok ? (P ? P.scheduleTableHtml(s) : '') + '<p class="f3-fine">' + (F.engineKind(st.pkind) === 'completed' ? 'Option terms can differ; your option sets the actual amounts and dates.' : 'Construction stages fall due as building progresses; the developer’s notice sets each date.') + '</p>' : '';
+      sched.innerHTML = s.ok ? schedHtml(st, s) : '';
       view = { tool: 'cost', st: st, c: c, inc: inc, mine: mine, up: up, judge: judgeCostText(st, c, inc, mine, up), s: s, und: und, incBasis: incBasis, pl: pl, bucUp: bucUp };
       pdfBtn(true);
       paintFund(st); paintBuf(st, c);
@@ -1605,7 +1635,9 @@
       const u = unanswered(st); if (!u.length || !out) return;
       const nm = u.map((i) => 'Existing home ' + (i + 1)).join(' and ');
       if (!(st.price > 0)) return;
-      out.insertAdjacentHTML('beforeend', '<p class="f3-note" data-home-ask>' + nm + ': still paying a home loan on ' + (u.length > 1 ? 'them' : 'it') + '? Not answered yet. It sets the loan limit and your monthly commitments, so the figures wait for it. <button type="button" class="f3-lnk" data-open-who>Answer it</button></p>');
+      // under the figures that wait for it, above the payments that don't (Priority 1, 31 Oct 2026)
+      const nx = out.querySelector('.f3-next'), h = '<p class="f3-note" data-home-ask>' + nm + ': still paying a home loan on ' + (u.length > 1 ? 'them' : 'it') + '? Not answered yet. It sets the loan limit and your monthly commitments, so the figures wait for it. <button type="button" class="f3-lnk" data-open-who>Answer it</button></p>';
+      if (nx) nx.insertAdjacentHTML('beforebegin', h); else out.insertAdjacentHTML('beforeend', h);
     }
     box.addEventListener('click', (e) => { if (e.target.closest('[data-open-who]')) openChip('who');
       const lm = e.target.closest('[data-ltv-more]'); if (lm) { ltvOpen = !ltvOpen; lm.setAttribute('aria-expanded', String(ltvOpen)); const w = lm.parentElement.querySelector('[data-ltv-why]'); if (w) w.hidden = !ltvOpen; }
