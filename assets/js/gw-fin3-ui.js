@@ -212,7 +212,10 @@
       '<p class="f3-fine f3-chipnote">Usual assumptions. Tap one to change it.</p><div class="f3-scrim" data-scrim hidden></div>' +
       panel('pkind', 'The property', seg('pkind', '', [['new', 'New launch'], ['ec', 'New EC'], ['completed', 'Completed private'], ['resaleec', 'Resale EC'], ['hdb', 'HDB resale flat'], ['bto', 'New HDB flat (BTO)']], 'new', { aria: 'Buying' }) + '<div data-when="pkind:bto">' + seg('btoRoom', 'Flat size', [['2', '2-room Flexi'], ['3', '3-room'], ['4', '4-room or bigger']], '4') + '</div>', { hold: true }) +
       panel('who', 'Who’s buying', peopleHtml('pay') + homeListHtml() + loansHtml()) +
-      panel('loan', 'The loan', '<div data-when="pkind:hdb,bto">' + seg('hdbLoan', 'Loan from', [['hdb', 'HDB loan'], ['bank', 'Bank loan']], 'hdb') + '</div>' + money('loanAmt', 'Loan amount', { ph: 'the most allowed' }) + '<p class="f3-loanline"><span data-loan-hint></span></p>' +
+      panel('loan', 'The loan', '<div data-when="pkind:hdb,bto">' + seg('hdbLoan', 'Loan from', [['hdb', 'HDB loan'], ['bank', 'Bank loan']], 'hdb') + '</div>' + seg('loanMode', 'How to size the loan', [['income', 'From my income'], ['manual', 'I know my loan']], 'income', { when: 'lmode:1' }) +
+        '<p class="f3-fine" data-when="lmi:1">Sized from the ages and incomes under Who is buying, by MAS’s income test, within the loan limit. Without them, the most the limit allows is shown. Type a % or an amount below to choose your own.</p>' +
+        '<div class="f3-g2" data-when="lman:1"><div data-when="lpct:1">' + numf('loanPct', 'Loan, % of the price', '%', { ph: 'e.g. 75' }) + '</div>' + money('loanAmt', 'Loan amount', { ph: 'the most allowed' }) + '</div><input type="hidden" data-k="loanBy" data-t="hid">' +
+        '<p class="f3-loanline"><span data-loan-hint></span></p>' +
         '<div data-when="pkind:hdb">' + money('valuation', 'HDB valuation', { opt: true, ph: 'if known', hint: 'The loan is on the lower of the price and the valuation; any amount above the valuation is cash.' }) + '</div>') +
       panel('rate', 'Interest and tenure', '<div class="f3-g2">' + numf('ratePct', 'Interest rate', '% a year', { ph: '4' }) + numf('years', 'Loan tenure', 'years', { ph: '30' }) + '</div>') +
       panel('cpf', 'CPF', money('cpf', 'CPF to use', { ph: '0 if none', hint: 'Ordinary Account savings you will put in. Leave it blank to see the least cash you need.' })) +
@@ -300,7 +303,7 @@
         ratePct: N('ratePct', L.ratePct.min, L.ratePct.max, 'Enter a rate between ' + L.ratePct.min + '% and ' + L.ratePct.max + '%.'), years: N('years', L.years.min, L.years.max, 'Enter between ' + L.years.min + ' and ' + L.years.max + ' years.'),
         saveMo: M('saveMo'), cpfMo: M('cpfMo'), oaMo: [0, 1].map((k) => M('oaMo.' + k)), upFlatMo: M('upFlatMo'), bfCash: M('bfCash'), bfCpf: M('bfCpf'),
         flatPrice: M('flatPrice'), flatVal: M('flatVal'), reserve: M('reserve'), bkind: o.bkind || 'private', hdbLoan: o.hdbLoan || 'hdb', btoRoom: o.btoRoom || '4', household: o.household || 'family', lease: N('lease', 1, 99, 'Enter the remaining lease, 1 to 99 years.'), akind: o.akind || 'new', price: M('price'), valuation: M('valuation'), loanAmt: M('loanAmt'),
-        pkind: o.pkind || 'new', otp: o.otp || null, noDate: o.noDate === '1', top: o.top || null, csc: o.csc || null, completion: o.completion || null,
+        pkind: o.pkind || 'new', loanMode: o.loanMode === 'manual' ? 'manual' : 'income', otp: o.otp || null, noDate: o.noDate === '1', top: o.top || null, csc: o.csc || null, completion: o.completion || null,
         order: o.order || 'none', saleWhen: o.saleWhen || 'unsure', saleMonth: N('saleMonth', 1, 120, 'Between 1 and 120 months.'), saleDate: o.saleDate || null, saleAfter: N('saleAfter', 0, 120, 'Between 0 and 120 months.'), refund: o.refund === '1', rent: M('rent') };
       if (st.cover95 === null && o.cover95 === 'unsure') st.cover95 = null;
       // V3.4: bonus and commission are typed as a year's total and rent as a month's; the engines take one monthly figure (bonus / 12 + rent), as before
@@ -350,11 +353,14 @@
     }
     // ---- the conditional parts: shown only when they apply ----
     function flags(o, st) {
+      const hdbK = st.pkind === 'hdb' || st.pkind === 'bto';
       const res = [st.p[0].res, st.n === 2 ? st.p[1].res : null];
       const ownBoth = page === 'borrow' && st.n === 2 && ['1', '2'].indexOf(o['p.0.own']) >= 0 && ['1', '2'].indexOf(o['p.1.own']) >= 0 ? '1' : '0';
       return { ownBoth: ownBoth, selling: page === 'pay' && st.plan === 'sell' ? '1' : '0', 'sale.type': page === 'pay' ? (st.sale && st.sale.type === 'private' ? 'private' : 'hdb') : (o['sale.type'] || 'hdb'), n: String(st.n), own: st.homes >= 1 ? '1' : '0', ownTwo: st.n === 2 && st.homes >= 1 ? '1' : '0', mixed: st.n === 2 && st.homes === 0 && (page !== 'borrow' || st.ownKnown) && (res[0] === 'SC') !== (res[1] === 'SC') && (res[0] === 'SC' || res[1] === 'SC') ? '1' : '0',
         saleCount: st.homes >= 1 && (st.order === 'sell' || (st.order === 'buy' && st.saleWhen !== 'unsure')) ? '1' : '0',
-        hdbl: st.bkind === 'hdb' && st.hdbLoan !== 'bank' ? '1' : '0', bpriv: st.bkind === 'private' ? '1' : '0' };
+        hdbl: st.bkind === 'hdb' && st.hdbLoan !== 'bank' ? '1' : '0', bpriv: st.bkind === 'private' ? '1' : '0',
+        // Loan selection (Ken, 1 Nov 2026): a private home's loan is sized from income or typed (a % or an amount, kept in step); an HDB flat keeps its amount field
+        lmode: hdbK ? '0' : '1', lmi: !hdbK && o.loanMode !== 'manual' ? '1' : '0', lman: '1', lpct: !hdbK ? '1' : '0' };
     }
     function applyWhen(o, st) {
       const fl = flags(o, st);
@@ -505,6 +511,7 @@
         if (H && (!raw['sale.price'] || raw['sale.price'] === '') && (page === 'upgrade' || !raw['sale.type'] || raw['sale.type'] === 'hdb')) { raw['sale.price'] = (Math.round((H.lo + H.hi) / 2 / 1000) * 1000).toLocaleString('en-US'); raw['sale.type'] = 'hdb'; }
         const bh = q('[data-blockhint]'); if (bh && H) { bh.hidden = false; bh.innerHTML = 'Flats like yours at Blk ' + esc(H.block) + ' ' + esc(titleCase(H.street)) + ' sold for ' + $(H.lo) + '–' + $(H.hi) + ' (' + H.n + ' recent resales). <a href="../../journey/worth/#hdb" data-gw-go="worth-hdb">See them</a>'; }
       }
+      if (page === 'pay' && raw.loanMode === undefined && raw.loanAmt) raw.loanMode = 'manual';
       Object.keys(raw).forEach((k) => put(k, raw[k]));
       // V3.4: entries another page asked for (the sale on the borrowing page, the income on the selling page...) are kept as they are, so a hand-off never loses them
       Object.keys(raw).forEach((k) => { if (!fieldsOf(k).length) offPage[k] = raw[k]; });
@@ -520,6 +527,16 @@
     let tmr = null, started = false, completed = false, last = null;
     root.__f3Settled = () => tmr === null;
     function changed(now) { if (!started) { started = true; track('tool_started', {}); } clearTimeout(tmr); tmr = setTimeout(recalc, now === true ? 0 : 120); }
+    // Loan selection (Ken, 1 Nov 2026). "I know my loan": the % of the price and the amount stay in step. The one typed last is kept when the price changes (a % keeps its
+    // %, an amount keeps its dollars) and the other follows. "From my income": nothing typed, so GW_FIN3.cost sizes the loan (the income-supported loan within the limit).
+    function syncLoan(o) {
+      if (o.pkind === 'hdb' || o.pkind === 'bto') return;
+      if (o.loanMode !== 'manual') { if ((o.loanAmt || '') !== '' || (o.loanPct || '') !== '') { o.loanAmt = ''; o.loanPct = ''; put('loanAmt', ''); put('loanPct', ''); } return; }
+      const P = mv(o.price); if (!(P > 0)) return;
+      if (o.loanBy === 'pct') { const v = nv(o.loanPct), a = v === null ? '' : Number.isNaN(v) || v < 0 || v > 100 ? '' : fmt(P * v / 100); o.loanAmt = a; put('loanAmt', a); }
+      else { const a = mv(o.loanAmt), t = a === null || Number.isNaN(a) ? '' : String(Math.round(a / P * 1000) / 10); o.loanPct = t; put('loanPct', t); }
+    }
+    box.addEventListener('input', (e) => { const k = e.target && e.target.dataset ? e.target.dataset.k : ''; if (k === 'loanPct' || k === 'loanAmt') { put('loanBy', k === 'loanPct' ? 'pct' : 'amt'); const pk = q('[data-k="pkind"]'); if (!pk || ['hdb', 'bto'].indexOf(segVal(pk)) < 0) put('loanMode', 'manual'); } }, true);
     function showErrs() { $$('[data-err]').forEach((el) => { const t = errs[el.dataset.err] || ''; el.hidden = !t; el.textContent = t; const f = el.closest('.f3-f'); if (f) f.classList.toggle('bad', !!t); }); }
     // Priority 1 (31 Oct 2026): a figure that can't be worked out never leaves the previous answer on screen. The card says so and the schedule and
     // details are cleared, so nothing from an earlier set of entries can be read as this one's; the next change recalculates as usual.
@@ -534,7 +551,8 @@
       }
     }
     function recalc0() {
-      raw = Object.assign({}, offPage, readAll()); const st = stOf(raw);
+      raw = Object.assign({}, offPage, readAll()); if (page === 'pay') syncLoan(raw); const st = stOf(raw);
+      if (page === 'pay' && raw.loanMode === 'manual' && st.pkind !== 'hdb' && st.pkind !== 'bto') { const pv = nv(raw.loanPct); if (Number.isNaN(pv)) errs.loanPct = 'Type a percentage, e.g. 75.'; else if (pv !== null && (pv < 0 || pv > 100)) errs.loanPct = 'Enter between 0% and 100%.'; }
       if (page !== 'sell' && (raw['sale.oCash'] || raw['sale.oCpf']) && saleSig !== null && saleSig !== ['sale.price', 'sale.loan', 'sale.cpfRefund'].map((k) => raw[k] || '').join('|')) { raw['sale.oCash'] = ''; raw['sale.oCpf'] = ''; put('sale.oCash', ''); put('sale.oCpf', ''); }
       saleSig = ['sale.price', 'sale.loan', 'sale.cpfRefund'].map((k) => raw[k] || '').join('|');
       [0, 1].forEach((k) => { if (raw['p.' + k + '.bonusYr'] !== undefined || raw['p.' + k + '.rentMo'] !== undefined) raw['p.' + k + '.variable'] = st.p[k] && typeof st.p[k].variable === 'number' ? String(st.p[k].variable) : ''; });
@@ -588,7 +606,7 @@
     function paintSheet(k) {
       const el = q('[data-optl="' + k + '"]'); if (!el || !lastSt) return;
       const groups = (page === 'borrow' ? optsBorrow : page === 'sell' ? optsSell : page === 'upgrade' ? optsUp : optsPay)(k, lastSt) || [];
-      el.innerHTML = groups.map((g) => (g.title ? '<p class="f3-og">' + g.title + '</p>' : '') + g.opts.map((o) => '<button type="button" class="f3-opt' + (o.sel ? ' sel' : '') + '" data-opt="' + esc(JSON.stringify({ set: o.set || {}, act: o.act || '' })) + '" aria-pressed="' + !!o.sel + '"><span class="f3-ol">' + o.label + '</span>' + (o.sub ? '<span class="f3-os">' + o.sub + '</span>' : '') + '</button>').join('')).join('') +
+      el.innerHTML = groups.map((g) => (g.title ? '<p class="f3-og">' + g.title + '</p>' : '') + g.opts.map((o) => '<button type="button" class="f3-opt' + (o.sel ? ' sel' : '') + (o.req ? ' req' : '') + '" data-opt="' + esc(JSON.stringify({ set: o.set || {}, act: o.act || '' })) + '" aria-pressed="' + !!o.sel + '"' + (o.req ? ' data-opt-req' : '') + '><span class="f3-ol">' + o.label + '</span>' + (o.sub ? '<span class="f3-os">' + o.sub + '</span>' : '') + '</button>').join('')).join('') +
         (groups.note ? '<p class="f3-onote">' + groups.note + '</p>' : '');
       if (groups.some((g) => g.opts.some((o) => o.sel && o.act === 'cust'))) { const cu = q('[data-cust="' + k + '"]'); if (cu && !cu.classList.contains('f3-hold')) cu.hidden = false; }
     }
@@ -647,10 +665,18 @@
         return g;
       }
       if (k === 'loan') {
-        const P = c0.price, rule = c0.ruleLoan, list = [{ label: 'The most allowed', sub: pc(rule / P) + ' of the price · ' + $(rule), set: { loanAmt: '' }, sel: c0.typed === null }];
-        [0.7, 0.6, 0.5].filter((x) => P * x < rule - 1).forEach((x) => { const c = alt({ loanAmt: Math.round(P * x) }); if (c) list.push({ label: Math.round(x * 100) + '% of the price', sub: $(c.loan) + ' · upfront ' + $(up(c)) + ' · ' + $(c.monthly) + '/mo', set: { loanAmt: fmt(P * x) }, sel: c0.typed !== null && Math.abs(c0.typed - P * x) < 1 }); });
-        list.push(cust('Another amount'));
-        return [{ opts: list }];
+        const P = c0.price, man = c0.typed !== null, inc = alt({ loanAmt: null });
+        const incSub = !inc ? '' : inc.incomeCap !== null ? (inc.incomeCap < inc.ruleLoan - 0.5 ? 'About ' + $(inc.loan) + ' (' + pc(inc.loan / P) + '), what your income supports' : pc(inc.ltv) + ' · ' + $(inc.loan) + ': the limit, which your income supports') : 'Needs your age and income. Until then ' + pc(inc.ltv) + ' · ' + $(inc.loan) + ', the most the limit allows';
+        const g = [{ title: 'How to size the loan', opts: [{ label: 'From my income', sub: incSub, set: { loanMode: 'income', loanAmt: '', loanPct: '', loanBy: '' }, sel: !man },
+          { label: 'I know my loan', sub: man ? (c0.overLimit ? 'Requested: ' + pc(c0.typed / P) + ' (' + $(c0.typed) + ') · Applicable limit: ' + pc(c0.ltv) + ' (' + $(c0.loan) + ')' : pc(c0.typed / P) + ' · ' + $(c0.typed)) : 'A % of the price or an amount', set: { loanMode: 'manual' }, act: 'cust', sel: man && !c0.overLimit, req: man && c0.overLimit }] }];
+        // quick choices: the four highest within this buyer's limit (the earlier 70/60/50% and the MAS tiers 75/55/45/35%), and 75% when the limit is lower, which says
+        // the limit is what would be used (a request, never shown as allowed)
+        const lim = inc ? inc.ltv : 0.75, within = [0.75, 0.7, 0.6, 0.55, 0.5, 0.45, 0.35].filter((x) => x <= lim + 1e-9).slice(0, 4);
+        const tiers = (lim < 0.75 - 1e-9 ? [0.75] : []).concat(within).map((x) => { const c = alt({ loanAmt: Math.round(P * x) }); if (!c) return null;
+          // Ken (1 Nov 2026): a percentage above the limit, when it is the one asked for, is shown as requested (no tick), with the limit beside it; the limit is what is used
+          const picked = man && Math.abs(c0.typed - P * x) < 1;
+          return { label: Math.round(x * 100) + '% of the price', sub: c.overLimit ? (picked ? 'Requested: ' + Math.round(x * 100) + '% · Applicable limit: ' + pc(c.ltv) + ' (' + $(c.loan) + ' is used)' : 'Above your ' + pc(c.ltv) + ' limit: ' + $(c.loan) + ' would be used') : $(c.loan) + ' · upfront ' + $(up(c)) + ' · ' + $(c.monthly) + '/mo', set: { loanMode: 'manual', loanPct: String(Math.round(x * 100)), loanBy: 'pct', loanAmt: fmt(P * x) }, sel: picked && !c.overLimit, req: picked && c.overLimit }; }).filter(Boolean);
+        return g.concat([{ title: 'Or choose a loan', opts: tiers }, { opts: [{ label: 'Another % or amount', act: 'cust', set: { loanMode: 'manual' } }] }]);
       }
       if (k === 'rate') {
         const r0 = st.ratePct !== null ? st.ratePct : 4;
@@ -738,7 +764,7 @@
       if (page === 'pay') {
         set('pkind', { new: 'New launch', ec: 'New EC', completed: 'Completed private', resaleec: 'Resale EC', hdb: 'HDB resale flat', bto: 'New HDB flat (BTO)' }[st.pkind] || 'New launch');
         set('who', (st.n === 2 ? 'Two buyers' : RN[st.p[0].res] || 'Singapore Citizen') + ', ' + (st.homes === 0 ? 'first home' : st.homes === 1 ? 'own a home' : 'own 2+ homes') + (L0.total > 0 ? ', loans' : ''));
-        set('loan', !c && st.price > 0 && unanswered(st).length ? 'Loan' : c && c.state === 'ok' && c.hdb ? (c.typed === 0 ? 'No loan' : (c.lender === 'hdb' ? 'HDB loan' : 'Bank loan') + (c.typed !== null ? ' ' + $s(c.loan) : '')) : c && c.state === 'ok' ? (c.typed !== null ? 'Loan ' + $s(c.loan) : pc(c.ltv) + ' loan') : (st.pkind === 'hdb' || st.pkind === 'bto' ? (st.hdbLoan === 'bank' ? 'Bank loan' : 'HDB loan') : '75% loan'));
+        set('loan', !c && st.price > 0 && unanswered(st).length ? 'Loan' : c && c.state === 'ok' && c.hdb ? (c.typed === 0 ? 'No loan' : (c.lender === 'hdb' ? 'HDB loan' : 'Bank loan') + (c.typed !== null ? ' ' + $s(c.loan) : '')) : c && c.state === 'ok' ? (c.typed !== null ? 'Loan ' + $s(c.loan) : c.incomeCap !== null && c.incomeCap < c.ruleLoan - 0.5 ? 'Loan from income' : pc(c.ltv) + ' loan') : (st.pkind === 'hdb' || st.pkind === 'bto' ? (st.hdbLoan === 'bank' ? 'Bank loan' : 'HDB loan') : '75% loan'));
         set('rate', (c && c.state === 'ok' ? c.ratePct : st.ratePct !== null ? st.ratePct : 4) + '% · ' + (c && c.state === 'ok' ? c.years : (st.years || 30)) + ' years');
         set('cpf', st.cpf > 0 ? 'CPF ' + $s(st.cpf) : 'No CPF');
       }
@@ -802,6 +828,21 @@
     }
     // a short term left at TOP (an older buyer's default tenure): the figure rests on how the bank sets the tenure, so it is never shown as a normal arrangement (Ken, 28 Oct 2026)
     const shortTerm = (c, b) => !!b && b.yearsLeft < 10;
+    // Loan selection (Ken, 1 Nov 2026): where this loan comes from, in one line. A loan typed is the buyer's choice (checked against the limit, and against income
+    // once age and income are in); "From my income" is GW_FIN3.cost's own sizing (MAS's income test at the higher of the rate and 4%, within the limit). Never an approval.
+    function loanSrc(st, c) {
+      if (c.hdb) return '';
+      const test = Math.max(4, c.ratePct), tested = c.ratePct < 4 ? 'tested at ' + test + '% (MAS), your instalment at ' + c.ratePct + '%' : 'tested at ' + test + '% (MAS)';
+      const missing = (() => { const bs = st.p.slice(0, st.n), m = []; if (bs.some((x) => typeof x.age !== 'number')) m.push('age'); if (!bs.some((x) => x.fixed > 0 || x.variable > 0)) m.push('income'); if ((st.loans || []).some((l) => l && l.type !== 'home' && !(l.amt > 0))) m.push('each loan’s monthly repayment'); return m; })();
+      const add = missing.length ? ' <button type="button" class="f3-lnk" data-go="' + (missing[0] === 'age' ? 'p.0.age' : 'p.0.fixed') + '">Add ' + missing.join(' and ').replace(/ and ([^ ]+)$/, ' and $1') + '</button>' : '';
+      let t;
+      if (c.typed !== null) t = c.overLimit ? '' : 'Your chosen loan, ' + pc(c.loan / c.price) + ' of the price: ' + (c.incomeCap !== null ? (c.aboveIncome ? 'more than your income supports.' : 'within the limit and what your income supports (' + tested + '). Not a bank approval.') : 'within the ' + pc(c.ltv) + ' limit, not checked against income.' + add);
+      else if (st.loanMode === 'manual') t = 'Type a % or an amount in Loan. Until then, the most the ' + pc(c.ltv) + ' limit allows.';
+      else if (c.incomeCap !== null) t = c.incomeCap < c.ruleLoan - 0.5 ? 'Sized from your income: about ' + $(c.loan) + ', ' + tested + ', within the ' + pc(c.ltv) + ' limit. Not a bank approval.' : 'Your income supports the most the ' + pc(c.ltv) + ' limit allows (' + tested + '). Not a bank approval.';
+      // with nothing about the buyers entered, the chips' "Usual assumptions" line already says so (the V3.3 word budget): said once something is entered
+      else t = st.p.slice(0, st.n).some((x) => typeof x.age === 'number' || x.fixed > 0 || x.variable > 0) || st.homes >= 1 ? 'The most the ' + pc(c.ltv) + ' limit allows. Not sized from your income yet.' + add : '';
+      return t ? '<br><span class="f3-cond" data-loan-src>' + t + '</span>' : '';
+    }
     function instSub(st, c) {
       const b = bucOf(st, c), rate = c.ratePct + '%';
       // the alternative financing route (a longer tenure at the lower MAS limit, so a smaller loan): its own loan, limit and instalment, never mixed into the figure above
@@ -1405,10 +1446,13 @@
         typeof st.ratePct === 'number' ? '' : c.ratePct + '% is MAS’s stress-test rate, used because no rate was chosen. Today’s packages are lower.',
         shortTerm(c, b) ? (b.endsBeforeTop ? 'The repayment start at TOP is an assumption made so a figure can be shown; the ' + pc(c.ltv) + ' limit is unchanged. ' : '') + 'With few years left by TOP, banks may set the tenure differently, for example by when your loan must end by age 65. That is for your bank to confirm.' : ''].filter(Boolean);
       // each construction milestone: what the bank pays and the estimated monthly mortgage from the month after it (Ken, 28 Oct 2026)
-      const L = b.stageLoans || {}, ids = Object.keys(L), when = (m) => monAfter(st, m) || 'month ' + m + ' after the option';
-      const ms = ids.length ? '<p class="f3-sgt">Each stage the bank pays</p><div class="f3-tw"><table class="f3-cmp f3-mst"><thead><tr><th scope="col">Stage</th><th scope="col" class="n">Bank pays</th><th scope="col" class="n">Monthly mortgage</th></tr></thead><tbody>' +
-        ids.map((id) => '<tr><th scope="row">' + (SHORT_S[id] || id) + '<small>from ' + when(b.stageMonths[id] + 1) + (topEst(st) && (id === 'top' || id === 'csc') ? ' (est.)' : '') + '</small></th><td class="n">' + $(L[id]) + '</td><td class="n">' + (b.after[id] > 0.5 ? $(b.after[id]) : '–') + '</td></tr>').join('') +
-        '</tbody></table></div><p class="f3-fine">' + (b.endsBeforeTop ? 'Illustration: no instalment before TOP, as above.' : 'Each instalment repays what the bank has paid so far, until TOP; from the month after TOP, the whole loan.') + (topEst(st) ? ' Stage months are typical points in a ' + b.top + '-month build, not the developer’s dates.' : ' Stage months are typical points before your TOP date.') + '</p>' : '';
+      // Loan selection (Ken, 1 Nov 2026): every construction stage is listed, $0 where the bank has not paid yet; the instalment after a stage is the engine's own
+      // (bank.after for a stage it pays, bank.dueAt for one it doesn't), so the figures are those of the validated path
+      const L = b.stageLoans || {}, M = b.stageMonths || {}, ids = BUILD_IDS.filter((id) => typeof M[id] === 'number'), when = (m) => monAfter(st, m) || 'month ' + m + ' after the option';
+      const dueAfter = (id) => (b.after && typeof b.after[id] === 'number' ? b.after[id] : b.dueAt ? b.dueAt(M[id] + 1) : 0);
+      const ms = ids.length ? '<p class="f3-sgt">Each stage: what the bank pays, and the monthly mortgage after it</p><div class="f3-tw"><table class="f3-cmp f3-mst"><thead><tr><th scope="col">Stage</th><th scope="col" class="n">Bank pays</th><th scope="col" class="n">Monthly mortgage</th></tr></thead><tbody>' +
+        ids.map((id) => { const d = dueAfter(id); return '<tr data-mst="' + id + '"><th scope="row">' + (SHORT_S[id] || id) + '<small>from ' + when(M[id] + 1) + (topEst(st) && (id === 'top' || id === 'csc') ? ' (est.)' : '') + '</small></th><td class="n">' + $(L[id] || 0) + '</td><td class="n">' + $(d > 0.5 ? d : 0) + '</td></tr>'; }).join('') +
+        '</tbody></table></div><p class="f3-fine">' + (b.endsBeforeTop ? 'Illustration: no instalment before TOP, as above.' : 'Each instalment repays what the bank has paid so far, until TOP; from the month after TOP, the whole loan. $0: you pay that stage, the bank has not started.') + (topEst(st) ? ' Stage months are typical points in a ' + b.top + '-month build, not the developer’s dates.' : ' Stage months are typical points before your TOP date.') + '</p>' : '';
       return '<div data-bd-mort><p class="f3-sgt">The monthly instalment</p><div class="f3-rcpt">' + rows + '</div>' + ms + '<ul class="f3-fine f3-bufl">' + notes.map((x) => '<li>' + x + '</li>').join('') + '</ul></div>';
     }
     const bankWhen = (b) => (b.firstStage === 'top' ? 'At TOP and CSC' : b.firstStage === 'csc' ? 'At CSC' : 'From the ' + STG[b.firstStage] + ' stage to CSC');
@@ -1485,15 +1529,20 @@
       return '<p class="f3-note" data-home-ask>' + (a.length ? homeNames(a) + ': still paying a home loan on ' + (a.length > 1 ? 'them' : 'it') + '? Not answered yet. ' : '') +
         (b.length ? homeNames(b) + ': the monthly repayment on ' + (b.length > 1 ? 'their loans isn’t' : 'its loan isn’t') + ' entered yet; the bank’s income test counts it. ' : '') + tail + ' <button type="button" class="f3-lnk" data-open-who>Answer it</button></p>';
     }
-    function illusHtml(st, un) {
-      const I = illusOf(st, un), A = I.A, B = I.B, open = I.open, one = open.length === 1;
+    // the illustrated answers, labelled: one column each (the same columns on the card and in the breakdown below it)
+    function illusCols(I) {
+      const A = I.A, B = I.B, open = I.open, one = open.length === 1; if (!A) return [];
+      const eq = B && Math.abs(A.loan - B.loan) < 1 && Math.abs(A.cash - B.cash) < 1 && Math.abs(A.monthly - B.monthly) < 1 && Math.abs(A.cpfUsed - B.cpfUsed) < 1;
+      return !open.length ? [['With the loan still being paid', A]] : eq ? [['Either answer', A]] : [[one ? 'If fully paid' : 'If none has a loan', A]].concat(B ? [[one ? 'If still being paid' : 'If one still has a loan', B]] : []);
+    }
+    function illusHtml(st, un, I) {
+      const A = I.A, B = I.B, open = I.open;
       const ask = askHtml(st, un, open.length ? 'It sets the loan limit, so the loan, cash, CPF and instalment are shown for ' + (B ? 'each answer' : 'the answer that can be worked out') + ' below: illustrations, not loan offers.' : 'Until then the loan, cash, CPF and instalment below are illustrations, not loan offers.');
       if (!A) return ask;
-      const eq = B && Math.abs(A.loan - B.loan) < 1 && Math.abs(A.cash - B.cash) < 1 && Math.abs(A.monthly - B.monthly) < 1 && Math.abs(A.cpfUsed - B.cpfUsed) < 1;
-      const cols = !open.length ? [['With the loan still being paid', A]] : eq ? [['Either answer', A]] : [[one ? 'If fully paid' : 'If none has a loan', A]].concat(B ? [[one ? 'If still being paid' : 'If one still has a loan', B]] : []);
+      const cols = illusCols(I);
       const tr = (k, f) => '<tr><th scope="row">' + k + '</th>' + cols.map((x) => '<td>' + f(x[1]) + '</td>').join('') + '</tr>';
       return ask + '<div class="f3-tw"><table class="f3-cmp f3-illt" data-illus><thead><tr><th></th>' + cols.map((x) => '<th scope="col">' + x[0] + '</th>').join('') + '</tr></thead><tbody>' +
-        tr('Loan limit', (c) => pc(c.ltv) + '<br><small>of the price</small>') + tr('Bank loan', (c) => $(c.loan)) + tr('Cash you’ll need', (c) => $(c.cash)) + tr('CPF used', (c) => $(c.cpfUsed)) +
+        tr('Loan limit', (c) => pc(c.ltv) + '<br><small>of the price</small>') + tr('Bank loan', (c) => $(c.loan) + (c.overLimit ? '<br><small>you asked ' + $(c.typed) + '; ' + pc(c.ltv) + ' is the most</small>' : '')) + tr('Cash you’ll need', (c) => $(c.cash)) + tr('CPF used', (c) => $(c.cpfUsed)) +
         tr('Monthly instalment' + (F.engineKind(st.pkind) !== 'completed' ? ', from TOP' : ''), (c) => $(c.monthly) + '<br><small>' + c.ratePct + '%, ' + yrs(c.years) + '</small>') + '</tbody></table></div>' +
         (open.length && !B ? '<p class="f3-fine">With a loan still being paid on one of these homes, the limit depends on whose home it is: answer for each home to see it.</p>' : '') +
         '<p class="f3-fine">Stamp duty included in the cash. The rate and tenure are the ones above; your age, income and bank decide the actual loan.</p>';
@@ -1517,6 +1566,14 @@
     /* ---- Payments and dates ---- */
     const fundD = q('[data-fund]'), fundOut = q('[data-fund-out]'), scnD = q('[data-scn]');
     let lastF = null;
+    // where the money goes, and the instalment (the "Where the money goes" breakdown), for one answer: the confirmed one, or an illustration while a home-loan answer waits
+    function bdHtml(st, c, inc) {
+      const up = c.down + c.duty;
+      const ln = (t, ctx, v, cls) => '<div class="f3-rl' + (cls ? ' ' + cls : '') + '"><div><span>' + t + '</span>' + (ctx ? '<small>' + ctx + '</small>' : '') + '</div><b>' + v + '</b></div>';
+        return '<div class="f3-rcpt">' + ln('Cash, at least', pc(c.minCash) + ' of the price. MAS rule.', $(c.cashMin)) + (c.cov > 0 ? ln('Above the valuation', 'The bank lends on the lower of price and valuation; the gap is cash.', $(c.cov)) : '') +
+          ln('Cash or CPF', pc(c.flex / c.price) + ' of the price', $(c.flex)) + ln('Buyer’s stamp duty', 'Usually paid in cash first; CPF may reimburse it if eligible, or pay it directly for some purchases under construction', $(c.bsd)) + (c.absd > 0 ? ln('ABSD ' + Math.round(c.absdRate * 100) + '%', 'Additional buyer’s stamp duty; ' + absdSub(c).charAt(0).toLowerCase() + absdSub(c).slice(1), $(c.absd)) : '') +
+          ln('From you, cash and CPF', 'Cash ' + $(c.cash) + ' + CPF ' + $(c.cpfUsed), $(up), 'tot') + ln('Bank loan', pc(c.loan / c.price) + ' of the price', $(c.loan)) + '</div><p class="f3-fine">Legal and valuation fees are not included.</p>' + mortHow(st, c, inc, ln);
+    }
     function paintPay(st) {
       const und = !!st.noDate || !st.otp;
       if (P && P.setUndated) P.setUndated(und, F.engineKind(st.pkind));
@@ -1532,14 +1589,18 @@
         paintChips(st, null); quiet();
         // stamp duty does not depend on the loan (who owns what is already answered)
         const c0 = isHdb(st) ? F.costHdb(st) : F.cost(st), ok0 = !!(c0 && c0.state === 'ok'), dutyRow = ok0 ? row('Stamp duty', $(c0.duty), '<span data-duty-line>' + (c0.absd > 0 ? $(c0.bsd) + ' BSD + ' + $(c0.absd) + ' ABSD ' + Math.round(c0.absdRate * 100) + '%' : 'Buyer’s stamp duty') + '</span>, whatever the loan') : '';
-        const s0 = !isHdb(st) && ok0 ? F.schedule(Object.assign({}, st, { noDate: und })) : null, g0 = s0 && s0.ok ? grossOf(st, s0, c0) : null;
+        const s0 = !isHdb(st) && ok0 ? F.schedule(Object.assign({}, st, { noDate: und })) : null, g0 = s0 && s0.ok ? grossOf(st, s0, c0) : null, I0 = g0 ? illusOf(st, un) : null;
         if (!g0) {   // an HDB flat (its stages depend on the loan's lender) or a schedule that can't be drawn: as before
           out.innerHTML = '<p class="f3-eb">For a ' + $(st.price) + ' ' + KN[st.pkind] + '</p>' + row('Cash you’ll need', '<span class="f3-dash">—</span>', 'Waiting for: ' + pendingWords(st, un)) + row('CPF used', '<span class="f3-dash">—</span>', '') + row('Monthly instalment', '<span class="f3-dash">—</span>', 'On the ' + (isHdb(st) ? 'loan' : 'bank loan')) + dutyRow;
           paintFund(st); paintBuf(st, null); return;
         }
         out.innerHTML = '<p class="f3-eb">For a ' + $(st.price) + ' ' + KN[st.pkind] + '</p>' +
           row('Known upfront payments', '<span data-known-up>' + $(g0.upfront) + '</span>', (g0.buc ? 'Booking fee, the S&P payment and stamp duty, ' : 'Option fee, exercise fee and stamp duty, ') + g0.upWhen + '. The same whatever the loan.', 'f3-ar1') +
-          dutyRow + illusHtml(st, un) + grossHtml(g0);
+          dutyRow + illusHtml(st, un, I0) + grossHtml(g0);
+        // Loan selection (Ken, 1 Nov 2026): the full breakdown (where the money goes, each stage the bank pays and the mortgage after it, from TOP, the CSC alternative)
+        // for each illustrated answer, one after another, labelled; never as a confirmed figure. A loan answered Yes without its repayment has one column only.
+        { const cols = illusCols(I0); if (cols.length) { bd.hidden = false; q('[data-bd-sum]').textContent = 'Where the money goes, and the instalment' + (cols.length > 1 ? ', for each answer' : '') + ' (illustration)';
+          q('[data-bd-out]').innerHTML = '<p class="f3-note" data-bd-illus>Illustrations, not loan offers: the home-loan question above is not answered yet.</p>' + cols.map((x) => '<div data-bd-col><p class="f3-sgt">' + x[0] + '</p>' + bdHtml(st, x[1], null) + '</div>').join(''); } }
         wireSched();
         const sec = q('[data-schsec]'); if (sec) sec.hidden = false; const sn = q('[data-sch-note]'); if (sn) sn.textContent = (und ? 'Add the option date for exact dates.' : 'From the option on ' + day(st.otp) + '.') + ' Which payments are yours and which the bank’s follows once the home-loan question above is answered.';
         sched.innerHTML = schedHtml(st, s0);
@@ -1572,7 +1633,7 @@
         incRow = row('Income needed', '<span class="f3-approx">≈</span> ' + r100(inc.income) + '<small>/mth</small>', mine ? (c.aboveIncome ? '<b class="f3-warn">Your income supports about ' + $r(c.incomeCap) + '</b>, so a bank would lend less' : 'Your income covers it') : basis);
       } else if (inc && inc.state === 'out') incRow = row('Income needed', '<span class="f3-dash">—</span>', 'More than an income can support at this age and tenure');
       const alerts = [];
-      if (c.overLimit) alerts.push('Above the loan limit: banks lend up to ' + $(c.ruleLoan) + ' here (' + pc(c.ltv) + ' of the price), so that is used.');
+      if (c.overLimit) alerts.push('Above the loan limit. You asked for ' + $(c.typed) + ' (' + pc(c.typed / c.price) + '). With ' + (c.homeLoans ? (c.homeLoans === 1 ? 'one housing loan' : 'two or more housing loans') + ' already' : 'your entries') + ', banks lend up to ' + pc(c.ltv) + ' here (' + $(c.ruleLoan) + '), so that is used: the ' + pc(c.typed / c.price) + ' loan is not available.');
       if (st.years && c.years < st.years) alerts.push('You chose ' + yrs(st.years) + '. Most banks end a loan by age ' + root.GW_RULES.bankLtv.maturityAge + ', so ' + yrs(c.years) + ' is used here. MAS allows up to ' + root.GW_RULES.bankLtv.maxTenure.private + ' years for a private home; a bank may decide differently.');
       if (c.lower) { const c0 = F.cost(Object.assign({}, st, { years: null })), more = c0.state === 'ok' && !c0.lower ? (c.down + c.duty) - (c0.down + c0.duty) : 0;
         // Ken (28 Oct 2026): when a loan ending by 65 would, counted from the bank's first payment, end before TOP, the scenario shown is the longer tenure at the lower limit; say why
@@ -1588,17 +1649,14 @@
       out.innerHTML = '<p class="f3-eb">For a ' + $(c.price) + ' ' + KN[st.pkind] + '</p>' + upRow +
         row('Cash you’ll need', bucUp ? $(c.cash) : '<span data-answer>' + $(c.cash) + '</span>', (bucUp ? 'In all, with stamp duty. ' + cashSub : cashSub + '<br>' + dutyTxt) + absdLine, bucUp ? 'f3-ar2' : 'f3-ar1') +
         row(cpfLbl, $(c.cpfUsed), cpfSub, 'f3-ar2') +
-        row('Monthly instalment', $(c.monthly), instSub(st, c) + ltvLines(st, c) + (bucOf(st, c) ? INDIC_BUC : INDIC)) + incRow + judgeCost(st, c, inc, mine, up) +
+        row('Monthly instalment', $(c.monthly), instSub(st, c) + ltvLines(st, c) + loanSrc(st, c) + (bucOf(st, c) ? INDIC_BUC : INDIC)) + incRow + judgeCost(st, c, inc, mine, up) +
         (alerts.length ? '<ul class="f3-alert">' + alerts.map((x) => '<li>' + x + '</li>').join('') + '</ul>' : '') + stagesHtml(st, c);
       $$('[data-open-bd]', out).forEach((x) => x.addEventListener('click', () => { const d = q('[data-bd]'); if (!d) return; d.open = true; const m = q('[data-bd-mort]'); try { (m || d).scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { /* ignore */ } }));
       $$('[data-open-fund]', out).forEach((x) => x.addEventListener('click', () => { allPay(true); fundD.open = true; try { fundD.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { /* ignore */ } }));
       wireSched();
       bd.hidden = false; cmp.hidden = false; if (ob) ob.hidden = false;
       q('[data-bd-sum]').textContent = 'Where the ' + $(up) + ' goes' + (bucOf(st, c) ? ', and the instalment' : '');
-      { const ln = (t, ctx, v, cls) => '<div class="f3-rl' + (cls ? ' ' + cls : '') + '"><div><span>' + t + '</span>' + (ctx ? '<small>' + ctx + '</small>' : '') + '</div><b>' + v + '</b></div>';
-        q('[data-bd-out]').innerHTML = '<div class="f3-rcpt">' + ln('Cash, at least', pc(c.minCash) + ' of the price. MAS rule.', $(c.cashMin)) + (c.cov > 0 ? ln('Above the valuation', 'The bank lends on the lower of price and valuation; the gap is cash.', $(c.cov)) : '') +
-          ln('Cash or CPF', pc(c.flex / c.price) + ' of the price', $(c.flex)) + ln('Buyer’s stamp duty', 'Usually paid in cash first; CPF may reimburse it if eligible, or pay it directly for some purchases under construction', $(c.bsd)) + (c.absd > 0 ? ln('ABSD ' + Math.round(c.absdRate * 100) + '%', 'Additional buyer’s stamp duty; ' + absdSub(c).charAt(0).toLowerCase() + absdSub(c).slice(1), $(c.absd)) : '') +
-          ln('From you, cash and CPF', 'Cash ' + $(c.cash) + ' + CPF ' + $(c.cpfUsed), $(up), 'tot') + ln('Bank loan', pc(c.loan / c.price) + ' of the price', $(c.loan)) + '</div><p class="f3-fine">Legal and valuation fees are not included.</p>' + mortHow(st, c, inc, ln); }
+      q('[data-bd-out]').innerHTML = bdHtml(st, c, inc);
       paintCmp(st, c);
       setBar(bucUp ? '<span class="f3-bm"><span class="k">Needed upfront</span><b>' + $(pl.upfront) + '</b><span class="s">then ' + $(pl.later) + ' · ' + $(c.monthly) + '/mo from TOP</span></span>' : '<span class="f3-bm"><span class="k">Cash you’ll need</span><b>' + $(c.cash) + '</b><span class="s">' + $(c.monthly) + '/mo · CPF ' + $(c.cpfUsed) + '</span></span>');
       // ---- the payment schedule: every payment and when it is due (counted from the option until a date is given) ----
