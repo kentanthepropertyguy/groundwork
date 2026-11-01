@@ -8,7 +8,7 @@ Each scenario is entered the way a buyer would (typing the price, the chips and 
   * no script error, no NaN or undefined, no sideways scroll
 Scenarios: first home (price and loan changed); second home with a loan, price before and after the homes; second home fully paid;
 two buyers, before and after the price; two buyers with a loan; residency changed and changed back; new launch; completed home;
-property type switched and back; first, second and first again; the home-loan question unanswered (the schedule stays, the figures wait);
+property type switched and back; first, second and first again; the home-loan question unanswered (the schedule stays; since 1 Nov 2026 the loan-dependent figures show only as labelled illustrations, answer-first-render.py);
 an HDB valuation left behind when another property type is chosen (not counted, and counted again for the HDB flat); rapid changes."""
 import json, os, pathlib, re, socket, subprocess, sys, time
 from playwright.sync_api import sync_playwright
@@ -127,9 +127,10 @@ try:
         check(f'{tag} first, second, first again: the original result returns', rv == first, [k for k in rv if rv[k] != first[k]])
         # 10 the home-loan question not answered yet: the figures wait and say why; the schedule (price and dates only) stays
         pg, errs, st = run(ctx, [['price', '1,800,000']] + H1 + [['close']]); f = pg.evaluate(FACTS)
-        check(f'{tag} home-loan question unanswered: cash, CPF and instalment wait, and the card says for what', f['dash'] >= 3 and 'Waiting for one answer' in f['text'] and 'Answer it' in f['text'], f['text'][:200])
-        check(f'{tag} home-loan question unanswered: the payment schedule stays (every construction stage), with the next payments on the card', f['schsec'] is False and all(any(s in r for r in f['rows']) for s in BUILD) and f['next'], [f['schsec'], len(f['rows']), f['next']])
-        check(f'{tag} home-loan question unanswered: no cash or loan figure is assumed', 'Cash you’ll need —' in f['text'] or re.search(r'Cash you’ll need.{0,120}—', f['text']), f['text'][:200])
+        # Ken, 1 Nov 2026 (answer-first): no CONFIRMED cash, CPF or instalment while the question waits; they show only side by side, labelled as illustrations
+        check(f'{tag} home-loan question unanswered: no confirmed cash, CPF or instalment, the card says why and asks', not f['res'] and 'Not answered yet' in f['text'] and 'illustrations, not loan offers' in f['text'] and 'Answer it' in f['text'], f['text'][:200])
+        check(f'{tag} home-loan question unanswered: the payment schedule stays (every construction stage), with the stages on the card', f['schsec'] is False and all(any(s in r for r in f['rows']) for s in BUILD) and 'When each payment falls due' in f['text'], [f['schsec'], len(f['rows'])])
+        check(f'{tag} home-loan question unanswered: no loan is assumed: both answers side by side, 75% and 45%', re.search(r'Loan limit\s*75%.{0,40}45%', f['text']) is not None, f['text'][:400])
         pg.locator('[data-out] [data-open-who]').first.click(); pg.wait_for_selector('[data-home="0"] button[data-hk="mort"]'); act(pg, ['home', 0, 'mort', 'yes']); act(pg, ['homeamt', 0, '2,500']); act(pg, ['close']); settle(pg)
         f2 = pg.evaluate(FACTS)
         check(f'{tag} home-loan question answered: every figure and the card\'s stages appear at once, no other click', f2['res'] and f2['stages'] and f2['ok'] is True and f2['dash'] == 0 and not stale(pg), [f2['ok'], f2['dash']])
