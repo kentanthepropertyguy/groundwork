@@ -1,0 +1,31 @@
+{
+ "peer.rule": "same class ({class}), market segment ({segment}) and lease-age group; original lease 99 years or longer",
+ "peer.label.P": "Price position",
+ "peer.label.R": "Resale activity",
+ "peer.label.M": "Recent market activity",
+ "peer.band.above": "Above peers",
+ "peer.band.around": "Around peers",
+ "peer.band.below": "Below peers",
+ "peer.priceBand.above": "Higher relative price than most peers",
+ "peer.priceBand.around": "Around peers",
+ "peer.priceBand.below": "Lower relative price than most peers",
+ "yield.caption": "Gross yield = 12 x typical rent / typical resale price for the same size band. Before maintenance, property tax, vacancy and agent fees. Not a return on your cash.",
+ "yield.peers": "same class, market segment and 100 sq ft size band; original lease 99 years or longer, including freehold and 999-year (short leases excluded)",
+ "yield.range": "the range from combining the middle half of rents with the middle half of prices (12 x lower-quartile rent / upper-quartile price to 12 x upper-quartile rent / lower-quartile price); not a confidence interval",
+ "yield.shortLease": "Developments with leases under 99 years are excluded from standard long-lease peer groups.",
+ "yield.position.near": "near the peer median (its range includes it)",
+ "yield.position.above": "above the peer median",
+ "yield.position.below": "below the peer median",
+ "income.geography": "{planningArea} planning area (Master Plan 2019), not a postal district.",
+ "income.definition": "Income is household employment income including employer CPF.",
+ "income.context": "This describes the area, not buyers.",
+ "income.attribution": "SingStat, General Household Survey 2025, table C020145 (resident households by planning area and monthly household employment income)",
+ "income.conditions": [
+  "Planning areas follow Master Plan 2019",
+  "Employment income includes employer CPF and platform-worker CPF contributions",
+  "Figures are rounded to the nearest 100 and may not add up",
+  "\"-\" means nil or negligible",
+  "Small cells should be read with caution",
+  "GHS 2025 sample design: go.gov.sg/ghs2025-sample-design-and-variability"
+ ]
+}

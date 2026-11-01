@@ -290,3 +290,33 @@ body #ws-dev .lg-sb .kpr-search.has-go>input{padding-right:196px}
   .gwp-dimp[hidden]{display:grid!important}
   .gwp-bar2,.gwp-hero,.gwp-all,.gwp-chev,.gwp-next,.gwp-tabs{display:none!important}
 }
+
+/* PRISM V1.1 (A1, 2 Nov 2026): the approved peer positions, gross rental yield and household income, inside the dimension rows */
+.gwp-v11{display:grid;gap:6px;margin-top:22px;padding-top:18px;border-top:1px solid var(--gwp-line,#E6E8ED);min-width:0}
+.gwp-dimp > .gwp-v11:first-child{margin-top:0;padding-top:0;border-top:0}
+.gwp-pos{margin:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.gwp-pos b{font-size:19px;line-height:1.3;color:var(--gwp-ink)}
+.gwp-pos span{font-size:13.5px;color:var(--gwp-muted)}
+.gwp-tw{overflow-x:auto;max-width:100%}
+.gwp-yt{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.gwp-yt th,.gwp-yt td{padding:9px 8px;border-top:1px solid var(--gwp-line,#E6E8ED);text-align:left;vertical-align:top}
+.gwp-yt thead th{border-top:0;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--gwp-muted)}
+.gwp-yt .n{text-align:right;white-space:nowrap}
+.gwp-yt th[scope="row"]{font-weight:600;color:var(--gwp-ink);white-space:nowrap}
+.gwp-yt small{display:block;font-size:12px;line-height:1.35;color:var(--gwp-muted);white-space:normal}
+.gwp-yt td b{color:var(--gwp-ink)}
+.gwp-v11l{margin:0;padding-left:18px;display:grid;gap:2px}
+.gwp-it{max-width:620px}
+@media (max-width:560px){
+  .gwp-yt{font-size:13px}.gwp-yt th,.gwp-yt td{padding:8px 5px}
+  .gwp-yt thead th{letter-spacing:0;text-transform:none;font-size:12px}
+  /* the yield table: one block per size band on a phone, each figure under its own label (no sideways scrolling) */
+  .gwp-yt--stack thead{display:none}
+  .gwp-yt--stack,.gwp-yt--stack tbody{display:block}
+  .gwp-yt--stack tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 14px;padding:12px 0;border-top:1px solid var(--gwp-line,#E6E8ED)}
+  .gwp-yt--stack th,.gwp-yt--stack td{display:block;padding:0;border:0;text-align:left;white-space:normal}
+  .gwp-yt--stack th[scope="row"]{grid-column:1/-1;font-size:15px}
+  .gwp-yt--stack td:last-child{grid-column:1/-1}
+  .gwp-yt--stack .n{text-align:left}
+  .gwp-yt--stack td::before{content:attr(data-l);display:block;font-size:11.5px;color:var(--gwp-muted);margin-bottom:1px}
+}

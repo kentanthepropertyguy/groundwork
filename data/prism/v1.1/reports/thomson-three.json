@@ -1,0 +1,434 @@
+{
+ "schemaVersion": "prism-public-v1.1",
+ "reportId": "thomson-three",
+ "name": "Thomson Three",
+ "kind": "completed",
+ "datasetReleaseId": "prism-v1.1-release-2026-10-31-3aa8d3141390",
+ "supplementsV1Report": "thomson-three",
+ "release": {
+  "status": "approved",
+  "approvalRef": "GW-PRISM-V1.1-2026-11-01-A1"
+ },
+ "compositeScore": null,
+ "peerComparison": {
+  "peerGroup": {
+   "propertyClass": "condo",
+   "marketSegment": "RCR",
+   "leaseAge": "10–25 years",
+   "developments": 51,
+   "rule": "same class (condo), market segment (RCR) and lease-age group; original lease 99 years or longer"
+  },
+  "positions": [
+   {
+    "itemId": "A1-3/thomson-three/P",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-01-A1"
+    },
+    "dimension": "P",
+    "label": "Price position",
+    "positionOnly": true,
+    "band": "above",
+    "bandLabel": "Higher relative price than most peers",
+    "percentile": null,
+    "periodLabel": "1-bedroom Oct 2025–Sep 2026; 2-bedroom Aug 2025–Jul 2026; 3-bedroom Jul 2025–Jun 2026",
+    "period": {
+     "subject": [
+      {
+       "type": "1-bedroom",
+       "months": 12,
+       "start": "2025-10",
+       "end": "2026-09"
+      },
+      {
+       "type": "2-bedroom",
+       "months": 12,
+       "start": "2025-08",
+       "end": "2026-07"
+      },
+      {
+       "type": "3-bedroom",
+       "months": 12,
+       "start": "2025-07",
+       "end": "2026-06"
+      }
+     ],
+     "peerWindowMonths": [
+      12,
+      36
+     ]
+    },
+    "statement": "Price position — Higher relative price than most peers: 0.7% above its local comparables; 30 of 44 similar developments with a figure have a lower relative price (a position, not a measure of value).",
+    "basis": {
+     "method": "bedroom_type",
+     "bedroomTypes": 3,
+     "localComparables": null,
+     "radiusKm": null,
+     "resalesMatchedPct": null
+    },
+    "components": [
+     {
+      "id": "relativePricePosition",
+      "value": 0.7,
+      "unit": "pct_vs_local_comparables",
+      "peersWithValue": 44,
+      "lower": 30,
+      "equal": 0,
+      "higher": 14
+     }
+    ],
+    "context": [],
+    "sample": null,
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "GW_BEDROOM"
+    ]
+   },
+   {
+    "itemId": "A1-3/thomson-three/R",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-01-A1"
+    },
+    "dimension": "R",
+    "label": "Resale activity",
+    "positionOnly": false,
+    "band": "around",
+    "bandLabel": "Around peers",
+    "percentile": 58.8,
+    "periodLabel": "Oct 2024–Sep 2026",
+    "period": {
+     "months": 24,
+     "start": "2024-10",
+     "end": "2026-09"
+    },
+    "statement": "Resale activity — Around peers (58.8): 5.1 resales per 100 homes a year (24 months): higher than 29 of 51 similar developments (the same as 2). Context, not scored: resales in 91.7% of months (24 months).",
+    "basis": null,
+    "components": [
+     {
+      "id": "turnover24",
+      "value": 5.1,
+      "unit": "resales_per_100_homes_a_year",
+      "peersWithValue": 51,
+      "lower": 29,
+      "equal": 2,
+      "higher": 20
+     }
+    ],
+    "context": [
+     {
+      "id": "activeMonthShare24",
+      "value": 91.7,
+      "unit": "pct_of_months",
+      "scored": false
+     }
+    ],
+    "sample": {
+     "homes": 435
+    },
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "URA_DWELLING_UNITS"
+    ]
+   },
+   {
+    "itemId": "A1-3/thomson-three/M",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-01-A1"
+    },
+    "dimension": "M",
+    "label": "Recent market activity",
+    "positionOnly": false,
+    "band": "below",
+    "bandLabel": "Below peers",
+    "percentile": 2,
+    "periodLabel": "Oct 2025–Sep 2026 against Oct 2024–Sep 2025",
+    "period": {
+     "latest": {
+      "start": "2025-10",
+      "end": "2026-09"
+     },
+     "prior": {
+      "start": "2024-10",
+      "end": "2025-09"
+     }
+    },
+    "statement": "Recent market activity — Below peers (2.0): condo and EC resales within 2 km −24.7%, latest 12 months against the prior 12: higher than 1 of 51 similar developments. Context, not scored: planning-area private resales −23.4%. Observed activity, not a prediction.",
+    "basis": null,
+    "components": [
+     {
+      "id": "nearbyResaleChangePct",
+      "value": -24.7,
+      "unit": "pct_change",
+      "peersWithValue": 51,
+      "lower": 1,
+      "equal": 0,
+      "higher": 50
+     }
+    ],
+    "context": [
+     {
+      "id": "paPrivateResaleChangePct",
+      "value": -23.4,
+      "unit": "pct_change",
+      "scored": false
+     }
+    ],
+    "sample": null,
+    "sourceIds": [
+     "URA_TRANSACTIONS"
+    ]
+   }
+  ]
+ },
+ "rentalYield": {
+  "period": {
+   "start": "2025-10",
+   "end": "2026-09"
+  },
+  "caption": "Gross yield = 12 x typical rent / typical resale price for the same size band. Before maintenance, property tax, vacancy and agent fees. Not a return on your cash. Lease: 99 yrs from 2012.",
+  "rules": {
+   "minResales": 5,
+   "minRentalContracts": 10,
+   "minPeers": 10,
+   "peers": "same class, market segment and 100 sq ft size band; original lease 99 years or longer, including freehold and 999-year (short leases excluded)",
+   "range": "the range from combining the middle half of rents with the middle half of prices (12 x lower-quartile rent / upper-quartile price to 12 x upper-quartile rent / lower-quartile price); not a confidence interval",
+   "shortLease": "Developments with leases under 99 years are excluded from standard long-lease peer groups."
+  },
+  "bands": [
+   {
+    "itemId": "A1-1/thomson-three/400-499",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-01-A1"
+    },
+    "band": "400-499 sq ft",
+    "typicalRent": 3100,
+    "rentalContracts": 20,
+    "typicalResalePrice": 915000,
+    "resales": 5,
+    "grossYieldPct": 4.07,
+    "rangePct": [
+     3.91,
+     4.27
+    ],
+    "peerGroup": {
+     "developments": 18,
+     "medianPct": 4.31,
+     "middleHalfPct": [
+      4.17,
+      4.41
+     ]
+    },
+    "position": "below",
+    "positionText": "below the peer median",
+    "differencePts": -0.24
+   },
+   {
+    "itemId": "A1-1/thomson-three/700-799",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-01-A1"
+    },
+    "band": "700-799 sq ft",
+    "typicalRent": 3850,
+    "rentalContracts": 43,
+    "typicalResalePrice": 1575000,
+    "resales": 7,
+    "grossYieldPct": 2.93,
+    "rangePct": [
+     2.88,
+     3.05
+    ],
+    "peerGroup": {
+     "developments": 16,
+     "medianPct": 3.26,
+     "middleHalfPct": [
+      3.06,
+      3.36
+     ]
+    },
+    "position": "below",
+    "positionText": "below the peer median",
+    "differencePts": -0.33
+   }
+  ],
+  "sourceIds": [
+   "URA_TRANSACTIONS",
+   "URA_RENTAL"
+  ]
+ },
+ "householdIncome": {
+  "itemId": "A1-2/thomson-three/Bishan",
+  "approval": {
+   "state": "approved",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-01-A1"
+  },
+  "surveyYear": 2025,
+  "planningArea": "Bishan",
+  "geographyNote": "Bishan planning area (Master Plan 2019), not a postal district.",
+  "households": 30100,
+  "atOrAbove": [
+   {
+    "monthlyIncomeAtLeast": 10000,
+    "households": 17500,
+    "pct": 58.1
+   },
+   {
+    "monthlyIncomeAtLeast": 15000,
+    "households": 13400,
+    "pct": 44.5
+   },
+   {
+    "monthlyIncomeAtLeast": 20000,
+    "households": 10400,
+    "pct": 34.6
+   },
+   {
+    "monthlyIncomeAtLeast": 30000,
+    "households": 5000,
+    "pct": 16.6
+   }
+  ],
+  "incomeDefinition": "Income is household employment income including employer CPF.",
+  "rounding": "nearest 100",
+  "conditions": [
+   "Planning areas follow Master Plan 2019",
+   "Employment income includes employer CPF and platform-worker CPF contributions",
+   "Figures are rounded to the nearest 100 and may not add up",
+   "\"-\" means nil or negligible",
+   "Small cells should be read with caution",
+   "GHS 2025 sample design: go.gov.sg/ghs2025-sample-design-and-variability"
+  ],
+  "context": "This describes the area, not buyers.",
+  "attribution": "SingStat, General Household Survey 2025, table C020145 (resident households by planning area and monthly household employment income)",
+  "sourceIds": [
+   "SINGSTAT_GHS2025",
+   "URA_MP2019"
+  ]
+ },
+ "sources": [
+  {
+   "id": "URA_TRANSACTIONS",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "PMI_Resi_Transaction",
+   "datasetId": "PMI_Resi_Transaction",
+   "asAt": "2026-09",
+   "updated": null,
+   "accessed": "2026-10-05",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0 (URA Data Service grant of licence)",
+    "url": "https://www.ura.gov.sg/eservices-info/maps/acceptance-grant-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated, with the access date.",
+     "Analysis and derived statistics are Groundwork’s; not endorsed by URA."
+    ]
+   },
+   "attribution": "Contains information from URA private residential data (PMI_Resi_Transaction) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
+   "url": "https://eservice.ura.gov.sg/maps/api/"
+  },
+  {
+   "id": "URA_RENTAL",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "PMI_Resi_Rental",
+   "datasetId": "PMI_Resi_Rental",
+   "asAt": "2026-09",
+   "updated": null,
+   "accessed": null,
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0 (URA Data Service grant of licence)",
+    "url": "https://www.ura.gov.sg/eservices-info/maps/acceptance-grant-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated, with the access date.",
+     "Analysis and derived statistics are Groundwork’s; not endorsed by URA."
+    ]
+   },
+   "attribution": "Contains information from URA private residential data (PMI_Resi_Rental) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
+   "url": "https://eservice.ura.gov.sg/maps/api/"
+  },
+  {
+   "id": "URA_DWELLING_UNITS",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "No of Dwelling Units",
+   "datasetId": "d_be71daeab5930f96b90ad2857454d876",
+   "asAt": null,
+   "updated": "2026-02-26",
+   "accessed": null,
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from No of Dwelling Units (Urban Redevelopment Authority (URA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_be71daeab5930f96b90ad2857454d876/view",
+   "note": "The dataset description states Q4 2022; its totals match URA completed private stock of 2025. Record edit dates are not a stock date, so no as-at date is asserted."
+  },
+  {
+   "id": "URA_MP2019",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "Master Plan 2019 Subzone Boundary (No Sea)",
+   "datasetId": "d_8594ae9ff96d0c708bc2af633048edfb",
+   "asAt": null,
+   "updated": null,
+   "accessed": null,
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from Master Plan 2019 Subzone Boundary (No Sea) (Urban Redevelopment Authority (URA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_8594ae9ff96d0c708bc2af633048edfb/view",
+   "note": "Planning-area and subzone boundaries (Master Plan 2019)."
+  },
+  {
+   "id": "GW_BEDROOM",
+   "publisher": "Groundwork",
+   "dataset": "Groundwork bedroom classification (accepted; 12 quarters)",
+   "datasetId": "groundwork-bedroom",
+   "asAt": "2026-09",
+   "updated": null,
+   "accessed": null,
+   "licence": {
+    "name": "Groundwork derived data",
+    "url": null,
+    "status": "own",
+    "conditions": []
+   },
+   "attribution": "Bedroom classification by Groundwork from floor plans and URA rental records.",
+   "url": null
+  },
+  {
+   "id": "SINGSTAT_GHS2025",
+   "publisher": "Singapore Department of Statistics (SingStat)",
+   "dataset": "General Household Survey 2025, table C020145",
+   "datasetId": "C020145",
+   "asAt": "2025",
+   "updated": "30/06/2026",
+   "accessed": null,
+   "licence": {
+    "name": "SingStat Terms of Use (SingStat Table Builder is a listed Service); datasets under the Singapore Open Data Licence, which prevails",
+    "url": "https://www.singstat.gov.sg/terms-of-use",
+    "status": "confirmed",
+    "conditions": [
+     "Credit the source.",
+     "Reproduce the figures accurately.",
+     "Do not present Groundwork’s analysis as the Government’s, or suggest Government association or endorsement.",
+     "Stop using the content if SingStat asks."
+    ]
+   },
+   "attribution": "SingStat, General Household Survey 2025, table C020145 (resident households by planning area and monthly household employment income)",
+   "url": "https://www.singstat.gov.sg/tablebuilder"
+  }
+ ]
+}
