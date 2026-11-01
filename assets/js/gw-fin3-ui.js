@@ -1433,6 +1433,71 @@
       const row = (e, i) => '<div class="f3-nr"><span class="f3-nn">' + esc(SHORT[e.id] || e.label) + (e.pct ? ' <em>' + Math.round(e.pct * 100) + '%</em>' : '') + '</span><span class="f3-nw">' + when(e, i) + '</span><b>' + $(e.amount) + '</b></div>';
       return '<div class="f3-next"><div class="f3-nh2"><span>Next payments</span><a href="#" data-to-sched>All payments</a></div>' + ev.map(row).join('') + '</div>';
     }
+    // Priority 1 answer-first (Ken, 1 Nov 2026), used while a home-loan question waits. The GROSS schedule: every payment the schedule lists, at its full amount,
+    // from GW_SCHEDULE (the same events as All payments); nothing split between you and the bank. The payments due before any loan can be drawn (booking or option,
+    // the S&P or exercise, the stamp duty) are always yours: at most 75% can be borrowed and they come to 20% (5% for a completed home) plus the duty.
+    function grossOf(st, s, c0) {
+      const ev = s.events.filter((e) => e.type === 'pay'); if (!ev.length) return null;
+      const dated = !st.noDate && !!st.otp, d0 = Date.parse(ev[0].date), wk = (e) => Math.max(0, Math.round((Date.parse(e.date) - d0) / 6048e5));
+      const buc = F.engineKind(st.pkind) !== 'completed', UP = ['otp', 'snp', 'option', 'exercise', 'bsd', 'absd'];
+      let first = true;
+      const when = (e) => {
+        if (BUILD_IDS.indexOf(e.id) >= 0) { const t = first ? (dated ? 'As the developer calls it, from ' + day(e.date) : 'As the developer calls it, from about ' + wk(e) + ' weeks') : 'As the developer calls it'; first = false; return t; }
+        if (e.id === 'bsd' || e.id === 'absd') return dated ? 'By ' + day(e.date) : 'Within 14 days of ' + (buc ? 'signing the S&P' : 'exercising the option');
+        if (dated) return (e.id === 'otp' || e.id === 'option' ? 'On ' : 'By ') + day(e.date);
+        if (e.id === 'otp' || e.id === 'option') return 'On the option';
+        if (e.id === 'snp' || e.id === 'exercise') return 'Within ' + wk(e) + ' weeks of the option';
+        return 'About ' + wk(e) + ' weeks after the option';
+      };
+      const rowOf = (e) => ({ id: e.id, label: e.id === 'bsd' ? 'Buyer’s stamp duty' : e.id === 'absd' ? 'ABSD' : !buc && e.id === 'completion' ? 'Balance at completion' : STAGE[e.id] || e.label,
+        pct: e.id === 'absd' ? Math.round(c0.absdRate * 100) + '%' : e.id === 'bsd' ? '' : (e.pct ? Math.round(e.pct * 100) + '%' : ''), amt: e.amount, when: when(e) });
+      const up = ev.filter((e) => UP.indexOf(e.id) >= 0).map(rowOf), later = ev.filter((e) => UP.indexOf(e.id) < 0).map(rowOf), last = ev.filter((e) => UP.indexOf(e.id) >= 0).pop();
+      const sum = (a) => a.reduce((x, r) => x + r.amt, 0);
+      return { buc: buc, up: up, later: later, upfront: sum(up), laterSum: sum(later), upWhen: dated ? 'by ' + day(last.date) : 'within about ' + wk(last) + ' weeks of ' + (buc ? 'booking' : 'the option') };
+    }
+    function grossHtml(g) {
+      const sr = (r, cls) => '<div class="f3-sr' + (cls ? ' ' + cls : '') + '"><div class="f3-sr1"><span class="f3-sl">' + r.label + (r.pct ? ' <em>' + r.pct + '</em>' : '') + '</span><b>' + $(r.amt) + '</b></div>' + (r.when ? '<p class="f3-sw">' + r.when + '</p>' : '') + '</div>';
+      return '<div class="f3-next f3-stages" data-stages-gross><div class="f3-nh2"><span>When each payment falls due</span><a href="#" data-to-sched>All payments</a></div>' +
+        '<div class="f3-sg" data-sg="up"><p class="f3-sgt">' + (g.buc ? 'Booking, S&P and stamp duty' : 'Option, exercise and stamp duty') + '</p>' + g.up.map((r) => sr(r)).join('') + sr({ label: 'Upfront, in all', amt: g.upfront }, 'f3-ssub') + '</div>' +
+        (g.later.length ? '<div class="f3-sg" data-sg="later"><p class="f3-sgt">' + (g.buc ? 'During construction, the full stage amounts' : 'At completion, the full amount') + '</p>' + g.later.map((r) => sr(r)).join('') +
+          '<p class="f3-fine">You pay your share of these first, then the bank pays the rest; the split follows the loan, once the question above is answered.</p></div>' : '') + '</div>';
+    }
+    // the figures the loan changes, for each answer to the question that waits: the same engine (GW_FIN3.cost) with the home's loan fully paid, or still being paid.
+    // Two or more homes waiting: "one still has a loan" only when they have the same owner(s) (then it is the same loan count whichever it is); otherwise only "none",
+    // and the page says what is missing. Nothing else is assumed: the rate and tenure are the ones on the chips above, and no age, income or loan amount is added.
+    function illusOf(st, un) {
+      const L = st.homesL || [], open = un.filter((i) => L[i].mort === ''), same = open.every((i) => L[i].own === L[open[0]].own);
+      // GW_FIN3 counts a housing loan only with a repayment. A loan answered Yes whose repayment isn't typed yet, and the loan in the "still being paid" column, are
+      // marked with a nominal $1 a month so the loan limit counts them; the income test is left out of both columns (incomes set aside), so no figure shown uses the $1.
+      const noInc = Object.assign({}, st, { p: st.p.map((x) => Object.assign({}, x, { fixed: null, variable: null })) });
+      const mk = (yes) => { const list = L.map((h, i) => (open.indexOf(i) >= 0 ? Object.assign({}, h, { mort: i === yes ? 'yes' : 'no', amt: i === yes ? 1 : null }) : h.mort === 'yes' && !(h.amt > 0) ? Object.assign({}, h, { amt: 1 }) : h));
+        const w = F.withHomes(noInc, list, st.order === 'sell' ? 'sell' : 'buy'); w.homesL = list; const c = F.cost(w); return c && c.state === 'ok' ? c : null; };
+      return { A: mk(-1), B: open.length && same ? mk(open[0]) : null, open: open };
+    }
+    const homeNames = (x) => x.map((i) => 'Existing home ' + (i + 1)).join(' and ');
+    // what the figures wait for, in words: a loan not answered, or a loan answered Yes with its monthly repayment not typed (the bank's income test counts it)
+    function pendingWords(st, u) {
+      const L = st.homesL || [], a = u.filter((i) => L[i].mort === ''), b = u.filter((i) => L[i].mort === 'yes');
+      return [a.length ? 'is a home loan still being paid on ' + homeNames(a) + '?' : '', b.length ? 'the monthly repayment on the loan on ' + homeNames(b) + '.' : ''].filter(Boolean).join(' And ');
+    }
+    function askHtml(st, u, tail) {
+      const L = st.homesL || [], a = u.filter((i) => L[i].mort === ''), b = u.filter((i) => L[i].mort === 'yes');
+      return '<p class="f3-note" data-home-ask>' + (a.length ? homeNames(a) + ': still paying a home loan on ' + (a.length > 1 ? 'them' : 'it') + '? Not answered yet. ' : '') +
+        (b.length ? homeNames(b) + ': the monthly repayment on ' + (b.length > 1 ? 'their loans isn’t' : 'its loan isn’t') + ' entered yet; the bank’s income test counts it. ' : '') + tail + ' <button type="button" class="f3-lnk" data-open-who>Answer it</button></p>';
+    }
+    function illusHtml(st, un) {
+      const I = illusOf(st, un), A = I.A, B = I.B, open = I.open, one = open.length === 1;
+      const ask = askHtml(st, un, open.length ? 'It sets the loan limit, so the loan, cash, CPF and instalment are shown for ' + (B ? 'each answer' : 'the answer that can be worked out') + ' below: illustrations, not loan offers.' : 'Until then the loan, cash, CPF and instalment below are illustrations, not loan offers.');
+      if (!A) return ask;
+      const eq = B && Math.abs(A.loan - B.loan) < 1 && Math.abs(A.cash - B.cash) < 1 && Math.abs(A.monthly - B.monthly) < 1 && Math.abs(A.cpfUsed - B.cpfUsed) < 1;
+      const cols = !open.length ? [['With the loan still being paid', A]] : eq ? [['Either answer', A]] : [[one ? 'If fully paid' : 'If none has a loan', A]].concat(B ? [[one ? 'If still being paid' : 'If one still has a loan', B]] : []);
+      const tr = (k, f) => '<tr><th scope="row">' + k + '</th>' + cols.map((x) => '<td>' + f(x[1]) + '</td>').join('') + '</tr>';
+      return ask + '<div class="f3-tw"><table class="f3-cmp f3-illt" data-illus><thead><tr><th></th>' + cols.map((x) => '<th scope="col">' + x[0] + '</th>').join('') + '</tr></thead><tbody>' +
+        tr('Loan limit', (c) => pc(c.ltv) + '<br><small>of the price</small>') + tr('Bank loan', (c) => $(c.loan)) + tr('Cash you’ll need', (c) => $(c.cash)) + tr('CPF used', (c) => $(c.cpfUsed)) +
+        tr('Monthly instalment' + (F.engineKind(st.pkind) !== 'completed' ? ', from TOP' : ''), (c) => $(c.monthly) + '<br><small>' + c.ratePct + '%, ' + yrs(c.years) + '</small>') + '</tbody></table></div>' +
+        (open.length && !B ? '<p class="f3-fine">With a loan still being paid on one of these homes, the limit depends on whose home it is: answer for each home to see it.</p>' : '') +
+        '<p class="f3-fine">Stamp duty included in the cash. The rate and tenure are the ones above; your age, income and bank decide the actual loan.</p>';
+    }
     // All payments: the option date, the full schedule, the funding check and Ask Ken stay closed until asked for
     const allOpen = () => { const a = q('[data-allpay]'); return !!a && !a.hidden; };
     function allPay(o) { const a = q('[data-allpay]'); if (!a) return; a.hidden = !o; $$('[data-to-sched]').forEach((x) => { x.textContent = o ? 'Hide payments' : 'All payments'; x.classList.toggle('up', o); x.setAttribute('aria-expanded', String(o)); }); }
@@ -1458,26 +1523,27 @@
       const sched = q('[data-sched]'), bd = q('[data-bd]'), cmp = q('[data-cmp]'), lh = q('[data-loan-hint]'), ob = q('.f3-opts [data-open-borrow]');
       // the sections an answer fills are emptied as well as hidden, so nothing from the previous entries is left behind in the page (Priority 1, 31 Oct 2026)
       const quiet = () => { view = null; pdfBtn(false); const sec0 = q('[data-schsec]'); if (sec0) sec0.hidden = true; [bd, cmp].forEach((x) => { x.hidden = true; }); ['[data-bd-out]', '[data-cmp-out]'].forEach((k) => { const el = q(k); if (el) el.innerHTML = ''; }); if (ob) ob.hidden = true; if (lh) lh.textContent = ''; setBar(''); sched.innerHTML = ''; if (scnD) scnD.hidden = true; };
-      // V3.12 Stage 2 (Ken, 27 Oct 2026): whether an existing home still has a loan sets the loan limit (and the monthly commitments), so no cash, CPF or instalment is shown
-      // until it is answered for every home; nothing is assumed (Stage 1 showed the figures with no loan counted, and said so)
+      // V3.12 Stage 2 (Ken, 27 Oct 2026): whether an existing home still has a loan sets the loan limit (and the monthly commitments), so no CONFIRMED cash, CPF or
+      // instalment is shown until it is answered for every home; nothing is assumed.
+      // Priority 1 answer-first (Ken, 1 Nov 2026): everything the loan does not change shows at once (the payments due upfront, the stamp duty, every stage of the
+      // gross schedule), and the loan-dependent figures are shown side by side for each answer, from the same engine, labelled as illustrations, not offers.
       const un = st.price > 0 ? unanswered(st) : [];
       if (un.length) {
-        paintChips(st, null);
-        const nm = un.map((i) => 'Existing home ' + (i + 1)).join(' and ');
-        // stamp duty does not depend on the loan, so it is shown meanwhile (who owns what is already answered)
-        const c0 = isHdb(st) ? F.costHdb(st) : F.cost(st), dutyRow = c0 && c0.state === 'ok' ? row('Stamp duty', $(c0.duty), '<span data-duty-line>' + (c0.absd > 0 ? $(c0.bsd) + ' BSD + ' + $(c0.absd) + ' ABSD ' + Math.round(c0.absdRate * 100) + '%' : 'Buyer’s stamp duty') + '</span>, whatever the loan') : '';
-        out.innerHTML = '<p class="f3-eb">For a ' + $(st.price) + ' ' + KN[st.pkind] + '</p>' + row('Cash you’ll need', '<span class="f3-dash">—</span>', 'Waiting for one answer: is a home loan still being paid on ' + nm + '?') + row('CPF used', '<span class="f3-dash">—</span>', '') + row('Monthly instalment', '<span class="f3-dash">—</span>', 'On the ' + (isHdb(st) ? 'loan' : 'bank loan')) + dutyRow;
-        quiet();
-        // Priority 1 (31 Oct 2026): the payment schedule depends only on the price, the property type and the dates, like the stamp duty, so it stays on screen
-        // while the loan question waits (it used to disappear). Which payments are yours and which the bank's follows the answer; no loan is assumed.
-        if (!isHdb(st) && c0 && c0.state === 'ok') {
-          const s0 = F.schedule(Object.assign({}, st, { noDate: und }));
-          if (s0.ok) {
-            out.insertAdjacentHTML('beforeend', nextHtml(st)); wireSched();
-            const sec = q('[data-schsec]'); if (sec) sec.hidden = false; const sn = q('[data-sch-note]'); if (sn) sn.textContent = (und ? 'Add the option date for exact dates.' : 'From the option on ' + day(st.otp) + '.') + ' Which payments are yours and which the bank’s follows once the home-loan question above is answered.';
-            sched.innerHTML = schedHtml(st, s0);
-          }
+        paintChips(st, null); quiet();
+        // stamp duty does not depend on the loan (who owns what is already answered)
+        const c0 = isHdb(st) ? F.costHdb(st) : F.cost(st), ok0 = !!(c0 && c0.state === 'ok'), dutyRow = ok0 ? row('Stamp duty', $(c0.duty), '<span data-duty-line>' + (c0.absd > 0 ? $(c0.bsd) + ' BSD + ' + $(c0.absd) + ' ABSD ' + Math.round(c0.absdRate * 100) + '%' : 'Buyer’s stamp duty') + '</span>, whatever the loan') : '';
+        const s0 = !isHdb(st) && ok0 ? F.schedule(Object.assign({}, st, { noDate: und })) : null, g0 = s0 && s0.ok ? grossOf(st, s0, c0) : null;
+        if (!g0) {   // an HDB flat (its stages depend on the loan's lender) or a schedule that can't be drawn: as before
+          out.innerHTML = '<p class="f3-eb">For a ' + $(st.price) + ' ' + KN[st.pkind] + '</p>' + row('Cash you’ll need', '<span class="f3-dash">—</span>', 'Waiting for: ' + pendingWords(st, un)) + row('CPF used', '<span class="f3-dash">—</span>', '') + row('Monthly instalment', '<span class="f3-dash">—</span>', 'On the ' + (isHdb(st) ? 'loan' : 'bank loan')) + dutyRow;
+          paintFund(st); paintBuf(st, null); return;
         }
+        out.innerHTML = '<p class="f3-eb">For a ' + $(st.price) + ' ' + KN[st.pkind] + '</p>' +
+          row('Known upfront payments', '<span data-known-up>' + $(g0.upfront) + '</span>', (g0.buc ? 'Booking fee, the S&P payment and stamp duty, ' : 'Option fee, exercise fee and stamp duty, ') + g0.upWhen + '. The same whatever the loan.', 'f3-ar1') +
+          dutyRow + illusHtml(st, un) + grossHtml(g0);
+        wireSched();
+        const sec = q('[data-schsec]'); if (sec) sec.hidden = false; const sn = q('[data-sch-note]'); if (sn) sn.textContent = (und ? 'Add the option date for exact dates.' : 'From the option on ' + day(st.otp) + '.') + ' Which payments are yours and which the bank’s follows once the home-loan question above is answered.';
+        sched.innerHTML = schedHtml(st, s0);
+        setBar('<span class="f3-bm"><span class="k">Known upfront</span><b>' + $(g0.upfront) + '</b><span class="s">loan question not answered yet</span></span>');
         paintFund(st); paintBuf(st, null); return;
       }
       if (isHdb(st)) { paintHdb(st, quiet); return; }
@@ -1630,13 +1696,14 @@
       const row = (k, a, b) => '<tr><th scope="row">' + k + '</th><td>' + a + '</td><td>' + b + '</td></tr>';
       o.innerHTML = '<table class="f3-cmp"><thead><tr><th></th><th scope="col">' + $s(c.price) + '</th><th scope="col">' + $s(c2.price) + '</th></tr></thead><tbody>' + row('Cash you’ll need', $(c.cash), $(c2.cash)) + row('CPF used', $(c.cpfUsed), $(c2.cpfUsed)) + row('Monthly instalment', $(c.monthly), $(c2.monthly)) + row('Bank loan', $(c.loan), $(c2.loan)) + row('Stamp duty', $(c.duty), $(c2.duty)) + '</tbody></table>' + (c.typed !== null ? '<p class="f3-fine">The same share of the price is borrowed.</p>' : '');
     }
-    function unanswered(st) { return (st.homesL || []).map((h, i) => (h.mort === '' ? i : -1)).filter((i) => i >= 0); }
+    // a home whose loan is not answered, or answered Yes with its monthly repayment not typed (Priority 1, 1 Nov 2026: such a loan was not counted at all, so the card
+    // showed the 75% limit as confirmed; now its limit is shown, labelled, until the repayment the income test needs is in)
+    function unanswered(st) { return (st.homesL || []).map((h, i) => (h.mort === '' || (h.mort === 'yes' && !(h.amt > 0)) ? i : -1)).filter((i) => i >= 0); }
     function paintHomeAsk(st) {
-      const u = unanswered(st); if (!u.length || !out) return;
-      const nm = u.map((i) => 'Existing home ' + (i + 1)).join(' and ');
+      const u = unanswered(st); if (!u.length || !out || out.querySelector('[data-home-ask]')) return;   // the answer-first card asks it already, above its illustrations
       if (!(st.price > 0)) return;
-      // under the figures that wait for it, above the payments that don't (Priority 1, 31 Oct 2026)
-      const nx = out.querySelector('.f3-next'), h = '<p class="f3-note" data-home-ask>' + nm + ': still paying a home loan on ' + (u.length > 1 ? 'them' : 'it') + '? Not answered yet. It sets the loan limit and your monthly commitments, so the figures wait for it. <button type="button" class="f3-lnk" data-open-who>Answer it</button></p>';
+      // under the figures that wait for it, above the payments that don't (Priority 1, 31 Oct 2026); used where no illustration can be drawn (an HDB flat)
+      const nx = out.querySelector('.f3-next'), h = askHtml(st, u, 'It sets the loan limit and your monthly commitments, so the figures wait for it.');
       if (nx) nx.insertAdjacentHTML('beforebegin', h); else out.insertAdjacentHTML('beforeend', h);
     }
     box.addEventListener('click', (e) => { if (e.target.closest('[data-open-who]')) openChip('who');
@@ -1647,7 +1714,7 @@
     function paintBuf(st, c) {
       if (!bufD || !bufOut) return;
       const b = c && c.state === 'ok' ? F.cpfBuffer(st, c) : null;
-      if (!b) { bufOut.innerHTML = '<p class="f3-fine">' + (F.engineKind(st.pkind) === 'completed' ? 'For a home under construction only.' : 'Enter the price above first.') + '</p>'; return; }
+      if (!b) { bufOut.innerHTML = '<p class="f3-fine">' + (F.engineKind(st.pkind) === 'completed' ? 'For a home under construction only.' : st.price > 0 && unanswered(st).length ? 'Waits for the home-loan question above: the loan sets how much of each stage the bank pays.' : 'Enter the price above first.') + '</p>'; return; }
       const B = b.bank, dated = !st.noDate && !!st.otp;
       const when = (m) => (dated ? monAfter(st, m) : m + ' months after the option');
       const ln = (t, ctx, v, cls, key) => '<div class="f3-rl' + (cls ? ' ' + cls : '') + '"' + (key ? ' data-buf-line="' + key + '"' : '') + '><div><span>' + t + '</span>' + (ctx ? '<small>' + ctx + '</small>' : '') + '</div><b>' + v + '</b></div>';
@@ -1696,7 +1763,7 @@
     function paintFund(st) {
       if (!fundD || !P) return;
       { const u = unanswered(st); if (u.length) { if (scnD) scnD.hidden = true; lastF = null;
-        fundOut.innerHTML = '<p class="f3-note" data-fund-home-ask>Before this check: is a home loan still being paid on ' + u.map((i) => 'Existing home ' + (i + 1)).join(' and ') + '? The loan limit and your monthly commitments depend on it.</p><div class="f3-cta"><button type="button" class="gw-btn" data-open-who>Answer it</button></div>'; return; } }
+        fundOut.innerHTML = '<p class="f3-note" data-fund-home-ask>Before this check: ' + pendingWords(st, u) + ' The loan limit and your monthly commitments depend on it.</p><div class="f3-cta"><button type="button" class="gw-btn" data-open-who>Answer it</button></div>'; return; } }
       const f = F.funding(st); lastF = f.ok ? f : null;
       { const cp = q('[data-cpf2]'), ck = f.i && f.i.cpfCheck; if (cp) cp.hidden = !ck; const co = q('[data-cpf2-out]'); if (co) co.textContent = ck && ck.ok ? 'CPF counted: ' + $(f.i.cpf) + (f.i.cpfPlanned > f.i.cpf + 0.5 ? ' of the ' + $(f.i.cpfPlanned) + ' you entered' : '') + ', the OA above the ' + (ck.sumName === 'BRS' ? 'Basic' : 'Full') + ' Retirement Sum (' + $(ck.setAside) + ').' : ''; }
       if (f.needCpf) { fundOut.innerHTML = '<p class="f3-note">You’ll still own a home when you buy, so CPF lets you use only the OA above a set-aside. Add your CPF balances to check it.</p><div class="f3-cta"><button type="button" class="gw-btn" data-go="cpfBal.0.oa">Add CPF balances</button></div>'; if (scnD) scnD.hidden = true; return; }

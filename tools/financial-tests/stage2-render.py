@@ -108,7 +108,8 @@ try:
             # ===== 3b. a new home's loan status unanswered: the cost card waits, stamp duty shows =====
             saved(pg, '/tools/payment-planner/', dict(COUPLE, order='none'), [{'own': 'both', 'type': 'hdb', 'act': 'keep', 'mort': '', 'amt': ''}])
             f = figs(pg)
-            check(vn + ' 3b loan status not answered: no cash, CPF or instalment; stamp duty (not loan-dependent) shows; the page asks', f[:3] == ['—', '—', '—'] and f[3] == '$419,600' and pg.is_visible('[data-home-ask]') and pg.locator('[data-out] [data-answer]').count() == 0, f)
+            # Ken, 1 Nov 2026 (answer-first): the cash, CPF and instalment are no longer dashes but labelled illustrations of each answer; none is confirmed
+            check(vn + ' 3b loan status not answered: no confirmed cash, CPF or instalment (illustrations only); stamp duty (not loan-dependent) shows; the page asks', '$419,600' in f and pg.is_visible('[data-home-ask]') and pg.locator('[data-out] [data-answer]').count() == 0 and pg.locator('[data-out] [data-illus]').count() == 1 and 'illustrations, not loan offers' in pg.inner_text('[data-home-ask]'), f)
             check(vn + ' 3b ... the loan chip states no limit meanwhile', pg.inner_text('[data-chip="loan"]').strip() == 'Loan', pg.inner_text('[data-chip="loan"]'))
             pg.click('[data-out] [data-open-who]'); pg.click('[data-chp="who"] [data-home="0"] [data-hk="mort"][data-v="yes"]'); pg.fill('[data-chp="who"] [data-home="0"] [data-hk="amt"]', '1,500'); settle(pg); pg.evaluate("()=>window.__f3OpenChip(null)"); settle(pg)
             en = pg.evaluate(ENGINE, {'homes': [{'own': 'both', 'type': 'hdb', 'act': 'keep', 'mort': 'yes', 'amt': 1500}], 'order': None})
