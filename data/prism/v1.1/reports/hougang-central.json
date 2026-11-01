@@ -1,0 +1,109 @@
+{
+ "schemaVersion": "prism-public-v1.1",
+ "reportId": "hougang-central",
+ "name": "Hougang Central",
+ "kind": "new_launch",
+ "datasetReleaseId": "prism-v1.1-release-2026-10-31-3aa8d3141390",
+ "supplementsV1Report": "hougang-central",
+ "release": {
+  "status": "approved",
+  "approvalRef": "GW-PRISM-V1.1-2026-11-01-A1"
+ },
+ "compositeScore": null,
+ "peerComparison": null,
+ "rentalYield": null,
+ "householdIncome": {
+  "itemId": "A1-2/hougang-central/Hougang",
+  "approval": {
+   "state": "approved",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-01-A1"
+  },
+  "surveyYear": 2025,
+  "planningArea": "Hougang",
+  "geographyNote": "Hougang planning area (Master Plan 2019), not a postal district.",
+  "households": 79400,
+  "atOrAbove": [
+   {
+    "monthlyIncomeAtLeast": 10000,
+    "households": 40000,
+    "pct": 50.4
+   },
+   {
+    "monthlyIncomeAtLeast": 15000,
+    "households": 26700,
+    "pct": 33.6
+   },
+   {
+    "monthlyIncomeAtLeast": 20000,
+    "households": 16800,
+    "pct": 21.2
+   },
+   {
+    "monthlyIncomeAtLeast": 30000,
+    "households": 6100,
+    "pct": 7.7
+   }
+  ],
+  "incomeDefinition": "Income is household employment income including employer CPF.",
+  "rounding": "nearest 100",
+  "conditions": [
+   "Planning areas follow Master Plan 2019",
+   "Employment income includes employer CPF and platform-worker CPF contributions",
+   "Figures are rounded to the nearest 100 and may not add up",
+   "\"-\" means nil or negligible",
+   "Small cells should be read with caution",
+   "GHS 2025 sample design: go.gov.sg/ghs2025-sample-design-and-variability"
+  ],
+  "context": "This describes the area, not buyers.",
+  "attribution": "SingStat, General Household Survey 2025, table C020145 (resident households by planning area and monthly household employment income)",
+  "sourceIds": [
+   "SINGSTAT_GHS2025",
+   "URA_MP2019"
+  ]
+ },
+ "sources": [
+  {
+   "id": "URA_MP2019",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "Master Plan 2019 Subzone Boundary (No Sea)",
+   "datasetId": "d_8594ae9ff96d0c708bc2af633048edfb",
+   "asAt": null,
+   "updated": null,
+   "accessed": null,
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from Master Plan 2019 Subzone Boundary (No Sea) (Urban Redevelopment Authority (URA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_8594ae9ff96d0c708bc2af633048edfb/view",
+   "note": "Planning-area and subzone boundaries (Master Plan 2019)."
+  },
+  {
+   "id": "SINGSTAT_GHS2025",
+   "publisher": "Singapore Department of Statistics (SingStat)",
+   "dataset": "General Household Survey 2025, table C020145",
+   "datasetId": "C020145",
+   "asAt": "2025",
+   "updated": "30/06/2026",
+   "accessed": null,
+   "licence": {
+    "name": "SingStat Terms of Use (SingStat Table Builder is a listed Service); datasets under the Singapore Open Data Licence, which prevails",
+    "url": "https://www.singstat.gov.sg/terms-of-use",
+    "status": "confirmed",
+    "conditions": [
+     "Credit the source.",
+     "Reproduce the figures accurately.",
+     "Do not present Groundwork’s analysis as the Government’s, or suggest Government association or endorsement.",
+     "Stop using the content if SingStat asks."
+    ]
+   },
+   "attribution": "SingStat, General Household Survey 2025, table C020145 (resident households by planning area and monthly household employment income)",
+   "url": "https://www.singstat.gov.sg/tablebuilder"
+  }
+ ]
+}

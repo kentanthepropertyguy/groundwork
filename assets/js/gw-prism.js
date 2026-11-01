@@ -16,22 +16,30 @@
    assessment is approved copy from the report; numbers are the approved metric values, formatted.
    Never shown: score100 (no validated scoring method), Ken's Take (not yet approved), unapproved metrics or copy, and the
    supply measures S3/S4 unless the release itself allows them (allowPublicS3/S4).
+   V1.1 supplement (GW-PRISM-V1.1-2026-11-01-A1; Ken, 2 Nov 2026): data/prism/v1.1/ (schema prism-public-v1.1) adds, inside the existing
+   dimension rows, the approved peer positions (Price position, Resale activity, Recent market activity, each with its exact period, peer
+   counts and statement), gross rental yield by size band and planning-area household income. It is read only when its manifest is the
+   approved one (sha256 pinned below), it pairs with the very V1 report on screen (by sha256), its report's sha256 matches, and every item
+   carries the A1 approval; otherwise the page is exactly V1. It never creates a page: a development without an approved V1 assessment
+   shows nothing. Never shown: a composite score, purchasing-power or affordability wording, S3/S4, OneMap-dependent items.
    ========================================================================== */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
   else root.GW_PRISM = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
-  const VERSION = 'prism-v1-web-1';
+  const VERSION = 'prism-v1.1-web-1';
   const SCHEMA = 'prism-public-v1';
   const DIR = 'data/prism/v1/';
-  const MANIFEST_V = '831114f97c';   // first 10 hex of manifest.json's sha256: a new release changes the address, so caches never mix releases
+  const MANIFEST_V = '831114f97c';
+  const V11 = { SCHEMA: 'prism-public-v1.1', DIR: 'data/prism/v1.1/', APPROVAL: 'GW-PRISM-V1.1-2026-11-01-A1',
+    MANIFEST: '372940ebebab4e884a7369e6d618395acd0fde4dabf383024b6698b37a708576' };   // the approved V1.1 manifest, byte for byte: any other is not read   // first 10 hex of manifest.json's sha256: a new release changes the address, so caches never mix releases
   const PILLARS = [['P', 'Price Position'], ['R', 'Resale Potential'], ['I', 'Infrastructure & Catalysts'], ['S', 'Supply Pressure'], ['M', 'Market Demand']];
   const SUPPLY_GATE = { 'S.launchedUnsold2km': 'allowPublicS3', 'S.pipeline2km': 'allowPublicS4' };
   const SCOPE = { observed_resale_activity: 'Observed resale activity · project-wide', observed_neighbourhood_market: 'Surrounding resale market' };
   const KIND = { 'completed-condo': 'Condominium', 'awarded-site': 'Awarded site' };
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const SOURCE_NAME = { URA_TRANSACTIONS: 'URA transactions', URA_RENTAL: 'URA rental contracts', URA_DEV_SALES: 'URA developer sales', URA_PIPELINE: 'URA pipeline', URA_DWELLING_UNITS: 'URA dwelling units', URA_SALE_SITES: 'URA Sale Sites', URA_MP2019: 'URA Master Plan 2019 subzones', HDB_PROPERTY: 'HDB property information', HDB_RESALE: 'HDB resale prices', SINGSTAT_RESIDENTS: 'SingStat residents', LTA_RAIL_EXITS: 'LTA station exits', MOE_SCHOOLS: 'MOE schools', NEA_SUPERMARKETS: 'NEA supermarkets', NEA_HAWKERS: 'NEA hawker centres', NPARKS_PARKS: 'NParks parks', ONEMAP: 'OneMap', GW_BEDROOM: 'Groundwork bedroom classification', GW_UPCOMING: 'Groundwork named sites', AMENITIES: 'Amenities (LTA, MOE, NEA, NParks, OneMap)' };
+  const SOURCE_NAME = { URA_TRANSACTIONS: 'URA transactions', URA_RENTAL: 'URA rental contracts', URA_DEV_SALES: 'URA developer sales', URA_PIPELINE: 'URA pipeline', URA_DWELLING_UNITS: 'URA dwelling units', URA_SALE_SITES: 'URA Sale Sites', URA_MP2019: 'URA Master Plan 2019 subzones', SINGSTAT_GHS2025: 'SingStat General Household Survey 2025', HDB_PROPERTY: 'HDB property information', HDB_RESALE: 'HDB resale prices', SINGSTAT_RESIDENTS: 'SingStat residents', LTA_RAIL_EXITS: 'LTA station exits', MOE_SCHOOLS: 'MOE schools', NEA_SUPERMARKETS: 'NEA supermarkets', NEA_HAWKERS: 'NEA hawker centres', NPARKS_PARKS: 'NParks parks', ONEMAP: 'OneMap', GW_BEDROOM: 'Groundwork bedroom classification', GW_UPCOMING: 'Groundwork named sites', AMENITIES: 'Amenities (LTA, MOE, NEA, NParks, OneMap)' };
 
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const isNum = (v) => typeof v === 'number' && isFinite(v);
@@ -114,6 +122,41 @@
       periodsBySource: man && man.dataPeriodsBySource && typeof man.dataPeriodsBySource === 'object' ? man.dataPeriodsBySource : {}
       // never carried: score100, kenTake, unapproved copy or values
     };
+  }
+
+  /* ---------------------------------------------------------------- the V1.1 supplement (pure; tested in node) */
+  const FORBID = /score(100|s)?$|purchas|afford|everyday|onemap|pipeline|launchedUnsold|kenTake/i;   // keys a V1.1 report may never carry (compositeScore: null only)
+  function checkManifest11(m, v1, v1sha) {
+    if (!m || m.schemaVersion !== V11.SCHEMA || m.status !== 'approved' || m.approvalRef !== V11.APPROVAL) throw new Error('v1.1 manifest: not the approved release');
+    const sp = m.supplements;
+    if (!sp || sp.schemaVersion !== SCHEMA || !v1 || sp.datasetReleaseId !== v1.datasetReleaseId || sp.approvalRef !== v1.approvalRef) throw new Error('v1.1 manifest: does not supplement this V1 release');
+    if (!Array.isArray(m.reports) || !Array.isArray(sp.reports)) throw new Error('v1.1 manifest: no reports');
+    m.reports.forEach((r) => { if (!r || !/^[a-z0-9-]{1,80}$/.test(r.id) || r.path !== 'reports/' + r.id + '.json' || !/^[0-9a-f]{64}$/.test(r.sha256 || '') || r.approved !== true) throw new Error('v1.1 manifest: bad report entry'); });
+    if (v1sha) { const e = sp.reports.find((x) => x.id === v1sha.id); if (!e || e.sha256 !== v1sha.sha256) throw new Error('v1.1 manifest: pairs with a different V1 report'); }
+    return m;
+  }
+  function keysOk(o, path) {
+    if (!o || typeof o !== 'object') return;
+    Object.keys(o).forEach((k) => { if (FORBID.test(k) && !(k === 'compositeScore' && o[k] === null)) throw new Error('v1.1 report: forbidden field ' + path + k); keysOk(o[k], path + k + '.'); });
+  }
+  const ok11 = (x) => !!(x && x.approval && x.approval.state === 'approved' && x.approval.approvalRef === V11.APPROVAL);
+  function checkReport11(r, entry) {
+    if (!r || r.schemaVersion !== V11.SCHEMA || r.reportId !== entry.id || r.supplementsV1Report !== entry.id) throw new Error('v1.1 report: id or schema');
+    if (!r.release || r.release.status !== 'approved' || r.release.approvalRef !== V11.APPROVAL) throw new Error('v1.1 report: not approved');
+    if (r.compositeScore !== null) throw new Error('v1.1 report: a composite score');
+    keysOk(r, '');
+    return r;
+  }
+  // only A1-approved items, as the report states them (no value, label or sentence is written here)
+  function model11(r) {
+    const pc = r.peerComparison, pos = {};
+    if (pc && Array.isArray(pc.positions)) pc.positions.filter(ok11).forEach((x) => { if (['P', 'R', 'M'].indexOf(x.dimension) >= 0 && x.statement && x.bandLabel && x.periodLabel) pos[x.dimension] = x; });
+    const ry = r.rentalYield && Array.isArray(r.rentalYield.bands) ? r.rentalYield : null, bands = ry ? ry.bands.filter(ok11).filter((b) => isNum(b.grossYieldPct)) : [];
+    const inc = ok11(r.householdIncome) && Array.isArray(r.householdIncome.atOrAbove) ? r.householdIncome : null;
+    const items = Object.keys(pos).length + bands.length + (inc ? 1 : 0);
+    if (!items) return null;
+    return { positions: pos, peerGroup: pc ? pc.peerGroup : null, yield: bands.length ? { period: ry.period, caption: ry.caption, rules: ry.rules || {}, bands: bands, sourceIds: ry.sourceIds || [] } : null, income: inc, items: items,
+      sources: (r.sources || []).map((x) => ({ id: x.id, publisher: x.publisher, dataset: x.dataset, asAt: x.asAt, updated: x.updated, licence: x.licence ? { name: x.licence.name, url: x.licence.url } : null, attribution: x.attribution, url: x.url })) };
   }
 
   /* ---------------------------------------------------------------- formatting an approved value */
@@ -275,18 +318,56 @@
     const a = phrase(pick[0]), b = pick[1] ? phrase(pick[1]) : '';
     return { main: b && (a + ' · ' + b).length <= 66 ? a + ' · ' + b : a, sub: qualifier(pick[0]) };
   }
+  // ---- V1.1 (A1): each approved item as the report states it; the labels around them are the page's own (Size, Typical rent...).
+  // The price window line restates the export's own windows: this development's exact period, and its peers' 12 to 36 months (peerWindowMonths).
+  const srcNames = (ids) => (ids || []).map((id) => SOURCE_NAME[id] || id).join(', ');
+  function pricePhrase(x) { const c = (x.components || [])[0]; if (!c || !isNum(c.value)) return x.bandLabel; return num(Math.abs(c.value), 1) + '% ' + (c.value < 0 ? 'below' : c.value > 0 ? 'above' : 'level with') + ' its local comparables'; }
+  function posHtml(x, pg) {
+    const P = x.dimension === 'P', w = P && x.period && Array.isArray(x.period.peerWindowMonths) ? x.period.peerWindowMonths : null, b = x.basis || {};
+    return '<div class="gwp-v11" data-gwp-v11="' + x.dimension + '"><p class="gwp-k">Compared with peers</p>' +
+      '<p class="gwp-pos"><b>' + esc(x.bandLabel) + '</b><span data-gwp-period>' + esc(x.periodLabel) + '</span></p><p class="gwp-md" data-gwp-statement>' + esc(x.statement) + '</p>' +
+      (w ? '<p class="gwp-ms" data-gwp-window>This development: ' + esc(x.periodLabel) + '. Comparison developments were measured over their own latest ' + num(w[0], 0) + ' to ' + num(w[1], 0) + ' months.</p>' : '') +
+      (P && isNum(b.localComparables) ? '<p class="gwp-ms">Local comparables: ' + num(b.localComparables, 0) + (isNum(b.radiusKm) ? ' within ' + num(b.radiusKm, 0) + ' km' : '') + '</p>' : '') +
+      (pg ? '<p class="gwp-ms">Peer group: ' + esc(pg.rule) + (isNum(pg.developments) ? ' · ' + num(pg.developments, 0) + ' developments' : '') + (x.sample && isNum(x.sample.homes) ? ' · this development ' + num(x.sample.homes, 0) + ' homes' : '') + ' · ' + esc(srcNames(x.sourceIds)) + '</p>' : '') + '</div>';
+  }
+  const pct2 = (v) => (isNum(v) ? v.toLocaleString('en-SG', { maximumFractionDigits: 2 }) : '');   // a percentage exactly as the export gives it (4.3, 4.37)
+  function yieldHtml(y) {
+    const r = y.rules || {};
+    return '<div class="gwp-v11" data-gwp-yield><p class="gwp-k">Gross rental yield by size · ' + esc(period(y.period)) + '</p><div class="gwp-tw"><table class="gwp-yt gwp-yt--stack"><thead><tr><th scope="col">Size</th><th scope="col" class="n">Typical rent</th><th scope="col" class="n">Typical resale price</th><th scope="col" class="n">Gross yield</th><th scope="col">Comparable developments</th></tr></thead><tbody>' +
+      y.bands.map((b) => '<tr data-gwp-band="' + esc(b.band) + '"><th scope="row">' + esc(b.band.replace('-', '–')) + '</th><td class="n" data-l="Typical rent">' + money(b.typicalRent) + '<small>a month · ' + plural(b.rentalContracts, 'contract') + '</small></td><td class="n" data-l="Typical resale price">' + money(b.typicalResalePrice) + '<small>' + plural(b.resales, 'resale') + '</small></td>' +
+        '<td class="n" data-l="Gross yield"><b>' + pct2(b.grossYieldPct) + '%</b>' + (Array.isArray(b.rangePct) ? '<small>range ' + pct2(b.rangePct[0]) + '–' + pct2(b.rangePct[1]) + '%</small>' : '') + '</td>' +
+        '<td data-l="Comparable developments">' + (b.peerGroup ? 'Median ' + pct2(b.peerGroup.medianPct) + '% of ' + num(b.peerGroup.developments, 0) + (Array.isArray(b.peerGroup.middleHalfPct) ? ' (middle half ' + pct2(b.peerGroup.middleHalfPct[0]) + '–' + pct2(b.peerGroup.middleHalfPct[1]) + '%)' : '') : '') + (b.positionText ? '<small>' + esc(b.positionText) + '</small>' : '') + '</td></tr>').join('') +
+      '</tbody></table></div><p class="gwp-md" data-gwp-yield-caption>' + esc(y.caption) + '</p>' +
+      '<ul class="gwp-fine gwp-v11l">' + [r.range ? 'Range: ' + r.range + '.' : '', r.peers ? 'Comparable developments: ' + r.peers + '.' : '', r.shortLease || ''].filter(Boolean).map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul>' +
+      '<p class="gwp-ms">' + esc(srcNames(y.sourceIds)) + ' · ' + esc(period(y.period)) + '</p></div>';
+  }
+  function incomeHtml(h) {
+    return '<div class="gwp-v11" data-gwp-income><p class="gwp-k">Household income · ' + esc(h.planningArea) + ' planning area · GHS ' + esc(h.surveyYear) + '</p>' +
+      '<p class="gwp-md" data-gwp-income-context><b>' + esc(h.context) + '</b> ' + esc(h.geographyNote) + '</p><div class="gwp-tw"><table class="gwp-yt gwp-it"><thead><tr><th scope="col">Monthly household employment income</th><th scope="col" class="n">Households</th><th scope="col" class="n">Share</th></tr></thead><tbody>' +
+      h.atOrAbove.map((x) => '<tr><th scope="row">' + money(x.monthlyIncomeAtLeast) + ' or more</th><td class="n">' + num(x.households, 0) + '</td><td class="n"><b>' + pct2(x.pct) + '%</b></td></tr>').join('') +
+      '</tbody></table></div><p class="gwp-ms">Of ' + num(h.households, 0) + ' resident households. ' + esc(h.incomeDefinition) + '</p>' +
+      '<ul class="gwp-fine gwp-v11l">' + (h.conditions || []).map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul><p class="gwp-ms" data-gwp-income-attr>' + esc(h.attribution) + '</p></div>';
+  }
+  function v11Html(md, k) {
+    const v = md.v11; if (!v) return '';
+    const x = v.positions[k];
+    return (x ? posHtml(x, v.peerGroup) : '') + (k === 'M' && v.yield ? yieldHtml(v.yield) : '') + (k === 'M' && v.income ? incomeHtml(v.income) : '');
+  }
   // The five dimensions: one row each with its headline; each opens in place, directly beneath its own row (several may stay open);
   // closed on a first visit. Opened, a dimension shows ALL its approved measures, what it does not assess, and the evidence links.
   function dimsHtml(md) {
     return md.pillars.map((p) => {
-      const none = !p.metrics.length, toPrices = none && p.key === 'P' && hasRecords(md), h = headline(p);
+      const x11 = md.v11 && md.v11.positions[p.key], add = v11Html(md, p.key), none = !p.metrics.length && !add, toPrices = !p.metrics.length && p.key === 'P' && hasRecords(md);
+      // V1.1: a dimension V1 left unassessed (Price Position) takes its approved position as the headline, with the position and its period beneath
+      const h = !p.metrics.length && x11 ? { main: p.key === 'P' ? pricePhrase(x11) : x11.bandLabel, sub: x11.bandLabel + ' · ' + x11.periodLabel } : headline(p);
       return '<section class="gwp-dim' + (none ? ' gwp-dim--none' : '') + '" id="gwp-' + p.key + '" data-gwp-pillar="' + p.key + '">' +
         '<h3 class="gwp-dimh"><button type="button" class="gwp-dimb" aria-expanded="false" aria-controls="gwpDim' + p.key + '" data-gwp-toggle="' + p.key + '">' +
         '<span class="gwp-pl" aria-hidden="true">' + p.key + '</span><span class="gwp-dn"><b>' + esc(p.name) + '</b><small>' + esc(QUESTION[p.key]) + '</small></span>' +
         '<span class="gwp-hl" data-gwp-headline><b>' + esc(h.main) + '</b>' + (h.sub ? '<small>' + esc(h.sub) + '</small>' : '') + '</span><i class="gwp-chev" aria-hidden="true"></i></button></h3>' +
         '<div class="gwp-dimp" id="gwpDim' + p.key + '" role="region" aria-labelledby="gwpDimL' + p.key + '" hidden><span class="gwp-sr" id="gwpDimL' + p.key + '">' + esc(p.name) + ' in detail</span>' +
         (none ? '<p class="gwp-fine">Not assessed in this report.' + (toPrices ? ' <a class="gwp-evl" href="#/p/' + esc(md.id) + '" data-gwp-evidence="lgTypes">See prices by size in Property Data <span aria-hidden="true">›</span></a>' : '') + '</p>' :
-          '<dl class="gwp-ml">' + p.metrics.map((m) => metricRow(m, md)).join('') + '</dl>') +
+          (p.metrics.length ? '<dl class="gwp-ml">' + p.metrics.map((m) => metricRow(m, md)).join('') + '</dl>' : '') + add +
+          (!p.metrics.length && toPrices ? '<p class="gwp-fine"><a class="gwp-evl" href="#/p/' + esc(md.id) + '" data-gwp-evidence="lgTypes">See prices by size in Property Data <span aria-hidden="true">›</span></a></p>' : '')) +
         (p.unpublished.length ? '<p class="gwp-fine gwp-un"><b>Not assessed in this report:</b> ' + esc(p.unpublished.join('; ')) + '.</p>' : '') + '</div></section>';
     }).join('');
   }
@@ -302,12 +383,15 @@
   }
   function sourcesHtml(md) {
     const used = {}; Object.keys(md.metrics).forEach((k) => (md.metrics[k].sourceIds || []).forEach((s) => { used[s] = 1; }));
-    const S = md.sources.filter((s) => used[s.id]);
+    const v = md.v11, u11 = {};
+    if (v) { Object.keys(v.positions).forEach((k) => (v.positions[k].sourceIds || []).forEach((s) => { u11[s] = 1; })); if (v.yield) v.yield.sourceIds.forEach((s) => { u11[s] = 1; }); if (v.income) (v.income.sourceIds || []).forEach((s) => { u11[s] = 1; }); }
+    const S = md.sources.filter((s) => used[s.id] || u11[s.id]).concat(v ? v.sources.filter((s) => u11[s.id] && !md.sources.some((x) => x.id === s.id)) : []);
     return '<details class="gwp-d gwp-src" id="gwp-src" data-gwp-sources><summary><span class="gwp-pn">Sources, data periods and limits</span></summary><div class="gwp-din">' +
       '<ul class="gwp-sl">' + S.map((s) => '<li><b>' + esc(s.publisher) + '</b> · ' + esc(s.dataset) + (s.asAt ? ' · as at ' + esc(ym(s.asAt) || day(s.asAt) || s.asAt) : s.updated ? ' · updated ' + esc(day(s.updated) || s.updated) : '') +
         (s.licence && s.licence.url ? ' · <a href="' + esc(s.licence.url) + '" target="_blank" rel="noopener">' + esc(s.licence.name) + '</a>' : s.licence ? ' · ' + esc(s.licence.name) : '') + (s.attribution ? '<small>' + esc(s.attribution) + '</small>' : '') + '</li>').join('') + '</ul>' +
       (md.limitations.length ? '<p class="gwp-fine"><b>Limits of this evidence</b></p><ul class="gwp-lim">' + md.limitations.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul>' : '') +
-      '<p class="gwp-fine">PRISM V1 · records to ' + esc(ym(md.asOf) || md.asOf) + (md.approvedAt ? ' · published ' + esc(day(md.approvedAt)) : '') + '. Analysis and derived statistics by Groundwork; not endorsed by the data publishers.</p></div></details>';
+      '<p class="gwp-fine">PRISM V1 · records to ' + esc(ym(md.asOf) || md.asOf) + (md.approvedAt ? ' · published ' + esc(day(md.approvedAt)) : '') + '. Analysis and derived statistics by Groundwork; not endorsed by the data publishers.</p>' +
+      (v ? '<p class="gwp-fine" data-gwp-v11-src>PRISM V1.1 additions (peer positions, gross rental yield, household income) · URA records to ' + esc(ym(v.periods.URA_TRANSACTIONS) || v.periods.URA_TRANSACTIONS || '') + (v.income ? ' · ' + esc(v.periods.SINGSTAT_GHS2025 || '') : '') + '.</p>' : '') + '</div></details>';
   }
   // The PRISM Analysis view. o.site: the launch's own site { url } (a launch has no resale report); o.compare: offer Compare.
   function pageHtml(md, o) {
@@ -320,7 +404,7 @@
       '<div class="gwp-ttl"><div class="gwp-ht"><h1 class="gwp-h1">' + esc(md.name) + '</h1>' + (md.meta.length ? '<p class="gwp-meta">' + esc(md.meta.join(' · ')) + '</p>' : '') + '</div><div class="gwp-acts">' + acts + '</div></div>' +
       switchHtml(md, 'prism', root) + '<img class="gwp-hero" src="' + esc(root) + 'assets/img/prism/prism-hero.svg" width="600" height="420" alt="" aria-hidden="true"></header>';
     const bar = '<nav class="gwp-bar2" aria-label="On this page" data-gwp-bar><div class="gwp-bar2-in"><button type="button" data-gwp-jump="sum" aria-current="true">Summary</button>' +
-      md.pillars.map((p) => '<button type="button" data-gwp-jump="' + p.key + '"' + (p.metrics.length ? '' : ' class="dim"') + '><b>' + p.key + '</b> ' + SHORT[p.key] + '</button>').join('') + '<button type="button" data-gwp-jump="src">Sources</button></div></nav>';
+      md.pillars.map((p) => '<button type="button" data-gwp-jump="' + p.key + '"' + (p.metrics.length || v11Html(md, p.key) ? '' : ' class="dim"') + '><b>' + p.key + '</b> ' + SHORT[p.key] + '</button>').join('') + '<button type="button" data-gwp-jump="src">Sources</button></div></nav>';
     const next = '<section class="gwp-next" aria-label="Where next"><a class="gwp-nx" href="' + esc(back) + '" data-gwp-back><b>Property Data</b><span>' + (hasRecords(md) ? 'Prices, sales and rents for ' + esc(md.name) : 'Explore the numbers') + '</span></a>' +
       '<a class="gwp-nx" href="' + esc(root) + 'tools/payment-planner/" data-gwp-calc2><b>Calculate my purchase</b><span>Cash, CPF and the monthly instalment</span></a></section>';
     return '<div class="gwp-page" data-gwp-page="' + esc(md.id) + '" data-gwp-mode="assessment"><div class="gwp-wrap">' + head + '</div>' + bar + '<div class="gwp-wrap">' +
@@ -354,10 +438,23 @@
     const p = manifest(root).then((m) => {
       const e = m.reports.find((x) => x.id === id); if (!e) return null;
       return fetch(root + DIR + e.path + '?v=' + e.sha256.slice(0, 10)).then((r) => { if (!r.ok) throw new Error('report ' + r.status); return r.text(); })
-        .then((t) => sha256(t).then((h) => { if (h !== e.sha256) throw new Error('report: sha256 does not match the manifest'); return model(checkReport(JSON.parse(t), e), m); }));
+        .then((t) => sha256(t).then((h) => { if (h !== e.sha256) throw new Error('report: sha256 does not match the manifest'); return model(checkReport(JSON.parse(t), e), m); }))
+        .then((md) => (md ? load11(root, e, m).then((v) => { md.v11 = v; return md; }) : md));
     }).catch(() => null);
     cache.reports[id] = p; p.then((x) => { if (x === null) delete cache.reports[id]; });
     return p;
+  }
+  // V1.1: the approved manifest (pinned by sha256) for this V1 release, the pairing with this exact V1 report, and the report's own sha256
+  let man11 = null;
+  function load11(root, e, v1) {
+    if (!man11) { man11 = fetch(root + V11.DIR + 'manifest.json?v=' + V11.MANIFEST.slice(0, 10)).then((r) => { if (!r.ok) throw new Error('v1.1 manifest ' + r.status); return r.text(); })
+      .then((t) => sha256(t).then((h) => { if (h !== V11.MANIFEST) throw new Error('v1.1 manifest: not the approved file'); return JSON.parse(t); })); man11.catch(() => { man11 = null; }); }
+    return man11.then((m) => {
+      checkManifest11(m, v1, { id: e.id, sha256: e.sha256 });
+      const f = m.reports.find((x) => x.id === e.id); if (!f) return null;
+      return fetch(root + V11.DIR + f.path + '?v=' + f.sha256.slice(0, 10)).then((r) => { if (!r.ok) throw new Error('v1.1 report ' + r.status); return r.text(); })
+        .then((t) => sha256(t).then((h) => { if (h !== f.sha256) throw new Error('v1.1 report: sha256'); const v = model11(checkReport11(JSON.parse(t), f)); if (v) v.periods = m.dataPeriodsBySource || {}; return v; }));
+    }).catch(() => null);
   }
   const settled = {};   // id -> model (or null) once loaded, so a page redraw can place the PRISM parts without waiting
   const ss = { get: (k) => { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { sessionStorage.setItem(k, v); } catch (e) { /* private mode */ } }, del: (k) => { try { sessionStorage.removeItem(k); } catch (e) { /* */ } } };
@@ -484,5 +581,5 @@
     }
   }
 
-  return { VERSION, switchHtml, leadSites, layersHtml, dimsHtml, evidenceOf, headline, landingHtml, mountLanding, QUESTION, SCHEMA, DIR, MANIFEST_V, PILLARS, checkManifest, checkReport, approved, shown, model, value, detail, period, evidence, previewHtml, pageHtml, load, mountPreview, show, _cache: cache, _settled: settled };
+  return { V11, checkManifest11, checkReport11, model11, posHtml, yieldHtml, incomeHtml, v11Html, VERSION, switchHtml, leadSites, layersHtml, dimsHtml, evidenceOf, headline, landingHtml, mountLanding, QUESTION, SCHEMA, DIR, MANIFEST_V, PILLARS, checkManifest, checkReport, approved, shown, model, value, detail, period, evidence, previewHtml, pageHtml, load, mountPreview, show, _cache: cache, _settled: settled };
 });
