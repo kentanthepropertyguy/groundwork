@@ -131,7 +131,7 @@ check('never: a sustained resale rate for a settling development, or an unsold f
 
 // ---- 4 pages
 check('KW and HC: their V1 assessment page (verdict first) with the r2 supplement', ['kingsford-waterbay', 'hougang-central'].every((id) => P[id].mode === 'assessment' && html[id].includes('class="gwp-card gwp-open"') && html[id].includes('PRISM Verdict') && P[id].v11));
-check('TT, HP, The Quinn: evidence-profile pages (the same page, no verdict, nothing written in its place)', ['thomson-three', 'hundred-palms-residences', 'the-quinn'].every((id) => P[id].mode === 'profile' && G.hasPage(P[id]) && html[id].includes('data-gwp-mode="profile"') && !html[id].includes('gwp-card') && !/PRISM Verdict|Why\?|watch out/i.test(txt[id])));
+check('TT, HP, The Quinn: evidence-profile pages (the same page, no verdict card; their Reveal is tested below)', ['thomson-three', 'hundred-palms-residences', 'the-quinn'].every((id) => P[id].mode === 'profile' && G.hasPage(P[id]) && html[id].includes('data-gwp-mode="profile"') && !html[id].includes('gwp-card') && !/PRISM Verdict|Why\?|watch out/i.test(txt[id])));
 check('TT keeps its V1 identity line (District, planning area) and none of its unassessed V1 measures', P['thomson-three'].meta.join(' · ').startsWith('District ') && !html['thomson-three'].includes('data-gwp-metric='));
 check('HP and The Quinn: identity from the r2 comparison group (OCR, class)', P['hundred-palms-residences'].meta.join(' · ') === 'OCR · Executive condominium' && P['the-quinn'].meta.join(' · ') === 'OCR · Condominium');
 check('Hougang Central: income only, in Market Demand; no position, yield or profile', html['hougang-central'].includes('data-gwp-income') && !html['hougang-central'].includes('data-gwp-yield') && !html['hougang-central'].includes('data-gwp-v11="') && !html['hougang-central'].includes('data-gwp-profile'));
@@ -150,5 +150,47 @@ SUPP.forEach((id) => {
 });
 check('HP and The Quinn with no V1.1: no page at all', ONLY.every((id) => G.compose(null, null) === null && !G.hasPage(G.compose(null, null))));
 check('names and numbers come from the data, never the code', !/Kingsford|Hougang|Thomson|Hundred Palms|Quinn|6\.4|22\.7|1,060/.test(read('assets/js/gw-prism.js')));
+
+// ---- 5 the Standard Reveal on evidence-profile pages (Master Planning, 3 Nov 2026): the approved headlines, approved figures with their
+//      periods, qualifications word for word from the approved statements; a factual summary when no approved headline fits; never a verdict
+const RV = (id) => G.reveal11(P[id].v11);
+const statementsOf = (id) => { const r = R(id); return (r.peerComparison ? r.peerComparison.positions.map((x) => x.statement) : []).concat(r.profile ? r.profile.lines.map((l) => l.statement) : []).join(' '); };
+check('the three approved headlines, exactly', G.REVEAL.resaleSettling === 'High resale activity, but sustained activity is still settling' && G.REVEAL.resaleAbove === 'Resale activity is above most peers' && G.REVEAL.quiet === 'A relatively quiet surrounding resale market' && Object.keys(G.REVEAL).length === 3);
+{ const x = RV('hundred-palms-residences');
+  check('Hundred Palms: "High resale activity, but sustained activity is still settling"; 12.6 observed (Oct 2024–Sep 2026, higher than 45 of 46) and +22.7% price (a position, not a measure of value; Oct 2025–Sep 2026)',
+    x.kind === 'reveal' && x.head === G.REVEAL.resaleSettling && x.figs[0].v === '12.6' && x.figs[0].label === 'Observed resales per 100 homes a year' && x.figs[0].sub === 'Oct 2024–Sep 2026 · higher than 45 of 46 similar developments' &&
+    x.figs[1].v === '+22.7%' && x.figs[1].label.endsWith('(a position, not a measure of value)') && x.figs[1].sub === 'Higher relative price than most peers · Oct 2025–Sep 2026', x);
+  check('Hundred Palms: the settling and resale-wave qualifications, word for word from the approved statements (analytical proxy, not an official MOP date)', x.notes.length === 2 && x.notes.every((n) => statementsOf('hundred-palms-residences').includes(n)) && /^Settling: /.test(x.notes[0]) && /not an official MOP date\.$/.test(x.notes[1]), x.notes); }
+{ const x = RV('the-quinn');
+  check('The Quinn: "Resale activity is above most peers"; 4.7 (Oct 2024–Sep 2026, higher than 208 of 266 with a figure) and −2.2% price, "In line with comparable condos", a position not a measure of value',
+    x.kind === 'reveal' && x.head === G.REVEAL.resaleAbove && x.figs[0].v === '4.7' && x.figs[0].sub === 'Oct 2024–Sep 2026 · higher than 208 of 266 similar developments with a figure' && x.figs[1].v === '−2.2%' && x.figs[1].sub === 'In line with comparable condos · Oct 2024–Sep 2026' && x.figs[1].label.endsWith('(a position, not a measure of value)'), x); }
+{ const x = RV('thomson-three');
+  check('Thomson Three: "A relatively quiet surrounding resale market"; 217 resales within 2 km (Oct 2025–Sep 2026, more than 2 of 51) and −24.7% against Oct 2024–Sep 2025',
+    x.kind === 'reveal' && x.head === G.REVEAL.quiet && x.figs[0].v === '217' && x.figs[0].sub === 'Oct 2025–Sep 2026 · more than 2 of 51 similar developments' && x.figs[1].v === '−24.7%' && x.figs[1].sub === 'Oct 2025–Sep 2026 against Oct 2024–Sep 2025', x);
+  check('Thomson Three: the quiet-market qualification and "Observed transactions, not a prediction.", word for word', x.notes.length === 2 && x.notes.every((n) => statementsOf('thomson-three').includes(n)) && /thin market, not an advantage\.$/.test(x.notes[0]), x.notes); }
+check('every Reveal figure is an approved value as exported (no new calculation)', (() => { const h = R('hundred-palms-residences'), q = R('the-quinn'), t = R('thomson-three');
+  return statementsOf('hundred-palms-residences').includes('12.6 resales per 100 homes') && statementsOf('hundred-palms-residences').includes('22.7% above') && statementsOf('the-quinn').includes('4.7 resales per 100 homes') && statementsOf('the-quinn').includes('2.2% below') && statementsOf('thomson-three').includes('217 resales within 2 km') && statementsOf('thomson-three').includes('(−24.7%)') && h && q && t; })());
+['thomson-three', 'hundred-palms-residences', 'the-quinn'].forEach((id) => {
+  const h = html[id], at = h.indexOf('data-gwp-reveal='), rv = text(h.slice(h.indexOf('<div class="gwp-ev"', at), h.indexOf('</section>', at))).trim();
+  check(id + ': the Reveal opens the page (after the brand line, before the five dimensions), in the Reveal design, labelled "PRISM Reveal"', at > h.indexOf('id="gwp-sum"') && at < h.indexOf('id="gwpDimsH"') && /class="gwp-ev" data-gwp-ev="reveal11"/.test(h) && rv.startsWith('PRISM Reveal'));
+  check(id + ': never a verdict, recommendation, prediction, score, Ken\'s Take or unsupported comparison in the Reveal', !/verdict|recommend|\bbuy\b|invest|forecast|predict(?!ion\.)|score|undervalued|bargain|guarantee|ken.s take|older|EC comparables|will /i.test(rv), rv);
+});
+check('Kingsford Waterbay and Hougang Central: their V1 Reveal in the verdict card, no r2 Reveal', ['kingsford-waterbay', 'hougang-central'].every((id) => !html[id].includes('data-gwp-reveal') && html[id].includes('<p class="gwp-k">PRISM Reveal</p>') && html[id].includes('class="gwp-card gwp-open"')));
+// fallbacks: no approved headline fits -> a factual summary of the approved labels; a missing qualification -> no Reveal; nothing -> no card
+const mod = (id, f) => { const r = clone(R(id)); f(r); return G.model11(r, null); };
+{ const x = G.reveal11(mod('thomson-three', (r) => { r.profile.lines.find((l) => l.measure === 'supply.quietArea').data.flag = false; }));
+  check('fallback, nothing fits (price and resale around peers, not a quiet area): a factual summary of the approved labels', x.kind === 'summary' && x.head === 'Price: In line with comparable condos · Resale activity: Around peers' && x.figs.length === 2 && !Object.values(G.REVEAL).includes(x.head), x);
+  check('fallback summary is labelled "PRISM summary", not Reveal', /PRISM summary/.test(G.revealHtml(x)) && !/PRISM Reveal/.test(G.revealHtml(x))); }
+{ const x = G.reveal11(mod('the-quinn', (r) => { const p = r.peerComparison.positions.find((y) => y.dimension === 'R'); p.band = 'below'; p.bandLabel = 'Below peers'; }));
+  check('fallback, resale below peers (no approved headline): a factual summary', x.kind === 'summary' && x.head.includes('Resale activity: Below peers')); }
+{ const x = G.reveal11(mod('the-quinn', (r) => { const c = r.peerComparison.positions.find((y) => y.dimension === 'R').components[0]; c.lower = 100; }));
+  check('"above most peers" only when more than half the peers are lower: otherwise a summary', x.kind === 'summary'); }
+{ const x = G.reveal11(mod('hundred-palms-residences', (r) => { const l = r.profile.lines.find((y) => y.measure === 'resale.sustained'); l.statement = l.statement.replace('Settling: ', 'Pending: '); }));
+  check('a settling Reveal never appears without its qualification (missing: no Reveal and no summary)', x === null); }
+{ const x = G.reveal11(mod('thomson-three', (r) => { const l = r.profile.lines.find((y) => y.measure === 'supply.quietArea'); l.statement = l.statement.replace('Quiet area: ', 'Thin: '); }));
+  check('a quiet-market Reveal never appears without its qualification (it becomes the factual summary)', x.kind === 'summary'); }
+{ const x = G.reveal11(mod('the-quinn', (r) => { r.peerComparison.positions = []; r.profile.lines.find((y) => y.measure === 'supply.quietArea').data.flag = false; }));
+  const pm = G.compose(null, (() => { const v = mod('the-quinn', (r) => { r.peerComparison.positions = []; }); v.periods = m.dataPeriodsBySource; return v; })());
+  check('no position and no flag: no card at all; the five dimensions still show', x === null && !G.pageHtml(pm, { root: '../' }).includes('data-gwp-reveal') && G.pageHtml(pm, { root: '../' }).includes('id="gwpDimsH"')); }
 console.log('prism-v11-tests: ' + ok + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

@@ -331,3 +331,16 @@ body #ws-dev .lg-sb .kpr-search.has-go>input{padding-right:196px}
 .gwp-pst > span + span{margin-top:4px}
 /* a panel that opens straight onto a V1.1 block (no V1 measures above it): no rule and no gap above its first block */
 .gwp-dimp > .gwp-sr + .gwp-v11{margin-top:0;padding-top:0;border-top:0}
+/* Standard Reveal on an evidence-profile page (Master Planning, 3 Nov 2026): the existing Reveal design, on its own; from 1024 px the
+   finding and its qualification on the left, the two figures on the right */
+.gwp-rv11{min-width:0}
+.gwp-rv11 .gwp-ev{box-shadow:0 1px 2px rgba(22,33,62,.04),0 12px 32px rgba(22,33,62,.06)}
+@media (min-width:1024px){
+  .gwp-rv11 .gwp-ev{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);grid-template-areas:"k f" "h f" "n f";grid-template-rows:auto auto 1fr;column-gap:32px;padding:26px 28px}
+  .gwp-rv11 .gwp-k{grid-area:k}
+  .gwp-rv11 .gwp-rv{grid-area:h;font-size:26px}
+  .gwp-rv11 .gwp-figs{grid-area:f;align-self:start}
+  .gwp-rv11 .gwp-evn{grid-area:n;align-self:start}
+}
+/* below 360 px (200% zoom on a phone) the two Reveal figures stack: side by side their words ran past their boxes (V1 Reveals too) */
+@media (max-width:359px){.gwp-figs{grid-template-columns:minmax(0,1fr)}.gwp-ev{padding:12px}.gwp-fig{padding:10px}.gwp-fig b{font-size:24px}.gwp-fig b em{font-size:14px}.gwp-fig span{font-size:13px}.gwp-fig span,.gwp-fig small{overflow-wrap:break-word}}

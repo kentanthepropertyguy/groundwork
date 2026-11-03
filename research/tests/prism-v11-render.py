@@ -8,6 +8,8 @@ Run from the site folder:  python3 research/tests/prism-v11-render.py
    profile page; the landing lists all five; a dimension link (#/prism/<id>/s) opens that dimension.
  Fails closed in the browser: a changed r2 report or manifest, a missing manifest, the previous A1 files left in place, a V1 pairing that
    does not match -> the V1 pages are exactly V1, and a profile page's address falls back to its Property Data.
+ The Standard Reveal (Master Planning, 3 Nov 2026) on the three profile pages: approved headline, figures, periods, qualifications;
+   the factual-summary fallback; the V1 Reveals unchanged.
  Never: a score, purchasing power, affordability or forecast wording; sideways scrolling; a script error."""
 import json, os, pathlib, re, socket, subprocess, sys, time
 from playwright.sync_api import sync_playwright
@@ -83,6 +85,38 @@ try:
             check(f'{vn} TT: "In line with comparable condos"; Supply names the quiet area', 'In line with comparable condos' in hl(pg, 'P') and hl(pg, 'S').endswith('Quiet area'), [hl(pg, 'P'), hl(pg, 'S')])
             open_prism(pg, 'hougang-central')
             check(f'{vn} HC: income only (Market Demand); Price Position still "Not assessed"', pg.locator('[data-gwp-income]').count() == 1 and pg.locator('[data-gwp-yield], [data-gwp-profile], [data-gwp-v11="P"]').count() == 0 and 'Not assessed in this report' in hl(pg, 'P'))
+            ctx.close()
+        # the Standard Reveal (Master Planning, 3 Nov 2026) on the three evidence-profile pages, desktop, phone and 200% zoom
+        RVX = {'hundred-palms-residences': ('High resale activity, but sustained activity is still settling', ['12.6', '+22.7%'], ['Settling: fewer than 12 months of resales', 'not an official MOP date', 'Oct 2024–Sep 2026', 'Oct 2025–Sep 2026', '(a position, not a measure of value)']),
+               'the-quinn': ('Resale activity is above most peers', ['4.7', '−2.2%'], ['higher than 208 of 266 similar developments with a figure', 'In line with comparable condos', '(a position, not a measure of value)', 'Oct 2024–Sep 2026']),
+               'thomson-three': ('A relatively quiet surrounding resale market', ['217', '−24.7%'], ['thin market, not an advantage', 'Observed transactions, not a prediction.', 'Oct 2025–Sep 2026 against Oct 2024–Sep 2025', 'more than 2 of 51 similar developments'])}
+        for w in [1440, 390, 195]:
+            vn = f'{w}px'; ctx, pg, errs = fresh(br, w)
+            for id, (head, figs, quals) in RVX.items():
+                pg.goto(B + '/research/#/prism/' + id); pg.wait_for_selector('[data-gwp-reveal]', timeout=30000); pg.wait_for_timeout(500)
+                rv = re.sub(r'\s+', ' ', pg.inner_text('[data-gwp-reveal]')).strip()
+                got = pg.evaluate("[...document.querySelectorAll('[data-gwp-reveal] .gwp-fig b')].map(b => b.textContent)")
+                check(f'{vn} {id} Reveal: "PRISM Reveal", "{head}", figures {figs}', rv.lower().startswith(('PRISM Reveal ' + head).lower()) and head in rv and got == figs, [rv[:120], got])
+                check(f'{vn} {id} Reveal: its periods and qualifications', all(q in rv for q in quals), rv)
+                check(f'{vn} {id} Reveal: nothing unsupported (no verdict, recommendation, prediction, score, Ken\'s Take)', not re.search(r'verdict|recommend|\bbuy\b|invest|forecast|predict(?!ion\.)|score|undervalued|ken.s take|older', rv, re.I), rv)
+                order = pg.evaluate("(() => { const r = document.querySelector('[data-gwp-reveal]').getBoundingClientRect(), d = document.querySelector('#gwpDimsH').getBoundingClientRect(), s = document.querySelector('#gwp-sum').getBoundingClientRect(); return [s.top <= r.top, r.bottom <= d.top]; })()")
+                check(f'{vn} {id} Reveal: opens the page, before the five dimensions', all(order), order)
+                lay = pg.evaluate("(() => { const h = document.querySelector('[data-gwp-reveal] .gwp-rv').getBoundingClientRect(), f = document.querySelector('[data-gwp-reveal] .gwp-figs').getBoundingClientRect(); return [Math.round(f.left - h.right), Math.round(f.top - h.bottom)]; })()")
+                check(f'{vn} {id} Reveal layout: {"figures beside the finding" if w >= 1024 else "stacked"}', (lay[0] >= 16) if w >= 1024 else (lay[1] >= 0), lay)
+                check(f'{vn} {id} Reveal: no sideways scroll, no script error', pg.evaluate(NOOVER) and not errs, errs[:2])
+                ov = pg.evaluate("[...document.querySelectorAll('[data-gwp-reveal] .gwp-fig')].map(f => f.scrollWidth - f.clientWidth)")
+                check(f'{vn} {id} Reveal: every figure fits its box (no words running past it)', all(x <= 1 for x in ov), ov)
+            # the factual summary (fallback), drawn by the page itself from Thomson Three's model with its quiet flag cleared
+            pg.goto(B + '/research/#/prism/thomson-three'); pg.wait_for_selector('[data-gwp-reveal]', timeout=30000); pg.wait_for_timeout(400)
+            fb = pg.evaluate("(() => { const v = JSON.parse(JSON.stringify(GW_PRISM._settled['thomson-three'].v11)); v.profile.lines.S.find(l => l.measure === 'supply.quietArea').data.flag = false; const x = GW_PRISM.reveal11(v); document.querySelector('[data-gwp-reveal]').outerHTML = GW_PRISM.revealHtml(x); return [x.kind, x.head]; })()")
+            pg.wait_for_timeout(200); fbt = re.sub(r'\s+', ' ', pg.inner_text('[data-gwp-reveal]')).strip()
+            check(f'{vn} fallback: a factual summary of the approved labels, labelled "PRISM summary", no approved headline', fb == ['summary', 'Price: In line with comparable condos · Resale activity: Around peers'] and fbt.lower().startswith('prism summary price: in line with comparable condos') and 'prism reveal' not in fbt.lower(), [fb, fbt[:120]])
+            check(f'{vn} fallback summary: no sideways scroll', pg.evaluate(NOOVER))
+            for id in ['kingsford-waterbay', 'hougang-central']:
+                pg.goto(B + '/research/#/prism/' + id); pg.wait_for_selector('[data-gwp-page]', timeout=30000); pg.wait_for_timeout(400)
+                check(f'{vn} {id}: its V1 Reveal in the verdict card, unchanged; no r2 Reveal', pg.locator('.gwp-card .gwp-rvl .gwp-ev').count() == 1 and pg.locator('[data-gwp-reveal]').count() == 0)
+                ov = pg.evaluate("[...document.querySelectorAll('.gwp-rvl .gwp-fig')].map(f => f.scrollWidth - f.clientWidth)")
+                check(f'{vn} {id}: its V1 Reveal figures fit their boxes', all(x <= 1 for x in ov), ov)
             ctx.close()
         # navigation
         for w in [1440, 390]:
