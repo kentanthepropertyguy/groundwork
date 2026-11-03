@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "textile-centre",
  "name": "Textile Centre",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/textile-centre/P",
+    "itemId": "textile-centre/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/textile-centre/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -74,10 +70,11 @@
     ]
    },
    {
-    "itemId": "B1/textile-centre/R",
+    "itemId": "textile-centre/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/textile-centre/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -137,10 +134,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/textile-centre/price.entry",
+    "itemId": "textile-centre/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/textile-centre/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -188,10 +186,11 @@
     ]
    },
    {
-    "itemId": "B1/textile-centre/resale.sustained",
+    "itemId": "textile-centre/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/textile-centre/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -215,10 +214,11 @@
     ]
    },
    {
-    "itemId": "B1/textile-centre/infrastructure.mrt",
+    "itemId": "textile-centre/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/textile-centre/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -256,10 +256,11 @@
     ]
    },
    {
-    "itemId": "B1/textile-centre/infrastructure.schools",
+    "itemId": "textile-centre/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/textile-centre/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -292,10 +293,11 @@
     ]
    },
    {
-    "itemId": "B1/textile-centre/infrastructure.amenities",
+    "itemId": "textile-centre/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/textile-centre/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -334,10 +336,11 @@
     ]
    },
    {
-    "itemId": "B1/textile-centre/infrastructure.futureTransport",
+    "itemId": "textile-centre/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/textile-centre/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -352,10 +355,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/textile-centre/supply.competition",
+    "itemId": "textile-centre/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/textile-centre/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -418,10 +422,11 @@
     ]
    },
    {
-    "itemId": "B1/textile-centre/supply.unsoldInventory",
+    "itemId": "textile-centre/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/textile-centre/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -436,10 +441,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/textile-centre/supply.pipeline",
+    "itemId": "textile-centre/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/textile-centre/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -483,10 +489,11 @@
     ]
    },
    {
-    "itemId": "B1/textile-centre/supply.quietArea",
+    "itemId": "textile-centre/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/textile-centre/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -513,10 +520,11 @@
     ]
    },
    {
-    "itemId": "B1/textile-centre/market.backdrop",
+    "itemId": "textile-centre/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/textile-centre/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

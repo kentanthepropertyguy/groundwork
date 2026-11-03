@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "ygk-garden",
  "name": "YGK Garden",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": null,
  "rentalYield": null,
@@ -25,10 +20,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/ygk-garden/price.entry",
+    "itemId": "ygk-garden/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/ygk-garden/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -43,10 +39,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/ygk-garden/resale.sustained",
+    "itemId": "ygk-garden/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/ygk-garden/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -61,10 +58,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/ygk-garden/infrastructure.mrt",
+    "itemId": "ygk-garden/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/ygk-garden/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -102,10 +100,11 @@
     ]
    },
    {
-    "itemId": "B1/ygk-garden/infrastructure.schools",
+    "itemId": "ygk-garden/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/ygk-garden/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -138,10 +137,11 @@
     ]
    },
    {
-    "itemId": "B1/ygk-garden/infrastructure.amenities",
+    "itemId": "ygk-garden/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/ygk-garden/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -180,10 +180,11 @@
     ]
    },
    {
-    "itemId": "B1/ygk-garden/infrastructure.futureTransport",
+    "itemId": "ygk-garden/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/ygk-garden/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -198,10 +199,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/ygk-garden/supply.competition",
+    "itemId": "ygk-garden/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/ygk-garden/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -244,10 +246,11 @@
     ]
    },
    {
-    "itemId": "B1/ygk-garden/supply.unsoldInventory",
+    "itemId": "ygk-garden/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/ygk-garden/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -262,10 +265,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/ygk-garden/supply.pipeline",
+    "itemId": "ygk-garden/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/ygk-garden/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -284,10 +288,11 @@
     ]
    },
    {
-    "itemId": "B1/ygk-garden/supply.quietArea",
+    "itemId": "ygk-garden/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/ygk-garden/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -314,10 +319,11 @@
     ]
    },
    {
-    "itemId": "B1/ygk-garden/market.backdrop",
+    "itemId": "ygk-garden/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/ygk-garden/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

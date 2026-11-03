@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "wing-fong-building",
  "name": "Wing Fong Building",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": null,
  "rentalYield": null,
@@ -25,10 +20,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/wing-fong-building/price.entry",
+    "itemId": "wing-fong-building/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wing-fong-building/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -43,10 +39,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/wing-fong-building/resale.sustained",
+    "itemId": "wing-fong-building/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wing-fong-building/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -61,10 +58,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/wing-fong-building/infrastructure.mrt",
+    "itemId": "wing-fong-building/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wing-fong-building/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -102,10 +100,11 @@
     ]
    },
    {
-    "itemId": "B1/wing-fong-building/infrastructure.schools",
+    "itemId": "wing-fong-building/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wing-fong-building/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -138,10 +137,11 @@
     ]
    },
    {
-    "itemId": "B1/wing-fong-building/infrastructure.amenities",
+    "itemId": "wing-fong-building/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wing-fong-building/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -180,10 +180,11 @@
     ]
    },
    {
-    "itemId": "B1/wing-fong-building/infrastructure.futureTransport",
+    "itemId": "wing-fong-building/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wing-fong-building/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -198,10 +199,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/wing-fong-building/supply.competition",
+    "itemId": "wing-fong-building/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wing-fong-building/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -254,10 +256,11 @@
     ]
    },
    {
-    "itemId": "B1/wing-fong-building/supply.unsoldInventory",
+    "itemId": "wing-fong-building/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wing-fong-building/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -272,10 +275,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/wing-fong-building/supply.pipeline",
+    "itemId": "wing-fong-building/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wing-fong-building/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -311,10 +315,11 @@
     ]
    },
    {
-    "itemId": "B1/wing-fong-building/supply.quietArea",
+    "itemId": "wing-fong-building/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wing-fong-building/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -341,10 +346,11 @@
     ]
    },
    {
-    "itemId": "B1/wing-fong-building/market.backdrop",
+    "itemId": "wing-fong-building/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wing-fong-building/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "treasure-crest",
  "name": "Treasure Crest",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/treasure-crest/P",
+    "itemId": "treasure-crest/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/treasure-crest/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -74,10 +70,11 @@
     ]
    },
    {
-    "itemId": "B1/treasure-crest/R",
+    "itemId": "treasure-crest/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/treasure-crest/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -137,10 +134,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/treasure-crest/price.entry",
+    "itemId": "treasure-crest/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/treasure-crest/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -188,10 +186,11 @@
     ]
    },
    {
-    "itemId": "B1/treasure-crest/resale.sustained",
+    "itemId": "treasure-crest/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/treasure-crest/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -220,10 +219,11 @@
     ]
    },
    {
-    "itemId": "B1/treasure-crest/infrastructure.mrt",
+    "itemId": "treasure-crest/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/treasure-crest/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -261,10 +261,11 @@
     ]
    },
    {
-    "itemId": "B1/treasure-crest/infrastructure.schools",
+    "itemId": "treasure-crest/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/treasure-crest/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -297,10 +298,11 @@
     ]
    },
    {
-    "itemId": "B1/treasure-crest/infrastructure.amenities",
+    "itemId": "treasure-crest/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/treasure-crest/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -339,10 +341,11 @@
     ]
    },
    {
-    "itemId": "B1/treasure-crest/infrastructure.futureTransport",
+    "itemId": "treasure-crest/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/treasure-crest/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -357,10 +360,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/treasure-crest/supply.competition",
+    "itemId": "treasure-crest/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/treasure-crest/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -387,10 +391,11 @@
     ]
    },
    {
-    "itemId": "B1/treasure-crest/supply.unsoldInventory",
+    "itemId": "treasure-crest/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/treasure-crest/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -405,10 +410,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/treasure-crest/supply.pipeline",
+    "itemId": "treasure-crest/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/treasure-crest/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -427,10 +433,11 @@
     ]
    },
    {
-    "itemId": "B1/treasure-crest/supply.quietArea",
+    "itemId": "treasure-crest/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/treasure-crest/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -457,10 +464,11 @@
     ]
    },
    {
-    "itemId": "B1/treasure-crest/market.backdrop",
+    "itemId": "treasure-crest/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/treasure-crest/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

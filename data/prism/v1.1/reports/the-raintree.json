@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "the-raintree",
  "name": "The Raintree",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/the-raintree/P",
+    "itemId": "the-raintree/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-raintree/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -74,10 +70,11 @@
     ]
    },
    {
-    "itemId": "B1/the-raintree/R",
+    "itemId": "the-raintree/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-raintree/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -137,10 +134,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/the-raintree/price.entry",
+    "itemId": "the-raintree/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-raintree/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -188,10 +186,11 @@
     ]
    },
    {
-    "itemId": "B1/the-raintree/resale.sustained",
+    "itemId": "the-raintree/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-raintree/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -215,10 +214,11 @@
     ]
    },
    {
-    "itemId": "B1/the-raintree/infrastructure.mrt",
+    "itemId": "the-raintree/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-raintree/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -256,10 +256,11 @@
     ]
    },
    {
-    "itemId": "B1/the-raintree/infrastructure.schools",
+    "itemId": "the-raintree/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-raintree/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -292,10 +293,11 @@
     ]
    },
    {
-    "itemId": "B1/the-raintree/infrastructure.amenities",
+    "itemId": "the-raintree/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-raintree/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -334,10 +336,11 @@
     ]
    },
    {
-    "itemId": "B1/the-raintree/infrastructure.futureTransport",
+    "itemId": "the-raintree/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-raintree/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -352,10 +355,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/the-raintree/supply.competition",
+    "itemId": "the-raintree/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-raintree/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -403,10 +407,11 @@
     ]
    },
    {
-    "itemId": "B1/the-raintree/supply.unsoldInventory",
+    "itemId": "the-raintree/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-raintree/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -421,10 +426,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/the-raintree/supply.pipeline",
+    "itemId": "the-raintree/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-raintree/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -443,10 +449,11 @@
     ]
    },
    {
-    "itemId": "B1/the-raintree/supply.quietArea",
+    "itemId": "the-raintree/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-raintree/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -473,10 +480,11 @@
     ]
    },
    {
-    "itemId": "B1/the-raintree/market.backdrop",
+    "itemId": "the-raintree/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-raintree/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

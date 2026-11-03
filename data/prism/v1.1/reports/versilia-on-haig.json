@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "versilia-on-haig",
  "name": "Versilia on Haig",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/versilia-on-haig/P",
+    "itemId": "versilia-on-haig/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/versilia-on-haig/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -74,10 +70,11 @@
     ]
    },
    {
-    "itemId": "B1/versilia-on-haig/R",
+    "itemId": "versilia-on-haig/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/versilia-on-haig/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -137,10 +134,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/versilia-on-haig/price.entry",
+    "itemId": "versilia-on-haig/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/versilia-on-haig/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -188,10 +186,11 @@
     ]
    },
    {
-    "itemId": "B1/versilia-on-haig/resale.sustained",
+    "itemId": "versilia-on-haig/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/versilia-on-haig/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -215,10 +214,11 @@
     ]
    },
    {
-    "itemId": "B1/versilia-on-haig/infrastructure.mrt",
+    "itemId": "versilia-on-haig/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/versilia-on-haig/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -256,10 +256,11 @@
     ]
    },
    {
-    "itemId": "B1/versilia-on-haig/infrastructure.schools",
+    "itemId": "versilia-on-haig/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/versilia-on-haig/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -292,10 +293,11 @@
     ]
    },
    {
-    "itemId": "B1/versilia-on-haig/infrastructure.amenities",
+    "itemId": "versilia-on-haig/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/versilia-on-haig/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -334,10 +336,11 @@
     ]
    },
    {
-    "itemId": "B1/versilia-on-haig/infrastructure.futureTransport",
+    "itemId": "versilia-on-haig/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/versilia-on-haig/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -352,10 +355,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/versilia-on-haig/supply.competition",
+    "itemId": "versilia-on-haig/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/versilia-on-haig/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -423,10 +427,11 @@
     ]
    },
    {
-    "itemId": "B1/versilia-on-haig/supply.unsoldInventory",
+    "itemId": "versilia-on-haig/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/versilia-on-haig/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -441,10 +446,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/versilia-on-haig/supply.pipeline",
+    "itemId": "versilia-on-haig/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/versilia-on-haig/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -463,10 +469,11 @@
     ]
    },
    {
-    "itemId": "B1/versilia-on-haig/supply.quietArea",
+    "itemId": "versilia-on-haig/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/versilia-on-haig/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -493,10 +500,11 @@
     ]
    },
    {
-    "itemId": "B1/versilia-on-haig/market.backdrop",
+    "itemId": "versilia-on-haig/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/versilia-on-haig/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

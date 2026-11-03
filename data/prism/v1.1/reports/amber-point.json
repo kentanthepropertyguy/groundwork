@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "amber-point",
  "name": "Amber Point",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/amber-point/R",
+    "itemId": "amber-point/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/amber-point/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -83,10 +79,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/amber-point/price.entry",
+    "itemId": "amber-point/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/amber-point/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -101,10 +98,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/amber-point/resale.sustained",
+    "itemId": "amber-point/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/amber-point/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -128,10 +126,11 @@
     ]
    },
    {
-    "itemId": "B1/amber-point/infrastructure.mrt",
+    "itemId": "amber-point/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/amber-point/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -169,10 +168,11 @@
     ]
    },
    {
-    "itemId": "B1/amber-point/infrastructure.schools",
+    "itemId": "amber-point/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/amber-point/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -205,10 +205,11 @@
     ]
    },
    {
-    "itemId": "B1/amber-point/infrastructure.amenities",
+    "itemId": "amber-point/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/amber-point/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -247,10 +248,11 @@
     ]
    },
    {
-    "itemId": "B1/amber-point/infrastructure.futureTransport",
+    "itemId": "amber-point/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/amber-point/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -265,10 +267,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/amber-point/supply.competition",
+    "itemId": "amber-point/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/amber-point/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -336,10 +339,11 @@
     ]
    },
    {
-    "itemId": "B1/amber-point/supply.unsoldInventory",
+    "itemId": "amber-point/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/amber-point/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -354,10 +358,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/amber-point/supply.pipeline",
+    "itemId": "amber-point/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/amber-point/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -376,10 +381,11 @@
     ]
    },
    {
-    "itemId": "B1/amber-point/supply.quietArea",
+    "itemId": "amber-point/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/amber-point/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -406,10 +412,11 @@
     ]
    },
    {
-    "itemId": "B1/amber-point/market.backdrop",
+    "itemId": "amber-point/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/amber-point/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

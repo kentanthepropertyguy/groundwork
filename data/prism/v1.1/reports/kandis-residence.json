@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "kandis-residence",
  "name": "Kandis Residence",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/kandis-residence/P",
+    "itemId": "kandis-residence/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/kandis-residence/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -74,10 +70,11 @@
     ]
    },
    {
-    "itemId": "B1/kandis-residence/R",
+    "itemId": "kandis-residence/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/kandis-residence/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -137,10 +134,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/kandis-residence/price.entry",
+    "itemId": "kandis-residence/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/kandis-residence/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -188,10 +186,11 @@
     ]
    },
    {
-    "itemId": "B1/kandis-residence/resale.sustained",
+    "itemId": "kandis-residence/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/kandis-residence/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -220,10 +219,11 @@
     ]
    },
    {
-    "itemId": "B1/kandis-residence/infrastructure.mrt",
+    "itemId": "kandis-residence/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/kandis-residence/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -261,10 +261,11 @@
     ]
    },
    {
-    "itemId": "B1/kandis-residence/infrastructure.schools",
+    "itemId": "kandis-residence/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/kandis-residence/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -297,10 +298,11 @@
     ]
    },
    {
-    "itemId": "B1/kandis-residence/infrastructure.amenities",
+    "itemId": "kandis-residence/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/kandis-residence/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -339,10 +341,11 @@
     ]
    },
    {
-    "itemId": "B1/kandis-residence/infrastructure.futureTransport",
+    "itemId": "kandis-residence/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/kandis-residence/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -357,10 +360,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/kandis-residence/supply.competition",
+    "itemId": "kandis-residence/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/kandis-residence/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -393,10 +397,11 @@
     ]
    },
    {
-    "itemId": "B1/kandis-residence/supply.unsoldInventory",
+    "itemId": "kandis-residence/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/kandis-residence/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -411,10 +416,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/kandis-residence/supply.pipeline",
+    "itemId": "kandis-residence/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/kandis-residence/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -433,10 +439,11 @@
     ]
    },
    {
-    "itemId": "B1/kandis-residence/supply.quietArea",
+    "itemId": "kandis-residence/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/kandis-residence/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -463,10 +470,11 @@
     ]
    },
    {
-    "itemId": "B1/kandis-residence/market.backdrop",
+    "itemId": "kandis-residence/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/kandis-residence/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

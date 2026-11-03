@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "the-treeline",
  "name": "The Treeline",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/the-treeline/R",
+    "itemId": "the-treeline/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-treeline/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -83,10 +79,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/the-treeline/price.entry",
+    "itemId": "the-treeline/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-treeline/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -101,10 +98,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/the-treeline/resale.sustained",
+    "itemId": "the-treeline/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-treeline/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -128,10 +126,11 @@
     ]
    },
    {
-    "itemId": "B1/the-treeline/infrastructure.mrt",
+    "itemId": "the-treeline/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-treeline/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -169,10 +168,11 @@
     ]
    },
    {
-    "itemId": "B1/the-treeline/infrastructure.schools",
+    "itemId": "the-treeline/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-treeline/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -205,10 +205,11 @@
     ]
    },
    {
-    "itemId": "B1/the-treeline/infrastructure.amenities",
+    "itemId": "the-treeline/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-treeline/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -247,10 +248,11 @@
     ]
    },
    {
-    "itemId": "B1/the-treeline/infrastructure.futureTransport",
+    "itemId": "the-treeline/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-treeline/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -265,10 +267,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/the-treeline/supply.competition",
+    "itemId": "the-treeline/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-treeline/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -321,10 +324,11 @@
     ]
    },
    {
-    "itemId": "B1/the-treeline/supply.unsoldInventory",
+    "itemId": "the-treeline/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-treeline/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -339,10 +343,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/the-treeline/supply.pipeline",
+    "itemId": "the-treeline/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-treeline/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -361,10 +366,11 @@
     ]
    },
    {
-    "itemId": "B1/the-treeline/supply.quietArea",
+    "itemId": "the-treeline/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-treeline/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -391,10 +397,11 @@
     ]
    },
    {
-    "itemId": "B1/the-treeline/market.backdrop",
+    "itemId": "the-treeline/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-treeline/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

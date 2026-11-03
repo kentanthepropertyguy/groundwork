@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "the-clift",
  "name": "The Clift",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/the-clift/P",
+    "itemId": "the-clift/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-clift/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -73,10 +69,11 @@
     ]
    },
    {
-    "itemId": "B1/the-clift/R",
+    "itemId": "the-clift/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-clift/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -136,10 +133,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/the-clift/price.entry",
+    "itemId": "the-clift/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-clift/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -154,10 +152,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/the-clift/resale.sustained",
+    "itemId": "the-clift/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-clift/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -181,10 +180,11 @@
     ]
    },
    {
-    "itemId": "B1/the-clift/infrastructure.mrt",
+    "itemId": "the-clift/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-clift/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -222,10 +222,11 @@
     ]
    },
    {
-    "itemId": "B1/the-clift/infrastructure.schools",
+    "itemId": "the-clift/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-clift/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -258,10 +259,11 @@
     ]
    },
    {
-    "itemId": "B1/the-clift/infrastructure.amenities",
+    "itemId": "the-clift/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-clift/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -300,10 +302,11 @@
     ]
    },
    {
-    "itemId": "B1/the-clift/infrastructure.futureTransport",
+    "itemId": "the-clift/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-clift/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -318,10 +321,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/the-clift/supply.competition",
+    "itemId": "the-clift/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-clift/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -389,10 +393,11 @@
     ]
    },
    {
-    "itemId": "B1/the-clift/supply.unsoldInventory",
+    "itemId": "the-clift/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-clift/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -407,10 +412,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/the-clift/supply.pipeline",
+    "itemId": "the-clift/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-clift/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -429,10 +435,11 @@
     ]
    },
    {
-    "itemId": "B1/the-clift/supply.quietArea",
+    "itemId": "the-clift/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-clift/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -459,10 +466,11 @@
     ]
    },
    {
-    "itemId": "B1/the-clift/market.backdrop",
+    "itemId": "the-clift/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-clift/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

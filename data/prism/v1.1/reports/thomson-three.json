@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "thomson-three",
  "name": "Thomson Three",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": "thomson-three",
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "A1-3/thomson-three/P",
+    "itemId": "thomson-three/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2",
+     "recordItem": "A1-3/thomson-three/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -86,10 +82,11 @@
     ]
    },
    {
-    "itemId": "A1-3/thomson-three/R",
+    "itemId": "thomson-three/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2",
+     "recordItem": "A1-3/thomson-three/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -151,10 +148,11 @@
   },
   "bands": [
    {
-    "itemId": "A1-1/thomson-three/400-499",
+    "itemId": "thomson-three/400-499",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-01-A1",
+     "recordItem": "A1-1/thomson-three/400-499"
     },
     "band": "400-499 sq ft",
     "typicalRent": 3100,
@@ -179,10 +177,11 @@
     "differencePts": -0.24
    },
    {
-    "itemId": "A1-1/thomson-three/700-799",
+    "itemId": "thomson-three/700-799",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-01-A1",
+     "recordItem": "A1-1/thomson-three/700-799"
     },
     "band": "700-799 sq ft",
     "typicalRent": 3850,
@@ -213,10 +212,11 @@
   ]
  },
  "householdIncome": {
-  "itemId": "A1-2/thomson-three/Bishan",
+  "itemId": "thomson-three/Bishan",
   "approval": {
    "state": "approved",
-   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+   "approvalRef": "GW-PRISM-V1.1-2026-11-01-A1",
+   "recordItem": "A1-2/thomson-three/Bishan"
   },
   "surveyYear": 2025,
   "planningArea": "Bishan",
@@ -273,10 +273,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "A2/thomson-three/price.entry",
+    "itemId": "thomson-three/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2",
+     "recordItem": "A2/thomson-three/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -380,10 +381,11 @@
     ]
    },
    {
-    "itemId": "A2/thomson-three/resale.sustained",
+    "itemId": "thomson-three/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2",
+     "recordItem": "A2/thomson-three/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -407,10 +409,11 @@
     ]
    },
    {
-    "itemId": "A2/thomson-three/infrastructure.mrt",
+    "itemId": "thomson-three/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2",
+     "recordItem": "A2/thomson-three/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -448,10 +451,11 @@
     ]
    },
    {
-    "itemId": "A2/thomson-three/infrastructure.schools",
+    "itemId": "thomson-three/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2",
+     "recordItem": "A2/thomson-three/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -484,10 +488,11 @@
     ]
    },
    {
-    "itemId": "A2/thomson-three/infrastructure.amenities",
+    "itemId": "thomson-three/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2",
+     "recordItem": "A2/thomson-three/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -526,10 +531,11 @@
     ]
    },
    {
-    "itemId": "A2/thomson-three/infrastructure.futureTransport",
+    "itemId": "thomson-three/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2",
+     "recordItem": "A2/thomson-three/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -544,10 +550,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "A2/thomson-three/supply.competition",
+    "itemId": "thomson-three/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2",
+     "recordItem": "A2/thomson-three/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -580,10 +587,11 @@
     ]
    },
    {
-    "itemId": "A2/thomson-three/supply.unsoldInventory",
+    "itemId": "thomson-three/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2",
+     "recordItem": "A2/thomson-three/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -598,10 +606,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "A2/thomson-three/supply.pipeline",
+    "itemId": "thomson-three/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2",
+     "recordItem": "A2/thomson-three/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -629,10 +638,11 @@
     ]
    },
    {
-    "itemId": "A2/thomson-three/supply.quietArea",
+    "itemId": "thomson-three/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2",
+     "recordItem": "A2/thomson-three/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -659,10 +669,11 @@
     ]
    },
    {
-    "itemId": "A2/thomson-three/market.backdrop",
+    "itemId": "thomson-three/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2",
+     "recordItem": "A2/thomson-three/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

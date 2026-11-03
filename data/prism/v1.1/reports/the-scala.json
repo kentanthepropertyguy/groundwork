@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "the-scala",
  "name": "The Scala",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/the-scala/P",
+    "itemId": "the-scala/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-scala/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -86,10 +82,11 @@
     ]
    },
    {
-    "itemId": "B1/the-scala/R",
+    "itemId": "the-scala/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-scala/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -149,10 +146,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/the-scala/price.entry",
+    "itemId": "the-scala/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-scala/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -256,10 +254,11 @@
     ]
    },
    {
-    "itemId": "B1/the-scala/resale.sustained",
+    "itemId": "the-scala/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-scala/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -283,10 +282,11 @@
     ]
    },
    {
-    "itemId": "B1/the-scala/infrastructure.mrt",
+    "itemId": "the-scala/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-scala/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -324,10 +324,11 @@
     ]
    },
    {
-    "itemId": "B1/the-scala/infrastructure.schools",
+    "itemId": "the-scala/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-scala/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -360,10 +361,11 @@
     ]
    },
    {
-    "itemId": "B1/the-scala/infrastructure.amenities",
+    "itemId": "the-scala/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-scala/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -402,10 +404,11 @@
     ]
    },
    {
-    "itemId": "B1/the-scala/infrastructure.futureTransport",
+    "itemId": "the-scala/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-scala/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -420,10 +423,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/the-scala/supply.competition",
+    "itemId": "the-scala/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-scala/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -461,10 +465,11 @@
     ]
    },
    {
-    "itemId": "B1/the-scala/supply.unsoldInventory",
+    "itemId": "the-scala/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-scala/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -479,10 +484,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/the-scala/supply.pipeline",
+    "itemId": "the-scala/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-scala/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -510,10 +516,11 @@
     ]
    },
    {
-    "itemId": "B1/the-scala/supply.quietArea",
+    "itemId": "the-scala/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-scala/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -540,10 +547,11 @@
     ]
    },
    {
-    "itemId": "B1/the-scala/market.backdrop",
+    "itemId": "the-scala/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-scala/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

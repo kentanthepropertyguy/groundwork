@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "roxy-square",
  "name": "Roxy Square",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": null,
  "rentalYield": null,
@@ -25,10 +20,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/roxy-square/price.entry",
+    "itemId": "roxy-square/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/roxy-square/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -43,10 +39,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/roxy-square/resale.sustained",
+    "itemId": "roxy-square/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/roxy-square/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -61,10 +58,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/roxy-square/infrastructure.mrt",
+    "itemId": "roxy-square/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/roxy-square/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -102,10 +100,11 @@
     ]
    },
    {
-    "itemId": "B1/roxy-square/infrastructure.schools",
+    "itemId": "roxy-square/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/roxy-square/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -138,10 +137,11 @@
     ]
    },
    {
-    "itemId": "B1/roxy-square/infrastructure.amenities",
+    "itemId": "roxy-square/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/roxy-square/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -180,10 +180,11 @@
     ]
    },
    {
-    "itemId": "B1/roxy-square/infrastructure.futureTransport",
+    "itemId": "roxy-square/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/roxy-square/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -198,10 +199,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/roxy-square/supply.competition",
+    "itemId": "roxy-square/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/roxy-square/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -269,10 +271,11 @@
     ]
    },
    {
-    "itemId": "B1/roxy-square/supply.unsoldInventory",
+    "itemId": "roxy-square/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/roxy-square/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -287,10 +290,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/roxy-square/supply.pipeline",
+    "itemId": "roxy-square/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/roxy-square/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -309,10 +313,11 @@
     ]
    },
    {
-    "itemId": "B1/roxy-square/supply.quietArea",
+    "itemId": "roxy-square/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/roxy-square/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -339,10 +344,11 @@
     ]
    },
    {
-    "itemId": "B1/roxy-square/market.backdrop",
+    "itemId": "roxy-square/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/roxy-square/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

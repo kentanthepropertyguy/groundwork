@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "botanique-at-bartley",
  "name": "Botanique at Bartley",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/botanique-at-bartley/P",
+    "itemId": "botanique-at-bartley/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/botanique-at-bartley/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -86,10 +82,11 @@
     ]
    },
    {
-    "itemId": "B1/botanique-at-bartley/R",
+    "itemId": "botanique-at-bartley/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/botanique-at-bartley/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -149,10 +146,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/botanique-at-bartley/price.entry",
+    "itemId": "botanique-at-bartley/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/botanique-at-bartley/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -256,10 +254,11 @@
     ]
    },
    {
-    "itemId": "B1/botanique-at-bartley/resale.sustained",
+    "itemId": "botanique-at-bartley/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/botanique-at-bartley/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -283,10 +282,11 @@
     ]
    },
    {
-    "itemId": "B1/botanique-at-bartley/infrastructure.mrt",
+    "itemId": "botanique-at-bartley/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/botanique-at-bartley/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -324,10 +324,11 @@
     ]
    },
    {
-    "itemId": "B1/botanique-at-bartley/infrastructure.schools",
+    "itemId": "botanique-at-bartley/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/botanique-at-bartley/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -360,10 +361,11 @@
     ]
    },
    {
-    "itemId": "B1/botanique-at-bartley/infrastructure.amenities",
+    "itemId": "botanique-at-bartley/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/botanique-at-bartley/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -402,10 +404,11 @@
     ]
    },
    {
-    "itemId": "B1/botanique-at-bartley/infrastructure.futureTransport",
+    "itemId": "botanique-at-bartley/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/botanique-at-bartley/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -420,10 +423,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/botanique-at-bartley/supply.competition",
+    "itemId": "botanique-at-bartley/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/botanique-at-bartley/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -450,10 +454,11 @@
     ]
    },
    {
-    "itemId": "B1/botanique-at-bartley/supply.unsoldInventory",
+    "itemId": "botanique-at-bartley/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/botanique-at-bartley/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -468,10 +473,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/botanique-at-bartley/supply.pipeline",
+    "itemId": "botanique-at-bartley/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/botanique-at-bartley/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -490,10 +496,11 @@
     ]
    },
    {
-    "itemId": "B1/botanique-at-bartley/supply.quietArea",
+    "itemId": "botanique-at-bartley/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/botanique-at-bartley/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -520,10 +527,11 @@
     ]
    },
    {
-    "itemId": "B1/botanique-at-bartley/market.backdrop",
+    "itemId": "botanique-at-bartley/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/botanique-at-bartley/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

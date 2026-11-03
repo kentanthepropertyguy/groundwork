@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "the-taipan",
  "name": "The Taipan",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": null,
  "rentalYield": null,
@@ -25,10 +20,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/the-taipan/price.entry",
+    "itemId": "the-taipan/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-taipan/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -43,10 +39,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/the-taipan/resale.sustained",
+    "itemId": "the-taipan/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-taipan/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -61,10 +58,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/the-taipan/infrastructure.mrt",
+    "itemId": "the-taipan/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-taipan/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -102,10 +100,11 @@
     ]
    },
    {
-    "itemId": "B1/the-taipan/infrastructure.schools",
+    "itemId": "the-taipan/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-taipan/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -138,10 +137,11 @@
     ]
    },
    {
-    "itemId": "B1/the-taipan/infrastructure.amenities",
+    "itemId": "the-taipan/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-taipan/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -180,10 +180,11 @@
     ]
    },
    {
-    "itemId": "B1/the-taipan/infrastructure.futureTransport",
+    "itemId": "the-taipan/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-taipan/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -198,10 +199,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/the-taipan/supply.competition",
+    "itemId": "the-taipan/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-taipan/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -234,10 +236,11 @@
     ]
    },
    {
-    "itemId": "B1/the-taipan/supply.unsoldInventory",
+    "itemId": "the-taipan/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-taipan/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -252,10 +255,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/the-taipan/supply.pipeline",
+    "itemId": "the-taipan/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-taipan/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -274,10 +278,11 @@
     ]
    },
    {
-    "itemId": "B1/the-taipan/supply.quietArea",
+    "itemId": "the-taipan/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-taipan/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -304,10 +309,11 @@
     ]
    },
    {
-    "itemId": "B1/the-taipan/market.backdrop",
+    "itemId": "the-taipan/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/the-taipan/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

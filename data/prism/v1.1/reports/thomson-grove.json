@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "thomson-grove",
  "name": "Thomson Grove",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/thomson-grove/P",
+    "itemId": "thomson-grove/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/thomson-grove/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -74,10 +70,11 @@
     ]
    },
    {
-    "itemId": "B1/thomson-grove/R",
+    "itemId": "thomson-grove/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/thomson-grove/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -137,10 +134,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/thomson-grove/price.entry",
+    "itemId": "thomson-grove/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/thomson-grove/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -188,10 +186,11 @@
     ]
    },
    {
-    "itemId": "B1/thomson-grove/resale.sustained",
+    "itemId": "thomson-grove/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/thomson-grove/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -220,10 +219,11 @@
     ]
    },
    {
-    "itemId": "B1/thomson-grove/infrastructure.mrt",
+    "itemId": "thomson-grove/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/thomson-grove/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -261,10 +261,11 @@
     ]
    },
    {
-    "itemId": "B1/thomson-grove/infrastructure.schools",
+    "itemId": "thomson-grove/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/thomson-grove/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -297,10 +298,11 @@
     ]
    },
    {
-    "itemId": "B1/thomson-grove/infrastructure.amenities",
+    "itemId": "thomson-grove/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/thomson-grove/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -339,10 +341,11 @@
     ]
    },
    {
-    "itemId": "B1/thomson-grove/infrastructure.futureTransport",
+    "itemId": "thomson-grove/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/thomson-grove/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -357,10 +360,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/thomson-grove/supply.competition",
+    "itemId": "thomson-grove/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/thomson-grove/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -413,10 +417,11 @@
     ]
    },
    {
-    "itemId": "B1/thomson-grove/supply.unsoldInventory",
+    "itemId": "thomson-grove/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/thomson-grove/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -431,10 +436,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/thomson-grove/supply.pipeline",
+    "itemId": "thomson-grove/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/thomson-grove/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -462,10 +468,11 @@
     ]
    },
    {
-    "itemId": "B1/thomson-grove/supply.quietArea",
+    "itemId": "thomson-grove/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/thomson-grove/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -492,10 +499,11 @@
     ]
    },
    {
-    "itemId": "B1/thomson-grove/market.backdrop",
+    "itemId": "thomson-grove/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/thomson-grove/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

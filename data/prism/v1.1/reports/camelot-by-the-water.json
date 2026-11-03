@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "camelot-by-the-water",
  "name": "Camelot By-The-Water",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/camelot-by-the-water/R",
+    "itemId": "camelot-by-the-water/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/camelot-by-the-water/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -83,10 +79,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/camelot-by-the-water/price.entry",
+    "itemId": "camelot-by-the-water/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/camelot-by-the-water/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -101,10 +98,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/camelot-by-the-water/resale.sustained",
+    "itemId": "camelot-by-the-water/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/camelot-by-the-water/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -128,10 +126,11 @@
     ]
    },
    {
-    "itemId": "B1/camelot-by-the-water/infrastructure.mrt",
+    "itemId": "camelot-by-the-water/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/camelot-by-the-water/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -169,10 +168,11 @@
     ]
    },
    {
-    "itemId": "B1/camelot-by-the-water/infrastructure.schools",
+    "itemId": "camelot-by-the-water/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/camelot-by-the-water/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -205,10 +205,11 @@
     ]
    },
    {
-    "itemId": "B1/camelot-by-the-water/infrastructure.amenities",
+    "itemId": "camelot-by-the-water/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/camelot-by-the-water/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -247,10 +248,11 @@
     ]
    },
    {
-    "itemId": "B1/camelot-by-the-water/infrastructure.futureTransport",
+    "itemId": "camelot-by-the-water/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/camelot-by-the-water/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -265,10 +267,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/camelot-by-the-water/supply.competition",
+    "itemId": "camelot-by-the-water/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/camelot-by-the-water/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -316,10 +319,11 @@
     ]
    },
    {
-    "itemId": "B1/camelot-by-the-water/supply.unsoldInventory",
+    "itemId": "camelot-by-the-water/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/camelot-by-the-water/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -334,10 +338,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/camelot-by-the-water/supply.pipeline",
+    "itemId": "camelot-by-the-water/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/camelot-by-the-water/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -373,10 +378,11 @@
     ]
    },
    {
-    "itemId": "B1/camelot-by-the-water/supply.quietArea",
+    "itemId": "camelot-by-the-water/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/camelot-by-the-water/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -403,10 +409,11 @@
     ]
    },
    {
-    "itemId": "B1/camelot-by-the-water/market.backdrop",
+    "itemId": "camelot-by-the-water/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/camelot-by-the-water/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

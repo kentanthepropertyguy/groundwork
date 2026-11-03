@@ -1,113 +1,123 @@
 {
- "schemaVersion": "prism-public-v1.1-r2-index",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
+ "schemaVersion": "prism-public-v1.1-r3-index",
+ "releaseId": "prism-v1.1-r3-release-2026-11-03-a8b865345a70",
  "status": "approved",
- "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+ "asAt": "2026-11-03",
  "approvalChain": [
   "GW-PRISM-V1.1-2026-11-01-A1",
   "GW-PRISM-V1.1-2026-11-03-DECILE",
   "GW-PRISM-V1.1-2026-11-03-A2",
   "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
  ],
- "manifestSha256": "5e1c76ad30ff016540aa0e4001df687f38d1b41268e12a97139964ee81df65cd",
- "reports": 2099,
- "v11OnlyReports": 2096,
+ "manifestSha256": "37fea25c57706a3a1d4b7deb873c8ab284318e7acc7df2ae5d5432abae3fec61",
+ "redirectsSha256": "2b67e1e3ca7b0e34e526ae4d6022fce59f97f80672a928ad8e4c8eba3c18d600",
+ "counts": {
+  "reports": 2099,
+  "entries": 2509,
+  "states": {
+   "partial": 1444,
+   "full": 655,
+   "unavailable": 260,
+   "new_launch": 139,
+   "pending": 11
+  }
+ },
  "shards": [
   {
    "key": "0",
    "path": "index/0.json",
-   "sha256": "0828fac104251d161035813687ff3362b70e687b9b0bd3f0ef470ec3436f177a",
-   "reports": 135
+   "sha256": "0869ae7d9fd19a3957420761cf6308152ca4d8ea493aab6d3dcdc3d6701f686b",
+   "entries": 165
   },
   {
    "key": "1",
    "path": "index/1.json",
-   "sha256": "2df5b125951f3343189a3c638e6f8e45d3cd7dd82652d84118d6c477d6ebba6d",
-   "reports": 143
+   "sha256": "e7a490e55b2f39ac4b320cce5f3d2587c316b9523dc979f2f7ef5451db751c0d",
+   "entries": 179
   },
   {
    "key": "2",
    "path": "index/2.json",
-   "sha256": "5dffb2f89405ab7255a2ec164390cd08a31951fdc80cd153b1ba559ced87de6f",
-   "reports": 124
+   "sha256": "b38c0f227c2da3f35cdea5a8d7dfd5f065357badb2a4b97eed9f493396590add",
+   "entries": 145
   },
   {
    "key": "3",
    "path": "index/3.json",
-   "sha256": "5323fb1dc4b51bb726f58544f9655b706c98241d80137086e000bab7c05671f3",
-   "reports": 127
+   "sha256": "10d830bddf14f4a917737d5851ecbc5826abb7c70e54c52ec9c8fc8b496596c6",
+   "entries": 144
   },
   {
    "key": "4",
    "path": "index/4.json",
-   "sha256": "54fda633121b3d3b2c8748018dc25dbce70ef539afa75c358ab85fa7aa0b4fe3",
-   "reports": 138
+   "sha256": "20a60dec6a3ecd46a2c85125002f0076496b9c8a962ab5380e967c9bde4d752d",
+   "entries": 159
   },
   {
    "key": "5",
    "path": "index/5.json",
-   "sha256": "66b8aab42caa9c7b588786e7717057651bdba28d4f5bbea35372700bf23fa954",
-   "reports": 112
+   "sha256": "417905ac26cdb0ea7f52aa41868639afcfff3e189e8b49bcdf9909aa795dc94c",
+   "entries": 142
   },
   {
    "key": "6",
    "path": "index/6.json",
-   "sha256": "68ec3ce3da64651ca2d356a3bc02b5270ddc647cc450b8b7ca4cbf782d67a171",
-   "reports": 143
+   "sha256": "d1e8393e469c5f2a3a08a813706a15a22e178fd722f8c7169cbbd37f289040a4",
+   "entries": 169
   },
   {
    "key": "7",
    "path": "index/7.json",
-   "sha256": "ebff89f0ac0dd6bc4f36e575c6d8c35a42866396ee157782ad3708f6bf1bee01",
-   "reports": 141
+   "sha256": "26ff17a17eaa7617a31b101440fc4986365da3c7ba801f141aaa2353ffb916cb",
+   "entries": 174
   },
   {
    "key": "8",
    "path": "index/8.json",
-   "sha256": "a119856366e78d271db75df8dad4b1728308b5de71cb631225c07ea4748609d0",
-   "reports": 124
+   "sha256": "0365af01db2f3ce17043c2a17db13b0a33ff2d7f767b37929d57fff94eca363d",
+   "entries": 148
   },
   {
    "key": "9",
    "path": "index/9.json",
-   "sha256": "d6f249b10584074057c1c52b55f25ad82c18eb06cfcaba504092eaf50773f619",
-   "reports": 132
+   "sha256": "9e2f7e873e54e4761467ff91ec94a082a190d44138f0aa57cca87049b66ba5d3",
+   "entries": 155
   },
   {
    "key": "a",
    "path": "index/a.json",
-   "sha256": "7f2e23a27137271f2bb03f2d23a18ffa2e2461c5c0052ea135d8a5c65d1c973f",
-   "reports": 132
+   "sha256": "cdf28b4584447171a45a73a5aad861ddcc3e99e2ae5c11c96809978d39d1812f",
+   "entries": 169
   },
   {
    "key": "b",
    "path": "index/b.json",
-   "sha256": "374ec8dc999b4a9dc8535c2c6080a2a77f3f2d8bf34c983e428166fb66b27ac8",
-   "reports": 143
+   "sha256": "1c1ae63be5b90e2e3ec36cbf51375748d5475b585551a45903cecae8bbb16e12",
+   "entries": 168
   },
   {
    "key": "c",
    "path": "index/c.json",
-   "sha256": "96d625bb74d00643d1a282cac521418f41d54bbf76232b9595b9935a079630ab",
-   "reports": 140
+   "sha256": "78bf5b735ba13b7a6c92bfd87bea69966a4c892052c13974939b5652c22f6366",
+   "entries": 158
   },
   {
    "key": "d",
    "path": "index/d.json",
-   "sha256": "07fcca5b1160132a8ed4c76ddccd22f9831102254f24cd6cf0817377881c8e0f",
-   "reports": 114
+   "sha256": "b9e91ce80dfe70b05e7db51dd92e71b674f93220429b6e1af96b530a0b214429",
+   "entries": 134
   },
   {
    "key": "e",
    "path": "index/e.json",
-   "sha256": "bf9bed9301dfd356da0b22138e73bcbde227dec6828d7c0a9c2936721d973ea5",
-   "reports": 133
+   "sha256": "90ec9976f010512a1e65a4df22d9a04427572eef94eb205b87b188e90fc3efa8",
+   "entries": 160
   },
   {
    "key": "f",
    "path": "index/f.json",
-   "sha256": "156981f83786a63b6fe2f63b64df976d3e58d15f6ecc9e1ed7337c99a18007aa",
-   "reports": 118
+   "sha256": "1298e5b76b5799410e708af72df373037165204d1f861d164bf1da14fee70ee5",
+   "entries": 140
   }
  ]
 }

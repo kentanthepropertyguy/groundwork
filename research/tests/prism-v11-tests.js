@@ -1,4 +1,4 @@
-/* PRISM V1.1 nationwide (GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1, after A1, DECILE and A2): the publication gate and what it draws for the
+/* PRISM V1.1 nationwide, r3 format (GW-PRISM-R3-SCHEMA-20261103-01; approvals A1, DECILE, A2, NATIONWIDE-1): the publication gate and what it draws for the
    five curated reports approved before the nationwide batch, in node. (Every one of the 2,099 reports: prism-batch-tests.js.)
    Run from the site folder:  node research/tests/prism-v11-tests.js
    1 the approved files pass: index.json pinned by sha256; the release id and the A1 -> DECILE -> A2 -> NATIONWIDE-1 chain; 16 shards, each
@@ -28,18 +28,18 @@ const v1 = JSON.parse(read('data/prism/v1/manifest.json')), it = read('data/pris
 const key = (id) => sha(id).charAt(0), shard = (k) => JSON.parse(read('data/prism/v1.1/index/' + k + '.json')), sEntry = (k) => ix.shards.find((x) => x.key === k);
 const SUPP = ['kingsford-waterbay', 'thomson-three', 'hougang-central'], ONLY = ['hundred-palms-residences', 'the-quinn'], ALL = SUPP.concat(ONLY);
 const rep = (id) => read('data/prism/v1.1/reports/' + id + '.json'), R = (id) => JSON.parse(rep(id)), rep1 = (id) => JSON.parse(read('data/prism/v1/reports/' + id + '.json'));
-const e1 = (id) => v1.reports.find((x) => x.id === id), e = (id) => shard(key(id)).reports.find((x) => x.id === id);
+const e1 = (id) => v1.reports.find((x) => x.id === id), e = (id) => shard(key(id)).entries.find((x) => x.id === id);
 const v11 = (id, r) => { const v = G.model11(G.checkReport11(r || R(id), e(id), ONLY.indexOf(id) >= 0), e(id)); if (v) v.periods = G.V11.PERIODS; return v; };
 const v1md = (id) => (e1(id) ? G.model(G.checkReport(rep1(id), e1(id)), v1) : null);
 const page = (id) => G.compose(v1md(id), v11(id));
 
-// ---- 1 the approved release
+// ---- 1 the approved release (r3, GW-PRISM-R3-SCHEMA-20261103-01: the same approved content, re-issued with Registry v2)
 check('index.json is the approved file (sha256 pinned in the page) and binds the approved manifest', sha(it) === G.V11.INDEX && ix.manifestSha256 === sha(mt) && sha(mt) === G.V11.MANIFEST);
-check('release prism-v1.1-r2-release-2026-11-03-505d952296ff, approval NATIONWIDE-1, chain A1 -> DECILE -> A2 -> NATIONWIDE-1', !throws(() => G.checkIndex(ix)) && ix.datasetReleaseId === G.V11.RELEASE && ix.approvalChain.join(' ') === 'GW-PRISM-V1.1-2026-11-01-A1 GW-PRISM-V1.1-2026-11-03-DECILE GW-PRISM-V1.1-2026-11-03-A2 GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1');
-check('16 shards, each passing its gate, every id in the shard its sha256 names (2,099 reports)', ix.shards.length === 16 && ix.shards.every((x) => sha(read('data/prism/v1.1/' + x.path)) === x.sha256 && !throws(() => G.checkShard(shard(x.key), x, key))) && ix.reports === 2099);
+check('release prism-v1.1-r3-release-2026-11-03-a8b865345a70, format GW-PRISM-R3-SCHEMA-20261103-01, chain A1 -> DECILE -> A2 -> NATIONWIDE-1', !throws(() => G.checkIndex(ix)) && ix.releaseId === G.V11.RELEASE && m.formatApproval === 'GW-PRISM-R3-SCHEMA-20261103-01' && ix.approvalChain.join(' ') === 'GW-PRISM-V1.1-2026-11-01-A1 GW-PRISM-V1.1-2026-11-03-DECILE GW-PRISM-V1.1-2026-11-03-A2 GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1');
+check('16 shards, each passing its gate, every id in the shard its sha256 names (2,509 Registry v2 ids, 2,099 reports)', ix.shards.length === 16 && ix.shards.every((x) => sha(read('data/prism/v1.1/' + x.path)) === x.sha256 && !throws(() => G.checkShard(shard(x.key), x, key))) && ix.counts.entries === 2509 && ix.counts.reports === 2099);
 check('the V1 pairing pinned in the page equals the release\'s own (supplements: release, approval, three sha256)', m.supplements.datasetReleaseId === G.V11.V1PAIR.release && m.supplements.approvalRef === G.V11.V1PAIR.approvalRef && m.supplements.reports.map((x) => x.sha256).sort().join() === G.V11.V1PAIR.sha256.slice().sort().join() && v1.datasetReleaseId === G.V11.V1PAIR.release);
 check('the data periods pinned in the page equal the release\'s own (dataPeriodsBySource)', JSON.stringify(m.dataPeriodsBySource) === JSON.stringify(G.V11.PERIODS));
-check('the five curated reports are marked curated in their shards (profile "approved")', ALL.every((id) => e(id).profile === 'approved'));
+check('the five reports approved before the nationwide batch are marked so in their shards ("approved-existing"), and no other', ALL.every((id) => G.isCurated(e(id))) && ix.shards.reduce((a, x) => a + shard(x.key).entries.filter(G.isCurated).length, 0) === 5);
 const counts = {};
 ALL.forEach((id) => {
   const t = rep(id);
@@ -53,20 +53,27 @@ ALL.forEach((id) => {
 check('exactly the 60 curated items: 17, 16, 1, 13, 13', ALL.map((id) => counts[id]).join() === '17,16,1,13,13' && Object.values(counts).reduce((a, b) => a + b, 0) === 60, counts);
 // ---- 2 fails closed
 const KW = R('kingsford-waterbay'), kwE = e('kingsford-waterbay'), HP = R('hundred-palms-residences'), hpE = e('hundred-palms-residences');
-check('another approval reference (A2): refused', throws(() => G.checkIndex(Object.assign(clone(ix), { approvalRef: 'GW-PRISM-V1.1-2026-11-03-A2' }))));
 check('a draft index: refused', throws(() => G.checkIndex(Object.assign(clone(ix), { status: 'draft' }))));
 check('another approval chain (no NATIONWIDE-1): refused', throws(() => G.checkIndex(Object.assign(clone(ix), { approvalChain: ix.approvalChain.slice(0, 3) }))));
-check('another release id: refused', throws(() => G.checkIndex(Object.assign(clone(ix), { datasetReleaseId: 'prism-v1.1-r2-release-other' }))));
-check('an index binding another manifest: refused', throws(() => G.checkIndex(Object.assign(clone(ix), { manifestSha256: '0'.repeat(64) }))));
-check('15 shards, or shard counts that do not add up: refused', throws(() => G.checkIndex(Object.assign(clone(ix), { shards: ix.shards.slice(0, 15) }))) && throws(() => G.checkIndex(Object.assign(clone(ix), { reports: 2100 }))));
-{ const k = key('kingsford-waterbay'), sh = shard(k), en = sEntry(k);
-  check('a shard from another release: refused', throws(() => G.checkShard(Object.assign(clone(sh), { datasetReleaseId: 'other' }), en, key)));
-  check('a shard with one report more or less than the index lists: refused', throws(() => G.checkShard(Object.assign(clone(sh), { reports: sh.reports.slice(1) }), en, key)));
-  check('a shard holding an id that belongs in another shard: refused', throws(() => { const x = clone(sh); x.reports[0].id = 'not-this-shard-' + k; let i = 0; while (key(x.reports[0].id) === k) x.reports[0].id = 'moved-' + (i++); x.reports[0].path = 'reports/' + x.reports[0].id + '.json'; G.checkShard(x, en, key); }));
-  check('a shard listing an id twice: refused', throws(() => { const x = clone(sh); x.reports[1] = clone(x.reports[0]); G.checkShard(x, en, key); })); }
+check('another release id: refused', throws(() => G.checkIndex(Object.assign(clone(ix), { releaseId: 'prism-v1.1-r3-release-other' }))));
+check('an index binding another manifest, or without its redirects pin: refused', throws(() => G.checkIndex(Object.assign(clone(ix), { manifestSha256: '0'.repeat(64) }))) && throws(() => G.checkIndex(Object.assign(clone(ix), { redirectsSha256: undefined }))));
+check('15 shards, shard counts that do not add up, or state counts that do not: refused', throws(() => G.checkIndex(Object.assign(clone(ix), { shards: ix.shards.slice(0, 15) }))) && throws(() => G.checkIndex(Object.assign(clone(ix), { counts: Object.assign(clone(ix.counts), { entries: 2510 }) }))) && throws(() => G.checkIndex(Object.assign(clone(ix), { counts: Object.assign(clone(ix.counts), { reports: 2100 }) }))));
+{ const k = key('kingsford-waterbay'), sh = shard(k), en = sEntry(k), i = sh.entries.findIndex(G.hasReport), j = sh.entries.findIndex((x) => !G.hasReport(x));
+  check('a shard of another schema (r2): refused', throws(() => G.checkShard(Object.assign(clone(sh), { schemaVersion: 'prism-public-v1.1-r2-index' }), en, key)));
+  check('a shard with one entry more or less than the index lists: refused', throws(() => G.checkShard(Object.assign(clone(sh), { entries: sh.entries.slice(1) }), en, key)));
+  check('a shard holding an id that belongs in another shard: refused', throws(() => { const x = clone(sh); x.entries[i].id = 'not-this-shard-' + k; let n = 0; while (key(x.entries[i].id) === k) x.entries[i].id = 'moved-' + (n++); x.entries[i].path = 'reports/' + x.entries[i].id + '.json'; G.checkShard(x, en, key); }));
+  check('a shard listing an id twice: refused', throws(() => { const x = clone(sh); x.entries[1] = clone(x.entries[0]); G.checkShard(x, en, key); }));
+  check('an unknown state, or a report on a pending / unavailable / new-launch entry: refused', throws(() => { const x = clone(sh); x.entries[i].state = 'draft'; G.checkShard(x, en, key); }) && throws(() => { const x = clone(sh); Object.assign(x.entries[j], { path: 'reports/' + x.entries[j].id + '.json', sha256: '0'.repeat(64) }); G.checkShard(x, en, key); }));
+  check('a page entry approved under a reference outside the chain: refused', throws(() => { const x = clone(sh); x.entries[i].approvalRef = 'GW-PRISM-V1.1-2026-11-03-DRAFT'; G.checkShard(x, en, key); }));
+  check('a redirect to itself or to nothing: refused', throws(() => { const x = clone(sh); Object.assign(x.entries[j], { state: 'redirect', to: x.entries[j].id }); G.checkShard(x, en, key); }) && throws(() => { const x = clone(sh); Object.assign(x.entries[j], { state: 'redirect' }); delete x.entries[j].to; G.checkShard(x, en, key); }));
+  check('pending, unavailable and new-launch entries have no page (as an id without a report)', sh.entries.filter((x) => ['pending', 'unavailable', 'new_launch'].indexOf(x.state) >= 0).every((x) => !G.hasReport(x))); }
 check('another V1 release, or a different V1 report on screen (pairing sha256): refused', throws(() => G.checkPair(Object.assign(clone(v1), { datasetReleaseId: 'prism-v1-release-other' }), e1('kingsford-waterbay'))) && throws(() => G.checkPair(v1, { id: 'kingsford-waterbay', sha256: '0'.repeat(64) })));
-check('the previous A1 and A2 files (left in place, or rolled back without the page): refused as the index', throws(() => G.checkIndex(JSON.parse(read('research/tests/fixtures/prism-v11-a1-manifest.json')))) && throws(() => G.checkIndex(JSON.parse(read('research/tests/fixtures/prism-v11-a2-manifest.json')))));
-check('a report under another approval: refused', throws(() => G.checkReport11(Object.assign(clone(KW), { release: { status: 'approved', approvalRef: 'GW-PRISM-V1.1-2026-11-01-A1' } }), kwE, false)));
+check('the previous A1, A2 and r2 files (left in place, or rolled back without the page): refused as the index', throws(() => G.checkIndex(JSON.parse(read('research/tests/fixtures/prism-v11-a1-manifest.json')))) && throws(() => G.checkIndex(JSON.parse(read('research/tests/fixtures/prism-v11-a2-manifest.json')))) && throws(() => G.checkIndex(JSON.parse(read('research/tests/fixtures/prism-v11-r2-index.json')))));
+{ const r2 = JSON.parse(read('research/tests/fixtures/prism-v11-r2-index.json')), r2s = JSON.parse(read('research/tests/fixtures/prism-v11-r2-shard-0.json')), r2kw = JSON.parse(read('research/tests/fixtures/prism-v11-r2-kingsford-waterbay.json'));
+  check('an r2 shard or report given to the r3 renderer: refused', throws(() => G.checkShard(r2s, sEntry('0'), key)) && throws(() => G.checkReport11(r2kw, kwE, false)));
+  const OLD = require(path.join(SITE, 'research/tests/fixtures/gw-prism-r2.js'));   // the renderer live before r3 (rollback pairing)
+  check('the reverse: the r3 root, shard and report given to the previous (r2) renderer: refused (data and renderer ship and roll back together)', throws(() => OLD.checkIndex(ix)) && throws(() => OLD.checkShard(shard('0'), sEntry('0'), key)) && throws(() => OLD.checkReport11(KW, kwE, false)) && !throws(() => OLD.checkIndex(r2))); }
+check('a report of another schema (r2): refused', throws(() => G.checkReport11(Object.assign(clone(KW), { schemaVersion: 'prism-public-v1.1-r2' }), kwE, false)));
 check('a V1.1-only report claiming a V1 report (or the reverse): refused', throws(() => G.checkReport11(HP, hpE, false)) && throws(() => G.checkReport11(KW, kwE, true)));
 check('a composite score: refused', throws(() => G.checkReport11(Object.assign(clone(KW), { compositeScore: 72 }), kwE, false)));
 [['score', 72], ['score100', 72], ['overall', 1], ['purchasingPower', {}], ['affordability', {}], ['forecast', 'x'], ['launchedUnsoldPer100Homes2km', 1], ['pipelinePer100Homes2km', 1], ['lat', 1.3], ['kenTake', 'x'], ['notes', 'x']].forEach(([k, v]) => {
@@ -77,18 +84,23 @@ check('a composite score: refused', throws(() => G.checkReport11(Object.assign(c
   const r = clone(KW); r.profile.lines[2].statement += ' ' + w;
   check('wording with ' + n + ': refused', throws(() => G.checkReport11(r, kwE, false)));
 });
-{ const r = clone(KW); r.peerComparison.positions.push(Object.assign(clone(r.peerComparison.positions[1]), { dimension: 'M', itemId: 'A1-3/kingsford-waterbay/M' }));
+{ const r = clone(KW); r.peerComparison.positions.push(Object.assign(clone(r.peerComparison.positions[1]), { dimension: 'M', itemId: 'kingsford-waterbay/M' }));
   check('a Market position (the withdrawn Market rank): refused', throws(() => G.checkReport11(r, kwE, false))); }
 const line = (r, ms) => r.profile.lines.find((l) => l.measure === ms);
 { const r = clone(KW); Object.assign(line(r, 'supply.unsoldInventory'), { status: 'available', data: { units: 120 } }); check('unsold inventory with a value: refused', throws(() => G.checkReport11(r, kwE, false))); }
-{ const r = clone(KW); Object.assign(line(r, 'infrastructure.futureTransport'), { status: 'available', data: { stations: [{ name: 'A planned station' }] } }); check('future transport with a value (no official LTA evidence): refused', throws(() => G.checkReport11(r, kwE, false))); }
+{ const r = clone(KW); Object.assign(line(r, 'infrastructure.futureTransport'), { status: 'available', data: { stations: [{ name: 'A planned station' }] } }); check('future transport with a value (no upcoming-MRT evidence): refused', throws(() => G.checkReport11(r, kwE, false))); }
 { const r = clone(KW); line(r, 'market.backdrop').data.decile = 6; check('a Market decile: refused', throws(() => G.checkReport11(r, kwE, false))); }
 { const r = clone(KW); line(r, 'market.backdrop').data.rank = { percentile: 50 }; check('a Market rank: refused', throws(() => G.checkReport11(r, kwE, false))); }
 { const r = clone(HP); line(r, 'resale.sustained').data.value = 12.6; check('a sustained value while settling: refused', throws(() => G.checkReport11(r, hpE, true))); }
 { const r = clone(KW); line(r, 'price.entry').data = { medianPrice: 1 }; check('a value for a measure marked not available: refused', throws(() => G.checkReport11(r, kwE, false))); }
 { const r = clone(KW); r.profile.lines.push(Object.assign(clone(r.profile.lines[0]), { panel: 'S', measure: 'supply.pipelineCount' })); check('a line outside the approved profile: refused', throws(() => G.checkReport11(r, kwE, false))); }
-{ const r = clone(KW); r.rentalYield.bands[0].approval.state = 'pending'; check('an item without the A2 approval: the report is not shown (its count no longer matches the manifest)', G.model11(G.checkReport11(r, kwE, false), kwE) === null); }
-{ const r = clone(KW); r.profile.lines[0].approval.approvalRef = 'GW-PRISM-V1.1-2026-11-01-A1'; check('an item under the earlier A1 reference only: the report is not shown', G.model11(G.checkReport11(r, kwE, false), kwE) === null); }
+// r3: every item carries its own approval; one pending item, or one reference outside the chain, rejects the whole report (fail closed)
+{ const r = clone(KW); r.rentalYield.bands[0].approval.state = 'pending'; check('a pending item: the whole report is refused', throws(() => G.checkReport11(r, kwE, false))); }
+{ const r = clone(KW); r.profile.lines[0].approval.approvalRef = 'GW-PRISM-V1.1-2026-11-04-DELTA'; check('an item under a reference outside the chain: the whole report is refused', throws(() => G.checkReport11(r, kwE, false))); }
+{ const r = clone(KW); r.profile.lines[0].itemId = 'thomson-three/' + r.profile.lines[0].itemId.split('/').pop(); check('an item with another report\'s id: refused', throws(() => G.checkReport11(r, kwE, false))); }
+{ const r = clone(KW); r.profile.lines.push(Object.assign(clone(r.profile.lines[0]), { approval: { state: 'pending', approvalRef: 'GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1' } })); check('an extra unapproved item (the count alone would not catch it): refused', throws(() => G.checkReport11(r, kwE, false))); }
+{ const r = clone(KW); r.profile.lines[0].approval.approvalRef = 'GW-PRISM-V1.1-2026-11-01-A1'; check('items may mix references within the chain (A1 and NATIONWIDE-1): accepted', !throws(() => G.checkReport11(r, kwE, false)) && G.model11(G.checkReport11(r, kwE, false), kwE) !== null); }
+{ const r = clone(KW); r.peerComparison.positions = r.peerComparison.positions.slice(1); check('a dropped item: the report is not shown (its count no longer matches the shard)', G.model11(G.checkReport11(r, kwE, false), kwE) === null); }
 
 // ---- 3 what the pages show
 const P = {}; ALL.forEach((id) => { P[id] = page(id); });

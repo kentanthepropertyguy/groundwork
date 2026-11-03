@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "united-mansion",
  "name": "United Mansion",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": null,
  "rentalYield": null,
@@ -25,10 +20,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/united-mansion/price.entry",
+    "itemId": "united-mansion/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/united-mansion/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -43,10 +39,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/united-mansion/resale.sustained",
+    "itemId": "united-mansion/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/united-mansion/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -61,10 +58,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/united-mansion/infrastructure.mrt",
+    "itemId": "united-mansion/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/united-mansion/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -102,10 +100,11 @@
     ]
    },
    {
-    "itemId": "B1/united-mansion/infrastructure.schools",
+    "itemId": "united-mansion/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/united-mansion/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -138,10 +137,11 @@
     ]
    },
    {
-    "itemId": "B1/united-mansion/infrastructure.amenities",
+    "itemId": "united-mansion/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/united-mansion/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -180,10 +180,11 @@
     ]
    },
    {
-    "itemId": "B1/united-mansion/infrastructure.futureTransport",
+    "itemId": "united-mansion/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/united-mansion/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -198,10 +199,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/united-mansion/supply.competition",
+    "itemId": "united-mansion/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/united-mansion/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -249,10 +251,11 @@
     ]
    },
    {
-    "itemId": "B1/united-mansion/supply.unsoldInventory",
+    "itemId": "united-mansion/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/united-mansion/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -267,10 +270,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/united-mansion/supply.pipeline",
+    "itemId": "united-mansion/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/united-mansion/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -289,10 +293,11 @@
     ]
    },
    {
-    "itemId": "B1/united-mansion/supply.quietArea",
+    "itemId": "united-mansion/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/united-mansion/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -319,10 +324,11 @@
     ]
    },
    {
-    "itemId": "B1/united-mansion/market.backdrop",
+    "itemId": "united-mansion/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/united-mansion/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

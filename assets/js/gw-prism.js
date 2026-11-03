@@ -43,11 +43,14 @@
   // needs and that development's report, nothing else (manifest.json is the release's integrity record; pages never load it). The V1 pairing
   // and the data periods are the approved release's own values (manifest.json supplements and dataPeriodsBySource), pinned here and checked
   // against it by the tests.
-  const V11 = { SCHEMA: 'prism-public-v1.1-r2', INDEX_SCHEMA: 'prism-public-v1.1-r2-index', DIR: 'data/prism/v1.1/', APPROVAL: 'GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1',
+  // r3 (GW-PRISM-R3-SCHEMA-20261103-01, Registry v2): the same reports, re-issued; the root lists every Registry v2 id (2,509) with its
+  // state, and each item carries its own approval reference, which must be one of CHAIN (no single release-wide approval any more)
+  const V11 = { SCHEMA: 'prism-public-v1.1-r3', INDEX_SCHEMA: 'prism-public-v1.1-r3-index', SHARD_SCHEMA: 'prism-public-v1.1-r3-shard', DIR: 'data/prism/v1.1/',
     CHAIN: ['GW-PRISM-V1.1-2026-11-01-A1', 'GW-PRISM-V1.1-2026-11-03-DECILE', 'GW-PRISM-V1.1-2026-11-03-A2', 'GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1'],
-    RELEASE: 'prism-v1.1-r2-release-2026-11-03-505d952296ff',
-    INDEX: '11af2ea3a192a821683eae63a09191c82a348c940a5fca1ef5a2eaba3daae61c',      // index.json, byte for byte: any other is not read
-    MANIFEST: '5e1c76ad30ff016540aa0e4001df687f38d1b41268e12a97139964ee81df65cd',   // manifest.json, bound by the root (manifestSha256)
+    RELEASE: 'prism-v1.1-r3-release-2026-11-03-a8b865345a70',
+    INDEX: 'fbf04c39c8e61f50e1a9a45db2d4e99270caae9b6763b0dba526668a475552d2',      // index.json, byte for byte: any other is not read
+    MANIFEST: '37fea25c57706a3a1d4b7deb873c8ab284318e7acc7df2ae5d5432abae3fec61',   // manifest.json, bound by the root (manifestSha256)
+    STATES: ['full', 'partial', 'pending', 'unavailable', 'new_launch', 'redirect'], PAGE_STATES: ['full', 'partial'],
     SHARDS: '0123456789abcdef',
     V1PAIR: { release: 'prism-v1-release-2026-10-30-10911d7e2c92', approvalRef: 'GW-PRISM-V1-2026-10-31-A1',
       sha256: ['2d7266d31571169f2281a8aad3b31acb682de0229a6fd106cf47d2ff54ca1144', '330f8e9f874bbf0e9e282b75d9e94b19a5e8d723be1f3ccb20faabfa306fc78f', '56b6139e0f013ac17bf92ac18183e290cc46fdb617e7906dc2513ff14e948ce1'] },
@@ -149,33 +152,46 @@
     };
   }
 
-  /* ---------------------------------------------------------------- the V1.1 r2 release (pure; tested in node) */
+  /* ---------------------------------------------------------------- the V1.1 release, r3 format (pure; tested in node) */
   // Keys an r2 report may never carry (the release's own forbidden-field list, plus the V1 internal fields); compositeScore: null only
   const FORBID_KEYS = ['purchasingPower', 'grossIncomeForTdsr', 'surveyBasisIncome', 'householdsAtOrAbovePct', 'stressInstalment', 'affordability', 'overall', 'score100', 'score',
     'launchedUnsoldPer100Homes2km', 'pipelinePer100Homes2km', 'newSaleDevelopments2km', 'primarySchools1km', 'supermarkets1km', 'nearestRailM', 'forecast', 'lat', 'lon', 'll', 'notes', 'limitations', 'kenTake'];
   const FORBID = /score100|afford|purchasingPower|kenTake|forecast/i;
   const FORBID_TEXT = /score\s*\/\s*100|\/\s*100\b|purchasing power|affordab|ken.s take/i;   // wording no r2 text may contain
   // the root: the approved release, its chain, the manifest it binds, and 16 shards (one per hex digit) whose counts add up
+  const ID = /^[a-z0-9-]{1,80}$/;
   function checkIndex(ix) {
-    if (!ix || ix.schemaVersion !== V11.INDEX_SCHEMA || ix.status !== 'approved' || ix.approvalRef !== V11.APPROVAL || ix.datasetReleaseId !== V11.RELEASE) throw new Error('v1.1 index: not the approved release');
+    if (!ix || ix.schemaVersion !== V11.INDEX_SCHEMA || ix.status !== 'approved' || ix.releaseId !== V11.RELEASE) throw new Error('v1.1 index: not the approved release');
     if (!Array.isArray(ix.approvalChain) || ix.approvalChain.join('|') !== V11.CHAIN.join('|')) throw new Error('v1.1 index: not the approved chain');
     if (ix.manifestSha256 !== V11.MANIFEST) throw new Error('v1.1 index: binds another manifest');
+    if (!/^[0-9a-f]{64}$/.test(ix.redirectsSha256 || '')) throw new Error('v1.1 index: no redirects pin');
+    const c = ix.counts;
+    if (!c || !Number.isInteger(c.reports) || !Number.isInteger(c.entries) || !c.states || typeof c.states !== 'object') throw new Error('v1.1 index: no counts');
+    if (Object.keys(c.states).some((k) => V11.STATES.indexOf(k) < 0) || Object.keys(c.states).reduce((a, k) => a + c.states[k], 0) !== c.entries ||
+      V11.PAGE_STATES.reduce((a, k) => a + (c.states[k] || 0), 0) !== c.reports) throw new Error('v1.1 index: state counts');
     if (!Array.isArray(ix.shards) || ix.shards.map((x) => x && x.key).join('') !== V11.SHARDS) throw new Error('v1.1 index: not the 16 shards');
-    ix.shards.forEach((x) => { if (x.path !== 'index/' + x.key + '.json' || !/^[0-9a-f]{64}$/.test(x.sha256 || '') || !(Number.isInteger(x.reports) && x.reports > 0)) throw new Error('v1.1 index: bad shard entry'); });
-    if (ix.shards.reduce((a, x) => a + x.reports, 0) !== ix.reports) throw new Error('v1.1 index: shard counts');
+    ix.shards.forEach((x) => { if (x.path !== 'index/' + x.key + '.json' || !/^[0-9a-f]{64}$/.test(x.sha256 || '') || !(Number.isInteger(x.entries) && x.entries > 0)) throw new Error('v1.1 index: bad shard entry'); });
+    if (ix.shards.reduce((a, x) => a + x.entries, 0) !== c.entries) throw new Error('v1.1 index: shard counts');
     return ix;
   }
-  // a shard: its own key and release, exactly the count the root lists, unique ids, each id in the shard its sha256 names (idKey)
+  // a shard: its own key, exactly the count the root lists, unique ids, each id in the shard its sha256 names (idKey). Every Registry v2 id is
+  // listed with its state; only a full or partial entry with a report (path, sha256, item count) can have a page; a redirect names one other id.
   function checkShard(sh, entry, idKey) {
-    if (!sh || sh.schemaVersion !== V11.INDEX_SCHEMA || sh.datasetReleaseId !== V11.RELEASE || sh.key !== entry.key || !Array.isArray(sh.reports) || sh.reports.length !== entry.reports) throw new Error('v1.1 shard: not the approved shard');
+    if (!sh || sh.schemaVersion !== V11.SHARD_SCHEMA || sh.key !== entry.key || !Array.isArray(sh.entries) || sh.entries.length !== entry.entries) throw new Error('v1.1 shard: not the approved shard');
     const seen = {};
-    sh.reports.forEach((r) => {
-      if (!r || !/^[a-z0-9-]{1,80}$/.test(r.id) || r.path !== 'reports/' + r.id + '.json' || !/^[0-9a-f]{64}$/.test(r.sha256 || '') || !(Number.isInteger(r.items) && r.items > 0) || seen[r.id]) throw new Error('v1.1 shard: bad report entry');
+    sh.entries.forEach((r) => {
+      if (!r || !ID.test(r.id) || V11.STATES.indexOf(r.state) < 0 || typeof r.name !== 'string' || !r.name || seen[r.id]) throw new Error('v1.1 shard: bad entry');
+      if (V11.PAGE_STATES.indexOf(r.state) >= 0 && (r.path !== 'reports/' + r.id + '.json' || !/^[0-9a-f]{64}$/.test(r.sha256 || '') || !(Number.isInteger(r.items) && r.items > 0) || V11.CHAIN.indexOf(r.approvalRef) < 0)) throw new Error('v1.1 shard: bad report entry');
+      if (V11.PAGE_STATES.indexOf(r.state) < 0 && (r.path != null || r.sha256 != null)) throw new Error('v1.1 shard: a report for an entry without a page');
+      if (r.state === 'redirect' && (!ID.test(r.to || '') || r.to === r.id)) throw new Error('v1.1 shard: bad redirect');
       seen[r.id] = 1;
     });
-    if (idKey) sh.reports.forEach((r) => { if (idKey(r.id) !== entry.key) throw new Error('v1.1 shard: an id in the wrong shard'); });
+    if (idKey) sh.entries.forEach((r) => { if (idKey(r.id) !== entry.key) throw new Error('v1.1 shard: an id in the wrong shard'); });
     return sh;
   }
+  const hasReport = (f) => !!(f && V11.PAGE_STATES.indexOf(f.state) >= 0 && f.path);
+  // curated: the reports approved before the nationwide batch carry "approved-existing" (r2: profile "approved")
+  const isCurated = (f) => !!(f && Array.isArray(f.reasons) && f.reasons.indexOf('approved-existing') >= 0);
   // the V1 pairing: a V1.1 report that supplements a V1 report must pair with that exact approved V1 report (release and sha256)
   function checkPair(v1, e1) {
     if (!v1 || v1.datasetReleaseId !== V11.V1PAIR.release || v1.approvalRef !== V11.V1PAIR.approvalRef || !e1 || V11.V1PAIR.sha256.indexOf(e1.sha256) < 0) throw new Error('v1.1: pairs with a different V1 report');
@@ -189,13 +205,24 @@
       keysOk(o[k], path + k + '.');
     });
   }
-  const ok11 = (x) => !!(x && x.approval && x.approval.state === 'approved' && x.approval.approvalRef === V11.APPROVAL);
+  const ok11 = (x) => !!(x && x.approval && x.approval.state === 'approved' && V11.CHAIN.indexOf(x.approval.approvalRef) >= 0);
+  // every item in a report (anything carrying an approval): its id within the report, approved under a reference in CHAIN. One item that is
+  // not (pending, another reference, a foreign id) rejects the whole report.
+  function itemsOk(r) {
+    const walk = (o) => {
+      if (!o || typeof o !== 'object') return;
+      if (Array.isArray(o)) { o.forEach(walk); return; }
+      if ('approval' in o && (!ok11(o) || typeof o.itemId !== 'string' || o.itemId.indexOf(r.reportId + '/') !== 0)) throw new Error('v1.1 report: an item that is not approved');
+      Object.keys(o).forEach((k) => walk(o[k]));
+    };
+    walk(r);
+  }
   // only=true: a V1.1-only entry (supplementsV1Report: null). The safeguards are checked on the data itself, so a changed file cannot show them.
   function checkReport11(r, entry, only) {
-    if (!r || r.schemaVersion !== V11.SCHEMA || r.reportId !== entry.id || r.datasetReleaseId !== V11.RELEASE || typeof r.name !== 'string' || !r.name) throw new Error('v1.1 report: id or schema');
+    if (!r || r.schemaVersion !== V11.SCHEMA || r.reportId !== entry.id || typeof r.name !== 'string' || !r.name) throw new Error('v1.1 report: id or schema');
     if (r.supplementsV1Report !== (only ? null : entry.id)) throw new Error('v1.1 report: supplements the wrong report');
-    if (!r.release || r.release.status !== 'approved' || r.release.approvalRef !== V11.APPROVAL) throw new Error('v1.1 report: not approved');
     if (r.compositeScore !== null) throw new Error('v1.1 report: a composite score');
+    itemsOk(r);
     keysOk(r, '');
     const pos = r.peerComparison && Array.isArray(r.peerComparison.positions) ? r.peerComparison.positions : [];
     pos.forEach((x) => { if (['P', 'R'].indexOf(x.dimension) < 0) throw new Error('v1.1 report: a ' + x.dimension + ' position (Market ranks are withdrawn)'); });
@@ -839,23 +866,30 @@
       shards11[key] = getText(root + V11.DIR + e.path + '?v=' + e.sha256.slice(0, 10)).then((t) => sha256(t).then((h) => {
         if (h !== e.sha256) throw new Error('v1.1 shard: sha256');
         const sh = checkShard(JSON.parse(t), e);
-        return Promise.all(sh.reports.map((r) => idKey(r.id))).then((ks) => { if (ks.some((k) => k !== key)) throw new Error('v1.1 shard: an id in the wrong shard'); return sh; });
+        return Promise.all(sh.entries.map((r) => idKey(r.id))).then((ks) => { if (ks.some((k) => k !== key)) throw new Error('v1.1 shard: an id in the wrong shard'); return sh; });
       }));
       shards11[key].catch(() => { delete shards11[key]; });
     }
     return shards11[key];
   }
+  const entry11 = (root, id) => index11(root).then((ix) => idKey(id).then((k) => shard11(root, ix, k))).then((sh) => sh.entries.find((x) => x.id === id) || null);
   function load11(root, id, e1, v1) {
-    return index11(root).then((ix) => idKey(id).then((k) => shard11(root, ix, k))).then((sh) => {
-      const f = sh.reports.find((x) => x.id === id); if (!f) return null;
+    return entry11(root, id).then((f) => {
+      if (!hasReport(f)) return null;   // pending, unavailable, new launch, redirect: as an id without a report
       return getText(root + V11.DIR + f.path + '?v=' + f.sha256.slice(0, 10)).then((t) => sha256(t).then((h) => {
         if (h !== f.sha256) throw new Error('v1.1 report: sha256');
         const r = JSON.parse(t), only = r.supplementsV1Report === null;
         if (only ? !!e1 : !e1) throw new Error('v1.1 report: V1 pairing');
         if (!only) checkPair(v1, e1);
-        const v = model11(checkReport11(r, f, only), f); if (v) { v.periods = V11.PERIODS; v.curated = f.profile === 'approved'; } return v;
+        const v = model11(checkReport11(r, f, only), f); if (v) { v.periods = V11.PERIODS; v.curated = isCurated(f); } return v;
       }));
     }).catch(() => null);
+  }
+  // a redirect entry: the id it names, only when that id has a page of its own (one hop: a redirect to a redirect has no page, so it is not
+  // followed); anything else, or any failure: null
+  function redirect11(root, id) {
+    if (!ID.test(String(id || ''))) return Promise.resolve(null);
+    return entry11(root, id).then((f) => (f && f.state === 'redirect' ? load(root, f.to).then((md) => (hasPage(md) ? f.to : null)) : null)).catch(() => null);
   }
   const settled = {};   // id -> model (or null) once loaded, so a page redraw can place the PRISM parts without waiting
   const ss = { get: (k) => { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { sessionStorage.setItem(k, v); } catch (e) { /* private mode */ } }, del: (k) => { try { sessionStorage.removeItem(k); } catch (e) { /* */ } } };
@@ -889,7 +923,10 @@
   function show(app, id, o) {
     return load(o.root || '../', id).then((md) => {
       if (o.still && !o.still()) return md;
-      if (!hasPage(md)) { if (o.fallback) o.fallback(); return null; }
+      if (!hasPage(md)) {
+        // a Registry v2 redirect: #/prism/<id> becomes #/prism/<to> (replacing the address, not adding to the history) when <to> has a page
+        return redirect11(o.root || '../', id).then((to) => { if (o.still && !o.still()) return null; if (to) location.replace('#/prism/' + to); else if (o.fallback) o.fallback(); return null; });
+      }
       settled[id] = md;
       document.title = 'PRISM · ' + md.name + ' — Research — Groundwork';
       app.innerHTML = pageHtml(md, o);
@@ -989,5 +1026,5 @@
     }
   }
 
-  return { explain11, explainHtml, XT, PICKS_MAX, CURATED, hasEvidence, REVEAL, ES, reveal11, revealHtml, V11, PANELS, checkIndex, checkShard, checkPair, checkReport11, model11, compose, hasPage, headline11, lineHtml, posHtml, yieldHtml, incomeHtml, v11Html, VERSION, switchHtml, leadSites, layersHtml, dimsHtml, evidenceOf, headline, landingHtml, mountLanding, QUESTION, SCHEMA, DIR, MANIFEST_V, PILLARS, checkManifest, checkReport, approved, shown, model, value, detail, period, evidence, previewHtml, pageHtml, load, mountPreview, show, _cache: cache, _settled: settled };
+  return { itemsOk, redirect11, hasReport, isCurated, explain11, explainHtml, XT, PICKS_MAX, CURATED, hasEvidence, REVEAL, ES, reveal11, revealHtml, V11, PANELS, checkIndex, checkShard, checkPair, checkReport11, model11, compose, hasPage, headline11, lineHtml, posHtml, yieldHtml, incomeHtml, v11Html, VERSION, switchHtml, leadSites, layersHtml, dimsHtml, evidenceOf, headline, landingHtml, mountLanding, QUESTION, SCHEMA, DIR, MANIFEST_V, PILLARS, checkManifest, checkReport, approved, shown, model, value, detail, period, evidence, previewHtml, pageHtml, load, mountPreview, show, _cache: cache, _settled: settled };
 });

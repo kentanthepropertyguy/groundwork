@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "verticus",
  "name": "Verticus",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/verticus/P",
+    "itemId": "verticus/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/verticus/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -73,10 +69,11 @@
     ]
    },
    {
-    "itemId": "B1/verticus/R",
+    "itemId": "verticus/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/verticus/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -136,10 +133,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/verticus/price.entry",
+    "itemId": "verticus/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/verticus/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -154,10 +152,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/verticus/resale.sustained",
+    "itemId": "verticus/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/verticus/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -191,10 +190,11 @@
     ]
    },
    {
-    "itemId": "B1/verticus/infrastructure.mrt",
+    "itemId": "verticus/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/verticus/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -232,10 +232,11 @@
     ]
    },
    {
-    "itemId": "B1/verticus/infrastructure.schools",
+    "itemId": "verticus/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/verticus/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -268,10 +269,11 @@
     ]
    },
    {
-    "itemId": "B1/verticus/infrastructure.amenities",
+    "itemId": "verticus/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/verticus/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -310,10 +312,11 @@
     ]
    },
    {
-    "itemId": "B1/verticus/infrastructure.futureTransport",
+    "itemId": "verticus/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/verticus/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -328,10 +331,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/verticus/supply.competition",
+    "itemId": "verticus/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/verticus/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -384,10 +388,11 @@
     ]
    },
    {
-    "itemId": "B1/verticus/supply.unsoldInventory",
+    "itemId": "verticus/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/verticus/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -402,10 +407,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/verticus/supply.pipeline",
+    "itemId": "verticus/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/verticus/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -441,10 +447,11 @@
     ]
    },
    {
-    "itemId": "B1/verticus/supply.quietArea",
+    "itemId": "verticus/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/verticus/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -471,10 +478,11 @@
     ]
    },
    {
-    "itemId": "B1/verticus/market.backdrop",
+    "itemId": "verticus/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/verticus/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

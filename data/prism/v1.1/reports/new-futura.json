@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "new-futura",
  "name": "New Futura",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/new-futura/R",
+    "itemId": "new-futura/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/new-futura/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -83,10 +79,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/new-futura/price.entry",
+    "itemId": "new-futura/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/new-futura/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -101,10 +98,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/new-futura/resale.sustained",
+    "itemId": "new-futura/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/new-futura/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -133,10 +131,11 @@
     ]
    },
    {
-    "itemId": "B1/new-futura/infrastructure.mrt",
+    "itemId": "new-futura/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/new-futura/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -174,10 +173,11 @@
     ]
    },
    {
-    "itemId": "B1/new-futura/infrastructure.schools",
+    "itemId": "new-futura/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/new-futura/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -210,10 +210,11 @@
     ]
    },
    {
-    "itemId": "B1/new-futura/infrastructure.amenities",
+    "itemId": "new-futura/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/new-futura/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -252,10 +253,11 @@
     ]
    },
    {
-    "itemId": "B1/new-futura/infrastructure.futureTransport",
+    "itemId": "new-futura/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/new-futura/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -270,10 +272,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/new-futura/supply.competition",
+    "itemId": "new-futura/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/new-futura/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -341,10 +344,11 @@
     ]
    },
    {
-    "itemId": "B1/new-futura/supply.unsoldInventory",
+    "itemId": "new-futura/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/new-futura/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -359,10 +363,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/new-futura/supply.pipeline",
+    "itemId": "new-futura/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/new-futura/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -406,10 +411,11 @@
     ]
    },
    {
-    "itemId": "B1/new-futura/supply.quietArea",
+    "itemId": "new-futura/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/new-futura/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -436,10 +442,11 @@
     ]
    },
    {
-    "itemId": "B1/new-futura/market.backdrop",
+    "itemId": "new-futura/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/new-futura/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

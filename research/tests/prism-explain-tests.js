@@ -27,14 +27,14 @@ const metres = (m) => (m >= 1000 ? fmt(m / 1000, 1).replace(/\.0$/, '') + ' km' 
 // ---- every report through the approved gate (as prism-batch-tests.js)
 const ix = JSON.parse(read('data/prism/v1.1/index.json')), v1 = JSON.parse(read('data/prism/v1/manifest.json'));
 const pages = [];
-ix.shards.forEach((s) => G.checkShard(JSON.parse(read('data/prism/v1.1/' + s.path)), s, (id) => sha(id).charAt(0)).reports.forEach((e) => {
+ix.shards.forEach((s) => G.checkShard(JSON.parse(read('data/prism/v1.1/' + s.path)), s, (id) => sha(id).charAt(0)).entries.filter(G.hasReport).forEach((e) => {
   const r = JSON.parse(read('data/prism/v1.1/' + e.path)), only = r.supplementsV1Report === null, e1 = v1.reports.find((x) => x.id === e.id);
   const v = G.model11(G.checkReport11(r, e, only), e); v.periods = G.V11.PERIODS;
   const md = e1 ? G.model(G.checkReport(JSON.parse(read('data/prism/v1/' + e1.path)), e1), v1) : null;
   const pg = G.compose(md, v), html = pg ? G.pageHtml(pg, { root: '../' }) : '';
   pages.push({ id: e.id, r, v, pg, html });
 }));
-check('every report in the release loads through the gate (' + pages.length + ')', pages.length === ix.reports && pages.length === 2099);
+check('every report in the release loads through the gate (' + pages.length + ')', pages.length === ix.counts.reports && pages.length === 2099);
 
 // ---- the approved wording, literally
 const W = {

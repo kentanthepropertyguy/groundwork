@@ -1,1222 +1,2044 @@
 {
- "schemaVersion": "prism-public-v1.1-r2-index",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
+ "schemaVersion": "prism-public-v1.1-r3-shard",
  "key": "0",
- "reports": [
+ "entries": [
+  {
+   "id": "19-nassim",
+   "state": "unavailable",
+   "name": "19 Nassim",
+   "reasons": [
+    "group-under-30"
+   ]
+  },
+  {
+   "id": "8-at-bt",
+   "state": "new_launch",
+   "name": "8@BT",
+   "reasons": [
+    "separate-track",
+    "stage:new-launch"
+   ]
+  },
   {
    "id": "8-farrer-suites",
-   "path": "reports/8-farrer-suites.json",
-   "sha256": "99ec03ce62b7a92429ad29f9f60203ec19244b6d21dfe0326f4c0ac70411296c",
-   "items": 12,
+   "state": "partial",
    "name": "8 Farrer Suites",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/8-farrer-suites.json",
+   "sha256": "45246dd064c6a87aa38c83809e15bca0ca274c089d25bc991ee65a7456259f7d",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "8-raja",
-   "path": "reports/8-raja.json",
-   "sha256": "fa1c90ddc9a84b8d672786903329b15457d8d83523e1cb31c634d5febb370acc",
-   "items": 11,
+   "state": "partial",
    "name": "8 Raja",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/8-raja.json",
+   "sha256": "59117ac4efdd5a8a9589cfd91e84844ebececa4f50c6d3cf187f2b1ee58bc95d",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "alba",
-   "path": "reports/alba.json",
-   "sha256": "1a3f9cda87edb6063422655730a9647433a8e7b0566c9cbec96247cfe0826748",
-   "items": 12,
+   "state": "partial",
    "name": "Alba",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/alba.json",
+   "sha256": "027b63fe0bd15a8f23510033109754833a8c2fe7ac73f97a7828b77b13f9056b",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "attitude-at-kim-yam",
-   "path": "reports/attitude-at-kim-yam.json",
-   "sha256": "e913c2e63718b469751ad8d36a70d9245909225089cc7ea437a16a2d5b630d7b",
-   "items": 12,
+   "state": "partial",
    "name": "Attitude at Kim Yam",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/attitude-at-kim-yam.json",
+   "sha256": "7d74fa86ac4aa1977a7740a6111612013c51e354701e02c5224416bc4c668dab",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "avant-residences",
-   "path": "reports/avant-residences.json",
-   "sha256": "c1a1bfd7093ab4e59de71f0137bd38539467a25af74edcee0826d41850d10ef7",
-   "items": 12,
+   "state": "partial",
    "name": "Avant Residences",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/avant-residences.json",
+   "sha256": "7893153907acd49a1c1b0fbc9310da97350aeb884b215d1a0866d76f702562e7",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "bartley-ridge",
-   "path": "reports/bartley-ridge.json",
-   "sha256": "6329e199b82872363218e223e42beed617a77270e699f3dd61e1d4c56e6b5449",
-   "items": 13,
+   "state": "full",
    "name": "Bartley Ridge",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/bartley-ridge.json",
+   "sha256": "51b0f40f0cfa1fd85656dc6687e0e77c67961b78157ad00fa5a7ed856aa7c154",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "bassein-court",
-   "path": "reports/bassein-court.json",
-   "sha256": "63ddd830b73fd3ec93edee05d5ff84fc5999b85689fa69fd4645e6f36f70ac66",
-   "items": 11,
+   "state": "partial",
    "name": "Bassein Court",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/bassein-court.json",
+   "sha256": "178c0b131013a51f98066fcc4b1472078f5bc7a8a6e3455d30fefc07f8e9a169",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "bayou-residence",
-   "path": "reports/bayou-residence.json",
-   "sha256": "8529ad31a83dac98d39c9cbbef4421e9c5e91318eac6aa4d115743cc2a218f18",
-   "items": 11,
+   "state": "partial",
    "name": "Bayou Residence",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/bayou-residence.json",
+   "sha256": "2c9e2b3844a4bf13834fad225ae440f32b55f40845c3805c97252d3700f2450c",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "bellerive",
-   "path": "reports/bellerive.json",
-   "sha256": "808e2684cca85999dad0e76720371b22b4535c7f1ea7c0ca1f58697a8648dc71",
-   "items": 12,
+   "state": "partial",
    "name": "Bellerive",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/bellerive.json",
+   "sha256": "bb8901895c9a8fbe5ca2cd822662d6aa523a4a6c715eae790c68a6c9e2f2793a",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "belysa",
-   "path": "reports/belysa.json",
-   "sha256": "9e1204feffe8660febfa902d0cec6a043bd2fe9e59f517826d53ea4215101c0d",
-   "items": 13,
+   "state": "full",
    "name": "Belysa",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/belysa.json",
+   "sha256": "4fec00bf5d80215c342516f1dee594980017519382e16de90cabdc36b905f028",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "beta-grove",
-   "path": "reports/beta-grove.json",
-   "sha256": "686cf274bb049ca7c913be4f93a2ffb98736ab16acbac362c69ebacc5edeef86",
-   "items": 11,
+   "state": "partial",
    "name": "Beta Grove",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/beta-grove.json",
+   "sha256": "ad6f3dbf7e7be805e765d978f75b526b8691c581c000400e1d29fde94fd0e94c",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "bishan-8",
-   "path": "reports/bishan-8.json",
-   "sha256": "37dbff67b77833fd8082c9dc06eb877f8b6503dea230c61d70d306d508fae34d",
-   "items": 13,
+   "state": "full",
    "name": "Bishan 8",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/bishan-8.json",
+   "sha256": "a532f32fcaa3897db3a6dbb3018d70f103aefb291472de905f36e8b70976ee98",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "bliss-residences",
-   "path": "reports/bliss-residences.json",
-   "sha256": "ad11662ede7b749d9033882dd84163985527a383d2375d1263db87fb3e0220a2",
-   "items": 11,
+   "state": "partial",
    "name": "Bliss Residences",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/bliss-residences.json",
+   "sha256": "29bea180ba3281eddd8d1bfce75eb332c1c221c5535550a32c166ff7c710de25",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "botannia",
-   "path": "reports/botannia.json",
-   "sha256": "61ec730c5d5e3e33494b11294b03898f9bb0eb271e4917fea62edfb662297437",
-   "items": 13,
+   "state": "full",
    "name": "Botannia",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/botannia.json",
+   "sha256": "6d1fdb6361115ac36b9a03a7b535d904014d4e993088d4d2237633a4d405c074",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "bristol-lodge",
-   "path": "reports/bristol-lodge.json",
-   "sha256": "fe0279fc908950348e403db4276cb37d770c25c35c620abdd2136c4482b1860a",
-   "items": 11,
+   "state": "partial",
    "name": "Bristol Lodge",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/bristol-lodge.json",
+   "sha256": "7e329295bec21cf1956cf954bba663a3ebb74eabb1a5a0ca80124d97159fce0b",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "canninghill-piers",
+   "state": "new_launch",
+   "name": "Canninghill Piers",
+   "reasons": [
+    "separate-track",
+    "stage:new-launch"
+   ]
   },
   {
    "id": "caribbean-at-keppel-bay",
-   "path": "reports/caribbean-at-keppel-bay.json",
-   "sha256": "fe0bb210d1a5d6ee0528477e3c56c25d1ac8aead662808188c95b9730f424490",
-   "items": 13,
+   "state": "full",
    "name": "Caribbean at Keppel Bay",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/caribbean-at-keppel-bay.json",
+   "sha256": "5774177130848369cac7b49ab74c02e3aef0e635a27a70de3b6ce1b046cd3ee5",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "carpmael-thirty-eight",
-   "path": "reports/carpmael-thirty-eight.json",
-   "sha256": "65d1060b23c129db9073f3e36fb42b52156a12cd2a1b98d8ad5c68a3c3e8974b",
-   "items": 11,
+   "state": "partial",
    "name": "Carpmael Thirty-Eight",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/carpmael-thirty-eight.json",
+   "sha256": "3505d893cff4b5c7f497c31732a7a1ff4332149b124c19c754450ef21ffe9e59",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "casa-irrawaddy",
-   "path": "reports/casa-irrawaddy.json",
-   "sha256": "f211c5f0aadaf0d0e66517860e03733761653514ac616d49a10e6ec3860ec739",
-   "items": 12,
+   "state": "partial",
    "name": "Casa Irrawaddy",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/casa-irrawaddy.json",
+   "sha256": "b2e76ade1c8b68e082d0223f9ac57d6530b885671a492f89355447463bf9d2eb",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "casa-jervois",
-   "path": "reports/casa-jervois.json",
-   "sha256": "1862e10e8b4f456010e8dedb3cafefad1868987183150ff9eb4de33ea961777d",
-   "items": 12,
+   "state": "partial",
    "name": "Casa Jervois",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/casa-jervois.json",
+   "sha256": "e8c342e54aa650df1911b003440e6191878a522e56b5da371a8e37993efccf15",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "casero-at-dunman",
-   "path": "reports/casero-at-dunman.json",
-   "sha256": "1b71ed9acafe8884ceee2d9e051474310b347352647cdae2e3418ce3018e3e63",
-   "items": 11,
+   "state": "partial",
    "name": "Casero @ Dunman",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/casero-at-dunman.json",
+   "sha256": "30e555431dc48b8fe3daf62177153cae5eadda2822a881de989eb838a86b51d9",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "cashew-heights-condominium",
-   "path": "reports/cashew-heights-condominium.json",
-   "sha256": "05a09cb6a361aeb1c83473f3c9325dc7b93687c29644dc2d8d7c7d03aa57b4b2",
-   "items": 13,
+   "state": "full",
    "name": "Cashew Heights Condominium",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/cashew-heights-condominium.json",
+   "sha256": "d67a403cf197232522604f0f65458e5b6955f5d26b6694ef85367169b58d0644",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "centra-residence",
-   "path": "reports/centra-residence.json",
-   "sha256": "569cb07205bc1ab5a05de10c4fcf5d4faf39eb5e340d27e8303368664a9ba372",
-   "items": 12,
+   "state": "partial",
    "name": "Centra Residence",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/centra-residence.json",
+   "sha256": "5c3ca38dc7811b302a3549e19a3f85343420b1ccf8752a77fa5bbc49dfe2d69a",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "central-green-condominium",
-   "path": "reports/central-green-condominium.json",
-   "sha256": "d1b7493e5d6390db1a684924cf720ba2723c206ab8a2b2b1fbd5a2fff2b12d1d",
-   "items": 13,
+   "state": "full",
    "name": "Central Green Condominium",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/central-green-condominium.json",
+   "sha256": "7572eac2d8f2ded607f6eb563b22a985b220dac1a65ee90d2699a2266e81c957",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "centrina",
-   "path": "reports/centrina.json",
-   "sha256": "2590e922dacd0e530db94c6460825a489e38881b935e5c45e2ac7f791e5d7a69",
-   "items": 11,
+   "state": "partial",
    "name": "Centrina",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/centrina.json",
+   "sha256": "5f866aef5b5ac711763cec6dc041eefdbd29bcd5abf363afaa092696cf7d289e",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "centro-residences",
-   "path": "reports/centro-residences.json",
-   "sha256": "e7cec5e451318afd91410228049e45d107a072e623efe7968619451465d7ed29",
-   "items": 13,
+   "state": "full",
    "name": "Centro Residences",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/centro-residences.json",
+   "sha256": "2887cc03303e6ee57195654456f83aaf8c5f4187ac292527c376648909529691",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "changi-green",
-   "path": "reports/changi-green.json",
-   "sha256": "cfdbd652c80c67b7173d16e3a0c1f2c25267793a6fc998ef5192215ea639ae15",
-   "items": 13,
+   "state": "full",
    "name": "Changi Green",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/changi-green.json",
+   "sha256": "73b9ed94474b8971bf815f70a6395426a8586c74caf057392d72c978c31f9e19",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "charlton-residences",
+   "state": "unavailable",
+   "name": "Charlton Residences",
+   "reasons": [
+    "landed-cluster"
+   ]
   },
   {
    "id": "cliften",
-   "path": "reports/cliften.json",
-   "sha256": "e1c72ee605700674b4d08e143e93352cbfdf96c5ecc4a8a88913fb7f54dd9b29",
-   "items": 12,
+   "state": "partial",
    "name": "Cliften",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/cliften.json",
+   "sha256": "297f6ec47fdbbf9a927414d67eb601c539f8fb8a2c4b7be7f61a16697312e048",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "coronation-grove",
-   "path": "reports/coronation-grove.json",
-   "sha256": "9215b37527d7d9410ae834ec0ac6518ef9f513df4ced4e962fc8092b84e1dfe9",
-   "items": 11,
+   "state": "partial",
    "name": "Coronation Grove",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/coronation-grove.json",
+   "sha256": "e381c4e9e1d8ab486424162b3f27e8d5e2cde59725f8911c7409d734f12ecdaf",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "cosy-lodge",
-   "path": "reports/cosy-lodge.json",
-   "sha256": "5c2a863fc359982e6a194f4349cda6d0347f3433de647d92ee5accdbaf7f7504",
-   "items": 11,
+   "state": "partial",
    "name": "Cosy Lodge",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/cosy-lodge.json",
+   "sha256": "dc6ba988c0bc778290fd93b3ed2875fd731f5ee9b7358bd2376c43e8549f32a8",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "d-ixoras",
-   "path": "reports/d-ixoras.json",
-   "sha256": "b5958d399db859889315f9655789fd2265aa72f76dde32a11b6f89214896475f",
-   "items": 11,
+   "state": "partial",
    "name": "D' Ixoras",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/d-ixoras.json",
+   "sha256": "f0e14594cbc82d6d0f3bdbc6973354f4d85aa3c4c13a0d9e23159b5b328f41b0",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "dakota-residences",
-   "path": "reports/dakota-residences.json",
-   "sha256": "dc2011190c69867916130080e4d32a1d43e562edeceb3c401e817db6a83c588c",
-   "items": 13,
+   "state": "full",
    "name": "Dakota Residences",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/dakota-residences.json",
+   "sha256": "3af40320a328c461b4f3a2f5e03b1132c0e165aa22f7876dc9177126b76ca965",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "dukes-residence",
-   "path": "reports/dukes-residence.json",
-   "sha256": "826aca1316d13d3797eac82ed2cdc4ae0d53cda95154affa41eed86b29c893b6",
-   "items": 12,
+   "state": "partial",
    "name": "Dukes Residence",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/dukes-residence.json",
+   "sha256": "732b79cceea0d44e5e6e1c0b469eb263ae9d37db19a140bf33e2d28d8ccf6423",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "duku-apartments",
-   "path": "reports/duku-apartments.json",
-   "sha256": "b8b79e447310e7a5c28f0ccd47e6cbc9936b40166fffda3a8f6d217db858cb2b",
-   "items": 11,
+   "state": "partial",
    "name": "Duku Apartments",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/duku-apartments.json",
+   "sha256": "aac16fab4189a89f84038fe88c68f3cd85f3a1a31a099303da4ebac273894a42",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "eastpac-building",
-   "path": "reports/eastpac-building.json",
-   "sha256": "345b394bc1b3d651958a8ad72d6126ea36ad92eb4ef2cff3ca97a589fd835c1a",
-   "items": 11,
+   "state": "partial",
    "name": "Eastpac Building",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/eastpac-building.json",
+   "sha256": "c8d70453564802e1144853fb11a0187c7e7f1c5b267bffcf807e2f6e68be533d",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "eastpoint-green",
-   "path": "reports/eastpoint-green.json",
-   "sha256": "017c9927a1122a4d3e53a8ad4bbe6b82deb1e976fd6b23401c7832cd956f8d65",
-   "items": 13,
+   "state": "full",
    "name": "Eastpoint Green",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/eastpoint-green.json",
+   "sha256": "2a4a9a181827859780e1178c51e14946e7c97fe49b99cca91a05ebb979211d91",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "eastwood-lodge",
-   "path": "reports/eastwood-lodge.json",
-   "sha256": "9ece0dc877d2086a6a54fd1bb5ce968e57c0d8079ed77887ed31aebc2266cf14",
-   "items": 11,
+   "state": "partial",
    "name": "Eastwood Lodge",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/eastwood-lodge.json",
+   "sha256": "6956f1a925174a0b43f24ee3f757f41221930cd84b673f7c51f1a7ce496a759a",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "eden-residences-capitol",
-   "path": "reports/eden-residences-capitol.json",
-   "sha256": "3764a0a1bf55a7bcecae24e7f0125f47b1f642468e8ac06d61baca883b190af2",
-   "items": 12,
+   "state": "partial",
    "name": "Eden Residences Capitol",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/eden-residences-capitol.json",
+   "sha256": "e3aae1d2d7a56f7ca628aad4d6f47db2683ff4352e295bd341eda1c7808fe248",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "emprado-suites",
-   "path": "reports/emprado-suites.json",
-   "sha256": "408ad5d57940ae97a8787d10edb73278739815071ce8c7fb2db497af6aa97840",
-   "items": 11,
+   "state": "partial",
    "name": "Emprado Suites",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/emprado-suites.json",
+   "sha256": "3b1f49dc54f6c57c7ff28d101677f557f550a67a8df1e1f0df5bcee3f035b41b",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "escada-view",
-   "path": "reports/escada-view.json",
-   "sha256": "250a94db6d199d5a2d0a3795c7dc1af9568a1dfcd4cf8ea2b860459cb75e09d6",
-   "items": 12,
+   "state": "partial",
    "name": "Escada View",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/escada-view.json",
+   "sha256": "2180484dd7c0503410f0d7d2ad5d2500271c2229a39f24cbc650afc6f4c32e81",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "este-villa",
+   "state": "unavailable",
+   "name": "Este Villa",
+   "reasons": [
+    "landed-cluster"
+   ]
   },
   {
    "id": "estilo",
-   "path": "reports/estilo.json",
-   "sha256": "8a9dcf1a7351cb873db9907f089b7c2dd45ce039574b208236aef94c40d6efa8",
-   "items": 12,
+   "state": "partial",
    "name": "Estilo",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/estilo.json",
+   "sha256": "0b2e0c03c996ece6c3507954cdd37f32b7a7c8ca1137dfb5669eac8e66818ea5",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "euro-asia-court",
-   "path": "reports/euro-asia-court.json",
-   "sha256": "f56ef0b32f47eedbae293e34cf40a5491dcc4fa3cfe689da0b4b9386fc0874e3",
-   "items": 12,
+   "state": "partial",
    "name": "Euro-Asia Court",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/euro-asia-court.json",
+   "sha256": "0dfc531d37e33aa68b23b5f222e67f53d6179082c6bb5b645b23f5efc8402499",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "five-chancery",
+   "state": "unavailable",
+   "name": "Five Chancery",
+   "reasons": [
+    "landed-cluster"
+   ]
   },
   {
    "id": "flora-east",
-   "path": "reports/flora-east.json",
-   "sha256": "a552ed0d1dbe4afaf2d912c0a479479cde688caccc97873b7483d756b199d220",
-   "items": 11,
+   "state": "partial",
    "name": "Flora East",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/flora-east.json",
+   "sha256": "e84b5295d43e90a7a6e034efd46c55a9ce8f68769ff8816a52e10c02e8b567db",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "galaxy-towers",
-   "path": "reports/galaxy-towers.json",
-   "sha256": "7cfd87b41b6a5bed35a7471b7d179705fc1256de4e9fd59a3956ba9bda5dd850",
-   "items": 13,
+   "state": "full",
    "name": "Galaxy Towers",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/galaxy-towers.json",
+   "sha256": "2d53181eb87e92714e8847da4f56325ac51a6071489604d915e57476f47a917f",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "gambier-court",
+   "state": "unavailable",
+   "name": "Gambier Court",
+   "reasons": [
+    "group-under-30"
+   ]
+  },
+  {
+   "id": "gentle-reflections",
+   "state": "unavailable",
+   "name": "Gentle Reflections",
+   "reasons": [
+    "landed-cluster"
+   ]
+  },
+  {
+   "id": "gls-202510-upper-thomson-road-parcel-a",
+   "state": "new_launch",
+   "name": "Upper Thomson Road (Parcel A) GLS site",
+   "reasons": [
+    "separate-track",
+    "stage:gls-awarded"
+   ]
   },
   {
    "id": "goodview-apartments",
-   "path": "reports/goodview-apartments.json",
-   "sha256": "33237fd94ea1321d244a9912be1650a7e0050a36df6c35e4136c17db6d0158cc",
-   "items": 11,
+   "state": "partial",
    "name": "Goodview Apartments",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/goodview-apartments.json",
+   "sha256": "c93fd0a5b409f19d69efb5a91fb53d9757bd7cc64ffa87b36eddb941ae688dc0",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "grandeur-park-residences",
-   "path": "reports/grandeur-park-residences.json",
-   "sha256": "0af31adb2f50afd841a5aa0030e6b474703adaf3941490cc4e12f58d08ebb0d2",
-   "items": 13,
+   "state": "full",
    "name": "Grandeur Park Residences",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/grandeur-park-residences.json",
+   "sha256": "df4c335376a487aa9fe53247d584d89be0d220ae79d42b3b7114bab3faadf049",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "guilin-view",
-   "path": "reports/guilin-view.json",
-   "sha256": "0f316f6a13d841d79ddb9bdab105bf520f94c69acf6c016cc82194b0b6b6d456",
-   "items": 13,
+   "state": "full",
    "name": "Guilin View",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/guilin-view.json",
+   "sha256": "b418e0c2908fad99af2f3927b77966746bddf639fe52c1adcab9fb439b4556a3",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "heritage-residences",
-   "path": "reports/heritage-residences.json",
-   "sha256": "79c7227925c48cb61b28d03f651f02d8721817d80a7d21d2233d6369b4389d3d",
-   "items": 11,
+   "state": "partial",
    "name": "Heritage Residences",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/heritage-residences.json",
+   "sha256": "f8966b949178df778e06a73b2f5aaaa6e0042523d078a156af4d643f507ced67",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "heritage-view",
-   "path": "reports/heritage-view.json",
-   "sha256": "28b0c163bf8ea88e9204dae08ab0b1a05b90605fc04e3e8845739967803dec47",
-   "items": 13,
+   "state": "full",
    "name": "Heritage View",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/heritage-view.json",
+   "sha256": "2ca51586d0506b11a0d039cdc992ff15529bb9e49d431a87b98c8b25d7c8370c",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "highland-centre",
-   "path": "reports/highland-centre.json",
-   "sha256": "9734423a7fa82c9afa6c5c1a635c8d792d2739c749f96b3548273a1cf96fb82c",
-   "items": 11,
+   "state": "partial",
    "name": "Highland Centre",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/highland-centre.json",
+   "sha256": "d743b8f7883c684a931db1549c424c6180724c587c365e9ef44fb106f607a105",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "hillview-apartments",
-   "path": "reports/hillview-apartments.json",
-   "sha256": "f9022af0968778933296581cf8a3d15c36290890b9a4379a50e3c742246af0e2",
-   "items": 12,
+   "state": "partial",
    "name": "Hillview Apartments",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/hillview-apartments.json",
+   "sha256": "26ba60a4399fd5c1bbf0a70796340fde2bea03aa9e8ef7de6c2e874b757cb90b",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "jervois-jade",
+   "state": "unavailable",
+   "name": "Jervois Jade",
+   "reasons": [
+    "group-under-30"
+   ]
   },
   {
    "id": "jervois-treasures",
-   "path": "reports/jervois-treasures.json",
-   "sha256": "80112d3983b3c73f1a46f7732c5d70c9535e7d1846b9c4590aad15eb7fd55130",
-   "items": 13,
+   "state": "full",
    "name": "Jervois Treasures",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/jervois-treasures.json",
+   "sha256": "a0b70d42193ddb834d9674592884a8f4601a8b66f34479ed6f547d96a26decd3",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "joo-chiat-verbena",
-   "path": "reports/joo-chiat-verbena.json",
-   "sha256": "9f166240bb51cebd57f109233fc8fe629467a313ab2f7847237ab0c133339f5e",
-   "items": 11,
+   "state": "partial",
    "name": "Joo Chiat Verbena",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/joo-chiat-verbena.json",
+   "sha256": "a221c4dbedd5e4b096d65f03490f6665d1a0f1fad43c44ebcd5deafbeed2d902",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "kandis-residence",
-   "path": "reports/kandis-residence.json",
-   "sha256": "999705b0c814bca8c186c6d56d649e9ca543d279706420757da3fddcc088827e",
-   "items": 13,
+   "state": "full",
    "name": "Kandis Residence",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/kandis-residence.json",
+   "sha256": "ba95305a12042e9d12dbddd58e8def1c56c852cc3e50e630ff444af0fa729596",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "keng-lee-view",
-   "path": "reports/keng-lee-view.json",
-   "sha256": "3cb1bb76c26d719d673fd0a00b97297acd98abfdddde368c9307879a438f9483",
-   "items": 11,
+   "state": "partial",
    "name": "Keng Lee View",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/keng-lee-view.json",
+   "sha256": "dbe8146346a1cacaacfd2c3cfcf500c69ac398316e7b6aea482728ab476d12d7",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "kindol-gardens",
-   "path": "reports/kindol-gardens.json",
-   "sha256": "d065ba6205935ebac6c4b75819da81fce88443dc075204741be5c65c680d4826",
-   "items": 11,
+   "state": "partial",
    "name": "Kindol Gardens",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/kindol-gardens.json",
+   "sha256": "9ed3292c33b1308fcc5aa8647f7b22c829597c5950e9264fdd892fb98b19a62f",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "kovan-regency",
-   "path": "reports/kovan-regency.json",
-   "sha256": "a5e78e1e214a39e362043d289e3e34e1b2ed1502b35e544bac4bb71a4c6f0714",
-   "items": 13,
+   "state": "full",
    "name": "Kovan Regency",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/kovan-regency.json",
+   "sha256": "3c93051a8c0fca2d48ce7b2f8b0cb2dbf2717fa97cb0cb547037a5efe39e288d",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "lakeside-tower",
-   "path": "reports/lakeside-tower.json",
-   "sha256": "98ad695db5e7120b5fa904c6079932886f0959bce50a30973cebb02bf88cd794",
-   "items": 12,
+   "state": "partial",
    "name": "Lakeside Tower",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/lakeside-tower.json",
+   "sha256": "fd14eac562f38fe8d046e2b0f664685809c1aa581d75bfe80ba6a255c17b5d85",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "landridge-condominium",
-   "path": "reports/landridge-condominium.json",
-   "sha256": "cd96f47c539702e53e855d36c219e0cb33be8da181a8b87109d254a301eecaac",
-   "items": 12,
+   "state": "partial",
    "name": "Landridge Condominium",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/landridge-condominium.json",
+   "sha256": "54f82f6bf71a3b34ad2259508ae265a5085a6fe9757dd53573b5445d38629fe0",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "le-royce-at-leith-park",
+   "state": "unavailable",
+   "name": "LE Royce @ Leith Park",
+   "reasons": [
+    "landed-cluster"
+   ]
   },
   {
    "id": "legenda-at-joo-chiat",
-   "path": "reports/legenda-at-joo-chiat.json",
-   "sha256": "639f865b6866dd3f635fe8e406882e27c291138eb6cc1e035267f4f8ccbe0681",
-   "items": 12,
+   "state": "partial",
    "name": "Legenda at Joo Chiat",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/legenda-at-joo-chiat.json",
+   "sha256": "cd0a3df517a2b873596e68da1cb63ca12ef0a375c6b3d546f7d90bb69620629e",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "lentor-central-residences",
+   "state": "new_launch",
+   "name": "Lentor Central Residences",
+   "reasons": [
+    "separate-track"
+   ]
   },
   {
    "id": "lincoln-suites",
-   "path": "reports/lincoln-suites.json",
-   "sha256": "9d6a611043cd593cd220f75d49adc0ca1bd18c3278df3ffbcc12e6656c7508be",
-   "items": 13,
+   "state": "full",
    "name": "Lincoln Suites",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/lincoln-suites.json",
+   "sha256": "0a58e6e469c80ebd56ccb3bc9574d57c7fa5c00a549412e68fe11108be002e4e",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "lucerne-grand",
+   "state": "new_launch",
+   "name": "Lucerne Grand",
+   "reasons": [
+    "separate-track",
+    "stage:new-launch"
+   ]
   },
   {
    "id": "lush-acres",
-   "path": "reports/lush-acres.json",
-   "sha256": "66315a21ff8517c74994c216f10a6b8ae4e4b55ad1324b30a977a19df65c7d78",
-   "items": 13,
+   "state": "full",
    "name": "Lush Acres",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/lush-acres.json",
+   "sha256": "49867128a887cb3d31452471d19aac4e20a4fa24967cfcd436371efed3713d51",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "luxe-ville",
-   "path": "reports/luxe-ville.json",
-   "sha256": "0e917c2c2177bc1fac2bfc11f009d38fd2156eeb4b0231184551f10d72ba636c",
-   "items": 12,
+   "state": "partial",
    "name": "Luxe Ville",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/luxe-ville.json",
+   "sha256": "631a13a63faa0a2da2a8a0b410131637ec381f2a3bfbbd08267dcd5ba6b92e4a",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "malvern-springs",
-   "path": "reports/malvern-springs.json",
-   "sha256": "287a1ed4b2ec0433c50386828a191c4fbf02a4bf39ed573a6ca5a29c78c7b44c",
-   "items": 12,
+   "state": "partial",
    "name": "Malvern Springs",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/malvern-springs.json",
+   "sha256": "d3a509767e08972364cb7773be54a0a214833b85df6bb8c0aa1d89ae0ca9c56e",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "mandarin-park",
-   "path": "reports/mandarin-park.json",
-   "sha256": "1af8a0f47c5a1d7e308435c534c73c98222d1c12816dfff3adb0f34597b1bbb8",
-   "items": 11,
+   "state": "partial",
    "name": "Mandarin Park",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/mandarin-park.json",
+   "sha256": "3c33978931c35c96a8225a6dd3b57dceef22673a1139963fc4c1110078dea3b6",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "meadows-at-peirce",
-   "path": "reports/meadows-at-peirce.json",
-   "sha256": "6781e78d069aef7fc7b15e794954c4b73075c1354dae7adb2ae9b85c0ef5d9c0",
-   "items": 12,
+   "state": "partial",
    "name": "Meadows @ Peirce",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/meadows-at-peirce.json",
+   "sha256": "27f535a23f1b7fcffc3fe3aca903361f1937d577a3715202bbe96d3e75bf4262",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "midwood",
+   "state": "unavailable",
+   "name": "Midwood",
+   "reasons": [
+    "group-under-30"
+   ]
   },
   {
    "id": "mont-botanik-residence",
-   "path": "reports/mont-botanik-residence.json",
-   "sha256": "41bdc067bd95dbd5446d65e02784ce134a44ec1e35d2fb3190512d4855b1f51e",
-   "items": 13,
+   "state": "full",
    "name": "Mont Botanik Residence",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/mont-botanik-residence.json",
+   "sha256": "ad96708edf314af40d170960d1aeab10f7078f960f8dc3b767e213582b18afa8",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "myra",
-   "path": "reports/myra.json",
-   "sha256": "09b6a5735ce2b8956c81c5389702a4f8f7c01aa79a0c96cb4fb0b62358c07c02",
-   "items": 12,
+   "state": "partial",
    "name": "Myra",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/myra.json",
+   "sha256": "f1921a644c08b59ceabb8af101cfff1377f982fdbfc1629672d9c8ce37755da5",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "ocean-front-suites",
-   "path": "reports/ocean-front-suites.json",
-   "sha256": "3264e2380d8b7263975aee97a6484ad118f3f87bfbc0788490a8d5dc0e2d4a5e",
-   "items": 12,
+   "state": "partial",
    "name": "Ocean Front Suites",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/ocean-front-suites.json",
+   "sha256": "1633989bcd529397b798313f94ed779e8225ad5daa4b7cac8a68a16b94f86685",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "okio",
-   "path": "reports/okio.json",
-   "sha256": "510ee16270b4ea080974a18a2c3f945b700d53a0bb75c175d1fbcc3af3cdde6a",
-   "items": 13,
+   "state": "full",
    "name": "Okio",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/okio.json",
+   "sha256": "cc4da5544b29a1636b9a7f8eb608316367489aa2831a2b388d7fe222f3979ce9",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "one-chatsworth",
-   "path": "reports/one-chatsworth.json",
-   "sha256": "345fdda6586e41cb1985747f2fb62482cc946f4ce6e1117f9e7b9be7ac24b4fd",
-   "items": 12,
+   "state": "partial",
    "name": "One Chatsworth",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/one-chatsworth.json",
+   "sha256": "6b486dbc411f9dfd9f28ee749bfd21cf95f0dbee3a9854e4990ca361f7da5fbd",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "one-chiltern",
+   "state": "unavailable",
+   "name": "One Chiltern",
+   "reasons": [
+    "landed-cluster"
+   ]
   },
   {
    "id": "orchard-towers",
-   "path": "reports/orchard-towers.json",
-   "sha256": "4e20d1d569b03c848600eeace079ef80025d7e823f8816faf63d2ca31fc883ed",
-   "items": 11,
+   "state": "partial",
    "name": "Orchard Towers",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/orchard-towers.json",
+   "sha256": "717a9e7d3949a91b0fdb9778edd142ccc67a2badd7e28f8d0fab1135043bc908",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "otto-place",
+   "state": "pending",
+   "name": "Otto Place",
+   "reasons": [
+    "no-resale-history"
+   ]
   },
   {
    "id": "oue-twin-peaks",
-   "path": "reports/oue-twin-peaks.json",
-   "sha256": "86dde9eb13985c1f1fae9891d5b57742302ddee2997fd46dd1c36d18cb3eb20e",
-   "items": 13,
+   "state": "full",
    "name": "OUE Twin Peaks",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/oue-twin-peaks.json",
+   "sha256": "b7d6939904487a0d228c27fbcac1e25cfdc68227d42a09d63eb77cae527d57ce",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "parc-esta",
+   "state": "unavailable",
+   "name": "Parc Esta",
+   "reasons": [
+    "group-under-30"
+   ]
   },
   {
    "id": "people-s-park-centre",
-   "path": "reports/people-s-park-centre.json",
-   "sha256": "f173fdc417619f2837f52b9dbf547a8feec71f8cc7d2396ac859ff7f586a2221",
-   "items": 12,
+   "state": "partial",
    "name": "People's Park Centre",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/people-s-park-centre.json",
+   "sha256": "e1c17b5aba8332bdfb30a5b44a5ad607d8d84086a5ad86020b4a5c2e6bca2ac0",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "perfect-ten",
+   "state": "new_launch",
+   "name": "Perfect Ten",
+   "reasons": [
+    "separate-track"
+   ]
   },
   {
    "id": "poh-heng-court",
-   "path": "reports/poh-heng-court.json",
-   "sha256": "67d9b533827639b13553c7a33a4d2e0e45e1d0d1a51facf39bf062a2903ee862",
-   "items": 11,
+   "state": "partial",
    "name": "Poh Heng Court",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/poh-heng-court.json",
+   "sha256": "140f12ac014ab39c16ef90e4195c254fdc4932f511ebe73b849e4e0718b91c15",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "public-mansion",
-   "path": "reports/public-mansion.json",
-   "sha256": "f21dec1b53d9ddf30f8fa282a55e38fdab465d8e330418d8a6a51ca7e8f18297",
-   "items": 12,
+   "state": "partial",
    "name": "Public Mansion",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/public-mansion.json",
+   "sha256": "e775837edcae7bc00250745117f12c76f98d81cf1ae5e9b7c36775c2c0c2de7e",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "reflections-at-keppel-bay",
-   "path": "reports/reflections-at-keppel-bay.json",
-   "sha256": "a29627392d2a38ce6bfff2309df68e07299ec49dcd6f1dc0c2cfe4a0b4399366",
-   "items": 13,
+   "state": "full",
    "name": "Reflections at Keppel Bay",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/reflections-at-keppel-bay.json",
+   "sha256": "5526769854d4a041abfbc4ecf6f244dae3709a373f69ddfdc637ee952d9886e6",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "richmond-park",
-   "path": "reports/richmond-park.json",
-   "sha256": "f021719c0ad8866b52a1ae5281202b8a6833d4b5cba6d70e9c19e7696ad7fbc5",
-   "items": 12,
+   "state": "partial",
    "name": "Richmond Park",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/richmond-park.json",
+   "sha256": "be87fb3f5e1de443fe3087e89459c2e7fb7c1b39a714e85b1074f40ab0154185",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "riverfront-residences",
+   "state": "unavailable",
+   "name": "Riverfront Residences",
+   "reasons": [
+    "group-under-30"
+   ]
   },
   {
    "id": "riverside-48",
-   "path": "reports/riverside-48.json",
-   "sha256": "e7e73781fc792244bfbd46d36a1d95fc82599e6b8fa77290b8ab386bf78423ce",
-   "items": 12,
+   "state": "partial",
    "name": "Riverside 48",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/riverside-48.json",
+   "sha256": "b679e58334a02ffdd2a8cabb0765b799713b7fe98b366bce950714e042192a38",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "riverwalk-apartments",
-   "path": "reports/riverwalk-apartments.json",
-   "sha256": "795d44cf2242b1a47a5343e5bf31bbbf099dc46ec819621fac42d73a38ff5f5d",
-   "items": 13,
+   "state": "full",
    "name": "Riverwalk Apartments",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/riverwalk-apartments.json",
+   "sha256": "2ed607671838eee787e8e499196a9ca12e41bd58ec9556906ccf66e3816d9b85",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "riviera-38",
-   "path": "reports/riviera-38.json",
-   "sha256": "df9d52158487a78494bff72280cf0ec7c96b5bbbbc17b554f52324f39ab3cd18",
-   "items": 13,
+   "state": "full",
    "name": "Riviera 38",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/riviera-38.json",
+   "sha256": "b9a77cd55993064817e8e2452c85b8e04683618563f0c799caf24b3ebfef96ee",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "rosalia-park",
-   "path": "reports/rosalia-park.json",
-   "sha256": "4f859fd46b2f5a8bbafb65ee6fa9eb88dc2fad7ba0e110834063304adc57b651",
-   "items": 12,
+   "state": "partial",
    "name": "Rosalia Park",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/rosalia-park.json",
+   "sha256": "7f54110cb0429f988b1d33aef818f5cb49050b6884fb75e5b608b6e08df99570",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "rose-ville",
-   "path": "reports/rose-ville.json",
-   "sha256": "0498752dc79213d3aaf278555e24af39b181152c383b790da6640da95807cf9f",
-   "items": 11,
+   "state": "partial",
    "name": "Rose Ville",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/rose-ville.json",
+   "sha256": "b7ea768c1cdcbbceafbd6aeb441ce599208f19cb8b1f0e8d71a4d548d5b3e3fd",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "rosyth-residence",
-   "path": "reports/rosyth-residence.json",
-   "sha256": "bc9d94cf4f4dd67f87d26cc9dcb9510934215ab0b97b7cd38ca41c424db78c4d",
-   "items": 11,
+   "state": "partial",
    "name": "Rosyth Residence",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/rosyth-residence.json",
+   "sha256": "029db6747838b7ead09b83fc4f4df7cda1da29aed875f59816b0c16c7214f65c",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "roxy-square",
-   "path": "reports/roxy-square.json",
-   "sha256": "3e7978ab485ff8fa9b0f798bd079b5fd298779bb96d3497531a842e652fec63c",
-   "items": 11,
+   "state": "partial",
    "name": "Roxy Square",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/roxy-square.json",
+   "sha256": "df4848aa4f9cf14092e21b2a10f23dba238961e1ef309f524e90c30cd97d59a0",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "sanctuary-at-newton",
+   "state": "new_launch",
+   "name": "Sanctuary@Newton",
+   "reasons": [
+    "separate-track"
+   ]
   },
   {
    "id": "scotts-highpark",
-   "path": "reports/scotts-highpark.json",
-   "sha256": "a17a00c128895896dc5b9b3a6d6fd41d09e1628d113f7dcdf698839d4b4aa3d6",
-   "items": 12,
+   "state": "partial",
    "name": "Scotts Highpark",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/scotts-highpark.json",
+   "sha256": "3156ff0489c0199e8dfb8fb59a35548ae6f5fc939e83359ec0daa7d7c75c3d44",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "sea-horizon",
-   "path": "reports/sea-horizon.json",
-   "sha256": "2f862b0ada1f1d6371a3aea3924bc9b0ab49ea32a5c6f45d0559b2d3f6cf6a62",
-   "items": 13,
+   "state": "full",
    "name": "Sea Horizon",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/sea-horizon.json",
+   "sha256": "1435b0e934ca14f4f5b5c375cbcb3c56852e1d1e6af00a0049b6b4784203000f",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "serangoon-garden-view",
+   "state": "unavailable",
+   "name": "Serangoon Garden View",
+   "reasons": [
+    "landed-cluster"
+   ]
   },
   {
    "id": "shan-gate-apartments",
-   "path": "reports/shan-gate-apartments.json",
-   "sha256": "7af4a0ccaee6da115de77c24d9ecf099388af2e1c185db09ff12720f0cb88604",
-   "items": 11,
+   "state": "partial",
    "name": "Shan Gate Apartments",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/shan-gate-apartments.json",
+   "sha256": "5cdc56e5db4feba62f1280aa87af06c9e1bf5984173853b28d702a9887e233e5",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "sheares-ville",
-   "path": "reports/sheares-ville.json",
-   "sha256": "5eaae637e9242bf400529a75b35cee3e47a82f535efafd775e0d2ea0b1fed502",
-   "items": 12,
+   "state": "partial",
    "name": "Sheares Ville",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/sheares-ville.json",
+   "sha256": "7d64a92d2ce1aad885593ee0d0ccc96bceb4ea586f5f7e378917c73b563c97ed",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "sheba-lodge",
-   "path": "reports/sheba-lodge.json",
-   "sha256": "82cf11c8c18ab8f9b4f506f193771cfacbba168373a0e9b48c93588e89c3e08a",
-   "items": 11,
+   "state": "partial",
    "name": "Sheba Lodge",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/sheba-lodge.json",
+   "sha256": "63fb1e8a2e7380fd53bcf58e3fe0c55562ca4e5e4eca2318b4b6e9cb02431fff",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "shelford-23",
-   "path": "reports/shelford-23.json",
-   "sha256": "9ec18ab63f236a9a9819ca3afe960bdc324db8e33074cdb0d57efda90df76501",
-   "items": 12,
+   "state": "partial",
    "name": "Shelford 23",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/shelford-23.json",
+   "sha256": "256ea9648a7b7d864dabcfda94857ff33c9a57f4bdc23213cdd2cabff6882d93",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "shelford-green",
-   "path": "reports/shelford-green.json",
-   "sha256": "1d41db2c0677238436963974f4f058b4c97547cba29ac7fb4674a973ccb2dad0",
-   "items": 12,
+   "state": "partial",
    "name": "Shelford Green",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/shelford-green.json",
+   "sha256": "4fe00a46cf66d6382d188d4f18614886a9500b8c65d3985011ab0a4663ba3da4",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "sims-dorado",
-   "path": "reports/sims-dorado.json",
-   "sha256": "353a9907d40e3a8d48ecb22b885439284e12da341be4a5939bf643f39de8e940",
-   "items": 12,
+   "state": "partial",
    "name": "Sims Dorado",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/sims-dorado.json",
+   "sha256": "a94c3783bff1ec83b905c2a224b595153c207aacabd135ed7eb956227469e927",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "sims-meadows",
-   "path": "reports/sims-meadows.json",
-   "sha256": "66512548141bc07b993606535fb147de198657fed9269abd201fba6ac07982cf",
-   "items": 13,
+   "state": "full",
    "name": "Sims Meadows",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/sims-meadows.json",
+   "sha256": "bc680f855f83004eb4870c00456ddeb43089c652eb62c6013c81221aa67be16e",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "sophia-lodge",
-   "path": "reports/sophia-lodge.json",
-   "sha256": "0ec381c8604b78ba3afff7a2de80f61b6f8177f7d285f1a38817757571287417",
-   "items": 11,
+   "state": "partial",
    "name": "Sophia Lodge",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/sophia-lodge.json",
+   "sha256": "e8f6e3489f29bac03bef3ab4d61d54e39561f433593962caab43419444e51413",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "southaven-ii",
-   "path": "reports/southaven-ii.json",
-   "sha256": "2436574fa144d54873f89e80e056d9dbae83f3a93402cd0c13c749311947bd1b",
-   "items": 12,
+   "state": "partial",
    "name": "Southaven II",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "R"
+   ],
+   "path": "reports/southaven-ii.json",
+   "sha256": "2562076b5f968776df65771e57dbb73d10edab424a63e716b87c7b5b8da14505",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "southbank",
-   "path": "reports/southbank.json",
-   "sha256": "418a3126e1d1bbdcab137c659342eeee5b45adfab88d49df6a1f82586855254d",
-   "items": 13,
+   "state": "full",
    "name": "Southbank",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/southbank.json",
+   "sha256": "e1740edb68a132d921ef3743d073ad130a2cdb25f62d66fa475073ebf92201ec",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "stillz-residence",
-   "path": "reports/stillz-residence.json",
-   "sha256": "433a1a0557f294608c52f74d48eeaf0d53056edc23ed6877b26d4abff46dc065",
-   "items": 11,
+   "state": "partial",
    "name": "Stillz Residence",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/stillz-residence.json",
+   "sha256": "94157683ef189351536ec07e90ca0e4bbdb7b1df3d5d32efc9760f42a894af2a",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "suites-at-amber",
-   "path": "reports/suites-at-amber.json",
-   "sha256": "379ed5735b679041bd3b2ef6caa9f98499b82385592a155a004fb01a079569e2",
-   "items": 11,
+   "state": "partial",
    "name": "Suites @ Amber",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/suites-at-amber.json",
+   "sha256": "e47ed0578e2c031e158795f5df8db485d333d3ba0b640a34343b32486e1c6a9e",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "suites-at-eastcoast",
-   "path": "reports/suites-at-eastcoast.json",
-   "sha256": "3532b238b0708641cf7933c6498d7ec9a1d372090118e4c8eeb4273fdbd4c2a5",
-   "items": 12,
+   "state": "partial",
    "name": "Suites @ Eastcoast",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/suites-at-eastcoast.json",
+   "sha256": "dba198ebae77e950c8512817522ee24acf34487f5354a605bc718efcec789149",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "suites-de-laurel",
-   "path": "reports/suites-de-laurel.json",
-   "sha256": "11d6614f05cf2159b641db2a9a7f2b921935d195138c721ec18b6ac019a67d36",
-   "items": 12,
+   "state": "partial",
    "name": "Suites DE Laurel",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/suites-de-laurel.json",
+   "sha256": "3419f987f147eeec3bcbf3ca3841b185ba9dd344e1faf92c8c0c7b5c26edcb27",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "symphony-suites",
-   "path": "reports/symphony-suites.json",
-   "sha256": "b4ee1e7dc8bece8b236107fcd67a54e5cdd543836849b5b00cecec9deae389f0",
-   "items": 13,
+   "state": "full",
    "name": "Symphony Suites",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/symphony-suites.json",
+   "sha256": "0b7c37b9c8cfe6007e27b4ccb01b593ea56ef7057983d2819018ac2f787f1a3d",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "taipan-regency",
-   "path": "reports/taipan-regency.json",
-   "sha256": "080d2fa088bed5a798186465c8aa5d9c1ac6fbf4794f99103ec8077964e6d25c",
-   "items": 11,
+   "state": "partial",
    "name": "Taipan Regency",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/taipan-regency.json",
+   "sha256": "d015c2bc18edc1c8036a4bd8d8bb47f4f6131c67bf7cb73eb3a68c82b12a40dc",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "tanglin-regency",
+   "state": "unavailable",
+   "name": "Tanglin Regency",
+   "reasons": [
+    "group-under-30"
+   ]
   },
   {
    "id": "tembelina",
-   "path": "reports/tembelina.json",
-   "sha256": "bfd4d1358b99b9a7a4774e705230361bb80686793802f8d4f7bbecdceb8327c8",
-   "items": 11,
+   "state": "partial",
    "name": "Tembelina",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/tembelina.json",
+   "sha256": "40112f39675ab2636de3573b62ca961e26a3229bc4698cbb70ba32b43c2e94b0",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "the-abode-at-devonshire",
-   "path": "reports/the-abode-at-devonshire.json",
-   "sha256": "feb9a0783eb56eecf7d6596126f23dc152be536c84cd8e8a6878bcd768c51f1a",
-   "items": 11,
+   "state": "partial",
    "name": "The Abode at Devonshire",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/the-abode-at-devonshire.json",
+   "sha256": "4eebcabeb41b7e613de63860d232ca26533c112729f80982f317729f3cd7927a",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "the-atelier",
+   "state": "new_launch",
+   "name": "The Atelier",
+   "reasons": [
+    "separate-track"
+   ]
   },
   {
    "id": "the-blossomvale",
-   "path": "reports/the-blossomvale.json",
-   "sha256": "505deaf5e4e59a53c13932fc25ddcd317e6b1a92d75d58ea1627d00b88e90548",
-   "items": 13,
+   "state": "full",
    "name": "The Blossomvale",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/the-blossomvale.json",
+   "sha256": "baa25e7d51c7eaf9e8c49126751868ab10e696267778e77f1d37882fa613ec13",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "the-capri",
-   "path": "reports/the-capri.json",
-   "sha256": "963624647e8413f6beb53e19e0decac625cd0afe3621e7bad9663c01006d56d9",
-   "items": 11,
+   "state": "partial",
    "name": "The Capri",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/the-capri.json",
+   "sha256": "606f2de5c91629320c0f556349cd016bacf61b17c0db3cf12a33b4c7d8db47e7",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "the-citrine",
-   "path": "reports/the-citrine.json",
-   "sha256": "9ea2a96b722cf3ad305d7ae9f0a5a8633ff33854a94c9ad5f6bc89d4bbc46ad7",
-   "items": 12,
+   "state": "partial",
    "name": "The Citrine",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/the-citrine.json",
+   "sha256": "472c922b6b67ffa23a86c43924ba2378ce00d9645cb19a6fc0b77ed2080f842e",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "the-cornwall",
-   "path": "reports/the-cornwall.json",
-   "sha256": "83baf121af9604156c39c2c67de5ca5b1ec811ff883d088223a35631bcbbc7f4",
-   "items": 12,
+   "state": "partial",
    "name": "The Cornwall",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/the-cornwall.json",
+   "sha256": "2093d9d549b753a5c0ceda1c22887337cd0f3a31ea7744688d54736765c73f01",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "the-espira",
-   "path": "reports/the-espira.json",
-   "sha256": "3d6a198b4091fd68e39f0f22be6c7a5d429ab7012a0924a03431a2bef1c04f6d",
-   "items": 12,
+   "state": "partial",
    "name": "The Espira",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/the-espira.json",
+   "sha256": "38880bc75bb9dcbecf5bb37b4768b962e68c09d961b0e61333382c00dce19f9e",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "the-gazania",
-   "path": "reports/the-gazania.json",
-   "sha256": "d1b63e4a51220c9597233ffe4d1ce7611881d39eb2b6e6a9449956d17c04bbdc",
-   "items": 13,
+   "state": "full",
    "name": "The Gazania",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/the-gazania.json",
+   "sha256": "8ecce1e1582473aead0a10256c5130d11934738582d0574dc65472dac75be5e9",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "the-hill-at-one-north",
+   "state": "new_launch",
+   "name": "The Hill @One-North",
+   "reasons": [
+    "separate-track"
+   ]
   },
   {
    "id": "the-interweave",
-   "path": "reports/the-interweave.json",
-   "sha256": "521f80fd40719a890cd049fb72ab3cb921bd6c88e59b605c8fb6aefc35f4c2e9",
-   "items": 13,
+   "state": "full",
    "name": "The Interweave",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/the-interweave.json",
+   "sha256": "da10b67289c0f3df3535b4b61a9fabe4ef2d1db1b2eb6c3d370d0e9d96500ce6",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "the-lumos",
-   "path": "reports/the-lumos.json",
-   "sha256": "78ede3af19b4be31078ec220648b7fe75978cd709936bce295862f186c727819",
-   "items": 12,
+   "state": "partial",
    "name": "The Lumos",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/the-lumos.json",
+   "sha256": "8009f06be7ad85a63983ee00d8b22b76ec9b3bd6d8371b94ecdbd27a7cdc8065",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "the-marbella",
-   "path": "reports/the-marbella.json",
-   "sha256": "c45f97126ae8039de82fff350e46a631372cb22b206b2c33db4d09a4fbe44858",
-   "items": 13,
+   "state": "full",
    "name": "The Marbella",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/the-marbella.json",
+   "sha256": "0778dcc7628a58e66103939dcc69224006d28d87007be8aac1531d082730ce5f",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "the-montana",
-   "path": "reports/the-montana.json",
-   "sha256": "48184e5808fa697c1df50172030f092c5540bc77dae23b6ff231193e6782c06f",
-   "items": 13,
+   "state": "full",
    "name": "The Montana",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/the-montana.json",
+   "sha256": "2ce157c9c583fb3706001f87c19c928820b7407773a6d0186336463cf8976b16",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "the-nautical",
-   "path": "reports/the-nautical.json",
-   "sha256": "83aa81bb4839e7df008f95d2dafc82c5684e54768afd7fb30f2073b9151a9837",
-   "items": 12,
+   "state": "partial",
    "name": "The Nautical",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/the-nautical.json",
+   "sha256": "5f67a81ab859000f03cc962e6cbf817b5375c59b3a49a5db90edaed9c7b8c6cb",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "the-oliv",
-   "path": "reports/the-oliv.json",
-   "sha256": "bf4e90a808fbabacdadb22cc4fd510ddbaec4ff34474e75bbdf41dfba6cf8ed4",
-   "items": 11,
+   "state": "partial",
    "name": "The Oliv",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/the-oliv.json",
+   "sha256": "50c01b12fc7ce4bef4867fd1941879ad9147e1675e1882289dd73c75f5f6ea71",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "the-paterson",
-   "path": "reports/the-paterson.json",
-   "sha256": "d57ad33bb5fe7c09efb77213e565bad265416d4f2279c23a8dee2691326f2faa",
-   "items": 13,
+   "state": "full",
    "name": "The Paterson",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/the-paterson.json",
+   "sha256": "bb00dc72b8ece70b888ec2aa66d6ccb8b2fd522781f598f3e3a41e20f741f86a",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "the-princeton",
-   "path": "reports/the-princeton.json",
-   "sha256": "7a49c5679fb54efdb6d21c9bd8e81d59962be74701c14f5299432ad1eda6cfe9",
-   "items": 12,
+   "state": "partial",
    "name": "The Princeton",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/the-princeton.json",
+   "sha256": "af7309fadbe2a155db8dcc4e9c495430d4f8744afc52667e9a4b80b14887a24b",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "the-rise-at-oxley-residences",
-   "path": "reports/the-rise-at-oxley-residences.json",
-   "sha256": "03fbc9090f1aca6b454ea3cc91e6fc53bff5c521e51e5008205dfffb6d1c98a7",
-   "items": 13,
+   "state": "full",
    "name": "The Rise @ Oxley - Residences",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/the-rise-at-oxley-residences.json",
+   "sha256": "8edc61bc68ef90de5450828599ecd1deddf9672ff244a90b2db8c3adddd41436",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "the-sail-at-marina-bay",
-   "path": "reports/the-sail-at-marina-bay.json",
-   "sha256": "afad6dad29aebdff9b141334a8658d9ea19c02ce0b4790a790da5e1116e34946",
-   "items": 13,
+   "state": "full",
    "name": "The Sail @ Marina Bay",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/the-sail-at-marina-bay.json",
+   "sha256": "9a767f72bad589acca727cb230a57cd3a23b078add405ebb68cceb77ed3ae960",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "the-serra-residences",
+   "state": "new_launch",
+   "name": "The Serra Residences",
+   "reasons": [
+    "separate-track",
+    "stage:new-launch"
+   ]
   },
   {
    "id": "the-sunniflora",
-   "path": "reports/the-sunniflora.json",
-   "sha256": "d53b94b140925449ff8e405807aeda8ed065e7d9c26d5ff1187a14049b0d354a",
-   "items": 11,
+   "state": "partial",
    "name": "The Sunniflora",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/the-sunniflora.json",
+   "sha256": "e4d37a24480fe58101f02c4e2716c2a12bce20daedc072d8f64d8ff9a6f646fb",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "the-sunny-spring",
-   "path": "reports/the-sunny-spring.json",
-   "sha256": "c6a4d3ef01cb3b59107d3eaf30bd161c28aa789fa92432ce89e6ef9549058e4a",
-   "items": 13,
+   "state": "full",
    "name": "The Sunny Spring",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/the-sunny-spring.json",
+   "sha256": "16a05ae95477914562c944bfcafdd253faf2b34d8f73066604a356567511b72e",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "the-trumps",
-   "path": "reports/the-trumps.json",
-   "sha256": "68d562ef5361411e80d81399c3bee257b4cbe40a1e298b8c15057a2cbe81c426",
-   "items": 13,
+   "state": "full",
    "name": "The Trumps",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/the-trumps.json",
+   "sha256": "7112812d0816ea7b584fe68c05c91a6edaec1ed6f69621b3ad9c3d6b89b7b6ba",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "the-vision",
-   "path": "reports/the-vision.json",
-   "sha256": "71b38894b1ea466adcfd984db75a8e1b94a45eef1ad2612fe63f8419ec751702",
-   "items": 13,
+   "state": "full",
    "name": "The Vision",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/the-vision.json",
+   "sha256": "ec9bd872e810393306b28f97942f601645dede9d33f14b5c48025a02628f99ef",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "the-vue",
-   "path": "reports/the-vue.json",
-   "sha256": "b7450081522c380a98010b6605479aba79942a2b28c5b6172ed3caec48196395",
-   "items": 13,
+   "state": "full",
    "name": "The Vue",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/the-vue.json",
+   "sha256": "9568f91bee5dc97e2519bbd9fb66f7c1a1d5cdffbb95fe214041076edb894d1e",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "the-waterina",
-   "path": "reports/the-waterina.json",
-   "sha256": "2b813575a694c484e821afb9305b5ef2d2b22d40c6353a518def3b5717207fe2",
-   "items": 12,
+   "state": "partial",
    "name": "The Waterina",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/the-waterina.json",
+   "sha256": "fe04cf55297809eda82ef12275dc39e2bc27a3d6eb1dd55b7201f7b3a22e7106",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "tivoli-grande",
-   "path": "reports/tivoli-grande.json",
-   "sha256": "e2ab23b2d32cea3604df0107652c9f1945caf4d34daea1320b59ab5df669a106",
-   "items": 13,
+   "state": "full",
    "name": "Tivoli Grande",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/tivoli-grande.json",
+   "sha256": "03a75a81c11d2d617b548eb995ee7ef4c4156951f71f02bf964ab8d385cb35ed",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "twin-regency",
-   "path": "reports/twin-regency.json",
-   "sha256": "c3c2f977504650c192d7eb0fb74d2281f478c1b18780cf17892af2ee9c7e2c23",
-   "items": 12,
+   "state": "partial",
    "name": "Twin Regency",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/twin-regency.json",
+   "sha256": "a254e9e9bba4771ee51fb2f79a378f4eee2036735a3dc4e8e89f386bd7d5d9bb",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "urban-treasures",
-   "path": "reports/urban-treasures.json",
-   "sha256": "12b991ebdb6cfdf7e40f8d87e10b1e29e7a5cca9ed2d9b8b50c2cbf5d90a8e17",
-   "items": 13,
+   "state": "full",
    "name": "Urban Treasures",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/urban-treasures.json",
+   "sha256": "853b9d6890c31bd1ffa66d62f7658c9cf5dd84c91b025c5aec6e0cac5bb9dd9d",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "venezio",
-   "path": "reports/venezio.json",
-   "sha256": "542717b6ef706787704fad9dc5f80872782d1943b3148f67326171b92ca97f21",
-   "items": 12,
+   "state": "partial",
    "name": "Venezio",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/venezio.json",
+   "sha256": "b350c065f138e2bd95ec775fa49c0909a227efd73e095e508e0bee41cac9d349",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "verdana-villas",
+   "state": "unavailable",
+   "name": "Verdana Villas",
+   "reasons": [
+    "landed-cluster"
+   ]
   },
   {
    "id": "vicenta-lodge",
-   "path": "reports/vicenta-lodge.json",
-   "sha256": "f19ff40ad853e1f7ddeb16b0cb0e37118b8620b5a0cb74199dee0496dc0193df",
-   "items": 11,
+   "state": "partial",
    "name": "Vicenta Lodge",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P",
+    "R"
+   ],
+   "path": "reports/vicenta-lodge.json",
+   "sha256": "a295f80012185624fe87fc08047e64eafe33e52aca4c9b034f8b3d0f0d53d870",
+   "items": 11,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "villa-de-west",
-   "path": "reports/villa-de-west.json",
-   "sha256": "a0d6dd5752df0c98438d87fa11febb0227522629ff6523aefd870fb0bfe44eba",
-   "items": 12,
+   "state": "partial",
    "name": "Villa DE West",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/villa-de-west.json",
+   "sha256": "b06df6be9bb6f710bae91886229daa3429d4d974aba9d6c627f996d44e86935e",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "waterford-residence",
-   "path": "reports/waterford-residence.json",
-   "sha256": "edce474586ce0212bd8e05268139fd309a8336e790ad5741437eec3e27786b5f",
-   "items": 12,
+   "state": "partial",
    "name": "Waterford Residence",
    "kind": "completed",
-   "profile": "partial"
+   "missingPanels": [
+    "P"
+   ],
+   "path": "reports/waterford-residence.json",
+   "sha256": "14bee96e5fc78125ab3017c70e89b071606724485faa54097ecd985a019e4aac",
+   "items": 12,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
   {
    "id": "westcove-condominium",
-   "path": "reports/westcove-condominium.json",
-   "sha256": "101be89e24ec1cb9fae94b6335c1dde6f99e9658b74ff6546f98f1ab920a3724",
-   "items": 13,
+   "state": "full",
    "name": "Westcove Condominium",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/westcove-condominium.json",
+   "sha256": "4c74cf0114ef35139eabceda8b8fa760a2708c484b0bac8de07f86579683f4cd",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+  },
+  {
+   "id": "westmere",
+   "state": "unavailable",
+   "name": "Westmere",
+   "reasons": [
+    "group-under-30"
+   ]
+  },
+  {
+   "id": "windermere",
+   "state": "unavailable",
+   "name": "Windermere",
+   "reasons": [
+    "group-under-30"
+   ]
+  },
+  {
+   "id": "woodsvale",
+   "state": "unavailable",
+   "name": "Woodsvale",
+   "reasons": [
+    "group-under-30"
+   ]
+  },
+  {
+   "id": "yew-mei-green",
+   "state": "unavailable",
+   "name": "Yew Mei Green",
+   "reasons": [
+    "group-under-30"
+   ]
   },
   {
    "id": "zenith",
-   "path": "reports/zenith.json",
-   "sha256": "3190e771191dd9591781f7fc0ca9429a030703320667af668ac92cd695662abf",
-   "items": 13,
+   "state": "full",
    "name": "Zenith",
    "kind": "completed",
-   "profile": "full"
+   "path": "reports/zenith.json",
+   "sha256": "812e5407e86cad99d328a469f553d1f3a5cc4ce510eb86192ecfda3ca5c3e9c0",
+   "items": 13,
+   "asAt": "2026-11-03",
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   }
  ]
 }

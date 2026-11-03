@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "cardiff-residence",
  "name": "Cardiff Residence",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/cardiff-residence/P",
+    "itemId": "cardiff-residence/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/cardiff-residence/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -73,10 +69,11 @@
     ]
    },
    {
-    "itemId": "B1/cardiff-residence/R",
+    "itemId": "cardiff-residence/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/cardiff-residence/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -136,10 +133,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/cardiff-residence/price.entry",
+    "itemId": "cardiff-residence/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/cardiff-residence/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -154,10 +152,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/cardiff-residence/resale.sustained",
+    "itemId": "cardiff-residence/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/cardiff-residence/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -181,10 +180,11 @@
     ]
    },
    {
-    "itemId": "B1/cardiff-residence/infrastructure.mrt",
+    "itemId": "cardiff-residence/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/cardiff-residence/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -222,10 +222,11 @@
     ]
    },
    {
-    "itemId": "B1/cardiff-residence/infrastructure.schools",
+    "itemId": "cardiff-residence/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/cardiff-residence/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -258,10 +259,11 @@
     ]
    },
    {
-    "itemId": "B1/cardiff-residence/infrastructure.amenities",
+    "itemId": "cardiff-residence/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/cardiff-residence/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -300,10 +302,11 @@
     ]
    },
    {
-    "itemId": "B1/cardiff-residence/infrastructure.futureTransport",
+    "itemId": "cardiff-residence/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/cardiff-residence/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -318,10 +321,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/cardiff-residence/supply.competition",
+    "itemId": "cardiff-residence/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/cardiff-residence/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -359,10 +363,11 @@
     ]
    },
    {
-    "itemId": "B1/cardiff-residence/supply.unsoldInventory",
+    "itemId": "cardiff-residence/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/cardiff-residence/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -377,10 +382,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/cardiff-residence/supply.pipeline",
+    "itemId": "cardiff-residence/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/cardiff-residence/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -408,10 +414,11 @@
     ]
    },
    {
-    "itemId": "B1/cardiff-residence/supply.quietArea",
+    "itemId": "cardiff-residence/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/cardiff-residence/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -438,10 +445,11 @@
     ]
    },
    {
-    "itemId": "B1/cardiff-residence/market.backdrop",
+    "itemId": "cardiff-residence/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/cardiff-residence/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

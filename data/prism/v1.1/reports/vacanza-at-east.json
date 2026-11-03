@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "vacanza-at-east",
  "name": "Vacanza @ East",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/vacanza-at-east/P",
+    "itemId": "vacanza-at-east/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/vacanza-at-east/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -86,10 +82,11 @@
     ]
    },
    {
-    "itemId": "B1/vacanza-at-east/R",
+    "itemId": "vacanza-at-east/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/vacanza-at-east/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -149,10 +146,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/vacanza-at-east/price.entry",
+    "itemId": "vacanza-at-east/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/vacanza-at-east/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -256,10 +254,11 @@
     ]
    },
    {
-    "itemId": "B1/vacanza-at-east/resale.sustained",
+    "itemId": "vacanza-at-east/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/vacanza-at-east/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -283,10 +282,11 @@
     ]
    },
    {
-    "itemId": "B1/vacanza-at-east/infrastructure.mrt",
+    "itemId": "vacanza-at-east/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/vacanza-at-east/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -324,10 +324,11 @@
     ]
    },
    {
-    "itemId": "B1/vacanza-at-east/infrastructure.schools",
+    "itemId": "vacanza-at-east/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/vacanza-at-east/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -360,10 +361,11 @@
     ]
    },
    {
-    "itemId": "B1/vacanza-at-east/infrastructure.amenities",
+    "itemId": "vacanza-at-east/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/vacanza-at-east/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -402,10 +404,11 @@
     ]
    },
    {
-    "itemId": "B1/vacanza-at-east/infrastructure.futureTransport",
+    "itemId": "vacanza-at-east/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/vacanza-at-east/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -420,10 +423,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/vacanza-at-east/supply.competition",
+    "itemId": "vacanza-at-east/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/vacanza-at-east/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -456,10 +460,11 @@
     ]
    },
    {
-    "itemId": "B1/vacanza-at-east/supply.unsoldInventory",
+    "itemId": "vacanza-at-east/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/vacanza-at-east/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -474,10 +479,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/vacanza-at-east/supply.pipeline",
+    "itemId": "vacanza-at-east/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/vacanza-at-east/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -496,10 +502,11 @@
     ]
    },
    {
-    "itemId": "B1/vacanza-at-east/supply.quietArea",
+    "itemId": "vacanza-at-east/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/vacanza-at-east/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -526,10 +533,11 @@
     ]
    },
    {
-    "itemId": "B1/vacanza-at-east/market.backdrop",
+    "itemId": "vacanza-at-east/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/vacanza-at-east/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

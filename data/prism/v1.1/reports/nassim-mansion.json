@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "nassim-mansion",
  "name": "Nassim Mansion",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/nassim-mansion/R",
+    "itemId": "nassim-mansion/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/nassim-mansion/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -83,10 +79,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/nassim-mansion/price.entry",
+    "itemId": "nassim-mansion/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/nassim-mansion/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -101,10 +98,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/nassim-mansion/resale.sustained",
+    "itemId": "nassim-mansion/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/nassim-mansion/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -128,10 +126,11 @@
     ]
    },
    {
-    "itemId": "B1/nassim-mansion/infrastructure.mrt",
+    "itemId": "nassim-mansion/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/nassim-mansion/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -169,10 +168,11 @@
     ]
    },
    {
-    "itemId": "B1/nassim-mansion/infrastructure.schools",
+    "itemId": "nassim-mansion/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/nassim-mansion/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -205,10 +205,11 @@
     ]
    },
    {
-    "itemId": "B1/nassim-mansion/infrastructure.amenities",
+    "itemId": "nassim-mansion/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/nassim-mansion/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -247,10 +248,11 @@
     ]
    },
    {
-    "itemId": "B1/nassim-mansion/infrastructure.futureTransport",
+    "itemId": "nassim-mansion/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/nassim-mansion/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -265,10 +267,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/nassim-mansion/supply.competition",
+    "itemId": "nassim-mansion/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/nassim-mansion/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -326,10 +329,11 @@
     ]
    },
    {
-    "itemId": "B1/nassim-mansion/supply.unsoldInventory",
+    "itemId": "nassim-mansion/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/nassim-mansion/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -344,10 +348,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/nassim-mansion/supply.pipeline",
+    "itemId": "nassim-mansion/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/nassim-mansion/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -375,10 +380,11 @@
     ]
    },
    {
-    "itemId": "B1/nassim-mansion/supply.quietArea",
+    "itemId": "nassim-mansion/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/nassim-mansion/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -405,10 +411,11 @@
     ]
    },
    {
-    "itemId": "B1/nassim-mansion/market.backdrop",
+    "itemId": "nassim-mansion/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/nassim-mansion/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

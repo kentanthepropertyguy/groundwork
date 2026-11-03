@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "forett-at-bukit-timah",
  "name": "Forett@Bukit Timah",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/forett-at-bukit-timah/P",
+    "itemId": "forett-at-bukit-timah/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/forett-at-bukit-timah/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -74,10 +70,11 @@
     ]
    },
    {
-    "itemId": "B1/forett-at-bukit-timah/R",
+    "itemId": "forett-at-bukit-timah/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/forett-at-bukit-timah/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -137,10 +134,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/forett-at-bukit-timah/price.entry",
+    "itemId": "forett-at-bukit-timah/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/forett-at-bukit-timah/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -188,10 +186,11 @@
     ]
    },
    {
-    "itemId": "B1/forett-at-bukit-timah/resale.sustained",
+    "itemId": "forett-at-bukit-timah/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/forett-at-bukit-timah/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -225,10 +224,11 @@
     ]
    },
    {
-    "itemId": "B1/forett-at-bukit-timah/infrastructure.mrt",
+    "itemId": "forett-at-bukit-timah/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/forett-at-bukit-timah/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -266,10 +266,11 @@
     ]
    },
    {
-    "itemId": "B1/forett-at-bukit-timah/infrastructure.schools",
+    "itemId": "forett-at-bukit-timah/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/forett-at-bukit-timah/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -302,10 +303,11 @@
     ]
    },
    {
-    "itemId": "B1/forett-at-bukit-timah/infrastructure.amenities",
+    "itemId": "forett-at-bukit-timah/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/forett-at-bukit-timah/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -344,10 +346,11 @@
     ]
    },
    {
-    "itemId": "B1/forett-at-bukit-timah/infrastructure.futureTransport",
+    "itemId": "forett-at-bukit-timah/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/forett-at-bukit-timah/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -362,10 +365,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/forett-at-bukit-timah/supply.competition",
+    "itemId": "forett-at-bukit-timah/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/forett-at-bukit-timah/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -408,10 +412,11 @@
     ]
    },
    {
-    "itemId": "B1/forett-at-bukit-timah/supply.unsoldInventory",
+    "itemId": "forett-at-bukit-timah/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/forett-at-bukit-timah/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -426,10 +431,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/forett-at-bukit-timah/supply.pipeline",
+    "itemId": "forett-at-bukit-timah/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/forett-at-bukit-timah/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -448,10 +454,11 @@
     ]
    },
    {
-    "itemId": "B1/forett-at-bukit-timah/supply.quietArea",
+    "itemId": "forett-at-bukit-timah/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/forett-at-bukit-timah/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -478,10 +485,11 @@
     ]
    },
    {
-    "itemId": "B1/forett-at-bukit-timah/market.backdrop",
+    "itemId": "forett-at-bukit-timah/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/forett-at-bukit-timah/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

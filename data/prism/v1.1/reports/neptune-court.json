@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "neptune-court",
  "name": "Neptune Court",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/neptune-court/P",
+    "itemId": "neptune-court/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/neptune-court/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -73,10 +69,11 @@
     ]
    },
    {
-    "itemId": "B1/neptune-court/R",
+    "itemId": "neptune-court/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/neptune-court/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -136,10 +133,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/neptune-court/price.entry",
+    "itemId": "neptune-court/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/neptune-court/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -154,10 +152,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/neptune-court/resale.sustained",
+    "itemId": "neptune-court/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/neptune-court/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -181,10 +180,11 @@
     ]
    },
    {
-    "itemId": "B1/neptune-court/infrastructure.mrt",
+    "itemId": "neptune-court/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/neptune-court/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -222,10 +222,11 @@
     ]
    },
    {
-    "itemId": "B1/neptune-court/infrastructure.schools",
+    "itemId": "neptune-court/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/neptune-court/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -258,10 +259,11 @@
     ]
    },
    {
-    "itemId": "B1/neptune-court/infrastructure.amenities",
+    "itemId": "neptune-court/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/neptune-court/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -300,10 +302,11 @@
     ]
    },
    {
-    "itemId": "B1/neptune-court/infrastructure.futureTransport",
+    "itemId": "neptune-court/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/neptune-court/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -318,10 +321,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/neptune-court/supply.competition",
+    "itemId": "neptune-court/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/neptune-court/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -369,10 +373,11 @@
     ]
    },
    {
-    "itemId": "B1/neptune-court/supply.unsoldInventory",
+    "itemId": "neptune-court/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/neptune-court/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -387,10 +392,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/neptune-court/supply.pipeline",
+    "itemId": "neptune-court/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/neptune-court/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -409,10 +415,11 @@
     ]
    },
    {
-    "itemId": "B1/neptune-court/supply.quietArea",
+    "itemId": "neptune-court/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/neptune-court/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -439,10 +446,11 @@
     ]
    },
    {
-    "itemId": "B1/neptune-court/market.backdrop",
+    "itemId": "neptune-court/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/neptune-court/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

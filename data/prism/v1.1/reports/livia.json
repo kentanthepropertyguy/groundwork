@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "livia",
  "name": "Livia",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/livia/P",
+    "itemId": "livia/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/livia/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -80,10 +76,11 @@
     ]
    },
    {
-    "itemId": "B1/livia/R",
+    "itemId": "livia/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/livia/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -143,10 +140,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/livia/price.entry",
+    "itemId": "livia/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/livia/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -222,10 +220,11 @@
     ]
    },
    {
-    "itemId": "B1/livia/resale.sustained",
+    "itemId": "livia/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/livia/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -249,10 +248,11 @@
     ]
    },
    {
-    "itemId": "B1/livia/infrastructure.mrt",
+    "itemId": "livia/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/livia/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -290,10 +290,11 @@
     ]
    },
    {
-    "itemId": "B1/livia/infrastructure.schools",
+    "itemId": "livia/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/livia/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -326,10 +327,11 @@
     ]
    },
    {
-    "itemId": "B1/livia/infrastructure.amenities",
+    "itemId": "livia/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/livia/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -368,10 +370,11 @@
     ]
    },
    {
-    "itemId": "B1/livia/infrastructure.futureTransport",
+    "itemId": "livia/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/livia/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -386,10 +389,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/livia/supply.competition",
+    "itemId": "livia/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/livia/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -422,10 +426,11 @@
     ]
    },
    {
-    "itemId": "B1/livia/supply.unsoldInventory",
+    "itemId": "livia/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/livia/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -440,10 +445,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/livia/supply.pipeline",
+    "itemId": "livia/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/livia/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -462,10 +468,11 @@
     ]
    },
    {
-    "itemId": "B1/livia/supply.quietArea",
+    "itemId": "livia/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/livia/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -492,10 +499,11 @@
     ]
    },
    {
-    "itemId": "B1/livia/market.backdrop",
+    "itemId": "livia/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/livia/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

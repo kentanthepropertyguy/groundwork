@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "waterfront-gold",
  "name": "Waterfront Gold",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/waterfront-gold/P",
+    "itemId": "waterfront-gold/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/waterfront-gold/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -95,10 +91,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/waterfront-gold/price.entry",
+    "itemId": "waterfront-gold/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/waterfront-gold/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -174,10 +171,11 @@
     ]
    },
    {
-    "itemId": "B1/waterfront-gold/resale.sustained",
+    "itemId": "waterfront-gold/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/waterfront-gold/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -192,10 +190,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/waterfront-gold/infrastructure.mrt",
+    "itemId": "waterfront-gold/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/waterfront-gold/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -233,10 +232,11 @@
     ]
    },
    {
-    "itemId": "B1/waterfront-gold/infrastructure.schools",
+    "itemId": "waterfront-gold/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/waterfront-gold/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -269,10 +269,11 @@
     ]
    },
    {
-    "itemId": "B1/waterfront-gold/infrastructure.amenities",
+    "itemId": "waterfront-gold/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/waterfront-gold/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -311,10 +312,11 @@
     ]
    },
    {
-    "itemId": "B1/waterfront-gold/infrastructure.futureTransport",
+    "itemId": "waterfront-gold/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/waterfront-gold/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -329,10 +331,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/waterfront-gold/supply.competition",
+    "itemId": "waterfront-gold/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/waterfront-gold/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -365,10 +368,11 @@
     ]
    },
    {
-    "itemId": "B1/waterfront-gold/supply.unsoldInventory",
+    "itemId": "waterfront-gold/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/waterfront-gold/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -383,10 +387,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/waterfront-gold/supply.pipeline",
+    "itemId": "waterfront-gold/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/waterfront-gold/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -405,10 +410,11 @@
     ]
    },
    {
-    "itemId": "B1/waterfront-gold/supply.quietArea",
+    "itemId": "waterfront-gold/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/waterfront-gold/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -435,10 +441,11 @@
     ]
    },
    {
-    "itemId": "B1/waterfront-gold/market.backdrop",
+    "itemId": "waterfront-gold/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/waterfront-gold/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "liv-on-sophia",
  "name": "Liv on Sophia",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/liv-on-sophia/P",
+    "itemId": "liv-on-sophia/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/liv-on-sophia/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -74,10 +70,11 @@
     ]
    },
    {
-    "itemId": "B1/liv-on-sophia/R",
+    "itemId": "liv-on-sophia/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/liv-on-sophia/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -137,10 +134,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/liv-on-sophia/price.entry",
+    "itemId": "liv-on-sophia/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/liv-on-sophia/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -188,10 +186,11 @@
     ]
    },
    {
-    "itemId": "B1/liv-on-sophia/resale.sustained",
+    "itemId": "liv-on-sophia/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/liv-on-sophia/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -233,10 +232,11 @@
     ]
    },
    {
-    "itemId": "B1/liv-on-sophia/infrastructure.mrt",
+    "itemId": "liv-on-sophia/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/liv-on-sophia/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -274,10 +274,11 @@
     ]
    },
    {
-    "itemId": "B1/liv-on-sophia/infrastructure.schools",
+    "itemId": "liv-on-sophia/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/liv-on-sophia/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -310,10 +311,11 @@
     ]
    },
    {
-    "itemId": "B1/liv-on-sophia/infrastructure.amenities",
+    "itemId": "liv-on-sophia/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/liv-on-sophia/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -352,10 +354,11 @@
     ]
    },
    {
-    "itemId": "B1/liv-on-sophia/infrastructure.futureTransport",
+    "itemId": "liv-on-sophia/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/liv-on-sophia/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -370,10 +373,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/liv-on-sophia/supply.competition",
+    "itemId": "liv-on-sophia/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/liv-on-sophia/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -441,10 +445,11 @@
     ]
    },
    {
-    "itemId": "B1/liv-on-sophia/supply.unsoldInventory",
+    "itemId": "liv-on-sophia/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/liv-on-sophia/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -459,10 +464,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/liv-on-sophia/supply.pipeline",
+    "itemId": "liv-on-sophia/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/liv-on-sophia/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -514,10 +520,11 @@
     ]
    },
    {
-    "itemId": "B1/liv-on-sophia/supply.quietArea",
+    "itemId": "liv-on-sophia/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/liv-on-sophia/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -544,10 +551,11 @@
     ]
    },
    {
-    "itemId": "B1/liv-on-sophia/market.backdrop",
+    "itemId": "liv-on-sophia/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/liv-on-sophia/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

@@ -29,10 +29,26 @@ const research = new Set(JSON.parse(read('data/projects/index.json')).rows.map((
 const LAUNCHES = new Set(['hougang-central']);   // a launch with its own site (no Research resale report): its V1 PRISM page links to that site
 
 // ---- 1 integrity (D5: the root pinned, 16 shards pinned by the root, each report pinned by its shard)
-check('index.json is the approved root (pinned sha256), the release and the A1 -> DECILE -> A2 -> NATIONWIDE-1 chain', sha(it) === G.V11.INDEX && (() => { try { G.checkIndex(ix); return true; } catch (e) { return false; } })());
-const entries = [], badShard = [];
-ix.shards.forEach((x) => { const t = read('data/prism/v1.1/' + x.path); if (sha(t) !== x.sha256) { badShard.push(x.key + ': sha256'); return; } try { G.checkShard(JSON.parse(t), x, key).reports.forEach((r) => entries.push(r)); } catch (e) { badShard.push(x.key + ': ' + e.message); } });
-check('every shard matches the root and passes its gate; every id sits in the shard its sha256 names (' + entries.length + ' reports)', badShard.length === 0 && entries.length === ix.reports, badShard);
+check('index.json is the approved r3 root (pinned sha256), the release and the A1 -> DECILE -> A2 -> NATIONWIDE-1 chain', sha(it) === G.V11.INDEX && (() => { try { G.checkIndex(ix); return true; } catch (e) { return false; } })());
+// r3 (GW-PRISM-R3-SCHEMA-20261103-01): every shard lists every Registry v2 id with its state; only full and partial entries have a report
+const entries = [], all = [], badShard = [];
+ix.shards.forEach((x) => { const t = read('data/prism/v1.1/' + x.path); if (sha(t) !== x.sha256) { badShard.push(x.key + ': sha256'); return; } try { G.checkShard(JSON.parse(t), x, key).entries.forEach((r) => { all.push(r); if (G.hasReport(r)) entries.push(r); }); } catch (e) { badShard.push(x.key + ': ' + e.message); } });
+check('every shard matches the root and passes its gate; every id sits in the shard its sha256 names (' + all.length + ' Registry v2 ids, ' + entries.length + ' reports)', badShard.length === 0 && entries.length === ix.counts.reports && all.length === ix.counts.entries && entries.length === 2099 && all.length === 2509, badShard);
+const stc = all.reduce((a, r) => { a[r.state] = (a[r.state] || 0) + 1; return a; }, {});
+check('Registry v2 states as approved: ' + JSON.stringify(stc) + ' (the root\'s counts; only full and partial have a page)', JSON.stringify(stc, Object.keys(stc).sort()) === JSON.stringify(ix.counts.states, Object.keys(ix.counts.states).sort()) && all.filter((r) => !G.hasReport(r)).every((r) => r.path == null && r.sha256 == null));
+// Master Planning's index corrections (3 Nov 2026, release a8b865345a70): Hougang Central partial (approved-existing, v1-income-only); no
+// "new-launch-research" reason in any public entry; the five reports approved before the nationwide batch are the only "approved-existing"
+const hc = all.find((r) => r.id === 'hougang-central');
+check('index corrections: Hougang Central partial with approved-existing and v1-income-only; no "new-launch-research" anywhere; exactly 5 approved-existing',
+  hc && hc.state === 'partial' && JSON.stringify(hc.reasons) === JSON.stringify(['approved-existing', 'v1-income-only']) && !all.some((r) => (r.reasons || []).indexOf('new-launch-research') >= 0) &&
+  all.filter((r) => (r.reasons || []).indexOf('approved-existing') >= 0).map((r) => r.id).sort().join() === 'hougang-central,hundred-palms-residences,kingsford-waterbay,the-quinn,thomson-three');
+const rd = read('data/prism/v1.1/redirects.json'), rdj = JSON.parse(rd), reds = all.filter((r) => r.state === 'redirect'), byId = {}; all.forEach((r) => { byId[r.id] = r; });
+check('redirects: redirects.json is the one the root pins; every redirect entry matches it, names a different id with a page (never a redirect: one hop) (' + reds.length + ' redirects)',
+  sha(rd) === ix.redirectsSha256 && rdj.schemaVersion === 'prism-public-v1.1-r3-redirects' && Object.keys(rdj.redirects).length === reds.length && reds.every((r) => rdj.redirects[r.id] === r.to && byId[r.to] && G.hasReport(byId[r.to])));
+const mf = read('data/prism/v1.1/manifest.json'), mfj = JSON.parse(mf), onDisk = [];
+(function walk(d, q) { fs.readdirSync(path.join(SITE, d)).forEach((f) => { const p = d + '/' + f; if (fs.statSync(path.join(SITE, p)).isDirectory()) walk(p, q + f + '/'); else onDisk.push(q + f); }); })('data/prism/v1.1', '');
+check('manifest.json is the one the root binds; it lists every file in the release with its sha256, and nothing else is there (' + onDisk.length + ' files)', sha(mf) === G.V11.MANIFEST &&
+  mfj.files.every((f) => onDisk.indexOf(f.path) >= 0 && sha(read('data/prism/v1.1/' + f.path)) === f.sha256) && onDisk.filter((f) => f !== 'manifest.json' && f !== 'index.json').length === mfj.files.length && onDisk.length === 2118);
 const ids = entries.map((r) => r.id), dup = ids.filter((x, i) => ids.indexOf(x) !== i);
 check('every id appears once across the shards', dup.length === 0, dup.slice(0, 5));
 const files = fs.readdirSync(path.join(SITE, 'data/prism/v1.1/reports'));
@@ -56,7 +72,9 @@ entries.forEach((e) => {
   const ms = Number(process.hrtime.bigint() - t0) / 1e6; total += ms; if (ms > BUDGET.renderMs) slow++;
 });
 check('every report matches its sha256, pairs correctly with V1 (or is V1.1-only), passes the gate with exactly the items its shard lists', bad.length === 0, bad.slice(0, 5));
-check('every item in the release carries the NATIONWIDE-1 approval (no item is shown otherwise)', Object.keys(models).length === entries.length);
+check('every item in the release is approved under a reference in the chain, with its own report id (no item is shown otherwise)', Object.keys(models).length === entries.length);
+const refs = {}; let nItems = 0; entries.forEach((e) => { (function walk(o) { if (!o || typeof o !== 'object') return; if (Array.isArray(o)) { o.forEach(walk); return; } if ('approval' in o) { nItems++; refs[o.approval.approvalRef] = (refs[o.approval.approvalRef] || 0) + 1; } Object.keys(o).forEach((k) => walk(o[k])); })(models[e.id].r); });
+check('25,229 evidence items, each approved (' + JSON.stringify(refs) + ')', nItems === 25229 && Object.keys(refs).every((k) => G.V11.CHAIN.indexOf(k) >= 0));
 
 // ---- 2 every page
 const pages = Object.keys(models), problems = [];

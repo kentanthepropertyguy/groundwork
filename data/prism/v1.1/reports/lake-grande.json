@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "lake-grande",
  "name": "Lake Grande",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/lake-grande/P",
+    "itemId": "lake-grande/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/lake-grande/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -80,10 +76,11 @@
     ]
    },
    {
-    "itemId": "B1/lake-grande/R",
+    "itemId": "lake-grande/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/lake-grande/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -143,10 +140,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/lake-grande/price.entry",
+    "itemId": "lake-grande/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/lake-grande/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -222,10 +220,11 @@
     ]
    },
    {
-    "itemId": "B1/lake-grande/resale.sustained",
+    "itemId": "lake-grande/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/lake-grande/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -249,10 +248,11 @@
     ]
    },
    {
-    "itemId": "B1/lake-grande/infrastructure.mrt",
+    "itemId": "lake-grande/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/lake-grande/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -290,10 +290,11 @@
     ]
    },
    {
-    "itemId": "B1/lake-grande/infrastructure.schools",
+    "itemId": "lake-grande/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/lake-grande/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -326,10 +327,11 @@
     ]
    },
    {
-    "itemId": "B1/lake-grande/infrastructure.amenities",
+    "itemId": "lake-grande/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/lake-grande/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -368,10 +370,11 @@
     ]
    },
    {
-    "itemId": "B1/lake-grande/infrastructure.futureTransport",
+    "itemId": "lake-grande/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/lake-grande/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -386,10 +389,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/lake-grande/supply.competition",
+    "itemId": "lake-grande/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/lake-grande/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -432,10 +436,11 @@
     ]
    },
    {
-    "itemId": "B1/lake-grande/supply.unsoldInventory",
+    "itemId": "lake-grande/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/lake-grande/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -450,10 +455,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/lake-grande/supply.pipeline",
+    "itemId": "lake-grande/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/lake-grande/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -481,10 +487,11 @@
     ]
    },
    {
-    "itemId": "B1/lake-grande/supply.quietArea",
+    "itemId": "lake-grande/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/lake-grande/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -511,10 +518,11 @@
     ]
    },
    {
-    "itemId": "B1/lake-grande/market.backdrop",
+    "itemId": "lake-grande/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/lake-grande/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

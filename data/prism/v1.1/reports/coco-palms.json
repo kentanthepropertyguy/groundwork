@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "coco-palms",
  "name": "Coco Palms",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/coco-palms/P",
+    "itemId": "coco-palms/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/coco-palms/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -101,10 +97,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/coco-palms/price.entry",
+    "itemId": "coco-palms/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/coco-palms/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -208,10 +205,11 @@
     ]
    },
    {
-    "itemId": "B1/coco-palms/resale.sustained",
+    "itemId": "coco-palms/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/coco-palms/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -226,10 +224,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/coco-palms/infrastructure.mrt",
+    "itemId": "coco-palms/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/coco-palms/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -267,10 +266,11 @@
     ]
    },
    {
-    "itemId": "B1/coco-palms/infrastructure.schools",
+    "itemId": "coco-palms/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/coco-palms/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -303,10 +303,11 @@
     ]
    },
    {
-    "itemId": "B1/coco-palms/infrastructure.amenities",
+    "itemId": "coco-palms/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/coco-palms/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -345,10 +346,11 @@
     ]
    },
    {
-    "itemId": "B1/coco-palms/infrastructure.futureTransport",
+    "itemId": "coco-palms/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/coco-palms/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -363,10 +365,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/coco-palms/supply.competition",
+    "itemId": "coco-palms/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/coco-palms/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -404,10 +407,11 @@
     ]
    },
    {
-    "itemId": "B1/coco-palms/supply.unsoldInventory",
+    "itemId": "coco-palms/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/coco-palms/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -422,10 +426,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/coco-palms/supply.pipeline",
+    "itemId": "coco-palms/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/coco-palms/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -444,10 +449,11 @@
     ]
    },
    {
-    "itemId": "B1/coco-palms/supply.quietArea",
+    "itemId": "coco-palms/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/coco-palms/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -474,10 +480,11 @@
     ]
    },
    {
-    "itemId": "B1/coco-palms/market.backdrop",
+    "itemId": "coco-palms/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/coco-palms/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

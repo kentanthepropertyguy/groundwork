@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "martin-modern",
  "name": "Martin Modern",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/martin-modern/P",
+    "itemId": "martin-modern/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/martin-modern/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -80,10 +76,11 @@
     ]
    },
    {
-    "itemId": "B1/martin-modern/R",
+    "itemId": "martin-modern/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/martin-modern/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -143,10 +140,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/martin-modern/price.entry",
+    "itemId": "martin-modern/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/martin-modern/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -222,10 +220,11 @@
     ]
    },
    {
-    "itemId": "B1/martin-modern/resale.sustained",
+    "itemId": "martin-modern/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/martin-modern/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -267,10 +266,11 @@
     ]
    },
    {
-    "itemId": "B1/martin-modern/infrastructure.mrt",
+    "itemId": "martin-modern/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/martin-modern/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -308,10 +308,11 @@
     ]
    },
    {
-    "itemId": "B1/martin-modern/infrastructure.schools",
+    "itemId": "martin-modern/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/martin-modern/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -344,10 +345,11 @@
     ]
    },
    {
-    "itemId": "B1/martin-modern/infrastructure.amenities",
+    "itemId": "martin-modern/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/martin-modern/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -386,10 +388,11 @@
     ]
    },
    {
-    "itemId": "B1/martin-modern/infrastructure.futureTransport",
+    "itemId": "martin-modern/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/martin-modern/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -404,10 +407,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/martin-modern/supply.competition",
+    "itemId": "martin-modern/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/martin-modern/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -475,10 +479,11 @@
     ]
    },
    {
-    "itemId": "B1/martin-modern/supply.unsoldInventory",
+    "itemId": "martin-modern/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/martin-modern/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -493,10 +498,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/martin-modern/supply.pipeline",
+    "itemId": "martin-modern/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/martin-modern/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -532,10 +538,11 @@
     ]
    },
    {
-    "itemId": "B1/martin-modern/supply.quietArea",
+    "itemId": "martin-modern/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/martin-modern/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -562,10 +569,11 @@
     ]
    },
    {
-    "itemId": "B1/martin-modern/market.backdrop",
+    "itemId": "martin-modern/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/martin-modern/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "wandervale",
  "name": "Wandervale",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/wandervale/P",
+    "itemId": "wandervale/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wandervale/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -73,10 +69,11 @@
     ]
    },
    {
-    "itemId": "B1/wandervale/R",
+    "itemId": "wandervale/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wandervale/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -136,10 +133,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/wandervale/price.entry",
+    "itemId": "wandervale/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wandervale/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -154,10 +152,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/wandervale/resale.sustained",
+    "itemId": "wandervale/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wandervale/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -186,10 +185,11 @@
     ]
    },
    {
-    "itemId": "B1/wandervale/infrastructure.mrt",
+    "itemId": "wandervale/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wandervale/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -227,10 +227,11 @@
     ]
    },
    {
-    "itemId": "B1/wandervale/infrastructure.schools",
+    "itemId": "wandervale/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wandervale/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -263,10 +264,11 @@
     ]
    },
    {
-    "itemId": "B1/wandervale/infrastructure.amenities",
+    "itemId": "wandervale/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wandervale/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -305,10 +307,11 @@
     ]
    },
    {
-    "itemId": "B1/wandervale/infrastructure.futureTransport",
+    "itemId": "wandervale/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wandervale/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -323,10 +326,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/wandervale/supply.competition",
+    "itemId": "wandervale/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wandervale/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -353,10 +357,11 @@
     ]
    },
    {
-    "itemId": "B1/wandervale/supply.unsoldInventory",
+    "itemId": "wandervale/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wandervale/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -371,10 +376,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/wandervale/supply.pipeline",
+    "itemId": "wandervale/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wandervale/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -393,10 +399,11 @@
     ]
    },
    {
-    "itemId": "B1/wandervale/supply.quietArea",
+    "itemId": "wandervale/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wandervale/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -423,10 +430,11 @@
     ]
    },
    {
-    "itemId": "B1/wandervale/market.backdrop",
+    "itemId": "wandervale/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/wandervale/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

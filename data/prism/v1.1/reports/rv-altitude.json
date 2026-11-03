@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "rv-altitude",
  "name": "RV Altitude",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/rv-altitude/P",
+    "itemId": "rv-altitude/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/rv-altitude/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -74,10 +70,11 @@
     ]
    },
    {
-    "itemId": "B1/rv-altitude/R",
+    "itemId": "rv-altitude/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/rv-altitude/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -137,10 +134,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/rv-altitude/price.entry",
+    "itemId": "rv-altitude/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/rv-altitude/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -188,10 +186,11 @@
     ]
    },
    {
-    "itemId": "B1/rv-altitude/resale.sustained",
+    "itemId": "rv-altitude/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/rv-altitude/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -233,10 +232,11 @@
     ]
    },
    {
-    "itemId": "B1/rv-altitude/infrastructure.mrt",
+    "itemId": "rv-altitude/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/rv-altitude/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -274,10 +274,11 @@
     ]
    },
    {
-    "itemId": "B1/rv-altitude/infrastructure.schools",
+    "itemId": "rv-altitude/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/rv-altitude/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -310,10 +311,11 @@
     ]
    },
    {
-    "itemId": "B1/rv-altitude/infrastructure.amenities",
+    "itemId": "rv-altitude/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/rv-altitude/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -352,10 +354,11 @@
     ]
    },
    {
-    "itemId": "B1/rv-altitude/infrastructure.futureTransport",
+    "itemId": "rv-altitude/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/rv-altitude/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -370,10 +373,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/rv-altitude/supply.competition",
+    "itemId": "rv-altitude/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/rv-altitude/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -441,10 +445,11 @@
     ]
    },
    {
-    "itemId": "B1/rv-altitude/supply.unsoldInventory",
+    "itemId": "rv-altitude/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/rv-altitude/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -459,10 +464,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/rv-altitude/supply.pipeline",
+    "itemId": "rv-altitude/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/rv-altitude/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -506,10 +512,11 @@
     ]
    },
    {
-    "itemId": "B1/rv-altitude/supply.quietArea",
+    "itemId": "rv-altitude/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/rv-altitude/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -536,10 +543,11 @@
     ]
    },
    {
-    "itemId": "B1/rv-altitude/market.backdrop",
+    "itemId": "rv-altitude/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/rv-altitude/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

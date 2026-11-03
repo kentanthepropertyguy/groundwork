@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "sommerville-grandeur",
  "name": "Sommerville Grandeur",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/sommerville-grandeur/P",
+    "itemId": "sommerville-grandeur/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/sommerville-grandeur/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -74,10 +70,11 @@
     ]
    },
    {
-    "itemId": "B1/sommerville-grandeur/R",
+    "itemId": "sommerville-grandeur/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/sommerville-grandeur/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -137,10 +134,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/sommerville-grandeur/price.entry",
+    "itemId": "sommerville-grandeur/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/sommerville-grandeur/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -188,10 +186,11 @@
     ]
    },
    {
-    "itemId": "B1/sommerville-grandeur/resale.sustained",
+    "itemId": "sommerville-grandeur/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/sommerville-grandeur/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -220,10 +219,11 @@
     ]
    },
    {
-    "itemId": "B1/sommerville-grandeur/infrastructure.mrt",
+    "itemId": "sommerville-grandeur/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/sommerville-grandeur/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -261,10 +261,11 @@
     ]
    },
    {
-    "itemId": "B1/sommerville-grandeur/infrastructure.schools",
+    "itemId": "sommerville-grandeur/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/sommerville-grandeur/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -297,10 +298,11 @@
     ]
    },
    {
-    "itemId": "B1/sommerville-grandeur/infrastructure.amenities",
+    "itemId": "sommerville-grandeur/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/sommerville-grandeur/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -339,10 +341,11 @@
     ]
    },
    {
-    "itemId": "B1/sommerville-grandeur/infrastructure.futureTransport",
+    "itemId": "sommerville-grandeur/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/sommerville-grandeur/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -357,10 +360,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/sommerville-grandeur/supply.competition",
+    "itemId": "sommerville-grandeur/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/sommerville-grandeur/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -398,10 +402,11 @@
     ]
    },
    {
-    "itemId": "B1/sommerville-grandeur/supply.unsoldInventory",
+    "itemId": "sommerville-grandeur/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/sommerville-grandeur/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -416,10 +421,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/sommerville-grandeur/supply.pipeline",
+    "itemId": "sommerville-grandeur/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/sommerville-grandeur/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -438,10 +444,11 @@
     ]
    },
    {
-    "itemId": "B1/sommerville-grandeur/supply.quietArea",
+    "itemId": "sommerville-grandeur/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/sommerville-grandeur/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -468,10 +475,11 @@
     ]
    },
    {
-    "itemId": "B1/sommerville-grandeur/market.backdrop",
+    "itemId": "sommerville-grandeur/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/sommerville-grandeur/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

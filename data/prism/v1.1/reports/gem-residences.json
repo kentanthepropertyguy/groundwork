@@ -1,14 +1,9 @@
 {
- "schemaVersion": "prism-public-v1.1-r2",
+ "schemaVersion": "prism-public-v1.1-r3",
  "reportId": "gem-residences",
  "name": "Gem Residences",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
- "release": {
-  "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
- },
  "compositeScore": null,
  "peerComparison": {
   "peerGroup": {
@@ -20,10 +15,11 @@
   },
   "positions": [
    {
-    "itemId": "B1/gem-residences/P",
+    "itemId": "gem-residences/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/gem-residences/P"
     },
     "dimension": "P",
     "label": "Price position",
@@ -86,10 +82,11 @@
     ]
    },
    {
-    "itemId": "B1/gem-residences/R",
+    "itemId": "gem-residences/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/gem-residences/R"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -149,10 +146,11 @@
   "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
   "lines": [
    {
-    "itemId": "B1/gem-residences/price.entry",
+    "itemId": "gem-residences/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/gem-residences/price.entry"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -256,10 +254,11 @@
     ]
    },
    {
-    "itemId": "B1/gem-residences/resale.sustained",
+    "itemId": "gem-residences/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/gem-residences/resale.sustained"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -293,10 +292,11 @@
     ]
    },
    {
-    "itemId": "B1/gem-residences/infrastructure.mrt",
+    "itemId": "gem-residences/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/gem-residences/infrastructure.mrt"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -334,10 +334,11 @@
     ]
    },
    {
-    "itemId": "B1/gem-residences/infrastructure.schools",
+    "itemId": "gem-residences/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/gem-residences/infrastructure.schools"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -370,10 +371,11 @@
     ]
    },
    {
-    "itemId": "B1/gem-residences/infrastructure.amenities",
+    "itemId": "gem-residences/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/gem-residences/infrastructure.amenities"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -412,10 +414,11 @@
     ]
    },
    {
-    "itemId": "B1/gem-residences/infrastructure.futureTransport",
+    "itemId": "gem-residences/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/gem-residences/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -430,10 +433,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/gem-residences/supply.competition",
+    "itemId": "gem-residences/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/gem-residences/supply.competition"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -466,10 +470,11 @@
     ]
    },
    {
-    "itemId": "B1/gem-residences/supply.unsoldInventory",
+    "itemId": "gem-residences/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/gem-residences/supply.unsoldInventory"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -484,10 +489,11 @@
     "sourceIds": []
    },
    {
-    "itemId": "B1/gem-residences/supply.pipeline",
+    "itemId": "gem-residences/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/gem-residences/supply.pipeline"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -523,10 +529,11 @@
     ]
    },
    {
-    "itemId": "B1/gem-residences/supply.quietArea",
+    "itemId": "gem-residences/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/gem-residences/supply.quietArea"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -553,10 +560,11 @@
     ]
    },
    {
-    "itemId": "B1/gem-residences/market.backdrop",
+    "itemId": "gem-residences/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
+     "recordItem": "B1/gem-residences/market.backdrop"
     },
     "panel": "M",
     "measure": "market.backdrop",

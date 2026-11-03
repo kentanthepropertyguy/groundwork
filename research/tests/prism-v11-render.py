@@ -28,6 +28,7 @@ B = os.environ.get('LIVE') or f'http://127.0.0.1:{P}'
 REP = {i: json.loads((SITE / f'data/prism/v1.1/reports/{i}.json').read_text()) for i in ['kingsford-waterbay', 'hougang-central', 'thomson-three', 'hundred-palms-residences', 'the-quinn']}
 PROFILE = ['thomson-three', 'hundred-palms-residences', 'the-quinn']
 A2_MANIFEST = (SITE / 'research/tests/fixtures/prism-v11-a2-manifest.json').read_text()
+R2_INDEX = (SITE / 'research/tests/fixtures/prism-v11-r2-index.json').read_text()   # the r2 root live before r3 (rollback pairing)
 NOOVER = 'document.documentElement.scrollWidth <= innerWidth + 1'
 TXT = "s=>{const e=document.querySelector(s);return e?e.textContent.replace(/\\s+/g,' ').trim():''}"
 BAD = re.compile(r'score\s*/?\s*100|/\s*100\b|purchasing|affordab|\bforecast', re.I)
@@ -147,6 +148,8 @@ try:
                  ('a missing index.json (the previous A2 data left in place has none)', [(IX, lambda r: r.fulfill(status=404, body=''))], 'all'),
                  ('the previous A2 manifest served as the index', [(IX, lambda r: r.fulfill(status=200, content_type='application/json', body=A2_MANIFEST))], 'all'),
                  ('a changed shard (Kingsford Waterbay\'s)', [(KWS, lambda r: body_of(r, lambda t: t.replace('"items": 17', '"items": 18')))], 'kw'),
+                 ('the previous r2 root served as the index (data rolled back without the page)', [(IX, lambda r: r.fulfill(status=200, content_type='application/json', body=R2_INDEX))], 'all'),
+                 ('a pending item in the Kingsford Waterbay report (r3: one item outside the approval rejects the report)', [(r'data/prism/v1\.1/reports/kingsford-waterbay\.json', lambda r: body_of(r, lambda t: t.replace('"state": "approved"', '"state": "pending"', 1)))], 'kw'),
                  ('a changed Hundred Palms report', [(r'data/prism/v1\.1/reports/hundred-palms-residences\.json', lambda r: body_of(r, lambda t: t.replace('12.6', '12.7')))], 'hp')]
         for name, tp, scope in cases:
             ctx, pg, errs = fresh(br, 1440, tp)
