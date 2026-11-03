@@ -320,3 +320,14 @@ body #ws-dev .lg-sb .kpr-search.has-go>input{padding-right:196px}
   .gwp-yt--stack .n{text-align:left}
   .gwp-yt--stack td::before{content:attr(data-l);display:block;font-size:11.5px;color:var(--gwp-muted);margin-bottom:1px}
 }
+/* V1.1 r2 (GW-PRISM-V1.1-2026-11-03-A2): the evidence profile. Each line: its label (the measure's name, as the figure a V1 row would show),
+   then its approved statement; a line whose evidence is missing keeps its place, in a quieter tone. */
+.gwp-pf{margin-top:2px}
+.gwp-pfl dt{font-size:14px;font-weight:600;color:var(--gwp-ink)}
+.gwp-pfl--gap .gwp-md{color:var(--gwp-muted)}
+.gwp-v11 > [data-gwp-surrounding]{margin-top:8px}
+.gwp-pf--one{grid-template-columns:minmax(0,1fr);max-width:860px}
+.gwp-pst > span{display:block}
+.gwp-pst > span + span{margin-top:4px}
+/* a panel that opens straight onto a V1.1 block (no V1 measures above it): no rule and no gap above its first block */
+.gwp-dimp > .gwp-sr + .gwp-v11{margin-top:0;padding-top:0;border-top:0}

@@ -2,12 +2,13 @@
 Research -> PRISM -> Back: Kingsford Waterbay's report shows the PRISM preview, which opens #/prism/kingsford-waterbay (verdict, Why,
 Watch out, Reveal figures, benchmark bars and rank, then every layer on the page with each dimension's detail on request, sources); the browser's Back returns to the report with the preview
 in view, Forward reopens PRISM; the breadcrumb returns too. Hougang Central's launch page (no resale report is invented) does the same with
-its evidence strip. Thomson Three and a development outside the release get no PRISM, and their #/prism/ address falls back to the report.
+its evidence strip. A development outside the release gets no PRISM, and its #/prism/ address falls back to the report. (V1.1 r2,
+GW-PRISM-V1.1-2026-11-03-A2: Thomson Three, Hundred Palms Residences and The Quinn have evidence-profile pages, tested in prism-v11-render.py.)
 A direct (shared) link works in a fresh browser. A tampered report or a draft manifest shows no PRISM anywhere. Never: a score, Ken's Take,
 sideways scrolling or a script error. The report's own controls still work with the preview in place.
 Research arrangement (Ken, 31 Oct 2026): the landing keeps its two choices and one search, explains PRISM Analysis / Property Data and the five
 questions (beside the search from 1200 px, aligned with the choice cards); Research's own search leads with PRISM for the two developments
-(an overview tab, or the launch card), Thomson Three stays Property Data only, the global search still opens Property Data; the switch moves
+(an overview tab, or the launch card), and for an r2 evidence-profile page (Thomson Three), the global search still opens Property Data; the switch moves
 between #/prism/ and #/p/; "Calculate my purchase" opens the existing calculator with nothing passed.
 Run from the site folder:  python3 research/tests/prism-render.py
 """
@@ -138,9 +139,10 @@ try:
             pg.go_back(); pg.wait_for_selector('[data-gwp-preview="hougang-central"]', timeout=20000); pg.wait_for_timeout(300)
             check(f'{vn}: Back returns to the Hougang Central page', pg.url.endswith('#/p/hougang-central') and 'Open its site' in pg.inner_text('#app'))
             check(f'{vn}: Hougang Central: no script errors', not errs, errs[:2]); ctx.close()
-        # Thomson Three and a development outside the release: no PRISM at all; their #/prism/ address falls back to the report
+        # a development outside the release: no PRISM at all; its #/prism/ address falls back to the report
+        # (V1.1 r2, GW-PRISM-V1.1-2026-11-03-A2: Thomson Three now has an approved evidence-profile page; see prism-v11-render.py)
         for w in [390, 1440]:
-            for dev in ['thomson-three', 'jadescape']:
+            for dev in ['jadescape']:
                 ctx, pg, errs = fresh(br, w)
                 pg.goto(B + '/research/#/p/' + dev); pg.wait_for_selector('header.lg-hero', timeout=30000); pg.wait_for_timeout(2500)
                 check(f'{w}px {dev}: report unchanged, no PRISM preview', pg.locator('[data-gwp-preview]').count() == 0 and 'PRISM' not in pg.inner_text('#app'))
@@ -176,11 +178,13 @@ try:
             check(f'{vn}: landing explains PRISM and the five questions, with nothing to click in it', all(s in land for s in ['The bigger picture behind the numbers.', 'Five questions every property buyer should consider', 'Price Position', 'Resale Potential', 'Infrastructure & Catalysts', 'Supply Pressure', 'Market Demand', 'Am I paying a reasonable price compared with relevant alternatives?']) and pg.locator('[data-gwp-land] a, [data-gwp-land] button').count() == 0, land[:300])
             pg.wait_for_selector('[data-gwp-picks]:not([hidden])', timeout=20000)
             pk = pg.inner_text('[data-gwp-picks]')
-            check(f'{vn}: "Explore a PRISM report" links come from the release: Kingsford Waterbay and Hougang Central, never Thomson Three', 'Kingsford Waterbay' in pk and 'Hougang Central' in pk and 'Thomson' not in pk and pg.locator('[data-gwp-picks] a[href="#/prism/kingsford-waterbay"]').count() == 1, pk)
+            # V1.1 r2 (GW-PRISM-V1.1-2026-11-03-A2): the links are every development with a PRISM page: the two V1 assessments, then the three evidence profiles
+            check(f'{vn}: "Explore a PRISM report" links come from the releases: Kingsford Waterbay, Hougang Central, Thomson Three, Hundred Palms Residences, The Quinn', [a.replace('›', '').strip() for a in pg.locator('[data-gwp-picks] a').all_inner_texts()] == ['Kingsford Waterbay', 'Hougang Central', 'Thomson Three', 'Hundred Palms Residences', 'The Quinn'] and pg.locator('[data-gwp-picks] a[href="#/prism/kingsford-waterbay"]').count() == 1, pk)
             order = pg.evaluate("[...document.querySelectorAll('#ws-dev > *')].map(e => e.id || e.getAttribute('data-gwp-picks') !== null && 'picks' || e.className).slice(0, 6)")
             check(f'{vn}: the search, then "If several match…" directly beneath it, then the PRISM report links', order[2:5] == ['sb', 'lgCount', 'picks'], order)
             gp = pg.evaluate("(() => { const a = document.querySelector('#sb').getBoundingClientRect(), b = document.querySelector('#lgCount').getBoundingClientRect(), c = document.querySelector('[data-gwp-picks]').getBoundingClientRect(); return [Math.round(b.top - a.bottom), Math.round(c.top - b.bottom), Math.round(c.height)]; })()")
-            check(f'{vn}: tight spacing: hint and links close under the search', gp[0] <= 20 and gp[1] <= 20 and gp[2] <= (100 if w < 720 else 50), gp)
+            # V1.1 r2 (GW-PRISM-V1.1-2026-11-03-A2): five links instead of two, so they wrap (up to 2 rows from 720 px, 3 on a phone); the gaps stay tight
+            check(f'{vn}: tight spacing: hint and links close under the search', gp[0] <= 20 and gp[1] <= 20 and gp[2] <= (160 if w < 720 else 120), gp)
             g = pg.evaluate("""(() => { const r = (s) => document.querySelector(s).getBoundingClientRect(); const l = r('[data-gwp-land]'), q = r('#sb'), h = r('#ws-dev > h2'), c = r('.gw-ropts'); return { lL: l.left, lR: l.right, lT: l.top, qL: q.left, qR: q.right, qB: q.bottom, hT: h.top, cR: c.right, cL: c.left }; })()""")
             if w >= 1200:
                 check(f'{vn}: the explanation sits beside the search, top-aligned with its heading, right edge on the choice cards\' edge', g['lL'] > g['qR'] and abs(g['lT'] - g['hT']) < 2 and abs(g['lR'] - g['cR']) < 2, g)
@@ -237,11 +241,11 @@ try:
             check(f'{w}px … and opens Hougang Central\'s PRISM Analysis; its Property Data is the launch page', pg.get_attribute('[data-gwp-switch] [data-gwp-view="data"]', 'href') == '#/p/hougang-central')
             check(f'{w}px Hougang Central: its HDB/condo finding is a Hidden connection; no "Explore sales by size" (no resales of its own)', HC['hiddenConnections'][0]['text'] in pg.inner_text('[data-gwp-hidden]') and pg.locator('[data-gwp-context]').count() == 0 and pg.locator('[data-gwp-sizes]').count() == 0)
             pg.goto(B + '/research/'); pg.wait_for_selector('#q'); pg.fill('#q', ''); pg.click('#q'); pg.keyboard.type('thomson three', delay=25); pg.wait_for_selector('#res [data-id="thomson-three"]', timeout=20000); pg.keyboard.press('Enter')
-            pg.wait_for_selector('[data-ov="dev"][data-ov-id="thomson-three"]', timeout=20000); pg.wait_for_timeout(1200)
-            check(f'{w}px Research search, Thomson Three: its Property Data overview, as before (no PRISM)', pg.url.endswith('/research/') or pg.url.endswith('#/'), pg.url)
-            check(f'{w}px … no PRISM anywhere in it', 'PRISM' not in pg.inner_text('#rwOver') and pg.locator('#rwOver [data-ov-full]').count() >= 1)
-            pg.goto(B + '/research/#/p/thomson-three'); pg.wait_for_selector('header.lg-hero', timeout=20000); pg.wait_for_timeout(1500)
-            check(f'{w}px Thomson Three report: no switch', pg.locator('[data-gwp-switch]').count() == 0)
+            # V1.1 r2 (GW-PRISM-V1.1-2026-11-03-A2): Thomson Three has an approved evidence profile, so Research's own search leads with it (as for the V1 assessments)
+            pg.wait_for_selector('[data-gwp-page="thomson-three"]', timeout=20000); pg.wait_for_timeout(600)
+            check(f'{w}px Research search, Thomson Three: opens its PRISM evidence profile (no verdict)', pg.url.endswith('#/prism/thomson-three') and pg.get_attribute('[data-gwp-page]', 'data-gwp-mode') == 'profile' and pg.locator('.gwp-card').count() == 0, pg.url)
+            pg.goto(B + '/research/#/p/thomson-three'); pg.wait_for_selector('[data-gwp-switch]', timeout=20000); pg.wait_for_timeout(800)
+            check(f'{w}px Thomson Three report: the switch to PRISM Analysis, and no verdict line', pg.locator('[data-gwp-switch] [data-gwp-view="prism"]').count() == 1 and pg.locator('[data-gwp-preview]').count() == 0)
             # the global search is unchanged: a development opens Property Data
             pg.goto(B + '/'); pg.wait_for_selector('[data-gw-search] input:visible', timeout=20000)
             pg.locator('[data-gw-search] input:visible').first.click(); pg.keyboard.type('kingsford waterbay', delay=40)

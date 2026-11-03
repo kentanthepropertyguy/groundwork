@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="../assets/css/kpt-lg.css?v=a7388ecdb6">
 <link rel="stylesheet" href="../assets/css/gw-pulse.css?v=3387a27e04">
 <link rel="stylesheet" href="../assets/css/gw-bedroom.css?v=23b82e11df">
-<link rel="stylesheet" href="../assets/css/gw-prism.css?v=1f65d819c7">
+<link rel="stylesheet" href="../assets/css/gw-prism.css?v=20dfe238df">
 <link rel="canonical" href="https://tools.kentanthepropertyguy.com/research/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Groundwork">
@@ -47,7 +47,7 @@
 <template id="gwLazy-hdb"><script src="../assets/js/gw-hdb.js?v=ff7e6ae643"></script></template>
 <template id="gwLazy-budget"><link rel="stylesheet" href="../assets/css/kpt-discover.css?v=8d0ad26e1e"><script src="../assets/js/kpt-market.js?v=f2c5f82332"></script><script src="../assets/js/kpt-find.js?v=e88bca722f"></script><script src="../assets/js/kpt-discover.js?v=bdf69efa8d"></script><script src="../assets/js/kpt-discover-beds.js?v=8a9a8b8867"></script></template>
 <template id="gwLazy-budget-ui"><script src="../assets/js/kpt-discover-ui.js?v=bb58e094b2"></script></template>
-<template id="gwLazy-prism"><script src="../assets/js/gw-prism.js?v=c49b0e6a05"></script></template>
+<template id="gwLazy-prism"><script src="../assets/js/gw-prism.js?v=67fc0fe1b3"></script></template>
 <template id="gwLazy-az"><script src="../assets/js/kpt-registry-core.js?v=f702981cf5"></script></template>
 <script src="../assets/js/kpt-analytics.js?v=3b78ef5642"></script>
 <script src="../assets/js/kpt-components.js?v=597f0bf0d3"></script>
@@ -323,7 +323,7 @@
     // PRISM V1 (Ken, 31 Oct 2026): from this search, a development with a published PRISM assessment opens its PRISM Analysis page itself;
     // every other development keeps its overview (Property Data). The global search, the Map and every #/p/ link are unchanged.
     const pz = prismLoad().then(() => GW_PRISM.load('../', id)).catch(() => null);
-    pz.then((md) => { if (md && md.assessment && my === OV.seq) { clearOver(); location.hash = '#/prism/' + id; } });
+    pz.then((md) => { if (md && (md.page || md.assessment) && my === OV.seq) { clearOver(); location.hash = '#/prism/' + id; } });   // V1.1 r2: an evidence-profile page leads too
     store.manifest().then((m) => store.index().then((ix) => { const r = P.findById(ix, id); if (!r) throw new Error('nf'); return Promise.all([bedFor(id, m), txFor(id, m).catch(() => null), rentFor(id).catch(() => null), pz]).then((y) => ({ r, bed: y[0], tx: y[1], rent: y[2] })); }))
       .then((d) => {
         const BV = d.bed && window.GW_BED ? GW_BED.view(d.bed, 'resale', null) : null, hasBed = !!(BV && BV.types && BV.types.length);
