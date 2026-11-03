@@ -85,25 +85,28 @@ try:
             open_prism(pg, 'hougang-central')
             check(f'{vn} HC: income only (Market Demand); Price Position still "Not assessed"', pg.locator('[data-gwp-income]').count() == 1 and pg.locator('[data-gwp-yield], [data-gwp-profile], [data-gwp-v11="P"]').count() == 0 and 'Not assessed in this report' in hl(pg, 'P'))
             ctx.close()
-        # the Standard Reveal (Master Planning, 3 Nov 2026) on the three evidence-profile pages, desktop, phone and 200% zoom
-        RVX = {'hundred-palms-residences': ('High resale activity, but sustained activity is still settling', ['12.6', '+22.7%'], ['Settling: fewer than 12 months of resales', 'not an official MOP date', 'Oct 2024–Sep 2026', 'Oct 2025–Sep 2026', '(a position, not a measure of value)']),
-               'the-quinn': ('Resale activity is above most peers', ['4.7', '−2.2%'], ['higher than 208 of 266 similar developments with a figure', 'In line with comparable condos', '(a position, not a measure of value)', 'Oct 2024–Sep 2026']),
-               'thomson-three': ('A relatively quiet surrounding resale market', ['217', '−24.7%'], ['thin market, not an advantage', 'Observed transactions, not a prediction.', 'Oct 2025–Sep 2026 against Oct 2024–Sep 2025', 'more than 2 of 51 similar developments'])}
+        # the Standard Reveal (Master Planning, 3 Nov 2026) on the three evidence-profile pages, desktop, phone and 200% zoom. Since the buyer
+        # explanation (Master Planning, 3 Nov 2026, V2) the Reveal heads the explanation card: kicker, headline and qualifications word for
+        # word; its figures are the card figures, meaning first ("22.7% above comparable prices"), with their peer counts and periods
+        RVX = {'hundred-palms-residences': ('High resale activity, but sustained activity is still settling', ['22.7% above', '12.6', '1.6 km', '0.8% fewer'], ['Settling: fewer than 12 months of resales', 'not an official MOP date', 'Observed, Oct 2024–Sep 2026', 'Oct 2025–Sep 2026', 'A position against comparables, not a valuation or a price change.', 'Higher than 45 of 46 similar developments']),
+               'the-quinn': ('Resale activity is above most peers', ['2.2% below', '4.7', '520 m', '15% fewer'], ['Higher than 208 of 266 similar developments with a figure', 'Close to the price level of comparable condos nearby.', 'A position against comparables, not a valuation or a price change.', 'Oct 2024–Sep 2026']),
+               'thomson-three': ('A relatively quiet surrounding resale market', ['0.7% above', '5.1', '190 m', '24.7% fewer'], ['thin market, not an advantage', 'Observed transactions, not a prediction.', 'Oct 2025–Sep 2026 against the year before', 'More nearby resales than 2 of 51 similar developments', '288 → 217'])}
         for w in [1440, 390, 195]:
             vn = f'{w}px'; ctx, pg, errs = fresh(br, w)
             for id, (head, figs, quals) in RVX.items():
                 pg.goto(B + '/research/#/prism/' + id); pg.wait_for_selector('[data-gwp-reveal]', timeout=30000); pg.wait_for_timeout(500)
-                rv = re.sub(r'\s+', ' ', pg.inner_text('[data-gwp-reveal]')).strip()
-                got = pg.evaluate("[...document.querySelectorAll('[data-gwp-reveal] .gwp-fig b')].map(b => b.textContent)")
-                check(f'{vn} {id} Reveal: "PRISM Reveal", "{head}", figures {figs}', rv.lower().startswith(('PRISM Reveal ' + head).lower()) and head in rv and got == figs, [rv[:120], got])
-                check(f'{vn} {id} Reveal: its periods and qualifications', all(q in rv for q in quals), rv)
+                rv = re.sub(r'\s+', ' ', pg.inner_text('[data-gwp-reveal]')).strip(); rvall = re.sub(r'\s+', ' ', pg.text_content('[data-gwp-reveal]')).strip()
+                got = pg.evaluate("[...document.querySelectorAll('[data-gwp-reveal] .gwp-xf b')].map(b => b.textContent)")
+                check(f'{vn} {id} Reveal: "PRISM Reveal", "{head}", then the explanation with figures {figs}', rv.lower().startswith(('PRISM Reveal ' + head).lower()) and head in rv and got == figs, [rv[:120], got])
+                check(f'{vn} {id} Reveal: its periods, peer counts and qualifications', all(q in rvall for q in quals), [q for q in quals if q not in rvall])
                 check(f'{vn} {id} Reveal: nothing unsupported (no verdict, recommendation, prediction, score, Ken\'s Take)', not re.search(r'verdict|recommend|\bbuy\b|invest|forecast|predict(?!ion\.)|score|undervalued|ken.s take|older', rv, re.I), rv)
                 order = pg.evaluate("(() => { const r = document.querySelector('[data-gwp-reveal]').getBoundingClientRect(), d = document.querySelector('#gwpDimsH').getBoundingClientRect(), s = document.querySelector('#gwp-sum').getBoundingClientRect(); return [s.top <= r.top, r.bottom <= d.top]; })()")
                 check(f'{vn} {id} Reveal: opens the page, before the five dimensions', all(order), order)
-                lay = pg.evaluate("(() => { const h = document.querySelector('[data-gwp-reveal] .gwp-rv').getBoundingClientRect(), f = document.querySelector('[data-gwp-reveal] .gwp-figs').getBoundingClientRect(); return [Math.round(f.left - h.right), Math.round(f.top - h.bottom)]; })()")
-                check(f'{vn} {id} Reveal layout: {"figures beside the finding" if w >= 1024 else "stacked"}', (lay[0] >= 16) if w >= 1024 else (lay[1] >= 0), lay)
+                tops = pg.evaluate("[...document.querySelectorAll('[data-gwp-reveal] .gwp-xf')].map(f => Math.round(f.getBoundingClientRect().top))")
+                rows = len(set(tops)); want_rows = 1 if w >= 1024 else 2 if w >= 360 else len(tops)
+                check(f'{vn} {id} explanation layout: {"four figures in one row" if w >= 1024 else "a 2 x 2 grid" if w >= 360 else "one column"}', rows == want_rows, tops)
                 check(f'{vn} {id} Reveal: no sideways scroll, no script error', pg.evaluate(NOOVER) and not errs, errs[:2])
-                ov = pg.evaluate("[...document.querySelectorAll('[data-gwp-reveal] .gwp-fig')].map(f => f.scrollWidth - f.clientWidth)")
+                ov = pg.evaluate("[...document.querySelectorAll('[data-gwp-reveal] .gwp-xf')].map(f => f.scrollWidth - f.clientWidth)")
                 check(f'{vn} {id} Reveal: every figure fits its box (no words running past it)', all(x <= 1 for x in ov), ov)
             # the factual summary (fallback), drawn by the page itself from Thomson Three's model with its quiet flag cleared
             pg.goto(B + '/research/#/prism/thomson-three'); pg.wait_for_selector('[data-gwp-reveal]', timeout=30000); pg.wait_for_timeout(400)

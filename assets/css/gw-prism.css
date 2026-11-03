@@ -344,3 +344,46 @@ body #ws-dev .lg-sb .kpr-search.has-go>input{padding-right:196px}
 }
 /* below 360 px (200% zoom on a phone) the two Reveal figures stack: side by side their words ran past their boxes (V1 Reveals too) */
 @media (max-width:359px){.gwp-figs{grid-template-columns:minmax(0,1fr)}.gwp-ev{padding:12px}.gwp-fig{padding:10px}.gwp-fig b{font-size:24px}.gwp-fig b em{font-size:14px}.gwp-fig span{font-size:13px}.gwp-fig span,.gwp-fig small{overflow-wrap:break-word}}
+
+/* The buyer explanation (Master Planning, 3 Nov 2026: V2). White, navy and muted gold only; no colour carries a sign or a judgement.
+   Desktop: a strong headline, four compact cards (meaning-first figure, peer comparison, reading, limitation), then What stands out /
+   What deserves attention / What to check next side by side. Phone: a compact 2x2 grid (figure, reading and the key limitations: price position,
+   low resale activity; the peer count, period, other limitations and "Details" stay in the dimension the card opens), the three short sections stacked. */
+.gwp-xp{display:grid;gap:16px;padding:26px 28px;border:1px solid var(--gwp-line);border-radius:18px;background:#fff;box-shadow:0 1px 2px rgba(22,33,62,.04),0 12px 32px rgba(22,33,62,.06);min-width:0}
+.gwp-xp > .gwp-k{margin:0}
+.gwp-xh{margin:-6px 0 0;font-size:27px;line-height:1.26;font-weight:700;letter-spacing:-.01em;color:var(--gwp-ink);text-wrap:balance;max-width:50ch}
+.gwp-xrn{margin:-6px 0 0;font-size:13.5px;line-height:1.5;color:var(--gwp-muted);max-width:860px}
+.gwp-xlead{margin:0;font-size:17px;line-height:1.45;font-weight:600;color:var(--gwp-ink);max-width:70ch}
+.gwp-xfs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.gwp-xfs--3{grid-template-columns:repeat(3,minmax(0,1fr))}.gwp-xfs--2{grid-template-columns:repeat(2,minmax(0,1fr))}.gwp-xfs--1{grid-template-columns:minmax(0,1fr)}
+.gwp-xf{display:flex;flex-direction:column;gap:5px;padding:14px 16px 12px;border:1px solid var(--gwp-line);border-top:3px solid var(--gwp-ink);border-radius:12px;min-width:0;color:inherit;text-decoration:none;background:#fff}
+.gwp-xf:hover{border-color:var(--gwp-gold);border-top-color:var(--gwp-ink)}
+.gwp-xf:focus-visible{outline:2px solid var(--gwp-gold);outline-offset:2px}
+.gwp-xs{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--gwp-gold);overflow-wrap:break-word}
+.gwp-xv{display:block;color:var(--gwp-ink);overflow-wrap:break-word}
+.gwp-xv b{display:block;font-size:28px;line-height:1.08;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.gwp-xl{display:block;font-size:14px;line-height:1.3;font-weight:600;margin-top:2px}
+.gwp-xy{font-size:14px;line-height:1.45;color:var(--gwp-body)}
+.gwp-xf small{font-size:12.5px;line-height:1.4;color:var(--gwp-muted);overflow-wrap:break-word}
+.gwp-xf .gwp-xw{font-style:italic}
+.gwp-xm{font-size:12.5px;font-weight:700;margin-top:auto;padding-top:4px;color:var(--gwp-ink)}
+.gwp-xb{display:grid;gap:14px;padding-top:18px;border-top:1px solid var(--gwp-line)}
+.gwp-xt3 h3,.gwp-xq h3{margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gwp-gold)}
+.gwp-xt3 ul{margin:0;padding:0 0 0 18px;display:grid;gap:5px}
+.gwp-xt3 li{font-size:15px;line-height:1.5;color:var(--gwp-ink)}
+.gwp-xt3 li::marker{color:var(--gwp-gold)}
+.gwp-xq{display:grid;gap:4px;align-content:start;padding:14px 16px;border-radius:12px;background:var(--gwp-soft,#F6F7F9);border-left:3px solid var(--gwp-gold)}
+.gwp-xq h3{margin:0}
+.gwp-xq p{margin:0;font-size:15.5px;line-height:1.5;font-weight:600;color:var(--gwp-ink)}
+.gwp-xq small{font-size:12.5px;color:var(--gwp-muted)}
+.gwp-xfoot{margin:0;font-size:12.5px;color:var(--gwp-muted)}
+@media (min-width:1024px){.gwp-xb{grid-template-columns:repeat(auto-fit,minmax(0,1fr));column-gap:28px;align-items:start}}
+@media (max-width:1023px){.gwp-xfs,.gwp-xfs--3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){
+  .gwp-xp{padding:18px 14px;gap:12px}.gwp-xh{font-size:20px;margin-top:-4px}.gwp-xlead{font-size:15px}.gwp-xrn{font-size:13px}
+  .gwp-xfs{gap:8px}.gwp-xf{padding:10px 11px;gap:3px;border-top-width:2px}.gwp-xv b{font-size:20px}.gwp-xl{font-size:12.5px}.gwp-xs{font-size:9.5px;letter-spacing:.05em}
+  .gwp-xy{font-size:12.5px;line-height:1.4}.gwp-xf small{font-size:11.5px;line-height:1.35}
+  .gwp-xf .gwp-xd,.gwp-xf .gwp-xt,.gwp-xf .gwp-xm,.gwp-xf .gwp-xw:not(.gwp-xw--k){display:none}
+  .gwp-xb{padding-top:12px;gap:12px}.gwp-xt3 li{font-size:14.5px;line-height:1.45}.gwp-xt3 ul{gap:3px}.gwp-xq{padding:11px 13px}.gwp-xq p{font-size:14.5px}
+}
+@media (max-width:359px){.gwp-xfs,.gwp-xfs--3,.gwp-xfs--2{grid-template-columns:minmax(0,1fr)}}

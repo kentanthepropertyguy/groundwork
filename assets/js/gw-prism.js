@@ -370,6 +370,139 @@
     if (rs && rs.status === 'settling' && !settle) return null;
     return { kind: 'summary', id: id, head: [P ? 'Price: ' + P.bandLabel : '', R ? 'Resale activity: ' + R.bandLabel : ''].filter(Boolean).join(' · '), figs: [figR, figP].filter(Boolean), notes: settle ? [settle] : [] };
   }
+  /* ---------------------------------------------------------------- the buyer explanation (Master Planning, 3 Nov 2026: V2)
+     On an evidence-profile page, above the five dimensions (unchanged): what stands out -> why it matters -> what to check next.
+     A headline of fixed clauses chosen by the exported bands; four cards (Price, Resale, MRT, nearby Market; a missing measure is
+     omitted, never replaced), each with a meaning-first figure ("2% below comparable prices", "16.8% fewer nearby resales"), its approved
+     peer comparison, a one-line reading by its approved band and a limitation only where one matters; then "What stands out", "What
+     deserves attention" (weaker positions, missing evidence, the surrounding market apart from the development) and one question chosen by
+     the evidence. Every sentence is a fixed template (XT); every figure is an approved value (the signed figures stay in the dimensions).
+     Rules: market wording describes resale volume only (slowed / picked up at -10% / +10%), never prices or demand; a price position is never
+     a price change or a valuation; MRT within 500 m is a proximity observation; D4 (no "more than most" resale finding under 50 homes); no
+     sign-based colour, school wording, score, forecast, rating, recommendation or automatic Ken's Take. An approved opening (a Reveal, the
+     D3 summary) stays on top word for word and is not repeated below. */
+  const XT = {
+    head: { price: { around: 'Priced in line with comparable {cls}s', below: 'Priced below most comparable {cls}s', above: 'Priced above most comparable {cls}s' },
+      resale: { steady: 'with steady resales', around: 'with resale activity typical of similar developments', above: 'with more resale activity than most similar developments', below: 'with less resale activity than most similar developments', settling: 'with resale activity still settling after its first wave' },
+      market: { down: 'while nearby resale activity has slowed', up: 'while nearby resale activity has picked up', flat: 'while nearby resale activity is broadly unchanged' },
+      marketOnly: { down: 'Nearby resale activity has slowed.', up: 'Nearby resale activity has picked up.', flat: 'Nearby resale activity is broadly unchanged.' } },
+    card: {
+      P: { name: 'Price position', below: '{x}% below', above: '{x}% above', zero: 'In line', unit: 'comparable prices', cmp: '{lower} of {n} similar developments{wf} have a lower relative price',
+        why: { around: 'Close to the price level of comparable {cls}s nearby.', below: 'Lower than most comparable {cls}s nearby.', above: 'Higher than most comparable {cls}s nearby.' },
+        limit: 'A position against comparables, not a valuation or a price change.' },
+      R: { name: 'Resale activity', unit: 'resales per 100 homes annually', cmp: 'Higher than {lower} of {n} similar developments{wf}', cmp0: 'Lower than all {n} similar developments{wf}',
+        why: { above: 'Homes here change hands more often than at most similar developments.', small: 'Measured on fewer than 50 homes, so a few sales move this figure.',
+          steady: 'Typical of similar developments.', around: 'Typical of similar developments.',
+          below: 'Homes here change hands less often than at most similar developments.', settling: 'Most resales so far came in the first resale wave after completion.' },
+        limit: { settling: 'The long-run resale rate is not yet known.', below: 'Fewer observed resales, not necessarily weaker demand.', above: 'Past resales do not guarantee a future sale.' } },
+      I: { name: 'Nearest MRT or LRT', unit: 'to {station}', closer: 'Closer than {x} of {n} similar developments{wf}',
+        why: { above: 'Closer to a station than most similar developments.', around: 'A typical station distance for similar developments.', below: 'Farther from a station than most similar developments.' },
+        limit: 'Straight-line distance, not walking time.' },
+      M: { name: 'Nearby resales', fewer: '{x}% fewer', more: '{x}% more', zero: 'No change in', unit: 'nearby resales', cmp: '{prior} → {latest} condo and EC resales within 2 km', rank: 'More nearby resales than {lower} of {n} similar developments{wf}', rank0: 'Fewer nearby resales than all {n} similar developments{wf}',
+        why: { down: 'Fewer homes changed hands within 2 km than a year earlier.', up: 'More homes changed hands within 2 km than a year earlier.', flat: 'Within 10% of a year earlier, so broadly unchanged.', quiet: 'A relatively quiet surrounding resale market.' },
+        limit: 'Counts transactions, not prices or demand.' }
+    },
+    scope: { project: 'This development', location: 'Location', market: 'Neighbourhood · 2 km' },
+    good: { resaleAbove: 'More resale activity than most similar developments.', steady: 'Homes here have resold in every month of the last two years.',
+      mrt: '{name} is about {m} from {station} (straight line).', mrtCloser: 'Closer to an MRT or LRT station than most similar developments.',
+      priceAround: 'Priced in line with comparable {cls}s.', priceBelow: 'Priced below most comparable {cls}s (a position, not a sign of value).',
+      competition: 'No other {cls} was selling new homes within 2 km in the latest year.' },
+    watch: { settling: 'Most recent resales came in the first resale wave, so the long-run resale rate is not yet known.', resaleBelow: 'Less resale activity than most similar developments.',
+      priceAbove: 'Priced above most comparable {cls}s.', mrtFar: 'Farther from an MRT or LRT station than most similar developments.',
+      marketDown: 'The surrounding market slowed ({x}% fewer resales within 2 km){apart}.', marketUp: 'The surrounding market picked up ({x}% more resales within 2 km){apart}.',
+      apart: ', separate from this development\'s own resale record',
+      noPrice: 'No price comparison: {why}', noResale: 'No resale rate: {why}', small: 'Fewer than 50 homes, so a few sales move the resale rate.',
+      competition: '{devs} sold new homes within 2 km in the latest year.' },
+    ask: { priceAbove: 'What does the premium over comparable {cls}s pay for: unit size, floor, facing, age or facilities?',
+      priceBelow: 'What explains the lower price position against comparable {cls}s: age, tenure, unit mix or location?',
+      resale: 'How many units are listed for resale here now, and how quickly have recent ones sold?',
+      mrt: 'How long is the actual walk or ride to the station you would use?',
+      market: 'How do recent transacted prices for similar units nearby compare with a year earlier?',
+      price: 'How does the asking price for the unit you are considering compare with recent resales of similar units here and at comparable {cls}s nearby?' },
+    sec: { good: 'What stands out', watch: 'What deserves attention', ask: 'What to check next' },
+    askNote: 'A question to check, not a prediction.', askNoteMarket: 'PRISM counts resales; it does not track prices.',
+    foot: 'The original figures, periods, comparison groups and sources are in the five dimensions below.'
+  };
+  const fill = (t, o) => t.replace(/\{(\w+)\}/g, (_, k) => (o[k] == null ? '' : o[k]));
+  // op: the page's approved opening (reveal11), shown on top; its notes (Settling, D3's missing-evidence statements) are not repeated below
+  function explain11(v, name, op) {
+    if (!v || !v.profile) return null;
+    const P = v.positions.P, R = v.positions.R, pc = P && (P.components || [])[0], rc = R && (R.components || [])[0], g = v.profile.group || v.peerGroup || {}, cls = CLS[g.propertyClass] || 'development';
+    const L = (k, ms) => { const l = lineOf(v, k, ms); return l && l.status === 'available' ? l : null; };
+    const mrt = L('I', 'infrastructure.mrt'), mk = L('M', 'market.backdrop'), comp = L('S', 'supply.competition'), q = L('S', 'supply.quietArea'), rs = lineOf(v, 'R', 'resale.sustained');
+    const st = mrt && mrt.data && Array.isArray(mrt.data.stations) ? mrt.data.stations[0] : null, rank = mrt && mrt.data && mrt.data.rank;
+    const steady = !!(R && (R.context || []).some((c) => c.id === 'activeMonthShare24' && c.value === 100)), settling = !!(rs && rs.status === 'settling');
+    const homes = R && R.sample && R.sample.homes, small = !(isNum(homes) && homes >= V11.MIN_HOMES_ABOVE);
+    const chg = mk && mk.data && isNum(mk.data.changePct) ? mk.data.changePct : null, mkey = chg === null ? '' : chg <= -10 ? 'down' : chg >= 10 ? 'up' : 'flat';
+    const quiet = !!(q && q.data && q.data.flag === true && isNum(q.data.resales2km));
+    const notes = (op && op.notes) || [], shown = (t) => notes.some((n) => n.indexOf(t) >= 0);
+    const ab = (x) => num(Math.abs(x));
+    // a peer count, as the statements give it; none lower and none equal: "than all N"
+    // "with a figure" when not every peer has one, as the statements say
+    const N = isNum(g.developments) ? g.developments : null, wf = (c) => (N !== null && isNum(c.peersWithValue) && c.peersWithValue < N ? ' with a figure' : '');
+    const rk = (c, t, t0) => (isNum(c.lower) && isNum(c.peersWithValue) ? fill(c.lower === 0 && c.equal === 0 && t0 ? t0 : t, { lower: num(c.lower, 0), n: num(c.peersWithValue, 0), wf: wf(c) }) : '');
+    // the headline: price clause, resale clause (D4: no "more than most" under 50 homes), market clause
+    const hp = P && XT.head.price[P.band] ? fill(XT.head.price[P.band], { cls }) : '';
+    const rkey = !R ? '' : settling ? 'settling' : R.band === 'around' ? (steady ? 'steady' : 'around') : R.band === 'above' && small ? '' : R.band;
+    const hr0 = rkey && XT.head.resale[rkey] ? XT.head.resale[rkey] : '', hr = hp || !hr0 ? hr0 : hr0.charAt(5).toUpperCase() + hr0.slice(6);   // without a price clause the resale clause opens the sentence
+    const head = hp || hr ? [hp, hr].filter(Boolean).join(', ') + (mkey ? ', ' + XT.head.market[mkey] : '') + '.' : (mkey ? XT.head.marketOnly[mkey] : '');
+    if (!head) return null;
+    // the four cards
+    const C = XT.card, cards = [];
+    if (P && pc && isNum(pc.value) && C.P.why[P.band]) cards.push({ dim: 'P', scope: XT.scope.project, name: C.P.name, v: fill(pc.value < 0 ? C.P.below : pc.value > 0 ? C.P.above : C.P.zero, { x: ab(pc.value) }), unit: C.P.unit,
+      cmp: rk(pc, C.P.cmp), why: fill(C.P.why[P.band], { cls }), limit: C.P.limit, key: true, when: priceWhen(P) });   // key: a limitation kept on the phone too
+    if (R && rc && isNum(rc.value)) { const k = settling ? 'settling' : R.band === 'above' ? (small ? 'small' : 'above') : R.band === 'around' ? (steady ? 'steady' : 'around') : R.band;
+      if (C.R.why[k]) cards.push({ dim: 'R', scope: XT.scope.project, name: C.R.name, v: num(rc.value, 1), unit: C.R.unit, cmp: rk(rc, C.R.cmp, C.R.cmp0),
+        why: C.R.why[k], limit: k === 'settling' && shown('Settling: ') ? '' : C.R.limit[k] || '', key: k === 'below', when: (settling ? 'Observed, ' : '') + R.periodLabel }); }
+    if (st && isNum(st.distanceM)) cards.push({ dim: 'I', scope: XT.scope.location, name: C.I.name, v: metres(st.distanceM), unit: fill(C.I.unit, { station: st.name }),
+      cmp: rank && isNum(rank.peersWithValue) ? fill(C.I.closer, { x: num(rank.higher, 0), n: num(rank.peersWithValue, 0), wf: wf(rank) })   /* the approved statement's own count, in every band */ : '',
+      why: rank && C.I.why[rank.band] ? C.I.why[rank.band] : '', limit: C.I.limit, when: '' });
+    if (chg !== null && mk.period && mk.period.latest) cards.push({ dim: 'M', scope: XT.scope.market, name: C.M.name, v: fill(chg < 0 ? C.M.fewer : chg > 0 ? C.M.more : C.M.zero, { x: ab(chg) }), unit: C.M.unit,
+      cmp: fill(C.M.cmp, { prior: num(mk.data.prior, 0), latest: num(mk.data.latest, 0) }) + (q && q.data && q.data.resales2km === mk.data.latest && rk(q.data, C.M.rank, C.M.rank0) ? '. ' + rk(q.data, C.M.rank, C.M.rank0) : ''),
+      why: C.M.why[mkey], limit: mkey === 'flat' ? '' : C.M.limit, when: period(mk.period.latest) + ' against the year before' });
+    else if (quiet) cards.push({ dim: 'S', scope: XT.scope.market, name: C.M.name, v: num(q.data.resales2km, 0), unit: C.M.unit,   // no year-on-year change: the quiet-area count, in its own dimension
+      cmp: rk(q.data, C.M.rank, C.M.rank0), why: C.M.why.quiet, limit: '', when: period(q.period) });
+    // what stands out / what deserves attention (at most two each, in a fixed order of strength)
+    const good = [], watch = [], ns = comp && comp.data && Array.isArray(comp.data.sameClassSelling) ? comp.data.sameClassSelling.length : null;
+    if (R && R.band === 'above' && !small && !settling) good.push(XT.good.resaleAbove);
+    if (steady && !settling) good.push(XT.good.steady);
+    if (st && isNum(st.distanceM) && st.distanceM <= 500 && !(rank && rank.band === 'below')) good.push(fill(XT.good.mrt, { name, m: metres(st.distanceM), station: st.name }));
+    else if (rank && rank.band === 'above') good.push(XT.good.mrtCloser);
+    if (P && P.band === 'around') good.push(fill(XT.good.priceAround, { cls }));
+    if (P && P.band === 'below') good.push(fill(XT.good.priceBelow, { cls }));
+    if (ns === 0 && !quiet) good.push(fill(XT.good.competition, { cls }));   // in a quiet area, little competition reflects a thin market, not an advantage
+    if (settling && !shown('Settling: ')) watch.push(XT.watch.settling);
+    if (R && R.band === 'below' && !settling) watch.push(XT.watch.resaleBelow);
+    if (P && P.band === 'above') watch.push(fill(XT.watch.priceAbove, { cls }));
+    if (rank && rank.band === 'below') watch.push(XT.watch.mrtFar);
+    if (mkey === 'down' || mkey === 'up') watch.push(fill(mkey === 'down' ? XT.watch.marketDown : XT.watch.marketUp, { x: ab(chg), apart: R ? XT.watch.apart : '' }));
+    const miss = (k, ms, t) => { const l = lineOf(v, k, ms); if (l && l.status === 'not_available' && l.statement.indexOf('Not available: ') === 0 && !shown(l.statement)) watch.push(fill(t, { why: l.statement.slice(15) })); };
+    if (!P) miss('P', 'price.entry', XT.watch.noPrice);
+    if (!R) miss('R', 'resale.sustained', XT.watch.noResale);
+    if (R && R.band === 'above' && small) watch.push(XT.watch.small);
+    if (ns > 0) watch.push(fill(XT.watch.competition, { devs: plural(ns, 'other ' + cls + ' development') }));
+    // one question, chosen by the evidence
+    const ask = P && P.band === 'above' ? XT.ask.priceAbove : P && P.band === 'below' ? XT.ask.priceBelow : settling || (R && R.band === 'below') ? XT.ask.resale :
+      rank && rank.band === 'below' ? XT.ask.mrt : mkey === 'down' || mkey === 'up' ? XT.ask.market : XT.ask.price;
+    const fresh = (t) => t !== head;   // never the headline again, word for word
+    return { head, lead: !!(hp || hr), cards, good: good.filter(fresh).slice(0, 2), watch: watch.filter(fresh).slice(0, 2), ask: fill(ask, { cls }), askNote: ask === XT.ask.market ? XT.askNoteMarket : XT.askNote, foot: XT.foot };
+  }
+  function explainHtml(x, op, id) {
+    if (!x) return '';
+    const card = (f) => '<a class="gwp-xf" href="#/prism/' + esc(id || '') + '/' + f.dim.toLowerCase() + '" data-gwp-xjump="' + f.dim + '"><span class="gwp-xs">' + esc(f.scope) + ' · ' + esc(f.name) + '</span>' +
+      '<span class="gwp-xv"><b>' + esc(f.v) + '</b> <span class="gwp-xl">' + esc(f.unit) + '</span></span>' + (f.cmp ? '<small class="gwp-xd">' + esc(f.cmp) + '</small>' : '') +
+      (f.why ? '<span class="gwp-xy">' + esc(f.why) + '</span>' : '') + (f.limit ? '<small class="gwp-xw' + (f.key ? ' gwp-xw--k' : '') + '">' + esc(f.limit) + '</small>' : '') + (f.when ? '<small class="gwp-xt">' + esc(f.when) + '</small>' : '') + '<span class="gwp-xm">Details ›</span></a>';
+    const notes = op && op.notes.length ? '<p class="gwp-xrn">' + op.notes.map(esc).join(' ') + '</p>' : '';
+    const top = op && op.kind === 'reveal' ? '<p class="gwp-k">PRISM Reveal</p><p class="gwp-xh">' + esc(op.head) + '</p>' + notes + '<p class="gwp-xlead">' + esc(x.head) + '</p>' :
+      !x.lead && op ? '<p class="gwp-k">PRISM summary</p><p class="gwp-xh">' + esc(op.head) + '</p>' + notes + '<p class="gwp-xlead">' + esc(x.head) + '</p>' :
+      '<p class="gwp-k">What the numbers reveal</p><p class="gwp-xh">' + esc(x.head) + '</p>' + notes;
+    const list = (h, a) => (a.length ? '<div class="gwp-xt3"><h3>' + esc(h) + '</h3><ul>' + a.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul></div>' : '');
+    return '<section class="gwp-xp" data-gwp-explain="' + esc(op ? op.id : 'explain') + '"' + (op ? ' data-gwp-reveal="' + esc(op.id) + '"' : '') + ' aria-label="What the numbers reveal">' + top +
+      (x.cards.length ? '<div class="gwp-xfs gwp-xfs--' + x.cards.length + '">' + x.cards.map(card).join('') + '</div>' : '') +
+      '<div class="gwp-xb">' + list(XT.sec.good, x.good) + list(XT.sec.watch, x.watch) +
+      '<div class="gwp-xq"><h3>' + esc(XT.sec.ask) + '</h3><p>' + esc(x.ask) + '</p><small>' + esc(x.askNote) + '</small></div></div>' +
+      '<p class="gwp-xfoot">' + esc(x.foot) + '</p></section>';
+  }
   function revealHtml(x) {
     if (!x) return '';
     const fig = (f) => '<div class="gwp-fig"><b>' + esc(f.v) + '</b><span>' + esc(f.label) + '</span>' + (f.sub ? '<small>' + esc(f.sub) + '</small>' : '') + '</div>';
@@ -634,7 +767,7 @@
     const card = A ? '<article class="gwp-card gwp-open"><div class="gwp-v"><p class="gwp-vk">PRISM Verdict' + (A.verdict.scope ? ' · ' + esc(A.verdict.scope) : '') + '</p><h2 class="gwp-vh">' + esc(A.verdict.headline) + '</h2></div>' +
       '<div class="gwp-why"><h3>Why?</h3><ul>' + A.verdict.why.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul></div>' +
       (A.verdict.watchOut.length ? '<div class="gwp-wo"><span class="gwp-wi" aria-hidden="true">!</span><div><h3>What should I watch out for?</h3><ul>' + A.verdict.watchOut.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul></div></div>' : '') +
-      '<div class="gwp-rvl">' + evidence(md) + '</div></article>' : revealHtml(reveal11(md.v11));   // a profile page: its r2 Reveal (or factual summary), never a verdict
+      '<div class="gwp-rvl">' + evidence(md) + '</div></article>' : (() => { const r = reveal11(md.v11), x = explain11(md.v11, md.name, r); return x ? explainHtml(x, r, md.id) : revealHtml(r); })();   // the buyer explanation (with the approved opening kept), or the opening alone   // a profile page: its r2 Reveal (or factual summary), never a verdict
     return '<div class="gwp-page' + (prof ? ' gwp-page--profile' : '') + '" data-gwp-page="' + esc(md.id) + '" data-gwp-mode="' + (prof ? 'profile' : 'assessment') + '"><div class="gwp-wrap">' + head + '</div>' + bar + '<div class="gwp-wrap">' +
       '<div id="gwp-sum" class="gwp-sumh"><div class="gwp-brand gwp-brand--sm">' + mark(root, 28) + '<p><b>PRISM</b> by Groundwork <span>· Five dimensions. One clearer property decision.</span></p></div></div>' +
       card + layersHtml(md) +
@@ -780,6 +913,7 @@
       const bar = app.querySelector('[data-gwp-bar]'), navH = () => (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gw-navh')) || 58) + (bar ? bar.offsetHeight : 0) + 10;
       const target = (k) => app.querySelector(k === 'sum' ? '#gwp-sum' : k === 'src' ? '#gwp-src' : '#gwp-' + k);
       const go = (k) => { const t = target(k); if (!t) return; if (k === 'src' && !t.open) t.open = true; if (/^[PRISM]$/.test(k)) { setOpen(k, true); save(); opened(); } offsetTo(t, navH()); };
+      app.querySelectorAll('[data-gwp-xjump]').forEach((a) => a.addEventListener('click', (ev) => { ev.preventDefault(); go(a.dataset.gwpXjump); }));   // explanation figures: open that dimension, in place
       if (bar) {
         bar.querySelectorAll('[data-gwp-jump]').forEach((b) => b.addEventListener('click', () => go(b.dataset.gwpJump)));
         const mark2 = () => { let cur = 'sum'; ['sum', 'P', 'R', 'I', 'S', 'M', 'src'].forEach((k) => { const t = target(k); if (t && t.getBoundingClientRect().top - navH() < 40) cur = k; });
@@ -855,5 +989,5 @@
     }
   }
 
-  return { PICKS_MAX, CURATED, hasEvidence, REVEAL, ES, reveal11, revealHtml, V11, PANELS, checkIndex, checkShard, checkPair, checkReport11, model11, compose, hasPage, headline11, lineHtml, posHtml, yieldHtml, incomeHtml, v11Html, VERSION, switchHtml, leadSites, layersHtml, dimsHtml, evidenceOf, headline, landingHtml, mountLanding, QUESTION, SCHEMA, DIR, MANIFEST_V, PILLARS, checkManifest, checkReport, approved, shown, model, value, detail, period, evidence, previewHtml, pageHtml, load, mountPreview, show, _cache: cache, _settled: settled };
+  return { explain11, explainHtml, XT, PICKS_MAX, CURATED, hasEvidence, REVEAL, ES, reveal11, revealHtml, V11, PANELS, checkIndex, checkShard, checkPair, checkReport11, model11, compose, hasPage, headline11, lineHtml, posHtml, yieldHtml, incomeHtml, v11Html, VERSION, switchHtml, leadSites, layersHtml, dimsHtml, evidenceOf, headline, landingHtml, mountLanding, QUESTION, SCHEMA, DIR, MANIFEST_V, PILLARS, checkManifest, checkReport, approved, shown, model, value, detail, period, evidence, previewHtml, pageHtml, load, mountPreview, show, _cache: cache, _settled: settled };
 });

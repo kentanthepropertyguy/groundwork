@@ -43,14 +43,17 @@ try:
                 except Exception: check(f'{vn} {id} ({group}): its PRISM page loads', False, pg.url); continue
                 pg.wait_for_timeout(300)
                 got = pg.get_attribute('[data-gwp-reveal]', 'data-gwp-reveal') if pg.locator('[data-gwp-reveal]').count() else None
-                kick = re.sub(r'\s+', ' ', pg.inner_text('[data-gwp-reveal] .gwp-k')).strip().lower() if got else ''
-                check(f'{vn} {id} ({group}): the approved opening "{want}", labelled {"Reveal" if want in ("quiet", "resaleAbove", "resaleSettling") else "summary"}', got == want and kick == ('prism reveal' if want in ('quiet', 'resaleAbove', 'resaleSettling') else 'prism summary') and pg.get_attribute('[data-gwp-page]', 'data-gwp-mode') == 'profile', [got, kick])
+                kick = re.sub(r'\s+', ' ', pg.inner_text('[data-gwp-reveal] > .gwp-k, [data-gwp-reveal] .gwp-ev > .gwp-k')).strip().lower() if got else ''
+                # buyer explanation (Master Planning, 3 Nov 2026): a Reveal keeps its kicker on top; a factual summary is headed by "What the
+                # numbers reveal" when the explanation has a Price or Resale finding to lead with, otherwise it keeps "PRISM summary" (e.g. D3)
+                kicks = ('prism reveal',) if want in ('quiet', 'resaleAbove', 'resaleSettling') else ('prism summary',) if want == 'evidence' else ('prism summary', 'what the numbers reveal')
+                check(f'{vn} {id} ({group}): the approved opening "{want}", labelled {" or ".join(kicks)}', got == want and kick in kicks and pg.get_attribute('[data-gwp-page]', 'data-gwp-mode') == 'profile', [got, kick])
                 if SHOTS: os.makedirs(SHOTS, exist_ok=True); pg.screenshot(path=f'{SHOTS}/{id}-top-{w}.png')
                 pg.click('[data-gwp-all="open"]'); pg.wait_for_timeout(250)
                 t = pg.evaluate(TXT, '[data-gwp-page]')
                 miss = [l['measure'] for l in r['profile']['lines'] if l['statement'] not in t] + [x['dimension'] for x in (r['peerComparison'] or {}).get('positions', []) if x['statement'] not in t]
                 check(f'{vn} {id}: five dimensions; every statement verbatim (missing evidence named)', pg.locator('[data-gwp-pillar]').count() == 5 and not miss, miss)
-                ov = pg.evaluate("[...document.querySelectorAll('[data-gwp-reveal] .gwp-fig')].map(f => f.scrollWidth - f.clientWidth)")
+                ov = pg.evaluate("[...document.querySelectorAll('[data-gwp-reveal] .gwp-fig, [data-gwp-reveal] .gwp-xf')].map(f => f.scrollWidth - f.clientWidth)")
                 check(f'{vn} {id}: no unsupported wording; figures fit; no sideways scroll; no script error', not BAD.search(t) and all(x <= 1 for x in ov) and pg.evaluate(NOOVER) and not errs, [BAD.search(t) and BAD.search(t).group(0), ov, errs[:1]])
             ctx.close()
         br.close()

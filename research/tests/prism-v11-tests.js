@@ -179,8 +179,10 @@ check('the three approved headlines, exactly', G.REVEAL.resaleSettling === 'High
 check('every Reveal figure is an approved value as exported (no new calculation)', (() => { const h = R('hundred-palms-residences'), q = R('the-quinn'), t = R('thomson-three');
   return statementsOf('hundred-palms-residences').includes('12.6 resales per 100 homes') && statementsOf('hundred-palms-residences').includes('22.7% above') && statementsOf('the-quinn').includes('4.7 resales per 100 homes') && statementsOf('the-quinn').includes('2.2% below') && statementsOf('thomson-three').includes('217 resales within 2 km') && statementsOf('thomson-three').includes('(−24.7%)') && h && q && t; })());
 ['thomson-three', 'hundred-palms-residences', 'the-quinn'].forEach((id) => {
-  const h = html[id], at = h.indexOf('data-gwp-reveal='), rv = text(h.slice(h.indexOf('<div class="gwp-ev"', at), h.indexOf('</section>', at))).trim();
-  check(id + ': the Reveal opens the page (after the brand line, before the five dimensions), in the Reveal design, labelled "PRISM Reveal"', at > h.indexOf('id="gwp-sum"') && at < h.indexOf('id="gwpDimsH"') && /class="gwp-ev" data-gwp-ev="reveal11"/.test(h) && rv.startsWith('PRISM Reveal'));
+  // since the buyer explanation (Master Planning, 3 Nov 2026) the approved Reveal heads the explanation card: its kicker, headline and
+  // qualifications, word for word, before the explanation's own lead sentence
+  const h = html[id], at = h.indexOf('data-gwp-reveal='), rv = text(h.slice(h.indexOf('<p class="gwp-k">', at), h.indexOf('<p class="gwp-xlead">', at))).trim();
+  check(id + ': the Reveal opens the page (after the brand line, before the five dimensions), heading the explanation card, labelled "PRISM Reveal"', at > h.indexOf('id="gwp-sum"') && at < h.indexOf('id="gwpDimsH"') && /<section class="gwp-xp" data-gwp-explain="(quiet|resaleAbove|resaleSettling)" data-gwp-reveal=/.test(h) && rv.startsWith('PRISM Reveal'));
   check(id + ': never a verdict, recommendation, prediction, score, Ken\'s Take or unsupported comparison in the Reveal', !/verdict|recommend|\bbuy\b|invest|forecast|predict(?!ion\.)|score|undervalued|bargain|guarantee|ken.s take|older|EC comparables|will /i.test(rv), rv);
 });
 check('Kingsford Waterbay and Hougang Central: their V1 Reveal in the verdict card, no r2 Reveal', ['kingsford-waterbay', 'hougang-central'].every((id) => !html[id].includes('data-gwp-reveal') && html[id].includes('<p class="gwp-k">PRISM Reveal</p>') && html[id].includes('class="gwp-card gwp-open"')));
