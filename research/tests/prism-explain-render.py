@@ -38,7 +38,8 @@ try:
             pg.route(re.compile(r'googletagmanager|facebook\.net|onemap'), lambda r: r.fulfill(status=200, body=''))
             for id in CASES:
                 pg.goto(B + '/research/#/prism/' + id)
-                try: pg.wait_for_selector(f'[data-gwp-page="{id}"] .gwp-xp', timeout=30000)
+                # V3 (Master Planning, 4 Nov 2026): the V2 explanation sits behind "Explore full PRISM analysis"; open it, then check V2 as before
+                try: pg.wait_for_selector(f'[data-gwp-page="{id}"] [data-gwp-full]', timeout=30000); pg.click('[data-gwp-full]'); pg.wait_for_selector(f'[data-gwp-page="{id}"] .gwp-xp', timeout=30000)
                 except Exception: check(f'{vn} {id}: the explanation loads', False, pg.url); continue
                 pg.wait_for_timeout(300)
                 ex = pg.evaluate(EXPECT, id)

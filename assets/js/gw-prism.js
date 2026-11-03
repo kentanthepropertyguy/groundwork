@@ -512,7 +512,7 @@
     const ask = P && P.band === 'above' ? XT.ask.priceAbove : P && P.band === 'below' ? XT.ask.priceBelow : settling || (R && R.band === 'below') ? XT.ask.resale :
       rank && rank.band === 'below' ? XT.ask.mrt : mkey === 'down' || mkey === 'up' ? XT.ask.market : XT.ask.price;
     const fresh = (t) => t !== head;   // never the headline again, word for word
-    return { head, lead: !!(hp || hr), cards, good: good.filter(fresh).slice(0, 2), watch: watch.filter(fresh).slice(0, 2), ask: fill(ask, { cls }), askNote: ask === XT.ask.market ? XT.askNoteMarket : XT.askNote, foot: XT.foot };
+    return { head, lead: !!(hp || hr), cards, goodAll: good, watchAll: watch, good: good.filter(fresh).slice(0, 2), watch: watch.filter(fresh).slice(0, 2), ask: fill(ask, { cls }), askNote: ask === XT.ask.market ? XT.askNoteMarket : XT.askNote, foot: XT.foot };
   }
   function explainHtml(x, op, id) {
     if (!x) return '';
@@ -529,6 +529,63 @@
       '<div class="gwp-xb">' + list(XT.sec.good, x.good) + list(XT.sec.watch, x.watch) +
       '<div class="gwp-xq"><h3>' + esc(XT.sec.ask) + '</h3><p>' + esc(x.ask) + '</p><small>' + esc(x.askNote) + '</small></div></div>' +
       '<p class="gwp-xfoot">' + esc(x.foot) + '</p></section>';
+  }
+  /* ---------------------------------------------------------------- PRISM V3 Quick Read (Master Planning, 4 Nov 2026): quick read first,
+     detailed analysis second. An ordinary buyer gets the main findings in about ten seconds: a headline of up to three short phrases, three
+     figures, what looks promising, what to watch and one question before buying; "Explore full PRISM analysis" opens the V2 explanation
+     (unchanged). Every phrase is a fixed template (QT) chosen by the approved bands; every figure is an approved value; a missing measure
+     is never replaced by an invented one (the next available figure takes its place). Rules: "Close to MRT" only for a station within
+     500 m (straight line) outside the "farther than most" band; a lower price is never called good value; the market phrase and figure
+     describe nearby resale volume only (development activity is labelled separately); an approved Reveal stays visible with its
+     qualifications; no score, forecast, recommendation or automatic Ken's Take. */
+  const QT = {
+    loc: { near: 'Close to MRT', access: 'Good MRT access', far: 'Farther from MRT' },   // wording: Master Planning, 4 Nov 2026
+    price: { around: 'Priced near comparable {cls}s', below: 'Lower pricing', above: 'Higher pricing' },
+    resale: { settling: 'Resales still settling', above: 'Active resales', below: 'Fewer resales', steady: 'Steady resales' },
+    market: { down: 'Slower market', up: 'Busier market', flat: 'Steady market' },
+    fig: { P: '{x} comparable {cls} prices', I: 'from {station}', M: 'nearby resales', S: 'nearby resales in the latest year', R: 'resales per 100 homes a year' },
+    scope: { P: 'This development', R: 'This development', I: 'Location', M: 'Neighbourhood · 2 km', S: 'Neighbourhood · 2 km' },
+    sec: { good: 'What looks promising', watch: 'What to watch', ask: 'Before you buy' },
+    note: 'Compared with similar developments: not a valuation, not a recommendation and not a forecast.',
+    more: 'Explore full PRISM analysis', less: 'Hide full PRISM analysis'
+  };
+  function quick11(v, name, op) {
+    if (!v || !v.profile) return null;
+    const x = explain11(v, name, op && op.kind === 'reveal' ? op : null);   // a Reveal's notes stay on top; other openings move into the full analysis
+    if (!x) return null;
+    const P = v.positions.P, R = v.positions.R, g = v.profile.group || v.peerGroup || {}, cls = CLS[g.propertyClass] || 'development';
+    const L = (k, ms) => { const l = lineOf(v, k, ms); return l && l.status === 'available' ? l : null; };
+    const mrt = L('I', 'infrastructure.mrt'), mk = L('M', 'market.backdrop'), rs = lineOf(v, 'R', 'resale.sustained');
+    const st = mrt && mrt.data && Array.isArray(mrt.data.stations) ? mrt.data.stations[0] : null, rank = mrt && mrt.data && mrt.data.rank;
+    const chg = mk && mk.data && isNum(mk.data.changePct) ? mk.data.changePct : null, mkey = chg === null ? '' : chg <= -10 ? 'down' : chg >= 10 ? 'up' : 'flat';
+    const settling = !!(rs && rs.status === 'settling'), steady = !!(R && (R.context || []).some((c) => c.id === 'activeMonthShare24' && c.value === 100));
+    const homes = R && R.sample && R.sample.homes, big = isNum(homes) && homes >= V11.MIN_HOMES_ABOVE;
+    const near = !!(st && isNum(st.distanceM) && st.distanceM <= 500 && !(rank && rank.band === 'below'));
+    const loc = near ? QT.loc.near : rank && rank.band === 'below' ? QT.loc.far : rank && rank.band === 'above' ? QT.loc.access : '';
+    const pr = P && QT.price[P.band] ? fill(QT.price[P.band], { cls }) : '';
+    const rsl = pr || !R ? '' : settling ? QT.resale.settling : R.band === 'above' && big ? QT.resale.above : R.band === 'below' ? QT.resale.below : R.band === 'around' && steady ? QT.resale.steady : '';
+    const head = [loc, pr || rsl, mkey ? QT.market[mkey] : ''].filter(Boolean).map((t) => t + '.').join(' ');
+    // three figures: Price, MRT, nearby market; a missing one is taken by the next available measure (resale rate), never invented
+    const by = {}; x.cards.forEach((c) => { by[c.dim] = c; });
+    const fig = (c) => ({ dim: c.dim, scope: QT.scope[c.dim], v: c.v, label: c.dim === 'P' ? fill(QT.fig.P, { x: '', cls }).trim() : c.dim === 'I' ? fill(QT.fig.I, { station: c.unit.replace(/^to /, '') }) : QT.fig[c.dim] });
+    const order = ['P', 'I', by.M ? 'M' : 'S', 'R'].filter((k) => by[k]), figs = order.slice(0, 3).map((k) => fig(by[k]));
+    // what looks promising / what to watch: the approved sentences, without the station distance already shown as a figure
+    const mrtLine = (t) => / is about [\d,.]+ k?m from .+ \(straight line\)\.$/.test(t);
+    const good = x.goodAll.filter((t) => !(mrtLine(t) && order.slice(0, 3).indexOf('I') >= 0)).slice(0, 2), watch = x.watchAll.slice(0, 2);
+    return { head: head || x.head, figs, good, watch, ask: x.ask, askNote: x.askNote, op: op && op.kind === 'reveal' ? op : null, x };
+  }
+  function quickHtml(q, id, full) {
+    if (!q) return '';
+    const fig = (f) => '<a class="gwp-qr-f" href="#/prism/' + esc(id || '') + '/' + f.dim.toLowerCase() + '" data-gwp-xjump="' + f.dim + '"><span class="gwp-qr-s">' + esc(f.scope) + '</span><b>' + esc(f.v) + '</b><span class="gwp-qr-l">' + esc(f.label) + '</span></a>';
+    const list = (h, a, k) => (a.length ? '<div class="gwp-qr-t gwp-qr-t--' + k + '"><h3>' + esc(h) + '</h3><ul>' + a.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul></div>' : '');
+    return '<section class="gwp-qr" data-gwp-quick aria-label="PRISM quick read"><p class="gwp-k">PRISM quick read</p><h2 class="gwp-qr-h">' + q.head.split(/(?<=\.) /).map((t) => '<span>' + esc(t) + '</span>').join(' ') + '</h2>' +
+      (q.op ? '<p class="gwp-qr-rv"><b>PRISM Reveal</b> · ' + esc(q.op.head) + '</p>' + (q.op.notes.length ? '<p class="gwp-qr-rn">' + q.op.notes.map(esc).join(' ') + '</p>' : '') : '') +
+      (q.figs.length ? '<div class="gwp-qr-fs gwp-qr-fs--' + q.figs.length + '">' + q.figs.map(fig).join('') + '</div>' : '') +
+      '<div class="gwp-qr-b">' + list(QT.sec.good, q.good, 'good') + list(QT.sec.watch, q.watch, 'watch') +
+      '<div class="gwp-qr-q"><h3>' + esc(QT.sec.ask) + '</h3><p>' + esc(q.ask) + '</p><small>' + esc(q.askNote) + '</small></div></div>' +
+      '<p class="gwp-qr-n">' + esc(QT.note) + '</p>' +
+      '<button type="button" class="gwp-qr-x" data-gwp-full aria-expanded="false" aria-controls="gwp-full">' + esc(QT.more) + '<span aria-hidden="true">⌄</span></button></section>' +
+      '<div class="gwp-full" id="gwp-full" hidden>' + full + '</div>';
   }
   function revealHtml(x) {
     if (!x) return '';
@@ -794,7 +851,7 @@
     const card = A ? '<article class="gwp-card gwp-open"><div class="gwp-v"><p class="gwp-vk">PRISM Verdict' + (A.verdict.scope ? ' · ' + esc(A.verdict.scope) : '') + '</p><h2 class="gwp-vh">' + esc(A.verdict.headline) + '</h2></div>' +
       '<div class="gwp-why"><h3>Why?</h3><ul>' + A.verdict.why.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul></div>' +
       (A.verdict.watchOut.length ? '<div class="gwp-wo"><span class="gwp-wi" aria-hidden="true">!</span><div><h3>What should I watch out for?</h3><ul>' + A.verdict.watchOut.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul></div></div>' : '') +
-      '<div class="gwp-rvl">' + evidence(md) + '</div></article>' : (() => { const r = reveal11(md.v11), x = explain11(md.v11, md.name, r); return x ? explainHtml(x, r, md.id) : revealHtml(r); })();   // the buyer explanation (with the approved opening kept), or the opening alone   // a profile page: its r2 Reveal (or factual summary), never a verdict
+      '<div class="gwp-rvl">' + evidence(md) + '</div></article>' : (() => { const r = reveal11(md.v11), x = explain11(md.v11, md.name, r), q = x && quick11(md.v11, md.name, r); return q ? quickHtml(q, md.id, explainHtml(x, r, md.id)) : x ? explainHtml(x, r, md.id) : revealHtml(r); })();   // V3: the quick read first, the V2 explanation behind "Explore full PRISM analysis"   // the buyer explanation (with the approved opening kept), or the opening alone   // a profile page: its r2 Reveal (or factual summary), never a verdict
     return '<div class="gwp-page' + (prof ? ' gwp-page--profile' : '') + '" data-gwp-page="' + esc(md.id) + '" data-gwp-mode="' + (prof ? 'profile' : 'assessment') + '"><div class="gwp-wrap">' + head + '</div>' + bar + '<div class="gwp-wrap">' +
       '<div id="gwp-sum" class="gwp-sumh"><div class="gwp-brand gwp-brand--sm">' + mark(root, 28) + '<p><b>PRISM</b> by Groundwork <span>· Five dimensions. One clearer property decision.</span></p></div></div>' +
       card + layersHtml(md) +
@@ -950,7 +1007,10 @@
       const bar = app.querySelector('[data-gwp-bar]'), navH = () => (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gw-navh')) || 58) + (bar ? bar.offsetHeight : 0) + 10;
       const target = (k) => app.querySelector(k === 'sum' ? '#gwp-sum' : k === 'src' ? '#gwp-src' : '#gwp-' + k);
       const go = (k) => { const t = target(k); if (!t) return; if (k === 'src' && !t.open) t.open = true; if (/^[PRISM]$/.test(k)) { setOpen(k, true); save(); opened(); } offsetTo(t, navH()); };
-      app.querySelectorAll('[data-gwp-xjump]').forEach((a) => a.addEventListener('click', (ev) => { ev.preventDefault(); go(a.dataset.gwpXjump); }));   // explanation figures: open that dimension, in place
+      app.querySelectorAll('[data-gwp-xjump]').forEach((a) => a.addEventListener('click', (ev) => { ev.preventDefault(); go(a.dataset.gwpXjump); }));
+      // V3: "Explore full PRISM analysis" opens (or closes) the V2 explanation in place, and moves to it when opened
+      const fb = app.querySelector('[data-gwp-full]'), fp = app.querySelector('#gwp-full');
+      if (fb && fp) fb.addEventListener('click', () => { const on = fp.hidden; fp.hidden = !on; fb.setAttribute('aria-expanded', String(on)); fb.firstChild.textContent = on ? QT.less : QT.more; if (on) { offsetTo(fp, navH()); if (o.track) o.track('full'); } });   // explanation figures: open that dimension, in place
       if (bar) {
         bar.querySelectorAll('[data-gwp-jump]').forEach((b) => b.addEventListener('click', () => go(b.dataset.gwpJump)));
         const mark2 = () => { let cur = 'sum'; ['sum', 'P', 'R', 'I', 'S', 'M', 'src'].forEach((k) => { const t = target(k); if (t && t.getBoundingClientRect().top - navH() < 40) cur = k; });
@@ -1026,5 +1086,5 @@
     }
   }
 
-  return { itemsOk, redirect11, hasReport, isCurated, explain11, explainHtml, XT, PICKS_MAX, CURATED, hasEvidence, REVEAL, ES, reveal11, revealHtml, V11, PANELS, checkIndex, checkShard, checkPair, checkReport11, model11, compose, hasPage, headline11, lineHtml, posHtml, yieldHtml, incomeHtml, v11Html, VERSION, switchHtml, leadSites, layersHtml, dimsHtml, evidenceOf, headline, landingHtml, mountLanding, QUESTION, SCHEMA, DIR, MANIFEST_V, PILLARS, checkManifest, checkReport, approved, shown, model, value, detail, period, evidence, previewHtml, pageHtml, load, mountPreview, show, _cache: cache, _settled: settled };
+  return { quick11, quickHtml, QT, itemsOk, redirect11, hasReport, isCurated, explain11, explainHtml, XT, PICKS_MAX, CURATED, hasEvidence, REVEAL, ES, reveal11, revealHtml, V11, PANELS, checkIndex, checkShard, checkPair, checkReport11, model11, compose, hasPage, headline11, lineHtml, posHtml, yieldHtml, incomeHtml, v11Html, VERSION, switchHtml, leadSites, layersHtml, dimsHtml, evidenceOf, headline, landingHtml, mountLanding, QUESTION, SCHEMA, DIR, MANIFEST_V, PILLARS, checkManifest, checkReport, approved, shown, model, value, detail, period, evidence, previewHtml, pageHtml, load, mountPreview, show, _cache: cache, _settled: settled };
 });

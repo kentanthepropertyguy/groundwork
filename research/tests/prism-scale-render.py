@@ -44,8 +44,8 @@ try:
             check(f'{vn} Property Data without PRISM: the V1 manifest, index.json and one shard (to learn it has none), no report', reports(log) == [] and len(set(shards(log))) <= 1 and pg.locator('[data-gwp-switch]').count() == 0, log)
             log.clear(); pg.goto(B + '/research/#/p/the-quinn'); pg.wait_for_selector('[data-gwp-switch]', timeout=30000); pg.wait_for_timeout(800)
             check(f'{vn} then a development with PRISM: only its own shard (if not already loaded) and its own report; index.json not fetched again', all(x.endswith('/the-quinn.json') for x in reports(log)) and len(reports(log)) >= 1 and manifests(log) == [] and len(set(shards(log))) <= 1, log)
-            log.clear(); t0 = time.time(); pg.click('[data-gwp-switch] [data-gwp-view="prism"]'); pg.wait_for_selector('[data-gwp-reveal]', timeout=30000); ms = (time.time() - t0) * 1000
-            check(f'{vn} its PRISM page: nothing new downloaded (the report is already verified), Reveal in {ms:.0f} ms (budget {BUDGET_MS})', reports(log) == [] and ms <= BUDGET_MS, log)
+            log.clear(); t0 = time.time(); pg.click('[data-gwp-switch] [data-gwp-view="prism"]'); pg.wait_for_selector('[data-gwp-quick], [data-gwp-reveal]', timeout=30000); ms = (time.time() - t0) * 1000
+            check(f'{vn} its PRISM page: nothing new downloaded (the report is already verified), quick read in {ms:.0f} ms (budget {BUDGET_MS})', reports(log) == [] and ms <= BUDGET_MS, log)
             log.clear(); pg.goto(B + '/research/#/prism/kingsford-waterbay'); pg.wait_for_selector('.gwp-card .gwp-ev', timeout=30000); pg.wait_for_timeout(500)
             check(f'{vn} another PRISM page: only that development\'s V1 and V1.1 reports (and at most its shard)', sorted(set(x.split('/')[-1] for x in reports(log))) == ['kingsford-waterbay.json'] and len(reports(log)) <= 2 and len(set(shards(log))) <= 1, log)
             check(f'{vn} no script error', not errs, errs[:2]); ctx.close()

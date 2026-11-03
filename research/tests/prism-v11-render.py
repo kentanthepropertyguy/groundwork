@@ -95,14 +95,17 @@ try:
         for w in [1440, 390, 195]:
             vn = f'{w}px'; ctx, pg, errs = fresh(br, w)
             for id, (head, figs, quals) in RVX.items():
-                pg.goto(B + '/research/#/prism/' + id); pg.wait_for_selector('[data-gwp-reveal]', timeout=30000); pg.wait_for_timeout(500)
+                # V3: the quick read opens the page (with the Reveal kept visible); the V2 explanation is opened with "Explore full PRISM analysis"
+                pg.goto(B + '/research/#/prism/' + id); pg.wait_for_selector('[data-gwp-quick]', timeout=30000)
+                check(f'{vn} {id} V3: the quick read keeps the approved Reveal visible ("PRISM Reveal · {head}")', ('PRISM Reveal · ' + head) in re.sub(r'\s+', ' ', pg.text_content('[data-gwp-quick]')))
+                pg.evaluate("(() => { const f = document.querySelector('#gwp-full'); if (f && f.hidden) document.querySelector('[data-gwp-full]').click(); })()"); pg.wait_for_selector('[data-gwp-reveal]', timeout=30000); pg.wait_for_timeout(500)   # open the full analysis (if not already open)
                 rv = re.sub(r'\s+', ' ', pg.inner_text('[data-gwp-reveal]')).strip(); rvall = re.sub(r'\s+', ' ', pg.text_content('[data-gwp-reveal]')).strip()
                 got = pg.evaluate("[...document.querySelectorAll('[data-gwp-reveal] .gwp-xf b')].map(b => b.textContent)")
                 check(f'{vn} {id} Reveal: "PRISM Reveal", "{head}", then the explanation with figures {figs}', rv.lower().startswith(('PRISM Reveal ' + head).lower()) and head in rv and got == figs, [rv[:120], got])
                 check(f'{vn} {id} Reveal: its periods, peer counts and qualifications', all(q in rvall for q in quals), [q for q in quals if q not in rvall])
                 check(f'{vn} {id} Reveal: nothing unsupported (no verdict, recommendation, prediction, score, Ken\'s Take)', not re.search(r'verdict|recommend|\bbuy\b|invest|forecast|predict(?!ion\.)|score|undervalued|ken.s take|older', rv, re.I), rv)
-                order = pg.evaluate("(() => { const r = document.querySelector('[data-gwp-reveal]').getBoundingClientRect(), d = document.querySelector('#gwpDimsH').getBoundingClientRect(), s = document.querySelector('#gwp-sum').getBoundingClientRect(); return [s.top <= r.top, r.bottom <= d.top]; })()")
-                check(f'{vn} {id} Reveal: opens the page, before the five dimensions', all(order), order)
+                order = pg.evaluate("(() => { const q = document.querySelector('[data-gwp-quick]').getBoundingClientRect(), r = document.querySelector('[data-gwp-reveal]').getBoundingClientRect(), d = document.querySelector('#gwpDimsH').getBoundingClientRect(), s = document.querySelector('#gwp-sum').getBoundingClientRect(); return [s.top <= q.top, q.bottom <= r.top, r.bottom <= d.top]; })()")
+                check(f'{vn} {id}: the quick read opens the page; the full analysis (with the Reveal) follows it, before the five dimensions', all(order), order)
                 tops = pg.evaluate("[...document.querySelectorAll('[data-gwp-reveal] .gwp-xf')].map(f => Math.round(f.getBoundingClientRect().top))")
                 rows = len(set(tops)); want_rows = 1 if w >= 1024 else 2 if w >= 360 else len(tops)
                 check(f'{vn} {id} explanation layout: {"four figures in one row" if w >= 1024 else "a 2 x 2 grid" if w >= 360 else "one column"}', rows == want_rows, tops)
@@ -110,7 +113,7 @@ try:
                 ov = pg.evaluate("[...document.querySelectorAll('[data-gwp-reveal] .gwp-xf')].map(f => f.scrollWidth - f.clientWidth)")
                 check(f'{vn} {id} Reveal: every figure fits its box (no words running past it)', all(x <= 1 for x in ov), ov)
             # the factual summary (fallback), drawn by the page itself from Thomson Three's model with its quiet flag cleared
-            pg.goto(B + '/research/#/prism/thomson-three'); pg.wait_for_selector('[data-gwp-reveal]', timeout=30000); pg.wait_for_timeout(400)
+            pg.goto(B + '/research/#/prism/thomson-three'); pg.wait_for_selector('[data-gwp-full]', timeout=30000); pg.evaluate("(() => { const f = document.querySelector('#gwp-full'); if (f && f.hidden) document.querySelector('[data-gwp-full]').click(); })()"); pg.wait_for_selector('[data-gwp-reveal]', timeout=30000); pg.wait_for_timeout(400)
             fb = pg.evaluate("(() => { const v = JSON.parse(JSON.stringify(GW_PRISM._settled['thomson-three'].v11)); v.profile.lines.S.find(l => l.measure === 'supply.quietArea').data.flag = false; const x = GW_PRISM.reveal11(v); document.querySelector('[data-gwp-reveal]').outerHTML = GW_PRISM.revealHtml(x); return [x.kind, x.head]; })()")
             pg.wait_for_timeout(200); fbt = re.sub(r'\s+', ' ', pg.inner_text('[data-gwp-reveal]')).strip()
             check(f'{vn} fallback: a factual summary of the approved labels, labelled "PRISM summary", no approved headline', fb == ['summary', 'Price: In line with comparable condos · Resale activity: Around peers'] and fbt.lower().startswith('prism summary price: in line with comparable condos') and 'prism reveal' not in fbt.lower(), [fb, fbt[:120]])
