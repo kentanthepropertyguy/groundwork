@@ -282,6 +282,59 @@
       (A.reveal.caveat ? '<p class="gwp-evn">' + esc(A.reveal.caveat) + '</p>' : '') + '</div>';
   }
 
+  /* ---------------------------------------------------------------- the r2 Reveal (Standard Reveal; Master Planning, 3 Nov 2026) */
+  // An evidence-profile page opens with a PRISM Reveal in the existing Reveal design: one finding, two approved figures with their periods,
+  // and the qualification the finding needs. Only the approved headlines below are ever used; each has a fixed condition on the exported
+  // band, counts and flags (no new threshold or calculation). The qualifications are sentences taken word for word from the approved
+  // statements; when one cannot be found, that Reveal is not shown. With no approved headline that fits, the page shows a factual summary of
+  // the approved position labels instead (never a verdict). Never: a prediction, a recommendation, a score, a Market rank.
+  const REVEAL = {
+    resaleSettling: 'High resale activity, but sustained activity is still settling',
+    resaleAbove: 'Resale activity is above most peers',
+    quiet: 'A relatively quiet surrounding resale market'
+  };
+  const sentenceOf = (s, start) => { const t = String(s || ''), i = t.indexOf(start); if (i < 0) return ''; const j = t.indexOf('. ', i); return j < 0 ? t.slice(i) : t.slice(i, j + 1); };
+  const QUAL_PRICE = '(a position, not a measure of value)';
+  function reveal11(v) {
+    if (!v || !v.profile) return null;
+    const P = v.positions.P, R = v.positions.R, pc = P && (P.components || [])[0], rc = R && (R.components || [])[0];
+    const rs = lineOf(v, 'R', 'resale.sustained'), q = lineOf(v, 'S', 'supply.quietArea'), mb = lineOf(v, 'M', 'market.backdrop');
+    const n = v.peerGroup && isNum(v.peerGroup.developments) ? v.peerGroup.developments : null;   // "with a figure" when not every peer has one, as the statements say
+    const of = (c, word) => (isNum(c.lower) && isNum(c.peersWithValue) ? word + ' ' + num(c.lower, 0) + ' of ' + num(c.peersWithValue, 0) + ' similar developments' + (n !== null && c.peersWithValue < n ? ' with a figure' : '') : '');
+    const figR = rc && isNum(rc.value) ? { v: num(rc.value, 1), label: (rs && rs.status === 'settling' ? 'Observed resales' : 'Resales') + ' per 100 homes a year', sub: [R.periodLabel, of(rc, 'higher than')].filter(Boolean).join(' · ') } : null;
+    const figP = pc && isNum(pc.value) && P.statement.indexOf(QUAL_PRICE) >= 0 ? { v: signed(pc.value) + '%', label: 'Price against its local comparables ' + QUAL_PRICE, sub: P.bandLabel + ' · ' + priceWhen(P) } : null;
+    // 1 resale activity above its peers (more than half of them lower)
+    if (R && R.band === 'above' && figR && rc.lower * 2 > rc.peersWithValue) {
+      if (rs && rs.status === 'settling') {
+        const a = sentenceOf(rs.statement, 'Settling: '), b = sentenceOf(R.statement, 'The wave start is based on ');
+        if (a && b) return { kind: 'reveal', id: 'resaleSettling', head: REVEAL.resaleSettling, figs: [figR, figP].filter(Boolean), notes: [a, b] };
+      } else if (rs && rs.status === 'available') return { kind: 'reveal', id: 'resaleAbove', head: REVEAL.resaleAbove, figs: [figR, figP].filter(Boolean), notes: [] };
+    }
+    // 2 a quiet surrounding resale market (the exported flag), with its own qualification and the observed change
+    if (q && q.status === 'available' && q.data && q.data.flag === true && isNum(q.data.resales2km)) {
+      const a = sentenceOf(q.statement, 'Quiet area: '), d = mb && mb.data;
+      if (a) return { kind: 'reveal', id: 'quiet', head: REVEAL.quiet,
+        figs: [{ v: num(q.data.resales2km, 0), label: 'Condo and EC resales within 2 km', sub: [period(q.period), of(q.data, 'more than')].filter(Boolean).join(' · ') },
+          d && isNum(d.changePct) && mb.period && mb.period.prior ? { v: signed(d.changePct) + '%', label: 'Against the previous 12 months', sub: period(mb.period.latest) + ' against ' + period(mb.period.prior) } : null].filter(Boolean),
+        notes: [a, mb && mb.statement.indexOf('Observed transactions, not a prediction.') >= 0 ? 'Observed transactions, not a prediction.' : ''].filter(Boolean) };
+    }
+    // 3 no approved headline fits: a factual summary of the approved position labels (never a verdict)
+    if (P || R) {
+      const settle = rs && rs.status === 'settling' ? sentenceOf(rs.statement, 'Settling: ') : '';
+      if (rs && rs.status === 'settling' && !settle) return null;
+      return { kind: 'summary', id: 'summary', head: [P ? 'Price: ' + P.bandLabel : '', R ? 'Resale activity: ' + R.bandLabel : ''].filter(Boolean).join(' · '), figs: [figR, figP].filter(Boolean), notes: settle ? [settle] : [] };
+    }
+    return null;
+  }
+  function revealHtml(x) {
+    if (!x) return '';
+    const fig = (f) => '<div class="gwp-fig"><b>' + esc(f.v) + '</b><span>' + esc(f.label) + '</span>' + (f.sub ? '<small>' + esc(f.sub) + '</small>' : '') + '</div>';
+    return '<section class="gwp-rv11" data-gwp-reveal="' + esc(x.id) + '" aria-label="' + (x.kind === 'reveal' ? 'PRISM Reveal' : 'PRISM summary') + '"><div class="gwp-ev" data-gwp-ev="' + (x.kind === 'reveal' ? 'reveal11' : 'summary11') + '">' +
+      '<p class="gwp-k">' + (x.kind === 'reveal' ? 'PRISM Reveal' : 'PRISM summary') + '</p><p class="gwp-rv">' + esc(x.head) + '</p>' +
+      (x.figs.length ? '<div class="gwp-figs">' + x.figs.map(fig).join('') + '</div>' : '') +
+      (x.notes.length ? '<p class="gwp-evn">' + x.notes.map(esc).join(' ') + '</p>' : '') + '</div></section>';
+  }
+
   /* ---------------------------------------------------------------- HTML */
   const mark = (root, size) => '<img class="gwp-mark" src="' + esc(root) + 'assets/img/prism/prism-mark.png" width="' + size + '" height="' + size + '" alt="PRISM">';
   const brand = (root) => '<div class="gwp-brand">' + mark(root, 52) + '<div><p class="gwp-bname">PRISM <span>by Groundwork</span></p><p class="gwp-bline">Five dimensions. One clearer property decision.</p></div></div>';
@@ -533,7 +586,7 @@
     const card = A ? '<article class="gwp-card gwp-open"><div class="gwp-v"><p class="gwp-vk">PRISM Verdict' + (A.verdict.scope ? ' · ' + esc(A.verdict.scope) : '') + '</p><h2 class="gwp-vh">' + esc(A.verdict.headline) + '</h2></div>' +
       '<div class="gwp-why"><h3>Why?</h3><ul>' + A.verdict.why.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul></div>' +
       (A.verdict.watchOut.length ? '<div class="gwp-wo"><span class="gwp-wi" aria-hidden="true">!</span><div><h3>What should I watch out for?</h3><ul>' + A.verdict.watchOut.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul></div></div>' : '') +
-      '<div class="gwp-rvl">' + evidence(md) + '</div></article>' : '';
+      '<div class="gwp-rvl">' + evidence(md) + '</div></article>' : revealHtml(reveal11(md.v11));   // a profile page: its r2 Reveal (or factual summary), never a verdict
     return '<div class="gwp-page' + (prof ? ' gwp-page--profile' : '') + '" data-gwp-page="' + esc(md.id) + '" data-gwp-mode="' + (prof ? 'profile' : 'assessment') + '"><div class="gwp-wrap">' + head + '</div>' + bar + '<div class="gwp-wrap">' +
       '<div id="gwp-sum" class="gwp-sumh"><div class="gwp-brand gwp-brand--sm">' + mark(root, 28) + '<p><b>PRISM</b> by Groundwork <span>· Five dimensions. One clearer property decision.</span></p></div></div>' +
       card + layersHtml(md) +
@@ -726,5 +779,5 @@
     }
   }
 
-  return { V11, PANELS, checkManifest11, checkReport11, model11, compose, hasPage, headline11, lineHtml, posHtml, yieldHtml, incomeHtml, v11Html, VERSION, switchHtml, leadSites, layersHtml, dimsHtml, evidenceOf, headline, landingHtml, mountLanding, QUESTION, SCHEMA, DIR, MANIFEST_V, PILLARS, checkManifest, checkReport, approved, shown, model, value, detail, period, evidence, previewHtml, pageHtml, load, mountPreview, show, _cache: cache, _settled: settled };
+  return { REVEAL, reveal11, revealHtml, V11, PANELS, checkManifest11, checkReport11, model11, compose, hasPage, headline11, lineHtml, posHtml, yieldHtml, incomeHtml, v11Html, VERSION, switchHtml, leadSites, layersHtml, dimsHtml, evidenceOf, headline, landingHtml, mountLanding, QUESTION, SCHEMA, DIR, MANIFEST_V, PILLARS, checkManifest, checkReport, approved, shown, model, value, detail, period, evidence, previewHtml, pageHtml, load, mountPreview, show, _cache: cache, _settled: settled };
 });
