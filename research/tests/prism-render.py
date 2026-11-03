@@ -6,6 +6,7 @@ its evidence strip. A development outside the release gets no PRISM, and its #/p
 GW-PRISM-V1.1-2026-11-03-A2: Thomson Three, Hundred Palms Residences and The Quinn have evidence-profile pages, tested in prism-v11-render.py.)
 A direct (shared) link works in a fresh browser. A tampered report or a draft manifest shows no PRISM anywhere. Never: a score, Ken's Take,
 sideways scrolling or a script error. The report's own controls still work with the preview in place.
+(PRISM V3 protected page alignment, Master Planning 4 Nov 2026: both pages open with a compact quick read above the Verdict; prism-v1-quick-render.py.)
 Research arrangement (Ken, 31 Oct 2026): the landing keeps its two choices and one search, explains PRISM Analysis / Property Data and the five
 questions (beside the search from 1200 px, aligned with the choice cards); Research's own search leads with PRISM for the two developments
 (an overview tab, or the launch card), and for an r2 evidence-profile page (Thomson Three), the global search still opens Property Data; the switch moves
@@ -55,8 +56,10 @@ try:
             body = pg.inner_text('#app'); first = pg.inner_text('.gwp-card')
             check(f'{vn}: PRISM opens at #/prism/kingsford-waterbay with its title', pg.url.endswith('#/prism/kingsford-waterbay') and pg.title().startswith('PRISM · Kingsford Waterbay'), [pg.url, pg.title()])
             check(f'{vn}: opening = verdict, reveal, Why, Watch out, bars 6.4 vs 4.6 and 5th of 25', all(s in first for s in [KW['verdict']['headline'], KW['reveal']['headline'], 'Why?', 'What should I watch out for?', '6.4', '4.6', '5th', 'of 25', 'Peer median']), first[:400])
-            vh = pg.evaluate("document.querySelector('.gwp-vh').getBoundingClientRect().bottom")
-            check(f'{vn}: the verdict is on the first screen', vh < pg.viewport_size['height'], vh)
+            # PRISM V3 protected page alignment (Master Planning, 4 Nov 2026): a compact quick read now sits above the Verdict, so the
+            # Verdict follows it directly (one button press away) instead of being on the first screen on every width
+            vh = pg.evaluate("(() => { const q = document.querySelector('[data-gwp-quick=\"compact\"]'), c = document.querySelector('.gwp-card'), h = document.querySelector('.gwp-qr-h'); return q && c && h ? [Math.round(c.getBoundingClientRect().top - q.getBoundingClientRect().bottom), h.getBoundingClientRect().bottom < innerHeight] : null; })()")
+            check(f'{vn}: the compact quick read is on the first screen and the verdict follows it directly', vh is not None and 0 <= vh[0] <= 40 and vh[1], vh)
             bars = pg.evaluate("[...document.querySelectorAll('.gwp-bt i')].map(i => i.getBoundingClientRect().width)")
             check(f'{vn}: same-scale bars: 6.4 longer than 4.6 in proportion', len(bars) == 2 and abs(bars[1] / bars[0] - 4.6 / 6.4) < 0.03, bars)
             check(f'{vn}: the official mark and the shared hero load', pg.evaluate("[...document.querySelectorAll('.gwp-mark, .gwp-hero')].every(i => i.complete && i.naturalWidth > 0)"))

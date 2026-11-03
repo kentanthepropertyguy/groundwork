@@ -430,3 +430,8 @@ body #ws-dev .lg-sb .kpr-search.has-go>input{padding-right:196px}
   .gwp-qr-b{padding-top:12px;gap:12px}.gwp-qr-t li{font-size:14.5px;line-height:1.45}.gwp-qr-q{padding:11px 13px}.gwp-qr-q p{font-size:14.5px}
 }
 @media (max-width:359px){.gwp-qr-f{grid-template-columns:minmax(0,1fr);grid-template-areas:"s" "b" "l"}.gwp-qr-h{font-size:21px}.gwp-qr-x{font-size:14px}}
+
+/* the compact quick read above a V1 Verdict (Master Planning, 4 Nov 2026): the same quick-read styles, spaced from the Verdict card below */
+.gwp-qr--compact{margin-bottom:16px}
+/* 200% zoom: the button's label wraps, so a rounded rectangle rather than a pill (compact quick read only) */
+@media (max-width:359px){.gwp-qr--compact .gwp-qr-x{border-radius:14px;padding:10px 14px;line-height:1.3}}

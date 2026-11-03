@@ -37,7 +37,8 @@ const ALLOWED = ['not prices or demand', 'not necessarily weaker demand', 'it do
 const QR = /<section class="gwp-qr"[\s\S]*?<\/section>/, FULL = /<div class="gwp-full" id="gwp-full" hidden>([\s\S]*?<\/section>)<\/div>/;
 
 const prof = pages.filter((p) => p.pg.mode === 'profile'), asmt = pages.filter((p) => p.pg.mode === 'assessment');
-check('the two V1 assessment pages are untouched (no quick read, no V2 card)', asmt.length === 2 && asmt.every((p) => !/gwp-qr|gwp-xp/.test(p.html)));
+// the two V1 pages carry the compact quick read instead (Master Planning, 4 Nov 2026; prism-v1-quick-tests.js), never the full one or the V2 card
+check('the two V1 assessment pages: no full quick read and no V2 card (their compact quick read is checked in prism-v1-quick-tests.js)', asmt.length === 2 && asmt.every((p) => !/gwp-xp|data-gwp-quick |id="gwp-full"/.test(p.html)));
 const withQ = prof.filter((p) => QR.test(p.html));
 check('every profile page with an explanation opens with the quick read (' + withQ.length + '); the 2 others keep their approved opening alone', withQ.length === 2095 && prof.filter((p) => !QR.test(p.html)).every((p) => /class="gwp-rv11"/.test(p.html)));
 check('the quick read comes first, then the V2 explanation (hidden, unchanged: exactly explainHtml), then the five dimensions', withQ.every((p) => {

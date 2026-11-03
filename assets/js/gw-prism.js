@@ -587,6 +587,41 @@
       '<button type="button" class="gwp-qr-x" data-gwp-full aria-expanded="false" aria-controls="gwp-full">' + esc(QT.more) + '<span aria-hidden="true">⌄</span></button></section>' +
       '<div class="gwp-full" id="gwp-full" hidden>' + full + '</div>';
   }
+  /* ---------------------------------------------------------------- the compact quick read on the V1 assessment pages (Master Planning,
+     4 Nov 2026): a headline, three figures, one line and a button to the approved Verdict, above it; the Verdict, its Reveal, the next
+     buyer question and the five dimensions are unchanged. No "promising / watch / before you buy" (the Verdict's Why and Watch out say it).
+     A page with an approved V1.1 profile: the V3 rules on that evidence (no V1.1 Reveal: the page keeps its approved V1 Reveal). A new
+     launch without one (its V1.1 release still verified): "New launch: no price evidence yet." with approved V1 values only (nearest station, comparable condo resales within
+     2 km, planning-area turnover against Singapore, labelled historical, not demand). Nothing is invented; no new verdict is written. */
+  const CQ = { launch: 'New launch: no price evidence yet.', near: 'Close to MRT.',
+    scope: { I: 'Location', R2: 'Neighbourhood · 2 km', PA: '{pa} planning area · historical' },
+    label: { I: 'from {station}', R2: 'comparable condo resales within 2 km over 24 months', PA: 'resales per 100 homes annually, against {sg} for Singapore; past activity, not demand for this launch' },
+    note: { full: 'The PRISM Verdict, with its reasons and what to watch out for, follows below.', launch: 'Price and this development\'s own resale record are not available before launch. The PRISM Verdict follows below.' },
+    btn: 'See the PRISM Verdict and evidence' };
+  function compactQuick(md) {
+    if (!md || !md.assessment || !md.v11) return null;   // fail closed: without a verified V1.1 release the V1 page is exactly V1
+    const ok = (m) => m && m.approval && m.approval.state === 'approved' && isNum(m.value) ? m : null;
+    if (md.v11 && md.v11.profile) {
+      const q = quick11(md.v11, md.name, null);   // null: never the V1.1 Reveal here
+      return q && q.figs.length ? { head: q.head, figs: q.figs, note: CQ.note.full } : null;
+    }
+    const sj = md.subject || {}, launch = sj.kind === 'awarded-site' || sj.stage === 'awarded' || sj.kind === 'launch';
+    if (!launch) return null;
+    const rail = ok(md.metrics['I.railStations']), st = rail && rail.detail && Array.isArray(rail.detail.stations) ? rail.detail.stations[0] : null;
+    const alt = ok(md.metrics['R.resaleAlternatives24_2km']), pa = ok(md.metrics['R.paEstablishedTurnover12']), figs = [];
+    if (st && isNum(st.metres)) figs.push({ dim: 'I', scope: CQ.scope.I, v: metres(st.metres), label: fill(CQ.label.I, { station: st.name }) });
+    if (alt) figs.push({ dim: 'R', scope: CQ.scope.R2, v: num(alt.value, 0), label: CQ.label.R2 });
+    if (pa && pa.detail && isNum(pa.detail.singapore)) figs.push({ dim: 'R', scope: fill(CQ.scope.PA, { pa: (pa.geography && pa.geography.id) || sj.planningArea || '' }), v: num(pa.value, 1), label: fill(CQ.label.PA, { sg: num(pa.detail.singapore, 1) }) });
+    if (!figs.length) return null;
+    return { head: (st && isNum(st.metres) && st.metres <= 500 ? CQ.near + ' ' : '') + CQ.launch, figs, note: CQ.note.launch };
+  }
+  function compactHtml(c, id) {
+    if (!c) return '';
+    const fig = (f) => '<a class="gwp-qr-f" href="#/prism/' + esc(id || '') + '/' + f.dim.toLowerCase() + '" data-gwp-xjump="' + f.dim + '"><span class="gwp-qr-s">' + esc(f.scope) + '</span><b>' + esc(f.v) + '</b><span class="gwp-qr-l">' + esc(f.label) + '</span></a>';
+    return '<section class="gwp-qr gwp-qr--compact" data-gwp-quick="compact" aria-label="PRISM quick read"><p class="gwp-k">PRISM quick read</p><h2 class="gwp-qr-h">' + c.head.split(/(?<=\.) /).map((t) => '<span>' + esc(t) + '</span>').join(' ') + '</h2>' +
+      '<div class="gwp-qr-fs gwp-qr-fs--' + c.figs.length + '">' + c.figs.map(fig).join('') + '</div><p class="gwp-qr-n">' + esc(c.note) + '</p>' +
+      '<button type="button" class="gwp-qr-x" data-gwp-verdict>' + esc(CQ.btn) + '<span aria-hidden="true">⌄</span></button></section>';
+  }
   function revealHtml(x) {
     if (!x) return '';
     const fig = (f) => '<div class="gwp-fig"><b>' + esc(f.v) + '</b><span>' + esc(f.label) + '</span>' + (f.sub ? '<small>' + esc(f.sub) + '</small>' : '') + '</div>';
@@ -848,7 +883,7 @@
     const next = '<section class="gwp-next" aria-label="Where next"><a class="gwp-nx" href="' + esc(back) + '" data-gwp-back><b>Property Data</b><span>' + (hasRecords(md) ? 'Prices, sales and rents for ' + esc(md.name) : 'Explore the numbers') + '</span></a>' +
       '<a class="gwp-nx" href="' + esc(root) + 'tools/payment-planner/" data-gwp-calc2><b>Calculate my purchase</b><span>Cash, CPF and the monthly instalment</span></a></section>';
     // An evidence-profile page (no approved verdict): the same page, with the five dimensions as its summary; nothing is written in a verdict's place
-    const card = A ? '<article class="gwp-card gwp-open"><div class="gwp-v"><p class="gwp-vk">PRISM Verdict' + (A.verdict.scope ? ' · ' + esc(A.verdict.scope) : '') + '</p><h2 class="gwp-vh">' + esc(A.verdict.headline) + '</h2></div>' +
+    const card = A ? compactHtml(compactQuick(md), md.id) + '<article class="gwp-card gwp-open"><div class="gwp-v"><p class="gwp-vk">PRISM Verdict' + (A.verdict.scope ? ' · ' + esc(A.verdict.scope) : '') + '</p><h2 class="gwp-vh">' + esc(A.verdict.headline) + '</h2></div>' +
       '<div class="gwp-why"><h3>Why?</h3><ul>' + A.verdict.why.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul></div>' +
       (A.verdict.watchOut.length ? '<div class="gwp-wo"><span class="gwp-wi" aria-hidden="true">!</span><div><h3>What should I watch out for?</h3><ul>' + A.verdict.watchOut.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul></div></div>' : '') +
       '<div class="gwp-rvl">' + evidence(md) + '</div></article>' : (() => { const r = reveal11(md.v11), x = explain11(md.v11, md.name, r), q = x && quick11(md.v11, md.name, r); return q ? quickHtml(q, md.id, explainHtml(x, r, md.id)) : x ? explainHtml(x, r, md.id) : revealHtml(r); })();   // V3: the quick read first, the V2 explanation behind "Explore full PRISM analysis"   // the buyer explanation (with the approved opening kept), or the opening alone   // a profile page: its r2 Reveal (or factual summary), never a verdict
@@ -1010,6 +1045,8 @@
       app.querySelectorAll('[data-gwp-xjump]').forEach((a) => a.addEventListener('click', (ev) => { ev.preventDefault(); go(a.dataset.gwpXjump); }));
       // V3: "Explore full PRISM analysis" opens (or closes) the V2 explanation in place, and moves to it when opened
       const fb = app.querySelector('[data-gwp-full]'), fp = app.querySelector('#gwp-full');
+      // the compact quick read on a V1 page: its button moves to the approved Verdict (nothing is hidden there)
+      const vb = app.querySelector('[data-gwp-verdict]'), vc = app.querySelector('.gwp-card'); if (vb && vc) vb.addEventListener('click', () => offsetTo(vc, navH()));
       if (fb && fp) fb.addEventListener('click', () => { const on = fp.hidden; fp.hidden = !on; fb.setAttribute('aria-expanded', String(on)); fb.firstChild.textContent = on ? QT.less : QT.more; if (on) { offsetTo(fp, navH()); if (o.track) o.track('full'); } });   // explanation figures: open that dimension, in place
       if (bar) {
         bar.querySelectorAll('[data-gwp-jump]').forEach((b) => b.addEventListener('click', () => go(b.dataset.gwpJump)));
@@ -1086,5 +1123,5 @@
     }
   }
 
-  return { quick11, quickHtml, QT, itemsOk, redirect11, hasReport, isCurated, explain11, explainHtml, XT, PICKS_MAX, CURATED, hasEvidence, REVEAL, ES, reveal11, revealHtml, V11, PANELS, checkIndex, checkShard, checkPair, checkReport11, model11, compose, hasPage, headline11, lineHtml, posHtml, yieldHtml, incomeHtml, v11Html, VERSION, switchHtml, leadSites, layersHtml, dimsHtml, evidenceOf, headline, landingHtml, mountLanding, QUESTION, SCHEMA, DIR, MANIFEST_V, PILLARS, checkManifest, checkReport, approved, shown, model, value, detail, period, evidence, previewHtml, pageHtml, load, mountPreview, show, _cache: cache, _settled: settled };
+  return { compactQuick, compactHtml, CQ, quick11, quickHtml, QT, itemsOk, redirect11, hasReport, isCurated, explain11, explainHtml, XT, PICKS_MAX, CURATED, hasEvidence, REVEAL, ES, reveal11, revealHtml, V11, PANELS, checkIndex, checkShard, checkPair, checkReport11, model11, compose, hasPage, headline11, lineHtml, posHtml, yieldHtml, incomeHtml, v11Html, VERSION, switchHtml, leadSites, layersHtml, dimsHtml, evidenceOf, headline, landingHtml, mountLanding, QUESTION, SCHEMA, DIR, MANIFEST_V, PILLARS, checkManifest, checkReport, approved, shown, model, value, detail, period, evidence, previewHtml, pageHtml, load, mountPreview, show, _cache: cache, _settled: settled };
 });
