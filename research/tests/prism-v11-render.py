@@ -1,10 +1,14 @@
-"""PRISM V1.1 (A1) in a real browser at 1440, 390 and 195 px (200% zoom on a phone).
+"""PRISM V1.1 r2 (GW-PRISM-V1.1-2026-11-03-A2) in a real browser at 1440, 390 and 195 px (200% zoom on a phone).
 Run from the site folder:  python3 research/tests/prism-v11-render.py
- Kingsford Waterbay: Price Position's headline is its approved position with its period; P, R and M each show their peer position (label,
-   exact period, statement, peer counts), P with the peer window explanation; M shows the gross yield bands and Hougang's household income;
-   Sources list SingStat. Hougang Central: income only. Thomson Three: no PRISM page.
- Fails closed in the browser: a changed V1.1 report, a changed or missing V1.1 manifest -> the page is exactly the V1 page (no V1.1 part).
- Never: a score, purchasing power, affordability or OneMap wording; sideways scrolling; a script error."""
+ The five reports: Kingsford Waterbay (its V1 verdict page, with the r2 positions, evidence profile, yield and income), Hougang Central
+   (V1 verdict page, income only), Thomson Three, Hundred Palms Residences and The Quinn (evidence-profile pages: no verdict). Every
+   approved statement on the page verbatim; missing evidence named; Market observational (no rank); the surrounding-market definition with
+   Supply and Market; sources with OneMap's attribution.
+ Navigation: Property Data -> PRISM Analysis (the switch; no verdict line on a profile page) -> Back; Research's own search leads with a
+   profile page; the landing lists all five; a dimension link (#/prism/<id>/s) opens that dimension.
+ Fails closed in the browser: a changed r2 report or manifest, a missing manifest, the previous A1 files left in place, a V1 pairing that
+   does not match -> the V1 pages are exactly V1, and a profile page's address falls back to its Property Data.
+ Never: a score, purchasing power, affordability or forecast wording; sideways scrolling; a script error."""
 import json, os, pathlib, re, socket, subprocess, sys, time
 from playwright.sync_api import sync_playwright
 SITE = pathlib.Path(__file__).resolve().parents[2]
@@ -20,58 +24,104 @@ for _ in range(100):
     try: socket.create_connection(('127.0.0.1', P), 0.2).close(); break
     except OSError: time.sleep(0.05)
 B = os.environ.get('LIVE') or f'http://127.0.0.1:{P}'
-KW = json.loads((SITE / 'data/prism/v1.1/reports/kingsford-waterbay.json').read_text())
+REP = {i: json.loads((SITE / f'data/prism/v1.1/reports/{i}.json').read_text()) for i in ['kingsford-waterbay', 'hougang-central', 'thomson-three', 'hundred-palms-residences', 'the-quinn']}
+PROFILE = ['thomson-three', 'hundred-palms-residences', 'the-quinn']
+A1_MANIFEST = (SITE / 'research/tests/fixtures/prism-v11-a1-manifest.json').read_text()
 NOOVER = 'document.documentElement.scrollWidth <= innerWidth + 1'
 TXT = "s=>{const e=document.querySelector(s);return e?e.textContent.replace(/\\s+/g,' ').trim():''}"
+BAD = re.compile(r'score\s*/?\s*100|/\s*100\b|purchasing|affordab|\bforecast', re.I)
+def clean(t): return re.sub(r'There is no overall score\.|PRISM gives no overall score\.?|(nothing here is|not) a forecast', '', t)
 def fresh(br, w, tamper=None):
     mob = w < 500; ctx = br.new_context(viewport={'width': w, 'height': {1440: 900, 390: 844, 195: 422}[w]}, is_mobile=mob, has_touch=mob); pg = ctx.new_page(); errs = []
     pg.on('pageerror', lambda e: errs.append(str(e)))
     pg.route(re.compile(r'googletagmanager|facebook\.net|onemap'), lambda r: r.fulfill(status=200, body=''))
-    if tamper: pg.route(re.compile(tamper[0]), tamper[1])
+    for t in (tamper or []): pg.route(re.compile(t[0]), t[1])
     return ctx, pg, errs
 def open_prism(pg, id):
-    pg.goto(B + '/research/#/prism/' + id); pg.wait_for_selector('[data-gwp-page]', timeout=30000); pg.wait_for_timeout(600)
+    pg.goto(B + '/research/#/prism/' + id); pg.wait_for_selector('[data-gwp-page="' + id + '"]', timeout=30000); pg.wait_for_timeout(600)
     pg.click('[data-gwp-all="open"]'); pg.wait_for_timeout(300)
 def dimtext(pg, k): return pg.evaluate(TXT, '#gwp-' + k)
+def body(pg): return pg.evaluate(TXT, '[data-gwp-page]')
+def hl(pg, k): return pg.evaluate(TXT, '#gwp-' + k + ' [data-gwp-headline]')
 try:
     with sync_playwright() as p:
         br = p.chromium.launch()
         for w in [1440, 390, 195]:
             vn = f'{w}px'; ctx, pg, errs = fresh(br, w)
+            for id, r in REP.items():
+                open_prism(pg, id); t = body(pg)
+                mode = pg.get_attribute('[data-gwp-page]', 'data-gwp-mode')
+                check(f'{vn} {id}: {"evidence-profile page, no verdict" if id in PROFILE else "its V1 verdict page"}', (mode == 'profile' and pg.locator('.gwp-card').count() == 0) if id in PROFILE else (mode == 'assessment' and pg.locator('.gwp-card.gwp-open .gwp-vh').count() == 1), mode)
+                for x in (r['peerComparison'] or {}).get('positions', []):
+                    d = dimtext(pg, x['dimension'])
+                    check(f'{vn} {id} {x["dimension"]}: "{x["bandLabel"]}", its period and statement verbatim', x['bandLabel'] in d and x['periodLabel'] in d and x['statement'] in d, d[-300:])
+                if r.get('profile'):
+                    miss = [l['measure'] for l in r['profile']['lines'] if l['statement'] not in dimtext(pg, l['panel']) or l['label'] not in dimtext(pg, l['panel'])]
+                    check(f'{vn} {id}: all {len(r["profile"]["lines"])} profile lines in their dimension, label and statement verbatim', not miss, miss)
+                    check(f'{vn} {id}: the profile rule and the comparison group ({r["profile"]["comparisonGroup"]["developments"]} developments)', r['profile']['rule'] in t and f'{r["profile"]["comparisonGroup"]["developments"]} developments' in pg.evaluate(TXT, '[data-gwp-group]'))
+                    check(f'{vn} {id}: the surrounding-market definition with Supply and with Market', r['profile']['surroundingMarket'] in dimtext(pg, 'S') and r['profile']['surroundingMarket'] in dimtext(pg, 'M'))
+                    mb = pg.evaluate(TXT, '#gwp-M [data-gwp-profile]')
+                    check(f'{vn} {id}: Market observational: no rank, decile or peer label', not re.search(r'\brank|decile|(Above|Around|Below) peers', mb, re.I) and pg.locator('[data-gwp-v11="M"]').count() == 0 and 'Observed transactions, not a prediction.' in mb, mb[:200])
+                    check(f'{vn} {id}: missing evidence named (unsold not available, future transport not yet assessed, known sites only)', all(s in t for s in ['Not available: unsold inventory has not been validated.', 'Not yet assessed: needs official LTA evidence for planned stations.', 'Known sites only; not a complete pipeline.']))
+                if r.get('rentalYield'):
+                    rows = pg.locator('[data-gwp-yield] tbody tr').count()
+                    check(f'{vn} {id}: gross rental yield, {len(r["rentalYield"]["bands"])} bands, with its caption', rows == len(r['rentalYield']['bands']) and r['rentalYield']['caption'] in dimtext(pg, 'M'))
+                if r.get('householdIncome'):
+                    h = r['householdIncome']
+                    check(f'{vn} {id}: household income, {h["planningArea"]} planning area, "{h["context"]}"', pg.locator('[data-gwp-income]').count() == 1 and f'{h["planningArea"]} planning area' in dimtext(pg, 'M') and h['context'] in dimtext(pg, 'M'))
+                check(f'{vn} {id}: no score, purchasing power, affordability or forecast wording', not BAD.search(clean(t)) and not re.search(r'\bscores?\b', clean(t), re.I), BAD.search(clean(t)))
+                src = pg.evaluate(TXT, '[data-gwp-sources]')
+                if r.get('profile'): check(f'{vn} {id}: sources include LTA, MOE, NEA, NParks and OneMap with its attribution', all(s in src for s in ['Land Transport Authority', 'Ministry of Education', 'National Environment Agency', 'National Parks Board', 'OneMap']) and 'Singapore Land Authority' in src, src[-200:])
+                check(f'{vn} {id}: no sideways scroll, no script error', pg.evaluate(NOOVER) and not errs, errs[:2])
+            # headlines (closed rows)
             open_prism(pg, 'kingsford-waterbay')
-            hl = pg.evaluate(TXT, '#gwp-P [data-gwp-headline]')
-            check(f'{vn} KW: Price Position headline is its approved position and period', hl == '9.9% below its local comparablesLower relative price than most peers · Oct 2024–Sep 2026', hl)
-            for x in KW['peerComparison']['positions']:
-                t = dimtext(pg, x['dimension'])
-                check(f'{vn} KW {x["dimension"]}: "{x["bandLabel"]}" with "{x["periodLabel"]}", the statement verbatim, peer group 116', x['bandLabel'] in t and x['periodLabel'] in t and x['statement'] in t and '116 developments' in t, t[-400:])
-            check(f'{vn} KW P: the peer window explanation', 'This development: Oct 2024–Sep 2026. Comparison developments were measured over their own latest 12 to 36 months.' in dimtext(pg, 'P'))
-            rows = pg.evaluate("()=>[...document.querySelectorAll('[data-gwp-yield] tbody tr')].map(r=>r.textContent.replace(/\\s+/g,' ').trim())")
-            check(f'{vn} KW M: three yield bands, each with rent, contracts, price, resales, yield and range', len(rows) == 3 and all(s in rows[0] for s in ['400–499 sq ft', '$2,575', '62 contracts', '$706,500', '12 resales', '4.37%', '4.17–4.64%', 'Median 4.3% of 27']) and '3.76%' in rows[1] and '3.56%' in rows[2], rows)
-            m = dimtext(pg, 'M')
-            check(f'{vn} KW M: the yield caption with the lease, and the income panel (Hougang, GHS 2025, 50.4% at $10,000 or more, "This describes the area, not buyers.")', KW['rentalYield']['caption'] in m and 'Hougang planning area' in m and 'GHS 2025' in m and '$10,000 or more' in m and '50.4%' in m and 'This describes the area, not buyers.' in m)
-            src = pg.evaluate(TXT, '[data-gwp-sources]')
-            check(f'{vn} KW sources: SingStat GHS 2025 with its attribution; V1.1 periods stated', 'SingStat, General Household Survey 2025, table C020145' in src and 'PRISM V1.1 additions' in src, src[-300:])
-            body = pg.evaluate(TXT, '[data-gwp-page]')
-            check(f'{vn} KW: no score, purchasing power, affordability or OneMap wording; "PRISM gives no overall score" kept', not re.search(r'\bscores?\b(?! *\))|/\s*100|purchasing|affordab|everyday access', body.replace('PRISM gives no overall score', '').replace('not scored', '')) and 'PRISM gives no overall score' in body)
-            check(f'{vn} KW: the Summary card is unchanged (verdict first)', pg.locator('.gwp-card.gwp-open .gwp-vh').count() == 1 and pg.locator('.gwp-card [data-gwp-v11]').count() == 0)
-            check(f'{vn} KW: no sideways scroll, no script error', pg.evaluate(NOOVER) and not errs, errs[:2])
+            check(f'{vn} KW: Price Position headline from r2, Market headline still V1', hl(pg, 'P') == '9.9% below its local comparablesLower relative price than most peers · Oct 2024–Sep 2026' and hl(pg, 'M').startswith('+2.3% same-size resale prices'), [hl(pg, 'P'), hl(pg, 'M')])
+            check(f'{vn} KW: the Summary card is unchanged (verdict first) and holds nothing from r2', pg.locator('.gwp-card [data-gwp-v11], .gwp-card [data-gwp-profile]').count() == 0)
+            open_prism(pg, 'hundred-palms-residences')
+            check(f'{vn} HP: Resale headline names the settling wave; its explanation and the analytical proxy are in the panel', hl(pg, 'R').startswith('12.6 resales per 100 homes a year') and 'sustained activity settling' in hl(pg, 'R') and 'not an official MOP date' in dimtext(pg, 'R'), hl(pg, 'R'))
+            open_prism(pg, 'thomson-three')
+            check(f'{vn} TT: "In line with comparable condos"; Supply names the quiet area', 'In line with comparable condos' in hl(pg, 'P') and hl(pg, 'S').endswith('Quiet area'), [hl(pg, 'P'), hl(pg, 'S')])
             open_prism(pg, 'hougang-central')
-            check(f'{vn} HC: household income only (Market Demand); no peer position or yield; Price Position still "Not assessed"', pg.locator('[data-gwp-income]').count() == 1 and pg.locator('[data-gwp-yield]').count() == 0 and pg.locator('[data-gwp-v11="P"],[data-gwp-v11="R"],[data-gwp-v11="M"]').count() == 0 and 'Not assessed in this report' in pg.evaluate(TXT, '#gwp-P [data-gwp-headline]'))
-            check(f'{vn} HC: no sideways scroll, no script error', pg.evaluate(NOOVER) and not errs, errs[:2])
-            pg.goto(B + '/research/#/prism/thomson-three'); pg.wait_for_timeout(2500)
-            check(f'{vn} Thomson Three: no PRISM page (V1.1 never makes one)', pg.locator('[data-gwp-page]').count() == 0 and '#/prism/' not in pg.url, pg.url)
+            check(f'{vn} HC: income only (Market Demand); Price Position still "Not assessed"', pg.locator('[data-gwp-income]').count() == 1 and pg.locator('[data-gwp-yield], [data-gwp-profile], [data-gwp-v11="P"]').count() == 0 and 'Not assessed in this report' in hl(pg, 'P'))
             ctx.close()
-        # fails closed: each tamper leaves the V1 page exactly
-        ctx, pg, errs = fresh(br, 1440); pg.goto(B + '/research/#/prism/kingsford-waterbay'); pg.wait_for_selector('[data-gwp-page]'); pg.wait_for_timeout(600)
-        ctx.close()
-        def body(r, f): resp = r.fetch(); r.fulfill(response=resp, body=f(resp.text()))
-        cases = [('a changed V1.1 report (6.4 -> 7.4)', (r'data/prism/v1\.1/reports/kingsford-waterbay\.json', lambda r: body(r, lambda t: t.replace('6.4 resales', '7.4 resales')))),
-                 ('a changed V1.1 manifest', (r'data/prism/v1\.1/manifest\.json', lambda r: body(r, lambda t: t.replace('"items": 7', '"items": 8')))),
-                 ('a missing V1.1 manifest', (r'data/prism/v1\.1/manifest\.json', lambda r: r.fulfill(status=404, body=''))),
-                 ('a V1.1 report pairing with another V1 file', (r'data/prism/v1\.1/manifest\.json', lambda r: body(r, lambda t: t.replace('2d7266d3', '2d7266d4'))))]
-        for name, tp in cases:
-            ctx, pg, errs = fresh(br, 1440, tp); open_prism(pg, 'kingsford-waterbay')
-            check(f'fails closed, {name}: no V1.1 part anywhere; the page is V1 (Price Position "Not assessed"); no script error', pg.locator('[data-gwp-v11],[data-gwp-yield],[data-gwp-income],[data-gwp-v11-src]').count() == 0 and 'Not assessed in this report' in pg.evaluate(TXT, '#gwp-P [data-gwp-headline]') and pg.locator('[data-gwp-page]').count() == 1 and not errs, errs[:2])
+        # navigation
+        for w in [1440, 390]:
+            vn = f'{w}px'; ctx, pg, errs = fresh(br, w)
+            pg.goto(B + '/research/#/p/hundred-palms-residences'); pg.wait_for_selector('[data-gwp-switch]', timeout=30000); pg.wait_for_timeout(600)
+            check(f'{vn} HP Property Data: the PRISM Analysis tab, no verdict line', pg.locator('[data-gwp-switch] [data-gwp-view="prism"]').count() == 1 and pg.locator('[data-gwp-preview]').count() == 0)
+            pg.click('[data-gwp-switch] [data-gwp-view="prism"]'); pg.wait_for_selector('[data-gwp-page="hundred-palms-residences"]', timeout=20000)
+            check(f'{vn} … opens its PRISM Analysis', pg.url.endswith('#/prism/hundred-palms-residences'))
+            pg.go_back(); pg.wait_for_selector('[data-gwp-switch]', timeout=20000)
+            check(f'{vn} … Back returns to its Property Data', pg.url.endswith('#/p/hundred-palms-residences'))
+            pg.goto(B + '/research/'); pg.wait_for_selector('#q'); pg.fill('#q', ''); pg.click('#q'); pg.keyboard.type('the quinn', delay=25); pg.wait_for_selector('#res [data-id="the-quinn"]', timeout=20000); pg.keyboard.press('Enter')
+            pg.wait_for_selector('[data-gwp-page="the-quinn"]', timeout=20000)
+            check(f'{vn} Research search, The Quinn: leads with its PRISM evidence profile', pg.url.endswith('#/prism/the-quinn'))
+            pg.goto(B + '/research/'); pg.wait_for_selector('[data-gwp-picks]:not([hidden])', timeout=20000)
+            pk = [a.replace('›', '').strip() for a in pg.locator('[data-gwp-picks] a').all_inner_texts()]
+            check(f'{vn} landing: "Explore a PRISM report" lists the five', pk == ['Kingsford Waterbay', 'Hougang Central', 'Thomson Three', 'Hundred Palms Residences', 'The Quinn'], pk)
+            pg.goto(B + '/research/#/prism/the-quinn/s'); pg.wait_for_selector('[data-gwp-page="the-quinn"]', timeout=20000); pg.wait_for_timeout(900)
+            check(f'{vn} a dimension link (#/prism/the-quinn/s) opens Supply Pressure', pg.locator('#gwpDimS').is_visible() and pg.locator('#gwpDimP').is_hidden())
+            check(f'{vn} navigation: no script error', not errs, errs[:2]); ctx.close()
+        # fails closed
+        def body_of(r, f): resp = r.fetch(); r.fulfill(response=resp, body=f(resp.text()))
+        M = r'data/prism/v1\.1/manifest\.json'
+        cases = [('a changed r2 report (Kingsford Waterbay)', [(r'data/prism/v1\.1/reports/kingsford-waterbay\.json', lambda r: body_of(r, lambda t: t.replace('"observed": 6.4', '"observed": 7.4')))], 'kw'),
+                 ('a changed r2 manifest', [(M, lambda r: body_of(r, lambda t: t.replace('"items": 17', '"items": 18')))], 'all'),
+                 ('a missing r2 manifest', [(M, lambda r: r.fulfill(status=404, body=''))], 'all'),
+                 ('the previous A1 files left in place (data rolled back without the page)', [(M, lambda r: r.fulfill(status=200, content_type='application/json', body=A1_MANIFEST))], 'all'),
+                 ('a manifest pairing with another V1 report', [(M, lambda r: body_of(r, lambda t: t.replace('2d7266d3', '2d7266d4')))], 'all'),
+                 ('a changed Hundred Palms report', [(r'data/prism/v1\.1/reports/hundred-palms-residences\.json', lambda r: body_of(r, lambda t: t.replace('12.6', '12.7')))], 'hp')]
+        for name, tp, scope in cases:
+            ctx, pg, errs = fresh(br, 1440, tp)
+            if scope in ('kw', 'all'):
+                open_prism(pg, 'kingsford-waterbay')
+                check(f'fails closed, {name}: Kingsford Waterbay is exactly V1 (no r2 part; Price Position "Not assessed")', pg.locator('[data-gwp-v11],[data-gwp-profile],[data-gwp-yield],[data-gwp-income],[data-gwp-v11-src]').count() == 0 and 'Not assessed in this report' in hl(pg, 'P') and not errs, errs[:2])
+            if scope in ('hp', 'all'):
+                pg.goto(B + '/research/#/prism/hundred-palms-residences'); pg.wait_for_function("location.hash === '#/p/hundred-palms-residences'", timeout=20000); pg.wait_for_selector('header.lg-hero', timeout=30000); pg.wait_for_timeout(1200)
+                check(f'fails closed, {name}: Hundred Palms has no PRISM page; its address falls back to Property Data, with no switch', pg.locator('[data-gwp-page]').count() == 0 and pg.locator('[data-gwp-switch]').count() == 0 and not errs, errs[:2])
+            if scope == 'all':
+                pg.goto(B + '/research/#/prism/thomson-three'); pg.wait_for_function("location.hash === '#/p/thomson-three'", timeout=20000); pg.wait_for_timeout(800)
+                check(f'fails closed, {name}: Thomson Three has no PRISM page (as in V1)', pg.locator('[data-gwp-page]').count() == 0)
             ctx.close()
         br.close()
 finally:

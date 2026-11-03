@@ -1,13 +1,13 @@
 {
- "schemaVersion": "prism-public-v1.1",
+ "schemaVersion": "prism-public-v1.1-r2",
  "reportId": "hougang-central",
  "name": "Hougang Central",
  "kind": "new_launch",
- "datasetReleaseId": "prism-v1.1-release-2026-10-31-3aa8d3141390",
+ "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-e48acc945f90",
  "supplementsV1Report": "hougang-central",
  "release": {
   "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-01-A1"
+  "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2"
  },
  "compositeScore": null,
  "peerComparison": null,
@@ -16,7 +16,7 @@
   "itemId": "A1-2/hougang-central/Hougang",
   "approval": {
    "state": "approved",
-   "approvalRef": "GW-PRISM-V1.1-2026-11-01-A1"
+   "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2"
   },
   "surveyYear": 2025,
   "planningArea": "Hougang",
@@ -61,6 +61,7 @@
    "URA_MP2019"
   ]
  },
+ "profile": null,
  "sources": [
   {
    "id": "URA_MP2019",

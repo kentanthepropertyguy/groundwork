@@ -16,24 +16,36 @@
    assessment is approved copy from the report; numbers are the approved metric values, formatted.
    Never shown: score100 (no validated scoring method), Ken's Take (not yet approved), unapproved metrics or copy, and the
    supply measures S3/S4 unless the release itself allows them (allowPublicS3/S4).
-   V1.1 supplement (GW-PRISM-V1.1-2026-11-01-A1; Ken, 2 Nov 2026): data/prism/v1.1/ (schema prism-public-v1.1) adds, inside the existing
-   dimension rows, the approved peer positions (Price position, Resale activity, Recent market activity, each with its exact period, peer
-   counts and statement), gross rental yield by size band and planning-area household income. It is read only when its manifest is the
-   approved one (sha256 pinned below), it pairs with the very V1 report on screen (by sha256), its report's sha256 matches, and every item
-   carries the A1 approval; otherwise the page is exactly V1. It never creates a page: a development without an approved V1 assessment
-   shows nothing. Never shown: a composite score, purchasing-power or affordability wording, S3/S4, OneMap-dependent items.
+   V1.1 r2 (GW-PRISM-V1.1-2026-11-03-A2, after A1 and the decile amendment; Master Planning, 3 Nov 2026): data/prism/v1.1/ (schema
+   prism-public-v1.1-r2) adds, inside the existing five dimension rows, the approved peer positions (Price position, Resale activity: band,
+   exact period, peer counts, statement), the five-dimension evidence profile (each line's approved statement with its status: available,
+   partial, settling, not available, not yet assessed), gross rental yield by size band and planning-area household income. Market is
+   observational only: no rank, decile or label. A report entry that supplements V1 is read only when it pairs with the very V1 report on
+   screen (by sha256); a V1.1-only entry (listed in the manifest's v11OnlyReports) or a V1 report without an approved Reveal + Verdict gets
+   an evidence-profile page (the same page, without a verdict) only when its approved r2 report has profile lines. Read only when the
+   manifest is the approved one (sha256 pinned below), each report's sha256 matches, every item carries the A2 approval, and the manifest's
+   item counts equal the approved items found; otherwise the page is exactly V1 (and a development without an approved V1 assessment
+   shows nothing). Never shown: a composite score, purchasing-power or affordability wording, a Market rank, unsold inventory (S3),
+   pipeline counts (S4; known sites only), future transport without official LTA evidence.
    ========================================================================== */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
   else root.GW_PRISM = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
-  const VERSION = 'prism-v1.1-web-1';
+  const VERSION = 'prism-v1.1-r2-web-1';
   const SCHEMA = 'prism-public-v1';
   const DIR = 'data/prism/v1/';
   const MANIFEST_V = '831114f97c';
-  const V11 = { SCHEMA: 'prism-public-v1.1', DIR: 'data/prism/v1.1/', APPROVAL: 'GW-PRISM-V1.1-2026-11-01-A1',
-    MANIFEST: '372940ebebab4e884a7369e6d618395acd0fde4dabf383024b6698b37a708576' };   // the approved V1.1 manifest, byte for byte: any other is not read   // first 10 hex of manifest.json's sha256: a new release changes the address, so caches never mix releases
+  // first 10 hex of manifest.json's sha256 (MANIFEST_V): a new release changes the address, so caches never mix releases
+  const V11 = { SCHEMA: 'prism-public-v1.1-r2', DIR: 'data/prism/v1.1/', APPROVAL: 'GW-PRISM-V1.1-2026-11-03-A2',
+    CHAIN: ['GW-PRISM-V1.1-2026-11-01-A1', 'GW-PRISM-V1.1-2026-11-03-DECILE', 'GW-PRISM-V1.1-2026-11-03-A2'],
+    RELEASE: 'prism-v1.1-r2-release-2026-11-03-e48acc945f90',
+    MANIFEST: '3567a72349dd1de8b62b2fff5048a123642a0ad20a175cf57358bbc03ce3590e' };   // the approved r2 manifest, byte for byte: any other is not read
+  const PANELS = { P: ['price.entry'], R: ['resale.sustained'], I: ['infrastructure.mrt', 'infrastructure.schools', 'infrastructure.amenities', 'infrastructure.futureTransport'],
+    S: ['supply.competition', 'supply.unsoldInventory', 'supply.pipeline', 'supply.quietArea'], M: ['market.backdrop'] };
+  const STATUS = ['available', 'partial', 'settling', 'not_available', 'not_yet_assessed'];
+  const CLS = { condo: 'condo', ec: 'EC' }, CLASS_NAME = { condo: 'Condominium', ec: 'Executive condominium' };
   const PILLARS = [['P', 'Price Position'], ['R', 'Resale Potential'], ['I', 'Infrastructure & Catalysts'], ['S', 'Supply Pressure'], ['M', 'Market Demand']];
   const SUPPLY_GATE = { 'S.launchedUnsold2km': 'allowPublicS3', 'S.pipeline2km': 'allowPublicS4' };
   const SCOPE = { observed_resale_activity: 'Observed resale activity · project-wide', observed_neighbourhood_market: 'Surrounding resale market' };
@@ -124,39 +136,69 @@
     };
   }
 
-  /* ---------------------------------------------------------------- the V1.1 supplement (pure; tested in node) */
-  const FORBID = /score(100|s)?$|purchas|afford|everyday|onemap|pipeline|launchedUnsold|kenTake/i;   // keys a V1.1 report may never carry (compositeScore: null only)
+  /* ---------------------------------------------------------------- the V1.1 r2 release (pure; tested in node) */
+  // Keys an r2 report may never carry (the release's own forbidden-field list, plus the V1 internal fields); compositeScore: null only
+  const FORBID_KEYS = ['purchasingPower', 'grossIncomeForTdsr', 'surveyBasisIncome', 'householdsAtOrAbovePct', 'stressInstalment', 'affordability', 'overall', 'score100', 'score',
+    'launchedUnsoldPer100Homes2km', 'pipelinePer100Homes2km', 'newSaleDevelopments2km', 'primarySchools1km', 'supermarkets1km', 'nearestRailM', 'forecast', 'lat', 'lon', 'll', 'notes', 'limitations', 'kenTake'];
+  const FORBID = /score100|afford|purchasingPower|kenTake|forecast/i;
+  const FORBID_TEXT = /score\s*\/\s*100|\/\s*100\b|purchasing power|affordab|ken.s take/i;   // wording no r2 text may contain
   function checkManifest11(m, v1, v1sha) {
-    if (!m || m.schemaVersion !== V11.SCHEMA || m.status !== 'approved' || m.approvalRef !== V11.APPROVAL) throw new Error('v1.1 manifest: not the approved release');
+    if (!m || m.schemaVersion !== V11.SCHEMA || m.status !== 'approved' || m.approvalRef !== V11.APPROVAL || m.datasetReleaseId !== V11.RELEASE) throw new Error('v1.1 manifest: not the approved release');
+    if (!Array.isArray(m.approvalChain) || m.approvalChain.join('|') !== V11.CHAIN.join('|')) throw new Error('v1.1 manifest: not the approved chain');
     const sp = m.supplements;
     if (!sp || sp.schemaVersion !== SCHEMA || !v1 || sp.datasetReleaseId !== v1.datasetReleaseId || sp.approvalRef !== v1.approvalRef) throw new Error('v1.1 manifest: does not supplement this V1 release');
     if (!Array.isArray(m.reports) || !Array.isArray(sp.reports)) throw new Error('v1.1 manifest: no reports');
-    m.reports.forEach((r) => { if (!r || !/^[a-z0-9-]{1,80}$/.test(r.id) || r.path !== 'reports/' + r.id + '.json' || !/^[0-9a-f]{64}$/.test(r.sha256 || '') || r.approved !== true) throw new Error('v1.1 manifest: bad report entry'); });
+    const only = Array.isArray(m.v11OnlyReports) ? m.v11OnlyReports : [];
+    m.reports.forEach((r) => { if (!r || !/^[a-z0-9-]{1,80}$/.test(r.id) || r.path !== 'reports/' + r.id + '.json' || !/^[0-9a-f]{64}$/.test(r.sha256 || '') || r.approved !== true || !(Number.isInteger(r.items) && r.items > 0)) throw new Error('v1.1 manifest: bad report entry'); });
+    only.forEach((id) => { if (!m.reports.some((r) => r.id === id) || sp.reports.some((x) => x.id === id) || v1.reports.some((x) => x.id === id)) throw new Error('v1.1 manifest: a V1.1-only entry that is not one'); });
     if (v1sha) { const e = sp.reports.find((x) => x.id === v1sha.id); if (!e || e.sha256 !== v1sha.sha256) throw new Error('v1.1 manifest: pairs with a different V1 report'); }
     return m;
   }
   function keysOk(o, path) {
     if (!o || typeof o !== 'object') return;
-    Object.keys(o).forEach((k) => { if (FORBID.test(k) && !(k === 'compositeScore' && o[k] === null)) throw new Error('v1.1 report: forbidden field ' + path + k); keysOk(o[k], path + k + '.'); });
+    Object.keys(o).forEach((k) => {
+      if ((FORBID.test(k) || FORBID_KEYS.indexOf(k) >= 0) && !(k === 'compositeScore' && o[k] === null)) throw new Error('v1.1 report: forbidden field ' + path + k);
+      if (typeof o[k] === 'string' && FORBID_TEXT.test(o[k])) throw new Error('v1.1 report: forbidden wording at ' + path + k);
+      keysOk(o[k], path + k + '.');
+    });
   }
   const ok11 = (x) => !!(x && x.approval && x.approval.state === 'approved' && x.approval.approvalRef === V11.APPROVAL);
-  function checkReport11(r, entry) {
-    if (!r || r.schemaVersion !== V11.SCHEMA || r.reportId !== entry.id || r.supplementsV1Report !== entry.id) throw new Error('v1.1 report: id or schema');
+  // only=true: a V1.1-only entry (supplementsV1Report: null). The safeguards are checked on the data itself, so a changed file cannot show them.
+  function checkReport11(r, entry, only) {
+    if (!r || r.schemaVersion !== V11.SCHEMA || r.reportId !== entry.id || r.datasetReleaseId !== V11.RELEASE || typeof r.name !== 'string' || !r.name) throw new Error('v1.1 report: id or schema');
+    if (r.supplementsV1Report !== (only ? null : entry.id)) throw new Error('v1.1 report: supplements the wrong report');
     if (!r.release || r.release.status !== 'approved' || r.release.approvalRef !== V11.APPROVAL) throw new Error('v1.1 report: not approved');
     if (r.compositeScore !== null) throw new Error('v1.1 report: a composite score');
     keysOk(r, '');
+    const pos = r.peerComparison && Array.isArray(r.peerComparison.positions) ? r.peerComparison.positions : [];
+    pos.forEach((x) => { if (['P', 'R'].indexOf(x.dimension) < 0) throw new Error('v1.1 report: a ' + x.dimension + ' position (Market ranks are withdrawn)'); });
+    const lines = r.profile && Array.isArray(r.profile.lines) ? r.profile.lines : [];
+    lines.forEach((l) => {
+      if (!l || !PANELS[l.panel] || PANELS[l.panel].indexOf(l.measure) < 0 || STATUS.indexOf(l.status) < 0 || typeof l.statement !== 'string' || !l.statement) throw new Error('v1.1 report: a line outside the profile');
+      if (l.measure === 'supply.unsoldInventory' && (l.status !== 'not_available' || l.data !== null)) throw new Error('v1.1 report: unsold inventory');
+      if (l.measure === 'infrastructure.futureTransport' && (l.status !== 'not_yet_assessed' || l.data !== null)) throw new Error('v1.1 report: future transport');
+      if (l.measure === 'market.backdrop' && l.data && ['rank', 'decile', 'percentile', 'band', 'bandLabel'].some((k) => k in l.data)) throw new Error('v1.1 report: a Market rank');
+      if (l.status === 'settling' && l.data && l.data.value !== null) throw new Error('v1.1 report: a settling value');
+      if ((l.status === 'not_available' || l.status === 'not_yet_assessed') && l.data !== null) throw new Error('v1.1 report: a value for a missing measure');
+    });
+    if (r.householdIncome && r.householdIncome.planningArea && !r.householdIncome.context) throw new Error('v1.1 report: income without its context');
     return r;
   }
-  // only A1-approved items, as the report states them (no value, label or sentence is written here)
-  function model11(r) {
+  // only A2-approved items, as the report states them (no value, label or sentence is written here). The manifest's item count must equal
+  // the approved items found: a dropped item means the file is not the approved one, so nothing of it is shown.
+  function model11(r, entry) {
     const pc = r.peerComparison, pos = {};
-    if (pc && Array.isArray(pc.positions)) pc.positions.filter(ok11).forEach((x) => { if (['P', 'R', 'M'].indexOf(x.dimension) >= 0 && x.statement && x.bandLabel && x.periodLabel) pos[x.dimension] = x; });
+    if (pc && Array.isArray(pc.positions)) pc.positions.filter(ok11).forEach((x) => { if (x.statement && x.bandLabel && x.periodLabel) pos[x.dimension] = x; });
     const ry = r.rentalYield && Array.isArray(r.rentalYield.bands) ? r.rentalYield : null, bands = ry ? ry.bands.filter(ok11).filter((b) => isNum(b.grossYieldPct)) : [];
     const inc = ok11(r.householdIncome) && Array.isArray(r.householdIncome.atOrAbove) ? r.householdIncome : null;
-    const items = Object.keys(pos).length + bands.length + (inc ? 1 : 0);
-    if (!items) return null;
-    return { positions: pos, peerGroup: pc ? pc.peerGroup : null, yield: bands.length ? { period: ry.period, caption: ry.caption, rules: ry.rules || {}, bands: bands, sourceIds: ry.sourceIds || [] } : null, income: inc, items: items,
-      sources: (r.sources || []).map((x) => ({ id: x.id, publisher: x.publisher, dataset: x.dataset, asAt: x.asAt, updated: x.updated, licence: x.licence ? { name: x.licence.name, url: x.licence.url } : null, attribution: x.attribution, url: x.url })) };
+    const pf = r.profile && Array.isArray(r.profile.lines) ? r.profile : null, lines = {}; let nl = 0;
+    PILLARS.forEach(([k]) => { lines[k] = pf ? PANELS[k].map((ms) => pf.lines.find((l) => l.panel === k && l.measure === ms)).filter(ok11) : []; nl += lines[k].length; });
+    const items = Object.keys(pos).length + bands.length + (inc ? 1 : 0) + nl;
+    if (!items || (entry && entry.items !== items)) return null;
+    return { id: r.reportId, name: r.name, kind: r.kind, positions: pos, peerGroup: pc ? pc.peerGroup : null,
+      yield: bands.length ? { period: ry.period, caption: ry.caption, rules: ry.rules || {}, bands: bands, sourceIds: ry.sourceIds || [] } : null, income: inc,
+      profile: nl ? { rule: pf.rule, group: pf.comparisonGroup || null, surrounding: pf.surroundingMarket || '', lines: lines } : null, items: items,
+      sources: (r.sources || []).map((x) => ({ id: x.id, publisher: x.publisher, dataset: x.dataset, asAt: x.asAt, updated: x.updated, accessed: x.accessed, licence: x.licence ? { name: x.licence.name, url: x.licence.url } : null, attribution: x.attribution, url: x.url })) };
   }
 
   /* ---------------------------------------------------------------- formatting an approved value */
@@ -254,7 +296,8 @@
     [/^I\.(railStations|primarySchools1km|everydayAmenities)$/, 'lgLoc', 'Location & amenities']
   ];
   const evidenceOf = (id) => { const e = EVIDENCE.find((x) => x[0].test(id)); return e ? { sec: e[1], label: e[2] } : null; };
-  const hasRecords = (md) => !!md.metrics['R.resales12'];   // the development has its own resales, so its Property Data has these sections
+  // the development has its own resales, so its Property Data has these sections (an evidence-profile page: a completed development)
+  const hasRecords = (md) => !!md.metrics['R.resales12'] || (md.mode === 'profile' && !!md.v11 && md.v11.kind === 'completed');
   // PRISM Analysis | Property Data, directly under the development's name on both views (links: each view keeps its address and Back/Forward)
   function switchHtml(md, active, root) {
     const tab = (k, href, label, icon) => '<a class="gwp-tab" href="' + href + '" data-gwp-view="' + k + '"' + (k === active ? ' aria-current="page"' : '') + '>' + icon + '<span>' + label + '</span></a>';
@@ -348,18 +391,85 @@
       '</tbody></table></div><p class="gwp-ms">Of ' + num(h.households, 0) + ' resident households. ' + esc(h.incomeDefinition) + '</p>' +
       '<ul class="gwp-fine gwp-v11l">' + (h.conditions || []).map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul><p class="gwp-ms" data-gwp-income-attr>' + esc(h.attribution) + '</p></div>';
   }
+  // r2 evidence profile: each line is its approved label and statement; beneath it, its period (when the statement does not already say it)
+  // and its sources with their data periods. A missing measure is shown, never hidden: its statement says why (not available, not yet assessed).
+  const signed = (v) => (v > 0 ? '+' : v < 0 ? '−' : '') + num(Math.abs(v));   // as the statements write it: −7.5%, −15%
+  function srcPeriod(s) {
+    const t = String(s || '');
+    if (/^\d{4}-\d{2}$/.test(t)) return 'to ' + ym(t);
+    return t.replace(/\d{4}-\d{2}-\d{2}/g, (d) => day(d) || d);
+  }
+  // sources with the same data period share it: "NEA supermarkets, NParks parks, OneMap (accessed 20 Oct 2026)"
+  function srcWith(ids, periods) {
+    const groups = [];
+    (ids || []).forEach((id) => { const p = periods && periods[id] ? srcPeriod(periods[id]) : '', g = groups.find((x) => x.p === p); if (g) g.n.push(SOURCE_NAME[id] || id); else groups.push({ p, n: [SOURCE_NAME[id] || id] }); });
+    return groups.map((g) => g.n.join(', ') + (g.p ? ' (' + g.p + ')' : '')).join(', ');
+  }
+  // the line's period, unless its statement already states it (both periods, for a latest-against-prior comparison)
+  function linePeriod(l) {
+    const p = l.period; if (!p) return '';
+    const parts = p.latest && p.prior ? [period(p.latest), period(p.prior)] : [period(p)];
+    return parts.every((x) => l.statement.indexOf(x) >= 0) ? '' : parts.join(' against ');
+  }
+  // one approved statement; an entry price for several bedroom types reads one type per line (the same words, in order)
+  function statementHtml(l) {
+    const parts = l.measure === 'price.entry' && l.data && Array.isArray(l.data.types) && l.data.types.length > 1 ? l.statement.split(/ (?=\d-bedroom: |The entry-price difference is illustrative)/) : [l.statement];
+    return parts.length > 1 ? '<span class="gwp-md gwp-pst" data-gwp-statement>' + parts.map((t, i) => '<span>' + esc(t) + (i < parts.length - 1 ? ' ' : '') + '</span>').join('') + '</span>' :
+      '<span class="gwp-md" data-gwp-statement>' + esc(l.statement) + '</span>';
+  }
+  function lineHtml(l, periods) {
+    const meta = [linePeriod(l), srcWith(l.sourceIds, periods)].filter(Boolean).join(' · '), gap = l.status === 'not_available' || l.status === 'not_yet_assessed';
+    return '<div class="gwp-m gwp-pfl' + (gap ? ' gwp-pfl--gap' : '') + '" data-gwp-line="' + esc(l.measure) + '" data-gwp-status="' + esc(l.status) + '"><dt>' + esc(l.label) + '</dt><dd>' + statementHtml(l) +
+      (meta ? '<span class="gwp-ms">' + esc(meta) + '</span>' : '') + '</dd></div>';
+  }
   function v11Html(md, k) {
     const v = md.v11; if (!v) return '';
+    const x = v.positions[k], ls = v.profile ? v.profile.lines[k] : [];
+    return (x ? posHtml(x, v.peerGroup) : '') +
+      (ls.length ? '<div class="gwp-v11" data-gwp-profile="' + k + '"><p class="gwp-k">Evidence profile</p><dl class="gwp-ml gwp-pf' + (ls.length === 1 ? ' gwp-pf--one' : '') + '">' + ls.map((l) => lineHtml(l, v.periods)).join('') + '</dl>' +
+        ((k === 'S' || k === 'M') && v.profile.surrounding ? '<p class="gwp-ms" data-gwp-surrounding>' + esc(v.profile.surrounding) + '</p>' : '') + '</div>' : '') +
+      (k === 'M' && v.yield ? yieldHtml(v.yield) : '') + (k === 'M' && v.income ? incomeHtml(v.income) : '');
+  }
+  // A dimension's headline from the r2 data alone (a page without V1 measures): its approved figures, formatted, with a short qualifier.
+  // Price: the approved position; Resale: the observed rate (settling named); Infrastructure: MRT and supermarkets; Supply: recorded
+  // new-launch competition (a quiet area named); Market: the observed change in surrounding resales. Never a rank, score or judgement.
+  const lineOf = (v, k, ms) => (v.profile ? v.profile.lines[k].find((l) => l.measure === ms) : null) || null;
+  const priceWhen = (x) => (x.period && Array.isArray(x.period.subject) && x.period.subject.length > 1 ? '12-month periods by bedroom type' : x.periodLabel);
+  function headline11(v, k) {
     const x = v.positions[k];
-    return (x ? posHtml(x, v.peerGroup) : '') + (k === 'M' && v.yield ? yieldHtml(v.yield) : '') + (k === 'M' && v.income ? incomeHtml(v.income) : '');
+    if (k === 'P' && x) return { main: pricePhrase(x), sub: x.bandLabel + ' · ' + priceWhen(x) };
+    if (k === 'R' && x) {
+      const c = (x.components || [])[0], l = lineOf(v, 'R', 'resale.sustained'), settling = !!(l && l.status === 'settling');
+      if (c && isNum(c.value)) return { main: num(c.value, 1) + ' resales per 100 homes a year', sub: (settling ? 'Initial resale wave; sustained activity settling' : x.bandLabel) + ' · ' + x.periodLabel };
+    }
+    if (k === 'I') {
+      const mrt = lineOf(v, 'I', 'infrastructure.mrt'), am = lineOf(v, 'I', 'infrastructure.amenities');
+      const s = mrt && mrt.data && Array.isArray(mrt.data.stations) ? mrt.data.stations[0] : null;
+      const a = s && s.name && isNum(s.distanceM) ? s.name + ' ' + metres(s.distanceM) : '', b = am && am.data && isNum(am.data.supermarketsWithin1km) ? plural(am.data.supermarketsWithin1km, 'supermarket') + ' within 1 km' : '';
+      if (a || b) return { main: a && b && (a + ' · ' + b).length <= 66 ? a + ' · ' + b : a || b, sub: 'Straight-line distances' };
+    }
+    if (k === 'S') {
+      const c = lineOf(v, 'S', 'supply.competition'), q = lineOf(v, 'S', 'supply.quietArea'), d = c && c.data;
+      if (d && Array.isArray(d.sameClassSelling) && CLS[d.sameClass]) {
+        const n = d.sameClassSelling.length, cls = CLS[d.sameClass];
+        return { main: (n === 0 ? 'No other ' + cls + ' development' : plural(n, 'other ' + cls + ' development')) + ' sold new homes within 2 km',
+          sub: period(c.period) + (q && q.data && q.data.flag === true ? ' · Quiet area' : '') };
+      }
+    }
+    if (k === 'M') {
+      const b = lineOf(v, 'M', 'market.backdrop'), d = b && b.data;
+      if (d && isNum(d.changePct) && b.period && b.period.latest && b.period.prior) return { main: signed(d.changePct) + '% condo and EC resales within 2 km', sub: period(b.period.latest) + ' against ' + period(b.period.prior) };
+    }
+    return null;
   }
   // The five dimensions: one row each with its headline; each opens in place, directly beneath its own row (several may stay open);
   // closed on a first visit. Opened, a dimension shows ALL its approved measures, what it does not assess, and the evidence links.
   function dimsHtml(md) {
     return md.pillars.map((p) => {
-      const x11 = md.v11 && md.v11.positions[p.key], add = v11Html(md, p.key), none = !p.metrics.length && !add, toPrices = !p.metrics.length && p.key === 'P' && hasRecords(md);
-      // V1.1: a dimension V1 left unassessed (Price Position) takes its approved position as the headline, with the position and its period beneath
-      const h = !p.metrics.length && x11 ? { main: p.key === 'P' ? pricePhrase(x11) : x11.bandLabel, sub: x11.bandLabel + ' · ' + x11.periodLabel } : headline(p);
+      const add = v11Html(md, p.key), none = !p.metrics.length && !add, toPrices = !p.metrics.length && p.key === 'P' && hasRecords(md);
+      // V1.1: a dimension without V1 measures (Price Position on a V1 page; every dimension on an evidence-profile page) takes its headline
+      // from the approved r2 data; a dimension with V1 measures keeps its V1 headline
+      const h = (!p.metrics.length && md.v11 && headline11(md.v11, p.key)) || headline(p);
       return '<section class="gwp-dim' + (none ? ' gwp-dim--none' : '') + '" id="gwp-' + p.key + '" data-gwp-pillar="' + p.key + '">' +
         '<h3 class="gwp-dimh"><button type="button" class="gwp-dimb" aria-expanded="false" aria-controls="gwpDim' + p.key + '" data-gwp-toggle="' + p.key + '">' +
         '<span class="gwp-pl" aria-hidden="true">' + p.key + '</span><span class="gwp-dn"><b>' + esc(p.name) + '</b><small>' + esc(QUESTION[p.key]) + '</small></span>' +
@@ -377,26 +487,38 @@
     // "Explore sales by size": the development's own Property Data, at its sizes section (only where it has resales to show)
     const sizes = hasRecords(md) ? '<a class="gwp-sizes" href="#/p/' + esc(md.id) + '" data-gwp-evidence="lgTypes" data-gwp-sizes>Explore sales by size <span aria-hidden="true">›</span></a>' : '';
     const Q = md.question ? '<section class="gwp-sec gwp-box gwp-q" data-gwp-question><p class="gwp-k">Next buyer question</p><p>' + esc(md.question) + '</p>' + sizes + '</section>' : '';
+    // with an r2 evidence profile: its approved rule (which states there is no overall score) and its comparison group, under the heading
+    const pf = md.v11 && md.v11.profile, g = pf && pf.group;
+    const intro = pf ? '<p class="gwp-fine">Each shows a key finding. Open any for its measures, dates and sources.</p><p class="gwp-fine" data-gwp-rule>' + esc(pf.rule) + '</p>' +
+      (g && g.rule ? '<p class="gwp-fine" data-gwp-group>Comparison group: ' + esc(g.rule) + (isNum(g.developments) ? ' · ' + num(g.developments, 0) + ' developments' : '') + '.</p>' : '') :
+      '<p class="gwp-fine">Each shows a key finding. Open any for its measures, dates and sources. PRISM gives no overall score.</p>';
     return (H || C || Q ? '<div class="gwp-two">' + H + C + Q + '</div>' : '') +
-      '<section class="gwp-sec gwp-dims" aria-labelledby="gwpDimsH"><div class="gwp-sech"><div><h2 id="gwpDimsH">The five PRISM dimensions</h2><p class="gwp-fine">Each shows a key finding. Open any for its measures, dates and sources. PRISM gives no overall score.</p></div>' +
+      '<section class="gwp-sec gwp-dims" aria-labelledby="gwpDimsH"><div class="gwp-sech"><div><h2 id="gwpDimsH">The five PRISM dimensions</h2>' + intro + '</div>' +
       '<p class="gwp-all"><button type="button" data-gwp-all="open">Expand all</button><span aria-hidden="true">/</span><button type="button" data-gwp-all="close">Collapse all</button></p></div><div class="gwp-ds">' + dimsHtml(md) + '</div></section>' + sourcesHtml(md);
   }
   function sourcesHtml(md) {
     const used = {}; Object.keys(md.metrics).forEach((k) => (md.metrics[k].sourceIds || []).forEach((s) => { used[s] = 1; }));
-    const v = md.v11, u11 = {};
-    if (v) { Object.keys(v.positions).forEach((k) => (v.positions[k].sourceIds || []).forEach((s) => { u11[s] = 1; })); if (v.yield) v.yield.sourceIds.forEach((s) => { u11[s] = 1; }); if (v.income) (v.income.sourceIds || []).forEach((s) => { u11[s] = 1; }); }
+    const v = md.v11, u11 = {}, add = (ids) => (ids || []).forEach((s) => { u11[s] = 1; });
+    if (v) {
+      Object.keys(v.positions).forEach((k) => add(v.positions[k].sourceIds)); if (v.yield) add(v.yield.sourceIds); if (v.income) add(v.income.sourceIds);
+      if (v.profile) Object.keys(v.profile.lines).forEach((k) => v.profile.lines[k].forEach((l) => add(l.sourceIds)));
+    }
     const S = md.sources.filter((s) => used[s.id] || u11[s.id]).concat(v ? v.sources.filter((s) => u11[s.id] && !md.sources.some((x) => x.id === s.id)) : []);
+    // what the V1.1 part adds, as it is present (a page may carry only some of it)
+    const parts = v ? [Object.keys(v.positions).length ? 'peer positions' : '', v.profile ? 'evidence profile' : '', v.yield ? 'gross rental yield' : '', v.income ? 'household income' : ''].filter(Boolean) : [];
+    const ura = v ? ym(v.periods.URA_TRANSACTIONS) || v.periods.URA_TRANSACTIONS || '' : '';
     return '<details class="gwp-d gwp-src" id="gwp-src" data-gwp-sources><summary><span class="gwp-pn">Sources, data periods and limits</span></summary><div class="gwp-din">' +
-      '<ul class="gwp-sl">' + S.map((s) => '<li><b>' + esc(s.publisher) + '</b> · ' + esc(s.dataset) + (s.asAt ? ' · as at ' + esc(ym(s.asAt) || day(s.asAt) || s.asAt) : s.updated ? ' · updated ' + esc(day(s.updated) || s.updated) : '') +
+      '<ul class="gwp-sl">' + S.map((s) => '<li><b>' + esc(s.publisher) + '</b> · ' + esc(s.dataset) + (s.asAt ? ' · as at ' + esc(ym(s.asAt) || day(s.asAt) || s.asAt) : s.updated ? ' · updated ' + esc(day(s.updated) || s.updated) : s.accessed ? ' · accessed ' + esc(day(s.accessed) || s.accessed) : '') +
         (s.licence && s.licence.url ? ' · <a href="' + esc(s.licence.url) + '" target="_blank" rel="noopener">' + esc(s.licence.name) + '</a>' : s.licence ? ' · ' + esc(s.licence.name) : '') + (s.attribution ? '<small>' + esc(s.attribution) + '</small>' : '') + '</li>').join('') + '</ul>' +
       (md.limitations.length ? '<p class="gwp-fine"><b>Limits of this evidence</b></p><ul class="gwp-lim">' + md.limitations.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul>' : '') +
-      '<p class="gwp-fine">PRISM V1 · records to ' + esc(ym(md.asOf) || md.asOf) + (md.approvedAt ? ' · published ' + esc(day(md.approvedAt)) : '') + '. Analysis and derived statistics by Groundwork; not endorsed by the data publishers.</p>' +
-      (v ? '<p class="gwp-fine" data-gwp-v11-src>PRISM V1.1 additions (peer positions, gross rental yield, household income) · URA records to ' + esc(ym(v.periods.URA_TRANSACTIONS) || v.periods.URA_TRANSACTIONS || '') + (v.income ? ' · ' + esc(v.periods.SINGSTAT_GHS2025 || '') : '') + '.</p>' : '') + '</div></details>';
+      (md.mode === 'profile' ? '<p class="gwp-fine" data-gwp-v11-src>PRISM V1.1 · ' + esc(parts.join(', ')) + (ura ? ' · URA records to ' + esc(ura) : '') + '. Analysis and derived statistics by Groundwork; not endorsed by the data publishers.</p>' :
+        '<p class="gwp-fine">PRISM V1 · records to ' + esc(ym(md.asOf) || md.asOf) + (md.approvedAt ? ' · published ' + esc(day(md.approvedAt)) : '') + '. Analysis and derived statistics by Groundwork; not endorsed by the data publishers.</p>' +
+        (v ? '<p class="gwp-fine" data-gwp-v11-src>PRISM V1.1 additions (' + esc(parts.join(', ')) + ')' + (v.positions.P || v.positions.R || v.profile || v.yield ? ' · URA records to ' + esc(ura) : '') + (v.income ? ' · ' + esc(v.periods.SINGSTAT_GHS2025 || '') : '') + '.</p>' : '')) + '</div></details>';
   }
   // The PRISM Analysis view. o.site: the launch's own site { url } (a launch has no resale report); o.compare: offer Compare.
   function pageHtml(md, o) {
-    const root = o.root || '../', A = md.assessment, back = o.backHref || '#/p/' + md.id;
-    if (!A) return '';
+    const root = o.root || '../', A = md.assessment, back = o.backHref || '#/p/' + md.id, prof = md.mode === 'profile' && !A && !!(md.v11 && md.v11.profile);
+    if (!A && !prof) return '';
     const calc = '<a class="lg-btn" href="' + esc(root) + 'tools/payment-planner/" data-gwp-calc>Calculate my purchase</a>';   // a clean start in the existing calculator: nothing is passed to it
     const acts = (o.site && o.site.url ? '<a class="lg-btn" href="' + esc(o.site.url) + '" target="_blank" rel="noopener" data-gwp-site>Open its site ↗</a>' : '') +
       (o.compare ? '<a class="lg-btn" href="#/compare/' + esc(md.id) + '" data-gwp-compare>Compare</a>' : '') + calc;
@@ -407,12 +529,14 @@
       md.pillars.map((p) => '<button type="button" data-gwp-jump="' + p.key + '"' + (p.metrics.length || v11Html(md, p.key) ? '' : ' class="dim"') + '><b>' + p.key + '</b> ' + SHORT[p.key] + '</button>').join('') + '<button type="button" data-gwp-jump="src">Sources</button></div></nav>';
     const next = '<section class="gwp-next" aria-label="Where next"><a class="gwp-nx" href="' + esc(back) + '" data-gwp-back><b>Property Data</b><span>' + (hasRecords(md) ? 'Prices, sales and rents for ' + esc(md.name) : 'Explore the numbers') + '</span></a>' +
       '<a class="gwp-nx" href="' + esc(root) + 'tools/payment-planner/" data-gwp-calc2><b>Calculate my purchase</b><span>Cash, CPF and the monthly instalment</span></a></section>';
-    return '<div class="gwp-page" data-gwp-page="' + esc(md.id) + '" data-gwp-mode="assessment"><div class="gwp-wrap">' + head + '</div>' + bar + '<div class="gwp-wrap">' +
-      '<div id="gwp-sum" class="gwp-sumh"><div class="gwp-brand gwp-brand--sm">' + mark(root, 28) + '<p><b>PRISM</b> by Groundwork <span>· Five dimensions. One clearer property decision.</span></p></div></div>' +
-      '<article class="gwp-card gwp-open"><div class="gwp-v"><p class="gwp-vk">PRISM Verdict' + (A.verdict.scope ? ' · ' + esc(A.verdict.scope) : '') + '</p><h2 class="gwp-vh">' + esc(A.verdict.headline) + '</h2></div>' +
+    // An evidence-profile page (no approved verdict): the same page, with the five dimensions as its summary; nothing is written in a verdict's place
+    const card = A ? '<article class="gwp-card gwp-open"><div class="gwp-v"><p class="gwp-vk">PRISM Verdict' + (A.verdict.scope ? ' · ' + esc(A.verdict.scope) : '') + '</p><h2 class="gwp-vh">' + esc(A.verdict.headline) + '</h2></div>' +
       '<div class="gwp-why"><h3>Why?</h3><ul>' + A.verdict.why.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul></div>' +
       (A.verdict.watchOut.length ? '<div class="gwp-wo"><span class="gwp-wi" aria-hidden="true">!</span><div><h3>What should I watch out for?</h3><ul>' + A.verdict.watchOut.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul></div></div>' : '') +
-      '<div class="gwp-rvl">' + evidence(md) + '</div></article>' + layersHtml(md) +
+      '<div class="gwp-rvl">' + evidence(md) + '</div></article>' : '';
+    return '<div class="gwp-page' + (prof ? ' gwp-page--profile' : '') + '" data-gwp-page="' + esc(md.id) + '" data-gwp-mode="' + (prof ? 'profile' : 'assessment') + '"><div class="gwp-wrap">' + head + '</div>' + bar + '<div class="gwp-wrap">' +
+      '<div id="gwp-sum" class="gwp-sumh"><div class="gwp-brand gwp-brand--sm">' + mark(root, 28) + '<p><b>PRISM</b> by Groundwork <span>· Five dimensions. One clearer property decision.</span></p></div></div>' +
+      card + layersHtml(md) +
       '<p class="gwp-foot">From official records to ' + esc(ym(md.asOf) || md.asOf) + '. PRISM describes what the records show; it is not a valuation or a purchase recommendation.</p>' + next + '</div></div>';
   }
 
@@ -431,29 +555,49 @@
     }
     return cache.manifest;
   }
-  // The model for one development, or null (not in the release, or anything failed a check)
+  // The model for one development, or null (not in either release, or anything failed a check). A V1 report with an approved Reveal +
+  // Verdict is its assessment page (with its r2 supplement when that passes); otherwise an approved r2 evidence profile is the page.
   function load(root, id) {
     if (!/^[a-z0-9-]{1,80}$/.test(String(id || ''))) return Promise.resolve(null);
     if (cache.reports[id]) return cache.reports[id];
     const p = manifest(root).then((m) => {
-      const e = m.reports.find((x) => x.id === id); if (!e) return null;
-      return fetch(root + DIR + e.path + '?v=' + e.sha256.slice(0, 10)).then((r) => { if (!r.ok) throw new Error('report ' + r.status); return r.text(); })
-        .then((t) => sha256(t).then((h) => { if (h !== e.sha256) throw new Error('report: sha256 does not match the manifest'); return model(checkReport(JSON.parse(t), e), m); }))
-        .then((md) => (md ? load11(root, e, m).then((v) => { md.v11 = v; return md; }) : md));
+      const e = m.reports.find((x) => x.id === id);
+      const v1 = e ? fetch(root + DIR + e.path + '?v=' + e.sha256.slice(0, 10)).then((r) => { if (!r.ok) throw new Error('report ' + r.status); return r.text(); })
+        .then((t) => sha256(t).then((h) => { if (h !== e.sha256) throw new Error('report: sha256 does not match the manifest'); return model(checkReport(JSON.parse(t), e), m); })) : Promise.resolve(null);
+      return v1.then((md) => load11(root, id, e, m).then((v) => compose(md, v)));
     }).catch(() => null);
     cache.reports[id] = p; p.then((x) => { if (x === null) delete cache.reports[id]; });
     return p;
   }
-  // V1.1: the approved manifest (pinned by sha256) for this V1 release, the pairing with this exact V1 report, and the report's own sha256
+  // V1 model + r2 model -> the page model. page: true when there is a PRISM page to show (mode 'assessment' or 'profile').
+  function compose(md, v) {
+    if (md && md.assessment) { md.v11 = v; md.page = true; md.mode = 'assessment'; return md; }
+    if (v && v.profile) {
+      const g = v.profile.group || v.peerGroup || {};
+      return { id: v.id, name: v.name, subject: md ? md.subject : null, meta: md && md.meta.length ? md.meta : [g.marketSegment, CLASS_NAME[g.propertyClass]].filter(Boolean),
+        assessment: null, hidden: [], question: null, pillars: PILLARS.map(([key, name]) => ({ key, name, metrics: [], unpublished: [] })), metrics: {}, count: 0,
+        sources: [], limitations: [], asOf: v.periods.URA_TRANSACTIONS, approvedAt: null, periodsBySource: v.periods, v11: v, page: true, mode: 'profile' };
+    }
+    if (md) { md.v11 = null; md.page = false; }   // a V1 report without an assessment and without an approved profile: no page, as in V1
+    return md;
+  }
+  const hasPage = (md) => !!(md && md.page);
+  // V1.1 r2: the approved manifest (pinned by sha256) for this V1 release; a supplement pairs with this exact V1 report; a V1.1-only entry
+  // is listed as one; the report's own sha256 and every check above
   let man11 = null;
-  function load11(root, e, v1) {
+  function manifest11(root, v1) {
     if (!man11) { man11 = fetch(root + V11.DIR + 'manifest.json?v=' + V11.MANIFEST.slice(0, 10)).then((r) => { if (!r.ok) throw new Error('v1.1 manifest ' + r.status); return r.text(); })
-      .then((t) => sha256(t).then((h) => { if (h !== V11.MANIFEST) throw new Error('v1.1 manifest: not the approved file'); return JSON.parse(t); })); man11.catch(() => { man11 = null; }); }
-    return man11.then((m) => {
-      checkManifest11(m, v1, { id: e.id, sha256: e.sha256 });
-      const f = m.reports.find((x) => x.id === e.id); if (!f) return null;
+      .then((t) => sha256(t).then((h) => { if (h !== V11.MANIFEST) throw new Error('v1.1 manifest: not the approved file'); return checkManifest11(JSON.parse(t), v1); })); man11.catch(() => { man11 = null; }); }
+    return man11;
+  }
+  function load11(root, id, e, v1) {
+    return manifest11(root, v1).then((m) => {
+      const f = m.reports.find((x) => x.id === id); if (!f) return null;
+      const only = (m.v11OnlyReports || []).indexOf(id) >= 0;
+      if (only ? !!e : !e) return null;
+      if (!only) checkManifest11(m, v1, { id: e.id, sha256: e.sha256 });
       return fetch(root + V11.DIR + f.path + '?v=' + f.sha256.slice(0, 10)).then((r) => { if (!r.ok) throw new Error('v1.1 report ' + r.status); return r.text(); })
-        .then((t) => sha256(t).then((h) => { if (h !== f.sha256) throw new Error('v1.1 report: sha256'); const v = model11(checkReport11(JSON.parse(t), f)); if (v) v.periods = m.dataPeriodsBySource || {}; return v; }));
+        .then((t) => sha256(t).then((h) => { if (h !== f.sha256) throw new Error('v1.1 report: sha256'); const v = model11(checkReport11(JSON.parse(t), f, only), f); if (v) v.periods = m.dataPeriodsBySource || {}; return v; }));
     }).catch(() => null);
   }
   const settled = {};   // id -> model (or null) once loaded, so a page redraw can place the PRISM parts without waiting
@@ -464,10 +608,10 @@
   function mountPreview(app, id, o) {
     const root = o.root || '../';
     const place = (md) => {
-      if (!md || !md.assessment || (o.still && !o.still())) return;
+      if (!hasPage(md) || (o.still && !o.still())) return;
       app.querySelectorAll('[data-gwp-preview], [data-gwp-switch], [data-gwp-back2]').forEach((x) => x.remove());
       const hero = app.querySelector(o.after || 'header.lg-hero'); if (!hero) return;
-      hero.insertAdjacentHTML('afterend', previewHtml(md, root));
+      if (md.assessment) hero.insertAdjacentHTML('afterend', previewHtml(md, root));   // an evidence-profile page has no verdict line: its tab is the way in
       const nameAt = hero.querySelector('.lg-id') || hero.querySelector('h1');
       if (nameAt) nameAt.insertAdjacentHTML('afterend', switchHtml(md, 'data', root));
       // back-links: only to dimensions with published measures read from that section
@@ -488,7 +632,7 @@
   function show(app, id, o) {
     return load(o.root || '../', id).then((md) => {
       if (o.still && !o.still()) return md;
-      if (!md || !md.assessment) { if (o.fallback) o.fallback(); return null; }
+      if (!hasPage(md)) { if (o.fallback) o.fallback(); return null; }
       settled[id] = md;
       document.title = 'PRISM · ' + md.name + ' — Research — Groundwork';
       app.innerHTML = pageHtml(md, o);
@@ -573,13 +717,14 @@
       const sb = home.querySelector(o.picksAfter || '#lgCount'); if (!sb) return;
       sb.insertAdjacentHTML('afterend', '<div class="gwp-picks" data-gwp-picks hidden><p class="gwp-pk">' + mark(root, 22) + '<span>Explore a PRISM report</span></p><div class="gwp-pl2" data-gwp-picklist></div></div>');
       const box = home.querySelector('[data-gwp-picks]');
-      manifest(root).then((m) => Promise.all(m.reports.map((r) => load(root, r.id)))).then((ms) => {
-        const ok = ms.filter((x) => x && x.assessment); if (!ok.length) return;
+      // every development with a PRISM page: the V1 release's, then the V1.1-only entries (when the r2 release passes its checks)
+      manifest(root).then((m) => manifest11(root, m).then((m11) => m11.v11OnlyReports || [], () => []).then((only) => Promise.all(m.reports.map((r) => r.id).concat(only).map((id) => load(root, id))))).then((ms) => {
+        const ok = ms.filter(hasPage); if (!ok.length) return;
         box.querySelector('[data-gwp-picklist]').innerHTML = ok.map((x) => '<a class="gwp-chip" href="#/prism/' + esc(x.id) + '" data-gwp-open-id="' + esc(x.id) + '">' + esc(x.name) + ' <span aria-hidden="true">›</span></a>').join('');
         box.hidden = false;
       }).catch(() => {});
     }
   }
 
-  return { V11, checkManifest11, checkReport11, model11, posHtml, yieldHtml, incomeHtml, v11Html, VERSION, switchHtml, leadSites, layersHtml, dimsHtml, evidenceOf, headline, landingHtml, mountLanding, QUESTION, SCHEMA, DIR, MANIFEST_V, PILLARS, checkManifest, checkReport, approved, shown, model, value, detail, period, evidence, previewHtml, pageHtml, load, mountPreview, show, _cache: cache, _settled: settled };
+  return { V11, PANELS, checkManifest11, checkReport11, model11, compose, hasPage, headline11, lineHtml, posHtml, yieldHtml, incomeHtml, v11Html, VERSION, switchHtml, leadSites, layersHtml, dimsHtml, evidenceOf, headline, landingHtml, mountLanding, QUESTION, SCHEMA, DIR, MANIFEST_V, PILLARS, checkManifest, checkReport, approved, shown, model, value, detail, period, evidence, previewHtml, pageHtml, load, mountPreview, show, _cache: cache, _settled: settled };
 });

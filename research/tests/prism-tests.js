@@ -225,7 +225,8 @@ const IDS = ['kingsford-waterbay', 'hougang-central', 'thomson-three'];
     const html = fs.readFileSync(path.join(root, 'research/index.html'), 'utf8');
     assert.ok(/<link rel="stylesheet" href="\.\.\/assets\/css\/gw-prism\.css\?v=[0-9a-f]{10}">/.test(html.split('</head>')[0]));
     assert.ok(/<template id="gwLazy-prism"><script src="\.\.\/assets\/js\/gw-prism\.js\?v=[0-9a-f]{10}"><\/script><\/template>/.test(html));
-    assert.ok(/pz\.then\(\(md\) => \{ if \(md && md\.assessment && my === OV\.seq\) \{ clearOver\(\); location\.hash = '#\/prism\/' \+ id; \} \}\);/.test(html), 'the Research search opens PRISM for an assessed development');
+    // V1.1 r2 (GW-PRISM-V1.1-2026-11-03-A2; Master Planning, 3 Nov 2026): an approved evidence-profile page leads from this search too (md.page)
+    assert.ok(/pz\.then\(\(md\) => \{ if \(md && \(md\.page \|\| md\.assessment\) && my === OV\.seq\) \{ clearOver\(\); location\.hash = '#\/prism\/' \+ id; \} \}\);/.test(html), 'the Research search opens PRISM for a development with a PRISM page');
     const nav = fs.readFileSync(path.join(root, 'assets/js/gw-nav.js'), 'utf8'); assert.ok(!/prism/i.test(nav));
   });
   console.log('\n' + pass + ' passed, ' + fail + ' failed'); process.exitCode = fail ? 1 : 0;
