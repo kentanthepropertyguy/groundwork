@@ -1,0 +1,661 @@
+{
+ "schemaVersion": "prism-public-v1.1-r2",
+ "reportId": "the-gazania",
+ "name": "The Gazania",
+ "kind": "completed",
+ "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
+ "supplementsV1Report": null,
+ "release": {
+  "status": "approved",
+  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+ },
+ "compositeScore": null,
+ "peerComparison": {
+  "peerGroup": {
+   "propertyClass": "condo",
+   "marketSegment": "OCR",
+   "leaseAge": "freehold or 999-year",
+   "developments": 462,
+   "rule": "same class (condo), market segment (OCR) and lease-age group; original lease 99 years or longer"
+  },
+  "positions": [
+   {
+    "itemId": "B1/the-gazania/P",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "dimension": "P",
+    "label": "Price position",
+    "positionOnly": true,
+    "band": "above",
+    "bandLabel": "Higher relative price than most peers",
+    "percentile": null,
+    "decile": null,
+    "periodLabel": "Oct 2024–Sep 2026",
+    "period": {
+     "subject": [
+      {
+       "type": "all sizes (100 sq ft bands)",
+       "months": 24,
+       "start": "2024-10",
+       "end": "2026-09"
+      }
+     ],
+     "peerWindowMonths": [
+      12,
+      36
+     ]
+    },
+    "statement": "Price position — Higher relative price than most peers: 38.5% above its local comparables; 85 of 85 similar developments with a figure have a lower relative price (a position, not a measure of value).",
+    "basis": {
+     "method": "size_band",
+     "bedroomTypes": null,
+     "localComparables": 25,
+     "radiusKm": 3,
+     "resalesMatchedPct": 75
+    },
+    "components": [
+     {
+      "id": "relativePricePosition",
+      "value": 38.5,
+      "unit": "pct_vs_local_comparables",
+      "peersWithValue": 85,
+      "lower": 85,
+      "equal": 0,
+      "higher": 0
+     }
+    ],
+    "context": [],
+    "sample": null,
+    "sourceIds": [
+     "URA_TRANSACTIONS"
+    ]
+   },
+   {
+    "itemId": "B1/the-gazania/R",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "dimension": "R",
+    "label": "Resale activity",
+    "positionOnly": false,
+    "band": "around",
+    "bandLabel": "Around peers",
+    "percentile": 35.9,
+    "decile": 7,
+    "periodLabel": "Oct 2024–Sep 2026",
+    "period": {
+     "months": 24,
+     "start": "2024-10",
+     "end": "2026-09"
+    },
+    "statement": "Resale activity — Around peers (35.9): 2.4 resales per 100 homes a year (24 months): higher than 92 of 266 similar developments with a figure (the same as 7). Initial resale-wave effect: 8 of the 12 resales in Oct 2024–Sep 2026 came in the first 12 months of the resale wave (Aug 2025–Jul 2026), so this figure is not yet a sustained rate; sustained activity remains settling. The wave start is based on the analytical proxy: the month recorded resales first reach 2% of homes; not an official MOP date. Context, not scored: resales in 37.5% of months (24 months).",
+    "basis": null,
+    "components": [
+     {
+      "id": "turnover24",
+      "value": 2.4,
+      "unit": "resales_per_100_homes_a_year",
+      "peersWithValue": 266,
+      "lower": 92,
+      "equal": 7,
+      "higher": 167
+     }
+    ],
+    "context": [
+     {
+      "id": "activeMonthShare24",
+      "value": 37.5,
+      "unit": "pct_of_months",
+      "scored": false
+     }
+    ],
+    "sample": {
+     "homes": 250
+    },
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "URA_DWELLING_UNITS"
+    ]
+   }
+  ]
+ },
+ "rentalYield": null,
+ "householdIncome": null,
+ "profile": {
+  "comparisonGroup": {
+   "propertyClass": "condo",
+   "marketSegment": "OCR",
+   "leaseAge": "freehold or 999-year",
+   "developments": 462,
+   "rule": "same class (condo), market segment (OCR) and lease-age group; original lease 99 years or longer"
+  },
+  "rule": "Each line compares this development with its own comparison group; numbers from different groups are not comparable. There is no overall score.",
+  "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
+  "lines": [
+   {
+    "itemId": "B1/the-gazania/price.entry",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "P",
+    "measure": "price.entry",
+    "label": "Entry price against comparable developments",
+    "status": "not_available",
+    "missing": {
+     "reason": "too few resales by bedroom type for a like-for-like entry-price comparison"
+    },
+    "statement": "Not available: too few resales by bedroom type for a like-for-like entry-price comparison; the size-matched price position applies.",
+    "data": null,
+    "period": null,
+    "sourceIds": []
+   },
+   {
+    "itemId": "B1/the-gazania/resale.sustained",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "R",
+    "measure": "resale.sustained",
+    "label": "Sustained resale activity",
+    "status": "settling",
+    "missing": {
+     "reason": "fewer than 12 months of resales after the first resale wave"
+    },
+    "statement": "Settling: fewer than 12 months of resales after the first resale wave, so sustained activity is not yet measurable. Observed activity is shown. First resale wave from Aug 2025 (analytical proxy: the month recorded resales first reach 2% of homes; not an official MOP date); 3 earlier resales do not start the wave. 2 months available from Aug 2026; measurable with data to Jul 2027. Observed: 2.4 resales per 100 homes a year (24 months).",
+    "data": {
+     "observed": 2.4,
+     "wave": {
+      "month": "2025-08",
+      "basis": "analytical_proxy_2pct_homes",
+      "basisLabel": "analytical proxy: the month recorded resales first reach 2% of homes; not an official MOP date",
+      "resalesBeforeWave": 3
+     },
+     "value": null,
+     "monthsAvailable": 2,
+     "from": "2026-08",
+     "measurableWithDataTo": "2027-07",
+     "rank": null
+    },
+    "period": {
+     "start": "2024-10",
+     "end": "2026-09"
+    },
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "URA_DWELLING_UNITS"
+    ]
+   },
+   {
+    "itemId": "B1/the-gazania/infrastructure.mrt",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "I",
+    "measure": "infrastructure.mrt",
+    "label": "MRT today",
+    "status": "available",
+    "missing": null,
+    "statement": "Bartley MRT about 170 m, Serangoon MRT about 760 m; closer than 438 of 462 similar developments. Straight-line distances.",
+    "data": {
+     "stations": [
+      {
+       "name": "Bartley MRT",
+       "type": "MRT",
+       "distanceM": 170
+      },
+      {
+       "name": "Serangoon MRT",
+       "type": "MRT",
+       "distanceM": 760
+      }
+     ],
+     "rank": {
+      "percentile": 94.8,
+      "decile": 1,
+      "band": "above",
+      "direction": "lower_is_better",
+      "peersWithValue": 462,
+      "lower": 24,
+      "equal": 0,
+      "higher": 438
+     }
+    },
+    "period": null,
+    "sourceIds": [
+     "LTA_RAIL_EXITS"
+    ]
+   },
+   {
+    "itemId": "B1/the-gazania/infrastructure.schools",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "I",
+    "measure": "infrastructure.schools",
+    "label": "Primary schools",
+    "status": "available",
+    "missing": null,
+    "statement": "1 within 1 km and 6 within 2 km; nearest Paya Lebar Methodist Girls' School (Primary) about 810 m; more than 59 of 462 similar developments (the same as 182). Straight-line distances. MOE measures distance for school admission differently.",
+    "data": {
+     "within1km": 1,
+     "within2km": 6,
+     "nearest": {
+      "name": "Paya Lebar Methodist Girls' School (Primary)",
+      "distanceM": 810
+     },
+     "rank": {
+      "percentile": 32.5,
+      "decile": 7,
+      "band": "around",
+      "direction": "higher_is_better",
+      "peersWithValue": 462,
+      "lower": 59,
+      "equal": 182,
+      "higher": 221
+     }
+    },
+    "period": null,
+    "sourceIds": [
+     "MOE_SCHOOLS",
+     "ONEMAP"
+    ]
+   },
+   {
+    "itemId": "B1/the-gazania/infrastructure.amenities",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "I",
+    "measure": "infrastructure.amenities",
+    "label": "Everyday amenities",
+    "status": "available",
+    "missing": null,
+    "statement": "3 supermarkets within 1 km (nearest about 760 m), more than 206 of 462 similar developments (the same as 81); nearest hawker centre Woodleigh Village Hawker Centre about 980 m; nearest park Greenway South about 210 m. Straight-line distances.",
+    "data": {
+     "supermarketsWithin1km": 3,
+     "nearestSupermarketM": 760,
+     "nearestHawker": {
+      "name": "Woodleigh Village Hawker Centre",
+      "distanceM": 980
+     },
+     "nearestPark": {
+      "name": "Greenway South",
+      "distanceM": 210
+     },
+     "rank": {
+      "percentile": 53.4,
+      "decile": 5,
+      "band": "around",
+      "direction": "higher_is_better",
+      "peersWithValue": 462,
+      "lower": 206,
+      "equal": 81,
+      "higher": 175
+     }
+    },
+    "period": null,
+    "sourceIds": [
+     "NEA_SUPERMARKETS",
+     "NEA_HAWKERS",
+     "NPARKS_PARKS",
+     "ONEMAP"
+    ]
+   },
+   {
+    "itemId": "B1/the-gazania/infrastructure.futureTransport",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "I",
+    "measure": "infrastructure.futureTransport",
+    "label": "Future transport",
+    "status": "not_yet_assessed",
+    "missing": {
+     "reason": "no official LTA planned-station record"
+    },
+    "statement": "Not yet assessed: needs official LTA evidence for planned stations.",
+    "data": null,
+    "period": null,
+    "sourceIds": []
+   },
+   {
+    "itemId": "B1/the-gazania/supply.competition",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "S",
+    "measure": "supply.competition",
+    "label": "Recorded new-launch competition",
+    "status": "available",
+    "missing": null,
+    "statement": "2 other condo developments sold new homes within 2 km (Jansen House, 10 new sales, about 1,670 m; Chuan Park, 115 new sales, about 1,740 m). Surrounding market, Oct 2025–Sep 2026: 126 other condo and EC developments within 2 km recorded 125 new sales and 605 resales (730 purchases); new sales were 17.1% of these purchases. Subsales (33) and this development’s own transactions are excluded. New sales as a share of local private purchases is a measure of market activity, not of supply pressure.",
+    "data": {
+     "sameClass": "condo",
+     "sameClassSelling": [
+      {
+       "name": "Jansen House",
+       "newSales12m": 10,
+       "distanceM": 1670
+      },
+      {
+       "name": "Chuan Park",
+       "newSales12m": 115,
+       "distanceM": 1740
+      }
+     ],
+     "otherDevelopments2km": 126,
+     "newSales2km": 125,
+     "resales2km": 605,
+     "purchases2km": 730,
+     "subsalesExcluded2km": 33,
+     "newSaleSharePct": 17.1
+    },
+    "period": {
+     "start": "2025-10",
+     "end": "2026-09"
+    },
+    "sourceIds": [
+     "URA_TRANSACTIONS"
+    ]
+   },
+   {
+    "itemId": "B1/the-gazania/supply.unsoldInventory",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "S",
+    "measure": "supply.unsoldInventory",
+    "label": "Unsold inventory",
+    "status": "not_available",
+    "missing": {
+     "reason": "not available until the URA-based launched-unsold measure (S3) passes the V1 local validation; no other inventory source is used"
+    },
+    "statement": "Not available: unsold inventory has not been validated.",
+    "data": null,
+    "period": null,
+    "sourceIds": []
+   },
+   {
+    "itemId": "B1/the-gazania/supply.pipeline",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "S",
+    "measure": "supply.pipeline",
+    "label": "Known pipeline",
+    "status": "partial",
+    "missing": {
+     "reason": "known sites only; not a complete pipeline"
+    },
+    "statement": "No site within 2 km in the known list. Known sites only; not a complete pipeline.",
+    "data": {
+     "sites": []
+    },
+    "period": null,
+    "sourceIds": [
+     "GW_UPCOMING"
+    ]
+   },
+   {
+    "itemId": "B1/the-gazania/supply.quietArea",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "S",
+    "measure": "supply.quietArea",
+    "label": "Quiet-area check",
+    "status": "available",
+    "missing": null,
+    "statement": "Not a quiet area. 605 resales within 2 km in Oct 2025–Sep 2026, more than 181 of 462 similar developments.",
+    "data": {
+     "flag": false,
+     "resales2km": 605,
+     "percentile": 39.2,
+     "peersWithValue": 462,
+     "lower": 181,
+     "equal": 0,
+     "higher": 281,
+     "thresholdPercentile": 30
+    },
+    "period": {
+     "start": "2025-10",
+     "end": "2026-09"
+    },
+    "sourceIds": [
+     "URA_TRANSACTIONS"
+    ]
+   },
+   {
+    "itemId": "B1/the-gazania/market.backdrop",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "M",
+    "measure": "market.backdrop",
+    "label": "Market backdrop",
+    "status": "available",
+    "missing": null,
+    "statement": "Condo and EC resales within 2 km: 605 in Oct 2025–Sep 2026 against 734 in Oct 2024–Sep 2025 (−17.6%). Planning-area private resales −15.2%. Observed transactions, not a prediction.",
+    "data": {
+     "latest": 605,
+     "prior": 734,
+     "changePct": -17.6,
+     "planningAreaChangePct": -15.2
+    },
+    "period": {
+     "latest": {
+      "start": "2025-10",
+      "end": "2026-09"
+     },
+     "prior": {
+      "start": "2024-10",
+      "end": "2025-09"
+     }
+    },
+    "sourceIds": [
+     "URA_TRANSACTIONS"
+    ]
+   }
+  ]
+ },
+ "sources": [
+  {
+   "id": "URA_TRANSACTIONS",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "PMI_Resi_Transaction",
+   "datasetId": "PMI_Resi_Transaction",
+   "asAt": "2026-09",
+   "updated": null,
+   "accessed": "2026-10-05",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0 (URA Data Service grant of licence)",
+    "url": "https://www.ura.gov.sg/eservices-info/maps/acceptance-grant-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated, with the access date.",
+     "Analysis and derived statistics are Groundwork’s; not endorsed by URA."
+    ]
+   },
+   "attribution": "Contains information from URA private residential data (PMI_Resi_Transaction) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
+   "url": "https://eservice.ura.gov.sg/maps/api/"
+  },
+  {
+   "id": "URA_DWELLING_UNITS",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "No of Dwelling Units",
+   "datasetId": "d_be71daeab5930f96b90ad2857454d876",
+   "asAt": null,
+   "updated": "2026-02-26",
+   "accessed": null,
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from No of Dwelling Units (Urban Redevelopment Authority (URA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_be71daeab5930f96b90ad2857454d876/view",
+   "note": "The dataset description states Q4 2022; its totals match URA completed private stock of 2025. Record edit dates are not a stock date, so no as-at date is asserted."
+  },
+  {
+   "id": "LTA_RAIL_EXITS",
+   "publisher": "Land Transport Authority (LTA)",
+   "dataset": "LTA MRT Station Exit",
+   "datasetId": "d_b39d3a0871985372d7e1637193335da5",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from LTA MRT Station Exit (Land Transport Authority (LTA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_b39d3a0871985372d7e1637193335da5/view"
+  },
+  {
+   "id": "MOE_SCHOOLS",
+   "publisher": "Ministry of Education (MOE)",
+   "dataset": "General information of schools",
+   "datasetId": "d_688b934f82c1059ed0a6993d2a829089",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from General information of schools (Ministry of Education (MOE)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_688b934f82c1059ed0a6993d2a829089/view",
+   "note": "Positions from OneMap."
+  },
+  {
+   "id": "NEA_SUPERMARKETS",
+   "publisher": "National Environment Agency (NEA)",
+   "dataset": "List of Supermarket Licences",
+   "datasetId": "d_11edd0117280c5776651d7891114c88c",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from List of Supermarket Licences (National Environment Agency (NEA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_11edd0117280c5776651d7891114c88c/view",
+   "note": "Positions from OneMap."
+  },
+  {
+   "id": "NEA_HAWKERS",
+   "publisher": "National Environment Agency (NEA)",
+   "dataset": "Hawker Centres",
+   "datasetId": "d_4a086da0a5553be1d89383cd90d07ecd",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from Hawker Centres (National Environment Agency (NEA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_4a086da0a5553be1d89383cd90d07ecd/view"
+  },
+  {
+   "id": "NPARKS_PARKS",
+   "publisher": "National Parks Board (NParks)",
+   "dataset": "NParks Parks and Nature Reserves",
+   "datasetId": "d_77d7ec97be83d44f61b85454f844382f",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from NParks Parks and Nature Reserves (National Parks Board (NParks)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_77d7ec97be83d44f61b85454f844382f/view"
+  },
+  {
+   "id": "ONEMAP",
+   "publisher": "Singapore Land Authority (SLA)",
+   "dataset": "OneMap Search",
+   "datasetId": "onemap.gov.sg",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "OneMap Terms of Use and OneMap Open Data Licence (Singapore Open Data Licence v1.0), registered API access",
+    "url": "https://www.onemap.gov.sg/legal/opendatalicence.html",
+    "status": "confirmed",
+    "conditions": [
+     "Groundwork’s registered OneMap API access confirmed by Master Planning, 31 Oct 2026 (Terms of Use: https://www.onemap.gov.sg/legal/termsofuse.html).",
+     "Open Data Licence: commercial and non-commercial use with attribution; no implied official status; provided as is; terminable on breach.",
+     "Use is limited to derived straight-line distances and counts: no OneMap coordinates, address records, map tiles or bulk positions are published (Terms of Use clause 3).",
+     "The Developer Agreement text is not held in Groundwork’s records; no specific restriction from it has been identified. File a copy with the release record.",
+     "Keep SLA copyright notices and trademarks unaltered."
+    ]
+   },
+   "attribution": "Positions: OneMap © contributors | Singapore Land Authority. Contains information from OneMap Search, used under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://www.onemap.gov.sg/"
+  },
+  {
+   "id": "GW_UPCOMING",
+   "publisher": "Groundwork",
+   "dataset": "Groundwork upcoming register (URA Sale Sites, launch records, OneMap)",
+   "datasetId": "groundwork-upcoming",
+   "asAt": "2026-10-21",
+   "updated": null,
+   "accessed": null,
+   "licence": {
+    "name": "Groundwork derived data",
+    "url": null,
+    "status": "own",
+    "conditions": []
+   },
+   "attribution": "Named sites compiled by Groundwork from official URA Sale Sites, launch records and the sources cited for each site.",
+   "url": null,
+   "note": "A site stage is named only where a cited source states it; otherwise \"Upcoming development\"."
+  }
+ ]
+}

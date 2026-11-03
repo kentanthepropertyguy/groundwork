@@ -1,0 +1,741 @@
+{
+ "schemaVersion": "prism-public-v1.1-r2",
+ "reportId": "dover-parkview",
+ "name": "Dover Parkview",
+ "kind": "completed",
+ "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
+ "supplementsV1Report": null,
+ "release": {
+  "status": "approved",
+  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+ },
+ "compositeScore": null,
+ "peerComparison": {
+  "peerGroup": {
+   "propertyClass": "condo",
+   "marketSegment": "RCR",
+   "leaseAge": "25 years or more",
+   "developments": 63,
+   "rule": "same class (condo), market segment (RCR) and lease-age group; original lease 99 years or longer"
+  },
+  "positions": [
+   {
+    "itemId": "B1/dover-parkview/P",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "dimension": "P",
+    "label": "Price position",
+    "positionOnly": true,
+    "band": "around",
+    "bandLabel": "In line with comparable condos",
+    "percentile": null,
+    "decile": null,
+    "periodLabel": "Oct 2025–Sep 2026",
+    "period": {
+     "subject": [
+      {
+       "type": "2-bedroom",
+       "months": 12,
+       "start": "2025-10",
+       "end": "2026-09"
+      }
+     ],
+     "peerWindowMonths": [
+      12,
+      36
+     ]
+    },
+    "statement": "Price position — In line with comparable condos: 7.1% above its local comparables; 21 of 36 similar developments with a figure have a lower relative price (a position, not a measure of value).",
+    "basis": {
+     "method": "bedroom_type",
+     "bedroomTypes": 1,
+     "localComparables": null,
+     "radiusKm": null,
+     "resalesMatchedPct": null
+    },
+    "components": [
+     {
+      "id": "relativePricePosition",
+      "value": 7.1,
+      "unit": "pct_vs_local_comparables",
+      "peersWithValue": 36,
+      "lower": 21,
+      "equal": 0,
+      "higher": 15
+     }
+    ],
+    "context": [],
+    "sample": null,
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "GW_BEDROOM"
+    ]
+   },
+   {
+    "itemId": "B1/dover-parkview/R",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "dimension": "R",
+    "label": "Resale activity",
+    "positionOnly": false,
+    "band": "around",
+    "bandLabel": "Around peers",
+    "percentile": 65.5,
+    "decile": 4,
+    "periodLabel": "Oct 2024–Sep 2026",
+    "period": {
+     "months": 24,
+     "start": "2024-10",
+     "end": "2026-09"
+    },
+    "statement": "Resale activity — Around peers (65.5): 3.5 resales per 100 homes a year (24 months): higher than 35 of 55 similar developments with a figure (the same as 2). Context, not scored: resales in 79.2% of months (24 months).",
+    "basis": null,
+    "components": [
+     {
+      "id": "turnover24",
+      "value": 3.5,
+      "unit": "resales_per_100_homes_a_year",
+      "peersWithValue": 55,
+      "lower": 35,
+      "equal": 2,
+      "higher": 18
+     }
+    ],
+    "context": [
+     {
+      "id": "activeMonthShare24",
+      "value": 79.2,
+      "unit": "pct_of_months",
+      "scored": false
+     }
+    ],
+    "sample": {
+     "homes": 686
+    },
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "URA_DWELLING_UNITS"
+    ]
+   }
+  ]
+ },
+ "rentalYield": null,
+ "householdIncome": null,
+ "profile": {
+  "comparisonGroup": {
+   "propertyClass": "condo",
+   "marketSegment": "RCR",
+   "leaseAge": "25 years or more",
+   "developments": 63,
+   "rule": "same class (condo), market segment (RCR) and lease-age group; original lease 99 years or longer"
+  },
+  "rule": "Each line compares this development with its own comparison group; numbers from different groups are not comparable. There is no overall score.",
+  "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
+  "lines": [
+   {
+    "itemId": "B1/dover-parkview/price.entry",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "P",
+    "measure": "price.entry",
+    "label": "Entry price against comparable developments",
+    "status": "available",
+    "missing": null,
+    "statement": "2-bedroom: median $1,370,000 ($1,442 psf, 936–968 sq ft; 19 resales, Oct 2025–Sep 2026); 4 comparable developments within 3 km: median $1,347 psf (range $1,204–1,548); 7.1% above; illustrative entry-price difference about $90,000 more. The entry-price difference is illustrative: the median price adjusted to the comparable median psf, for a similar-size unit. A premium or a discount is not in itself an advantage or a disadvantage.",
+    "data": {
+     "basis": "bedroom_type",
+     "types": [
+      {
+       "type": "2-bedroom",
+       "period": {
+        "start": "2025-10",
+        "end": "2026-09",
+        "months": 12
+       },
+       "subject": {
+        "resales": 19,
+        "medianPrice": 1370000,
+        "medianPsf": 1442,
+        "sizeSqft": [
+         936,
+         968
+        ]
+       },
+       "comparables": {
+        "developments": 4,
+        "medianPsf": 1347,
+        "rangePsf": [
+         1204,
+         1548
+        ],
+        "area": "within 3 km"
+       },
+       "differencePct": 7.1,
+       "entryPriceDifference": 90000
+      }
+     ]
+    },
+    "period": null,
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "GW_BEDROOM"
+    ]
+   },
+   {
+    "itemId": "B1/dover-parkview/resale.sustained",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "R",
+    "measure": "resale.sustained",
+    "label": "Sustained resale activity",
+    "status": "available",
+    "missing": null,
+    "statement": "No first resale wave in the observation period: sustained activity is the observed activity.",
+    "data": {
+     "observed": 3.5,
+     "wave": null,
+     "value": 3.5,
+     "rank": null
+    },
+    "period": {
+     "start": "2024-10",
+     "end": "2026-09"
+    },
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "URA_DWELLING_UNITS"
+    ]
+   },
+   {
+    "itemId": "B1/dover-parkview/infrastructure.mrt",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "I",
+    "measure": "infrastructure.mrt",
+    "label": "MRT today",
+    "status": "available",
+    "missing": null,
+    "statement": "Buona Vista MRT about 690 m, One-North MRT about 750 m; closer than 5 of 63 similar developments. Straight-line distances.",
+    "data": {
+     "stations": [
+      {
+       "name": "Buona Vista MRT",
+       "type": "MRT",
+       "distanceM": 690
+      },
+      {
+       "name": "One-North MRT",
+       "type": "MRT",
+       "distanceM": 750
+      }
+     ],
+     "rank": {
+      "percentile": 7.9,
+      "decile": 10,
+      "band": "below",
+      "direction": "lower_is_better",
+      "peersWithValue": 63,
+      "lower": 58,
+      "equal": 0,
+      "higher": 5
+     }
+    },
+    "period": null,
+    "sourceIds": [
+     "LTA_RAIL_EXITS"
+    ]
+   },
+   {
+    "itemId": "B1/dover-parkview/infrastructure.schools",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "I",
+    "measure": "infrastructure.schools",
+    "label": "Primary schools",
+    "status": "available",
+    "missing": null,
+    "statement": "1 within 1 km and 3 within 2 km; nearest Fairfield Methodist School (Primary) about 630 m; more than 17 of 63 similar developments (the same as 19). Straight-line distances. MOE measures distance for school admission differently.",
+    "data": {
+     "within1km": 1,
+     "within2km": 3,
+     "nearest": {
+      "name": "Fairfield Methodist School (Primary)",
+      "distanceM": 630
+     },
+     "rank": {
+      "percentile": 42.1,
+      "decile": 6,
+      "band": "around",
+      "direction": "higher_is_better",
+      "peersWithValue": 63,
+      "lower": 17,
+      "equal": 19,
+      "higher": 27
+     }
+    },
+    "period": null,
+    "sourceIds": [
+     "MOE_SCHOOLS",
+     "ONEMAP"
+    ]
+   },
+   {
+    "itemId": "B1/dover-parkview/infrastructure.amenities",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "I",
+    "measure": "infrastructure.amenities",
+    "label": "Everyday amenities",
+    "status": "available",
+    "missing": null,
+    "statement": "7 supermarkets within 1 km (nearest about 310 m), more than 36 of 63 similar developments (the same as 2); nearest hawker centre Ghim Moh Road Blk 20 about 700 m; nearest park One-North Park about 380 m. Straight-line distances.",
+    "data": {
+     "supermarketsWithin1km": 7,
+     "nearestSupermarketM": 310,
+     "nearestHawker": {
+      "name": "Ghim Moh Road Blk 20",
+      "distanceM": 700
+     },
+     "nearestPark": {
+      "name": "One-North Park",
+      "distanceM": 380
+     },
+     "rank": {
+      "percentile": 58.7,
+      "decile": 5,
+      "band": "around",
+      "direction": "higher_is_better",
+      "peersWithValue": 63,
+      "lower": 36,
+      "equal": 2,
+      "higher": 25
+     }
+    },
+    "period": null,
+    "sourceIds": [
+     "NEA_SUPERMARKETS",
+     "NEA_HAWKERS",
+     "NPARKS_PARKS",
+     "ONEMAP"
+    ]
+   },
+   {
+    "itemId": "B1/dover-parkview/infrastructure.futureTransport",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "I",
+    "measure": "infrastructure.futureTransport",
+    "label": "Future transport",
+    "status": "not_yet_assessed",
+    "missing": {
+     "reason": "no official LTA planned-station record"
+    },
+    "statement": "Not yet assessed: needs official LTA evidence for planned stations.",
+    "data": null,
+    "period": null,
+    "sourceIds": []
+   },
+   {
+    "itemId": "B1/dover-parkview/supply.competition",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "S",
+    "measure": "supply.competition",
+    "label": "Recorded new-launch competition",
+    "status": "available",
+    "missing": null,
+    "statement": "8 other condo developments sold new homes within 2 km (Blossoms by the Park, 11 new sales, about 580 m; The Hill @One-North, 14 new sales, about 740 m; Skye at Holland, 666 new sales, about 1,150 m; Lyndenwoods, 7 new sales, about 1,700 m; Bloomsbury Residences, 123 new sales, about 1,760 m; Pinetree Hill, 58 new sales, about 1,770 m; Nava Grove, 77 new sales, about 1,830 m; Hudson Place Residences, 226 new sales, about 1,850 m). Surrounding market, Oct 2025–Sep 2026: 59 other condo and EC developments within 2 km recorded 1,263 new sales and 255 resales (1,518 purchases); new sales were 83.2% of these purchases. Subsales (11) and this development’s own transactions are excluded. New sales as a share of local private purchases is a measure of market activity, not of supply pressure.",
+    "data": {
+     "sameClass": "condo",
+     "sameClassSelling": [
+      {
+       "name": "Blossoms by the Park",
+       "newSales12m": 11,
+       "distanceM": 580
+      },
+      {
+       "name": "The Hill @One-North",
+       "newSales12m": 14,
+       "distanceM": 740
+      },
+      {
+       "name": "Skye at Holland",
+       "newSales12m": 666,
+       "distanceM": 1150
+      },
+      {
+       "name": "Lyndenwoods",
+       "newSales12m": 7,
+       "distanceM": 1700
+      },
+      {
+       "name": "Bloomsbury Residences",
+       "newSales12m": 123,
+       "distanceM": 1760
+      },
+      {
+       "name": "Pinetree Hill",
+       "newSales12m": 58,
+       "distanceM": 1770
+      },
+      {
+       "name": "Nava Grove",
+       "newSales12m": 77,
+       "distanceM": 1830
+      },
+      {
+       "name": "Hudson Place Residences",
+       "newSales12m": 226,
+       "distanceM": 1850
+      }
+     ],
+     "otherDevelopments2km": 59,
+     "newSales2km": 1263,
+     "resales2km": 255,
+     "purchases2km": 1518,
+     "subsalesExcluded2km": 11,
+     "newSaleSharePct": 83.2
+    },
+    "period": {
+     "start": "2025-10",
+     "end": "2026-09"
+    },
+    "sourceIds": [
+     "URA_TRANSACTIONS"
+    ]
+   },
+   {
+    "itemId": "B1/dover-parkview/supply.unsoldInventory",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "S",
+    "measure": "supply.unsoldInventory",
+    "label": "Unsold inventory",
+    "status": "not_available",
+    "missing": {
+     "reason": "not available until the URA-based launched-unsold measure (S3) passes the V1 local validation; no other inventory source is used"
+    },
+    "statement": "Not available: unsold inventory has not been validated.",
+    "data": null,
+    "period": null,
+    "sourceIds": []
+   },
+   {
+    "itemId": "B1/dover-parkview/supply.pipeline",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "S",
+    "measure": "supply.pipeline",
+    "label": "Known pipeline",
+    "status": "partial",
+    "missing": {
+     "reason": "known sites only; not a complete pipeline"
+    },
+    "statement": "Within 2 km: Dover Drive GLS site (government land sale site, awarded), about 730 m. Known sites only; not a complete pipeline.",
+    "data": {
+     "sites": [
+      {
+       "name": "Dover Drive GLS site",
+       "kind": "gls",
+       "stage": "awarded",
+       "propertyClass": "condo",
+       "homesApprox": null,
+       "distanceM": 730
+      }
+     ]
+    },
+    "period": null,
+    "sourceIds": [
+     "GW_UPCOMING"
+    ]
+   },
+   {
+    "itemId": "B1/dover-parkview/supply.quietArea",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "S",
+    "measure": "supply.quietArea",
+    "label": "Quiet-area check",
+    "status": "available",
+    "missing": null,
+    "statement": "Quiet area: local resales are among the lowest 30% of similar developments, so little nearby competition reflects a thin market, not an advantage. 255 resales within 2 km in Oct 2025–Sep 2026, more than 4 of 63 similar developments.",
+    "data": {
+     "flag": true,
+     "resales2km": 255,
+     "percentile": 6.3,
+     "peersWithValue": 63,
+     "lower": 4,
+     "equal": 0,
+     "higher": 59,
+     "thresholdPercentile": 30
+    },
+    "period": {
+     "start": "2025-10",
+     "end": "2026-09"
+    },
+    "sourceIds": [
+     "URA_TRANSACTIONS"
+    ]
+   },
+   {
+    "itemId": "B1/dover-parkview/market.backdrop",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "M",
+    "measure": "market.backdrop",
+    "label": "Market backdrop",
+    "status": "available",
+    "missing": null,
+    "statement": "Condo and EC resales within 2 km: 255 in Oct 2025–Sep 2026 against 268 in Oct 2024–Sep 2025 (−4.9%). Planning-area private resales −1.4%. Observed transactions, not a prediction.",
+    "data": {
+     "latest": 255,
+     "prior": 268,
+     "changePct": -4.9,
+     "planningAreaChangePct": -1.4
+    },
+    "period": {
+     "latest": {
+      "start": "2025-10",
+      "end": "2026-09"
+     },
+     "prior": {
+      "start": "2024-10",
+      "end": "2025-09"
+     }
+    },
+    "sourceIds": [
+     "URA_TRANSACTIONS"
+    ]
+   }
+  ]
+ },
+ "sources": [
+  {
+   "id": "URA_TRANSACTIONS",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "PMI_Resi_Transaction",
+   "datasetId": "PMI_Resi_Transaction",
+   "asAt": "2026-09",
+   "updated": null,
+   "accessed": "2026-10-05",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0 (URA Data Service grant of licence)",
+    "url": "https://www.ura.gov.sg/eservices-info/maps/acceptance-grant-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated, with the access date.",
+     "Analysis and derived statistics are Groundwork’s; not endorsed by URA."
+    ]
+   },
+   "attribution": "Contains information from URA private residential data (PMI_Resi_Transaction) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
+   "url": "https://eservice.ura.gov.sg/maps/api/"
+  },
+  {
+   "id": "URA_DWELLING_UNITS",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "No of Dwelling Units",
+   "datasetId": "d_be71daeab5930f96b90ad2857454d876",
+   "asAt": null,
+   "updated": "2026-02-26",
+   "accessed": null,
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from No of Dwelling Units (Urban Redevelopment Authority (URA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_be71daeab5930f96b90ad2857454d876/view",
+   "note": "The dataset description states Q4 2022; its totals match URA completed private stock of 2025. Record edit dates are not a stock date, so no as-at date is asserted."
+  },
+  {
+   "id": "GW_BEDROOM",
+   "publisher": "Groundwork",
+   "dataset": "Groundwork bedroom classification (accepted; 12 quarters)",
+   "datasetId": "groundwork-bedroom",
+   "asAt": "2026-09",
+   "updated": null,
+   "accessed": null,
+   "licence": {
+    "name": "Groundwork derived data",
+    "url": null,
+    "status": "own",
+    "conditions": []
+   },
+   "attribution": "Bedroom classification by Groundwork from floor plans and URA rental records.",
+   "url": null
+  },
+  {
+   "id": "LTA_RAIL_EXITS",
+   "publisher": "Land Transport Authority (LTA)",
+   "dataset": "LTA MRT Station Exit",
+   "datasetId": "d_b39d3a0871985372d7e1637193335da5",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from LTA MRT Station Exit (Land Transport Authority (LTA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_b39d3a0871985372d7e1637193335da5/view"
+  },
+  {
+   "id": "MOE_SCHOOLS",
+   "publisher": "Ministry of Education (MOE)",
+   "dataset": "General information of schools",
+   "datasetId": "d_688b934f82c1059ed0a6993d2a829089",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from General information of schools (Ministry of Education (MOE)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_688b934f82c1059ed0a6993d2a829089/view",
+   "note": "Positions from OneMap."
+  },
+  {
+   "id": "NEA_SUPERMARKETS",
+   "publisher": "National Environment Agency (NEA)",
+   "dataset": "List of Supermarket Licences",
+   "datasetId": "d_11edd0117280c5776651d7891114c88c",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from List of Supermarket Licences (National Environment Agency (NEA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_11edd0117280c5776651d7891114c88c/view",
+   "note": "Positions from OneMap."
+  },
+  {
+   "id": "NEA_HAWKERS",
+   "publisher": "National Environment Agency (NEA)",
+   "dataset": "Hawker Centres",
+   "datasetId": "d_4a086da0a5553be1d89383cd90d07ecd",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from Hawker Centres (National Environment Agency (NEA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_4a086da0a5553be1d89383cd90d07ecd/view"
+  },
+  {
+   "id": "NPARKS_PARKS",
+   "publisher": "National Parks Board (NParks)",
+   "dataset": "NParks Parks and Nature Reserves",
+   "datasetId": "d_77d7ec97be83d44f61b85454f844382f",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from NParks Parks and Nature Reserves (National Parks Board (NParks)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_77d7ec97be83d44f61b85454f844382f/view"
+  },
+  {
+   "id": "ONEMAP",
+   "publisher": "Singapore Land Authority (SLA)",
+   "dataset": "OneMap Search",
+   "datasetId": "onemap.gov.sg",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "OneMap Terms of Use and OneMap Open Data Licence (Singapore Open Data Licence v1.0), registered API access",
+    "url": "https://www.onemap.gov.sg/legal/opendatalicence.html",
+    "status": "confirmed",
+    "conditions": [
+     "Groundwork’s registered OneMap API access confirmed by Master Planning, 31 Oct 2026 (Terms of Use: https://www.onemap.gov.sg/legal/termsofuse.html).",
+     "Open Data Licence: commercial and non-commercial use with attribution; no implied official status; provided as is; terminable on breach.",
+     "Use is limited to derived straight-line distances and counts: no OneMap coordinates, address records, map tiles or bulk positions are published (Terms of Use clause 3).",
+     "The Developer Agreement text is not held in Groundwork’s records; no specific restriction from it has been identified. File a copy with the release record.",
+     "Keep SLA copyright notices and trademarks unaltered."
+    ]
+   },
+   "attribution": "Positions: OneMap © contributors | Singapore Land Authority. Contains information from OneMap Search, used under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://www.onemap.gov.sg/"
+  },
+  {
+   "id": "GW_UPCOMING",
+   "publisher": "Groundwork",
+   "dataset": "Groundwork upcoming register (URA Sale Sites, launch records, OneMap)",
+   "datasetId": "groundwork-upcoming",
+   "asAt": "2026-10-21",
+   "updated": null,
+   "accessed": null,
+   "licence": {
+    "name": "Groundwork derived data",
+    "url": null,
+    "status": "own",
+    "conditions": []
+   },
+   "attribution": "Named sites compiled by Groundwork from official URA Sale Sites, launch records and the sources cited for each site.",
+   "url": null,
+   "note": "A site stage is named only where a cited source states it; otherwise \"Upcoming development\"."
+  }
+ ]
+}

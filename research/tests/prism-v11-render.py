@@ -6,12 +6,11 @@ Run from the site folder:  python3 research/tests/prism-v11-render.py
    Supply and Market; sources with OneMap's attribution.
  Navigation: Property Data -> PRISM Analysis (the switch; no verdict line on a profile page) -> Back; Research's own search leads with a
    profile page; the landing lists all five; a dimension link (#/prism/<id>/s) opens that dimension.
- Fails closed in the browser: a changed r2 report or manifest, a missing manifest, the previous A1 files left in place, a V1 pairing that
-   does not match -> the V1 pages are exactly V1, and a profile page's address falls back to its Property Data.
+ Fails closed in the browser (D5): a changed report, a changed or missing index.json, the previous A2 data left in place, a changed shard -> the V1 pages are exactly V1, and a profile page's address falls back to its Property Data.
  The Standard Reveal (Master Planning, 3 Nov 2026) on the three profile pages: approved headline, figures, periods, qualifications;
    the factual-summary fallback; the V1 Reveals unchanged.
  Never: a score, purchasing power, affordability or forecast wording; sideways scrolling; a script error."""
-import json, os, pathlib, re, socket, subprocess, sys, time
+import hashlib, json, os, pathlib, re, socket, subprocess, sys, time
 from playwright.sync_api import sync_playwright
 SITE = pathlib.Path(__file__).resolve().parents[2]
 ok_n = fail_n = 0
@@ -28,7 +27,7 @@ for _ in range(100):
 B = os.environ.get('LIVE') or f'http://127.0.0.1:{P}'
 REP = {i: json.loads((SITE / f'data/prism/v1.1/reports/{i}.json').read_text()) for i in ['kingsford-waterbay', 'hougang-central', 'thomson-three', 'hundred-palms-residences', 'the-quinn']}
 PROFILE = ['thomson-three', 'hundred-palms-residences', 'the-quinn']
-A1_MANIFEST = (SITE / 'research/tests/fixtures/prism-v11-a1-manifest.json').read_text()
+A2_MANIFEST = (SITE / 'research/tests/fixtures/prism-v11-a2-manifest.json').read_text()
 NOOVER = 'document.documentElement.scrollWidth <= innerWidth + 1'
 TXT = "s=>{const e=document.querySelector(s);return e?e.textContent.replace(/\\s+/g,' ').trim():''}"
 BAD = re.compile(r'score\s*/?\s*100|/\s*100\b|purchasing|affordab|\bforecast', re.I)
@@ -138,12 +137,13 @@ try:
             check(f'{vn} navigation: no script error', not errs, errs[:2]); ctx.close()
         # fails closed
         def body_of(r, f): resp = r.fetch(); r.fulfill(response=resp, body=f(resp.text()))
-        M = r'data/prism/v1\.1/manifest\.json'
-        cases = [('a changed r2 report (Kingsford Waterbay)', [(r'data/prism/v1\.1/reports/kingsford-waterbay\.json', lambda r: body_of(r, lambda t: t.replace('"observed": 6.4', '"observed": 7.4')))], 'kw'),
-                 ('a changed r2 manifest', [(M, lambda r: body_of(r, lambda t: t.replace('"items": 17', '"items": 18')))], 'all'),
-                 ('a missing r2 manifest', [(M, lambda r: r.fulfill(status=404, body=''))], 'all'),
-                 ('the previous A1 files left in place (data rolled back without the page)', [(M, lambda r: r.fulfill(status=200, content_type='application/json', body=A1_MANIFEST))], 'all'),
-                 ('a manifest pairing with another V1 report', [(M, lambda r: body_of(r, lambda t: t.replace('2d7266d3', '2d7266d4')))], 'all'),
+        IX = r'data/prism/v1\.1/index\.json'
+        KWS = r'data/prism/v1\.1/index/' + hashlib.sha256(b'kingsford-waterbay').hexdigest()[0] + r'\.json'
+        cases = [('a changed report (Kingsford Waterbay)', [(r'data/prism/v1\.1/reports/kingsford-waterbay\.json', lambda r: body_of(r, lambda t: t.replace('"observed": 6.4', '"observed": 7.4')))], 'kw'),
+                 ('a changed index.json', [(IX, lambda r: body_of(r, lambda t: t.replace('"reports": 2099', '"reports": 2100')))], 'all'),
+                 ('a missing index.json (the previous A2 data left in place has none)', [(IX, lambda r: r.fulfill(status=404, body=''))], 'all'),
+                 ('the previous A2 manifest served as the index', [(IX, lambda r: r.fulfill(status=200, content_type='application/json', body=A2_MANIFEST))], 'all'),
+                 ('a changed shard (Kingsford Waterbay\'s)', [(KWS, lambda r: body_of(r, lambda t: t.replace('"items": 17', '"items": 18')))], 'kw'),
                  ('a changed Hundred Palms report', [(r'data/prism/v1\.1/reports/hundred-palms-residences\.json', lambda r: body_of(r, lambda t: t.replace('12.6', '12.7')))], 'hp')]
         for name, tp, scope in cases:
             ctx, pg, errs = fresh(br, 1440, tp)

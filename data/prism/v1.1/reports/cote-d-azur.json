@@ -1,0 +1,681 @@
+{
+ "schemaVersion": "prism-public-v1.1-r2",
+ "reportId": "cote-d-azur",
+ "name": "Cote D'Azur",
+ "kind": "completed",
+ "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
+ "supplementsV1Report": null,
+ "release": {
+  "status": "approved",
+  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+ },
+ "compositeScore": null,
+ "peerComparison": {
+  "peerGroup": {
+   "propertyClass": "condo",
+   "marketSegment": "RCR",
+   "leaseAge": "25 years or more",
+   "developments": 63,
+   "rule": "same class (condo), market segment (RCR) and lease-age group; original lease 99 years or longer"
+  },
+  "positions": [
+   {
+    "itemId": "B1/cote-d-azur/P",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "dimension": "P",
+    "label": "Price position",
+    "positionOnly": true,
+    "band": "above",
+    "bandLabel": "Higher relative price than most peers",
+    "percentile": null,
+    "decile": null,
+    "periodLabel": "Oct 2023–Sep 2026",
+    "period": {
+     "subject": [
+      {
+       "type": "all sizes (100 sq ft bands)",
+       "months": 36,
+       "start": "2023-10",
+       "end": "2026-09"
+      }
+     ],
+     "peerWindowMonths": [
+      12,
+      36
+     ]
+    },
+    "statement": "Price position — Higher relative price than most peers: 28.5% above its local comparables; 35 of 36 similar developments with a figure have a lower relative price (a position, not a measure of value).",
+    "basis": {
+     "method": "size_band",
+     "bedroomTypes": null,
+     "localComparables": 11,
+     "radiusKm": 3,
+     "resalesMatchedPct": 83.3
+    },
+    "components": [
+     {
+      "id": "relativePricePosition",
+      "value": 28.5,
+      "unit": "pct_vs_local_comparables",
+      "peersWithValue": 36,
+      "lower": 35,
+      "equal": 0,
+      "higher": 1
+     }
+    ],
+    "context": [],
+    "sample": null,
+    "sourceIds": [
+     "URA_TRANSACTIONS"
+    ]
+   },
+   {
+    "itemId": "B1/cote-d-azur/R",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "dimension": "R",
+    "label": "Resale activity",
+    "positionOnly": false,
+    "band": "around",
+    "bandLabel": "Around peers",
+    "percentile": 65.5,
+    "decile": 4,
+    "periodLabel": "Oct 2024–Sep 2026",
+    "period": {
+     "months": 24,
+     "start": "2024-10",
+     "end": "2026-09"
+    },
+    "statement": "Resale activity — Around peers (65.5): 3.5 resales per 100 homes a year (24 months): higher than 35 of 55 similar developments with a figure (the same as 2). Context, not scored: resales in 83.3% of months (24 months).",
+    "basis": null,
+    "components": [
+     {
+      "id": "turnover24",
+      "value": 3.5,
+      "unit": "resales_per_100_homes_a_year",
+      "peersWithValue": 55,
+      "lower": 35,
+      "equal": 2,
+      "higher": 18
+     }
+    ],
+    "context": [
+     {
+      "id": "activeMonthShare24",
+      "value": 83.3,
+      "unit": "pct_of_months",
+      "scored": false
+     }
+    ],
+    "sample": {
+     "homes": 612
+    },
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "URA_DWELLING_UNITS"
+    ]
+   }
+  ]
+ },
+ "rentalYield": null,
+ "householdIncome": null,
+ "profile": {
+  "comparisonGroup": {
+   "propertyClass": "condo",
+   "marketSegment": "RCR",
+   "leaseAge": "25 years or more",
+   "developments": 63,
+   "rule": "same class (condo), market segment (RCR) and lease-age group; original lease 99 years or longer"
+  },
+  "rule": "Each line compares this development with its own comparison group; numbers from different groups are not comparable. There is no overall score.",
+  "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
+  "lines": [
+   {
+    "itemId": "B1/cote-d-azur/price.entry",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "P",
+    "measure": "price.entry",
+    "label": "Entry price against comparable developments",
+    "status": "not_available",
+    "missing": {
+     "reason": "too few resales by bedroom type for a like-for-like entry-price comparison"
+    },
+    "statement": "Not available: too few resales by bedroom type for a like-for-like entry-price comparison; the size-matched price position applies.",
+    "data": null,
+    "period": null,
+    "sourceIds": []
+   },
+   {
+    "itemId": "B1/cote-d-azur/resale.sustained",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "R",
+    "measure": "resale.sustained",
+    "label": "Sustained resale activity",
+    "status": "available",
+    "missing": null,
+    "statement": "No first resale wave in the observation period: sustained activity is the observed activity.",
+    "data": {
+     "observed": 3.5,
+     "wave": null,
+     "value": 3.5,
+     "rank": null
+    },
+    "period": {
+     "start": "2024-10",
+     "end": "2026-09"
+    },
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "URA_DWELLING_UNITS"
+    ]
+   },
+   {
+    "itemId": "B1/cote-d-azur/infrastructure.mrt",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "I",
+    "measure": "infrastructure.mrt",
+    "label": "MRT today",
+    "status": "available",
+    "missing": null,
+    "statement": "Marine Parade MRT about 210 m, Tanjong Katong MRT about 670 m; closer than 42 of 63 similar developments (the same as 2). Straight-line distances.",
+    "data": {
+     "stations": [
+      {
+       "name": "Marine Parade MRT",
+       "type": "MRT",
+       "distanceM": 210
+      },
+      {
+       "name": "Tanjong Katong MRT",
+       "type": "MRT",
+       "distanceM": 670
+      }
+     ],
+     "rank": {
+      "percentile": 68.3,
+      "decile": 4,
+      "band": "around",
+      "direction": "lower_is_better",
+      "peersWithValue": 63,
+      "lower": 19,
+      "equal": 2,
+      "higher": 42
+     }
+    },
+    "period": null,
+    "sourceIds": [
+     "LTA_RAIL_EXITS"
+    ]
+   },
+   {
+    "itemId": "B1/cote-d-azur/infrastructure.schools",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "I",
+    "measure": "infrastructure.schools",
+    "label": "Primary schools",
+    "status": "available",
+    "missing": null,
+    "statement": "2 within 1 km and 5 within 2 km; nearest Tanjong Katong Primary School about 630 m; more than 37 of 63 similar developments (the same as 17). Straight-line distances. MOE measures distance for school admission differently.",
+    "data": {
+     "within1km": 2,
+     "within2km": 5,
+     "nearest": {
+      "name": "Tanjong Katong Primary School",
+      "distanceM": 630
+     },
+     "rank": {
+      "percentile": 72.2,
+      "decile": 3,
+      "band": "above",
+      "direction": "higher_is_better",
+      "peersWithValue": 63,
+      "lower": 37,
+      "equal": 17,
+      "higher": 9
+     }
+    },
+    "period": null,
+    "sourceIds": [
+     "MOE_SCHOOLS",
+     "ONEMAP"
+    ]
+   },
+   {
+    "itemId": "B1/cote-d-azur/infrastructure.amenities",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "I",
+    "measure": "infrastructure.amenities",
+    "label": "Everyday amenities",
+    "status": "available",
+    "missing": null,
+    "statement": "8 supermarkets within 1 km (nearest about 170 m), more than 39 of 63 similar developments (the same as 5); nearest hawker centre Marine Parade Central Market And Food Centre about 330 m; nearest park Marine Parade Rd Park about 100 m. Straight-line distances.",
+    "data": {
+     "supermarketsWithin1km": 8,
+     "nearestSupermarketM": 170,
+     "nearestHawker": {
+      "name": "Marine Parade Central Market And Food Centre",
+      "distanceM": 330
+     },
+     "nearestPark": {
+      "name": "Marine Parade Rd Park",
+      "distanceM": 100
+     },
+     "rank": {
+      "percentile": 65.9,
+      "decile": 4,
+      "band": "around",
+      "direction": "higher_is_better",
+      "peersWithValue": 63,
+      "lower": 39,
+      "equal": 5,
+      "higher": 19
+     }
+    },
+    "period": null,
+    "sourceIds": [
+     "NEA_SUPERMARKETS",
+     "NEA_HAWKERS",
+     "NPARKS_PARKS",
+     "ONEMAP"
+    ]
+   },
+   {
+    "itemId": "B1/cote-d-azur/infrastructure.futureTransport",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "I",
+    "measure": "infrastructure.futureTransport",
+    "label": "Future transport",
+    "status": "not_yet_assessed",
+    "missing": {
+     "reason": "no official LTA planned-station record"
+    },
+    "statement": "Not yet assessed: needs official LTA evidence for planned stations.",
+    "data": null,
+    "period": null,
+    "sourceIds": []
+   },
+   {
+    "itemId": "B1/cote-d-azur/supply.competition",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "S",
+    "measure": "supply.competition",
+    "label": "Recorded new-launch competition",
+    "status": "available",
+    "missing": null,
+    "statement": "8 other condo developments sold new homes within 2 km (Amber House, 31 new sales, about 360 m; Emerald of Katong, 2 new sales, about 770 m; Ardor Residence, 13 new sales, about 790 m; Tembusu Grand, 11 new sales, about 940 m; Koon Seng House, 6 new sales, about 1,270 m; K Suites, 6 new sales, about 1,390 m; Claydence, 8 new sales, about 1,420 m; The Continuum, 208 new sales, about 1,420 m). Surrounding market, Oct 2025–Sep 2026: 372 other condo and EC developments within 2 km recorded 389 new sales and 753 resales (1,142 purchases); new sales were 34.1% of these purchases. Subsales (42) and this development’s own transactions are excluded. New sales as a share of local private purchases is a measure of market activity, not of supply pressure.",
+    "data": {
+     "sameClass": "condo",
+     "sameClassSelling": [
+      {
+       "name": "Amber House",
+       "newSales12m": 31,
+       "distanceM": 360
+      },
+      {
+       "name": "Emerald of Katong",
+       "newSales12m": 2,
+       "distanceM": 770
+      },
+      {
+       "name": "Ardor Residence",
+       "newSales12m": 13,
+       "distanceM": 790
+      },
+      {
+       "name": "Tembusu Grand",
+       "newSales12m": 11,
+       "distanceM": 940
+      },
+      {
+       "name": "Koon Seng House",
+       "newSales12m": 6,
+       "distanceM": 1270
+      },
+      {
+       "name": "K Suites",
+       "newSales12m": 6,
+       "distanceM": 1390
+      },
+      {
+       "name": "Claydence",
+       "newSales12m": 8,
+       "distanceM": 1420
+      },
+      {
+       "name": "The Continuum",
+       "newSales12m": 208,
+       "distanceM": 1420
+      }
+     ],
+     "otherDevelopments2km": 372,
+     "newSales2km": 389,
+     "resales2km": 753,
+     "purchases2km": 1142,
+     "subsalesExcluded2km": 42,
+     "newSaleSharePct": 34.1
+    },
+    "period": {
+     "start": "2025-10",
+     "end": "2026-09"
+    },
+    "sourceIds": [
+     "URA_TRANSACTIONS"
+    ]
+   },
+   {
+    "itemId": "B1/cote-d-azur/supply.unsoldInventory",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "S",
+    "measure": "supply.unsoldInventory",
+    "label": "Unsold inventory",
+    "status": "not_available",
+    "missing": {
+     "reason": "not available until the URA-based launched-unsold measure (S3) passes the V1 local validation; no other inventory source is used"
+    },
+    "statement": "Not available: unsold inventory has not been validated.",
+    "data": null,
+    "period": null,
+    "sourceIds": []
+   },
+   {
+    "itemId": "B1/cote-d-azur/supply.pipeline",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "S",
+    "measure": "supply.pipeline",
+    "label": "Known pipeline",
+    "status": "partial",
+    "missing": {
+     "reason": "known sites only; not a complete pipeline"
+    },
+    "statement": "No site within 2 km in the known list. Known sites only; not a complete pipeline.",
+    "data": {
+     "sites": []
+    },
+    "period": null,
+    "sourceIds": [
+     "GW_UPCOMING"
+    ]
+   },
+   {
+    "itemId": "B1/cote-d-azur/supply.quietArea",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "S",
+    "measure": "supply.quietArea",
+    "label": "Quiet-area check",
+    "status": "available",
+    "missing": null,
+    "statement": "Not a quiet area. 753 resales within 2 km in Oct 2025–Sep 2026, more than 40 of 63 similar developments.",
+    "data": {
+     "flag": false,
+     "resales2km": 753,
+     "percentile": 63.5,
+     "peersWithValue": 63,
+     "lower": 40,
+     "equal": 0,
+     "higher": 23,
+     "thresholdPercentile": 30
+    },
+    "period": {
+     "start": "2025-10",
+     "end": "2026-09"
+    },
+    "sourceIds": [
+     "URA_TRANSACTIONS"
+    ]
+   },
+   {
+    "itemId": "B1/cote-d-azur/market.backdrop",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "M",
+    "measure": "market.backdrop",
+    "label": "Market backdrop",
+    "status": "available",
+    "missing": null,
+    "statement": "Condo and EC resales within 2 km: 753 in Oct 2025–Sep 2026 against 876 in Oct 2024–Sep 2025 (−14%). Planning-area private resales −4.5%. Observed transactions, not a prediction.",
+    "data": {
+     "latest": 753,
+     "prior": 876,
+     "changePct": -14,
+     "planningAreaChangePct": -4.5
+    },
+    "period": {
+     "latest": {
+      "start": "2025-10",
+      "end": "2026-09"
+     },
+     "prior": {
+      "start": "2024-10",
+      "end": "2025-09"
+     }
+    },
+    "sourceIds": [
+     "URA_TRANSACTIONS"
+    ]
+   }
+  ]
+ },
+ "sources": [
+  {
+   "id": "URA_TRANSACTIONS",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "PMI_Resi_Transaction",
+   "datasetId": "PMI_Resi_Transaction",
+   "asAt": "2026-09",
+   "updated": null,
+   "accessed": "2026-10-05",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0 (URA Data Service grant of licence)",
+    "url": "https://www.ura.gov.sg/eservices-info/maps/acceptance-grant-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated, with the access date.",
+     "Analysis and derived statistics are Groundwork’s; not endorsed by URA."
+    ]
+   },
+   "attribution": "Contains information from URA private residential data (PMI_Resi_Transaction) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
+   "url": "https://eservice.ura.gov.sg/maps/api/"
+  },
+  {
+   "id": "URA_DWELLING_UNITS",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "No of Dwelling Units",
+   "datasetId": "d_be71daeab5930f96b90ad2857454d876",
+   "asAt": null,
+   "updated": "2026-02-26",
+   "accessed": null,
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from No of Dwelling Units (Urban Redevelopment Authority (URA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_be71daeab5930f96b90ad2857454d876/view",
+   "note": "The dataset description states Q4 2022; its totals match URA completed private stock of 2025. Record edit dates are not a stock date, so no as-at date is asserted."
+  },
+  {
+   "id": "LTA_RAIL_EXITS",
+   "publisher": "Land Transport Authority (LTA)",
+   "dataset": "LTA MRT Station Exit",
+   "datasetId": "d_b39d3a0871985372d7e1637193335da5",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from LTA MRT Station Exit (Land Transport Authority (LTA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_b39d3a0871985372d7e1637193335da5/view"
+  },
+  {
+   "id": "MOE_SCHOOLS",
+   "publisher": "Ministry of Education (MOE)",
+   "dataset": "General information of schools",
+   "datasetId": "d_688b934f82c1059ed0a6993d2a829089",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from General information of schools (Ministry of Education (MOE)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_688b934f82c1059ed0a6993d2a829089/view",
+   "note": "Positions from OneMap."
+  },
+  {
+   "id": "NEA_SUPERMARKETS",
+   "publisher": "National Environment Agency (NEA)",
+   "dataset": "List of Supermarket Licences",
+   "datasetId": "d_11edd0117280c5776651d7891114c88c",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from List of Supermarket Licences (National Environment Agency (NEA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_11edd0117280c5776651d7891114c88c/view",
+   "note": "Positions from OneMap."
+  },
+  {
+   "id": "NEA_HAWKERS",
+   "publisher": "National Environment Agency (NEA)",
+   "dataset": "Hawker Centres",
+   "datasetId": "d_4a086da0a5553be1d89383cd90d07ecd",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from Hawker Centres (National Environment Agency (NEA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_4a086da0a5553be1d89383cd90d07ecd/view"
+  },
+  {
+   "id": "NPARKS_PARKS",
+   "publisher": "National Parks Board (NParks)",
+   "dataset": "NParks Parks and Nature Reserves",
+   "datasetId": "d_77d7ec97be83d44f61b85454f844382f",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from NParks Parks and Nature Reserves (National Parks Board (NParks)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_77d7ec97be83d44f61b85454f844382f/view"
+  },
+  {
+   "id": "ONEMAP",
+   "publisher": "Singapore Land Authority (SLA)",
+   "dataset": "OneMap Search",
+   "datasetId": "onemap.gov.sg",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "OneMap Terms of Use and OneMap Open Data Licence (Singapore Open Data Licence v1.0), registered API access",
+    "url": "https://www.onemap.gov.sg/legal/opendatalicence.html",
+    "status": "confirmed",
+    "conditions": [
+     "Groundwork’s registered OneMap API access confirmed by Master Planning, 31 Oct 2026 (Terms of Use: https://www.onemap.gov.sg/legal/termsofuse.html).",
+     "Open Data Licence: commercial and non-commercial use with attribution; no implied official status; provided as is; terminable on breach.",
+     "Use is limited to derived straight-line distances and counts: no OneMap coordinates, address records, map tiles or bulk positions are published (Terms of Use clause 3).",
+     "The Developer Agreement text is not held in Groundwork’s records; no specific restriction from it has been identified. File a copy with the release record.",
+     "Keep SLA copyright notices and trademarks unaltered."
+    ]
+   },
+   "attribution": "Positions: OneMap © contributors | Singapore Land Authority. Contains information from OneMap Search, used under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://www.onemap.gov.sg/"
+  },
+  {
+   "id": "GW_UPCOMING",
+   "publisher": "Groundwork",
+   "dataset": "Groundwork upcoming register (URA Sale Sites, launch records, OneMap)",
+   "datasetId": "groundwork-upcoming",
+   "asAt": "2026-10-21",
+   "updated": null,
+   "accessed": null,
+   "licence": {
+    "name": "Groundwork derived data",
+    "url": null,
+    "status": "own",
+    "conditions": []
+   },
+   "attribution": "Named sites compiled by Groundwork from official URA Sale Sites, launch records and the sources cited for each site.",
+   "url": null,
+   "note": "A site stage is named only where a cited source states it; otherwise \"Upcoming development\"."
+  }
+ ]
+}

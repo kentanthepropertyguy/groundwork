@@ -1,0 +1,519 @@
+{
+ "schemaVersion": "prism-public-v1.1-r2",
+ "reportId": "bella-vista",
+ "name": "Bella Vista",
+ "kind": "completed",
+ "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
+ "supplementsV1Report": null,
+ "release": {
+  "status": "approved",
+  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+ },
+ "compositeScore": null,
+ "peerComparison": null,
+ "rentalYield": null,
+ "householdIncome": null,
+ "profile": {
+  "comparisonGroup": {
+   "propertyClass": "condo",
+   "marketSegment": "OCR",
+   "leaseAge": "freehold or 999-year",
+   "developments": 462,
+   "rule": "same class (condo), market segment (OCR) and lease-age group; original lease 99 years or longer"
+  },
+  "rule": "Each line compares this development with its own comparison group; numbers from different groups are not comparable. There is no overall score.",
+  "surroundingMarket": "Surrounding market: other condo and EC developments within 2 km (straight line between development positions); new sales plus resales; subsales, cluster and other landed housing, HDB flats and this development are excluded. Competition, the quiet-area check and the Market backdrop use this same set.",
+  "lines": [
+   {
+    "itemId": "B1/bella-vista/price.entry",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "P",
+    "measure": "price.entry",
+    "label": "Entry price against comparable developments",
+    "status": "not_available",
+    "missing": {
+     "reason": "too few comparable resales for a price comparison"
+    },
+    "statement": "Not available: too few comparable resales for a price comparison.",
+    "data": null,
+    "period": null,
+    "sourceIds": []
+   },
+   {
+    "itemId": "B1/bella-vista/resale.sustained",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "R",
+    "measure": "resale.sustained",
+    "label": "Sustained resale activity",
+    "status": "not_available",
+    "missing": {
+     "reason": "no recorded homes count for this development (URA count as at Q4 2022) or fewer than 30 homes, so a resale rate cannot be measured"
+    },
+    "statement": "Not available: no recorded homes count for this development (URA count as at Q4 2022) or fewer than 30 homes, so a resale rate cannot be measured.",
+    "data": null,
+    "period": null,
+    "sourceIds": []
+   },
+   {
+    "itemId": "B1/bella-vista/infrastructure.mrt",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "I",
+    "measure": "infrastructure.mrt",
+    "label": "MRT today",
+    "status": "available",
+    "missing": null,
+    "statement": "Woodleigh MRT about 480 m, Serangoon MRT about 720 m; closer than 278 of 462 similar developments (the same as 8). Straight-line distances.",
+    "data": {
+     "stations": [
+      {
+       "name": "Woodleigh MRT",
+       "type": "MRT",
+       "distanceM": 480
+      },
+      {
+       "name": "Serangoon MRT",
+       "type": "MRT",
+       "distanceM": 720
+      }
+     ],
+     "rank": {
+      "percentile": 61,
+      "decile": 4,
+      "band": "around",
+      "direction": "lower_is_better",
+      "peersWithValue": 462,
+      "lower": 176,
+      "equal": 8,
+      "higher": 278
+     }
+    },
+    "period": null,
+    "sourceIds": [
+     "LTA_RAIL_EXITS"
+    ]
+   },
+   {
+    "itemId": "B1/bella-vista/infrastructure.schools",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "I",
+    "measure": "infrastructure.schools",
+    "label": "Primary schools",
+    "status": "available",
+    "missing": null,
+    "statement": "1 within 1 km and 10 within 2 km; nearest Yangzheng Primary School about 540 m; more than 59 of 462 similar developments (the same as 182). Straight-line distances. MOE measures distance for school admission differently.",
+    "data": {
+     "within1km": 1,
+     "within2km": 10,
+     "nearest": {
+      "name": "Yangzheng Primary School",
+      "distanceM": 540
+     },
+     "rank": {
+      "percentile": 32.5,
+      "decile": 7,
+      "band": "around",
+      "direction": "higher_is_better",
+      "peersWithValue": 462,
+      "lower": 59,
+      "equal": 182,
+      "higher": 221
+     }
+    },
+    "period": null,
+    "sourceIds": [
+     "MOE_SCHOOLS",
+     "ONEMAP"
+    ]
+   },
+   {
+    "itemId": "B1/bella-vista/infrastructure.amenities",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "I",
+    "measure": "infrastructure.amenities",
+    "label": "Everyday amenities",
+    "status": "available",
+    "missing": null,
+    "statement": "2 supermarkets within 1 km (nearest about 770 m), more than 56 of 462 similar developments (the same as 149); nearest hawker centre Woodleigh Village Hawker Centre about 520 m; nearest park Bidadari Park Hillock about 280 m. Straight-line distances.",
+    "data": {
+     "supermarketsWithin1km": 2,
+     "nearestSupermarketM": 770,
+     "nearestHawker": {
+      "name": "Woodleigh Village Hawker Centre",
+      "distanceM": 520
+     },
+     "nearestPark": {
+      "name": "Bidadari Park Hillock",
+      "distanceM": 280
+     },
+     "rank": {
+      "percentile": 28.2,
+      "decile": 8,
+      "band": "below",
+      "direction": "higher_is_better",
+      "peersWithValue": 462,
+      "lower": 56,
+      "equal": 149,
+      "higher": 257
+     }
+    },
+    "period": null,
+    "sourceIds": [
+     "NEA_SUPERMARKETS",
+     "NEA_HAWKERS",
+     "NPARKS_PARKS",
+     "ONEMAP"
+    ]
+   },
+   {
+    "itemId": "B1/bella-vista/infrastructure.futureTransport",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "I",
+    "measure": "infrastructure.futureTransport",
+    "label": "Future transport",
+    "status": "not_yet_assessed",
+    "missing": {
+     "reason": "no official LTA planned-station record"
+    },
+    "statement": "Not yet assessed: needs official LTA evidence for planned stations.",
+    "data": null,
+    "period": null,
+    "sourceIds": []
+   },
+   {
+    "itemId": "B1/bella-vista/supply.competition",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "S",
+    "measure": "supply.competition",
+    "label": "Recorded new-launch competition",
+    "status": "available",
+    "missing": null,
+    "statement": "2 other condo developments sold new homes within 2 km (Chuan Park, 115 new sales, about 1,070 m; Jansen House, 10 new sales, about 1,880 m). Surrounding market, Oct 2025–Sep 2026: 140 other condo and EC developments within 2 km recorded 125 new sales and 684 resales (809 purchases); new sales were 15.5% of these purchases. Subsales (33) and this development’s own transactions are excluded. New sales as a share of local private purchases is a measure of market activity, not of supply pressure.",
+    "data": {
+     "sameClass": "condo",
+     "sameClassSelling": [
+      {
+       "name": "Chuan Park",
+       "newSales12m": 115,
+       "distanceM": 1070
+      },
+      {
+       "name": "Jansen House",
+       "newSales12m": 10,
+       "distanceM": 1880
+      }
+     ],
+     "otherDevelopments2km": 140,
+     "newSales2km": 125,
+     "resales2km": 684,
+     "purchases2km": 809,
+     "subsalesExcluded2km": 33,
+     "newSaleSharePct": 15.5
+    },
+    "period": {
+     "start": "2025-10",
+     "end": "2026-09"
+    },
+    "sourceIds": [
+     "URA_TRANSACTIONS"
+    ]
+   },
+   {
+    "itemId": "B1/bella-vista/supply.unsoldInventory",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "S",
+    "measure": "supply.unsoldInventory",
+    "label": "Unsold inventory",
+    "status": "not_available",
+    "missing": {
+     "reason": "not available until the URA-based launched-unsold measure (S3) passes the V1 local validation; no other inventory source is used"
+    },
+    "statement": "Not available: unsold inventory has not been validated.",
+    "data": null,
+    "period": null,
+    "sourceIds": []
+   },
+   {
+    "itemId": "B1/bella-vista/supply.pipeline",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "S",
+    "measure": "supply.pipeline",
+    "label": "Known pipeline",
+    "status": "partial",
+    "missing": {
+     "reason": "known sites only; not a complete pipeline"
+    },
+    "statement": "Within 2 km: One Chuan Grove (government land sale site, awarded, about 1,060 homes), about 1,380 m. Known sites only; not a complete pipeline.",
+    "data": {
+     "sites": [
+      {
+       "name": "One Chuan Grove",
+       "kind": "gls",
+       "stage": "awarded",
+       "propertyClass": "condo",
+       "homesApprox": 1060,
+       "distanceM": 1380
+      }
+     ]
+    },
+    "period": null,
+    "sourceIds": [
+     "GW_UPCOMING"
+    ]
+   },
+   {
+    "itemId": "B1/bella-vista/supply.quietArea",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "S",
+    "measure": "supply.quietArea",
+    "label": "Quiet-area check",
+    "status": "available",
+    "missing": null,
+    "statement": "Not a quiet area. 684 resales within 2 km in Oct 2025–Sep 2026, more than 228 of 462 similar developments.",
+    "data": {
+     "flag": false,
+     "resales2km": 684,
+     "percentile": 49.6,
+     "peersWithValue": 462,
+     "lower": 228,
+     "equal": 2,
+     "higher": 232,
+     "thresholdPercentile": 30
+    },
+    "period": {
+     "start": "2025-10",
+     "end": "2026-09"
+    },
+    "sourceIds": [
+     "URA_TRANSACTIONS"
+    ]
+   },
+   {
+    "itemId": "B1/bella-vista/market.backdrop",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
+    },
+    "panel": "M",
+    "measure": "market.backdrop",
+    "label": "Market backdrop",
+    "status": "available",
+    "missing": null,
+    "statement": "Condo and EC resales within 2 km: 684 in Oct 2025–Sep 2026 against 807 in Oct 2024–Sep 2025 (−15.2%). Planning-area private resales −15.2%. Observed transactions, not a prediction.",
+    "data": {
+     "latest": 684,
+     "prior": 807,
+     "changePct": -15.2,
+     "planningAreaChangePct": -15.2
+    },
+    "period": {
+     "latest": {
+      "start": "2025-10",
+      "end": "2026-09"
+     },
+     "prior": {
+      "start": "2024-10",
+      "end": "2025-09"
+     }
+    },
+    "sourceIds": [
+     "URA_TRANSACTIONS"
+    ]
+   }
+  ]
+ },
+ "sources": [
+  {
+   "id": "URA_TRANSACTIONS",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "PMI_Resi_Transaction",
+   "datasetId": "PMI_Resi_Transaction",
+   "asAt": "2026-09",
+   "updated": null,
+   "accessed": "2026-10-05",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0 (URA Data Service grant of licence)",
+    "url": "https://www.ura.gov.sg/eservices-info/maps/acceptance-grant-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated, with the access date.",
+     "Analysis and derived statistics are Groundwork’s; not endorsed by URA."
+    ]
+   },
+   "attribution": "Contains information from URA private residential data (PMI_Resi_Transaction) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
+   "url": "https://eservice.ura.gov.sg/maps/api/"
+  },
+  {
+   "id": "LTA_RAIL_EXITS",
+   "publisher": "Land Transport Authority (LTA)",
+   "dataset": "LTA MRT Station Exit",
+   "datasetId": "d_b39d3a0871985372d7e1637193335da5",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from LTA MRT Station Exit (Land Transport Authority (LTA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_b39d3a0871985372d7e1637193335da5/view"
+  },
+  {
+   "id": "MOE_SCHOOLS",
+   "publisher": "Ministry of Education (MOE)",
+   "dataset": "General information of schools",
+   "datasetId": "d_688b934f82c1059ed0a6993d2a829089",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from General information of schools (Ministry of Education (MOE)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_688b934f82c1059ed0a6993d2a829089/view",
+   "note": "Positions from OneMap."
+  },
+  {
+   "id": "NEA_SUPERMARKETS",
+   "publisher": "National Environment Agency (NEA)",
+   "dataset": "List of Supermarket Licences",
+   "datasetId": "d_11edd0117280c5776651d7891114c88c",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from List of Supermarket Licences (National Environment Agency (NEA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_11edd0117280c5776651d7891114c88c/view",
+   "note": "Positions from OneMap."
+  },
+  {
+   "id": "NEA_HAWKERS",
+   "publisher": "National Environment Agency (NEA)",
+   "dataset": "Hawker Centres",
+   "datasetId": "d_4a086da0a5553be1d89383cd90d07ecd",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from Hawker Centres (National Environment Agency (NEA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_4a086da0a5553be1d89383cd90d07ecd/view"
+  },
+  {
+   "id": "NPARKS_PARKS",
+   "publisher": "National Parks Board (NParks)",
+   "dataset": "NParks Parks and Nature Reserves",
+   "datasetId": "d_77d7ec97be83d44f61b85454f844382f",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from NParks Parks and Nature Reserves (National Parks Board (NParks)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_77d7ec97be83d44f61b85454f844382f/view"
+  },
+  {
+   "id": "ONEMAP",
+   "publisher": "Singapore Land Authority (SLA)",
+   "dataset": "OneMap Search",
+   "datasetId": "onemap.gov.sg",
+   "asAt": null,
+   "updated": null,
+   "accessed": "2026-10-20",
+   "licence": {
+    "name": "OneMap Terms of Use and OneMap Open Data Licence (Singapore Open Data Licence v1.0), registered API access",
+    "url": "https://www.onemap.gov.sg/legal/opendatalicence.html",
+    "status": "confirmed",
+    "conditions": [
+     "Groundwork’s registered OneMap API access confirmed by Master Planning, 31 Oct 2026 (Terms of Use: https://www.onemap.gov.sg/legal/termsofuse.html).",
+     "Open Data Licence: commercial and non-commercial use with attribution; no implied official status; provided as is; terminable on breach.",
+     "Use is limited to derived straight-line distances and counts: no OneMap coordinates, address records, map tiles or bulk positions are published (Terms of Use clause 3).",
+     "The Developer Agreement text is not held in Groundwork’s records; no specific restriction from it has been identified. File a copy with the release record.",
+     "Keep SLA copyright notices and trademarks unaltered."
+    ]
+   },
+   "attribution": "Positions: OneMap © contributors | Singapore Land Authority. Contains information from OneMap Search, used under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://www.onemap.gov.sg/"
+  },
+  {
+   "id": "GW_UPCOMING",
+   "publisher": "Groundwork",
+   "dataset": "Groundwork upcoming register (URA Sale Sites, launch records, OneMap)",
+   "datasetId": "groundwork-upcoming",
+   "asAt": "2026-10-21",
+   "updated": null,
+   "accessed": null,
+   "licence": {
+    "name": "Groundwork derived data",
+    "url": null,
+    "status": "own",
+    "conditions": []
+   },
+   "attribution": "Named sites compiled by Groundwork from official URA Sale Sites, launch records and the sources cited for each site.",
+   "url": null,
+   "note": "A site stage is named only where a cited source states it; otherwise \"Upcoming development\"."
+  }
+ ]
+}

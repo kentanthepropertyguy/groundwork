@@ -204,8 +204,12 @@ try:
             check(f'{vn}: Search property with an empty box puts the cursor in it', pg.evaluate("document.activeElement && document.activeElement.id === 'q'") and '/prism/' not in pg.url)
             pg.fill('#q', 'kingsford'); pg.wait_for_selector('#res [data-id="kingsford-hillview-peak"]', timeout=20000); n = pg.locator('#res button[data-id]').count(); pg.click('[data-search-go]'); pg.wait_for_timeout(500)
             check(f'{vn}: ambiguous "kingsford" ({n} matches): Search property moves to the list, opens nothing', n > 1 and pg.evaluate("!!(document.activeElement && document.activeElement.dataset && document.activeElement.dataset.id)") and '/prism/' not in pg.url and pg.locator('#rwOver [data-ov]').count() == 0)
-            pg.click('#res [data-id="kingsford-hillview-peak"]'); pg.wait_for_selector('[data-ov="dev"][data-ov-id="kingsford-hillview-peak"]', timeout=20000)
-            check(f'{vn}: … choosing Kingsford Hillview Peak opens its Property Data overview (no PRISM)', '/prism/' not in pg.url and 'PRISM' not in pg.inner_text('#rwOver'))
+            # nationwide (GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1): Kingsford Hillview Peak now has an approved PRISM report, so Research's own search
+            # leads with its PRISM page (the same rule as every development with PRISM); a development without one keeps its overview (below)
+            pg.click('#res [data-id="kingsford-hillview-peak"]'); pg.wait_for_selector('[data-gwp-page="kingsford-hillview-peak"]', timeout=20000)
+            check(f'{vn}: … choosing Kingsford Hillview Peak (nationwide PRISM) opens its PRISM Analysis', pg.url.endswith('#/prism/kingsford-hillview-peak'))
+            pg.goto(B + '/research/'); pg.wait_for_selector('#q', timeout=20000); pg.fill('#q', 'jadescape'); pg.wait_for_selector('#res [data-id="jadescape"]', timeout=20000); pg.click('#res [data-id="jadescape"]'); pg.wait_for_selector('[data-ov="dev"][data-ov-id="jadescape"]', timeout=20000); pg.wait_for_timeout(1200)
+            check(f'{vn}: … a development without PRISM (Jadescape) opens its Property Data overview (no PRISM)', '/prism/' not in pg.url and 'PRISM' not in pg.inner_text('#rwOver'))
             pg.fill('#q', ''); pg.fill('#q', 'kingsford'); pg.wait_for_selector('#res [data-id="kingsford-waterbay"]', timeout=20000); pg.click('#res [data-id="kingsford-waterbay"]'); pg.wait_for_selector('[data-gwp-page="kingsford-waterbay"]', timeout=20000)
             check(f'{vn}: … choosing Kingsford Waterbay from the same list opens its PRISM Analysis', pg.url.endswith('#/prism/kingsford-waterbay'))
             # "Explore sales by size": its Property Data at the sizes section; Back returns to PRISM

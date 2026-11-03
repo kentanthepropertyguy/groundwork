@@ -3,11 +3,11 @@
  "reportId": "the-quinn",
  "name": "The Quinn",
  "kind": "completed",
- "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-e48acc945f90",
+ "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
  "supplementsV1Report": null,
  "release": {
   "status": "approved",
-  "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2"
+  "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
  },
  "compositeScore": null,
  "peerComparison": {
@@ -23,7 +23,7 @@
     "itemId": "A2/the-quinn/P",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
     },
     "dimension": "P",
     "label": "Price position",
@@ -76,7 +76,7 @@
     "itemId": "A2/the-quinn/R",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
     },
     "dimension": "R",
     "label": "Resale activity",
@@ -139,7 +139,7 @@
     "itemId": "A2/the-quinn/price.entry",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
     },
     "panel": "P",
     "measure": "price.entry",
@@ -157,7 +157,7 @@
     "itemId": "A2/the-quinn/resale.sustained",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
     },
     "panel": "R",
     "measure": "resale.sustained",
@@ -184,7 +184,7 @@
     "itemId": "A2/the-quinn/infrastructure.mrt",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
     },
     "panel": "I",
     "measure": "infrastructure.mrt",
@@ -225,7 +225,7 @@
     "itemId": "A2/the-quinn/infrastructure.schools",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
     },
     "panel": "I",
     "measure": "infrastructure.schools",
@@ -261,7 +261,7 @@
     "itemId": "A2/the-quinn/infrastructure.amenities",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
     },
     "panel": "I",
     "measure": "infrastructure.amenities",
@@ -303,7 +303,7 @@
     "itemId": "A2/the-quinn/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
@@ -321,7 +321,7 @@
     "itemId": "A2/the-quinn/supply.competition",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
     },
     "panel": "S",
     "measure": "supply.competition",
@@ -362,7 +362,7 @@
     "itemId": "A2/the-quinn/supply.unsoldInventory",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
     },
     "panel": "S",
     "measure": "supply.unsoldInventory",
@@ -380,7 +380,7 @@
     "itemId": "A2/the-quinn/supply.pipeline",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
     },
     "panel": "S",
     "measure": "supply.pipeline",
@@ -411,7 +411,7 @@
     "itemId": "A2/the-quinn/supply.quietArea",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
     },
     "panel": "S",
     "measure": "supply.quietArea",
@@ -441,7 +441,7 @@
     "itemId": "A2/the-quinn/market.backdrop",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2"
+     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
     },
     "panel": "M",
     "measure": "market.backdrop",

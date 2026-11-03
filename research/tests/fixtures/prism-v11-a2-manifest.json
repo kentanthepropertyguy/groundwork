@@ -1,0 +1,109 @@
+{
+ "schemaVersion": "prism-public-v1.1-r2",
+ "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-e48acc945f90",
+ "status": "approved",
+ "approvalRef": "GW-PRISM-V1.1-2026-11-03-A2",
+ "amendmentRefs": [
+  "GW-PRISM-V1.1-2026-11-03-DECILE"
+ ],
+ "generatedAt": "2026-11-03T03:50:00Z",
+ "publishPath": "data/prism/v1.1/",
+ "supplements": {
+  "schemaVersion": "prism-public-v1",
+  "datasetReleaseId": "prism-v1-release-2026-10-30-10911d7e2c92",
+  "approvalRef": "GW-PRISM-V1-2026-10-31-A1",
+  "reports": [
+   {
+    "id": "kingsford-waterbay",
+    "path": "reports/kingsford-waterbay.json",
+    "sha256": "2d7266d31571169f2281a8aad3b31acb682de0229a6fd106cf47d2ff54ca1144"
+   },
+   {
+    "id": "hougang-central",
+    "path": "reports/hougang-central.json",
+    "sha256": "330f8e9f874bbf0e9e282b75d9e94b19a5e8d723be1f3ccb20faabfa306fc78f"
+   },
+   {
+    "id": "thomson-three",
+    "path": "reports/thomson-three.json",
+    "sha256": "56b6139e0f013ac17bf92ac18183e290cc46fdb617e7906dc2513ff14e948ce1"
+   }
+  ]
+ },
+ "dataPeriodsBySource": {
+  "URA_TRANSACTIONS": "2026-09",
+  "URA_RENTAL": "2026-09",
+  "URA_DWELLING_UNITS": "URA states Q4 2022; file updated 2026-02-26",
+  "URA_MP2019": "Master Plan 2019",
+  "GW_BEDROOM": "2026-09",
+  "SINGSTAT_GHS2025": "GHS 2025",
+  "LTA_RAIL_EXITS": "accessed 2026-10-20",
+  "MOE_SCHOOLS": "accessed 2026-10-20",
+  "NEA_SUPERMARKETS": "accessed 2026-10-20",
+  "NEA_HAWKERS": "accessed 2026-10-20",
+  "NPARKS_PARKS": "accessed 2026-10-20",
+  "ONEMAP": "accessed 2026-10-20",
+  "GW_UPCOMING": "2026-10-21"
+ },
+ "attribution": [
+  "Contains information from URA private residential data (PMI_Resi_Transaction) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
+  "Contains information from URA private residential data (PMI_Resi_Rental) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
+  "Contains information from No of Dwelling Units (Urban Redevelopment Authority (URA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+  "Contains information from Master Plan 2019 Subzone Boundary (No Sea) (Urban Redevelopment Authority (URA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+  "Bedroom classification by Groundwork from floor plans and URA rental records.",
+  "SingStat, General Household Survey 2025, table C020145 (resident households by planning area and monthly household employment income)",
+  "Contains information from LTA MRT Station Exit (Land Transport Authority (LTA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+  "Contains information from General information of schools (Ministry of Education (MOE)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+  "Contains information from List of Supermarket Licences (National Environment Agency (NEA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+  "Contains information from Hawker Centres (National Environment Agency (NEA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+  "Contains information from NParks Parks and Nature Reserves (National Parks Board (NParks)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+  "Positions: OneMap © contributors | Singapore Land Authority. Contains information from OneMap Search, used under the terms of the Singapore Open Data Licence version 1.0.",
+  "Named sites compiled by Groundwork from official URA Sale Sites, launch records and the sources cited for each site."
+ ],
+ "reports": [
+  {
+   "id": "kingsford-waterbay",
+   "path": "reports/kingsford-waterbay.json",
+   "sha256": "f44f7b397140e46039baf573dc94946f71d8a8eae9d0e76068e4600f785c3de1",
+   "approved": true,
+   "items": 17
+  },
+  {
+   "id": "thomson-three",
+   "path": "reports/thomson-three.json",
+   "sha256": "6dab6f8fc996eaffa71d72b1ac24c063bf2af79b050aef7f302e391955c98aeb",
+   "approved": true,
+   "items": 16
+  },
+  {
+   "id": "hougang-central",
+   "path": "reports/hougang-central.json",
+   "sha256": "35bd0d15da9a7fffbd564ee58de62cde0551f56e26a53c2b96082ced72ed05e4",
+   "approved": true,
+   "items": 1
+  },
+  {
+   "id": "hundred-palms-residences",
+   "path": "reports/hundred-palms-residences.json",
+   "sha256": "3224139662af76e226db1fa21c8207a312a6458a86ad2e73b38051d30428bc24",
+   "approved": true,
+   "items": 13
+  },
+  {
+   "id": "the-quinn",
+   "path": "reports/the-quinn.json",
+   "sha256": "74b27fd71520dfe38d0438386e214b2e0edca16c048a4a5e2d4275f8e5ec07b3",
+   "approved": true,
+   "items": 13
+  }
+ ],
+ "approvalChain": [
+  "GW-PRISM-V1.1-2026-11-01-A1",
+  "GW-PRISM-V1.1-2026-11-03-DECILE",
+  "GW-PRISM-V1.1-2026-11-03-A2"
+ ],
+ "v11OnlyReports": [
+  "hundred-palms-residences",
+  "the-quinn"
+ ]
+}

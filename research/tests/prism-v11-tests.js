@@ -1,17 +1,19 @@
-/* PRISM V1.1 r2 (GW-PRISM-V1.1-2026-11-03-A2): the publication gate and what it draws, in node.
+/* PRISM V1.1 nationwide (GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1, after A1, DECILE and A2): the publication gate and what it draws for the
+   five curated reports approved before the nationwide batch, in node. (Every one of the 2,099 reports: prism-batch-tests.js.)
    Run from the site folder:  node research/tests/prism-v11-tests.js
-   1 the approved files pass: manifest pinned by sha256, the A1 -> DECILE -> A2 chain, 5 reports and exactly the 60 approved items
-     (Kingsford Waterbay 17, Thomson Three 16, Hougang Central 1, Hundred Palms Residences 13, The Quinn 13); the supplements pair with the
-     deployed V1 reports; the two V1.1-only entries are not V1 reports
-   2 anything else fails closed: another manifest, chain, release or V1 pairing; a score, purchasing-power, affordability or forecast field
-     or wording; a Market position (ranks withdrawn); unsold inventory or future transport with a value; a Market rank; a settling value;
-     a missing measure with a value; an item without the A2 approval (the report is then not shown at all)
+   1 the approved files pass: index.json pinned by sha256; the release id and the A1 -> DECILE -> A2 -> NATIONWIDE-1 chain; 16 shards, each
+     id in the shard its sha256 names; the five curated reports keep exactly their approved items (17, 16, 1, 13, 13) and content; the three
+     supplements pair with the deployed V1 reports; the V1 pairing and data periods pinned in the page equal the release's own manifest
+   2 anything else fails closed: another index, chain, release or manifest binding; a shard from another release, with another count or an
+     id in the wrong shard; another V1 pairing; the previous A1 or A2 files; a score, purchasing-power, affordability or forecast field or
+     wording; a Market position (ranks withdrawn); unsold inventory or future transport with a value; a Market rank; a settling value; a
+     missing measure with a value; an item without the NATIONWIDE-1 approval (the report is then not shown at all)
    3 the pages show every item as the report states it: positions, the peer-window line, every profile line (missing evidence named),
-     the surrounding-market definition with Supply and Market, yields, income, the profile rule and comparison group; all 56 approved
+     the surrounding-market definition with Supply and Market, yields, income, the profile rule and comparison group; the approved
      editorial texts are known and every one the data uses is shown verbatim; Market has no rank, decile or label
-   4 pages: the two V1 assessments keep their verdict with the r2 supplement; Thomson Three, Hundred Palms Residences and The Quinn are
+   4 pages: the two V1 assessments keep their verdict with the supplement; Thomson Three, Hundred Palms Residences and The Quinn are
      evidence-profile pages (no verdict); Hougang Central stays income-only; with no V1.1 the V1 pages are byte for byte V1 and nothing
-     else has a page; the previous (A1) files are refused by this page (rollback restores both together) */
+     else has a page */
 'use strict';
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
 const SITE = path.resolve(__dirname, '../..');
@@ -22,42 +24,48 @@ const read = (p) => fs.readFileSync(path.join(SITE, p), 'utf8'), sha = (t) => cr
 const throws = (f) => { try { f(); return false; } catch (e) { return true; } };
 const clone = (o) => JSON.parse(JSON.stringify(o));
 const text = (h) => h.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\s+/g, ' ');
-const v1 = JSON.parse(read('data/prism/v1/manifest.json')), mt = read('data/prism/v1.1/manifest.json'), m = JSON.parse(mt);
+const v1 = JSON.parse(read('data/prism/v1/manifest.json')), it = read('data/prism/v1.1/index.json'), ix = JSON.parse(it), mt = read('data/prism/v1.1/manifest.json'), m = JSON.parse(mt);
+const key = (id) => sha(id).charAt(0), shard = (k) => JSON.parse(read('data/prism/v1.1/index/' + k + '.json')), sEntry = (k) => ix.shards.find((x) => x.key === k);
 const SUPP = ['kingsford-waterbay', 'thomson-three', 'hougang-central'], ONLY = ['hundred-palms-residences', 'the-quinn'], ALL = SUPP.concat(ONLY);
 const rep = (id) => read('data/prism/v1.1/reports/' + id + '.json'), R = (id) => JSON.parse(rep(id)), rep1 = (id) => JSON.parse(read('data/prism/v1/reports/' + id + '.json'));
-const e1 = (id) => v1.reports.find((x) => x.id === id), e = (id) => m.reports.find((x) => x.id === id);
-const v11 = (id, r) => { const v = G.model11(G.checkReport11(r || R(id), e(id), ONLY.indexOf(id) >= 0), e(id)); if (v) v.periods = m.dataPeriodsBySource; return v; };
+const e1 = (id) => v1.reports.find((x) => x.id === id), e = (id) => shard(key(id)).reports.find((x) => x.id === id);
+const v11 = (id, r) => { const v = G.model11(G.checkReport11(r || R(id), e(id), ONLY.indexOf(id) >= 0), e(id)); if (v) v.periods = G.V11.PERIODS; return v; };
 const v1md = (id) => (e1(id) ? G.model(G.checkReport(rep1(id), e1(id)), v1) : null);
 const page = (id) => G.compose(v1md(id), v11(id));
 
 // ---- 1 the approved release
-check('the r2 manifest is the approved file (sha256 pinned in the page)', sha(mt) === G.V11.MANIFEST, sha(mt));
-check('release prism-v1.1-r2-release-2026-11-03-e48acc945f90, approval A2, chain A1 -> DECILE -> A2', m.datasetReleaseId === G.V11.RELEASE && m.approvalRef === 'GW-PRISM-V1.1-2026-11-03-A2' && m.approvalChain.join(' ') === 'GW-PRISM-V1.1-2026-11-01-A1 GW-PRISM-V1.1-2026-11-03-DECILE GW-PRISM-V1.1-2026-11-03-A2');
-check('it supplements the deployed V1 release (GW-PRISM-V1-2026-10-31-A1); V1.1-only: Hundred Palms Residences and The Quinn', m.supplements.datasetReleaseId === v1.datasetReleaseId && m.supplements.approvalRef === v1.approvalRef && m.v11OnlyReports.join() === ONLY.join());
-check('the folder holds only the manifest and the 5 reports', fs.readdirSync(path.join(SITE, 'data/prism/v1.1/reports')).sort().join() === ALL.slice().sort().map((x) => x + '.json').join() && fs.readdirSync(path.join(SITE, 'data/prism/v1.1')).sort().join() === 'manifest.json,reports');
+check('index.json is the approved file (sha256 pinned in the page) and binds the approved manifest', sha(it) === G.V11.INDEX && ix.manifestSha256 === sha(mt) && sha(mt) === G.V11.MANIFEST);
+check('release prism-v1.1-r2-release-2026-11-03-505d952296ff, approval NATIONWIDE-1, chain A1 -> DECILE -> A2 -> NATIONWIDE-1', !throws(() => G.checkIndex(ix)) && ix.datasetReleaseId === G.V11.RELEASE && ix.approvalChain.join(' ') === 'GW-PRISM-V1.1-2026-11-01-A1 GW-PRISM-V1.1-2026-11-03-DECILE GW-PRISM-V1.1-2026-11-03-A2 GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1');
+check('16 shards, each passing its gate, every id in the shard its sha256 names (2,099 reports)', ix.shards.length === 16 && ix.shards.every((x) => sha(read('data/prism/v1.1/' + x.path)) === x.sha256 && !throws(() => G.checkShard(shard(x.key), x, key))) && ix.reports === 2099);
+check('the V1 pairing pinned in the page equals the release\'s own (supplements: release, approval, three sha256)', m.supplements.datasetReleaseId === G.V11.V1PAIR.release && m.supplements.approvalRef === G.V11.V1PAIR.approvalRef && m.supplements.reports.map((x) => x.sha256).sort().join() === G.V11.V1PAIR.sha256.slice().sort().join() && v1.datasetReleaseId === G.V11.V1PAIR.release);
+check('the data periods pinned in the page equal the release\'s own (dataPeriodsBySource)', JSON.stringify(m.dataPeriodsBySource) === JSON.stringify(G.V11.PERIODS));
+check('the five curated reports are marked curated in their shards (profile "approved")', ALL.every((id) => e(id).profile === 'approved'));
 const counts = {};
 ALL.forEach((id) => {
   const t = rep(id);
-  if (SUPP.indexOf(id) >= 0) check(id + ': pairs with the deployed V1 report (sha256)', sha(read('data/prism/v1/reports/' + id + '.json')) === e1(id).sha256 && m.supplements.reports.find((x) => x.id === id).sha256 === e1(id).sha256);
+  if (SUPP.indexOf(id) >= 0) check(id + ': pairs with the deployed V1 report (sha256)', sha(read('data/prism/v1/reports/' + id + '.json')) === e1(id).sha256 && !throws(() => G.checkPair(v1, e1(id))) && JSON.parse(t).supplementsV1Report === id);
   else check(id + ': a V1.1-only entry (not in V1, supplementsV1Report null)', !e1(id) && JSON.parse(t).supplementsV1Report === null);
-  check(id + ': its report matches the manifest (sha256)', sha(t) === e(id).sha256);
-  let v = null; const pass = !throws(() => { G.checkManifest11(m, v1, e1(id) ? { id, sha256: e1(id).sha256 } : null); v = v11(id); });
+  check(id + ': its report matches its shard entry (sha256)', sha(t) === e(id).sha256);
+  let v = null; const pass = !throws(() => { v = v11(id); });
   counts[id] = v ? v.items : 0;
-  check(id + ': passes the gate with ' + e(id).items + ' approved items, as the manifest lists', pass && v && v.items === e(id).items, counts[id]);
+  check(id + ': passes the gate with ' + e(id).items + ' approved items, as the shard lists', pass && v && v.items === e(id).items, counts[id]);
 });
-check('exactly the 60 approved items: 17, 16, 1, 13, 13', ALL.map((id) => counts[id]).join() === '17,16,1,13,13' && Object.values(counts).reduce((a, b) => a + b, 0) === 60, counts);
-
+check('exactly the 60 curated items: 17, 16, 1, 13, 13', ALL.map((id) => counts[id]).join() === '17,16,1,13,13' && Object.values(counts).reduce((a, b) => a + b, 0) === 60, counts);
 // ---- 2 fails closed
-const KW = R('kingsford-waterbay'), kwE = e('kingsford-waterbay'), kwP = { id: 'kingsford-waterbay', sha256: e1('kingsford-waterbay').sha256 }, HP = R('hundred-palms-residences'), hpE = e('hundred-palms-residences');
-check('another approval reference (A1): refused', throws(() => G.checkManifest11(Object.assign(clone(m), { approvalRef: 'GW-PRISM-V1.1-2026-11-01-A1' }), v1, kwP)));
-check('a draft manifest: refused', throws(() => G.checkManifest11(Object.assign(clone(m), { status: 'draft' }), v1, kwP)));
-check('another approval chain (no decile amendment): refused', throws(() => G.checkManifest11(Object.assign(clone(m), { approvalChain: ['GW-PRISM-V1.1-2026-11-01-A1', 'GW-PRISM-V1.1-2026-11-03-A2'] }), v1, kwP)));
-check('another release id: refused', throws(() => G.checkManifest11(Object.assign(clone(m), { datasetReleaseId: 'prism-v1.1-r2-release-other' }), v1, kwP)));
-check('another V1 release: refused', throws(() => G.checkManifest11(m, Object.assign(clone(v1), { datasetReleaseId: 'prism-v1-release-other' }), kwP)));
-check('a different V1 report on screen (pairing sha256): refused', throws(() => G.checkManifest11(m, v1, { id: 'kingsford-waterbay', sha256: '0'.repeat(64) })));
-check('a V1 report listed as V1.1-only: refused', throws(() => G.checkManifest11(Object.assign(clone(m), { v11OnlyReports: ONLY.concat(['kingsford-waterbay']) }), v1, kwP)));
-check('a manifest entry without its item count: refused', throws(() => { const x = clone(m); delete x.reports[0].items; G.checkManifest11(x, v1, kwP); }));
-check('the previous (A1) manifest: refused by this page', throws(() => G.checkManifest11(JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/prism-v11-a1-manifest.json'), 'utf8')), v1, kwP)));
+const KW = R('kingsford-waterbay'), kwE = e('kingsford-waterbay'), HP = R('hundred-palms-residences'), hpE = e('hundred-palms-residences');
+check('another approval reference (A2): refused', throws(() => G.checkIndex(Object.assign(clone(ix), { approvalRef: 'GW-PRISM-V1.1-2026-11-03-A2' }))));
+check('a draft index: refused', throws(() => G.checkIndex(Object.assign(clone(ix), { status: 'draft' }))));
+check('another approval chain (no NATIONWIDE-1): refused', throws(() => G.checkIndex(Object.assign(clone(ix), { approvalChain: ix.approvalChain.slice(0, 3) }))));
+check('another release id: refused', throws(() => G.checkIndex(Object.assign(clone(ix), { datasetReleaseId: 'prism-v1.1-r2-release-other' }))));
+check('an index binding another manifest: refused', throws(() => G.checkIndex(Object.assign(clone(ix), { manifestSha256: '0'.repeat(64) }))));
+check('15 shards, or shard counts that do not add up: refused', throws(() => G.checkIndex(Object.assign(clone(ix), { shards: ix.shards.slice(0, 15) }))) && throws(() => G.checkIndex(Object.assign(clone(ix), { reports: 2100 }))));
+{ const k = key('kingsford-waterbay'), sh = shard(k), en = sEntry(k);
+  check('a shard from another release: refused', throws(() => G.checkShard(Object.assign(clone(sh), { datasetReleaseId: 'other' }), en, key)));
+  check('a shard with one report more or less than the index lists: refused', throws(() => G.checkShard(Object.assign(clone(sh), { reports: sh.reports.slice(1) }), en, key)));
+  check('a shard holding an id that belongs in another shard: refused', throws(() => { const x = clone(sh); x.reports[0].id = 'not-this-shard-' + k; let i = 0; while (key(x.reports[0].id) === k) x.reports[0].id = 'moved-' + (i++); x.reports[0].path = 'reports/' + x.reports[0].id + '.json'; G.checkShard(x, en, key); }));
+  check('a shard listing an id twice: refused', throws(() => { const x = clone(sh); x.reports[1] = clone(x.reports[0]); G.checkShard(x, en, key); })); }
+check('another V1 release, or a different V1 report on screen (pairing sha256): refused', throws(() => G.checkPair(Object.assign(clone(v1), { datasetReleaseId: 'prism-v1-release-other' }), e1('kingsford-waterbay'))) && throws(() => G.checkPair(v1, { id: 'kingsford-waterbay', sha256: '0'.repeat(64) })));
+check('the previous A1 and A2 files (left in place, or rolled back without the page): refused as the index', throws(() => G.checkIndex(JSON.parse(read('research/tests/fixtures/prism-v11-a1-manifest.json')))) && throws(() => G.checkIndex(JSON.parse(read('research/tests/fixtures/prism-v11-a2-manifest.json')))));
 check('a report under another approval: refused', throws(() => G.checkReport11(Object.assign(clone(KW), { release: { status: 'approved', approvalRef: 'GW-PRISM-V1.1-2026-11-01-A1' } }), kwE, false)));
 check('a V1.1-only report claiming a V1 report (or the reverse): refused', throws(() => G.checkReport11(HP, hpE, false)) && throws(() => G.checkReport11(KW, kwE, true)));
 check('a composite score: refused', throws(() => G.checkReport11(Object.assign(clone(KW), { compositeScore: 72 }), kwE, false)));
@@ -190,7 +198,9 @@ const mod = (id, f) => { const r = clone(R(id)); f(r); return G.model11(r, null)
 { const x = G.reveal11(mod('thomson-three', (r) => { const l = r.profile.lines.find((y) => y.measure === 'supply.quietArea'); l.statement = l.statement.replace('Quiet area: ', 'Thin: '); }));
   check('a quiet-market Reveal never appears without its qualification (it becomes the factual summary)', x.kind === 'summary'); }
 { const x = G.reveal11(mod('the-quinn', (r) => { r.peerComparison.positions = []; r.profile.lines.find((y) => y.measure === 'supply.quietArea').data.flag = false; }));
-  const pm = G.compose(null, (() => { const v = mod('the-quinn', (r) => { r.peerComparison.positions = []; }); v.periods = m.dataPeriodsBySource; return v; })());
-  check('no position and no flag: no card at all; the five dimensions still show', x === null && !G.pageHtml(pm, { root: '../' }).includes('data-gwp-reveal') && G.pageHtml(pm, { root: '../' }).includes('id="gwpDimsH"')); }
+  check('D3 (NATIONWIDE-1): no position and no flag: the controlled evidence summary of the available measures ("Available evidence: …"), never a Reveal', x && x.kind === 'summary' && x.id === 'evidence' && x.head === G.ES.head + 'MRT today, Primary schools, Everyday amenities, Market backdrop', x); }
+{ const v = mod('the-quinn', (r) => { r.peerComparison.positions = []; r.profile.lines.forEach((l) => { if (G.ES.measures.indexOf(l.measure) >= 0) { l.status = 'not_available'; l.data = null; l.statement = 'Not available: (test).'; } }); r.profile.lines.find((y) => y.measure === 'supply.quietArea').data.flag = false; });
+  v.periods = G.V11.PERIODS; const pm = G.compose(null, v);
+  check('no position, no flag and none of the four D3 measures: no card; the five dimensions still show', G.reveal11(v) === null && !G.pageHtml(pm, { root: '../' }).includes('data-gwp-reveal') && G.pageHtml(pm, { root: '../' }).includes('id="gwpDimsH"')); }
 console.log('prism-v11-tests: ' + ok + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

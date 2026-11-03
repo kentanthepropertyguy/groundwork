@@ -1,0 +1,1069 @@
+{
+ "schemaVersion": "prism-public-v1.1-r2-index",
+ "datasetReleaseId": "prism-v1.1-r2-release-2026-11-03-505d952296ff",
+ "key": "f",
+ "reports": [
+  {
+   "id": "120-grange",
+   "path": "reports/120-grange.json",
+   "sha256": "a9f6e7ef1b8242a3fb2e52254ae4f94388e96ab8abeb4450172891f821e4bf0f",
+   "items": 12,
+   "name": "120 Grange",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "21-richards",
+   "path": "reports/21-richards.json",
+   "sha256": "0e4c7a2c054cbb5c2d50af8ff5b78be05bc23091291756bcde93bd9692afe18c",
+   "items": 12,
+   "name": "21 Richards",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "24-one-residences",
+   "path": "reports/24-one-residences.json",
+   "sha256": "d1ab863f6c1f1555a19d2de91cb41ee66b1143ab71331a746d0306bc64ceb973",
+   "items": 11,
+   "name": "24 One Residences",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "3-at-phillips",
+   "path": "reports/3-at-phillips.json",
+   "sha256": "8541f2b4b8855884b7abcb4da6cc82d028fa3c9f50b2fdd8268ba78a114078e4",
+   "items": 11,
+   "name": "3@Phillips",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "balmoral-8",
+   "path": "reports/balmoral-8.json",
+   "sha256": "03c3048a0a8b043e7687c019ec6b2377655bae5f0885710fdaa3ba514b5c451a",
+   "items": 12,
+   "name": "Balmoral 8",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "bayville-condominium",
+   "path": "reports/bayville-condominium.json",
+   "sha256": "0c155502aac41e1915e9e845428f3d5d12e946164d319d17130df191bccfa438",
+   "items": 12,
+   "name": "Bayville Condominium",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "bishan-park-condominium",
+   "path": "reports/bishan-park-condominium.json",
+   "sha256": "7d7e73c73c87c771c5fc5ab2e0b0ea7e4a9c68c96f7d2b09629685aaa522f86e",
+   "items": 12,
+   "name": "Bishan Park Condominium",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "boon-teck-apartments",
+   "path": "reports/boon-teck-apartments.json",
+   "sha256": "1b43e3fac8a3ccde6c70682d16094b3a72169c9fdbaf953d051ce124599be848",
+   "items": 11,
+   "name": "Boon Teck Apartments",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "buona-lodge",
+   "path": "reports/buona-lodge.json",
+   "sha256": "bcc2937acb36c44067650425f6d0c3d5656ac3d9d263d55808b7947c1642f322",
+   "items": 11,
+   "name": "Buona Lodge",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "casa-cairnhill",
+   "path": "reports/casa-cairnhill.json",
+   "sha256": "c1450ee5e6dee0c01af5c7208058998b20d3ce7b2d6a00a9cadd19adb6ede606",
+   "items": 12,
+   "name": "Casa Cairnhill",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "casa-espania",
+   "path": "reports/casa-espania.json",
+   "sha256": "510c5d1000c18bf09d10e8c71941d132f1b83c8ef3b90e880882621604d1f85e",
+   "items": 11,
+   "name": "Casa Espania",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "casa-feliz",
+   "path": "reports/casa-feliz.json",
+   "sha256": "2531243a16a3afba698608385761326f4c15cf6bc09217100dd78ccf68c205a8",
+   "items": 11,
+   "name": "Casa Feliz",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "casa-riviera",
+   "path": "reports/casa-riviera.json",
+   "sha256": "bb172ecda935fb53e514b04b2cc150013a692c4a2eb930c3bafef263b2fe9c27",
+   "items": 12,
+   "name": "Casa Riviera",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "cavendish-park",
+   "path": "reports/cavendish-park.json",
+   "sha256": "49e4c0b55b79d10d49d805c996ba37ed47663a5cb9ceaf729466197c706398ac",
+   "items": 13,
+   "name": "Cavendish Park",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "chapel-lodge",
+   "path": "reports/chapel-lodge.json",
+   "sha256": "29942376438183e05e25fd5366e28cb2c34021d857f97ae60cea42125d109fd0",
+   "items": 11,
+   "name": "Chapel Lodge",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "city-edge",
+   "path": "reports/city-edge.json",
+   "sha256": "b53622e00cb440c06cb8e73d72a84187da328d336f48706f797a6f58a0303a44",
+   "items": 12,
+   "name": "City Edge",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "clementiwoods-condominium",
+   "path": "reports/clementiwoods-condominium.json",
+   "sha256": "5ef02c069f8e96ef9f3974b74fdb254501e4b76b3def94b3dcfcf38da0dcad51",
+   "items": 12,
+   "name": "Clementiwoods Condominium",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "cosy-23",
+   "path": "reports/cosy-23.json",
+   "sha256": "7ca8b97e9f6ddfe051d8a71bb35c13d4e53340b5429a453cc93ab20ce8338b38",
+   "items": 11,
+   "name": "Cosy 23",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "crystal-mansions",
+   "path": "reports/crystal-mansions.json",
+   "sha256": "7cf8b7fb9bed14c2b6bfbfc4b2c0ec093547c0fe7c320b99ac9e1ba9973f291b",
+   "items": 11,
+   "name": "Crystal Mansions",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "de-centurion",
+   "path": "reports/de-centurion.json",
+   "sha256": "e785a8d15dfb6d6527288ffc97419a65ed6e60e8c2f348a375464d66f00f9c31",
+   "items": 12,
+   "name": "DE Centurion",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "devonshire-12",
+   "path": "reports/devonshire-12.json",
+   "sha256": "bb2d467e44c20325c665482ca7a7b72aeeacb1d061ebf2fad9f248f9d03cddce",
+   "items": 11,
+   "name": "Devonshire 12",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "dorsett-residences",
+   "path": "reports/dorsett-residences.json",
+   "sha256": "232aedb72e2c240795d84bcc0a12599e709d01ea7448b10f8033718766a85cbe",
+   "items": 12,
+   "name": "Dorsett Residences",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "east-court",
+   "path": "reports/east-court.json",
+   "sha256": "05ec8b3d6dba84018952a7ed78e4ee30089e41281dac2f36f3aabb8773aebd64",
+   "items": 11,
+   "name": "East Court",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "ebony-mansions",
+   "path": "reports/ebony-mansions.json",
+   "sha256": "2ac473d00ecf34569be835368e75ef5e413398355fc9838a2b20653c79230b03",
+   "items": 12,
+   "name": "Ebony Mansions",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "eco-sanctuary",
+   "path": "reports/eco-sanctuary.json",
+   "sha256": "64bba187f1aee6dc9b21eaf2a99dfdb2eb7c6376310c34f8b6fa012808a1139f",
+   "items": 13,
+   "name": "Eco Sanctuary",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "ecoville",
+   "path": "reports/ecoville.json",
+   "sha256": "7b921dbfa21e28ca8f5db1e8da942348cc38e55e48e0267f2b5702e34dd17be2",
+   "items": 12,
+   "name": "Ecoville",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "eis-residences",
+   "path": "reports/eis-residences.json",
+   "sha256": "1c4b83956f788c2ec6d8d699a3b6baf1d76e62cce83a14938f5436583b44dd92",
+   "items": 11,
+   "name": "Eis Residences",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "espira-suites",
+   "path": "reports/espira-suites.json",
+   "sha256": "7ebd544c63505513a04d26b281f57ef973fe01dfc80e56e87cf2e79c2b6bd9bb",
+   "items": 12,
+   "name": "Espira Suites",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "fairlodge",
+   "path": "reports/fairlodge.json",
+   "sha256": "180cc7678da1d60aec59cb47c1a9f1682b2b300fefd8557d562a6923275a07d2",
+   "items": 11,
+   "name": "Fairlodge",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "freesia-woods",
+   "path": "reports/freesia-woods.json",
+   "sha256": "4be9461dea67224166936cb61ac0373f23651c1be79ec4b7df0fe58ae8ecbbc1",
+   "items": 12,
+   "name": "Freesia Woods",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "fulcrum",
+   "path": "reports/fulcrum.json",
+   "sha256": "1c3deee2a868323e6b2f726ac28f8b23a0afa55cd8891534e5de1c8e09ec6f01",
+   "items": 13,
+   "name": "Fulcrum",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "gemini-apartments",
+   "path": "reports/gemini-apartments.json",
+   "sha256": "9485db3b39bbb8ff32d1dea8ee05b5af97eb17480b173c3eb18e62d9602c674c",
+   "items": 11,
+   "name": "Gemini Apartments",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "goldhill-towers",
+   "path": "reports/goldhill-towers.json",
+   "sha256": "5b348ed61c451e3b909842bfd338b09741be394ab280adefd1f34da9e455fb2d",
+   "items": 13,
+   "name": "Goldhill Towers",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "grace-court",
+   "path": "reports/grace-court.json",
+   "sha256": "8fb6b100c53b641ae44d001e210858fed86fe67ee1837f57ea75f672f6ee3b19",
+   "items": 11,
+   "name": "Grace Court",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "grand-regalia",
+   "path": "reports/grand-regalia.json",
+   "sha256": "25d9d20ade7abc73b2a4ae9cf34a3a11a4adbfafaac3b527b1d72f3ebf98d349",
+   "items": 11,
+   "name": "Grand Regalia",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "grandview-suites",
+   "path": "reports/grandview-suites.json",
+   "sha256": "8d274d8a889142515d4576b90d14c2b43c7fce74da82044621f204f3e0401fb3",
+   "items": 12,
+   "name": "Grandview Suites",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "grosvenor-view",
+   "path": "reports/grosvenor-view.json",
+   "sha256": "11b790d3846cf405f792b5639bdf21570f7f7004377b68b1cbd81b8f9f36d568",
+   "items": 12,
+   "name": "Grosvenor View",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "guillemard-view",
+   "path": "reports/guillemard-view.json",
+   "sha256": "c6de921193e5727cf9923206971ecbf7f927a17a87b244085bbec6bd83f1ed07",
+   "items": 12,
+   "name": "Guillemard View",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "h-residences",
+   "path": "reports/h-residences.json",
+   "sha256": "29490bfc41704b16cbffd22666adf63bbf6fbd2f5bc8986a00188adea06140a2",
+   "items": 11,
+   "name": "H Residences",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "harbour-view-towers",
+   "path": "reports/harbour-view-towers.json",
+   "sha256": "c267f2f7f3c77f912a12c3e44a10a5e0aaf4c1aa92021930c90274ea6d4cc841",
+   "items": 13,
+   "name": "Harbour View Towers",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "harmony-at-1a",
+   "path": "reports/harmony-at-1a.json",
+   "sha256": "6be95bf53dad5cf6c9dd32f83735ee3ee310fc50cf3502a1991682c330649a7b",
+   "items": 11,
+   "name": "Harmony @ 1A",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "hoa-nam-building",
+   "path": "reports/hoa-nam-building.json",
+   "sha256": "9950e48c3efc3f69c90c1056556d927f090bdf9c4034377e0766088df83ea106",
+   "items": 12,
+   "name": "Hoa Nam Building",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "holland-mews",
+   "path": "reports/holland-mews.json",
+   "sha256": "c735748c172b715585cd48c5f35d9a444a8b36809a59ff6b659753cf533a0c1c",
+   "items": 11,
+   "name": "Holland Mews",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "idyllic-suites",
+   "path": "reports/idyllic-suites.json",
+   "sha256": "0600b486a1f3d486d12d2e6d215874a558bb94e3f8fd42072a261ca975a98654",
+   "items": 12,
+   "name": "Idyllic Suites",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "j-gateway",
+   "path": "reports/j-gateway.json",
+   "sha256": "be2772945c91765fb474e2c956190e1b8a2863309c66dff296279645ae947434",
+   "items": 13,
+   "name": "J Gateway",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "jersey-lodge",
+   "path": "reports/jersey-lodge.json",
+   "sha256": "623da7311ce525d2331ab3e70ba6ce11ccc43c8219d9a008b84f1434e0721521",
+   "items": 11,
+   "name": "Jersey Lodge",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "katong-apartments",
+   "path": "reports/katong-apartments.json",
+   "sha256": "036f7406a86a2ba4a1ff86b6146269b53d3885e479fa8a08afaa0fa60287359d",
+   "items": 11,
+   "name": "Katong Apartments",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "kovan-81",
+   "path": "reports/kovan-81.json",
+   "sha256": "83c7a1e466245700ffc5f525b1e906bf5cd281bd8699b908bb2f1b76f1dd96ec",
+   "items": 11,
+   "name": "Kovan 81",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "kuie-pong-loft",
+   "path": "reports/kuie-pong-loft.json",
+   "sha256": "e99450b023ed558bfaf696cd6068c90fac253ffe20e43c20231304797be4e9f6",
+   "items": 11,
+   "name": "Kuie Pong Loft",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "laguna-park",
+   "path": "reports/laguna-park.json",
+   "sha256": "7a47155bacd28e8f1ce450908c47812197b044bf89548edd0bdbce02492450f7",
+   "items": 13,
+   "name": "Laguna Park",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "lake-grande",
+   "path": "reports/lake-grande.json",
+   "sha256": "e3b3e332e2fd8eceead7581965d60a2572f933c0d653d81330da005888317018",
+   "items": 13,
+   "name": "Lake Grande",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "lakeholmz",
+   "path": "reports/lakeholmz.json",
+   "sha256": "ca019add55cf7f7a486e530eb8c2aee497161066f49d7b8e2d09c854bb20e39b",
+   "items": 12,
+   "name": "Lakeholmz",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "lloyd-court",
+   "path": "reports/lloyd-court.json",
+   "sha256": "3dccca730db5bc870f46d2cf720dafcdd1a56f392d9551cd9ab9a1e226daa863",
+   "items": 11,
+   "name": "Lloyd Court",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "mattar-residences",
+   "path": "reports/mattar-residences.json",
+   "sha256": "00e468d391aa41030f2df1ec238ad7d57421c52e8585519a218dd8289a8f7191",
+   "items": 12,
+   "name": "Mattar Residences",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "maysprings",
+   "path": "reports/maysprings.json",
+   "sha256": "9bed935f5b1ebe3c21484ec9cb4015132946c0708474fe7e088aeee199c9e8ad",
+   "items": 13,
+   "name": "Maysprings",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "mimosa-park",
+   "path": "reports/mimosa-park.json",
+   "sha256": "3f6aa7175ba6b62537721e941de94bb597e5ab9550976186dd2e73e0c0a4f2d8",
+   "items": 12,
+   "name": "Mimosa Park",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "moonstone-residences",
+   "path": "reports/moonstone-residences.json",
+   "sha256": "093896438b5a323e14c8a2b5a8b43460178c3d6f2578bc886587423f562acade",
+   "items": 13,
+   "name": "Moonstone Residences",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "mountbatten-lodge",
+   "path": "reports/mountbatten-lodge.json",
+   "sha256": "3f7d1bcd9e8a6f9412563731189d85befaf6afb5cbc54acd681cc18c24082fa8",
+   "items": 11,
+   "name": "Mountbatten Lodge",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "northvale",
+   "path": "reports/northvale.json",
+   "sha256": "1f7030361929d3d8ef096499c6d6f46de415dadab42eac7da053d31cf02f0747",
+   "items": 13,
+   "name": "Northvale",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "northwood",
+   "path": "reports/northwood.json",
+   "sha256": "bc4767204880de97e31dbd6c9a7a71b252d7c279fd0b5c69c6a93c85aee72441",
+   "items": 12,
+   "name": "Northwood",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "oasis-at-elias",
+   "path": "reports/oasis-at-elias.json",
+   "sha256": "0d71ab0557f7a41769f25e4309c1f93400bd85a9bb5930fb2ac10f28d48f0924",
+   "items": 13,
+   "name": "Oasis @ Elias",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "one-duchess",
+   "path": "reports/one-duchess.json",
+   "sha256": "8a30193f87eb3c8c1bece766896c125ef7d56289be19065582c1accc9464a001",
+   "items": 11,
+   "name": "One Duchess",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "palm-green",
+   "path": "reports/palm-green.json",
+   "sha256": "1c06c28a9cac62b09f163df892f4a93d5efb73a1459e1a0224fa1ec45cafa830",
+   "items": 12,
+   "name": "Palm Green",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "parbury-hill-condominium",
+   "path": "reports/parbury-hill-condominium.json",
+   "sha256": "0d1104a5b6417f715040531a3a4d9235ba586f1ada3e8518f53c36b38a8be9b7",
+   "items": 12,
+   "name": "Parbury Hill Condominium",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "pavilion-square",
+   "path": "reports/pavilion-square.json",
+   "sha256": "db6e374a1b5bdc319cdd5b3ca9ef408b81ef1faf369cda1578a7c37804945d2e",
+   "items": 13,
+   "name": "Pavilion Square",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "picardy-gardens",
+   "path": "reports/picardy-gardens.json",
+   "sha256": "0ff25c7d3cfc5bcd159212f7a469a6496d527c2a605751d6a6883978157263ef",
+   "items": 11,
+   "name": "Picardy Gardens",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "pin-mansions",
+   "path": "reports/pin-mansions.json",
+   "sha256": "8c74fe760ddb48001df16f16b91a07a8c299152009eb36156942520dc201bff1",
+   "items": 11,
+   "name": "Pin Mansions",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "prestige-residence",
+   "path": "reports/prestige-residence.json",
+   "sha256": "37501c3c9a7de8d257764373c7ed38c081feb8cf4efb6b1db17360b4508d6f37",
+   "items": 11,
+   "name": "Prestige Residence",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "rangoon-apartments",
+   "path": "reports/rangoon-apartments.json",
+   "sha256": "b582b75e4786aaafe63ba6e46b1a49bdbc87dffc4f0aa97eaf5f887e60df1635",
+   "items": 11,
+   "name": "Rangoon Apartments",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "regal-35",
+   "path": "reports/regal-35.json",
+   "sha256": "61a1878268eb3b0d214adae78e136f3b35b8283b954b85f369d37b1e91f92850",
+   "items": 12,
+   "name": "Regal 35",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "regent-grove",
+   "path": "reports/regent-grove.json",
+   "sha256": "8a0c5f2a4251cc40fe5f49cc4a76483a205b32e6c304d0e617226cbe2af6b902",
+   "items": 13,
+   "name": "Regent Grove",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "regentville",
+   "path": "reports/regentville.json",
+   "sha256": "8ed30b811bee80170810ee4db30d079031006ab5f9e7950201c9939f5ef460b4",
+   "items": 13,
+   "name": "Regentville",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "residence-118",
+   "path": "reports/residence-118.json",
+   "sha256": "2806cba5a6dd194562d2bf22492b5122fded4a6812ca73adca8c34032857aa92",
+   "items": 11,
+   "name": "Residence 118",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "residence-66",
+   "path": "reports/residence-66.json",
+   "sha256": "0a89ee643daad2e2a2aa8332287c196d032ff1d80ecb2662c406975ee56b9a40",
+   "items": 11,
+   "name": "Residence 66",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "residence-twenty-two",
+   "path": "reports/residence-twenty-two.json",
+   "sha256": "7c90dd138ae268bfd262aa0abf4a31f0bc22cc8a0e83e43f3c92d0d47ad6ad5e",
+   "items": 11,
+   "name": "Residence Twenty-Two",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "ricchezza",
+   "path": "reports/ricchezza.json",
+   "sha256": "d545aa871ccece3b9cadb90f168bebc1f8b7600838b4fe3a2694e147d92c8198",
+   "items": 11,
+   "name": "Ricchezza",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "ritz-at-farrer",
+   "path": "reports/ritz-at-farrer.json",
+   "sha256": "c7cdfb0e4c56a94860f2b7d93a590d1f9273b7c495fc510b9c1c197ef987658e",
+   "items": 11,
+   "name": "Ritz @ Farrer",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "rv-point",
+   "path": "reports/rv-point.json",
+   "sha256": "4bdfa73f133dc71a54800f4b26b0768350e8e30f084d8b0da763bf10f4c6c799",
+   "items": 12,
+   "name": "RV Point",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "sandalwood",
+   "path": "reports/sandalwood.json",
+   "sha256": "1372b272f911f2defa3b07519542035b259367e05c4650a97b6d9a843e4a43c3",
+   "items": 11,
+   "name": "Sandalwood",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "seraya-court",
+   "path": "reports/seraya-court.json",
+   "sha256": "47db51cd8e939443d93756896e17a685807f3fbdfcbf7050e39a4cd4196f0bd6",
+   "items": 11,
+   "name": "Seraya Court",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "serenity-park",
+   "path": "reports/serenity-park.json",
+   "sha256": "708b0acecc0a32de1d86894f344c5734910ce7f4602f7c9ec729701544b13b1a",
+   "items": 12,
+   "name": "Serenity Park",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "setia-residences",
+   "path": "reports/setia-residences.json",
+   "sha256": "2033bbf483086dc36773c4a8742ce03cffa414190bf54c10d5383d16dfa344f0",
+   "items": 11,
+   "name": "Setia Residences",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "shanghai-one",
+   "path": "reports/shanghai-one.json",
+   "sha256": "b88f5b1a47fbb555f117c90d82fdf511009af16e4b81f7a86a20cd6503bbe33a",
+   "items": 13,
+   "name": "Shanghai One",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "soho-188",
+   "path": "reports/soho-188.json",
+   "sha256": "77f61fb3cbe51756ceb3233ceda779e988e2f99e12fadc0647277de836854a66",
+   "items": 12,
+   "name": "Soho 188",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "sunflower-court",
+   "path": "reports/sunflower-court.json",
+   "sha256": "889485ce94cb1b72b685bb096144dc8f1e4684fa9e00f192e26d12b4e5a90690",
+   "items": 11,
+   "name": "Sunflower Court",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "tembeling-mansions",
+   "path": "reports/tembeling-mansions.json",
+   "sha256": "191ca8791c963121615450be45d60537a98e62ca1742059d0df7bb046f5f10e7",
+   "items": 11,
+   "name": "Tembeling Mansions",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "the-amery",
+   "path": "reports/the-amery.json",
+   "sha256": "c5e8be218c206c9eb3b417194d47877413c6520959776ba578a5e7a1fbc09066",
+   "items": 12,
+   "name": "The Amery",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "the-arc-at-draycott",
+   "path": "reports/the-arc-at-draycott.json",
+   "sha256": "c58c66b23b80dd47e0250b64b9c6159cb0cdf2b793fa6cc288d8114fe75c4ed1",
+   "items": 12,
+   "name": "The Arc at Draycott",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "the-axis",
+   "path": "reports/the-axis.json",
+   "sha256": "8e9d972979232354b410b528fb81d3a6a19b9c7328d22aa57c36aa2af812bfb8",
+   "items": 13,
+   "name": "The Axis",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "the-azure",
+   "path": "reports/the-azure.json",
+   "sha256": "964d4f2e7a13e25fec3cfe0fcb3d621e0303a8b6ab6a94aede19da3595b773a2",
+   "items": 13,
+   "name": "The Azure",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "the-beacon-edge",
+   "path": "reports/the-beacon-edge.json",
+   "sha256": "e6b10083b1ae612bacc92f96ba15fb15997e7ecc0df820ee6d90d2142753f48e",
+   "items": 12,
+   "name": "The Beacon Edge",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "the-champagne",
+   "path": "reports/the-champagne.json",
+   "sha256": "b76f095d55a24f94b015894e0c56e43094e085022f212e30e9eb38f1085170a4",
+   "items": 11,
+   "name": "The Champagne",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "the-diamond",
+   "path": "reports/the-diamond.json",
+   "sha256": "57e687501d7fcbb1368d11ddd0754d659787716db0804fcfc83365349ae2bac8",
+   "items": 11,
+   "name": "The Diamond",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "the-ebony",
+   "path": "reports/the-ebony.json",
+   "sha256": "4cb42e00e1b4421c3311fadeb5acc255e4bb460959f3b28dc3bccc3555a3fdc3",
+   "items": 12,
+   "name": "The Ebony",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "the-enclave-holland",
+   "path": "reports/the-enclave-holland.json",
+   "sha256": "f212a1d800451a388d4dee0a7ecc2f7f6ab8c19399ed1bebf72c0b0f773110ec",
+   "items": 11,
+   "name": "The Enclave . Holland",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "the-greenwich",
+   "path": "reports/the-greenwich.json",
+   "sha256": "ad686c0dea732ca9ef93998a1368ea41d4f51bd953dda6029bb3b871246f7c02",
+   "items": 13,
+   "name": "The Greenwich",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "the-linc",
+   "path": "reports/the-linc.json",
+   "sha256": "b9c94c73af6bd87b191de8f23850be9775d806c0fbc15a96df7f9ac2e790598a",
+   "items": 12,
+   "name": "The Linc",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "the-maylea",
+   "path": "reports/the-maylea.json",
+   "sha256": "5e74bae65ba4d7491c5e1ae0eb693a56b1ad97c2f040922e687996ff6de28f23",
+   "items": 12,
+   "name": "The Maylea",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "the-navian",
+   "path": "reports/the-navian.json",
+   "sha256": "0f89d994d4a44432299d119ab25347226b9b8c771194037c739abde9cd59f06c",
+   "items": 13,
+   "name": "The Navian",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "the-palladium",
+   "path": "reports/the-palladium.json",
+   "sha256": "f4aaf0f2976b9a06b8c6e09ff68c69d3c5e5f0494f2ea5db1d02cc8c4b20e577",
+   "items": 12,
+   "name": "The Palladium",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "the-peak",
+   "path": "reports/the-peak.json",
+   "sha256": "ed4e4912c0367fd01e785739b91e28edc8f77786fe2c89779ef66393aaf1e323",
+   "items": 11,
+   "name": "The Peak",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "the-pier-at-robertson",
+   "path": "reports/the-pier-at-robertson.json",
+   "sha256": "1c38fc3b86b8552a905da2e9cff0fb0ffdd95310c74eadd6e21fb82fb79981a0",
+   "items": 13,
+   "name": "The Pier at Robertson",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "the-promont",
+   "path": "reports/the-promont.json",
+   "sha256": "7ec2b4b0807f33233343489826617b06bdb53d95c8244d407b92f2882e36d7b0",
+   "items": 11,
+   "name": "The Promont",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "the-regalia",
+   "path": "reports/the-regalia.json",
+   "sha256": "758b8d0012f6aa8d941ff425efb2c98613180984aae33cfe32c9c90948b00099",
+   "items": 13,
+   "name": "The Regalia",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "the-scala",
+   "path": "reports/the-scala.json",
+   "sha256": "fe43653ade6f213f1a7cfbc44b54a8a6867e6eb4151449e588df7b6929c14fd6",
+   "items": 13,
+   "name": "The Scala",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "the-skywoods",
+   "path": "reports/the-skywoods.json",
+   "sha256": "136a7e652181affc2c96a7d78ef72eae335ed14fba6ad928db068cfcf3947759",
+   "items": 13,
+   "name": "The Skywoods",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "the-verve",
+   "path": "reports/the-verve.json",
+   "sha256": "88b28192032306e3f0893b0724e7de353716183ddc75e060339831f8d2407e4b",
+   "items": 12,
+   "name": "The Verve",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "the-warren",
+   "path": "reports/the-warren.json",
+   "sha256": "5dd24e5c1d67dee594e2dfe7f31f122d5eb6fce1cf6137585837c849f4bf4f15",
+   "items": 13,
+   "name": "The Warren",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "the-waterside",
+   "path": "reports/the-waterside.json",
+   "sha256": "ef7dcbe42c3ef7395468d346f7c027a46a5704027c30277530ea50f0f14e02c1",
+   "items": 12,
+   "name": "The Waterside",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "thomson-grove",
+   "path": "reports/thomson-grove.json",
+   "sha256": "78eb03e42d4760cf84c4f0e4d233b07231ea88aae032324467bae027d28df3c8",
+   "items": 13,
+   "name": "Thomson Grove",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "treasures-at-g19",
+   "path": "reports/treasures-at-g19.json",
+   "sha256": "25b376e918afb05ac403b97a0e8b71e89a3e2f12a3626ce8fda8c659e2584af1",
+   "items": 11,
+   "name": "TREASURES@G19",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "trellis-towers",
+   "path": "reports/trellis-towers.json",
+   "sha256": "05b979854b01a48ac25deaf2d7fdb5e8bc912eac5d800720948aeec64eece9d0",
+   "items": 13,
+   "name": "Trellis Towers",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "twin-waterfalls",
+   "path": "reports/twin-waterfalls.json",
+   "sha256": "2d5d2d8703884f4848597b125a30ab2a87545972a082055da3fd1f3f45ac4942",
+   "items": 13,
+   "name": "Twin Waterfalls",
+   "kind": "completed",
+   "profile": "full"
+  },
+  {
+   "id": "vertis",
+   "path": "reports/vertis.json",
+   "sha256": "44898e93a2ac0fd25184ad76b1177e13887addd9b318467470b2126a46bdff72",
+   "items": 12,
+   "name": "Vertis",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "vibes-at-kovan",
+   "path": "reports/vibes-at-kovan.json",
+   "sha256": "420499c619d6ac5993c38f92140c080d5caaaa83f0e57f08c04fa003861dbf16",
+   "items": 12,
+   "name": "Vibes @ Kovan",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "waterfront-at-faber",
+   "path": "reports/waterfront-at-faber.json",
+   "sha256": "24d17db37e2306bb37f2549e21b35cf49b2bb8d23c1fe5547abd436dde539254",
+   "items": 12,
+   "name": "Waterfront @ Faber",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "willyn-ville",
+   "path": "reports/willyn-ville.json",
+   "sha256": "c1415e3f534fbe411189fed817b486ecc13f00e822e495436e7af5fe35f2326c",
+   "items": 12,
+   "name": "Willyn Ville",
+   "kind": "completed",
+   "profile": "partial"
+  },
+  {
+   "id": "wing-fong-court",
+   "path": "reports/wing-fong-court.json",
+   "sha256": "794a84e1e1e8267597286d9fa6214ace36ae7c008f16ff2f4c65fc5853f4e583",
+   "items": 11,
+   "name": "Wing Fong Court",
+   "kind": "completed",
+   "profile": "partial"
+  }
+ ]
+}
