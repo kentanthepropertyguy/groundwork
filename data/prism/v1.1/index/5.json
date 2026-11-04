@@ -213,7 +213,7 @@
     "R"
    ],
    "path": "reports/coco-palms.json",
-   "sha256": "0678e567310abc37ee5189e8b432a653860435cd53f670e9bd778f15c051cc2b",
+   "sha256": "969cda7a01b099f905164fff6bd9557054a289de619bde69c7ce952944fc5dd8",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -363,7 +363,7 @@
     "P"
    ],
    "path": "reports/glasgow-residence.json",
-   "sha256": "b8a6a15e492c09485b04c11e7c785388d529da1b1a67d878585c9f955d8f2de6",
+   "sha256": "f6def01a88585d9a7909d45c385999989587e53a53c3ce9e3eb1dbad89b04395",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -416,7 +416,7 @@
    "name": "Highgate",
    "kind": "completed",
    "path": "reports/highgate.json",
-   "sha256": "196b33e405f5907c647a72462964c6245ceccda768b72bf81def158b8ffd4bca",
+   "sha256": "d3447cd37e752c9a73c66a6cebd8a1791f430fd1b2d1d42745cb16dfc1536fd2",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -431,7 +431,7 @@
     "R"
    ],
    "path": "reports/highland-condominium.json",
-   "sha256": "7b902d371917401aec71620067f43a74fe82a1cbc3a4aa7b1df55ad04f7ed875",
+   "sha256": "506c4819e39221a71ec7456076bb2bdf80f2f03de1e98fad992863bf603becac",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -501,7 +501,7 @@
     "P"
    ],
    "path": "reports/kovan-grandeur.json",
-   "sha256": "c07d78e7b8de7dc4dcde34b9195a64667101a6ac3ec58deaa90eff927bf3f0bf",
+   "sha256": "5771f677ef1ae4999a757bc82c43c0cde3ae215881020c11f8904205eac2a314",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -654,7 +654,7 @@
    "name": "Midtown Residences",
    "kind": "completed",
    "path": "reports/midtown-residences.json",
-   "sha256": "d96cce68283507c61e3ac4067726a1de48f4f739d0c96b096196ba7d2242d2ad",
+   "sha256": "7f606bdbae8706f23e1fcbe1fe97423a0658a4c3d9e79176b8eb4877b69bd472",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -683,7 +683,7 @@
     "P"
    ],
    "path": "reports/montview.json",
-   "sha256": "b99e60ce2f3a588f7c4f10d45bb70731f81fec23c24efc96e4ee2bd1460aa435",
+   "sha256": "74263259dc422db3745253b9a4d7c11d67b1838a9a115bf1102312eded98ae8b",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -774,7 +774,7 @@
     "R"
    ],
    "path": "reports/onerobey.json",
-   "sha256": "e61e1fa0961c55da2998486761cc98e22f46deae04d31a34193df82573cef2a0",
+   "sha256": "a9b2caf92712a4a20c733647d83f39be157baebd7a16a6020507e4094f4f3e71",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -807,7 +807,7 @@
     "P"
    ],
    "path": "reports/pandan-valley.json",
-   "sha256": "71b12655184b87888f7fbb96051e4d6eba4ff3c58746862ae0ac6280307fad43",
+   "sha256": "fb03b5673a30a9b9bd6ae2654d3fa69ddf67e3360bc7fbd3c41c6ae38cd2def3",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -821,7 +821,7 @@
     "P"
    ],
    "path": "reports/parc-komo.json",
-   "sha256": "dd1c94cf5e106a5e4c080cad6a7a045b1ff58c4f7efe4ff47de73f17373f28ac",
+   "sha256": "f43ebafbce1e532ebe57278ba2c6bdafc62883779203c86bcc787c77c377244d",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -881,7 +881,7 @@
     "R"
    ],
    "path": "reports/queen-astrid-gardens.json",
-   "sha256": "fc4383975eea2185dbd935d0e80dc981897d63e0e8d289e57fa9507305ee67b7",
+   "sha256": "7849bd2390998322cebe6503391ebe487125b66de7ce609941c434d2aeb7b8d0",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -935,7 +935,7 @@
     "P"
    ],
    "path": "reports/royal-court.json",
-   "sha256": "543820f5ad009b451bc65241801066b0dee03860c84940156e8be2eeafb0bb0a",
+   "sha256": "8845988839da204c0799c53581af7893324adc0feaa8e184c052ef749ea3d77a",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -946,7 +946,7 @@
    "name": "Royalgreen",
    "kind": "completed",
    "path": "reports/royalgreen.json",
-   "sha256": "143b302ce3f847fe81132306a915bfaf241a68c36e104b305cf2a4db6e2065ea",
+   "sha256": "da935dcc3a467ca3154ba891dc5b6291831d7bb96ffd711387a686ada70cabfe",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -983,7 +983,7 @@
    "name": "Seasons View",
    "kind": "completed",
    "path": "reports/seasons-view.json",
-   "sha256": "3d946ebf29da9224bc79eb9fb54445aa65e680ea7fea8cdb2c00c921bb817f5a",
+   "sha256": "5d251724714a22d31969cbe3f3fea73043e682667b2ab92532af3054c523fe5c",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1319,7 +1319,7 @@
    "name": "The Creek @ Bukit",
    "kind": "completed",
    "path": "reports/the-creek-at-bukit.json",
-   "sha256": "2f09fed4b868a303c65fea3206d7743ceddece5974ea8ddd9c09782b4b30d454",
+   "sha256": "5e0236a160bf51c33994dc972db5de6aaace2cda0499e7bae8d4176abb893988",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1333,7 +1333,7 @@
     "P"
    ],
    "path": "reports/the-edgewater.json",
-   "sha256": "394090eb10dd8220c283d1c6ee622e1882abb5fcb3305c56bed260eb57d018c1",
+   "sha256": "66c6a4b7867368fa0b3ce91d37ff19ff334be2b233bab543392e472c754c5c42",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1435,7 +1435,7 @@
     "R"
    ],
    "path": "reports/the-old-house.json",
-   "sha256": "11373475dcdc1fe9d01352e4e6de38a96112c5cbdfd660473eb10c3f433bd290",
+   "sha256": "cfca2638a69a5d8e145d0d446bcaa957c3af7742bf33448c881b1bce946de293",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1555,7 +1555,7 @@
    "name": "The Trilinq",
    "kind": "completed",
    "path": "reports/the-trilinq.json",
-   "sha256": "27bcadb7b8910cf48ad0e020d0c933439237cbcd9a8e2f06014ec418a0111616",
+   "sha256": "53fe588e80734af031952d7221a3ae7965d4a6ba94e15a20a36d9a8de897c599",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"

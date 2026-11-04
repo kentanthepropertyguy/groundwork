@@ -47,7 +47,7 @@
     "P"
    ],
    "path": "reports/adana-at-thomson.json",
-   "sha256": "c8dfbf1748f6a64253a66706056a09ae7dce8b5efb59feea8251ef6d0499ad79",
+   "sha256": "6aa79fb1b065e4ce45c16daae13a22a518d89823862da845b5e608c45cd248bf",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -72,7 +72,7 @@
    "name": "Astor Green",
    "kind": "completed",
    "path": "reports/astor-green.json",
-   "sha256": "58317e6f33ac7a5244bdcb211eabc9cb84c5680108ad1559cfa4f793c67b4795",
+   "sha256": "48083ebe6549c2910f6abdb22411317492ebe80452f6a8b588ef8e0ec47a1dcb",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -114,7 +114,7 @@
     "P"
    ],
    "path": "reports/beaverton-court.json",
-   "sha256": "77ec68dc17619d6e4d3e649911769f0349d19c9bb7ce25f80fe6b5c34eae8596",
+   "sha256": "6e0c59306652fe5bcf9c552781096eea8515882c992e7466ee3e548889ccc0cc",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -164,7 +164,7 @@
     "P"
    ],
    "path": "reports/bliss-at-kovan.json",
-   "sha256": "2b8219614a27d9093a8778026fe3a9242cd95e91b28861de935159268290e7dd",
+   "sha256": "543bea45f94e76278f1b4b0b198bd4353cd88570d4b9d280bb71fd27194eac01",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -175,7 +175,7 @@
    "name": "Boathouse Residences",
    "kind": "completed",
    "path": "reports/boathouse-residences.json",
-   "sha256": "eeaff77f5f7c2fefb45162e139a99d1ecb4346d3b849a9e26a8fdac7c3dadaf5",
+   "sha256": "79c08076fb234c2a455b1592696c3f6c8d8d41c0ed763daff30470b916575e25",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -204,7 +204,7 @@
     "P"
    ],
    "path": "reports/casa-al-mare.json",
-   "sha256": "74b59805ef97ca384e8eaa07228a11811f02419a9975e9c953dbb2e3a6b63a3f",
+   "sha256": "85227fc3cb3f83d95d73fc37a915191453503ed1fe43c6de2f317d19832be3b8",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -301,7 +301,7 @@
     "P"
    ],
    "path": "reports/coastal-breeze-residences.json",
-   "sha256": "40c6c102f0a6d10905b85b6bffdf694d6e4fb445f61b8ef501e40da9da017e9b",
+   "sha256": "ce13dcc81c5e7d321b737dafdefa72c5a36219f69564a59b698725ae7cd30df1",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -584,7 +584,7 @@
    "name": "Heron Bay",
    "kind": "completed",
    "path": "reports/heron-bay.json",
-   "sha256": "7dbdb374dd60636eb66b8322133a427ea0f5bd4457ab6584fd2274d9198c0765",
+   "sha256": "ff61cebb16362d3408bb7c190e799bdeeea8d1a3c4def29a4afa3bfdb1ea3e1f",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -660,7 +660,7 @@
    "name": "Isuites @ Palm",
    "kind": "completed",
    "path": "reports/isuites-at-palm.json",
-   "sha256": "53cddfef9fc7f3a39a90ab9321fe4b0239fdd692bf169ed1845bd62cc0aa258f",
+   "sha256": "48b45fc69b35476283e8ce13f6844569c9b856623b007e8e524dad421f630175",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -675,7 +675,7 @@
     "R"
    ],
    "path": "reports/isuites-at-tani.json",
-   "sha256": "2727221f665861b607c2bfb4352d11c75aa305d17a938b43939b3856ae0bcfae",
+   "sha256": "6f933e6eb8b6b846d1cfa189cb0e98481e18a14b95559c646dcf974e9aa36449",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -738,7 +738,7 @@
     "R"
    ],
    "path": "reports/kovan-apartments.json",
-   "sha256": "0edd20a49db5ee2a0b537831d37006c6e635b4c00e1cc0a797fea40b12312144",
+   "sha256": "0d771192d3158ce012d6678b80507062a535f3665e7fba069106174c8edc29ca",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -753,7 +753,7 @@
     "R"
    ],
    "path": "reports/kovan-crest.json",
-   "sha256": "2937819ffc2018486c0e84ccefc2d217a13d045ba6496a1d31c9553a5a1129e6",
+   "sha256": "e1c1e3f2717895e0e38d250508241616a93224a78d9e633beeb936cb1ca05396",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -764,7 +764,7 @@
    "name": "Kovan Residences",
    "kind": "completed",
    "path": "reports/kovan-residences.json",
-   "sha256": "bfed3ead50fbad0bd3084071e117653d5a36aee46eb2ebbb0a6f9be10fc78a90",
+   "sha256": "dc6633d8ba889d294831418cf85624bbf39cb006b6d479b31d437c6d0c3ed75c",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -820,7 +820,7 @@
     "P"
    ],
    "path": "reports/loyang-valley.json",
-   "sha256": "1cf7c1d72b3d35d9fcac3c79d46760756a9b90cc963d2f1bdc769b8232ff720e",
+   "sha256": "bce1ba1cdeec1a70fe78b3da68866717c1b8262e6b54e6077e5dba82ad109ef1",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1114,7 +1114,7 @@
     "P"
    ],
    "path": "reports/residences-botanique.json",
-   "sha256": "a457c7ab4c2fac9e748a7926d69063e7bb49f7e1f829edc5726d318b2a721666",
+   "sha256": "87365a4707db78ebb35906bd0b974e3fddfbaede77d486fd7e4e31e4c0fcadc0",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1140,7 +1140,7 @@
    "name": "Ridgewood",
    "kind": "completed",
    "path": "reports/ridgewood.json",
-   "sha256": "e8d5270b7486ef691f5d4eec50f82cb71197b061c5e34d1edb6886edd4e690c1",
+   "sha256": "8f5aad0d821d6f5663111d1fa875948fe93b8fa67ac0e582ee7112659a2e100b",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1578,7 +1578,7 @@
    "name": "The Sterling",
    "kind": "completed",
    "path": "reports/the-sterling.json",
-   "sha256": "2990a69738c59313c5bfd13131d5fb15636f2081c9682b039a716affc665cd6c",
+   "sha256": "29b8d537e6722a0f3e36ff8bcae07ce5c0929c979e91a013abfecebfd0c41011",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1760,7 +1760,7 @@
     "P"
    ],
    "path": "reports/watercolours.json",
-   "sha256": "c5ae98a17b9e243d4ccd1d6edde279268b108d40c947a3ae9160d6a91c953569",
+   "sha256": "1632064cce940b18cab9f0b1f8f1b798c6040014d47d34bcaefaf20015366b04",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"

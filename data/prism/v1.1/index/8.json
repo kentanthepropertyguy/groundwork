@@ -67,7 +67,7 @@
     "P"
    ],
    "path": "reports/allsworth-park.json",
-   "sha256": "7dc640a37ac227e393f49c153cfcd029d0f0a80fa78f48cd1eb93ff168f05830",
+   "sha256": "1345a1a77506b5e813c6a366440e17c8a184f1220179267898e9eb502bbd2079",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -194,7 +194,7 @@
     "P"
    ],
    "path": "reports/bluwaters-2.json",
-   "sha256": "b020e4b90fce6b01a950cd91c1e9c6f48664ef7de7054c0bd76754e55fcf09df",
+   "sha256": "e6ef0ee4d095d5fd78b2ee9f96226efb3af8ad4713e3f5239ebb95be6998c7ce",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -479,7 +479,7 @@
    "name": "Flame Tree Park",
    "kind": "completed",
    "path": "reports/flame-tree-park.json",
-   "sha256": "b4299eabfaf1c9529054e793c8caa1f3c8cd1bde735d2e09223ba54aec9a4a34",
+   "sha256": "0bd35d8b7f096d3b65fe97aae65cde2e6362715144caf99f50c0e4ddd5287349",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -612,7 +612,7 @@
     "R"
    ],
    "path": "reports/hillside-mansions.json",
-   "sha256": "160f862ec5d4f543c86daa81d562c0774256a734db91662ee2c2c19a826f439c",
+   "sha256": "0bc86a712e30d53fcca6c45366b77f811fa3d9ae0d97d13349921a5724d46de9",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -818,7 +818,7 @@
     "R"
    ],
    "path": "reports/nanyang-park.json",
-   "sha256": "a451002281e76e0d6715eee1b9c09dfc0e94e757e1a7c1355cebf191df3cd013",
+   "sha256": "46b56207328b4bcbb7a4c652e3e3672c4e267ff312dcec2b732664fbafb8ad39",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -929,7 +929,7 @@
     "P"
    ],
    "path": "reports/pine-grove.json",
-   "sha256": "b5e669e0b2912a5fef070d7f293e8d2b36355999f3e85c79a5a4356ddd517b38",
+   "sha256": "53a1323ce62422d5163d0fa7d0f0c40b459d16e05d14d2b794a4097c507c08fe",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1050,7 +1050,7 @@
    "name": "Riversails",
    "kind": "completed",
    "path": "reports/riversails.json",
-   "sha256": "9619329ca74f895198f57b4298d29e90e7f13b386daa257bfd17dd1f75802c82",
+   "sha256": "8b57bd7e4ad04078df13e4d5a5568ca1780bbbea2e5d92c25e05180f5f80278e",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1113,7 +1113,7 @@
     "R"
    ],
    "path": "reports/sixth-avenue-centre.json",
-   "sha256": "4c58f1a86e93a21e062aa90b1724238d9fa7bf9bc4c8a96e6d88fddc850c1840",
+   "sha256": "d9b7bdb83489b34c2daa79ace2ce8f20b21e4224fe097d28b5f244018dd35f03",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1127,7 +1127,7 @@
     "P"
    ],
    "path": "reports/sixth-avenue-ville.json",
-   "sha256": "11177fc264724dd312d14b0ee8ee40ff3d9980b412bd26bc6bac8a22570afb85",
+   "sha256": "701cd40c5844147f4f65d82832a86fad88a21fa02f3bdfb5a2322ea1adb455e3",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1316,7 +1316,7 @@
     "P"
    ],
    "path": "reports/the-calrose.json",
-   "sha256": "6c70e74902c875110c4d95417ca36c0024c165fb1825cf78efc02f6617caa895",
+   "sha256": "7e5959c4e77c32f7de48bbeb767697a464cc4b6452c5b6cfb40f78b55c896e0b",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1355,7 +1355,7 @@
    "name": "The Esparis",
    "kind": "completed",
    "path": "reports/the-esparis.json",
-   "sha256": "ae8629d24acc649b33ff7e9a5fa95c326a0b162ca4ee0d5be2f9a0f8960df722",
+   "sha256": "301fd7ebc262930f3ecc63a213c06d290517828485a240c0390ce8de1240334c",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1499,7 +1499,7 @@
    "name": "The Promenade@Pelikat",
    "kind": "completed",
    "path": "reports/the-promenade-at-pelikat.json",
-   "sha256": "80edfdbd6fbc4c7aa8ef9c4fe89af53fc7524868ca99a154b1e64b0845add1b3",
+   "sha256": "f40e3e5a4213a6c61cac56e5bdc721751e5871bb34c1c057c9183cd3c30b981b",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1510,7 +1510,7 @@
    "name": "The Sixth Avenue Residences",
    "kind": "completed",
    "path": "reports/the-sixth-avenue-residences.json",
-   "sha256": "20d516a679aaf5b672153059680ba404b4879b11889d267618592e68a8c8eae9",
+   "sha256": "f833914ad4d0a4c631d39e60cc2b7fa50ee10512f90afc5baf8be0ef45566425",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1602,7 +1602,7 @@
    "name": "Thomson Impressions",
    "kind": "completed",
    "path": "reports/thomson-impressions.json",
-   "sha256": "1ced5404cf333780840adabe4e3f5b1b3a99dab09c74415579aadb5d0915c7db",
+   "sha256": "dd2416be8a2ec7a3b2585b208cfdcad86eb30fc39876c1d7e2717ec25495140b",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1631,7 +1631,7 @@
     "R"
    ],
    "path": "reports/thomson-view-condominium.json",
-   "sha256": "5a7d022db4f0492bd07c3baed889e1a92b1771e9c396f0d98f551027c7b57bfc",
+   "sha256": "960815b9b04359b613bc24a8b9d6c69c88c087da7abbbf30d6b3f56de944b416",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1669,7 +1669,7 @@
     "R"
    ],
    "path": "reports/treasure-gardens.json",
-   "sha256": "4ba39660c30eab0d84d72186f687833d34b75b833dd98b4313971a08f03960f0",
+   "sha256": "2475ed5d004fed31c60a81703c4f01ebbb3a701ca1de49a6b15286295b06a461",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1802,7 +1802,7 @@
     "P"
    ],
    "path": "reports/wembly-residences.json",
-   "sha256": "0a1162850582737f0370ba7963a3294bd401b489a5bf8434d0db642c9ec321d2",
+   "sha256": "adc5372c2ae8116354ac72668e6d3880a8a27fcdfe085390049439ba0ca72f99",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"

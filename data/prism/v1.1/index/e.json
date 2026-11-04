@@ -63,7 +63,7 @@
     "R"
    ],
    "path": "reports/57-at-kovan.json",
-   "sha256": "4d3962e2dde531316eae382556f7590b56972384917e80e9a7c13b813a581e84",
+   "sha256": "9affd3cb8f1e0849e973f034374e51457f0281f168e559510fb168323fa983d8",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -137,7 +137,7 @@
    "name": "Avila Gardens",
    "kind": "completed",
    "path": "reports/avila-gardens.json",
-   "sha256": "857b53aaae87919d3e99540bb9f7d4d0a567a3bb27b44a54c05e9fc406568624",
+   "sha256": "cf12afa3fc59be0a46dc0d0ee929d23f3010a1e207bbe46790b8aa29b7b0ae74",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -309,7 +309,7 @@
    "name": "Citylife@Tampines",
    "kind": "completed",
    "path": "reports/citylife-at-tampines.json",
-   "sha256": "951bd4d23b86ed54cccf0cccb0c10c7034fddfa25d6347c2a52732290c0a5e53",
+   "sha256": "7c8c5f911c2e9c6ac94e463899ddbc0847c204d898acc6061aa2278b1d517846",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -323,7 +323,7 @@
     "P"
    ],
    "path": "reports/coastal-view-residences.json",
-   "sha256": "1ca39719826ad2ea424184d200fbb89f793f11a6bb98fc3b31596b8c94bf6efc",
+   "sha256": "dcb46728a1b92b0e11bdfd5c4aff999c70c910d4373ee01f562cfee4d8844be9",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -348,7 +348,7 @@
     "P"
    ],
    "path": "reports/corona-ville.json",
-   "sha256": "c0bacc51a64a398e7933ebcca45f2dce273b147b377e666a30a1eabf569c95fd",
+   "sha256": "935d7e2194760ab04ffd4c88eaa8bfa661962fe8bb7e2fc57dc728ffd1518a0d",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -465,7 +465,7 @@
     "R"
    ],
    "path": "reports/dynasty-lodge.json",
-   "sha256": "1679061304fa417b9da2c562575f06ad28b4c016e77f35a3102e213060c1b117",
+   "sha256": "0a692d1a11b5b532c940193e03708290556fd8da26d33abd2037bd3436e73693",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -702,7 +702,7 @@
    "name": "Hedges Park Condominium",
    "kind": "completed",
    "path": "reports/hedges-park-condominium.json",
-   "sha256": "fd6cff319279eeb207ecbc37e48cc14b6b5ba25f362c28db7ba256e6b1fc2472",
+   "sha256": "4774ecc0a5e47a2ac5d39aba6a726bccdc76dc61a557dd94a33cfc644172f617",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -839,7 +839,7 @@
     "R"
    ],
    "path": "reports/kovana.json",
-   "sha256": "d3fb2a513e8dfb29ee15647987b3794a73127333699000ba487c2fcb1b3000e3",
+   "sha256": "0bc549531753dbe645e85f6e5ae3ad7596074011a487f558587fbb50846de9c6",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1138,7 +1138,7 @@
     "P"
    ],
    "path": "reports/nottinghill-suites.json",
-   "sha256": "913a19bc099a96e5572160834d248ac313638e6a449de9aed74596a2d9ea57de",
+   "sha256": "a99ea5b4a6293c776114cb0bf895bca519f02e6973a824f398037ca38ac0d06b",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1241,7 +1241,7 @@
     "P"
    ],
    "path": "reports/palm-haven.json",
-   "sha256": "8e3dd2d49adfb9ea9750fdf79d9040bcefa7a62e46e75e5f3a55f152353d1224",
+   "sha256": "5902ca18ae45834930661e16caca8cda63f0c966a63f00fa048b1f926ca5911c",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1301,7 +1301,7 @@
    "name": "Ris Grandeur",
    "kind": "completed",
    "path": "reports/ris-grandeur.json",
-   "sha256": "fbf474c85b131a0036f00e89b2ae187078d1e32ed8823dbb1cdcf54ee7c8b9ba",
+   "sha256": "7070a16fc4bff20a158db7f843fd90ef712446f40a17284d09fdb4078b8f27d2",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1329,7 +1329,7 @@
     "P"
    ],
    "path": "reports/riz-haven.json",
-   "sha256": "54d0079267caad098e0900cc43826917652a62142b7d9f0c588d2fcb656b4806",
+   "sha256": "5b03d0923cdd6b7d159ad3825aa13955576593485f3196b86d6b0a4b59e95c4c",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1366,7 +1366,7 @@
    "name": "Seletar Park Residence",
    "kind": "completed",
    "path": "reports/seletar-park-residence.json",
-   "sha256": "638a34752818758b8d34b46e92115248da4b174c3933fcdda270367052fd1a35",
+   "sha256": "908848f88324e0137e76fb05e2327dbf533072d39091a988db429b27f47fd702",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1380,7 +1380,7 @@
     "P"
    ],
    "path": "reports/seletar-springs-condominium.json",
-   "sha256": "6da326f44fbce36776641196d8643d38f6befca0d6d7753298e3973bfed77c93",
+   "sha256": "f9effbf45a5b62e8138ae2d5ef32a62c36fbd44209b5c71f2c9e9a5f4dfa1eb7",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1437,7 +1437,7 @@
    "name": "Space @ Kovan",
    "kind": "completed",
    "path": "reports/space-at-kovan.json",
-   "sha256": "7f675b794d4c14378e3d2993c3a4fdb9c23bc88d8d00c4d1d388ccb24069df17",
+   "sha256": "090cbbff3781b80d9d81349d7128eeed742dbff91ea861f2b876aa47185dd8e2",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1639,7 +1639,7 @@
    "name": "The Clement Canopy",
    "kind": "completed",
    "path": "reports/the-clement-canopy.json",
-   "sha256": "ceb7c4c593d6e94e23a7d460f6d845188825c1105c18e555bef0ff5bcacde67d",
+   "sha256": "229342b24429815e0c05391a4ef2feda1d1198917fc272646f6b0852c4f21051",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"

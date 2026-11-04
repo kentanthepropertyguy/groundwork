@@ -11,7 +11,7 @@
     "P"
    ],
    "path": "reports/1-king-albert-park.json",
-   "sha256": "095e3c0bce8a6ab1c1aa0a34a68ff7e7bb4c4a00bd69e13dffc1fc4ac9e4dfd5",
+   "sha256": "aa4f1d394ae46dd9bf31ad30d277c891b534cffdbace4a465f9e29dd8d6bacf8",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -260,7 +260,7 @@
     "P"
    ],
    "path": "reports/casabella.json",
-   "sha256": "1ce9f1830b606e2dd581fdde0e6bd0af2f46ab13cb7afe7837722c62b6d8d995",
+   "sha256": "a20903eeba979b601507f47a707cfecde0bf731c2352e5bae9144db03c06168c",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -423,7 +423,7 @@
     "R"
    ],
    "path": "reports/d-hiro-at-hillside.json",
-   "sha256": "f8be9053bc18c29bb6f27884d7b18516974a870f68778d8013d49b0d6860ced7",
+   "sha256": "ab9d29f28ac395cc055a916b5d9dc427256ae2d803c2d131014300124ac5afd2",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -466,7 +466,7 @@
     "R"
    ],
    "path": "reports/dynasty-garden.json",
-   "sha256": "4c3b43c6f927dc85df5c6a27addc7eea8ad1aa6e4b4ed518a9938bc9d5f22b35",
+   "sha256": "ee311b4aba6c72e212cd543c18d2fed77389a4dd25a3ebc749943ff5250faae6",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -511,7 +511,7 @@
    "name": "Ferraria Park Condominium",
    "kind": "completed",
    "path": "reports/ferraria-park-condominium.json",
-   "sha256": "6703ea3bf8513fd3a88c7adb70a7aa5e58a6e34240522bbc407bc29e7b41877e",
+   "sha256": "6e71f6c9205043b230d37443095cdebd3b221440cfccc79028eefa0d5ae3ba9c",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -707,7 +707,7 @@
     "R"
    ],
    "path": "reports/leighwoods.json",
-   "sha256": "2690d033e45ea8f6c51009e65405c85d7965d1f25f169efd6a748af13509ffb5",
+   "sha256": "cb94893a64046340977bc22821428a6c42a7d4370e0049583902f90df2a8cfda",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -794,7 +794,7 @@
     "P"
    ],
    "path": "reports/meadowlodge.json",
-   "sha256": "9badb467585564562798818af27567cece014423b03f5a99e862afc6dfc0cb5a",
+   "sha256": "64bd71400d570092d11cac041ab983b2e7baf344c9bdc71c5be8ea957f05698d",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -917,7 +917,7 @@
     "R"
    ],
    "path": "reports/one-rosyth.json",
-   "sha256": "bebc9f7e5d2c2d91b1b20151e2be6b484e47d531f0737f84db40f5aafadff04f",
+   "sha256": "5e06230761ad516845aa8365e3f1888f27750e66eced9b4fbd61d8d908a73c19",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -951,7 +951,7 @@
    "name": "Palm Grove Condominium",
    "kind": "completed",
    "path": "reports/palm-grove-condominium.json",
-   "sha256": "2c6eedb10f0950cbed6f5d29a097a3ff868ea9d4aca52164c7945471d09dd4c8",
+   "sha256": "44bc52ecf2140a348ec4865f9bfd5ec2185bcb33eec37e6e072e443cb7f8ec91",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -990,7 +990,7 @@
     "P"
    ],
    "path": "reports/park-residences-kovan.json",
-   "sha256": "a1fd7bd4be941ba2474c48fe3d2fdddc8d97ba37318611e5a1582650bda8baa8",
+   "sha256": "c86fe321d52cf13ff4a9742dcd0bcd3458e07949c6dbd185481715bb998488c9",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1068,7 +1068,7 @@
    "name": "Rafflesia Condominium",
    "kind": "completed",
    "path": "reports/rafflesia-condominium.json",
-   "sha256": "052503a14d3b41ca50145f2eb65461b9ebfe9784bf2653fdd0a40e512b8a39b1",
+   "sha256": "c0f107ab8ad77f8956a4ce67b9a22c4c3d8bcebb10f9182c083aa4dece22d6d5",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1163,7 +1163,7 @@
     "R"
    ],
    "path": "reports/rosyth-ville.json",
-   "sha256": "bca2947151eafe15e6562f89bf132ba13855568512225c6bf1eb2e70d5c58569",
+   "sha256": "5ed1e7d51bc60380fe1681837126f879f730fe8ef3530d5cd8cd3ab7c56c4945",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1332,7 +1332,7 @@
     "P"
    ],
    "path": "reports/terrene-at-bukit-timah.json",
-   "sha256": "92031ae4b2b574e20f068e284ba9001a00a1f0d0990a60b108f1fc374f50f0ec",
+   "sha256": "06e987244806730084970b406139727e11162502ee3c93d61f3495575bce297f",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1358,7 +1358,7 @@
    "name": "The Cascadia",
    "kind": "completed",
    "path": "reports/the-cascadia.json",
-   "sha256": "446822e8876674300b36b0ff326518c74cf480a06b460739d10aae55ea0356d6",
+   "sha256": "63cb97d724919cbf952cbf44c56805bd1dd61bc8493ad03df6a8cdc9d54f85f2",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1488,7 +1488,7 @@
    "name": "The Parc Condominium",
    "kind": "completed",
    "path": "reports/the-parc-condominium.json",
-   "sha256": "b93e715cc86e2576567caf4680c596cd9929b0139a231f941094f3f452eceb90",
+   "sha256": "0e2fc07fb3f1a7221ca11ee561a408f77b967ba18e89d830f405dce7568877f1",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1527,7 +1527,7 @@
     "P"
    ],
    "path": "reports/the-sorrento.json",
-   "sha256": "9a4b44e22b9298494dcdd77d9c062754f9bbeace208cd1fa1b9dd564b63aa2f0",
+   "sha256": "0d873375af297209f90d257034372d10146ba1f9ea3e7a6adaf269de1cb3bb3c",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1541,7 +1541,7 @@
     "P"
    ],
    "path": "reports/the-trizon.json",
-   "sha256": "1c400145f5d638b417ddc2c04c672b2fb065e149b6fee3a1709469c7e999ddf6",
+   "sha256": "011421d7dca3436a7800400a5e177a026b62357633fe9a426030cb43d0707869",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1570,7 +1570,7 @@
     "P"
    ],
    "path": "reports/the-waterline.json",
-   "sha256": "cff82e0a2666cc4952b3fde687383634ec2439e1e9ed864672a6e5539674f906",
+   "sha256": "985cd71922517ae7e4b940a1b017f81a3ae8648fc15a1c5da2b461d5bb0bcd5d",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1581,7 +1581,7 @@
    "name": "Thomson Grand",
    "kind": "completed",
    "path": "reports/thomson-grand.json",
-   "sha256": "709c60a8fb7f014f14780540bb00e5e488f84785363f44d8f2b2e3c60af96c6c",
+   "sha256": "4d0f3807c25dcd05f14420ccf21208a55b3e341eb9453627c62486fd8fdc7bb3",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1595,7 +1595,7 @@
     "P"
    ],
    "path": "reports/thomson-imperial-court.json",
-   "sha256": "f2a27d89cdbb0192ab2ec7b07da019f2160edd0bbfc3a6af087f0e0be98576b8",
+   "sha256": "ebf76ba002f8763eddfab4fd2095ad3cd30f6004a10a0ac92ac0e561c1f53920",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1643,7 +1643,7 @@
     "R"
    ],
    "path": "reports/vina-lodge.json",
-   "sha256": "64a6fea3afe9b5a4b192033010da51fbd907d01ab6a614502172449d1b616052",
+   "sha256": "30130982c5fb0fd20cb95ab7b0616fae9760368d46ed6d11fef92cd4bc569e97",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"

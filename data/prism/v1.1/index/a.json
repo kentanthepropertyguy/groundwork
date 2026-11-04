@@ -11,7 +11,7 @@
     "P"
    ],
    "path": "reports/183-longhaus.json",
-   "sha256": "f7bfa26b8449b82e61a8443f6d3b7fc4189ed8fecee49634338ea39b0d9c5735",
+   "sha256": "f922ffc5b9096fbb3ff58da1982720d624f4e51382c8762cc7cbb527ed58481e",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -266,7 +266,7 @@
    "name": "Carissa Park Condominium",
    "kind": "completed",
    "path": "reports/carissa-park-condominium.json",
-   "sha256": "7d2f5e7da2d833417f84504d9e232c90ca5c66410d7b9ee70dffdc6a424ccf84",
+   "sha256": "d8dfa9f06197c06bbc7c1a005a5ed2b2d21996721085726ba551256b7b867806",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -303,7 +303,7 @@
     "R"
    ],
    "path": "reports/chuan-park-demolished.json",
-   "sha256": "3bf2dd4bf4b1234a908e71f5e74d51244240899ea18a6924c5f356be2ac94b0b",
+   "sha256": "91e87593d7964e41b6c6b810c5bc34c9745da79fbff97fc8c287cf3afa5e64f6",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -339,7 +339,7 @@
     "P"
    ],
    "path": "reports/country-esquire.json",
-   "sha256": "9ac5e2d904dd0f5fe9a3978c4858067a9da786e271687ee8a061f485dff024dc",
+   "sha256": "bb549063983d2e39af03bbe8717780ec2c89cae045dcbafc73dce724c4314a01",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -436,7 +436,7 @@
     "P"
    ],
    "path": "reports/duchess-residences.json",
-   "sha256": "6271ddfe5da6e29fdb5f5e66c9585b5c449e794e60995aebe61eb46fab03c6d4",
+   "sha256": "276af17d31906a2a967eeb7c018e5c8472287cf97c8df0350308d0b5a4122705",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -534,7 +534,7 @@
     "P"
    ],
    "path": "reports/fontaine-parry.json",
-   "sha256": "e30e6cfc74e5a20f9e6f2faee58f70ae6028deb25ef54e253bb80acc6863bf81",
+   "sha256": "89101ac382394d42ed467789359512cc8a449a5d9cd6818ab3f8201b7ea4e7b0",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -779,7 +779,7 @@
     "P"
    ],
    "path": "reports/kingsgrove.json",
-   "sha256": "d4e436bf1c5cee53e496c4e29df19afe22115de782f60e9a31c2ab38cb6467ef",
+   "sha256": "8519206455379a9dc36bfce847053f0701e79bb306a1fe228c5cb3e8c2083f3a",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -893,7 +893,7 @@
     "R"
    ],
    "path": "reports/mayfair-park.json",
-   "sha256": "8a64dee9b4dfad9abd9737a6c7658603c075ef39008bdf079195d915513b59c1",
+   "sha256": "0912c3f4a3ed736ec9efce8198cc12fd8d457aeb9d42d7f728af1cf4d5e2a322",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1447,7 +1447,7 @@
    "name": "Sherwood Condominium",
    "kind": "completed",
    "path": "reports/sherwood-condominium.json",
-   "sha256": "46c3e2af0017c1b5ed4c08f29d20ea572ef5806c48b05b91824bb4645a802f65",
+   "sha256": "59956abf6a15bf59f0a31d8c7e30b8e9f9538b745a74bd7b0c074b9a31f7a998",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1521,7 +1521,7 @@
     "P"
    ],
    "path": "reports/suites-at-bukit-timah.json",
-   "sha256": "7a36749664c232ea3729ced5cf4ff6aa000f0ebc113225bbafa650e78f81edcf",
+   "sha256": "2d97802cb7eb3c84719f8cb3d5eea993119147ea95b5ec05803f515651d4a66b",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1666,7 +1666,7 @@
     "P"
    ],
    "path": "reports/the-bently-residences-at-kovan.json",
-   "sha256": "1aaee3e047812bba86ab1a6810803b587a709ba4b25c9b36d4d35be89c6fe37d",
+   "sha256": "c07d749fc47bc9616c09d35ee3347e004bc11a7334f7b8b3a7ae0785f930bb0b",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1815,7 +1815,7 @@
    "name": "The Quartz",
    "kind": "completed",
    "path": "reports/the-quartz.json",
-   "sha256": "5a148b4f2a54fc17f606a51971dc27c4986b5970e045063fd06c6a54646c555a",
+   "sha256": "70ba9bcae3a77531837f0058b8b046e129c127484d9067a1d114421221d986c0",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1879,7 +1879,7 @@
    "name": "The Tembusu",
    "kind": "completed",
    "path": "reports/the-tembusu.json",
-   "sha256": "12db87db2ec3ccfbea975d6e9c66bbec61d819b356574224ecb0a1ce8d2d2068",
+   "sha256": "cc6661905899cdeb697f51787365e4864c37ad654871f61926af0e365619a69d",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1987,7 +1987,7 @@
     "P"
    ],
    "path": "reports/villa-azura.json",
-   "sha256": "8abbdb01a44bd668649380e58839e29dc107a3e5c5f163dfb0794e150b28e851",
+   "sha256": "db2535219027322749bcafce35c9dc457029a1c64b830c51cdfbb0b58b4d3feb",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -2031,7 +2031,7 @@
    "name": "Whitewater",
    "kind": "completed",
    "path": "reports/whitewater.json",
-   "sha256": "ff617907ab377a278e8f5c7ab8a0ebb9bd77d47cee95daf3be9fb394587ec069",
+   "sha256": "88002f4f8d96616e3857fc596802134efbc63db5ea7387e406543c08994ee9ff",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"

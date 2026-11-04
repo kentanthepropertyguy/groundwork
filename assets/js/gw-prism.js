@@ -45,18 +45,23 @@
   // against it by the tests.
   // r3 (GW-PRISM-R3-SCHEMA-20261103-01, Registry v2): the same reports, re-issued; the root lists every Registry v2 id (2,509) with its
   // state, and each item carries its own approval reference, which must be one of CHAIN (no single release-wide approval any more)
+  // Future MRT Phase 1 (GW-FMRT-P1-20261104-01): a delta on r3 (manifest deltaApproval, previous = the r3 release). Only the
+  // infrastructure.futureTransport line of qualifying reports changes; FMRT (the last link of CHAIN) is accepted on that line alone, in exactly
+  // the approved form (futureOk); every other item keeps its own approval
+  const FMRT = 'GW-FMRT-P1-20261104-01';
   const V11 = { SCHEMA: 'prism-public-v1.1-r3', INDEX_SCHEMA: 'prism-public-v1.1-r3-index', SHARD_SCHEMA: 'prism-public-v1.1-r3-shard', DIR: 'data/prism/v1.1/',
-    CHAIN: ['GW-PRISM-V1.1-2026-11-01-A1', 'GW-PRISM-V1.1-2026-11-03-DECILE', 'GW-PRISM-V1.1-2026-11-03-A2', 'GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1'],
-    RELEASE: 'prism-v1.1-r3-release-2026-11-03-a8b865345a70',
-    INDEX: 'fbf04c39c8e61f50e1a9a45db2d4e99270caae9b6763b0dba526668a475552d2',      // index.json, byte for byte: any other is not read
-    MANIFEST: '37fea25c57706a3a1d4b7deb873c8ab284318e7acc7df2ae5d5432abae3fec61',   // manifest.json, bound by the root (manifestSha256)
+    CHAIN: ['GW-PRISM-V1.1-2026-11-01-A1', 'GW-PRISM-V1.1-2026-11-03-DECILE', 'GW-PRISM-V1.1-2026-11-03-A2', 'GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1', FMRT],
+    RELEASE: 'prism-v1.1-r3-fmrt-p1-2026-11-04-ebfc22ae60fd',
+    INDEX: '4e2793799cb4b8f7a2c1a12adfd2ffee29637baab7dd8399f69b8ef11257b8fe',      // index.json, byte for byte: any other is not read
+    MANIFEST: '2c12743bed454404358057b1b2ba65d69c9827c2c9569a1f83f80ce57a51534f',   // manifest.json, bound by the root (manifestSha256)
     STATES: ['full', 'partial', 'pending', 'unavailable', 'new_launch', 'redirect'], PAGE_STATES: ['full', 'partial'],
     SHARDS: '0123456789abcdef',
     V1PAIR: { release: 'prism-v1-release-2026-10-30-10911d7e2c92', approvalRef: 'GW-PRISM-V1-2026-10-31-A1',
       sha256: ['2d7266d31571169f2281a8aad3b31acb682de0229a6fd106cf47d2ff54ca1144', '330f8e9f874bbf0e9e282b75d9e94b19a5e8d723be1f3ccb20faabfa306fc78f', '56b6139e0f013ac17bf92ac18183e290cc46fdb617e7906dc2513ff14e948ce1'] },
     PERIODS: { URA_TRANSACTIONS: '2026-09', URA_RENTAL: '2026-09', URA_DWELLING_UNITS: 'URA states Q4 2022; file updated 2026-02-26', URA_MP2019: 'Master Plan 2019', GW_BEDROOM: '2026-09',
       SINGSTAT_GHS2025: 'GHS 2025', LTA_RAIL_EXITS: 'accessed 2026-10-20', MOE_SCHOOLS: 'accessed 2026-10-20', NEA_SUPERMARKETS: 'accessed 2026-10-20', NEA_HAWKERS: 'accessed 2026-10-20',
-      NPARKS_PARKS: 'accessed 2026-10-20', ONEMAP: 'accessed 2026-10-20', GW_UPCOMING: '2026-10-21' },
+      NPARKS_PARKS: 'accessed 2026-10-20', ONEMAP: 'accessed 2026-10-20', GW_UPCOMING: '2026-10-21',
+      URA_MP2025_RAIL_STATIONS: 'amended 2026-09-21', LTA_RAIL_PROJECTS: 'accessed 2026-11-04' },
     MIN_HOMES_ABOVE: 50 };   // D4: the "above most peers" Reveal needs 50 or more homes (the Resale position's sample.homes)
   const PANELS = { P: ['price.entry'], R: ['resale.sustained'], I: ['infrastructure.mrt', 'infrastructure.schools', 'infrastructure.amenities', 'infrastructure.futureTransport'],
     S: ['supply.competition', 'supply.unsoldInventory', 'supply.pipeline', 'supply.quietArea'], M: ['market.backdrop'] };
@@ -67,7 +72,7 @@
   const SCOPE = { observed_resale_activity: 'Observed resale activity · project-wide', observed_neighbourhood_market: 'Surrounding resale market' };
   const KIND = { 'completed-condo': 'Condominium', 'awarded-site': 'Awarded site' };
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const SOURCE_NAME = { URA_TRANSACTIONS: 'URA transactions', URA_RENTAL: 'URA rental contracts', URA_DEV_SALES: 'URA developer sales', URA_PIPELINE: 'URA pipeline', URA_DWELLING_UNITS: 'URA dwelling units', URA_SALE_SITES: 'URA Sale Sites', URA_MP2019: 'URA Master Plan 2019 subzones', SINGSTAT_GHS2025: 'SingStat General Household Survey 2025', HDB_PROPERTY: 'HDB property information', HDB_RESALE: 'HDB resale prices', SINGSTAT_RESIDENTS: 'SingStat residents', LTA_RAIL_EXITS: 'LTA station exits', MOE_SCHOOLS: 'MOE schools', NEA_SUPERMARKETS: 'NEA supermarkets', NEA_HAWKERS: 'NEA hawker centres', NPARKS_PARKS: 'NParks parks', ONEMAP: 'OneMap', GW_BEDROOM: 'Groundwork bedroom classification', GW_UPCOMING: 'Groundwork named sites', AMENITIES: 'Amenities (LTA, MOE, NEA, NParks, OneMap)' };
+  const SOURCE_NAME = { URA_TRANSACTIONS: 'URA transactions', URA_RENTAL: 'URA rental contracts', URA_DEV_SALES: 'URA developer sales', URA_PIPELINE: 'URA pipeline', URA_DWELLING_UNITS: 'URA dwelling units', URA_SALE_SITES: 'URA Sale Sites', URA_MP2019: 'URA Master Plan 2019 subzones', SINGSTAT_GHS2025: 'SingStat General Household Survey 2025', HDB_PROPERTY: 'HDB property information', HDB_RESALE: 'HDB resale prices', SINGSTAT_RESIDENTS: 'SingStat residents', LTA_RAIL_EXITS: 'LTA station exits', MOE_SCHOOLS: 'MOE schools', NEA_SUPERMARKETS: 'NEA supermarkets', NEA_HAWKERS: 'NEA hawker centres', NPARKS_PARKS: 'NParks parks', ONEMAP: 'OneMap', GW_BEDROOM: 'Groundwork bedroom classification', GW_UPCOMING: 'Groundwork named sites', AMENITIES: 'Amenities (LTA, MOE, NEA, NParks, OneMap)', URA_MP2025_RAIL_STATIONS: 'URA Master Plan 2025 rail station sites', LTA_RAIL_PROJECTS: 'LTA rail project pages' };
 
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const isNum = (v) => typeof v === 'number' && isFinite(v);
@@ -181,7 +186,7 @@
     const seen = {};
     sh.entries.forEach((r) => {
       if (!r || !ID.test(r.id) || V11.STATES.indexOf(r.state) < 0 || typeof r.name !== 'string' || !r.name || seen[r.id]) throw new Error('v1.1 shard: bad entry');
-      if (V11.PAGE_STATES.indexOf(r.state) >= 0 && (r.path !== 'reports/' + r.id + '.json' || !/^[0-9a-f]{64}$/.test(r.sha256 || '') || !(Number.isInteger(r.items) && r.items > 0) || V11.CHAIN.indexOf(r.approvalRef) < 0)) throw new Error('v1.1 shard: bad report entry');
+      if (V11.PAGE_STATES.indexOf(r.state) >= 0 && (r.path !== 'reports/' + r.id + '.json' || !/^[0-9a-f]{64}$/.test(r.sha256 || '') || !(Number.isInteger(r.items) && r.items > 0) || V11.CHAIN.indexOf(r.approvalRef) < 0 || r.approvalRef === FMRT)) throw new Error('v1.1 shard: bad report entry');
       if (V11.PAGE_STATES.indexOf(r.state) < 0 && (r.path != null || r.sha256 != null)) throw new Error('v1.1 shard: a report for an entry without a page');
       if (r.state === 'redirect' && (!ID.test(r.to || '') || r.to === r.id)) throw new Error('v1.1 shard: bad redirect');
       seen[r.id] = 1;
@@ -206,6 +211,31 @@
     });
   }
   const ok11 = (x) => !!(x && x.approval && x.approval.state === 'approved' && V11.CHAIN.indexOf(x.approval.approvalRef) >= 0);
+  /* Future MRT Phase 1 (GW-FMRT-P1-20261104-01). The approved template, applied to the line's own data: the line's statement must be exactly
+     this, so no other wording can be shown. 1 or 2 stations under construction, nearest first, at most 2 km, straight line to the planned
+     station site (URA Master Plan 2025, indicative outline); LTA's target year. Never a rank, score, walking distance or price wording. */
+  const FT = { SOURCES: ['URA_MP2025_RAIL_STATIONS', 'LTA_RAIL_PROJECTS'], STATION_KEYS: 'stationKey|name|line|code|status|target|distanceM|measuredTo', DATA_KEYS: 'register|stations',
+    NOTE: 'Opening dates are LTA targets and can change. Planned stations are facts, not part of any comparison.',
+    // the 12 stations this release shows (key: [name, line, code, LTA target]); a station is shown only as recorded here
+    STATIONS: { 'cross-island-line-cp2-elias': ["Elias MRT", "Cross Island Line", "CP2", "2032"], 'cross-island-line-cr10-tavistock': ["Tavistock MRT", "Cross Island Line", "CR10", "2030"], 'cross-island-line-cr12-teck-ghee': ["Teck Ghee MRT", "Cross Island Line", "CR12", "2030"], 'cross-island-line-cr14-turf-city': ["Turf City MRT", "Cross Island Line", "CR14", "2032"], 'cross-island-line-cr16-maju': ["Maju MRT", "Cross Island Line", "CR16", "2032"], 'cross-island-line-cr18-west-coast': ["West Coast MRT", "Cross Island Line", "CR18", "2032"], 'cross-island-line-cr19-jurong-lake-district': ["Jurong Lake District MRT", "Cross Island Line", "CR19", "2032"], 'cross-island-line-cr3-loyang': ["Loyang MRT", "Cross Island Line", "CR3", "2030"], 'cross-island-line-cr4-pasir-ris-east': ["Pasir Ris East MRT", "Cross Island Line", "CR4", "2030"], 'cross-island-line-cr6-tampines-north': ["Tampines North MRT", "Cross Island Line", "CR6", "2030"], 'cross-island-line-cr7-defu': ["Defu MRT", "Cross Island Line", "CR7", "2030"], 'cross-island-line-cr9-serangoon-north': ["Serangoon North MRT", "Cross Island Line", "CR9", "2030"] } };
+  const ftM = (m) => (m < 50 ? 'under 50 m' : 'about ' + num(m, 0) + ' m');
+  function futureStatement(ss) {
+    if (ss.length === 1) { const s = ss[0]; return 'Upcoming: ' + s.name + ' (' + s.line + ') ' + ftM(s.distanceM) + ', under construction; LTA target ' + s.target + '. Straight-line distance to the planned station site; entrances are not yet published.'; }
+    const part = (s) => s.name + ' ' + ftM(s.distanceM) + ' (LTA target ' + s.target + ')', tail = ', both under construction. Straight-line distances to the planned station sites; entrances are not yet published.';
+    return ss[0].line === ss[1].line ? 'Upcoming on the ' + ss[0].line + ': ' + part(ss[0]) + ' and ' + part(ss[1]) + tail : 'Upcoming: ' + part(ss[0]) + ' (' + ss[0].line + ') and ' + part(ss[1]) + ' (' + ss[1].line + ')' + tail;
+  }
+  function futureOk(l, r) {
+    if (l.status === 'not_yet_assessed' && l.data === null && l.approval.approvalRef !== FMRT) return true;   // the approved r3 line, unchanged
+    const d = l.data, ss = d && d.stations, src = (r.sources || []).map((x) => x.id);
+    if (l.status !== 'available' || l.missing !== null || l.period !== null || l.approval.approvalRef !== FMRT || l.label !== 'Future transport' ||
+      l.approval.recordItem !== 'FMRT1/' + r.reportId + '/infrastructure.futureTransport' || (l.sourceIds || []).join('|') !== FT.SOURCES.join('|') || FT.SOURCES.some((x) => src.indexOf(x) < 0) ||
+      !d || Object.keys(d).sort().join('|') !== FT.DATA_KEYS || !d.register || !/^[0-9a-f]{64}$/.test(d.register.sha256 || '') || !/^\d{4}-\d{2}-\d{2}$/.test(d.register.asAt || '') ||
+      !Array.isArray(ss) || ss.length < 1 || ss.length > 2) return false;
+    if (!ss.every((s, i) => s && Object.keys(s).join('|') === FT.STATION_KEYS && Array.isArray(FT.STATIONS[s.stationKey]) && FT.STATIONS[s.stationKey].join('|') === [s.name, s.line, s.code, s.target].join('|') && /^[a-z0-9-]+$/.test(s.stationKey) && / MRT$/.test(s.name) && typeof s.line === 'string' && s.line &&
+      typeof s.code === 'string' && s.code && s.status === 'under_construction' && /^20\d\d$/.test(s.target) && s.measuredTo === 'station_site' &&
+      Number.isInteger(s.distanceM) && s.distanceM >= 0 && s.distanceM <= 2000 && s.distanceM % 10 === 0 && (i === 0 || s.distanceM >= ss[i - 1].distanceM))) return false;
+    return l.statement === futureStatement(ss);
+  }
   // every item in a report (anything carrying an approval): its id within the report, approved under a reference in CHAIN. One item that is
   // not (pending, another reference, a foreign id) rejects the whole report.
   function itemsOk(r) {
@@ -213,6 +243,7 @@
       if (!o || typeof o !== 'object') return;
       if (Array.isArray(o)) { o.forEach(walk); return; }
       if ('approval' in o && (!ok11(o) || typeof o.itemId !== 'string' || o.itemId.indexOf(r.reportId + '/') !== 0)) throw new Error('v1.1 report: an item that is not approved');
+      if ('approval' in o && o.approval.approvalRef === FMRT && (o.measure !== 'infrastructure.futureTransport' || o.itemId !== r.reportId + '/infrastructure.futureTransport')) throw new Error('v1.1 report: the future MRT approval on another item');
       Object.keys(o).forEach((k) => walk(o[k]));
     };
     walk(r);
@@ -230,7 +261,7 @@
     lines.forEach((l) => {
       if (!l || !PANELS[l.panel] || PANELS[l.panel].indexOf(l.measure) < 0 || STATUS.indexOf(l.status) < 0 || typeof l.statement !== 'string' || !l.statement) throw new Error('v1.1 report: a line outside the profile');
       if (l.measure === 'supply.unsoldInventory' && (l.status !== 'not_available' || l.data !== null)) throw new Error('v1.1 report: unsold inventory');
-      if (l.measure === 'infrastructure.futureTransport' && (l.status !== 'not_yet_assessed' || l.data !== null)) throw new Error('v1.1 report: future transport');
+      if (l.measure === 'infrastructure.futureTransport' && !futureOk(l, r)) throw new Error('v1.1 report: future transport');
       if (l.measure === 'market.backdrop' && l.data && ['rank', 'decile', 'percentile', 'band', 'bandLabel'].some((k) => k in l.data)) throw new Error('v1.1 report: a Market rank');
       if (l.status === 'settling' && l.data && l.data.value !== null) throw new Error('v1.1 report: a settling value');
       if ((l.status === 'not_available' || l.status === 'not_yet_assessed') && l.data !== null) throw new Error('v1.1 report: a value for a missing measure');
@@ -769,6 +800,7 @@
   function lineHtml(l, periods) {
     const meta = [linePeriod(l), srcWith(l.sourceIds, periods)].filter(Boolean).join(' · '), gap = l.status === 'not_available' || l.status === 'not_yet_assessed';
     return '<div class="gwp-m gwp-pfl' + (gap ? ' gwp-pfl--gap' : '') + '" data-gwp-line="' + esc(l.measure) + '" data-gwp-status="' + esc(l.status) + '"><dt>' + esc(l.label) + '</dt><dd>' + statementHtml(l) +
+      (l.measure === 'infrastructure.futureTransport' && l.status === 'available' ? '<span class="gwp-ms" data-gwp-fnote>' + esc(FT.NOTE) + '</span>' : '') +
       (meta ? '<span class="gwp-ms">' + esc(meta) + '</span>' : '') + '</dd></div>';
   }
   function v11Html(md, k) {
@@ -1123,5 +1155,5 @@
     }
   }
 
-  return { compactQuick, compactHtml, CQ, quick11, quickHtml, QT, itemsOk, redirect11, hasReport, isCurated, explain11, explainHtml, XT, PICKS_MAX, CURATED, hasEvidence, REVEAL, ES, reveal11, revealHtml, V11, PANELS, checkIndex, checkShard, checkPair, checkReport11, model11, compose, hasPage, headline11, lineHtml, posHtml, yieldHtml, incomeHtml, v11Html, VERSION, switchHtml, leadSites, layersHtml, dimsHtml, evidenceOf, headline, landingHtml, mountLanding, QUESTION, SCHEMA, DIR, MANIFEST_V, PILLARS, checkManifest, checkReport, approved, shown, model, value, detail, period, evidence, previewHtml, pageHtml, load, mountPreview, show, _cache: cache, _settled: settled };
+  return { FMRT, FT, futureStatement, futureOk, compactQuick, compactHtml, CQ, quick11, quickHtml, QT, itemsOk, redirect11, hasReport, isCurated, explain11, explainHtml, XT, PICKS_MAX, CURATED, hasEvidence, REVEAL, ES, reveal11, revealHtml, V11, PANELS, checkIndex, checkShard, checkPair, checkReport11, model11, compose, hasPage, headline11, lineHtml, posHtml, yieldHtml, incomeHtml, v11Html, VERSION, switchHtml, leadSites, layersHtml, dimsHtml, evidenceOf, headline, landingHtml, mountLanding, QUESTION, SCHEMA, DIR, MANIFEST_V, PILLARS, checkManifest, checkReport, approved, shown, model, value, detail, period, evidence, previewHtml, pageHtml, load, mountPreview, show, _cache: cache, _settled: settled };
 });

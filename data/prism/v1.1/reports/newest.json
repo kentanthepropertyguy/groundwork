@@ -251,20 +251,38 @@
     "itemId": "newest/infrastructure.futureTransport",
     "approval": {
      "state": "approved",
-     "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
-     "recordItem": "B1/newest/infrastructure.futureTransport"
+     "approvalRef": "GW-FMRT-P1-20261104-01",
+     "recordItem": "FMRT1/newest/infrastructure.futureTransport"
     },
     "panel": "I",
     "measure": "infrastructure.futureTransport",
     "label": "Future transport",
-    "status": "not_yet_assessed",
-    "missing": {
-     "reason": "no official LTA planned-station record"
+    "status": "available",
+    "missing": null,
+    "statement": "Upcoming: West Coast MRT (Cross Island Line) about 570 m, under construction; LTA target 2032. Straight-line distance to the planned station site; entrances are not yet published.",
+    "data": {
+     "stations": [
+      {
+       "stationKey": "cross-island-line-cr18-west-coast",
+       "name": "West Coast MRT",
+       "line": "Cross Island Line",
+       "code": "CR18",
+       "status": "under_construction",
+       "target": "2032",
+       "distanceM": 570,
+       "measuredTo": "station_site"
+      }
+     ],
+     "register": {
+      "asAt": "2026-11-04",
+      "sha256": "664fa85c504a4cef3d6ff325ef7ea0e789a310410fcc7c7c2cd40011d2ba3080"
+     }
     },
-    "statement": "Not yet assessed: needs official LTA evidence for planned stations.",
-    "data": null,
     "period": null,
-    "sourceIds": []
+    "sourceIds": [
+     "URA_MP2025_RAIL_STATIONS",
+     "LTA_RAIL_PROJECTS"
+    ]
    },
    {
     "itemId": "newest/supply.competition",
@@ -605,6 +623,48 @@
    "attribution": "Named sites compiled by Groundwork from official URA Sale Sites, launch records and the sources cited for each site.",
    "url": null,
    "note": "A site stage is named only where a cited source states it; otherwise \"Upcoming development\"."
+  },
+  {
+   "id": "URA_MP2025_RAIL_STATIONS",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "Amendment to Master Plan 2025 Rail Station Layer (indicative station outlines)",
+   "datasetId": "d_6f5107a8cf6c9a32439cffbfa9013423",
+   "asAt": null,
+   "updated": "2026-09-21",
+   "accessed": "2026-11-04",
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0",
+    "url": "https://data.gov.sg/open-data-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated, with the access date.",
+     "Indicative station outlines: a planned station site, not a station entrance.",
+     "Do not imply endorsement by the publisher."
+    ]
+   },
+   "attribution": "Contains information from Amendment to Master Plan 2025 Rail Station Layer (Urban Redevelopment Authority (URA)) accessed on 4 Nov 2026 from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "url": "https://data.gov.sg/datasets/d_6f5107a8cf6c9a32439cffbfa9013423/view"
+  },
+  {
+   "id": "LTA_RAIL_PROJECTS",
+   "publisher": "Land Transport Authority (LTA)",
+   "dataset": "Cross Island Line project page (updated 4 Aug 2026); Factsheet: The Next Phase of Rail Development (4 Mar 2026)",
+   "datasetId": null,
+   "asAt": null,
+   "updated": "2026-08-04",
+   "accessed": "2026-11-04",
+   "licence": {
+    "name": "LTA website terms of use (facts cited by page title and date; not linked)",
+    "url": null,
+    "status": "confirmed",
+    "conditions": [
+     "Line, status and target dates as LTA states them.",
+     "Opening dates are LTA targets and can change.",
+     "No hyperlink to the LTA website (written permission requested separately)."
+    ]
+   },
+   "attribution": "Line, construction status and target opening years as stated by the Land Transport Authority (LTA). Opening dates are LTA targets and can change.",
+   "url": null
   }
  ]
 }

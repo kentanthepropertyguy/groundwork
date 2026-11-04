@@ -211,7 +211,7 @@
     "P"
    ],
    "path": "reports/charisma-view.json",
-   "sha256": "ae52e25912da9300d373d15d2c411c80983cea0ff29109c859c0e74efd22d8f3",
+   "sha256": "d27bc3be9a2d719521e132fea5d880cfaaf3e3b62ced826afb2bed0644bce027",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -347,7 +347,7 @@
    "name": "Elias Green",
    "kind": "completed",
    "path": "reports/elias-green.json",
-   "sha256": "80f54b53710faea7fd6fb285dd94e9fd47d1646a8203f25aeae662a17d4d1b81",
+   "sha256": "214ac35d8a737d78b89540e202c4d300eb78713e116d1b0d33465073d82f5dcc",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -376,7 +376,7 @@
     "R"
    ],
    "path": "reports/faber-hills.json",
-   "sha256": "3f59ef0d613429e458d66c73eedfc23a79c09f2002395950ac53d30166c4430f",
+   "sha256": "9de8de42f915247a98efde44fe0e8d433d8348341826b53cc0186f72d3e8b7bd",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -507,7 +507,7 @@
     "R"
    ],
    "path": "reports/hilbre28.json",
-   "sha256": "ec3b299b8b3d178d1a98bddcce1adf8085c842a9757f77fe74335359730c1cc6",
+   "sha256": "4b36536e75f88996218c92763f9d978d3ef544c9d88d4bc971a8d19b3a2a03a1",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -618,7 +618,7 @@
     "P"
    ],
    "path": "reports/jansen-28.json",
-   "sha256": "0e6bdb88f2ec4680513e037f59a32b58a58bffacb59208585f7757ad44748af5",
+   "sha256": "749c8c22f107f7e4222b4e69a27a3dfd255b6653928c1fe6a1935c41ea6055fb",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -640,7 +640,7 @@
     "P"
    ],
    "path": "reports/jlb-residences.json",
-   "sha256": "d76fec652dbbc4684442e05b4aa32951feba7d83082b1d09e5917632f8e1a8a7",
+   "sha256": "1fcbb5e01583488517096c15ffda27d51923a417848af63367846c0944f00a1d",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -686,7 +686,7 @@
     "R"
    ],
    "path": "reports/kovan-primera.json",
-   "sha256": "fd20a2a5c4719ae30fdfaebf5d4463e1ee4e29f9d03ab130dd13f8a9a673e53b",
+   "sha256": "ea682b07ac684886924f000ea0365785e09dddd3f3f3cc1dc5f91202a691a864",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -700,7 +700,7 @@
     "P"
    ],
    "path": "reports/lake-life.json",
-   "sha256": "044ca351d2e6edb80178f7feb3cd01372153591ca9d8e796043dc34eee1b50be",
+   "sha256": "d49d0cb748614bac8040048c61a281c8af377ccf0d3c53ab0fe581f17deb0aae",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -737,7 +737,7 @@
     "R"
    ],
    "path": "reports/loyang-townhouses.json",
-   "sha256": "7ef1fa868a85d2d08028b41cc2e4c5c9bf62d526f5a314f3251eb9210e7dacc3",
+   "sha256": "84350dd2da04118c52d163132c272169ee093a635fda9c8198cfdb3498783988",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1013,7 +1013,7 @@
    "name": "Rio Vista",
    "kind": "completed",
    "path": "reports/rio-vista.json",
-   "sha256": "a9d32a8b146a22f7ab48d03e5dd2c6ca78b0efef9445361b305de1d21430600b",
+   "sha256": "8041b9fa98a7f17836a3c1559c535e732c830ad1e93bc4dbdbe9da9f84c4048f",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1117,7 +1117,7 @@
    "name": "Savannah Condopark",
    "kind": "completed",
    "path": "reports/savannah-condopark.json",
-   "sha256": "4d934b7e3c691d508e31e157ece4d1a4e3263ec82744f4d973973fc1877c6f0a",
+   "sha256": "da77d72a8abf84111b3fa365f726df97735cb4f45cdd8113f245018f78472302",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1185,7 +1185,7 @@
    "name": "Sin Ming Plaza",
    "kind": "completed",
    "path": "reports/sin-ming-plaza.json",
-   "sha256": "f718d4cbccf56f3c94cb8ad9ca09697cff9b7cc6891f43fe4d400d890ca734fe",
+   "sha256": "8e5f4897bf44da3bae2f517350553e104b4b6f8a9b9d9f8bc379086f6622c118",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1290,7 +1290,7 @@
    "name": "Sunhaven",
    "kind": "completed",
    "path": "reports/sunhaven.json",
-   "sha256": "9b5ca28388357b4f6f223615a921d4ed3817ab45a694cc5a96d018d37fab9110",
+   "sha256": "248b3be8bd2a380a7c9503d4abd311fd1851f7bbbbc81580b958dbeea6a37cc0",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1524,7 +1524,7 @@
     "R"
    ],
    "path": "reports/the-morning-glory.json",
-   "sha256": "acddcc5ed97e4f72f90d8b5278f9991ccb0c6817f20493f533e2202c61c82ed1",
+   "sha256": "ff75337fe971fb5549bebf7b1603004dcebda8a66050a1000f4854b1dbef7fee",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1601,7 +1601,7 @@
     "P"
    ],
    "path": "reports/the-sierra.json",
-   "sha256": "f11efc7eb3cb4f549753ced2d4ec3dc85141fe77fd59005cc2132798f3039f06",
+   "sha256": "044aeebd52d6919b8634bea0666c29081fb30804ca61d24e94a789696c545ffd",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1791,7 +1791,7 @@
     "P"
    ],
    "path": "reports/village-tower.json",
-   "sha256": "5d93e82663ee4d5be14cc67f20c66ecfb263d6f8fb2b39d0b9e6f207b1826779",
+   "sha256": "6604301cd20522aecfcb9f3b560f7f823629fbb0ad154e3fb3444e0b452d82b5",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"

@@ -78,7 +78,7 @@
    "name": "Austville Residences",
    "kind": "completed",
    "path": "reports/austville-residences.json",
-   "sha256": "f6865bac83687fedd21b809187dc2bdc95b26a2567ec1662f057ff97310060f9",
+   "sha256": "0cb238906fd32967af3515bf53cb2846205b23d99b0aa855275f7711b1a6ff62",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -183,7 +183,7 @@
     "P"
    ],
    "path": "reports/central-view.json",
-   "sha256": "16aa7df7ce2d68b8f75495e3a64f09e134d8a49e52a17c9af3265b9980798865",
+   "sha256": "c1af9da14050486b423f50c6b74917ae23e6857ebbb4492776b41038bc00fa1e",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -405,7 +405,7 @@
    "name": "Edelweiss Park Condominium",
    "kind": "completed",
    "path": "reports/edelweiss-park-condominium.json",
-   "sha256": "3bfd9d1435696bda3e57d236c108c6b6b76176acf4d29d8b7ebc172515e3e520",
+   "sha256": "0f7353cb9c5eabc57007d9526fd8a47cfb7095fa35fbae7db43b4b01a2dc3e85",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -460,7 +460,7 @@
     "P"
    ],
    "path": "reports/fontana-heights.json",
-   "sha256": "17ccd06eb89cf172472b62a9fcd976139784b96a6d95983ed2f6e53fcb8fb57e",
+   "sha256": "c91997683c0affc16e2d3b540327687303252ec461908748de1c214bde4c93b3",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -471,7 +471,7 @@
    "name": "Gardenvista",
    "kind": "completed",
    "path": "reports/gardenvista.json",
-   "sha256": "72e7816d222ac3cd01080e26bed26217b716f6779878a6f1613d240a8b000d7b",
+   "sha256": "a115f01ecd7bf6263e2f78b16959b7ec3d1a2479e67c01e2d580722f0eac7b69",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -482,7 +482,7 @@
    "name": "Glentrees",
    "kind": "completed",
    "path": "reports/glentrees.json",
-   "sha256": "c0c57fbe8a8fb106d9f058fa0da8fb13d175e8de207e52bdf6e6f670eba3ccf1",
+   "sha256": "32b49f6ef26322c60ff58bc4f9add84e86f5531eee81baf9bd2818b1948eda33",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -493,7 +493,7 @@
    "name": "Grandeur 8",
    "kind": "completed",
    "path": "reports/grandeur-8.json",
-   "sha256": "86661fad177811590aa25da7bc58da205948799b9586918c17d7adadf87eb288",
+   "sha256": "3aa3c47f293eb34cc1aa344c80d6cbd58d9d8d516fe393c6d80e9782407e2954",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -781,7 +781,7 @@
     "R"
    ],
    "path": "reports/kilat-19.json",
-   "sha256": "28db03dbc71754d2739d2e7bec0cb3fd48335dc54e3417690665c1ef35bd4b37",
+   "sha256": "6f8012d2ee31fb5f3d4255f06b9f9cdbe3402d8d9f58de6ecaa9966b0fabe291",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -909,7 +909,7 @@
    "name": "Maple Woods",
    "kind": "completed",
    "path": "reports/maple-woods.json",
-   "sha256": "550604aa6ad25716bebb13dbe31eedd47f37bc78fc5b0d7e72a593c436d4aa64",
+   "sha256": "73fa8874535c7fb15afaea13c147e5a96e1f59a0251246e21c005278219f9fbb",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1015,7 +1015,7 @@
    "name": "Nim Gardens",
    "kind": "completed",
    "path": "reports/nim-gardens.json",
-   "sha256": "1bef1ee4d45d8b5196b0fa2164891a3f20ebf488a5d378e2bc2b0bf1b35808c1",
+   "sha256": "dcb752db1a40da6280310520775cefd1bd0fc5963ed603dd1f1d261b8afc05b3",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1168,7 +1168,7 @@
    "name": "Parc Vera",
    "kind": "completed",
    "path": "reports/parc-vera.json",
-   "sha256": "efefbd2b13f9e69dd805fb0d7f90fa837e85aca9084af02574b157b4ad4dee35",
+   "sha256": "b9e2c2f7c17c69cf1d356c56bd80c1d667747dba0cfcfa61de2e94acd2e00902",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1183,7 +1183,7 @@
     "R"
    ],
    "path": "reports/people-s-garden.json",
-   "sha256": "7edfd57afd12b1efb6a11c0c0cc37d35202b6485ff9d2284e881c20aab124129",
+   "sha256": "75210975a8cfec61050e794212d77aedd9d44c233ec6782d086b57447b83a6b5",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1317,7 +1317,7 @@
     "R"
    ],
    "path": "reports/rosyth-lodge.json",
-   "sha256": "1c72b99d7643210e7427784da4c05a831cf4a2ca15b9be507565aa7baa070a1b",
+   "sha256": "e28c5d33d75589165d854a019576d20a0e759e512ad4b9addd5ca905690dc9df",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1332,7 +1332,7 @@
     "R"
    ],
    "path": "reports/sanctuary-at-813.json",
-   "sha256": "99ee091f5326182dfc5999e48bf4e49e3eda783ae76dc2484b822123d767eec0",
+   "sha256": "2fbcebec2450754b9fd0a26c2bcf35ed86513f828753160eb2f0d809404cf2fb",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1414,7 +1414,7 @@
     "P"
    ],
    "path": "reports/sherwood-tower.json",
-   "sha256": "6374d92668430299db93eee8e644563fc7b7dc2544afc51ab6fb243854a3919a",
+   "sha256": "1d2d9cd8237d5be01f9c393a1f1fcd5459ec526240a207bb5065e321e8d4df9c",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1429,7 +1429,7 @@
     "R"
    ],
    "path": "reports/simon-plaza.json",
-   "sha256": "94df5fbd6efb3d7e3177428c78559c79a0510969f435bbf9777c42ac8b6c49e8",
+   "sha256": "1851076c6b777dcbabf73b539131beb370c5ed543a57b3940c0b61483b921696",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1455,7 +1455,7 @@
    "name": "Sky Habitat",
    "kind": "completed",
    "path": "reports/sky-habitat.json",
-   "sha256": "cc1a1be74cea9a5a9874247d7cd817cd4f5ab132b0b9ebb927db223ac18654fb",
+   "sha256": "51185358f7e826b34e62fcf803805672afa8c15769a78edfdd91f7880022ada1",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1466,7 +1466,7 @@
    "name": "Sky Vue",
    "kind": "completed",
    "path": "reports/sky-vue.json",
-   "sha256": "75bb205b9e3ed018505ca1b5768c687d1b827fc199b7192403008b2910c307c4",
+   "sha256": "41261a77afff77e625930995720602b61d1222af97227d7dfa88f8e3ac5e2bf8",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1596,7 +1596,7 @@
    "name": "The Alps Residences",
    "kind": "completed",
    "path": "reports/the-alps-residences.json",
-   "sha256": "a05312cf390619cee7e068c6bade7b7661a1a596d275054099e14dffeb7ccc2c",
+   "sha256": "e2905bf216fd51a4ec781b38164420fd1335b75ca105adf9a02f30d346b7c3ef",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1705,7 +1705,7 @@
    "name": "The Nexus",
    "kind": "completed",
    "path": "reports/the-nexus.json",
-   "sha256": "0a8aae1a53d8251a0733ba7d398ef26593a017c8e1152b8596d8c9abe0f2332d",
+   "sha256": "7fab4b42a57afb53ecbe0291338b65e122cf9ee9438a7afbf134d19d0daa35c0",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1789,7 +1789,7 @@
    "name": "The Topiary",
    "kind": "completed",
    "path": "reports/the-topiary.json",
-   "sha256": "73367ba958e68588d1bc973599afd1e8733ae2a4ed2c73e6c780cc1ac961addc",
+   "sha256": "d6e6c928d4cc05aac68de4ebe5d62cdf9e5deae3a39dae73b15c79b0036cae9e",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"

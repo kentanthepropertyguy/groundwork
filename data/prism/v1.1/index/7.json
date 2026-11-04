@@ -152,7 +152,7 @@
    "name": "Azalea Park Condominium",
    "kind": "completed",
    "path": "reports/azalea-park-condominium.json",
-   "sha256": "1fd9b2b2913d705d51618e1ed585da75af9466330e07d69ec5be6da4e14c9a07",
+   "sha256": "0d47d47064bd25613809eca7b0d8022fcea6f41e3297232b6e22f609f7a5c340",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -195,7 +195,7 @@
     "P"
    ],
    "path": "reports/beauty-world-centre.json",
-   "sha256": "41a41312653385efff38e802f41230efd8f8114c9376463f70eced1bfa4af802",
+   "sha256": "3402e672088c81b8d002e5947bc94ce404b001f744bff0d404f8937b88466f58",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -256,7 +256,7 @@
    "name": "Carabelle",
    "kind": "completed",
    "path": "reports/carabelle.json",
-   "sha256": "7732266265a9792ff6875933c4af16d94b2adc25df6911069fca7fe7e83f4d0b",
+   "sha256": "cbc7afbb5274fc6c3bbc6fc6046facd6bdec089f12df0007de77615b35db6941",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -281,7 +281,7 @@
     "P"
    ],
    "path": "reports/casa-pasir-ris.json",
-   "sha256": "e5909549d4e81db9878b6806b1fcb2d8140c8cf2f7eed7c721f2d18327b7ef2f",
+   "sha256": "0f1788790488b0509c45db33b435bc1704e8fd861a3fd3964cdfdb6bb4a747f0",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -362,7 +362,7 @@
     "P"
    ],
    "path": "reports/clover-by-the-park.json",
-   "sha256": "853d3d7102d4c00fd939bcfb1bf419c8f53827069b42d9ecd8efed118c21c076",
+   "sha256": "45709a46deb32f4ed4e5e78da120b71366c431ffa1a887b6b6be32ecc4e36ed9",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -420,7 +420,7 @@
     "P"
    ],
    "path": "reports/d-zire.json",
-   "sha256": "53ff91cd10339f8033e2ea6dd562c0d09d5743a361eda1e4143c6f2550b61c2e",
+   "sha256": "66e5d687051cf0ea7d97ef59d55a6a12118aee1ad1ee237f949e6b60612a4302",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -518,7 +518,7 @@
    "name": "Far Horizon Gardens",
    "kind": "completed",
    "path": "reports/far-horizon-gardens.json",
-   "sha256": "51e715dc7ac845ab27a4306aa9390ec43050608192a781c7789b7a54f63edaed",
+   "sha256": "13b12d2c38dbaafd66a976ca784e62cfe0b4ba112d761423d3811963ef8139e3",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -551,7 +551,7 @@
    "name": "Goldenhill Park Condominium",
    "kind": "completed",
    "path": "reports/goldenhill-park-condominium.json",
-   "sha256": "fd10fd6044890261c6efafefce8e8a4d243e09af34ab9811f29e73be17d7317d",
+   "sha256": "39d302bad471a422ed8e02d68ac1cd1a3edd9af95e1e81f97620ab13a6827f2e",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -576,7 +576,7 @@
     "P"
    ],
    "path": "reports/grand-regency.json",
-   "sha256": "3e533dca6960ae9c5bc7f768e0c027d7afe6fe6e517655928194abb2bddd7266",
+   "sha256": "3b7867f15f60cd09205060190913523d57c85e15462bbbc3c066961bdbb9cb7d",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -628,7 +628,7 @@
    "name": "High Oak Condominium",
    "kind": "completed",
    "path": "reports/high-oak-condominium.json",
-   "sha256": "a9573784cb9f00f8efd6b6a51ec6fe21acb399a073886f347509e2dbe407ec07",
+   "sha256": "fda64db4ce9689607b5683b672e7376f3e784fead6d745fe856d04991d1a14c6",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -778,7 +778,7 @@
     "P"
    ],
    "path": "reports/kap-residences.json",
-   "sha256": "472a8bdac5d3c4f124bdb62458032d86ce5b69f414bf6ffd2b1b51733198149f",
+   "sha256": "7c47e8d84c817e103d6595db237e7e56b465cff8b2e08316e856f264cad6d35a",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -949,7 +949,7 @@
    "name": "Monterey Park Condominium",
    "kind": "completed",
    "path": "reports/monterey-park-condominium.json",
-   "sha256": "861406173cd539e6b6778b16d1fc4f848702f03442d4f8565ae69fc4a99b0927",
+   "sha256": "484f4984dded3988b1349e9d20ab06ab40ba142c40e6bb4fd413191cef28573e",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1115,7 +1115,7 @@
     "R"
    ],
    "path": "reports/parry-court.json",
-   "sha256": "c54b4d13728480ca28c528034f8a4e7395e97b3435c72600579ea9580f0a8030",
+   "sha256": "f7181671a9c759ad62bc92ac5acf6c22d10b5b9d9225d58c8ceab685ab7cf896",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1189,7 +1189,7 @@
     "P"
    ],
    "path": "reports/regis-mansions.json",
-   "sha256": "fc24fc8bc202577005e807c165bbf07bae400993bc1d1ac5356bbf3c9b91d242",
+   "sha256": "8eb8c468ecb743742d13da0a93bcac13f4befbff768778ef515b8b92feba7e27",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1334,7 +1334,7 @@
     "P"
    ],
    "path": "reports/selanting-green.json",
-   "sha256": "585d942c8423983bceb12c1a40d2c21c3cbb7c90bd8d199a2e7aead44b6a5282",
+   "sha256": "8d3a0527328da1a27190a60842ec8ae33a282620ce2096e8e9f14283a00d61a6",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1641,7 +1641,7 @@
     "P"
    ],
    "path": "reports/the-florentine.json",
-   "sha256": "818ba7f79c4a4190daa1453daee2efb676ace899494296eba4d21a1011ad04a7",
+   "sha256": "ce175abe6ef63817e6ce1f17341fc5c816eaefe4191faa36594111f121047635",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1652,7 +1652,7 @@
    "name": "The Gale",
    "kind": "completed",
    "path": "reports/the-gale.json",
-   "sha256": "31504ab4f59c5e72e53286cc7f5ac863e275d6325a8f59369e1aefd5ac93cd35",
+   "sha256": "de124404a4f147db9951d88d9ee8ced30888f00a839d40aff56b6a2d2207ac0e",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1697,7 +1697,7 @@
    "name": "The Infiniti",
    "kind": "completed",
    "path": "reports/the-infiniti.json",
-   "sha256": "73de767c5f2e45aaaed9d820e81f66e8c9975467591a2db3a2e0d2f126c856ca",
+   "sha256": "cd40b1673773a6499f72490b736babc185a6ac9df00a7967d510119b9844cc29",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1858,7 +1858,7 @@
     "P"
    ],
    "path": "reports/three-11.json",
-   "sha256": "6c2211a212e8cd9e728ad838c512c390d79ca10d92c2a108ad2d313dae54a961",
+   "sha256": "1b73667286f0b1de9fec83c39858c9a81ee01aad63d048f278c5f3eb2de8c240",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1920,7 +1920,7 @@
    "name": "Trilive",
    "kind": "completed",
    "path": "reports/trilive.json",
-   "sha256": "eb728dec438ea8d4f634099913ef76fa1fc96a0b2b575f4983f1a1956a90a872",
+   "sha256": "6937eba40a998786d47298ac3770aaf42827a2d5a9d6ecdcbec7dedfbc7db8a8",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1960,7 +1960,7 @@
     "R"
    ],
    "path": "reports/upper-serangoon-shopping-centre.json",
-   "sha256": "e9405da01843299ee97b212f853df60bab3a58bee6d671b2dd95b49e650f63ff",
+   "sha256": "23b42889f7ffd3e5d2da184bfeb145e34cc4444e652fa945ea033bea40d814c1",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -2066,7 +2066,7 @@
    "name": "West Bay Condominium",
    "kind": "completed",
    "path": "reports/west-bay-condominium.json",
-   "sha256": "ef8d2d6d65b2e08125cffd1d6ffc14270d7209165865456f836f56f62ec85035",
+   "sha256": "b45b62d818b0a224685264f77b263bad46dfa0f25aea96a5a890fa070ee47fc8",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"

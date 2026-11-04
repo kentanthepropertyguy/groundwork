@@ -181,7 +181,7 @@
    "name": "Ballota Park Condominium",
    "kind": "completed",
    "path": "reports/ballota-park-condominium.json",
-   "sha256": "e5c3999519385e294072f3b72fe73be9692c6b3fa0ee2741d7d191aa9e9883cd",
+   "sha256": "c4708663a1061efb448762118b7c2be600a81996748620e1193b9d833384ac14",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -224,7 +224,7 @@
     "P"
    ],
    "path": "reports/beauty-world-plaza.json",
-   "sha256": "5939f33fb4dd7c7e34f1ca33a97bb7c21de7335b35ba6a4474ac653918876700",
+   "sha256": "98ab7491abf00a6de06255eae8e3a70f139c2e543e15351e215958c2f81314fa",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -239,7 +239,7 @@
     "R"
    ],
    "path": "reports/binjai-park.json",
-   "sha256": "c174c07cfafcb22c3de1bc0db6e1529058eb70213516ac18d112b984384e401e",
+   "sha256": "d772c01ecc2a5acc2c868267e5b1cbdb6553851559a638e1723f212c25daf3a1",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -318,7 +318,7 @@
    "name": "Casa Cambio",
    "kind": "completed",
    "path": "reports/casa-cambio.json",
-   "sha256": "aa338ffd036832b25ea81737df850ce50d55154e643e12321c13bd054d0ed55a",
+   "sha256": "a06df4627204618c7e75a864e911502127f738ee6ac9c9f71b043f41eaed4c7f",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -600,7 +600,7 @@
     "P"
    ],
    "path": "reports/eng-kong-green.json",
-   "sha256": "9aa752611ab5a1eafc271210a53b6daa274c27254679584d576eaa5775aa80fa",
+   "sha256": "08a8f4ae9c686e7a6e6540e2d54a802751a71fc56be8bab19eb5bf4cf60353ab",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -622,7 +622,7 @@
    "name": "Evergreen Park",
    "kind": "completed",
    "path": "reports/evergreen-park.json",
-   "sha256": "a2c9ffec3d15b686e9cdeaf0f7b4afb92d23a27d31324cbe47f5fa9a8e0b3d57",
+   "sha256": "3acfc7663185ae0fe120d80987f319a931d32a2bd13a86020d83ca3fbbd4b303",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -648,7 +648,7 @@
    "name": "Forett@Bukit Timah",
    "kind": "completed",
    "path": "reports/forett-at-bukit-timah.json",
-   "sha256": "1f03aae1e42de8b4ace4ced79b304acb3ac1acb0099283a7d78bc842f532990c",
+   "sha256": "efdaf16d40d74c5935cfdbadece36ed42b306e5fe485db8ca98a4b3a5c370646",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -736,7 +736,7 @@
     "R"
    ],
    "path": "reports/gillenia.json",
-   "sha256": "aea14b033b83a6a4a4be0c946be068ba0ae99566b33e265e250471d1077ba6b5",
+   "sha256": "949479a069282b9668b62b4c4835fbabb1fdf9065f35be86a26d0f444b2355b1",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -916,7 +916,7 @@
     "R"
    ],
    "path": "reports/kilat-court.json",
-   "sha256": "ce73be86eb8710e0f06215f9d5e451a00d19e11662076ad9785dae9d0cd08d63",
+   "sha256": "50c39f751c6a07a4530d41c32a934d992021ce11008caa1a3f99797a38189c95",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -945,7 +945,7 @@
     "R"
    ],
    "path": "reports/kismis-court.json",
-   "sha256": "1c24c50392bed8c2a4204bee5ee7ec92e81792edcea1151d19a81056b1e90385",
+   "sha256": "e5fdbf2a3e03e042e073f27c261baec455cdc426ff3f826eb6ecb72fc838d657",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1006,7 +1006,7 @@
    "name": "LA Suisse",
    "kind": "completed",
    "path": "reports/la-suisse.json",
-   "sha256": "d75584aaad9081609218435ef9c886ad6f360ac0e2299605cb348cb2cb51d04c",
+   "sha256": "8e8fb25cc0695dbe76db675cb0c4b490620613b39cdc7b0bcb7e8306e9f765a2",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1090,7 +1090,7 @@
     "P"
    ],
    "path": "reports/lighthouse.json",
-   "sha256": "4f4483655142fbabe4fb62d458d0a23d64ebd89b93cbf770461d767101136504",
+   "sha256": "81c885deef300f82777cca8fba9127b4d08da669b3796757a9c30248836101c5",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1488,7 +1488,7 @@
     "P"
    ],
    "path": "reports/quinterra.json",
-   "sha256": "ff026bbbd9aefe9eb27788da667bfa130ced41a75ffb37db3e6da374d4406983",
+   "sha256": "4a91cd76a359bf777c114c0423be94a67f39b387b2431c481076a20d3916cef2",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1546,7 +1546,7 @@
     "P"
    ],
    "path": "reports/seahill.json",
-   "sha256": "37593c9e05c042601cdf4e5f5839b9e046de0080676bff72895517e0528292ba",
+   "sha256": "9c82214dbd294fe758db9c42957d8a16a27b469ad2900bdf8314b3bf7b3afdc9",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1898,7 +1898,7 @@
    "name": "The Panorama",
    "kind": "completed",
    "path": "reports/the-panorama.json",
-   "sha256": "099c09e5667ce187a0806579b25b727cb30a5ccaf1a82caef8ea9543d24bff05",
+   "sha256": "e5ad38b4ac7f8db07f33af10b3452f0bacb8b9a9efc97dfb46147a9b4b119b28",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1947,7 +1947,7 @@
     "R"
    ],
    "path": "reports/the-stradia.json",
-   "sha256": "6e426dcd006be7398832577afe010c0b2cb3dadf14ee6198ccdd834b7bf288c3",
+   "sha256": "c6fe545ffd5dad568ffe86bb92e82634d2f8eb6ed875f3bab71c494ebc6de931",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -2012,7 +2012,7 @@
     "P"
    ],
    "path": "reports/thomson-v-two.json",
-   "sha256": "fcffd330ad6054fbef25d88b1e84da7cb1391863169271f53a869e89a666b28f",
+   "sha256": "52b0bfd7c0ad756c4b191d1d53508a576883836f19d74e59bb41c61f233bcc41",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -2027,7 +2027,7 @@
     "R"
    ],
    "path": "reports/toh-yi-court.json",
-   "sha256": "d0530276959c3a3e6b16c4e820b6ab486e7ea2128f725d13a2d3ee692ef550b4",
+   "sha256": "4b28a55b3be4b193e0e5c4b0ae69310bc97d80c38e54fb3c72364cfbae425dd5",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -2085,7 +2085,7 @@
    "name": "Vue 8 Residence",
    "kind": "completed",
    "path": "reports/vue-8-residence.json",
-   "sha256": "4321f883118586adc1e72ba5286b2280626f8caf7d8fe574a28d9ffd1e613a92",
+   "sha256": "18ce6091c833b30cbe121e05164af227a3bf0b8e29153cd48a643f6372353124",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -2099,7 +2099,7 @@
     "P"
    ],
    "path": "reports/watten-hill.json",
-   "sha256": "e13133f05d21f67001f45804a6b926bf5bd07ea5a4c69c59ec581b9a29011dd2",
+   "sha256": "5f0fdd6effc0265fee66fbf55fd9dfd25e20dc1ddd5bd0c405b287c9e53dc6b4",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"

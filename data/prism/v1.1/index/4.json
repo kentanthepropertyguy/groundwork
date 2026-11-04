@@ -130,7 +130,7 @@
    "name": "Blue Horizon",
    "kind": "completed",
    "path": "reports/blue-horizon.json",
-   "sha256": "ae9d6b1025322e897ba7ad154617103fbfa4d5ceeed4b36a09eb573fa60d56fd",
+   "sha256": "6ae950c0ca00ed1658c6267a66db09667c7af7cc97f104e4dd02bd2ae350c9db",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -294,7 +294,7 @@
     "R"
    ],
    "path": "reports/celadon-view.json",
-   "sha256": "7f371ebc6b01b1975033db18f29c1cdc189759fa9704ea89975815980d443930",
+   "sha256": "f3dfd7886a34d9f3f40449b06629f26278de4bb8468e4bda288fc71f14f61792",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -416,7 +416,7 @@
     "P"
    ],
    "path": "reports/d-pavilion.json",
-   "sha256": "0d80f30eea78d44a43a9028b2d5b4fa897878a70be917813a7959f6f92334984",
+   "sha256": "0833de3c1cb058db54a078a1703210d7964e91c756e046fd12291bcbbac253b6",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -592,7 +592,7 @@
     "P"
    ],
    "path": "reports/fifth-avenue-condominium.json",
-   "sha256": "71a8b72c863262778b227da685ec02a5e91ba5622d63fd719181595fe52adfbc",
+   "sha256": "0b9d919de2e94357a814439a90dd80f536f3c5eb250af3cc235fc8db9480910e",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -603,7 +603,7 @@
    "name": "Floridian",
    "kind": "completed",
    "path": "reports/floridian.json",
-   "sha256": "1b7e3707e78e39a91d1b9f310d6e94601328c7c249752dd8833c52fb9ef028c5",
+   "sha256": "78c38368bc8c142441accec7b6027db94fb794bf423e33c93a14b8feb80f5c4f",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -726,7 +726,7 @@
     "P"
    ],
    "path": "reports/hougang-green.json",
-   "sha256": "6ec33f76cd7223d440d8422148bcf5969fb79ec03c33f2e9b6475eaf2bc2b752",
+   "sha256": "d7e1d60c95e8212235b5f539ab9982187c0d2653dd1a02d5f549e2ddb2b623cc",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -737,7 +737,7 @@
    "name": "Hundred Trees",
    "kind": "completed",
    "path": "reports/hundred-trees.json",
-   "sha256": "48e2a398cddc1147cfad2c6d986d833a1bf28d4cf26cfcec33a637f34a0c9787",
+   "sha256": "7f8216a7735b7ba080ccfe96747d3da0e8483a2cd00c0c908c064bb1c7a3a81f",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -776,7 +776,7 @@
     "P"
    ],
    "path": "reports/jardin.json",
-   "sha256": "dbb7cb5f4cceb84dd2692632ab84fbe672c07412c87822ba7db7178c9b48910c",
+   "sha256": "3c64177529afa9130ccb8624194d19febb69916ff71f52e9fae06374e77554e2",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -806,7 +806,7 @@
     "R"
    ],
    "path": "reports/jk-building.json",
-   "sha256": "4e4c2ad37e1042add44acc5c0970ca33e9df635d93b727d639f7e42eec5c0ff6",
+   "sha256": "00e57486497b032874aa5e7304968017de8f87d5e815fe3a52d9d727fba0cba8",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -851,7 +851,7 @@
     "R"
    ],
    "path": "reports/kilat-centre.json",
-   "sha256": "e289d395c95c8e430ae7e152951583115807763c151d1cb2725203fc15129580",
+   "sha256": "bd3df10de6309bb07d41e8798871bc4b1f515e3f7bcf77ed00d69aab62841dda",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -910,7 +910,7 @@
     "P"
    ],
    "path": "reports/le-wood.json",
-   "sha256": "71b94b2cc285e419b5671254e9aa0c563fec6e4362dd5ca0a044888b6a83fb98",
+   "sha256": "25239f1d0561d9052de4f75217d1d856efb29d06cb06aa46f1909adeda7c788b",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -925,7 +925,7 @@
     "R"
    ],
    "path": "reports/leith-grove.json",
-   "sha256": "26016bdd9e61f1bd97ab03741056eb7cac6862e139412257a5d444dc11fea91d",
+   "sha256": "84fdd3d33bb74309cd6a8a06880dab87473b3dc0befb4582643d0ea889e45fcc",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1042,7 +1042,7 @@
     "R"
    ],
    "path": "reports/nv-residences.json",
-   "sha256": "22ca5d33cb20b8ed4dd35e2c709560ad58e9e62fbfd94b38ff73c8feca1bef21",
+   "sha256": "3f3534827abc12011d5f83f77fa62fab7d77e9b897b42c70f94e9aa699023b5a",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1130,7 +1130,7 @@
    "name": "Palm Isles",
    "kind": "completed",
    "path": "reports/palm-isles.json",
-   "sha256": "f399ccc581608c9eeece3c11f9acf1337359fcf272f8bc508295452207f73ba4",
+   "sha256": "0c1d7272cb1cfee78c790155454559a0952770b15b67dc33d1e08bd59d584de7",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1173,7 +1173,7 @@
     "P"
    ],
    "path": "reports/palm-residence.json",
-   "sha256": "785fb6177eb9fe7555abe444d2110e6baf4a98d876dbeaf726af116df01abba3",
+   "sha256": "daf95728f521351a30d0809a2cf7d3f468068171121b3ce8ee94300e6c95fddf",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1300,7 +1300,7 @@
     "R"
    ],
    "path": "reports/residences-at-jansen.json",
-   "sha256": "2425dceea2081575d04dbe08f30a1ffc7917c44b6952d236cbd8eee0ce08e722",
+   "sha256": "edbe6c1b8c80b6d220cc6652a7c8cbb59add9b8cadae630c17ac03359d852228",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1412,7 +1412,7 @@
     "R"
    ],
    "path": "reports/second-avenue-junction.json",
-   "sha256": "3aaac677716915b99015a3e3c5557906d415896b54dc71ea15509fa92831e1e6",
+   "sha256": "5769cf5c9b6284432209a28e202f65d86eac962be13ff8354c20f3d1f5a7a7b9",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1563,7 +1563,7 @@
     "R"
    ],
    "path": "reports/summer-scent.json",
-   "sha256": "e7a39e7862f1e0e417fe44b20cc0a9c764184cb86d3544bf1d2a8dc530577b19",
+   "sha256": "fb50b67a5f9d47092ce1a594c88da1ed7330a84a5f48da44ab9228a2f141d1cc",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1715,7 +1715,7 @@
     "R"
    ],
    "path": "reports/the-courtyard.json",
-   "sha256": "0d1d0508cfa2f1cb77307e377a617fb30abf7fa1e27e10a1c6971065cafad646",
+   "sha256": "3755ca1946cfc184fc52206eb7f65136792ea043fff8bc46482d9690ae77f5df",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1905,7 +1905,7 @@
    "name": "The Tessarina",
    "kind": "completed",
    "path": "reports/the-tessarina.json",
-   "sha256": "f396b0b56e866b010cbee64927eccb828c33b40301dada9a815c6c1f815d3b4e",
+   "sha256": "21ef3d7137396c5b543a739cdc6f2d88397ea49704ebe02e3e1b2c2de2ab8767",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1953,7 +1953,7 @@
     "R"
    ],
    "path": "reports/toh-tuck-lodge.json",
-   "sha256": "0a8a96854230f80a7d470bc4a1afb6ec0442625c3acc31ed9f3a2625e358598f",
+   "sha256": "f415a2826a69140cb6cac569f4bac1700aa211c7463d44e24215afbd2f4185de",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"

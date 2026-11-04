@@ -151,7 +151,7 @@
    "name": "Belysa",
    "kind": "completed",
    "path": "reports/belysa.json",
-   "sha256": "4fec00bf5d80215c342516f1dee594980017519382e16de90cabdc36b905f028",
+   "sha256": "a64333973359fff89328bb2917a9f224a5dc020c65981b4928f03f8d997e9d9e",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -177,7 +177,7 @@
    "name": "Bishan 8",
    "kind": "completed",
    "path": "reports/bishan-8.json",
-   "sha256": "a532f32fcaa3897db3a6dbb3018d70f103aefb291472de905f36e8b70976ee98",
+   "sha256": "119b824c170fda2a19aabde3dac8186f78664d3569a7cc2b91fa37809f524ecc",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -203,7 +203,7 @@
    "name": "Botannia",
    "kind": "completed",
    "path": "reports/botannia.json",
-   "sha256": "6d1fdb6361115ac36b9a03a7b535d904014d4e993088d4d2237633a4d405c074",
+   "sha256": "e68b58461ce2039c3a9fcca4b85fee54d0066ff21091186635287ffbb3694bcf",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -358,7 +358,7 @@
    "name": "Centro Residences",
    "kind": "completed",
    "path": "reports/centro-residences.json",
-   "sha256": "2887cc03303e6ee57195654456f83aaf8c5f4187ac292527c376648909529691",
+   "sha256": "01bbc447d03f751a1f6c6809b8e45efd5070dba7c015381837d2846a7c51553c",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -733,7 +733,7 @@
     "R"
    ],
    "path": "reports/highland-centre.json",
-   "sha256": "d743b8f7883c684a931db1549c424c6180724c587c365e9ef44fb106f607a105",
+   "sha256": "0a7f04a05417bcfe16535b33e3d0cff0b000e9d62136599dcd001447eec721f0",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -833,7 +833,7 @@
    "name": "Kovan Regency",
    "kind": "completed",
    "path": "reports/kovan-regency.json",
-   "sha256": "3c93051a8c0fca2d48ce7b2f8b0cb2dbf2717fa97cb0cb547037a5efe39e288d",
+   "sha256": "9daa942f696bdfacbe98ed4e96a701ef6b58f7735ec815d0e2474944a559bc43",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -965,7 +965,7 @@
     "R"
    ],
    "path": "reports/mandarin-park.json",
-   "sha256": "3c33978931c35c96a8225a6dd3b57dceef22673a1139963fc4c1110078dea3b6",
+   "sha256": "e259e38215cf51022ae0e0b1e58fa1770c12ad6294da86dce659ba090f378103",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1026,7 +1026,7 @@
     "P"
    ],
    "path": "reports/ocean-front-suites.json",
-   "sha256": "1633989bcd529397b798313f94ed779e8225ad5daa4b7cac8a68a16b94f86685",
+   "sha256": "843a8c0ae437fb836fbe1eec9c7bcb70cd8c65f9a24f73ad6e8925705934fb12",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1265,7 +1265,7 @@
     "R"
    ],
    "path": "reports/rosyth-residence.json",
-   "sha256": "029db6747838b7ead09b83fc4f4df7cda1da29aed875f59816b0c16c7214f65c",
+   "sha256": "26cabff4b6f2ce12f10c4702d6be76eaa168695fe8fe9e11e96d5fd0ffbf11c2",
    "items": 11,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1313,7 +1313,7 @@
    "name": "Sea Horizon",
    "kind": "completed",
    "path": "reports/sea-horizon.json",
-   "sha256": "1435b0e934ca14f4f5b5c375cbcb3c56852e1d1e6af00a0049b6b4784203000f",
+   "sha256": "76ed8e58ba52747cc5b898130a0cf0142294f81f5af3b2abe1004768754e5f34",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1447,7 +1447,7 @@
     "R"
    ],
    "path": "reports/southaven-ii.json",
-   "sha256": "2562076b5f968776df65771e57dbb73d10edab424a63e716b87c7b5b8da14505",
+   "sha256": "692379ae46198aa6ef20d6f8afab272f5a42e5c49115d6186696297b48d886f5",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1516,7 +1516,7 @@
     "P"
    ],
    "path": "reports/suites-de-laurel.json",
-   "sha256": "3419f987f147eeec3bcbf3ca3841b185ba9dd344e1faf92c8c0c7b5c26edcb27",
+   "sha256": "7f064517f13872baf9ac768a8b03d72fe9402ab99177b43f0f7d30d8236b9d00",
    "items": 12,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1599,7 +1599,7 @@
    "name": "The Blossomvale",
    "kind": "completed",
    "path": "reports/the-blossomvale.json",
-   "sha256": "baa25e7d51c7eaf9e8c49126751868ab10e696267778e77f1d37882fa613ec13",
+   "sha256": "9307171dc6f9ca6e0fbe8f5011dd0af062c52b15363c3fa6d42751712f511f04",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1711,7 +1711,7 @@
    "name": "The Marbella",
    "kind": "completed",
    "path": "reports/the-marbella.json",
-   "sha256": "0778dcc7628a58e66103939dcc69224006d28d87007be8aac1531d082730ce5f",
+   "sha256": "90ae0d42e56b15f3a601be5e3bb52cf95facf9481b504b4f03e2e98e436fafc0",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1855,7 +1855,7 @@
    "name": "The Vision",
    "kind": "completed",
    "path": "reports/the-vision.json",
-   "sha256": "ec9bd872e810393306b28f97942f601645dede9d33f14b5c48025a02628f99ef",
+   "sha256": "84ba95f19ce3f78560f457e23f10ecb95ca7f8bda9909c485047ae46d8467584",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
@@ -1992,7 +1992,7 @@
    "name": "Westcove Condominium",
    "kind": "completed",
    "path": "reports/westcove-condominium.json",
-   "sha256": "4c74cf0114ef35139eabceda8b8fa760a2708c484b0bac8de07f86579683f4cd",
+   "sha256": "f17ceb0b8b092148388180c73e5d08609dea58aa87f932a18df065a7f98f080e",
    "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
