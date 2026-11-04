@@ -1,0 +1,41 @@
+/* Neighbourhood Intelligence V1 (gw-area.js, Master Planning, 4 Nov 2026: Concept 1). Loaded with gw-area.js. Builds on gw-prism.css (the
+   same page, quick-read and dimension styles) so a planning-area page reads like PRISM but is labelled as the planning area, not one
+   development. White, navy, muted gold only; nothing coloured by sign. */
+.gwa-head{margin-bottom:22px}
+.gwa-f .gwa-q,.gwa-f .gwa-t{grid-column:1/-1}
+.gwa-q{font-size:12.5px;line-height:1.4;color:var(--gwp-body)}
+.gwa-t{font-size:11.5px;line-height:1.4;color:var(--gwp-muted)}
+.gwa-fx{margin-top:28px}
+.gwa-fx h2{margin:0;font-size:24px;letter-spacing:-.01em;color:var(--gwp-ink)}
+.gwa-ins{margin:14px 0 0;padding:0;list-style:none;display:grid;counter-reset:gwa}
+.gwa-ins li{position:relative;display:grid;gap:3px;padding:14px 0 14px 40px;border-top:1px solid var(--gwp-line);counter-increment:gwa}
+.gwa-ins li::before{content:counter(gwa);position:absolute;left:0;top:14px;width:26px;height:26px;border:1px solid var(--gwp-line);border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--gwp-ink)}
+.gwa-it{margin:0;max-width:72ch;font-size:17px;line-height:1.45;font-weight:600;color:var(--gwp-ink)}
+.gwa-iq{margin:0;max-width:72ch;font-size:14.5px;line-height:1.45;color:var(--gwp-body)}
+.gwa-im{margin:0;font-size:12.5px;line-height:1.4;color:var(--gwp-muted)}
+.gwa-dl{margin:0;display:grid}
+.gwa-dl>div{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:16px;padding:10px 0;border-top:1px solid var(--gwp-line)}
+.gwa-dl>div:first-child{border-top:0}
+.gwa-dl>div.gwa-note{padding-top:2px;border-top:0}
+.gwa-dl dt{font-size:14.5px;line-height:1.4;color:var(--gwp-body)}
+.gwa-dl dd{margin:0;display:grid;gap:2px;min-width:0}
+.gwa-dl dd b{font-size:16px;font-variant-numeric:tabular-nums;color:var(--gwp-ink)}
+.gwa-dl dd small{font-size:12.5px;line-height:1.4;color:var(--gwp-muted);overflow-wrap:anywhere}
+.gwa-gs{margin-top:10px}
+/* the link under the five PRISM dimensions of a development in the planning area */
+.gwa-link,.gwa-link:visited{display:flex;align-items:center;gap:14px;margin:18px 0 6px;padding:14px 18px;border:1px solid var(--gwp-line);border-radius:14px;background:#fff;color:var(--gwp-ink)!important;text-decoration:none!important;min-width:0}
+.gwa-link:hover{border-color:var(--gwp-gold)}
+.gwa-link:focus-visible{outline:2px solid var(--gwp-blue);outline-offset:2px}
+.gwa-link svg{flex:none;color:var(--gwp-gold)}
+.gwa-link span{flex:1;display:grid;gap:2px;min-width:0}
+.gwa-link b{font-size:16px}
+.gwa-link small{font-size:14px;line-height:1.4;color:var(--gwp-muted)}
+.gwa-link i{font-style:normal;font-size:22px;color:var(--gwp-blue)}
+/* wide screens: the findings in two columns, each still a short reading line */
+@media (min-width:1100px){.gwa-ins{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:40px}}
+@media (max-width:640px){
+  .gwa-dl>div{grid-template-columns:minmax(0,1fr);gap:4px}
+  .gwa-ins li{padding-left:34px}.gwa-it{font-size:15.5px}.gwa-iq{font-size:14px}.gwa-fx h2{font-size:21px}
+  .gwa-link{padding:12px 14px;gap:12px}
+}
+@media (max-width:359px){.gwa-link{padding:10px 12px;gap:8px}.gwa-link b,.gwa-link small{overflow-wrap:anywhere}}

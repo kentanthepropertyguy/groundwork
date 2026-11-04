@@ -1,0 +1,1078 @@
+{
+ "schemaVersion": "gw-neighbourhood-v1",
+ "status": "approved for publication",
+ "area": {
+  "type": "planning_area",
+  "name": "Hougang",
+  "boundary": "URA Master Plan 2019 planning area (no sea)",
+  "note": "HDB town HG differs by one block (97 flats in Serangoon planning area); SingStat 2026 resident estimates use Master Plan 2025 boundaries"
+ },
+ "dataMonth": "2026-09",
+ "asAt": "2026-11-04",
+ "evidenceClasses": {
+  "observed": "an official count or recorded value",
+  "computed": "arithmetic on observed values (rates, shares, ratios, ranks)",
+  "survey_estimate": "an official sample-survey estimate (GHS 2025), rounded to 100 by SingStat",
+  "estimate": "a value with a stated approximation",
+  "context": "background context; not a measure of buyers or demand"
+ },
+ "scope": {
+  "geography": "planning areas only (V1)",
+  "notInV1": [
+   "views around a single development (this page covers the planning area)",
+   "future HDB supply (not assessed)",
+   "scores or ratings",
+   "forecasts",
+   "estimates of buyer, upgrader or demand numbers"
+  ]
+ },
+ "vintages": {
+  "planningAreas": "Master Plan 2019 (every assignment and GHS 2025)",
+  "residentEstimates2026": "Master Plan 2025 (SingStat)",
+  "label": "Figures use Master Plan 2019 planning-area boundaries, except the 2026 resident estimates, which SingStat publishes on Master Plan 2025 boundaries"
+ },
+ "geography": {
+  "scope": "This page covers the Hougang planning area only",
+  "boundaries": {
+   "MP2019": {
+    "use": "every planning-area assignment in this output (HDB blocks, HDB resales, URA dwelling units, private developments, landed streets); also the boundary SingStat states for GHS 2025 tables C020141 and C020145",
+    "sourceId": "URA_MP2019",
+    "dataset": "Master Plan 2019 Subzone Boundary (No Sea), data.gov.sg d_8594ae9ff96d0c708bc2af633048edfb; planning area = union of its subzones",
+    "label": "Master Plan 2019 planning area"
+   },
+   "MP2025": {
+    "use": "The boundary SingStat uses for its 2026 resident estimates (residents aged 65 and over, 2026 value)",
+    "sourceId": "URA_MP2025_PA",
+    "dataset": "Master Plan 2025 Planning Area Boundary (No Sea), data.gov.sg d_2cc750190544007400b2cfd5d7f53209, updated 2026-02-27",
+    "label": "Master Plan 2025 planning area"
+   }
+  },
+  "lineage": {
+   "hdbBlocks": {
+    "records": "HDB Property Information blocks",
+    "position": "OneMap Search (SLA) block-and-street search, registered API access",
+    "method": "block point in MP2019 polygon",
+    "coverage": "10,761 of 10,817 blocks placed island-wide; every Hougang block placed",
+    "publication": "Block positions are used only to count flats in the planning area; no block coordinates or addresses are published",
+    "sourceIds": [
+     "HDB_PROPERTY",
+     "ONEMAP",
+     "URA_MP2019"
+    ],
+    "recordPeriod": {
+     "datasetUpdated": "2026-10-08",
+     "publisherCoverageEnd": "2025-12-31",
+     "latestCompletionYearInRecords": 2026,
+     "completionYear2026": {
+      "islandWide": {
+       "blocks": 77,
+       "flats": 11829
+      },
+      "hougang": {
+       "blocks": 8,
+       "flats": 886
+      }
+     },
+     "note": "Counts include every block in HDB's 8 Oct 2026 file, including the blocks HDB records as completed in 2026"
+    }
+   },
+   "hdbResales": {
+    "records": "HDB resale registrations",
+    "position": "joined to the block (street + block) and takes the block's OneMap-derived planning area",
+    "coverage": "78,865 of 78,869 resales placed (36 months)",
+    "sourceIds": [
+     "HDB_RESALE",
+     "HDB_PROPERTY",
+     "ONEMAP",
+     "URA_MP2019"
+    ]
+   },
+   "uraDwellingUnits": {
+    "records": "URA No. of Dwelling Units by development",
+    "position": "URA's own SVY21 coordinates in the dataset (X_ADDR / Y_ADDR), converted to WGS84",
+    "method": "point in MP2019 polygon",
+    "sourceIds": [
+     "URA_DWELLING_UNITS",
+     "URA_MP2019"
+    ]
+   },
+   "privateDevelopments": {
+    "records": "URA private residential transactions by development",
+    "position": "URA's own project coordinates from its private residential transaction records (PMI_Resi_Transaction), converted from SVY21 to latitude and longitude",
+    "method": "point in MP2019 polygon",
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "URA_MP2019"
+    ]
+   },
+   "landedResales": {
+    "records": "URA landed transactions",
+    "position": "one approximate OneMap point per street (not per house)",
+    "method": "street point in MP2019 polygon",
+    "caveat": "approximate",
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "ONEMAP",
+     "URA_MP2019"
+    ]
+   },
+   "surveyAndEstimates": {
+    "records": "GHS 2025 and SingStat resident estimates",
+    "position": "none: SingStat tabulates by planning area itself",
+    "boundary": "GHS 2025: MP2019 (SingStat footnote); resident estimates 2026: MP2025; 2021: MP2019",
+    "sourceIds": [
+     "SINGSTAT_GHS2025",
+     "SINGSTAT_GHS2025_DWELLING",
+     "SINGSTAT_RESIDENTS"
+    ]
+   }
+  },
+  "townNote": "HDB town HG differs from the planning area by one block (97 flats in Serangoon planning area); this output uses the planning area"
+ },
+ "stock": [
+  {
+   "evidence": "observed",
+   "id": "stock.hdb",
+   "label": "HDB flats",
+   "value": 59485,
+   "unit": "flats",
+   "blocks": 609,
+   "breakdown": {
+    "2-room": 2330,
+    "3-room": 11122,
+    "4-room": 28086,
+    "5-room": 11584,
+    "Executive": 4311,
+    "Studio apartment": 530,
+    "rental": 1522
+   },
+   "sourceIds": [
+    "HDB_PROPERTY"
+   ],
+   "asAt": "2026-10-08",
+   "coverage": "all blocks in the planning area placed (island-wide 99.5%)",
+   "period": "HDB Property Information, dataset updated 2026-10-08; records include completion years up to 2026 (8 Hougang blocks, 886 flats, recorded as completed in 2026). The publisher's metadata coverage end of 2025-12-31 is not the latest completion year in the records",
+   "denominator": null,
+   "sample": "full count (609 blocks)",
+   "lineage": "hdbBlocks",
+   "status": "publishable"
+  },
+  {
+   "evidence": "observed",
+   "id": "stock.privateNonLanded",
+   "label": "Private condominiums and apartments (excluding EC)",
+   "value": 15524,
+   "unit": "homes",
+   "sourceIds": [
+    "URA_DWELLING_UNITS"
+   ],
+   "asAt": "records to Feb 2026 (URA labels the dataset \"as at Q4 2022\")",
+   "caveat": "condominium and apartment are not separated",
+   "period": "URA dwelling units, records to 2026-02-26 (URA labels the dataset \"as at Q4 2022\")",
+   "denominator": null,
+   "sample": "full count",
+   "lineage": "uraDwellingUnits",
+   "status": "publishable"
+  },
+  {
+   "evidence": "observed",
+   "id": "stock.ec",
+   "label": "Executive condominiums",
+   "value": 1421,
+   "unit": "homes",
+   "sourceIds": [
+    "URA_DWELLING_UNITS"
+   ],
+   "asAt": "records to Feb 2026",
+   "period": "URA dwelling units, records to 2026-02-26 (URA labels the dataset \"as at Q4 2022\")",
+   "denominator": null,
+   "sample": "full count",
+   "lineage": "uraDwellingUnits",
+   "status": "publishable"
+  },
+  {
+   "evidence": "observed",
+   "id": "stock.landed",
+   "label": "Landed homes",
+   "value": 6138,
+   "unit": "homes",
+   "strataIdentifiedByName": 471,
+   "sourceIds": [
+    "URA_DWELLING_UNITS"
+   ],
+   "asAt": "records to Feb 2026",
+   "caveat": "strata landed identified by name only (partial)",
+   "period": "URA dwelling units, records to 2026-02-26 (URA labels the dataset \"as at Q4 2022\")",
+   "denominator": null,
+   "sample": "full count",
+   "lineage": "uraDwellingUnits",
+   "status": "publishable"
+  },
+  {
+   "evidence": "computed",
+   "id": "stock.privateShare",
+   "label": "HDB flats for every private home",
+   "value": 2.6,
+   "unit": "ratio",
+   "denominator": "condo, apartment, EC and landed homes (23,083)",
+   "period": "HDB as at 2026-10-08; URA records to 2026-02-26",
+   "numerator": "59,485 HDB flats (sold and rental)",
+   "sourceIds": [
+    "HDB_PROPERTY",
+    "URA_DWELLING_UNITS"
+   ],
+   "sample": "full counts",
+   "lineage": [
+    "hdbBlocks",
+    "uraDwellingUnits"
+   ],
+   "status": "publishable"
+  }
+ ],
+ "activity": [
+  {
+   "evidence": "observed",
+   "id": "activity.hdb",
+   "label": "HDB resales",
+   "value12": 1230,
+   "value24": 2564,
+   "unit": "resales",
+   "byType12": {
+    "2-room": 38,
+    "3-room": 253,
+    "4-room": 577,
+    "5-room": 239,
+    "Executive": 123
+   },
+   "period12": "2025-10 to 2026-09",
+   "period24": "2024-10 to 2026-09",
+   "basis": "registration month; positioned by block",
+   "sourceIds": [
+    "HDB_RESALE",
+    "HDB_PROPERTY"
+   ],
+   "coverage": "78,865 of 78,869 resales placed island-wide (36 months)",
+   "period": "2025-10 to 2026-09",
+   "denominator": null,
+   "sample": "all registered resales placed in the area",
+   "lineage": "hdbResales",
+   "status": "publishable"
+  },
+  {
+   "evidence": "observed",
+   "id": "activity.condo",
+   "label": "Condo and apartment resales",
+   "value12": 672,
+   "value24": 1329,
+   "unit": "resales",
+   "developments": 99,
+   "period12": "2025-10 to 2026-09",
+   "sourceIds": [
+    "URA_TRANSACTIONS"
+   ],
+   "note": "Resales only; new sales (10) and sub-sales (0) are not included",
+   "period": "2025-10 to 2026-09",
+   "period24": "2024-10 to 2026-09",
+   "denominator": null,
+   "sample": "all 672 resales in 99 developments, including developments for which URA does not record the number of homes",
+   "lineage": "privateDevelopments",
+   "status": "publishable"
+  },
+  {
+   "evidence": "observed",
+   "id": "activity.ec",
+   "label": "EC resales",
+   "value12": 76,
+   "value24": 227,
+   "unit": "resales",
+   "developments": 3,
+   "sourceIds": [
+    "URA_TRANSACTIONS"
+   ],
+   "period": "2025-10 to 2026-09",
+   "period24": "2024-10 to 2026-09",
+   "denominator": null,
+   "sample": "all resales in 3 developments",
+   "lineage": "privateDevelopments",
+   "status": "publishable"
+  },
+  {
+   "evidence": "observed",
+   "id": "activity.landed",
+   "label": "Landed resales (land title: terrace, semi-detached, detached)",
+   "value12": 162,
+   "value24": 308,
+   "unit": "resales",
+   "strata12": 29,
+   "sourceIds": [
+    "URA_TRANSACTIONS"
+   ],
+   "caveat": "positioned per street (approximate), planning area by street point",
+   "period": "2025-10 to 2026-09",
+   "period24": "2024-10 to 2026-09",
+   "denominator": null,
+   "sample": "land-title resales; strata landed shown separately",
+   "lineage": "landedResales",
+   "status": "publishable"
+  }
+ ],
+ "liquidity": [
+  {
+   "evidence": "computed",
+   "id": "liquidity.hdb",
+   "label": "HDB resales per 100 flats a year",
+   "value": 2.1,
+   "unit": "per 100 homes a year",
+   "period": "12 months to Sep 2026",
+   "denominator": "57,963 sold flats",
+   "byType": {
+    "3-room": 2.3,
+    "4-room": 2.1,
+    "5-room": 2.1,
+    "Executive": 2.9
+   },
+   "comparison": {
+    "singapore": 2.2,
+    "rank": {
+     "position": 13,
+     "of": 29,
+     "tiedWith": [
+      "Choa Chu Kang",
+      "Novena",
+      "Bukit Panjang"
+     ],
+     "rule": "areas with 1,000+ flats / homes; condo and EC developments with 12+ months since their first resale; HDB by HDB Property Information block positions"
+    },
+    "neighbouringAreas": [
+     {
+      "area": "Sengkang",
+      "value": 2.3
+     },
+     {
+      "area": "Serangoon",
+      "value": 1.8
+     },
+     {
+      "area": "Toa Payoh",
+      "value": 2.2
+     }
+    ]
+   },
+   "numerator": "1,230 HDB resales, 2025-10 to 2026-09",
+   "sample": "1,230 resales",
+   "sourceIds": [
+    "HDB_RESALE",
+    "HDB_PROPERTY"
+   ],
+   "lineage": "hdbResales",
+   "status": "publishable"
+  },
+  {
+   "evidence": "computed",
+   "id": "liquidity.condo",
+   "label": "Condo and apartment resales per 100 homes a year",
+   "value": 4.4,
+   "unit": "per 100 homes a year",
+   "period": "12 months to Sep 2026",
+   "denominator": "14,559 homes in the 50 developments with a URA homes count",
+   "sample": "643 resales",
+   "comparison": {
+    "singapore": 3.5,
+    "rank": {
+     "position": 2,
+     "of": 35,
+     "tiedWith": [
+      "Punggol"
+     ],
+     "rule": "areas with 1,000+ flats / homes; condo and EC developments with 12+ months since their first resale; HDB by HDB Property Information block positions"
+    },
+    "neighbouringAreas": [
+     {
+      "area": "Sengkang",
+      "value": 3.6
+     },
+     {
+      "area": "Serangoon",
+      "value": 4
+     },
+     {
+      "area": "Toa Payoh",
+      "value": 4
+     }
+    ],
+    "rankStatement": "joint 2nd of 35 (with Punggol); joint 8th of 35 (with Serangoon) excluding the three recently completed developments",
+    "rankRule": "Both rankings are given because three recently completed developments lift Hougang's headline rate"
+   },
+   "sensitivity": {
+    "excludingRecentlyCompleted": {
+     "value": 3.7,
+     "excluded": [
+      "Palm Haven (first resale 2024-05)",
+      "Riverfront Residences (first resale 2024-10)",
+      "The Florence Residences (first resale 2025-06)"
+     ],
+     "singapore": 3.3,
+     "rank": {
+      "position": 8,
+      "of": 35,
+      "tiedWith": [
+       "Serangoon"
+      ],
+      "rule": "areas with 1,000+ flats / homes; condo and EC developments with 12+ months since their first resale; HDB by HDB Property Information block positions"
+     },
+     "rule": "excludes developments whose first resale falls inside the last 36 months (completed recently): Palm Haven (first resale 2024-05), Riverfront Residences (first resale 2024-10), The Florence Residences (first resale 2025-06); 47 developments, 11,650 homes remain"
+    },
+    "windows": {
+     "12 months": {
+      "value": 4.4,
+      "developments": 50,
+      "homes": 14559
+     },
+     "24 months": {
+      "value": 4.6,
+      "developments": 50,
+      "homes": 14559
+     },
+     "36 months": {
+      "value": 4.7,
+      "developments": 50,
+      "homes": 14559
+     }
+    },
+    "method": "Home-weighted, development-level annualised rates: for each development with a URA homes count, resales in the window x 12 / the months it was resellable in the window (from its first resale, capped at the window; at least 12 months required); then the sum of annualised resales / the sum of homes x 100. Larger developments therefore weigh more. The 12-month headline (4.4) is 643 / 14,559 directly. The windows are sensitivities, not the headline, and are not compared with the Singapore 12-month figure."
+   },
+   "numerator": "643 resales, 2025-10 to 2026-09, in the 50 developments with a URA homes count",
+   "sourceIds": [
+    "URA_TRANSACTIONS",
+    "URA_DWELLING_UNITS"
+   ],
+   "lineage": "privateDevelopments",
+   "reconciliation": {
+    "allCondoResales12": {
+     "value": 672,
+     "developments": 99,
+     "usedIn": "activity.condo"
+    },
+    "inRate": {
+     "resales": 643,
+     "homes": 14559,
+     "developments": 50,
+     "usedIn": "liquidity.condo"
+    },
+    "outsideRate": {
+     "resales": 29,
+     "developments": 49,
+     "reason": "no URA homes count for the development (a rate needs its own denominator)"
+    },
+    "rule": "672 counts every condo resale; the rate of 4.4 uses the 643 resales in developments for which URA records the number of homes (14,559 homes)"
+   },
+   "status": "publishable"
+  },
+  {
+   "evidence": "computed",
+   "id": "liquidity.ec",
+   "label": "EC resales per 100 homes a year",
+   "value": 5.3,
+   "unit": "per 100 homes a year",
+   "denominator": "1421 homes, 3 developments",
+   "comparison": {
+    "singapore": 4.2
+   },
+   "caveat": "Not ranked against other areas: Hougang has only 3 EC developments",
+   "period": "2025-10 to 2026-09",
+   "numerator": "76 resales",
+   "sample": "76 resales",
+   "sourceIds": [
+    "URA_TRANSACTIONS",
+    "URA_DWELLING_UNITS"
+   ],
+   "lineage": "privateDevelopments",
+   "status": "publishable"
+  },
+  {
+   "evidence": "computed",
+   "id": "liquidity.privateToHdb",
+   "label": "Condo resale rate relative to HDB",
+   "value": 2.1,
+   "unit": "times",
+   "comparison": {
+    "singapore": 1.6,
+    "rank": {
+     "position": 3,
+     "of": 28,
+     "tiedWith": [],
+     "rule": "areas with 1,000+ flats / homes; condo and EC developments with 12+ months since their first resale; HDB by HDB Property Information block positions"
+    }
+   },
+   "period": "2025-10 to 2026-09",
+   "numerator": "liquidity.condo (4.4)",
+   "denominator": "liquidity.hdb (2.1)",
+   "sample": "as the two rates",
+   "sourceIds": [
+    "URA_TRANSACTIONS",
+    "URA_DWELLING_UNITS",
+    "HDB_RESALE",
+    "HDB_PROPERTY"
+   ],
+   "lineage": [
+    "privateDevelopments",
+    "hdbResales"
+   ],
+   "status": "publishable"
+  }
+ ],
+ "upgraderContext": [
+  {
+   "evidence": "computed",
+   "id": "context.hdbLargeFlats",
+   "label": "HDB flats that are 4-room or larger",
+   "value": 75.9,
+   "unit": "per cent of sold flats",
+   "count": 43981,
+   "comparison": {
+    "singapore": 71.8
+   },
+   "sourceIds": [
+    "HDB_PROPERTY"
+   ],
+   "period": "HDB Property Information, dataset updated 2026-10-08; records include completion years up to 2026 (8 Hougang blocks, 886 flats, recorded as completed in 2026). The publisher's metadata coverage end of 2025-12-31 is not the latest completion year in the records",
+   "numerator": "43,981 sold 4-room, 5-room, Executive and multi-generation flats (multi-generation: 0 in Hougang)",
+   "denominator": "57,963 sold flats (rental flats excluded)",
+   "basis": "sold HDB flats only, in Hougang and in the Singapore comparison",
+   "sample": "full count",
+   "lineage": "hdbBlocks",
+   "status": "publishable"
+  },
+  {
+   "evidence": "observed",
+   "id": "context.hdbMedianPrices",
+   "label": "Median HDB resale prices, 12 months",
+   "unit": "SGD",
+   "sourceIds": [
+    "HDB_RESALE"
+   ],
+   "values": {
+    "3-room": {
+     "hougang": 452500,
+     "n": 253,
+     "singapore": 440000,
+     "nSingapore": 5760
+    },
+    "4-room": {
+     "hougang": 618888,
+     "n": 577,
+     "singapore": 630000,
+     "nSingapore": 10809
+    },
+    "5-room": {
+     "hougang": 785000,
+     "n": 239,
+     "singapore": 740000,
+     "nSingapore": 5785
+    },
+    "Executive": {
+     "hougang": 970000,
+     "n": 123,
+     "singapore": 915000,
+     "nSingapore": 1531
+    }
+   },
+   "rule": "Medians are given only where there were at least 10 resales",
+   "period": "2025-10 to 2026-09",
+   "denominator": null,
+   "sample": "n per flat type (Hougang and Singapore) in values",
+   "lineage": "hdbResales",
+   "status": "publishable"
+  },
+  {
+   "evidence": "survey_estimate",
+   "id": "context.income",
+   "label": "Resident households by monthly household employment income",
+   "unit": "per cent of households",
+   "households": 79400,
+   "values": {
+    "noEmployedPerson": 14.7,
+    "atOrAbove10000": 50.4,
+    "atOrAbove15000": 33.6,
+    "atOrAbove20000": 21.2
+   },
+   "singapore": {
+    "noEmployedPerson": 14.2,
+    "atOrAbove10000": 50.5,
+    "atOrAbove15000": 33.5,
+    "atOrAbove20000": 21.8
+   },
+   "sourceIds": [
+    "SINGSTAT_GHS2025"
+   ],
+   "caveat": "Employment income includes employer CPF contributions and covers households in all dwelling types (SingStat does not publish income by dwelling type for planning areas). It does not measure buying power or demand",
+   "period": "General Household Survey 2025 (published 30 Jun 2026)",
+   "denominator": "79,400 resident households (survey estimate, rounded to 100)",
+   "sample": "GHS 2025 sample survey; SingStat advises caution with small cells",
+   "boundary": "MP2019",
+   "lineage": "surveyAndEstimates",
+   "status": "publishable"
+  },
+  {
+   "evidence": "survey_estimate",
+   "id": "context.householdsByDwelling",
+   "label": "Resident households by dwelling type",
+   "unit": "households",
+   "values": {
+    "Total": 79400,
+    "HDB Dwellings": 57800,
+    "Condominium & Other Apartments": 14600,
+    "Landed Properties": 6200
+   },
+   "sourceIds": [
+    "SINGSTAT_GHS2025_DWELLING"
+   ],
+   "caveat": "Counts resident households, not homes; household and housing-stock figures measure different things and are not combined",
+   "period": "General Household Survey 2025 (published 30 Jun 2026)",
+   "denominator": null,
+   "sample": "GHS 2025 sample survey, rounded to 100",
+   "boundary": "MP2019",
+   "lineage": "surveyAndEstimates",
+   "reconciliation": {
+    "total": 79400,
+    "listedCategories": 78600,
+    "unlisted": 800,
+    "explanation": "C020141 lists three dwelling categories (HDB dwellings, condominium & other apartments, landed properties). Its Total (column \"Total1/\") also covers households in dwelling types the table does not list; SingStat's footnote 1/ is not reproduced in the stored record. Each figure is separately rounded to the nearest 100 (SingStat: \"may not add up due to rounding\"), so rounding accounts for at most 200 of the gap and at least 600 households are in the unlisted category.",
+    "crossChecks": {
+     "singapore": {
+      "total": 1487100,
+      "listedCategories": 1483600,
+      "unlisted": 3500
+     },
+     "hdbSubtypes": {
+      "sumOfSubtypes": 57900,
+      "hdbTotal": 57800,
+      "note": "subtypes sum to 57,900 against the HDB total of 57,800: rounding"
+     }
+    },
+    "reading": "The 800 households outside the three listed categories are survey estimates in dwelling types the table does not list",
+    "rule": "The three categories and the total are shown as SingStat publishes them; the 800 are not shown as a separate category, and shares are of the published total"
+   },
+   "status": "publishable"
+  },
+  {
+   "evidence": "observed",
+   "id": "context.recentHdb",
+   "label": "HDB flats in blocks completed 2016 or later",
+   "value": 7502,
+   "unit": "flats",
+   "blocks": 56,
+   "sourceIds": [
+    "HDB_PROPERTY"
+   ],
+   "caveat": "Based on the year each block was completed, not on when its flats reach the minimum occupation period; includes 886 flats in blocks completed in 2026",
+   "period": "HDB Property Information, dataset updated 2026-10-08; records include completion years up to 2026 (8 Hougang blocks, 886 flats, recorded as completed in 2026). The publisher's metadata coverage end of 2025-12-31 is not the latest completion year in the records",
+   "denominator": null,
+   "sample": "full count",
+   "lineage": "hdbBlocks",
+   "status": "publishable"
+  },
+  {
+   "evidence": "estimate",
+   "id": "context.age65",
+   "label": "Residents aged 65 and over",
+   "value": 22.1,
+   "unit": "per cent of residents",
+   "earlier": {
+    "year": 2021,
+    "value": 17.2
+   },
+   "comparison": {
+    "singapore": 19.5
+   },
+   "sourceIds": [
+    "SINGSTAT_RESIDENTS"
+   ],
+   "caveat": "SingStat June estimates; 2026 on Master Plan 2025 boundaries",
+   "period": "June 2026 (earlier: June 2021)",
+   "denominator": "226,770 residents (SingStat estimate, rounded)",
+   "sample": "SingStat population estimate (not a survey sample)",
+   "boundary": "2026: MP2025; 2021: MP2019 (vintages differ; compare with care)",
+   "lineage": "surveyAndEstimates",
+   "status": "publishable"
+  }
+ ],
+ "futureSupply": [
+  {
+   "id": "supply.unsoldLaunched",
+   "label": "Launched private homes still unsold (developer sales)",
+   "status": "deferred",
+   "reason": "Not yet published: the number of launched but unsold private homes in the planning area is still being verified",
+   "value": null
+  },
+  {
+   "id": "supply.pipelineLocated",
+   "label": "Private homes in URA's pipeline located inside Hougang",
+   "status": "withheld",
+   "reason": "Not published: URA's list of private projects in the pipeline cannot yet be matched reliably to the Hougang planning area",
+   "value": null
+  },
+  {
+   "evidence": "observed",
+   "id": "supply.knownSites",
+   "label": "Known upcoming sites (awarded government land sale sites)",
+   "unit": "sites",
+   "sites": [
+    {
+     "registryId": "hougang-central",
+     "name": "Hougang Central",
+     "homesApprox": 830,
+     "status": "awarded (government land sale)",
+     "awarded": "January 2026",
+     "expectedCompletion": null,
+     "expectedCompletionNote": "not stated in the cited sources",
+     "sourceIds": [
+      "GW_UPCOMING",
+      "URA_SALE_SITES"
+     ]
+    }
+   ],
+   "rule": "A dated record of an awarded site; it is not added to any supply figure",
+   "sourceIds": [
+    "GW_UPCOMING",
+    "URA_SALE_SITES"
+   ],
+   "period": "award January 2026; recorded 2026-11-04",
+   "denominator": null,
+   "sample": "named known sites only",
+   "status": "publishable",
+   "inSupplyCount": false
+  },
+  {
+   "evidence": "context",
+   "id": "supply.hdbFuture",
+   "label": "Future HDB flats (BTO projects)",
+   "value": null,
+   "unit": "flats",
+   "missing": "Not assessed: there is no official open dataset of upcoming HDB projects",
+   "period": null,
+   "status": "not_assessed",
+   "denominator": null,
+   "sample": null
+  }
+ ],
+ "sources": [
+  {
+   "id": "GW_UPCOMING",
+   "publisher": "Groundwork",
+   "dataset": "Groundwork upcoming register (URA Sale Sites, launch records, OneMap)",
+   "licence": "Groundwork derived data",
+   "status": "own",
+   "attribution": "Named sites compiled by Groundwork from official URA Sale Sites, launch records and the sources cited for each site."
+  },
+  {
+   "id": "HDB_PROPERTY",
+   "publisher": "Housing & Development Board (HDB)",
+   "dataset": "HDB Property Information",
+   "licence": "Singapore Open Data Licence version 1.0",
+   "status": "confirmed",
+   "attribution": "Contains information from HDB Property Information (Housing & Development Board (HDB)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0."
+  },
+  {
+   "id": "HDB_RESALE",
+   "publisher": "Housing & Development Board (HDB)",
+   "dataset": "Resale flat prices based on registration date from Jan-2017 onwards",
+   "licence": "Singapore Open Data Licence version 1.0",
+   "status": "confirmed",
+   "attribution": "Contains information from Resale flat prices based on registration date from Jan-2017 onwards (Housing & Development Board (HDB)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0."
+  },
+  {
+   "id": "ONEMAP",
+   "publisher": "Singapore Land Authority (SLA)",
+   "dataset": "OneMap Search",
+   "licence": "OneMap Terms of Use and OneMap Open Data Licence (Singapore Open Data Licence v1.0), registered API access",
+   "status": "confirmed",
+   "attribution": "Positions: OneMap © contributors | Singapore Land Authority. Contains information from OneMap Search, used under the terms of the Singapore Open Data Licence version 1.0.",
+   "use": "Used only to place HDB blocks and landed streets in the planning area; no OneMap coordinates or address records are published"
+  },
+  {
+   "id": "SINGSTAT_GHS2025",
+   "publisher": "Singapore Department of Statistics (SingStat)",
+   "dataset": "General Household Survey 2025, table C020145",
+   "licence": "SingStat Terms of Use (SingStat Table Builder is a listed Service); datasets under the Singapore Open Data Licence, which prevails",
+   "status": "confirmed",
+   "attribution": "SingStat, General Household Survey 2025, table C020145 (resident households by planning area and monthly household employment income)"
+  },
+  {
+   "id": "SINGSTAT_GHS2025_DWELLING",
+   "publisher": "Singapore Department of Statistics (SingStat)",
+   "dataset": "General Household Survey 2025, table C020141 (Resident Households by Planning Area of Residence and Type of Dwelling)",
+   "licence": "SingStat Terms of Use and Singapore Open Data Licence version 1.0",
+   "status": "confirmed",
+   "attribution": "SingStat, General Household Survey 2025, table C020141 (resident households by planning area of residence and type of dwelling)",
+   "datasetId": "C020141",
+   "updated": "30/06/2026",
+   "conditions": [
+    "Credit the source as stated.",
+    "Reproduce the figures accurately (survey estimates rounded to 100).",
+    "Do not present Groundwork's analysis as the Government's, or suggest Government association or endorsement.",
+    "Stop using the content if SingStat asks."
+   ]
+  },
+  {
+   "id": "SINGSTAT_RESIDENTS",
+   "publisher": "Singapore Department of Statistics (SingStat)",
+   "dataset": "Singapore Residents by Planning Area / Subzone, Age Group, Sex and Type of Dwelling; Residential Dwellings by Planning Area / Subzone and Type of Dwelling (June)",
+   "licence": "SingStat Terms of Use and Singapore Open Data Licence version 1.0",
+   "status": "confirmed",
+   "attribution": "Source: Singapore Department of Statistics, Singapore Residents by Planning Area / Subzone, Age Group, Sex and Type of Dwelling (June 2021 and June 2026) and Residential Dwellings by Planning Area / Subzone and Type of Dwelling (June 2026). Analysis by Groundwork."
+  },
+  {
+   "id": "URA_DWELLING_UNITS",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "No of Dwelling Units",
+   "licence": "Singapore Open Data Licence version 1.0",
+   "status": "confirmed",
+   "attribution": "Contains information from No of Dwelling Units (Urban Redevelopment Authority (URA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0."
+  },
+  {
+   "id": "URA_MP2019",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "Master Plan 2019 Subzone Boundary (No Sea)",
+   "datasetId": "d_8594ae9ff96d0c708bc2af633048edfb",
+   "licence": "Singapore Open Data Licence version 1.0",
+   "status": "confirmed",
+   "attribution": "Contains information from Master Plan 2019 Subzone Boundary (No Sea) (Urban Redevelopment Authority (URA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "use": "planning-area boundaries for every assignment"
+  },
+  {
+   "id": "URA_MP2025_PA",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "Master Plan 2025 Planning Area Boundary (No Sea)",
+   "datasetId": "d_2cc750190544007400b2cfd5d7f53209",
+   "licence": "Singapore Open Data Licence version 1.0 (https://data.gov.sg/open-data-licence)",
+   "status": "confirmed",
+   "attribution": "Contains information from Master Plan 2025 Planning Area Boundary (No Sea) (Urban Redevelopment Authority (URA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "use": "boundary of the SingStat 2026 resident estimates only",
+   "conditions": [
+    "Attribute as stated.",
+    "Do not imply endorsement by the publisher.",
+    "Used only as the boundary of the SingStat 2026 resident estimates; no boundary geometry is published."
+   ]
+  },
+  {
+   "id": "URA_SALE_SITES",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "URA Sale Sites",
+   "licence": "Singapore Open Data Licence version 1.0",
+   "status": "confirmed",
+   "attribution": "Contains information from URA Sale Sites (Urban Redevelopment Authority (URA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0."
+  },
+  {
+   "id": "URA_TRANSACTIONS",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "PMI_Resi_Transaction",
+   "licence": "Singapore Open Data Licence version 1.0 (URA Data Service grant of licence)",
+   "status": "confirmed",
+   "attribution": "Contains information from URA private residential data (PMI_Resi_Transaction) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA."
+  }
+ ],
+ "limitations": [
+  "condo and apartment not separated",
+  "strata landed identified by name only",
+  "landed resales are placed in the planning area by street, so the landed resale count is approximate",
+  "URA dwelling units labelled \"as at Q4 2022\" but hold records to Feb 2026",
+  "future HDB supply and expected completion of known sites not available",
+  "buyer origin not available from official data",
+  "GHS 2025 income and dwelling figures are survey estimates rounded to 100",
+  "2026 resident estimates use MP2025 boundaries; every other figure uses MP2019"
+ ],
+ "insights": [
+  {
+   "id": "insight.1",
+   "text": "Hougang has about 59,500 HDB flats and 23,100 private homes: 2.6 HDB flats for every private home.",
+   "qualifier": "Counts of homes, not of buyers.",
+   "figures": {
+    "hdbFlats": 59485,
+    "privateHomes": 23083,
+    "hdbPerPrivate": 2.6
+   },
+   "period": "HDB as at 2026-10-08; URA records to 2026-02-26",
+   "itemIds": [
+    "stock.hdb",
+    "stock.privateNonLanded",
+    "stock.ec",
+    "stock.landed",
+    "stock.privateShare"
+   ],
+   "sourceIds": [
+    "HDB_PROPERTY",
+    "URA_DWELLING_UNITS"
+   ]
+  },
+  {
+   "id": "insight.2",
+   "text": "Hougang condos resell about twice as often as its HDB flats: 4.4 vs 2.1 homes per 100 a year (Singapore 3.5 vs 2.2).",
+   "qualifier": "Partly lifted by three recently completed developments; 3.7 without them.",
+   "figures": {
+    "condo": 4.4,
+    "hdb": 2.1,
+    "singaporeCondo": 3.5,
+    "singaporeHdb": 2.2,
+    "condoExcludingRecent": 3.7
+   },
+   "period": "12 months to Sep 2026",
+   "itemIds": [
+    "liquidity.condo",
+    "liquidity.hdb",
+    "liquidity.privateToHdb"
+   ],
+   "sourceIds": [
+    "URA_TRANSACTIONS",
+    "URA_DWELLING_UNITS",
+    "HDB_RESALE",
+    "HDB_PROPERTY"
+   ]
+  },
+  {
+   "id": "insight.3",
+   "text": "Hougang ranks joint 2nd of 35 planning areas for condo resale activity. Excluding three recently completed developments, it ranks joint 8th.",
+   "qualifier": "Resale activity does not establish selling time or price performance. Both rankings are given because three recently completed developments lift Hougang's headline rate.",
+   "figures": {
+    "rank": {
+     "position": 2,
+     "of": 35,
+     "tiedWith": [
+      "Punggol"
+     ],
+     "rule": "areas with 1,000+ flats / homes; condo and EC developments with 12+ months since their first resale; HDB by HDB Property Information block positions"
+    },
+    "rankExcludingRecent": {
+     "position": 8,
+     "of": 35,
+     "tiedWith": [
+      "Serangoon"
+     ],
+     "rule": "areas with 1,000+ flats / homes; condo and EC developments with 12+ months since their first resale; HDB by HDB Property Information block positions"
+    },
+    "rate": 4.4,
+    "rateExcludingRecent": 3.7,
+    "excluded": [
+     "Palm Haven (first resale 2024-05)",
+     "Riverfront Residences (first resale 2024-10)",
+     "The Florence Residences (first resale 2025-06)"
+    ]
+   },
+   "peerComparisons": {
+    "singapore": 3.5,
+    "singaporeExcludingRecent": 3.3,
+    "neighbouringAreas": [
+     {
+      "area": "Sengkang",
+      "value": 3.6
+     },
+     {
+      "area": "Serangoon",
+      "value": 4
+     },
+     {
+      "area": "Toa Payoh",
+      "value": 4
+     }
+    ],
+    "note": "joint 2nd with Punggol; joint 8th with Serangoon"
+   },
+   "period": "12 months to Sep 2026",
+   "itemIds": [
+    "liquidity.condo"
+   ],
+   "sourceIds": [
+    "URA_TRANSACTIONS",
+    "URA_DWELLING_UNITS"
+   ]
+  },
+  {
+   "id": "insight.4",
+   "text": "1,230 HDB flats and 672 condos resold in Hougang in the last 12 months.",
+   "qualifier": "October 2025 to September 2026. The 672 condo resales are all resales; the resale rate uses the 643 resales in the 50 developments for which URA records the number of homes.",
+   "figures": {
+    "hdbResales": 1230,
+    "condoResales": 672
+   },
+   "period": "2025-10 to 2026-09",
+   "itemIds": [
+    "activity.hdb",
+    "activity.condo",
+    "liquidity.condo"
+   ],
+   "sourceIds": [
+    "HDB_RESALE",
+    "URA_TRANSACTIONS"
+   ]
+  },
+  {
+   "id": "insight.5",
+   "text": "Hougang's 5-room flats resold at a median $785,000, 6% above Singapore's $740,000.",
+   "qualifier": "Median of 239 resales. Shown for context; it does not indicate what any buyer can afford.",
+   "figures": {
+    "hougang": 785000,
+    "n": 239,
+    "singapore": 740000,
+    "nSingapore": 5785,
+    "differencePct": 6.1
+   },
+   "period": "2025-10 to 2026-09",
+   "itemIds": [
+    "context.hdbMedianPrices"
+   ],
+   "sourceIds": [
+    "HDB_RESALE"
+   ]
+  },
+  {
+   "id": "insight.6",
+   "text": "Half of Hougang households (50.4%) earn $10,000 or more a month from work, in line with Singapore (50.5%).",
+   "qualifier": "Household income does not measure buying power or demand. Survey estimate from the General Household Survey 2025.",
+   "figures": {
+    "hougang": 50.4,
+    "singapore": 50.5,
+    "households": 79400
+   },
+   "period": "General Household Survey 2025 (published 30 Jun 2026)",
+   "itemIds": [
+    "context.income"
+   ],
+   "sourceIds": [
+    "SINGSTAT_GHS2025"
+   ]
+  },
+  {
+   "id": "insight.7a",
+   "text": "Hougang Central (about 830 homes) was awarded in a government land sale in January 2026; its completion date has not been stated.",
+   "qualifier": "A dated award record; it is not included in any supply figure.",
+   "figures": {
+    "homesApprox": 830,
+    "awarded": "January 2026",
+    "expectedCompletion": null
+   },
+   "period": "award January 2026; recorded 2026-11-04",
+   "itemIds": [
+    "supply.knownSites"
+   ],
+   "sourceIds": [
+    "URA_SALE_SITES",
+    "GW_UPCOMING"
+   ],
+   "inSupplyCount": false
+  }
+ ],
+ "updates": {
+  "cadence": "quarterly review",
+  "resaleActivity": "resale activity, resale rates and median prices move to the latest complete month of HDB and URA data",
+  "stockAndContext": "housing stock and household figures are updated when HDB, URA and SingStat update their datasets",
+  "supply": "future-supply figures are added only after they have been verified for the planning area"
+ },
+ "methodNotes": [
+  "Only totals, rates and medians are published; no coordinates, addresses or individual transactions.",
+  "Medians need at least 10 resales; rates per 100 homes need at least 1,000 homes in the area.",
+  "No scores, forecasts or buyer counts; income and age figures are background context.",
+  "Each figure states its source and period."
+ ],
+ "releaseId": "ni-v1-hougang-2026-11-04-r2-65b38e9d8599",
+ "supersedes": "ni-v1-hougang-2026-11-04-940d9596cba3"
+}

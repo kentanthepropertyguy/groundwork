@@ -583,7 +583,7 @@
     market: { down: 'Slower market', up: 'Busier market', flat: 'Steady market' },
     fig: { P: '{x} comparable {cls} prices', I: 'from {station}', M: 'nearby resales', S: 'nearby resales in the latest year', R: 'resales per 100 homes a year' },
     scope: { P: 'This development', R: 'This development', I: 'Location', M: 'Neighbourhood · 2 km', S: 'Neighbourhood · 2 km' },
-    sec: { good: 'What looks promising', watch: 'What to watch', ask: 'Before you buy' },
+    sec: { good: 'What looks promising', watch: 'What to watch', also: 'Also watch', ask: 'Before you buy' }, warn: 'Watch out:',
     note: 'Compared with similar developments: not a valuation, not a recommendation and not a forecast.',
     more: 'Explore full PRISM analysis', less: 'Hide full PRISM analysis'
   };
@@ -605,22 +605,33 @@
     const head = [loc, pr || rsl, mkey ? QT.market[mkey] : ''].filter(Boolean).map((t) => t + '.').join(' ');
     // three figures: Price, MRT, nearby market; a missing one is taken by the next available measure (resale rate), never invented
     const by = {}; x.cards.forEach((c) => { by[c.dim] = c; });
-    const fig = (c) => ({ dim: c.dim, scope: QT.scope[c.dim], v: c.v, label: c.dim === 'P' ? fill(QT.fig.P, { x: '', cls }).trim() : c.dim === 'I' ? fill(QT.fig.I, { station: c.unit.replace(/^to /, '') }) : QT.fig[c.dim] });
+    // Summary first (Master Planning, 4 Nov 2026): each figure keeps its approved peer comparison (the V2 card's first sentence) beneath it
+    const fig = (c) => ({ dim: c.dim, scope: QT.scope[c.dim], v: c.v, label: c.dim === 'P' ? fill(QT.fig.P, { x: '', cls }).trim() : c.dim === 'I' ? fill(QT.fig.I, { station: c.unit.replace(/^to /, '') }) : QT.fig[c.dim],
+      cmp: c.cmp ? c.cmp.split('. ')[0] : '' });
     const order = ['P', 'I', by.M ? 'M' : 'S', 'R'].filter((k) => by[k]), figs = order.slice(0, 3).map((k) => fig(by[k]));
     // what looks promising / what to watch: the approved sentences, without the station distance already shown as a figure
     const mrtLine = (t) => / is about [\d,.]+ k?m from .+ \(straight line\)\.$/.test(t);
     const good = x.goodAll.filter((t) => !(mrtLine(t) && order.slice(0, 3).indexOf('I') >= 0)).slice(0, 2), watch = x.watchAll.slice(0, 2);
-    return { head: head || x.head, figs, good, watch, ask: x.ask, askNote: x.askNote, op: op && op.kind === 'reveal' ? op : null, x };
+    // the one warning on top: the first approved "watch" sentence (they are in a fixed order of strength); with none, the first shown
+    // figure's own approved limitation. The other watch sentence stays in the quick read, below.
+    const lim = order.slice(0, 3).map((k) => by[k].limit).filter(Boolean)[0] || '';
+    return { head: head || x.head, figs, good, watch, warn: watch[0] || lim, also: watch.slice(1), ask: x.ask, askNote: x.askNote, op: op && op.kind === 'reveal' ? op : null, x };
   }
+  // Summary first (Master Planning, 4 Nov 2026): the answer in about fifteen seconds (one headline, three figures, one warning), then,
+  // below a rule, the rest of the approved quick read unchanged in wording: the Reveal with its qualifications, what looks promising, the
+  // other watch sentence and the question before buying
+  const qrFig = (f, id) => '<a class="gwp-qr-f" href="#/prism/' + esc(id || '') + '/' + f.dim.toLowerCase() + '" data-gwp-xjump="' + f.dim + '"><span class="gwp-qr-s">' + esc(f.scope) + '</span><b>' + esc(f.v) + '</b><span class="gwp-qr-l">' + esc(f.label) + '</span>' +
+    (f.cmp ? '<small class="gwp-qr-c">' + esc(f.cmp) + '</small>' : '') + '</a>';
+  const qrHead = (h) => '<h2 class="gwp-qr-h">' + h.split(/(?<=\.) /).map((t) => '<span>' + esc(t) + '</span>').join(' ') + '</h2>';
+  const qrWarn = (w) => (w ? '<p class="gwp-qr-w" data-gwp-warn><b>' + esc(QT.warn) + '</b> ' + esc(w) + '</p>' : '');
   function quickHtml(q, id, full) {
     if (!q) return '';
-    const fig = (f) => '<a class="gwp-qr-f" href="#/prism/' + esc(id || '') + '/' + f.dim.toLowerCase() + '" data-gwp-xjump="' + f.dim + '"><span class="gwp-qr-s">' + esc(f.scope) + '</span><b>' + esc(f.v) + '</b><span class="gwp-qr-l">' + esc(f.label) + '</span></a>';
     const list = (h, a, k) => (a.length ? '<div class="gwp-qr-t gwp-qr-t--' + k + '"><h3>' + esc(h) + '</h3><ul>' + a.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul></div>' : '');
-    return '<section class="gwp-qr" data-gwp-quick aria-label="PRISM quick read"><p class="gwp-k">PRISM quick read</p><h2 class="gwp-qr-h">' + q.head.split(/(?<=\.) /).map((t) => '<span>' + esc(t) + '</span>').join(' ') + '</h2>' +
-      (q.op ? '<p class="gwp-qr-rv"><b>PRISM Reveal</b> · ' + esc(q.op.head) + '</p>' + (q.op.notes.length ? '<p class="gwp-qr-rn">' + q.op.notes.map(esc).join(' ') + '</p>' : '') : '') +
-      (q.figs.length ? '<div class="gwp-qr-fs gwp-qr-fs--' + q.figs.length + '">' + q.figs.map(fig).join('') + '</div>' : '') +
-      '<div class="gwp-qr-b">' + list(QT.sec.good, q.good, 'good') + list(QT.sec.watch, q.watch, 'watch') +
-      '<div class="gwp-qr-q"><h3>' + esc(QT.sec.ask) + '</h3><p>' + esc(q.ask) + '</p><small>' + esc(q.askNote) + '</small></div></div>' +
+    return '<section class="gwp-qr" data-gwp-quick aria-label="PRISM quick read"><div class="gwp-qr-top" data-gwp-short><p class="gwp-k">PRISM quick read</p>' + qrHead(q.head) +
+      (q.figs.length ? '<div class="gwp-qr-fs gwp-qr-fs--' + q.figs.length + '">' + q.figs.map((f) => qrFig(f, id)).join('') + '</div>' : '') + qrWarn(q.warn) + '</div>' +
+      '<div class="gwp-qr-more">' + (q.op ? '<div class="gwp-qr-rvb"><p class="gwp-qr-rv"><b>PRISM Reveal</b> · ' + esc(q.op.head) + '</p>' + (q.op.notes.length ? '<p class="gwp-qr-rn">' + q.op.notes.map(esc).join(' ') + '</p>' : '') + '</div>' : '') +
+      '<div class="gwp-qr-b">' + list(QT.sec.good, q.good, 'good') + list(QT.sec.also, q.also, 'watch') +
+      '<div class="gwp-qr-q"><h3>' + esc(QT.sec.ask) + '</h3><p>' + esc(q.ask) + '</p><small>' + esc(q.askNote) + '</small></div></div></div>' +
       '<p class="gwp-qr-n">' + esc(QT.note) + '</p>' +
       '<button type="button" class="gwp-qr-x" data-gwp-full aria-expanded="false" aria-controls="gwp-full">' + esc(QT.more) + '<span aria-hidden="true">⌄</span></button></section>' +
       '<div class="gwp-full" id="gwp-full" hidden>' + full + '</div>';
@@ -638,10 +649,12 @@
     btn: 'See the PRISM Verdict and evidence' };
   function compactQuick(md) {
     if (!md || !md.assessment || !md.v11) return null;   // fail closed: without a verified V1.1 release the V1 page is exactly V1
+    // Summary first: the one warning is the approved Verdict's first "watch out" (the Verdict below keeps all of them, unchanged)
+    const warnV1 = (md.assessment.verdict.watchOut || [])[0] || '';
     const ok = (m) => m && m.approval && m.approval.state === 'approved' && isNum(m.value) ? m : null;
     if (md.v11 && md.v11.profile) {
       const q = quick11(md.v11, md.name, null);   // null: never the V1.1 Reveal here
-      return q && q.figs.length ? { head: q.head, figs: q.figs, note: CQ.note.full } : null;
+      return q && q.figs.length ? { head: q.head, figs: q.figs, warn: warnV1, note: CQ.note.full } : null;
     }
     const sj = md.subject || {}, launch = sj.kind === 'awarded-site' || sj.stage === 'awarded' || sj.kind === 'launch';
     if (!launch) return null;
@@ -651,13 +664,12 @@
     if (alt) figs.push({ dim: 'R', scope: CQ.scope.R2, v: num(alt.value, 0), label: CQ.label.R2 });
     if (pa && pa.detail && isNum(pa.detail.singapore)) figs.push({ dim: 'R', scope: fill(CQ.scope.PA, { pa: (pa.geography && pa.geography.id) || sj.planningArea || '' }), v: num(pa.value, 1), label: fill(CQ.label.PA, { sg: num(pa.detail.singapore, 1) }) });
     if (!figs.length) return null;
-    return { head: (st && isNum(st.metres) && st.metres <= 500 ? CQ.near + ' ' : '') + CQ.launch, figs, note: CQ.note.launch };
+    return { head: (st && isNum(st.metres) && st.metres <= 500 ? CQ.near + ' ' : '') + CQ.launch, figs, warn: warnV1, note: CQ.note.launch };
   }
   function compactHtml(c, id) {
     if (!c) return '';
-    const fig = (f) => '<a class="gwp-qr-f" href="#/prism/' + esc(id || '') + '/' + f.dim.toLowerCase() + '" data-gwp-xjump="' + f.dim + '"><span class="gwp-qr-s">' + esc(f.scope) + '</span><b>' + esc(f.v) + '</b><span class="gwp-qr-l">' + esc(f.label) + '</span></a>';
-    return '<section class="gwp-qr gwp-qr--compact" data-gwp-quick="compact" aria-label="PRISM quick read"><p class="gwp-k">PRISM quick read</p><h2 class="gwp-qr-h">' + c.head.split(/(?<=\.) /).map((t) => '<span>' + esc(t) + '</span>').join(' ') + '</h2>' +
-      '<div class="gwp-qr-fs gwp-qr-fs--' + c.figs.length + '">' + c.figs.map(fig).join('') + '</div><p class="gwp-qr-n">' + esc(c.note) + '</p>' +
+    return '<section class="gwp-qr gwp-qr--compact" data-gwp-quick="compact" aria-label="PRISM quick read"><div class="gwp-qr-top" data-gwp-short><p class="gwp-k">PRISM quick read</p>' + qrHead(c.head) +
+      '<div class="gwp-qr-fs gwp-qr-fs--' + c.figs.length + '">' + c.figs.map((f) => qrFig(f, id)).join('') + '</div>' + qrWarn(c.warn) + '</div><p class="gwp-qr-n">' + esc(c.note) + '</p>' +
       '<button type="button" class="gwp-qr-x" data-gwp-verdict>' + esc(CQ.btn) + '<span aria-hidden="true">⌄</span></button></section>';
   }
   function revealHtml(x) {
@@ -670,7 +682,7 @@
   }
 
   /* ---------------------------------------------------------------- HTML */
-  const mark = (root, size) => '<img class="gwp-mark" src="' + esc(root) + 'assets/img/prism/prism-mark.png" width="' + size + '" height="' + size + '" alt="PRISM">';
+  const mark = (root, size) => '<img class="gwp-mark" src="' + esc(root) + 'assets/img/prism/prism-mark-original.png" width="' + size + '" height="' + size + '" alt="PRISM">';
   const brand = (root) => '<div class="gwp-brand">' + mark(root, 52) + '<div><p class="gwp-bname">PRISM <span>by Groundwork</span></p><p class="gwp-bline">Five dimensions. One clearer property decision.</p></div></div>';
   const SHORT = { P: 'Price', R: 'Resale', I: 'Infrastructure', S: 'Supply', M: 'Demand' };
   // Where each measure's evidence lives in the development's Property Data (its own section there), and back. Only measures that are

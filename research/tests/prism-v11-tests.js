@@ -155,7 +155,7 @@ check('never: a sustained resale rate for a settling development, or an unsold f
 
 // ---- 4 pages
 check('KW and HC: their V1 assessment page (verdict first) with the r2 supplement', ['kingsford-waterbay', 'hougang-central'].every((id) => P[id].mode === 'assessment' && html[id].includes('class="gwp-card gwp-open"') && html[id].includes('PRISM Verdict') && P[id].v11));
-check('TT, HP, The Quinn: evidence-profile pages (the same page, no verdict card; their Reveal is tested below)', ['thomson-three', 'hundred-palms-residences', 'the-quinn'].every((id) => P[id].mode === 'profile' && G.hasPage(P[id]) && html[id].includes('data-gwp-mode="profile"') && !html[id].includes('gwp-card') && !/PRISM Verdict|Why\?|watch out/i.test(txt[id])));
+check('TT, HP, The Quinn: evidence-profile pages (the same page, no verdict card; their Reveal is tested below)', ['thomson-three', 'hundred-palms-residences', 'the-quinn'].every((id) => P[id].mode === 'profile' && G.hasPage(P[id]) && html[id].includes('data-gwp-mode="profile"') && !html[id].includes('gwp-card') && !/PRISM Verdict|Why\?|watch out/i.test(txt[id].replace(/Watch out: /, ''))));
 check('TT keeps its V1 identity line (District, planning area) and none of its unassessed V1 measures', P['thomson-three'].meta.join(' · ').startsWith('District ') && !html['thomson-three'].includes('data-gwp-metric='));
 check('HP and The Quinn: identity from the r2 comparison group (OCR, class)', P['hundred-palms-residences'].meta.join(' · ') === 'OCR · Executive condominium' && P['the-quinn'].meta.join(' · ') === 'OCR · Condominium');
 check('Hougang Central: income only, in Market Demand; no position, yield or profile', html['hougang-central'].includes('data-gwp-income') && !html['hougang-central'].includes('data-gwp-yield') && !html['hougang-central'].includes('data-gwp-v11="') && !html['hougang-central'].includes('data-gwp-profile'));
@@ -170,7 +170,8 @@ const OLD = (() => { try { return require(path.join(SITE, 'research/tests/fixtur
 SUPP.forEach((id) => {
   const a = G.compose(v1md(id), null);
   // search journey (Master Planning, 4 Nov 2026): the tabs gained a line saying what each holds; with that taken back, the page is the deployed V1 page
-  const untab = (h) => h.replace(/<span class="gwp-tl"><span>([^<]*)<\/span><span class="gwp-tsub">[^<]*<\/span><\/span>/g, '<span>$1</span>');
+  const untab = (h) => h.replace(/<span class="gwp-tl"><span>([^<]*)<\/span><span class="gwp-tsub">[^<]*<\/span><\/span>/g, '<span>$1</span>')
+    .split('prism-mark-original.png').join('prism-mark.png');   // summary first (Master Planning, 4 Nov 2026): the original PRISM logo, its file name taken back
   if (OLD && a.assessment) { const b = OLD.model(OLD.checkReport(rep1(id), e1(id)), v1); check(id + ': with no V1.1 the page is byte for byte the deployed V1 page (tab labels aside)', untab(G.pageHtml(a, { root: '../' })) === OLD.pageHtml(b, { root: '../' })); }
   if (!a.assessment) check(id + ': with no V1.1, no page (as in V1)', !G.hasPage(a) && G.pageHtml(a, { root: '../' }) === '');
 });

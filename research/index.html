@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="../assets/css/kpt-lg.css?v=a7388ecdb6">
 <link rel="stylesheet" href="../assets/css/gw-pulse.css?v=3387a27e04">
 <link rel="stylesheet" href="../assets/css/gw-bedroom.css?v=23b82e11df">
-<link rel="stylesheet" href="../assets/css/gw-prism.css?v=3fa617d1fa">
+<link rel="stylesheet" href="../assets/css/gw-prism.css?v=c9cd1e9100">
 <link rel="canonical" href="https://tools.kentanthepropertyguy.com/research/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Groundwork">
@@ -47,7 +47,8 @@
 <template id="gwLazy-hdb"><script src="../assets/js/gw-hdb.js?v=ff7e6ae643"></script></template>
 <template id="gwLazy-budget"><link rel="stylesheet" href="../assets/css/kpt-discover.css?v=8d0ad26e1e"><script src="../assets/js/kpt-market.js?v=f2c5f82332"></script><script src="../assets/js/kpt-find.js?v=e88bca722f"></script><script src="../assets/js/kpt-discover.js?v=bdf69efa8d"></script><script src="../assets/js/kpt-discover-beds.js?v=8a9a8b8867"></script></template>
 <template id="gwLazy-budget-ui"><script src="../assets/js/kpt-discover-ui.js?v=bb58e094b2"></script></template>
-<template id="gwLazy-prism"><script src="../assets/js/gw-prism.js?v=c9cf3fb441"></script></template>
+<template id="gwLazy-prism"><script src="../assets/js/gw-prism.js?v=78d31e240d"></script></template>
+<template id="gwLazy-area"><link rel="stylesheet" href="../assets/css/gw-area.css?v=565972c365"><script src="../assets/js/gw-area.js?v=f8dbc60d55"></script></template>
 <template id="gwLazy-az"><script src="../assets/js/kpt-registry-core.js?v=f702981cf5"></script></template>
 <script src="../assets/js/kpt-analytics.js?v=3b78ef5642"></script>
 <script src="../assets/js/kpt-components.js?v=597f0bf0d3"></script>
@@ -216,6 +217,12 @@
       return postalReady().then(([GP, D]) => { const towns = D && D.hdb ? GP.hdbTowns({ road: A.road }, D.hdb) : []; return towns.length ? GP.hdbBlock({ blk: A.block, road: A.road }, towns, '../') : null; })
         .then((h) => (h && h.found ? `<ul class="kpr-results" role="listbox" aria-label="HDB blocks">${pcRow('data-hdb', window.GW_POSTAL.hdbHash(h), 'Blk ' + h.block + ' ' + window.GW_POSTAL.streetName(h.street), KPTLG.titleCase(h.townName) + ' · HDB flat', 'See resale prices ›', false)}</ul>` : '')).catch(() => '');
     }
+    // Neighbourhood Intelligence: a planning area with an approved neighbourhood page (Hougang) is offered first when its name is typed
+    // (three letters or more of it, or the name with "neighbourhood", "planning area", "estate" or "town"); a development of that name keeps its own row below
+    const AREAS = [{ id: 'hougang', name: 'Hougang' }];
+    const areaRow = (q) => { if (!home) return ''; const t = q.trim().toLowerCase().replace(/\s+(neighbourhood|neighborhood|planning area|estate|town|area)$/, '');
+      const a = t.length >= 3 ? AREAS.find((x) => x.name.toLowerCase().indexOf(t) === 0) : null;
+      return a ? `<ul class="kpr-results" role="listbox" aria-label="Neighbourhoods" data-gwa-row><li role="option"><button type="button" data-area="${esc(a.id)}"><span><b>${esc(a.name)}</b><span class="m">Neighbourhood · planning area figures</span></span><span class="r"><span>See the neighbourhood ›</span></span></button></li></ul>` : ''; };
     // Not a development: the Map finds MRT stations, roads, neighbourhoods and schools. What was typed goes with the visitor to the Map in this tab only, never in an address.
     const mapRow = (q) => (home && q.trim().length >= 3 ? `<ul class="kpr-results" role="listbox" aria-label="Search the Map" data-pc-maprow><li role="option"><button type="button" data-mapq="${esc(q.trim().slice(0, 80))}"><span><b>Search the Map for “${esc(q.trim().slice(0, 40))}”</b><span class="m">MRT stations, roads, neighbourhoods and schools</span></span><span class="r"><span>Open Map ›</span></span></button></li></ul>` : '');
     // R3 (30 Oct 2026): an explicit postal-district search ("D19", "District 19") lists that district's developments, each opening its own price preview.
@@ -243,11 +250,12 @@
         if (otherCls.length) res.insertAdjacentHTML('beforeend', `<p class="lg-fine" data-lg-otherclass>Not offered: ${otherCls.map((r) => `${esc(R.displayName(r.name))} (${esc(P.classInfo(r).short === 'Condo' ? 'condominium' : P.classInfo(r).label.toLowerCase())})`).join(', ')}. Groundwork compares ${esc(P.CLASSES[cls].plural)} only with other ${esc(P.CLASSES[cls].plural)}, because ${cls === 'condo' ? 'ECs and cluster housing' : 'they'} sell under different rules and at different price levels.</p>`);
         if (rows.length && window.KPTLG && KPTLG.notCoveredNote) res.insertAdjacentHTML('beforeend', KPTLG.notCoveredNote(q, R));
         if (window.KPTV2) KPTV2.afterSearch(res, q, rows.length);
+        const ar = areaRow(q); if (ar) res.insertAdjacentHTML('afterbegin', ar);
         if (res.closest('#gwHome')) prismLoad().then(() => GW_PRISM.leadSites(res, { root: '../' })).catch(() => {});   // PRISM V1: the Research search leads with PRISM
         Promise.all([launchesHtml(q, rows), roadsHtml(q), hdbAddrHtml(q)]).then(([lh, rh, ah]) => {
           if (input.value !== q) return;
           if (ah) res.insertAdjacentHTML(rows.length ? 'beforeend' : 'afterbegin', ah);
-          if (!rows.length && !lh && !rh && !ah && !res.querySelector('.v2-sites')) { res.innerHTML = window.KPTLG && KPTLG.emptySearch ? KPTLG.emptySearch(q, R) : `<div class="kpr-results"><div class="kpr-empty">No transactions found under that name in the last 5 years. It may be a launch with no sales yet, or spelled differently.</div></div>`; if (home) res.insertAdjacentHTML('beforeend', mapRow(q) + '<p class="lg-fine" data-pc-tip>Looking for an HDB flat or another home? Enter its six-digit postal code.</p>'); input.setAttribute('aria-expanded', 'true'); return; }
+          if (!rows.length && !lh && !rh && !ah && !res.querySelector('.v2-sites') && !res.querySelector('[data-gwa-row]')) { res.innerHTML = window.KPTLG && KPTLG.emptySearch ? KPTLG.emptySearch(q, R) : `<div class="kpr-results"><div class="kpr-empty">No transactions found under that name in the last 5 years. It may be a launch with no sales yet, or spelled differently.</div></div>`; if (home) res.insertAdjacentHTML('beforeend', mapRow(q) + '<p class="lg-fine" data-pc-tip>Looking for an HDB flat or another home? Enter its six-digit postal code.</p>'); input.setAttribute('aria-expanded', 'true'); return; }
           if (lh) res.insertAdjacentHTML('beforeend', lh);
           if (rh) res.insertAdjacentHTML('beforeend', (rows.length || lh ? `<p class="kpr-note" style="margin:14px 0 4px">Roads and streets</p>` : '') + rh);
           if (home) res.insertAdjacentHTML('beforeend', mapRow(q));
@@ -262,7 +270,8 @@
     // what a result does: a launch or place opens the Map, a road its landed sales, an HDB block its research, a development its Research page
     function act(b) {
       const d = b.dataset;
-      if (d.mapq) { ssSet('kpt.map.q', d.mapq); track('research_map_opened', { from: 'home' }); location.href = 'map/'; }
+      if (d.area) { location.hash = '#/area/' + d.area; }
+      else if (d.mapq) { ssSet('kpt.map.q', d.mapq); track('research_map_opened', { from: 'home' }); location.href = 'map/'; }
       else if (d.launch) location.href = d.launch;
       else if (d.road) { if (hooks && hooks.street && d.street) { hooks.street(d.street); done(); } else location.href = d.road; }
       else if (d.hdb) { if (hooks && hooks.hdb) { hooks.hdb(d.hdb); done(); } else location.hash = d.hdb; }
@@ -271,7 +280,7 @@
     }
     // a recognised property is chosen: the list gives way to its overview
     function done() { res.innerHTML = ''; input.setAttribute('aria-expanded', 'false'); }
-    res.addEventListener('click', (e) => { const b = e.target.closest('button[data-launch],button[data-road],button[data-id],button[data-hdb],button[data-pcprices],button[data-mapq]'); if (b) act(b);
+    res.addEventListener('click', (e) => { const b = e.target.closest('button[data-launch],button[data-road],button[data-id],button[data-hdb],button[data-pcprices],button[data-mapq],button[data-area]'); if (b) act(b);
       // R3: Show more in a district list (the next rows, focus on the first new one)
       if (e.target.closest('[data-lg-dmore]') && dst) { const k = dst.shown; dst.shown += KPTLG.DSTEP; res.innerHTML = KPTLG.districtHtml(dst.dq, dst.rows, R, dst.shown, 'map/#pl=district:' + dst.dq.n); const nb = res.querySelectorAll('[data-lg-dlist] button')[k]; if (nb) nb.focus(); }
     });
@@ -743,10 +752,26 @@
     const site = window.KPTV2 && KPTV2.sites && KPTV2.sites[id];   // a launch with its own site: its PRISM page offers that site (it has no resale report to compare)
     prismLoad().then(() => GW_PRISM.show($app, id, { root: '../', still: onRoute('prism', id), cameFromReport: () => from === 'project:' + id, site: site && site.url ? { url: site.url } : null, compare: !site, dim: dim || null,
       fallback: () => { location.replace('#/p/' + id); }, track: (k) => track('research_option_selected', { project_id: id, option: k === 'full' ? 'prism-full' : 'prism' }) }))
-      .then(() => { const h = $app.querySelector('h1'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } })
+      .then(() => { const h = $app.querySelector('h1'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
+        // Neighbourhood Intelligence: a development the approved index lists in a planning area gets one plain link under its five dimensions
+        if ($app.querySelector('[data-gwp-page="' + id + '"]')) areaLoad().then(() => GW_AREA.mountLink($app, id, { root: '../', still: onRoute('prism', id) })).catch(() => {}); })
       .catch(() => { location.replace('#/p/' + id); });
   }
+  // Neighbourhood Intelligence V1 (Master Planning, 4 Nov 2026: Concept 1): #/area/<id> is the planning area's page (gw-area.js); an id the approved
+  // index does not list, or any failed check, returns to Research. Planning-area statistics stay apart from PRISM, which describes one development.
+  const AREA_HASH = /^#\/area\/([a-z0-9-]{1,40})\/?$/;
+  function areaLoad() { try { return lazy('area'); } catch (e) { return Promise.reject(e); } }
+  function showArea(id) {
+    $app.innerHTML = '<div class="kpr-state"><div class="kpr-skel"></div><div class="kpr-skel" style="width:60%"></div></div>';
+    document.body.dataset.view = 'area';
+    const still = () => { const m = AREA_HASH.exec(String(location.hash).toLowerCase()); return !!m && m[1] === id; };
+    areaLoad().then(() => GW_AREA.show($app, id, { root: '../', still, fallback: () => { location.replace('#/'); } }))
+      .then(() => { const h = $app.querySelector('h1'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } })
+      .catch(() => { location.replace('#/'); });
+  }
   function route() {
+    const am = AREA_HASH.exec(String(location.hash).toLowerCase());
+    if (am) { window.scrollTo(0, 0); lastRoute = 'area:' + am[1]; showArea(am[1]); return; }
     const v = R.parseHash(String(location.hash).toLowerCase()); window.scrollTo(0, 0);
     const was = lastRoute; lastRoute = v.view + ':' + (v.id || '');   // where the visitor came from (PRISM's Back returns there with the browser's Back)
     if (v.view === 'prism') showPrism(v.id, was, v.dim);

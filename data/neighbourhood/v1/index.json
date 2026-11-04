@@ -1,0 +1,14 @@
+{
+ "schemaVersion": "gw-neighbourhood-v1-index",
+ "areas": [
+  {
+   "id": "hougang",
+   "name": "Hougang",
+   "path": "hougang.json",
+   "sha256": "c92e648dba48b7007caf07f288839f5b48b2a4a3d79b7c8696ae41b5f5e8c8e8",
+   "releaseId": "ni-v1-hougang-2026-11-04-r2-65b38e9d8599",
+   "developmentsPath": "hougang-developments.json",
+   "developmentsSha256": "fdcb87946f09d6463bc24dda67e1716acc9a2f105ac1f2fc27bf44f12d809cf4"
+  }
+ ]
+}

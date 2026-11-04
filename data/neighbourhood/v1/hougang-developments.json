@@ -1,0 +1,536 @@
+{
+ "area": "Hougang",
+ "boundary": "URA Master Plan 2019 planning area",
+ "releaseId": "ni-v1-hougang-2026-11-04-r2-65b38e9d8599",
+ "count": 132,
+ "developments": [
+  {
+   "registryId": "21-richards",
+   "name": "21 RICHARDS"
+  },
+  {
+   "registryId": "3-at-phillips",
+   "name": "3@PHILLIPS"
+  },
+  {
+   "registryId": "3-at-sandilands",
+   "name": "3@SANDILANDS"
+  },
+  {
+   "registryId": "57-at-kovan",
+   "name": "57 @ KOVAN"
+  },
+  {
+   "registryId": "affluence-court",
+   "name": "AFFLUENCE COURT"
+  },
+  {
+   "registryId": "aston-green",
+   "name": "ASTON GREEN"
+  },
+  {
+   "registryId": "bliss-at-kovan",
+   "name": "BLISS@KOVAN"
+  },
+  {
+   "registryId": "boathouse-residences",
+   "name": "BOATHOUSE RESIDENCES"
+  },
+  {
+   "registryId": "breezy-mansions",
+   "name": "BREEZY MANSIONS"
+  },
+  {
+   "registryId": "central-view",
+   "name": "CENTRAL VIEW"
+  },
+  {
+   "registryId": "cerelia-vista",
+   "name": "CERELIA VISTA"
+  },
+  {
+   "registryId": "charlton-18",
+   "name": "CHARLTON 18"
+  },
+  {
+   "registryId": "charlton-27",
+   "name": "CHARLTON 27"
+  },
+  {
+   "registryId": "charlton-residences",
+   "name": "CHARLTON RESIDENCES"
+  },
+  {
+   "registryId": "charlton-villas",
+   "name": "CHARLTON VILLAS"
+  },
+  {
+   "registryId": "choon-kim-house",
+   "name": "CHOON KIM HOUSE"
+  },
+  {
+   "registryId": "d-hiro-at-hillside",
+   "name": "D'HIRO@HILLSIDE"
+  },
+  {
+   "registryId": "d-pavilion",
+   "name": "D'PAVILION"
+  },
+  {
+   "registryId": "d-zire",
+   "name": "D'ZIRE"
+  },
+  {
+   "registryId": "evergreen-park",
+   "name": "EVERGREEN PARK"
+  },
+  {
+   "registryId": "fiorenza",
+   "name": "FIORENZA"
+  },
+  {
+   "registryId": "fontaine-parry",
+   "name": "FONTAINE PARRY"
+  },
+  {
+   "registryId": "fortune-park",
+   "name": "FORTUNE PARK"
+  },
+  {
+   "registryId": "gillenia",
+   "name": "GILLENIA"
+  },
+  {
+   "registryId": "glasgow-residence",
+   "name": "GLASGOW RESIDENCE"
+  },
+  {
+   "registryId": "grand-regalia",
+   "name": "GRAND REGALIA"
+  },
+  {
+   "registryId": "harmony-at-1a",
+   "name": "HARMONY @ 1A"
+  },
+  {
+   "registryId": "heron-bay",
+   "name": "HERON BAY"
+  },
+  {
+   "registryId": "highland-centre",
+   "name": "HIGHLAND CENTRE"
+  },
+  {
+   "registryId": "highland-condominium",
+   "name": "HIGHLAND CONDOMINIUM"
+  },
+  {
+   "registryId": "hilbre28",
+   "name": "HILBRE28"
+  },
+  {
+   "registryId": "hillsgrove",
+   "name": "HILLSGROVE"
+  },
+  {
+   "registryId": "hillside-mansions",
+   "name": "HILLSIDE MANSIONS"
+  },
+  {
+   "registryId": "hougang-green",
+   "name": "HOUGANG GREEN"
+  },
+  {
+   "registryId": "hundred-palms-residences",
+   "name": "HUNDRED PALMS RESIDENCES"
+  },
+  {
+   "registryId": "hougang-central",
+   "name": "Hougang Central"
+  },
+  {
+   "registryId": "infinium",
+   "name": "INFINIUM"
+  },
+  {
+   "registryId": "isuites-at-palm",
+   "name": "ISUITES @ PALM"
+  },
+  {
+   "registryId": "isuites-at-tani",
+   "name": "ISUITES @ TANI"
+  },
+  {
+   "registryId": "jansen-28",
+   "name": "JANSEN 28"
+  },
+  {
+   "registryId": "jansen-8",
+   "name": "JANSEN 8"
+  },
+  {
+   "registryId": "jansen-house",
+   "name": "JANSEN HOUSE"
+  },
+  {
+   "registryId": "jazz-residences",
+   "name": "JAZZ RESIDENCES"
+  },
+  {
+   "registryId": "jewel-at-chuan-hoe",
+   "name": "JEWEL @ CHUAN HOE"
+  },
+  {
+   "registryId": "kensington-square",
+   "name": "KENSINGTON SQUARE"
+  },
+  {
+   "registryId": "kingsford-waterbay",
+   "name": "KINGSFORD WATERBAY"
+  },
+  {
+   "registryId": "kovan-81",
+   "name": "KOVAN 81"
+  },
+  {
+   "registryId": "kovan-apartments",
+   "name": "KOVAN APARTMENTS"
+  },
+  {
+   "registryId": "kovan-crest",
+   "name": "KOVAN CREST"
+  },
+  {
+   "registryId": "kovan-esquire",
+   "name": "KOVAN ESQUIRE"
+  },
+  {
+   "registryId": "kovan-grandeur",
+   "name": "KOVAN GRANDEUR"
+  },
+  {
+   "registryId": "kovan-jewel",
+   "name": "KOVAN JEWEL"
+  },
+  {
+   "registryId": "kovan-melody",
+   "name": "KOVAN MELODY"
+  },
+  {
+   "registryId": "kovan-primera",
+   "name": "KOVAN PRIMERA"
+  },
+  {
+   "registryId": "kovan-regency",
+   "name": "KOVAN REGENCY"
+  },
+  {
+   "registryId": "kovan-residences",
+   "name": "KOVAN RESIDENCES"
+  },
+  {
+   "registryId": "kovana",
+   "name": "KOVANA"
+  },
+  {
+   "registryId": "lange-28",
+   "name": "LANGE 28"
+  },
+  {
+   "registryId": "le-royce-at-leith-park",
+   "name": "LE ROYCE @ LEITH PARK"
+  },
+  {
+   "registryId": "legend-at-jansen",
+   "name": "LEGEND @ JANSEN"
+  },
+  {
+   "registryId": "leith-grove",
+   "name": "LEITH GROVE"
+  },
+  {
+   "registryId": "midtown-residences",
+   "name": "MIDTOWN RESIDENCES"
+  },
+  {
+   "registryId": "mint-residences-at-jansen",
+   "name": "MINT RESIDENCES @ JANSEN"
+  },
+  {
+   "registryId": "nanyang-park",
+   "name": "NANYANG PARK"
+  },
+  {
+   "registryId": "naung-residence",
+   "name": "NAUNG RESIDENCE"
+  },
+  {
+   "registryId": "nouvelle-park",
+   "name": "NOUVELLE PARK"
+  },
+  {
+   "registryId": "one-rosyth",
+   "name": "ONE ROSYTH"
+  },
+  {
+   "registryId": "one-surin",
+   "name": "ONE SURIN"
+  },
+  {
+   "registryId": "onerobey",
+   "name": "ONEROBEY"
+  },
+  {
+   "registryId": "palm-grove-condominium",
+   "name": "PALM GROVE CONDOMINIUM"
+  },
+  {
+   "registryId": "palm-grove-regency",
+   "name": "PALM GROVE REGENCY"
+  },
+  {
+   "registryId": "palm-haven",
+   "name": "PALM HAVEN"
+  },
+  {
+   "registryId": "parc-vera",
+   "name": "PARC VERA"
+  },
+  {
+   "registryId": "park-residences-kovan",
+   "name": "PARK RESIDENCES KOVAN"
+  },
+  {
+   "registryId": "parkwood-collection",
+   "name": "PARKWOOD COLLECTION"
+  },
+  {
+   "registryId": "parkwood-residences",
+   "name": "PARKWOOD RESIDENCES"
+  },
+  {
+   "registryId": "parry-court",
+   "name": "PARRY COURT"
+  },
+  {
+   "registryId": "people-s-garden",
+   "name": "PEOPLE'S GARDEN"
+  },
+  {
+   "registryId": "phillips-residence",
+   "name": "PHILLIPS RESIDENCE"
+  },
+  {
+   "registryId": "pin-mansions",
+   "name": "PIN MANSIONS"
+  },
+  {
+   "registryId": "place-8",
+   "name": "PLACE-8"
+  },
+  {
+   "registryId": "prestige-point",
+   "name": "PRESTIGE POINT"
+  },
+  {
+   "registryId": "primo-residences",
+   "name": "PRIMO RESIDENCES"
+  },
+  {
+   "registryId": "regentville",
+   "name": "REGENTVILLE"
+  },
+  {
+   "registryId": "residences-at-jansen",
+   "name": "RESIDENCES @ JANSEN"
+  },
+  {
+   "registryId": "residences-botanique",
+   "name": "RESIDENCES BOTANIQUE"
+  },
+  {
+   "registryId": "rich-residence",
+   "name": "RICH.RESIDENCE"
+  },
+  {
+   "registryId": "rio-vista",
+   "name": "RIO VISTA"
+  },
+  {
+   "registryId": "riverfront-residences",
+   "name": "RIVERFRONT RESIDENCES"
+  },
+  {
+   "registryId": "riversails",
+   "name": "RIVERSAILS"
+  },
+  {
+   "registryId": "rosyth-lodge",
+   "name": "ROSYTH LODGE"
+  },
+  {
+   "registryId": "rosyth-residence",
+   "name": "ROSYTH RESIDENCE"
+  },
+  {
+   "registryId": "rosyth-ville",
+   "name": "ROSYTH VILLE"
+  },
+  {
+   "registryId": "sanctuary-at-813",
+   "name": "SANCTUARY @ 813"
+  },
+  {
+   "registryId": "seletar-springs-condominium",
+   "name": "SELETAR SPRINGS CONDOMINIUM"
+  },
+  {
+   "registryId": "simon-plaza",
+   "name": "SIMON PLAZA"
+  },
+  {
+   "registryId": "solaris-residences",
+   "name": "SOLARIS RESIDENCES"
+  },
+  {
+   "registryId": "spazio-at-kovan",
+   "name": "SPAZIO @ KOVAN"
+  },
+  {
+   "registryId": "stars-of-kovan",
+   "name": "STARS OF KOVAN"
+  },
+  {
+   "registryId": "suites-at-kovan",
+   "name": "SUITES @ KOVAN"
+  },
+  {
+   "registryId": "suites-at-paya-lebar",
+   "name": "SUITES @ PAYA LEBAR"
+  },
+  {
+   "registryId": "summer-scent",
+   "name": "SUMMER SCENT"
+  },
+  {
+   "registryId": "summer-villas",
+   "name": "SUMMER VILLAS"
+  },
+  {
+   "registryId": "surin-villas",
+   "name": "SURIN VILLAS"
+  },
+  {
+   "registryId": "tangerine-grove",
+   "name": "TANGERINE GROVE"
+  },
+  {
+   "registryId": "terrasse",
+   "name": "TERRASSE"
+  },
+  {
+   "registryId": "the-bently-residences-at-kovan",
+   "name": "THE BENTLY RESIDENCES@KOVAN"
+  },
+  {
+   "registryId": "the-courtyard",
+   "name": "THE COURTYARD"
+  },
+  {
+   "registryId": "the-florence-residences",
+   "name": "THE FLORENCE RESIDENCES"
+  },
+  {
+   "registryId": "the-florentine",
+   "name": "THE FLORENTINE"
+  },
+  {
+   "registryId": "the-florida",
+   "name": "THE FLORIDA"
+  },
+  {
+   "registryId": "the-gardens-at-gerald",
+   "name": "THE GARDENS AT GERALD"
+  },
+  {
+   "registryId": "the-minton",
+   "name": "THE MINTON"
+  },
+  {
+   "registryId": "the-morning-glory",
+   "name": "THE MORNING GLORY"
+  },
+  {
+   "registryId": "the-morris-residences",
+   "name": "THE MORRIS RESIDENCES"
+  },
+  {
+   "registryId": "the-old-house",
+   "name": "THE OLD HOUSE"
+  },
+  {
+   "registryId": "the-promenade-at-pelikat",
+   "name": "THE PROMENADE@PELIKAT"
+  },
+  {
+   "registryId": "the-stradia",
+   "name": "THE STRADIA"
+  },
+  {
+   "registryId": "the-tembusu",
+   "name": "THE TEMBUSU"
+  },
+  {
+   "registryId": "the-top-residence",
+   "name": "THE TOP RESIDENCE"
+  },
+  {
+   "registryId": "the-waterline",
+   "name": "THE WATERLINE"
+  },
+  {
+   "registryId": "treasure-gardens",
+   "name": "TREASURE GARDENS"
+  },
+  {
+   "registryId": "treasure-mansions",
+   "name": "TREASURE MANSIONS"
+  },
+  {
+   "registryId": "trilive",
+   "name": "TRILIVE"
+  },
+  {
+   "registryId": "trussville",
+   "name": "TRUSSVILLE"
+  },
+  {
+   "registryId": "upper-serangoon-shopping-centre",
+   "name": "UPPER SERANGOON SHOPPING CENTRE"
+  },
+  {
+   "registryId": "urban-residences",
+   "name": "URBAN RESIDENCES"
+  },
+  {
+   "registryId": "vibes-at-kovan",
+   "name": "VIBES @ KOVAN"
+  },
+  {
+   "registryId": "vina-lodge",
+   "name": "VINA LODGE"
+  },
+  {
+   "registryId": "water-terrace",
+   "name": "WATER TERRACE"
+  },
+  {
+   "registryId": "water-villas",
+   "name": "WATER VILLAS"
+  },
+  {
+   "registryId": "wembly-residences",
+   "name": "WEMBLY RESIDENCES"
+  }
+ ]
+}

@@ -9,7 +9,9 @@
      the approved value; development and neighbourhood labelled apart
    4 sections: promising and watch are approved sentences (at most two each), the question and its note; an approved Reveal stays visible
      with its qualifications
-   5 wording: no score, forecast, valuation, recommendation, demand or price-movement wording */
+   5 wording: no score, forecast, valuation, recommendation, demand or price-movement wording
+   6 summary first (Master Planning, 4 Nov 2026): each figure's approved comparison beneath it; ONE warning after the figures (the first
+     watch sentence, or the first figure's limitation); the second watch sentence kept under "Also watch" */
 'use strict';
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
 const SITE = path.resolve(__dirname, '../..');
@@ -47,7 +49,7 @@ check('the quick read comes first, then the V2 explanation (hidden, unchanged: e
 }));
 
 const B = {}; const bad = (k, x) => (B[k] = B[k] || []).push(x);
-const n = { near: 0, below: 0, reveals: 0, figs: {} };
+const n = { near: 0, below: 0, reveals: 0, figs: {}, cmp: 0, warn: { watch: 0, limit: 0 } };
 withQ.forEach((p) => {
   const r = p.r, sec = QR.exec(p.html)[0], t = text(sec), op = G.reveal11(p.v), q = G.quick11(p.v, p.r.name, op);
   const pos = (d) => ((r.peerComparison && r.peerComparison.positions) || []).find((x) => x.dimension === d);
@@ -71,10 +73,19 @@ withQ.forEach((p) => {
   if (chg !== null && mk.period && mk.period.latest) avail.push(['M', chg < 0 ? fmt(-chg) + '% fewer' : chg > 0 ? fmt(chg) + '% more' : 'No change in']);
   else if (av(ql) && ql.data && ql.data.flag === true && typeof ql.data.resales2km === 'number') avail.push(['S', fmt(ql.data.resales2km, 0)]);
   if (rc && typeof rc.value === 'number' && G.explain11(p.v, p.r.name, op).cards.some((c) => c.dim === 'R')) avail.push(['R', fmt(rc.value, 1)]);
-  const wantF = avail.slice(0, 3), got = [...sec.matchAll(/<a class="gwp-qr-f" href="#\/prism\/[^/"]+\/(\w)" data-gwp-xjump="(\w)"><span class="gwp-qr-s">([^<]*)<\/span><b>([^<]*)<\/b><span class="gwp-qr-l">([^<]*)<\/span><\/a>/g)];
+  const wantF = avail.slice(0, 3), got = [...sec.matchAll(/<a class="gwp-qr-f" href="#\/prism\/[^/"]+\/(\w)" data-gwp-xjump="(\w)"><span class="gwp-qr-s">([^<]*)<\/span><b>([^<]*)<\/b><span class="gwp-qr-l">([^<]*)<\/span>(?:<small class="gwp-qr-c">([^<]*)<\/small>)?<\/a>/g)];
   if (got.map((m) => m[2] + '=' + text(m[4])).join() !== wantF.map((f) => f[0] + '=' + f[1]).join()) bad('figs', [p.id, got.map((m) => m[2] + '=' + text(m[4])), wantF]);
   got.forEach((m) => { const sc = { P: 'This development', R: 'This development', I: 'Location', M: 'Neighbourhood · 2 km', S: 'Neighbourhood · 2 km' }[m[2]]; if (text(m[3]) !== sc || /[−+]/.test(m[4])) bad('scope', [p.id, m[2], text(m[3]), m[4]]); });
   const k = got.map((m) => m[2]).join(''); n.figs[k] = (n.figs[k] || 0) + 1;
+  // summary first (Master Planning, 4 Nov 2026): each figure's comparison is its V2 card's approved comparison (first sentence), word for word
+  const x0 = G.explain11(p.v, p.r.name, op && op.kind === 'reveal' ? op : null);
+  got.forEach((m) => { const c = x0.cards.find((cc) => cc.dim === m[2]), want = c && c.cmp ? c.cmp.split('. ')[0] : ''; if (text(m[6] || '') !== want) bad('cmp', [p.id, m[2], m[6], want]); else if (want) n.cmp++; });
+  // one warning under the figures: the first approved watch sentence, or with none the first shown figure's approved limitation; the other watch sentence below
+  const w = [...sec.matchAll(/<p class="gwp-qr-w" data-gwp-warn><b>Watch out:<\/b> ([^<]*)<\/p>/g)], lim = got.map((m) => (x0.cards.find((cc) => cc.dim === m[2]) || {}).limit).filter(Boolean)[0];
+  const wantW = x0.watchAll[0] || lim;
+  if (w.length !== 1 || text(w[0][1]) !== wantW || sec.indexOf('data-gwp-warn') < sec.lastIndexOf('gwp-qr-f"') || sec.indexOf('data-gwp-warn') > sec.indexOf('gwp-qr-more')) bad('warn', [p.id, w.map((mm) => mm[1]), wantW]);
+  else n.warn[x0.watchAll[0] ? 'watch' : 'limit']++;
+  if (JSON.stringify(q.also) !== JSON.stringify(x0.watchAll.slice(1, 2)) || (q.also.length ? t.indexOf('Also watch ' + q.also[0]) < 0 : /Also watch|What to watch/.test(t))) bad('also', [p.id, q.also]);
   // 4 sections: approved sentences only (the V2 lists), at most two each; the question; a Reveal kept with its qualifications
   const x = G.explain11(p.v, p.r.name, op && op.kind === 'reveal' ? op : null);
   if (q.good.length > 2 || q.watch.length > 2 || !q.good.every((s) => x.goodAll.indexOf(s) >= 0) || !q.watch.every((s) => x.watchAll.indexOf(s) >= 0)) bad('sections', [p.id, q.good, q.watch]);
@@ -89,6 +100,9 @@ const r = (k) => [!B[k], (B[k] || []).slice(0, 4)];
 check('headline: up to three approved phrases chosen by the bands (recomputed for every page); "Close to MRT" only within 500 m (' + n.near + ' pages)', ...r('head'));
 check('figures: Price, MRT, nearby market, the resale rate only in place of a missing one; never invented; approved values (' + JSON.stringify(n.figs) + ')', ...r('figs'));
 check('figures: development and neighbourhood labelled apart; no plus or minus signs', ...r('scope'));
+check('summary first: each figure keeps its approved comparison beneath it, word for word (' + n.cmp + ' comparisons)', ...r('cmp'));
+check('summary first: exactly one warning, after the three figures and before the rest of the quick read: the first approved watch sentence (' + n.warn.watch + ' pages) or, with none, the first figure\'s approved limitation (' + n.warn.limit + ')', ...r('warn'));
+check('summary first: the second watch sentence stays in the quick read under "Also watch"; nothing is dropped', ...r('also'));
 check('what looks promising / what to watch: approved sentences only, at most two each', ...r('sections'));
 check('before you buy: one question; "Explore full PRISM analysis" on every quick read', ...r('ask'));
 check('an approved Reveal stays visible in the quick read with its qualifications (' + n.reveals + ' Reveals, including the three protected profile pages)', ...r('reveal'));

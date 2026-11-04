@@ -443,3 +443,26 @@ body #ws-dev .lg-sb .kpr-search.has-go>input{padding-right:196px}
 .gwp-tab--na .gwp-mark{filter:grayscale(1);opacity:.55}
 .gwp-tab[aria-current="page"]:not(a){cursor:default}
 .gwp-na{margin:10px 0 0;max-width:640px;font-size:14px;line-height:1.45;color:var(--gwp-muted)}
+/* PRISM summary first (Master Planning, 4 Nov 2026): the answer in about fifteen seconds at the top of the quick read (one headline,
+   three figures each with its approved comparison, one warning), then below a rule the rest of the approved quick read. White, navy and
+   muted gold only; the warning is set apart by a gold rule, never by a sign colour. */
+.gwp-qr-top{display:grid;gap:16px;min-width:0}
+.gwp-qr-c{margin-top:2px;font-size:12.5px;line-height:1.4;font-weight:500;color:var(--gwp-muted);overflow-wrap:break-word}
+.gwp-qr-w{margin:0;padding:12px 16px;border-left:3px solid var(--gwp-gold);border-radius:10px;background:#FBF8F1;font-size:16px;line-height:1.5;color:var(--gwp-ink);max-width:100%}
+.gwp-qr-w b{font-weight:700;color:var(--gwp-gold)}
+.gwp-qr-more{display:grid;gap:14px;padding-top:16px;border-top:1px solid var(--gwp-line);min-width:0}
+.gwp-qr-more>.gwp-qr-b{padding-top:0;border-top:0}
+.gwp-qr-rvb{display:grid;gap:4px}
+.gwp-qr-rvb .gwp-qr-rv,.gwp-qr-rvb .gwp-qr-rn{margin:0}
+@media (max-width:640px){
+  .gwp-qr-top{gap:10px}.gwp-qr-more{gap:10px;padding-top:12px}
+  .gwp-qr-f{grid-template-areas:"s s" "b l" "c c"}.gwp-qr-c{grid-area:c;margin-top:0;font-size:12px;line-height:1.35}
+  .gwp-qr-w{padding:8px 12px;font-size:14px;line-height:1.45}
+}
+@media (max-width:359px){.gwp-qr-f{grid-template-areas:"s" "b" "l" "c"}}
+/* 200% zoom (under 360 px): the dimension rows gave their name and finding a column of about 45 px, so words ran past it. The letter and
+   the chevron share the top line; the name and the finding take the full width beneath (desktop and phone unchanged). */
+@media (max-width:359px){
+  .gwp-dimb{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"l . c" "n n n" "h h h";gap:6px 10px;padding:12px}
+  .gwp-dn b,.gwp-hl b,.gwp-hl small{overflow-wrap:anywhere}
+}

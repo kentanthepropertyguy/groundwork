@@ -140,7 +140,7 @@ const IDS = ['kingsford-waterbay', 'hougang-central', 'thomson-three'];
   await t('the switch: PRISM Analysis (#/prism/) and Property Data (#/p/), the current view marked', () => {
     const h = P.switchHtml(MD('kingsford-waterbay'), 'data', '../');
     assert.ok(/href="#\/prism\/kingsford-waterbay" data-gwp-view="prism">/.test(h) && /href="#\/p\/kingsford-waterbay" data-gwp-view="data" aria-current="page"/.test(h));
-    assert.ok(/<span>PRISM Analysis<\/span>/.test(h) && /<span>Property Data<\/span>/.test(h) && /prism-mark\.png/.test(h));
+    assert.ok(/<span>PRISM Analysis<\/span>/.test(h) && /<span>Property Data<\/span>/.test(h) && /prism-mark-original\.png/.test(h));   // summary first (Master Planning, 4 Nov 2026): the original PRISM logo
     assert.ok(/aria-current="page"[^>]*>[\s\S]*?PRISM Analysis/.test(P.switchHtml(MD('kingsford-waterbay'), 'prism', '../')));
   });
   await t('the landing: an explanation only (PRISM, the five dimensions with Ken’s five questions), nothing to click; no development named in the code', () => {
