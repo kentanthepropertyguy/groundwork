@@ -49,11 +49,14 @@
   // infrastructure.futureTransport line of qualifying reports changes; FMRT (the last link of CHAIN) is accepted on that line alone, in exactly
   // the approved form (futureOk); every other item keeps its own approval
   const FMRT = 'GW-FMRT-P1-20261104-01';
+  // The protected-report amendment (GW-FMRT-P1-AMEND-HPR-20261104-01): one protected report, amended on its own. Its reference is accepted
+  // only on that report's future-transport line, in the same approved form; every other item of the report keeps its approval
+  const FMRT_AMEND = { 'hundred-palms-residences': 'GW-FMRT-P1-AMEND-HPR-20261104-01' };
   const V11 = { SCHEMA: 'prism-public-v1.1-r3', INDEX_SCHEMA: 'prism-public-v1.1-r3-index', SHARD_SCHEMA: 'prism-public-v1.1-r3-shard', DIR: 'data/prism/v1.1/',
-    CHAIN: ['GW-PRISM-V1.1-2026-11-01-A1', 'GW-PRISM-V1.1-2026-11-03-DECILE', 'GW-PRISM-V1.1-2026-11-03-A2', 'GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1', FMRT],
-    RELEASE: 'prism-v1.1-r3-fmrt-p1-2026-11-04-ebfc22ae60fd',
-    INDEX: '4e2793799cb4b8f7a2c1a12adfd2ffee29637baab7dd8399f69b8ef11257b8fe',      // index.json, byte for byte: any other is not read
-    MANIFEST: '2c12743bed454404358057b1b2ba65d69c9827c2c9569a1f83f80ce57a51534f',   // manifest.json, bound by the root (manifestSha256)
+    CHAIN: ['GW-PRISM-V1.1-2026-11-01-A1', 'GW-PRISM-V1.1-2026-11-03-DECILE', 'GW-PRISM-V1.1-2026-11-03-A2', 'GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1', FMRT, FMRT_AMEND['hundred-palms-residences']],
+    RELEASE: 'prism-v1.1-r3-fmrt-hpr-2026-11-04-5cc64056341d',
+    INDEX: '04afa13cdb2b891a400305309a9fe6be60c7cc0d5b095989e89be39f5d9332f0',      // index.json, byte for byte: any other is not read
+    MANIFEST: 'c56115d20a51dae0c8ed547aeeee71d7c74388492a9687bf73de48f79be7e67e',   // manifest.json, bound by the root (manifestSha256)
     STATES: ['full', 'partial', 'pending', 'unavailable', 'new_launch', 'redirect'], PAGE_STATES: ['full', 'partial'],
     SHARDS: '0123456789abcdef',
     V1PAIR: { release: 'prism-v1-release-2026-10-30-10911d7e2c92', approvalRef: 'GW-PRISM-V1-2026-10-31-A1',
@@ -186,7 +189,7 @@
     const seen = {};
     sh.entries.forEach((r) => {
       if (!r || !ID.test(r.id) || V11.STATES.indexOf(r.state) < 0 || typeof r.name !== 'string' || !r.name || seen[r.id]) throw new Error('v1.1 shard: bad entry');
-      if (V11.PAGE_STATES.indexOf(r.state) >= 0 && (r.path !== 'reports/' + r.id + '.json' || !/^[0-9a-f]{64}$/.test(r.sha256 || '') || !(Number.isInteger(r.items) && r.items > 0) || V11.CHAIN.indexOf(r.approvalRef) < 0 || r.approvalRef === FMRT)) throw new Error('v1.1 shard: bad report entry');
+      if (V11.PAGE_STATES.indexOf(r.state) >= 0 && (r.path !== 'reports/' + r.id + '.json' || !/^[0-9a-f]{64}$/.test(r.sha256 || '') || !(Number.isInteger(r.items) && r.items > 0) || V11.CHAIN.indexOf(r.approvalRef) < 0 || isFmrt(r.approvalRef))) throw new Error('v1.1 shard: bad report entry');
       if (V11.PAGE_STATES.indexOf(r.state) < 0 && (r.path != null || r.sha256 != null)) throw new Error('v1.1 shard: a report for an entry without a page');
       if (r.state === 'redirect' && (!ID.test(r.to || '') || r.to === r.id)) throw new Error('v1.1 shard: bad redirect');
       seen[r.id] = 1;
@@ -224,11 +227,15 @@
     const part = (s) => s.name + ' ' + ftM(s.distanceM) + ' (LTA target ' + s.target + ')', tail = ', both under construction. Straight-line distances to the planned station sites; entrances are not yet published.';
     return ss[0].line === ss[1].line ? 'Upcoming on the ' + ss[0].line + ': ' + part(ss[0]) + ' and ' + part(ss[1]) + tail : 'Upcoming: ' + part(ss[0]) + ' (' + ss[0].line + ') and ' + part(ss[1]) + ' (' + ss[1].line + ')' + tail;
   }
+  const isFmrt = (ref) => ref === FMRT || Object.keys(FMRT_AMEND).some((k) => FMRT_AMEND[k] === ref);
+  // the reference a report's future-transport line must carry (Phase 1, or the report's own amendment) and its record prefix
+  const fmrtOf = (id) => (FMRT_AMEND[id] ? [FMRT_AMEND[id], 'FMRT1A/'] : [FMRT, 'FMRT1/']);
   function futureOk(l, r) {
-    if (l.status === 'not_yet_assessed' && l.data === null && l.approval.approvalRef !== FMRT) return true;   // the approved r3 line, unchanged
+    if (l.status === 'not_yet_assessed' && l.data === null && !isFmrt(l.approval.approvalRef)) return true;   // the approved r3 line, unchanged
     const d = l.data, ss = d && d.stations, src = (r.sources || []).map((x) => x.id);
-    if (l.status !== 'available' || l.missing !== null || l.period !== null || l.approval.approvalRef !== FMRT || l.label !== 'Future transport' ||
-      l.approval.recordItem !== 'FMRT1/' + r.reportId + '/infrastructure.futureTransport' || (l.sourceIds || []).join('|') !== FT.SOURCES.join('|') || FT.SOURCES.some((x) => src.indexOf(x) < 0) ||
+    const [ref, rec] = fmrtOf(r.reportId);
+    if (l.status !== 'available' || l.missing !== null || l.period !== null || l.approval.approvalRef !== ref || l.label !== 'Future transport' ||
+      l.approval.recordItem !== rec + r.reportId + '/infrastructure.futureTransport' || (l.sourceIds || []).join('|') !== FT.SOURCES.join('|') || FT.SOURCES.some((x) => src.indexOf(x) < 0) ||
       !d || Object.keys(d).sort().join('|') !== FT.DATA_KEYS || !d.register || !/^[0-9a-f]{64}$/.test(d.register.sha256 || '') || !/^\d{4}-\d{2}-\d{2}$/.test(d.register.asAt || '') ||
       !Array.isArray(ss) || ss.length < 1 || ss.length > 2) return false;
     if (!ss.every((s, i) => s && Object.keys(s).join('|') === FT.STATION_KEYS && Array.isArray(FT.STATIONS[s.stationKey]) && FT.STATIONS[s.stationKey].join('|') === [s.name, s.line, s.code, s.target].join('|') && /^[a-z0-9-]+$/.test(s.stationKey) && / MRT$/.test(s.name) && typeof s.line === 'string' && s.line &&
@@ -243,7 +250,7 @@
       if (!o || typeof o !== 'object') return;
       if (Array.isArray(o)) { o.forEach(walk); return; }
       if ('approval' in o && (!ok11(o) || typeof o.itemId !== 'string' || o.itemId.indexOf(r.reportId + '/') !== 0)) throw new Error('v1.1 report: an item that is not approved');
-      if ('approval' in o && o.approval.approvalRef === FMRT && (o.measure !== 'infrastructure.futureTransport' || o.itemId !== r.reportId + '/infrastructure.futureTransport')) throw new Error('v1.1 report: the future MRT approval on another item');
+      if ('approval' in o && isFmrt(o.approval.approvalRef) && (o.measure !== 'infrastructure.futureTransport' || o.itemId !== r.reportId + '/infrastructure.futureTransport' || o.approval.approvalRef !== fmrtOf(r.reportId)[0])) throw new Error('v1.1 report: the future MRT approval on another item');
       Object.keys(o).forEach((k) => walk(o[k]));
     };
     walk(r);
@@ -679,10 +686,23 @@
   // the development has its own resales, so its Property Data has these sections (an evidence-profile page: a completed development)
   const hasRecords = (md) => !!md.metrics['R.resales12'] || (md.mode === 'profile' && !!md.v11 && md.v11.kind === 'completed');
   // PRISM Analysis | Property Data, directly under the development's name on both views (links: each view keeps its address and Back/Forward)
+  // Search journey (Master Planning, 4 Nov 2026): each tab says what it holds (720 px and up; a phone keeps the names)
+  const TAB_SUB = { prism: 'Quick read and five dimensions', data: 'Prices, past sales and rents' };
+  const tabLabel = (k, label, sub) => '<span class="gwp-tl"><span>' + label + '</span><span class="gwp-tsub">' + esc(sub || TAB_SUB[k]) + '</span></span>';
+  const DATA_ICON = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 20V12m5 8V7m5 13v-6m5 6V4"/></svg>';
   function switchHtml(md, active, root) {
-    const tab = (k, href, label, icon) => '<a class="gwp-tab" href="' + href + '" data-gwp-view="' + k + '"' + (k === active ? ' aria-current="page"' : '') + '>' + icon + '<span>' + label + '</span></a>';
+    const tab = (k, href, label, icon) => '<a class="gwp-tab" href="' + href + '" data-gwp-view="' + k + '"' + (k === active ? ' aria-current="page"' : '') + '>' + icon + tabLabel(k, label) + '</a>';
     return '<nav class="gwp-tabs" aria-label="' + esc(md.name) + ': views" data-gwp-switch="' + esc(md.id) + '">' + tab('prism', '#/prism/' + esc(md.id), 'PRISM Analysis', mark(root || '../', 20)) +
-      tab('data', '#/p/' + esc(md.id), 'Property Data', '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 20V12m5 8V7m5 13v-6m5 6V4"/></svg>') + '</nav>';
+      tab('data', '#/p/' + esc(md.id), 'Property Data', DATA_ICON) + '</nav>';
+  }
+  // A development without a PRISM page, on Property Data: its state, stated plainly (never a link, never a promise). Only an id the PRISM
+  // root lists as pending, unavailable or a new launch gets one; any other id, a redirect or a failed load shows nothing, as before.
+  const NA = { unavailable: 'PRISM Analysis is not available for this development. Its prices, past sales and rents are below.',
+    pending: 'PRISM Analysis is not available for this development. Its prices, past sales and rents are below.',
+    new_launch: 'PRISM Analysis is not available for a new launch before it has its own price and resale evidence.' };
+  function naHtml(name, state, root) {
+    return '<nav class="gwp-tabs" aria-label="' + esc(name) + ': views" data-gwp-na="' + esc(state) + '"><span class="gwp-tab gwp-tab--na" aria-disabled="true">' + mark(root || '../', 20) + tabLabel('prism', 'PRISM Analysis', 'Not available') + '</span>' +
+      '<span class="gwp-tab" aria-current="page">' + DATA_ICON + tabLabel('data', 'Property Data') + '</span></nav><p class="gwp-na" data-gwp-na-note>' + esc(NA[state]) + '</p>';
   }
   // On Property Data: one compact verdict line (replaces the large banner)
   function previewHtml(md, root) {
@@ -1023,8 +1043,17 @@
   function mountPreview(app, id, o) {
     const root = o.root || '../';
     const place = (md) => {
-      if (!hasPage(md) || (o.still && !o.still())) return;
-      app.querySelectorAll('[data-gwp-preview], [data-gwp-switch], [data-gwp-back2]').forEach((x) => x.remove());
+      if (o.still && !o.still()) return;
+      if (!hasPage(md)) {   // no PRISM page: its state from the root (pending / unavailable / new launch), nothing otherwise
+        if (md === null) entry11(root, id).then((f) => {
+          if (!f || !NA[f.state] || (o.still && !o.still())) return;
+          app.querySelectorAll('[data-gwp-na], [data-gwp-na-note]').forEach((x) => x.remove());
+          const hero = app.querySelector(o.after || 'header.lg-hero'), at = hero && (hero.querySelector('.lg-id') || hero.querySelector('h1'));
+          if (at) at.insertAdjacentHTML('afterend', naHtml(f.name || id, f.state, root));
+        }).catch(() => {});
+        return;
+      }
+      app.querySelectorAll('[data-gwp-preview], [data-gwp-switch], [data-gwp-back2], [data-gwp-na], [data-gwp-na-note]').forEach((x) => x.remove());
       const hero = app.querySelector(o.after || 'header.lg-hero'); if (!hero) return;
       if (md.assessment) hero.insertAdjacentHTML('afterend', previewHtml(md, root));   // an evidence-profile page has no verdict line: its tab is the way in
       const nameAt = hero.querySelector('.lg-id') || hero.querySelector('h1');
@@ -1155,5 +1184,5 @@
     }
   }
 
-  return { FMRT, FT, futureStatement, futureOk, compactQuick, compactHtml, CQ, quick11, quickHtml, QT, itemsOk, redirect11, hasReport, isCurated, explain11, explainHtml, XT, PICKS_MAX, CURATED, hasEvidence, REVEAL, ES, reveal11, revealHtml, V11, PANELS, checkIndex, checkShard, checkPair, checkReport11, model11, compose, hasPage, headline11, lineHtml, posHtml, yieldHtml, incomeHtml, v11Html, VERSION, switchHtml, leadSites, layersHtml, dimsHtml, evidenceOf, headline, landingHtml, mountLanding, QUESTION, SCHEMA, DIR, MANIFEST_V, PILLARS, checkManifest, checkReport, approved, shown, model, value, detail, period, evidence, previewHtml, pageHtml, load, mountPreview, show, _cache: cache, _settled: settled };
+  return { NA, naHtml, TAB_SUB, FMRT, FMRT_AMEND, FT, futureStatement, futureOk, compactQuick, compactHtml, CQ, quick11, quickHtml, QT, itemsOk, redirect11, hasReport, isCurated, explain11, explainHtml, XT, PICKS_MAX, CURATED, hasEvidence, REVEAL, ES, reveal11, revealHtml, V11, PANELS, checkIndex, checkShard, checkPair, checkReport11, model11, compose, hasPage, headline11, lineHtml, posHtml, yieldHtml, incomeHtml, v11Html, VERSION, switchHtml, leadSites, layersHtml, dimsHtml, evidenceOf, headline, landingHtml, mountLanding, QUESTION, SCHEMA, DIR, MANIFEST_V, PILLARS, checkManifest, checkReport, approved, shown, model, value, detail, period, evidence, previewHtml, pageHtml, load, mountPreview, show, _cache: cache, _settled: settled };
 });

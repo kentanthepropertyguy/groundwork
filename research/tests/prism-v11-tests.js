@@ -36,7 +36,7 @@ const page = (id) => G.compose(v1md(id), v11(id));
 // ---- 1 the approved release (r3, GW-PRISM-R3-SCHEMA-20261103-01: the same approved content, re-issued with Registry v2)
 check('index.json is the approved file (sha256 pinned in the page) and binds the approved manifest', sha(it) === G.V11.INDEX && ix.manifestSha256 === sha(mt) && sha(mt) === G.V11.MANIFEST);
 // Future MRT Phase 1 (GW-FMRT-P1-20261104-01, 4 Nov 2026): a delta on the r3 release; the chain gains its one approval (futureTransport lines only)
-check('release ' + G.V11.RELEASE + ' (delta GW-FMRT-P1-20261104-01 on r3 a8b865345a70), format GW-PRISM-R3-SCHEMA-20261103-01, chain A1 -> DECILE -> A2 -> NATIONWIDE-1 -> FMRT-P1', !throws(() => G.checkIndex(ix)) && ix.releaseId === G.V11.RELEASE && m.formatApproval === 'GW-PRISM-R3-SCHEMA-20261103-01' && m.deltaApproval === 'GW-FMRT-P1-20261104-01' && m.previous === 'prism-v1.1-r3-release-2026-11-03-a8b865345a70' && ix.approvalChain.join(' ') === 'GW-PRISM-V1.1-2026-11-01-A1 GW-PRISM-V1.1-2026-11-03-DECILE GW-PRISM-V1.1-2026-11-03-A2 GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1 GW-FMRT-P1-20261104-01');
+check('release ' + G.V11.RELEASE + ' (delta GW-FMRT-P1-20261104-01 on r3 a8b865345a70), format GW-PRISM-R3-SCHEMA-20261103-01, chain A1 -> DECILE -> A2 -> NATIONWIDE-1 -> FMRT-P1 -> AMEND-HPR (Hundred Palms Residences amendment, a delta on Phase 1)', !throws(() => G.checkIndex(ix)) && ix.releaseId === G.V11.RELEASE && m.formatApproval === 'GW-PRISM-R3-SCHEMA-20261103-01' && m.deltaApproval === 'GW-FMRT-P1-AMEND-HPR-20261104-01' && m.previous === 'prism-v1.1-r3-fmrt-p1-2026-11-04-ebfc22ae60fd' && ix.approvalChain.join(' ') === 'GW-PRISM-V1.1-2026-11-01-A1 GW-PRISM-V1.1-2026-11-03-DECILE GW-PRISM-V1.1-2026-11-03-A2 GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1 GW-FMRT-P1-20261104-01 GW-FMRT-P1-AMEND-HPR-20261104-01');
 check('16 shards, each passing its gate, every id in the shard its sha256 names (2,509 Registry v2 ids, 2,099 reports)', ix.shards.length === 16 && ix.shards.every((x) => sha(read('data/prism/v1.1/' + x.path)) === x.sha256 && !throws(() => G.checkShard(shard(x.key), x, key))) && ix.counts.entries === 2509 && ix.counts.reports === 2099);
 check('the V1 pairing pinned in the page equals the release\'s own (supplements: release, approval, three sha256)', m.supplements.datasetReleaseId === G.V11.V1PAIR.release && m.supplements.approvalRef === G.V11.V1PAIR.approvalRef && m.supplements.reports.map((x) => x.sha256).sort().join() === G.V11.V1PAIR.sha256.slice().sort().join() && v1.datasetReleaseId === G.V11.V1PAIR.release);
 check('the data periods pinned in the page equal the release\'s own (dataPeriodsBySource)', JSON.stringify(m.dataPeriodsBySource) === JSON.stringify(G.V11.PERIODS));
@@ -116,7 +116,10 @@ ALL.forEach((id) => {
     check(id + ': the profile rule ("There is no overall score.") and its comparison group (' + r.profile.comparisonGroup.developments + ' developments)', t.includes(r.profile.rule) && t.includes('Comparison group: ' + r.profile.comparisonGroup.rule + ' · ' + r.profile.comparisonGroup.developments + ' developments.'));
     const S = html[id].split('id="gwpDimS"')[1].split('data-gwp-pillar=')[0], Mk = html[id].split('id="gwpDimM"')[1];
     check(id + ': the surrounding-market definition with Supply and with Market', text(S).includes(r.profile.surroundingMarket) && text(Mk).includes(r.profile.surroundingMarket));
-    check(id + ': missing evidence named: unsold inventory not available, future transport not yet assessed, known sites only', t.includes('Not available: unsold inventory has not been validated.') && t.includes('Not yet assessed: needs official LTA evidence for planned stations.') && t.includes('Known sites only; not a complete pipeline.'));
+    // future transport: "not yet assessed", except Hundred Palms Residences, amended under GW-FMRT-P1-AMEND-HPR-20261104-01 (its approved line; prism-fmrt-hpr-tests.js)
+    const ft = r.profile.lines.find((l) => l.measure === 'infrastructure.futureTransport'), amended = !!(G.FMRT_AMEND && G.FMRT_AMEND[id]);
+    check(id + ': missing evidence named: unsold inventory not available, future transport ' + (amended ? 'as amended' : 'not yet assessed') + ', known sites only', t.includes('Not available: unsold inventory has not been validated.') &&
+      (amended ? ft.status === 'available' && t.includes(ft.statement) : t.includes('Not yet assessed: needs official LTA evidence for planned stations.')) && t.includes('Known sites only; not a complete pipeline.'));
     const mb = text(Mk.split('data-gwp-yield')[0].split('data-gwp-income')[0]);
     check(id + ': Market is observational: no rank, decile or Above/Around/Below label, no peer position', !/\brank|decile|(Above|Around|Below) peers/i.test(mb) && !html[id].includes('data-gwp-v11="M"') && mb.includes('Observed transactions, not a prediction.'), mb.slice(0, 300));
   }
@@ -166,7 +169,9 @@ check('a profile page\'s Property Data has the PRISM switch but no verdict line'
 const OLD = (() => { try { return require(path.join(SITE, 'research/tests/fixtures/gw-prism-v1.js')); } catch (x) { return null; } })();
 SUPP.forEach((id) => {
   const a = G.compose(v1md(id), null);
-  if (OLD && a.assessment) { const b = OLD.model(OLD.checkReport(rep1(id), e1(id)), v1); check(id + ': with no V1.1 the page is byte for byte the deployed V1 page', G.pageHtml(a, { root: '../' }) === OLD.pageHtml(b, { root: '../' })); }
+  // search journey (Master Planning, 4 Nov 2026): the tabs gained a line saying what each holds; with that taken back, the page is the deployed V1 page
+  const untab = (h) => h.replace(/<span class="gwp-tl"><span>([^<]*)<\/span><span class="gwp-tsub">[^<]*<\/span><\/span>/g, '<span>$1</span>');
+  if (OLD && a.assessment) { const b = OLD.model(OLD.checkReport(rep1(id), e1(id)), v1); check(id + ': with no V1.1 the page is byte for byte the deployed V1 page (tab labels aside)', untab(G.pageHtml(a, { root: '../' })) === OLD.pageHtml(b, { root: '../' })); }
   if (!a.assessment) check(id + ': with no V1.1, no page (as in V1)', !G.hasPage(a) && G.pageHtml(a, { root: '../' }) === '');
 });
 check('HP and The Quinn with no V1.1: no page at all', ONLY.every((id) => G.compose(null, null) === null && !G.hasPage(G.compose(null, null))));

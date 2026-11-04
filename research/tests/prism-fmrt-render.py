@@ -22,8 +22,9 @@ for _ in range(100):
 B = os.environ.get('LIVE') or f'http://127.0.0.1:{P}'
 rep = lambda i: json.loads((SITE / f'data/prism/v1.1/reports/{i}.json').read_text())
 ftl = lambda r: next((l for l in (r.get('profile') or {}).get('lines', []) if l['measure'] == 'infrastructure.futureTransport'), None)
-SHOW = ['parc-vera', 'vue-8-residence', '1-king-albert-park', 'the-esparis']                 # one station; two (60 m); two (Maju); two (150 m)
-KEEP = ['eastwood-lodge', 'bukit-828', 'caspian', 'hundred-palms-residences', 'bartley-ridge']  # TEL5 held; Brickland; JRL; protected; none within 2 km
+# Hundred Palms Residences: amended on its own (GW-FMRT-P1-AMEND-HPR-20261104-01); its Reveal, quick read and MRT today are checked as approved
+SHOW = ['parc-vera', 'vue-8-residence', '1-king-albert-park', 'the-esparis', 'hundred-palms-residences']   # one station; two (60 m); two (Maju); two (150 m); amended
+KEEP = ['eastwood-lodge', 'bukit-828', 'caspian', 'thomson-three', 'bartley-ridge']  # TEL5 held; Brickland; JRL; protected; none within 2 km
 PLANNED = re.compile(r'Defu MRT|Elias MRT|Maju MRT|Pasir Ris East MRT|Serangoon North MRT|Teck Ghee MRT|Turf City MRT|Tampines North MRT|Tavistock MRT|Loyang MRT|West Coast MRT|Jurong Lake District MRT|Bedok South|Sungei Bedok|Xilin|Brickland')
 NOOVER = 'document.documentElement.scrollWidth <= innerWidth + 1'
 try:
@@ -58,6 +59,12 @@ try:
                     check(f'{vn} {id}: keeps "Not yet assessed" (or no line)', (has == 0 and l is None) or (has == 1 and st.startswith('Not yet assessed') and (l is None or l['status'] == 'not_yet_assessed')), st)
                     body = pg.inner_text(f'[data-gwp-page="{id}"]')
                     check(f'{vn} {id}: no planned station named anywhere on the page', not PLANNED.search(body), (PLANNED.search(body) or [''])[0])
+                if id == 'hundred-palms-residences':
+                    hp = pg.evaluate("""(() => [document.querySelector('.gwp-qr-h') ? document.querySelector('.gwp-qr-h').innerText.replace(/\\s+/g, ' ').trim() : '',
+                      [...document.querySelectorAll('.gwp-qr .gwp-qr-f b')].map(b => b.textContent), document.body.textContent.indexOf('High resale activity, but sustained activity is still settling') >= 0,
+                      document.querySelector('#gwpDimI [data-gwp-line="infrastructure.mrt"] [data-gwp-statement]').textContent])()""")
+                    check(f'{vn} {id}: the approved quick read, Reveal and MRT today, exactly', hp[0] == 'Farther from MRT. Higher pricing. Steady market.' and hp[1] == ['22.7% above', '1.6 km', '0.8% fewer'] and hp[2] and
+                          hp[3] == 'Hougang MRT about 1,600 m, Kovan MRT about 1,610 m; closer than 1 of 46 similar developments. Straight-line distances.', hp)
                 qr = pg.evaluate("(() => { const q = document.querySelector('.gwp-qr'); return q ? q.innerText : ''; })()")
                 check(f'{vn} {id}: the quick read never names a planned station', not PLANNED.search(qr), qr[:200])
                 check(f'{vn} {id}: no script error', not errs, errs[:2])

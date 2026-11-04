@@ -1,19 +1,20 @@
 {
  "schemaVersion": "prism-public-v1.1-r3-manifest",
- "releaseId": "prism-v1.1-r3-fmrt-p1-2026-11-04-ebfc22ae60fd",
+ "releaseId": "prism-v1.1-r3-fmrt-hpr-2026-11-04-5cc64056341d",
  "status": "approved",
  "asAt": "2026-11-04",
- "generatedAt": "2026-11-04T03:19:49Z",
+ "generatedAt": "2026-11-04T04:18:03Z",
  "approvalChain": [
   "GW-PRISM-V1.1-2026-11-01-A1",
   "GW-PRISM-V1.1-2026-11-03-DECILE",
   "GW-PRISM-V1.1-2026-11-03-A2",
   "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
-  "GW-FMRT-P1-20261104-01"
+  "GW-FMRT-P1-20261104-01",
+  "GW-FMRT-P1-AMEND-HPR-20261104-01"
  ],
  "formatApproval": "GW-PRISM-R3-SCHEMA-20261103-01",
- "deltaApproval": "GW-FMRT-P1-20261104-01",
- "previous": "prism-v1.1-r3-release-2026-11-03-a8b865345a70",
+ "deltaApproval": "GW-FMRT-P1-AMEND-HPR-20261104-01",
+ "previous": "prism-v1.1-r3-fmrt-p1-2026-11-04-ebfc22ae60fd",
  "counts": {
   "reports": 2099,
   "entries": 2509,
@@ -122,7 +123,7 @@
   },
   {
    "path": "index/9.json",
-   "sha256": "53a73efc09c306e4c6b3a00cef6860a6999ec9594553329f5f3270daa5356506"
+   "sha256": "56a4d5a0b2480d471439e48208c18290bfb46b949dbc9ca87257753e0ca6fc69"
   },
   {
    "path": "index/a.json",
@@ -3038,7 +3039,7 @@
   },
   {
    "path": "reports/hundred-palms-residences.json",
-   "sha256": "63739dcaa573facd98526baaa87e0f4d4b4ab8771b12a8ecc62310779c228876"
+   "sha256": "ad9318193a0faae3a3b79a807d6ebad0cd92324c16516e371a6169f40a6526a9"
   },
   {
    "path": "reports/hundred-trees.json",

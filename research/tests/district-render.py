@@ -62,17 +62,15 @@ try:
             check(f'{vn}: keyboard: Enter into the list, arrows move, Up from the first row returns to the search', first and second and first != second and back_in == 'q', [first, second, back_in])
             pg.keyboard.press('Enter'); pg.keyboard.press('ArrowDown'); pg.keyboard.press('Escape')
             check(f'{vn}: Escape returns to the search box', pg.evaluate("document.activeElement.id") == 'q')
-            # a development opens its own price preview; the district list stays
+            # a development opens its page; Back returns to the district list. # Search journey (Master Planning, 4 Nov 2026): a development opens its development page directly (no intermediate summary)
             pg.keyboard.press('Enter'); pg.keyboard.press('ArrowDown'); pid = pg.evaluate("document.activeElement.dataset.id"); pg.keyboard.press('Enter')
-            pg.wait_for_selector('#rwOver [data-ov="dev"]', timeout=20000); pg.wait_for_timeout(300)
-            check(f'{vn}: a row (Enter) opens that development\'s price preview, the list kept and the row marked', pg.locator('[data-lg-dlist] button').count() == 12 and pg.get_attribute(f'[data-lg-dlist] button[data-id="{pid}"]', 'aria-current') == 'true' and pg.locator('#rwOver .gwr-row2, #rwOver [data-ov="dev"]').count() >= 1)
-            check(f'{vn}: the preview shows the development\'s own prices and View Full Research', '$' in pg.inner_text('#rwOver') and pg.locator(f'#rwOver [href*="#/p/{pid}"]').count() >= 1, pg.inner_text('#rwOver')[:200])
-            # Back / Forward through the full report
-            pg.click(f'#rwOver [href*="#/p/{pid}"] >> nth=0'); pg.wait_for_selector('[data-lg="project"]', timeout=20000); pg.wait_for_timeout(300)
+            pg.wait_for_function("(id) => new RegExp('#/(prism|p)/' + id + '($|/)').test(location.hash) && !!(document.querySelector('[data-gwp-page]') || document.querySelector('[data-lg=\"project\"]'))", arg=pid, timeout=30000); pg.wait_for_timeout(500)
+            check(f'{vn}: a row (Enter) opens that development\'s page directly', ('#/prism/' + pid in pg.url or '#/p/' + pid in pg.url) and pg.locator('#rwOver [data-ov="dev"]').count() == 0, pg.url)
+            # Back / Forward through the development page
             pg.go_back(); pg.wait_for_selector('[data-lg-district]', timeout=15000); pg.wait_for_timeout(300)
             check(f'{vn}: Back from the full report returns to the District 19 list', pg.input_value('#q') == 'D19' and pg.locator('[data-lg-dlist] button').count() == 12 and 'District 19' in pg.inner_text('[data-lg-district]'))
-            pg.go_forward(); pg.wait_for_selector('[data-lg="project"]', timeout=20000); pg.wait_for_timeout(300)   # the report finishes loading before the next Back
-            check(f'{vn}: Forward opens the report again', f'#/p/{pid}' in pg.url)
+            pg.go_forward(); pg.wait_for_function("(id) => new RegExp('#/(prism|p)/' + id + '($|/)').test(location.hash) && !!(document.querySelector('[data-gwp-page]') || document.querySelector('[data-lg=\"project\"]'))", arg=pid, timeout=30000); pg.wait_for_timeout(500)
+            check(f'{vn}: Forward opens the development page again', f'#/p/{pid}' in pg.url or f'#/prism/{pid}' in pg.url, pg.url)
             pg.go_back(); pg.wait_for_selector('[data-lg-district]', timeout=15000)
             # the Map link
             href = pg.get_attribute('[data-lg-dmap]', 'href')

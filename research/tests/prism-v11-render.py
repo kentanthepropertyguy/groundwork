@@ -64,7 +64,9 @@ try:
                     check(f'{vn} {id}: the surrounding-market definition with Supply and with Market', r['profile']['surroundingMarket'] in dimtext(pg, 'S') and r['profile']['surroundingMarket'] in dimtext(pg, 'M'))
                     mb = pg.evaluate(TXT, '#gwp-M [data-gwp-profile]')
                     check(f'{vn} {id}: Market observational: no rank, decile or peer label', not re.search(r'\brank|decile|(Above|Around|Below) peers', mb, re.I) and pg.locator('[data-gwp-v11="M"]').count() == 0 and 'Observed transactions, not a prediction.' in mb, mb[:200])
-                    check(f'{vn} {id}: missing evidence named (unsold not available, future transport not yet assessed, known sites only)', all(s in t for s in ['Not available: unsold inventory has not been validated.', 'Not yet assessed: needs official LTA evidence for planned stations.', 'Known sites only; not a complete pipeline.']))
+                    # Hundred Palms Residences: its future transport is amended (GW-FMRT-P1-AMEND-HPR-20261104-01); the others stay "not yet assessed"
+                    ft = 'Upcoming on the Cross Island Line: Serangoon North MRT about 300 m (LTA target 2030) and Tavistock MRT about 1,370 m (LTA target 2030), both under construction.' if id == 'hundred-palms-residences' else 'Not yet assessed: needs official LTA evidence for planned stations.'
+                    check(f'{vn} {id}: missing evidence named (unsold not available, future transport {"as amended" if id == "hundred-palms-residences" else "not yet assessed"}, known sites only)', all(s in t for s in ['Not available: unsold inventory has not been validated.', ft, 'Known sites only; not a complete pipeline.']))
                 if r.get('rentalYield'):
                     rows = pg.locator('[data-gwp-yield] tbody tr').count()
                     check(f'{vn} {id}: gross rental yield, {len(r["rentalYield"]["bands"])} bands, with its caption', rows == len(r['rentalYield']['bands']) and r['rentalYield']['caption'] in dimtext(pg, 'M'))

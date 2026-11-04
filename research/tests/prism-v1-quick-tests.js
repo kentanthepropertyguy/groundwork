@@ -23,6 +23,8 @@ const page = (id, withV11) => {
   const pg = G.compose(md, withV11 === false ? null : v); return { pg, html: G.pageHtml(pg, { root: '../' }), md };
 };
 const LIVE = JSON.parse(read('research/tests/fixtures/prism-v1-pages-v3-live.json')).pages;
+// search journey (Master Planning, 4 Nov 2026): the tabs gained a line saying what each holds; with that taken back, the page is the live V3 page
+const untab = (h) => h.replace(/<span class="gwp-tl"><span>([^<]*)<\/span><span class="gwp-tsub">[^<]*<\/span><\/span>/g, '<span>$1</span>');
 const SEC = /<section class="gwp-qr gwp-qr--compact"[\s\S]*?<\/section>/;
 const parse = (h) => { const s = SEC.exec(h); if (!s) return null; const t = s[0];
   return { sec: t, head: text((/<h2 class="gwp-qr-h">([\s\S]*?)<\/h2>/.exec(t) || [])[1] || ''), figs: [...t.matchAll(/<span class="gwp-qr-s">([^<]*)<\/span><b>([^<]*)<\/b><span class="gwp-qr-l">([^<]*)<\/span>/g)].map((m) => [text(m[1]), text(m[2]), text(m[3])]) }; };
@@ -45,7 +47,7 @@ check('Hougang Central: every figure is the approved V1 value (I.railStations, R
 [['kingsford-waterbay', kw, K], ['hougang-central', hc, H]].forEach(([id, p, Q]) => {
   check(id + ': compact only (no What looks promising / What to watch / Before you buy); a button to the Verdict; above the Verdict card', !!Q && !/What looks promising|What to watch|Before you buy|gwp-qr-t|gwp-qr-q/.test(Q.sec) &&
     /<button type="button" class="gwp-qr-x" data-gwp-verdict>See the PRISM Verdict and evidence/.test(Q.sec) && p.html.indexOf(Q.sec) < p.html.indexOf('<article class="gwp-card gwp-open">'));
-  check(id + ': with the quick read taken out, the page is byte for byte the live V3 page (Verdict, Reveal, next buyer question, five dimensions, sources, methodology)', sha(p.html.replace(Q ? Q.sec : '', '')) === LIVE[id]);
+  check(id + ': with the quick read taken out, the page is byte for byte the live V3 page, tab labels aside (Verdict, Reveal, next buyer question, five dimensions, sources, methodology)', sha(untab(p.html.replace(Q ? Q.sec : '', ''))) === LIVE[id]);
   check(id + ': no internal or unsupported wording in the quick read', !!Q && !/approved|withheld|not published|score|forecast(?!.)|recommend|good value|Ken's Take/i.test(text(Q.sec)));
   check(id + ': without a verified V1.1 release, no quick read (the V1 page exactly V1)', !SEC.test(page(id, false).html));
 });

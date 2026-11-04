@@ -27,8 +27,10 @@ try:
         pg.goto(base); pg.wait_for_selector('#q', timeout=15000)
         pg.type('#q', 'horizon green', delay=5)
         pg.wait_for_selector('#res [role=option], #res button, #res a', timeout=10000)
-        pg.click('#res >> text=Horizon Green >> nth=0'); pg.wait_for_selector('#rwOver [data-ov-full]', timeout=15000); pg.click('#rwOver [data-ov-full]'); pg.wait_for_url('**/research/#/p/horizon-green*', timeout=10000)   # 25 Oct 2026: Research opens the full analysis, never the Map first
-        check(vn+': search -> overview -> View Full Research opens the full analysis (not the Map)', '/research/#/p/horizon-green' in pg.url and '/map/' not in pg.url, pg.url)
+        pg.click('#res >> text=Horizon Green >> nth=0')
+        # Search journey (Master Planning, 4 Nov 2026): a development opens its development page directly (no intermediate summary)
+        pg.wait_for_function("(id) => new RegExp('#/(prism|p)/' + id + '($|/)').test(location.hash) && !!(document.querySelector('[data-gwp-page]') || document.querySelector('[data-lg=\"project\"]'))", arg='horizon-green', timeout=30000); pg.wait_for_timeout(500)
+        check(vn+': search opens the development page directly (not the Map, no intermediate summary)', re.search(r'/research/#/(prism|p)/horizon-green', pg.url) is not None and '/map/' not in pg.url and pg.locator('#rwOver [data-ov-full]').count() == 0, pg.url)
         pg.goto(base + '#/p/horizon-green'); forget_size(pg); pg.reload(); pg.wait_for_selector('#sizeSel', state='attached', timeout=10000)
         check(vn+': with no size chosen, no price is shown for the development, only the question and an at-a-glance summary', pg.query_selector('.lg-ans-v') is None and pg.query_selector('[data-lg-ov]') is not None and 'What size home are you looking at?' in pg.inner_text('#lgPick'))
         pick_dominant(pg); pg.wait_for_selector('[data-lg-ans]', timeout=10000)

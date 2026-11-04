@@ -431,7 +431,8 @@
       const where = esc(a.title) + (a.building && a.sub ? ' · ' + esc(a.sub.split(' · ')[0]) : '') + ' · ' + a.code;
       const ico = svg('map'), id = (t) => ' data-gw-nav-to="' + t + '"';
       let first;
-      if (c.k === 'dev') first = opt(kn(), base + 'research/#/p/' + encodeURIComponent(c.id), svg('dev') + '<span><b>' + esc(c.name) + '</b><small>' + esc(({ ec: 'Executive Condominium', cluster: 'Cluster housing' }[c.cls] || 'Condominium') + ' · ' + a.title + ' · ' + a.code) + '</small></span>', id('postal-development'));
+      // Search journey (Master Planning, 4 Nov 2026): a development opens #/prism/<id>: its analysis first when it has a report, otherwise Property Data (the route replaces the address)
+      if (c.k === 'dev') first = opt(kn(), base + 'research/#/prism/' + encodeURIComponent(c.id), svg('dev') + '<span><b>' + esc(c.name) + '</b><small>' + esc(({ ec: 'Executive Condominium', cluster: 'Cluster housing' }[c.cls] || 'Condominium') + ' · ' + a.title + ' · ' + a.code) + '</small></span>', id('postal-development'));
       else if (c.k === 'up') first = opt(kn(), base + 'research/map/#p=' + encodeURIComponent(c.id), ico + '<span><b>' + esc(c.name) + '</b><small>' + esc('New launch or site · ' + a.code) + '</small></span>', id('postal-launch'));
       else if (c.k === 'hdb' && c.h && root.GW_POSTAL) first = opt(kn(), base + 'research/' + root.GW_POSTAL.hdbHash(c.h), svg('worth') + '<span><b>Blk ' + esc(c.h.block) + ' ' + esc(root.GW_POSTAL.streetName(c.h.street)) + '</b><small>HDB flat · ' + esc(c.h.townName || '') + ' · ' + a.code + ' · Resale prices</small></span>', id('postal-hdb'));
       else if (c.k === 'hdb') first = opt(kn(), base + 'journey/worth/#pc=' + a.code, svg('worth') + '<span><b>' + esc(a.title) + '</b><small>HDB flat · ' + a.code + ' · Property values</small></span>', id('postal-hdb'));
@@ -474,7 +475,7 @@
         if (!devFirst) h += toolsHtml();
         if (all.length) h += group('Developments · Research', all.map((d) => d.site
           ? opt(k++, d.site.url, svg('ext') + '<span><b>' + esc(d.site.name) + ' <i aria-hidden="true">↗</i></b><small>Ken’s site for this development</small></span>', ' data-gw-nav-to="site-' + esc(d.site.id) + '" target="_blank" rel="noopener"')
-          : opt(k++, base + 'research/#/p/' + encodeURIComponent(d.id), svg('dev') + '<span><b>' + esc(d.name) + '</b><small>' + esc([d.cls === 'ec' ? 'Executive Condominium' : d.cls === 'cluster' ? 'Cluster housing' : '', d.street, 'District ' + d.district, d.n + ' sale' + (d.n === 1 ? '' : 's') + ' in 5 years'].filter(Boolean).join(' · ')) + '</small></span>', ' data-gw-nav-to="development"')).join(''));
+          : opt(k++, base + 'research/#/prism/' + encodeURIComponent(d.id), svg('dev') + '<span><b>' + esc(d.name) + '</b><small>' + esc([d.cls === 'ec' ? 'Executive Condominium' : d.cls === 'cluster' ? 'Cluster housing' : '', d.street, 'District ' + d.district, d.n + ' sale' + (d.n === 1 ? '' : 's') + ' in 5 years'].filter(Boolean).join(' · ')) + '</small></span>', ' data-gw-nav-to="development"')).join(''));
         // Roads and streets: one result per road, leading to what sold around it (landed homes are sold by street, not by development name).
         if (pc && pc.items && pc.items.length) h += group('Postal code', pc.items.map((x) => postalRows(x.a, x.c, opt, () => k++)).join(''));
         if (pc && pc.note) after += '<p class="gw-sx-note" data-gw-sx-postal="' + pc.state + '" role="status">' + esc(pc.note) + '</p>';

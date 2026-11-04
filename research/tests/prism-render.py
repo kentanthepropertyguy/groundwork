@@ -9,7 +9,7 @@ sideways scrolling or a script error. The report's own controls still work with 
 (PRISM V3 protected page alignment, Master Planning 4 Nov 2026: both pages open with a compact quick read above the Verdict; prism-v1-quick-render.py.)
 Research arrangement (Ken, 31 Oct 2026): the landing keeps its two choices and one search, explains PRISM Analysis / Property Data and the five
 questions (beside the search from 1200 px, aligned with the choice cards); Research's own search leads with PRISM for the two developments
-(an overview tab, or the launch card), and for an r2 evidence-profile page (Thomson Three), the global search still opens Property Data; the switch moves
+(an overview tab, or the launch card), and for an r2 evidence-profile page (Thomson Three); since the search journey (4 Nov 2026) the global search opens #/prism/ too; the switch moves
 between #/prism/ and #/p/; "Calculate my purchase" opens the existing calculator with nothing passed.
 Run from the site folder:  python3 research/tests/prism-render.py
 """
@@ -148,9 +148,12 @@ try:
             for dev in ['jadescape']:
                 ctx, pg, errs = fresh(br, w)
                 pg.goto(B + '/research/#/p/' + dev); pg.wait_for_selector('header.lg-hero', timeout=30000); pg.wait_for_timeout(2500)
-                check(f'{w}px {dev}: report unchanged, no PRISM preview', pg.locator('[data-gwp-preview]').count() == 0 and 'PRISM' not in pg.inner_text('#app'))
+                # Search journey (Master Planning, 4 Nov 2026): a development opens its development page directly (no intermediate summary); an unavailable development states it
+                pg.wait_for_selector('[data-gwp-na]', timeout=20000)
+                check(f'{w}px {dev}: report unchanged, no PRISM preview; its PRISM state stated, never a link', pg.locator('[data-gwp-preview]').count() == 0 and pg.locator('[data-gwp-switch]').count() == 0 and pg.get_attribute('[data-gwp-na]', 'data-gwp-na') == 'unavailable' and pg.locator('[data-gwp-na] a').count() == 0)
                 pg.goto(B + '/research/#/prism/' + dev); pg.wait_for_function(f"location.hash === '#/p/{dev}'", timeout=20000); pg.wait_for_selector('header.lg-hero', timeout=30000); pg.wait_for_timeout(1500)
-                check(f'{w}px {dev}: #/prism/{dev} falls back to its report, no empty PRISM page', pg.locator('[data-gwp-page]').count() == 0 and 'PRISM' not in pg.inner_text('#app'))
+                pg.wait_for_selector('[data-gwp-na]', timeout=20000)
+                check(f'{w}px {dev}: #/prism/{dev} falls back to its report, no empty PRISM page (its state stated)', pg.locator('[data-gwp-page]').count() == 0 and pg.locator('[data-gwp-na]').count() == 1)
                 check(f'{w}px {dev}: no script errors', not errs, errs[:2]); ctx.close()
         # a shared link in a fresh browser
         ctx, pg, errs = fresh(br, 390)
@@ -211,8 +214,10 @@ try:
             # leads with its PRISM page (the same rule as every development with PRISM); a development without one keeps its overview (below)
             pg.click('#res [data-id="kingsford-hillview-peak"]'); pg.wait_for_selector('[data-gwp-page="kingsford-hillview-peak"]', timeout=20000)
             check(f'{vn}: … choosing Kingsford Hillview Peak (nationwide PRISM) opens its PRISM Analysis', pg.url.endswith('#/prism/kingsford-hillview-peak'))
-            pg.goto(B + '/research/'); pg.wait_for_selector('#q', timeout=20000); pg.fill('#q', 'jadescape'); pg.wait_for_selector('#res [data-id="jadescape"]', timeout=20000); pg.click('#res [data-id="jadescape"]'); pg.wait_for_selector('[data-ov="dev"][data-ov-id="jadescape"]', timeout=20000); pg.wait_for_timeout(1200)
-            check(f'{vn}: … a development without PRISM (Jadescape) opens its Property Data overview (no PRISM)', '/prism/' not in pg.url and 'PRISM' not in pg.inner_text('#rwOver'))
+            pg.goto(B + '/research/'); pg.wait_for_selector('#q', timeout=20000); pg.fill('#q', 'jadescape'); pg.wait_for_selector('#res [data-id="jadescape"]', timeout=20000); pg.click('#res [data-id="jadescape"]'); pg.wait_for_function("location.hash === '#/p/jadescape'", timeout=20000); pg.wait_for_selector('[data-gwp-na]', timeout=20000)
+            # Search journey (Master Planning, 4 Nov 2026): a development opens its development page directly (no intermediate summary)
+            check(f'{vn}: … a development without PRISM (Jadescape) opens its Property Data directly, its PRISM state stated', pg.url.endswith('#/p/jadescape') and pg.locator('#rwOver [data-ov="dev"]').count() == 0)
+            pg.goto(B + '/research/'); pg.wait_for_selector('#q', timeout=20000)
             pg.fill('#q', ''); pg.fill('#q', 'kingsford'); pg.wait_for_selector('#res [data-id="kingsford-waterbay"]', timeout=20000); pg.click('#res [data-id="kingsford-waterbay"]'); pg.wait_for_selector('[data-gwp-page="kingsford-waterbay"]', timeout=20000)
             check(f'{vn}: … choosing Kingsford Waterbay from the same list opens its PRISM Analysis', pg.url.endswith('#/prism/kingsford-waterbay'))
             # "Explore sales by size": its Property Data at the sizes section; Back returns to PRISM
@@ -258,7 +263,7 @@ try:
             pg.locator('[data-gw-search] input:visible').first.click(); pg.keyboard.type('kingsford waterbay', delay=40)
             pg.wait_for_selector('a[data-gw-nav-to="development"]:visible', timeout=20000)
             href = pg.locator('a[data-gw-nav-to="development"]:visible').first.get_attribute('href')
-            check(f'{w}px global search: Kingsford Waterbay still opens Property Data (#/p/), never PRISM', href and href.endswith('#/p/kingsford-waterbay') or (href and 'map/#p=kingsford-waterbay' in href), href)
+            check(f'{w}px global search: Kingsford Waterbay opens its development page, #/prism/ (search journey, Master Planning 4 Nov 2026: PRISM first with a report)', href and href.endswith('#/prism/kingsford-waterbay') or (href and 'map/#p=kingsford-waterbay' in href), href)
             check(f'{w}px: no script errors', not errs, errs[:2]); ctx.close()
         # ---- the dimension rows (approved Summary-first correction): address, Back/Forward, a fresh visit, print, phones
         for w in [360, 390, 1440]:
