@@ -5,10 +5,11 @@ Run from the site folder:  python3 research/tests/area-render.py   (LIVE=https:/
   all; the open set survives a round trip), Future supply's unpublished records in words, every source's attribution; an unknown area
   returns to Research
 2 the link: under the five PRISM dimensions of a development in Claude C's verified list (Kingsford Waterbay, Regentville, Hundred Palms
-  Residences), before the sources; none on a development outside it (Bartley Ridge); it opens the neighbourhood; Back returns there
+  Residences), before the sources; none on a development outside every listed area (The Sail @ Marina Bay; Bartley Ridge links to Toa Payoh since Batch 1); it opens the neighbourhood; Back returns there
 3 Research search: "Hougang" offers the neighbourhood first, Enter opens it; "Hougang Central" does not; the search journey is unchanged
 4 fail closed: a changed data file shows no page and no link
-5 nothing runs past its box; no sideways scroll; no script error"""
+5 nothing runs past its box; no sideways scroll; no script error
+6 RC2: Serangoon's ratio reads "1.0 : 1" with "HDB flats to private homes" in its summary card and Homes row; Bishan keeps the data's own figure and label"""
 import json, os, pathlib, re, socket, subprocess, time
 from playwright.sync_api import sync_playwright
 SITE = pathlib.Path(__file__).resolve().parents[2]
@@ -64,6 +65,20 @@ try:
             src = pg.evaluate("(() => { const s = document.querySelector('[data-gwa-sources]'); s.open = true; return [...s.querySelectorAll('[data-gwa-source] small')].map((x) => x.textContent); })()")
             check(f'{vn} every source with its attribution ({len(src)})', src == [x['attribution'] for x in DATA['sources']])
             check(f'{vn} nothing runs past its box; no sideways scroll', not pg.evaluate(OVER) and pg.evaluate(NOOVER), pg.evaluate(OVER))
+            # RC2 (Master Planning, 5 Nov 2026): Serangoon's one-for-one ratio, in the summary card and the Homes row, on one line each
+            go(pg, '/research/#/area/serangoon', '[data-gwa-page="serangoon"]')
+            sg = pg.evaluate("""(() => { const f = document.querySelector('[data-gwa-fig="homes"]'), b = f.querySelector('b'), l = f.querySelector('.gwp-qr-l');
+              const btn = document.querySelector('[data-gwa-toggle="H"]'); if (btn.getAttribute('aria-expanded') !== 'true') btn.click();
+              const row = [...document.querySelectorAll('#gwaGH .gwa-dl > div')].find((d) => /HDB flats to private homes|for every private home/.test(d.innerText));
+              const lines = (e) => { const r = document.createRange(); r.selectNodeContents(e); return new Set([...r.getClientRects()].map((x) => Math.round(x.top))).size; };
+              return { v: b.textContent.replace(/\u00a0/g, ' '), l: l.textContent, vLines: lines(b), row: row ? [row.querySelector('dt').textContent, row.querySelector('dd b').textContent.replace(/\u00a0/g, ' ')] : null,
+                every: /for every private home/.test(document.querySelector('[data-gwa-page]').innerText) }; })()""")
+            check(f'{vn} Serangoon card: "1.0 : 1" / "HDB flats to private homes", the ratio on one line', sg['v'] == '1.0 : 1' and sg['l'] == 'HDB flats to private homes' and sg['vLines'] == 1, sg)
+            check(f'{vn} Serangoon Homes row: "HDB flats to private homes" | "1.0 : 1"; "for every private home" nowhere on the page', sg['row'] == ['HDB flats to private homes', '1.0 : 1'] and not sg['every'], sg)
+            check(f'{vn} Serangoon: nothing runs past its box; no sideways scroll', not pg.evaluate(OVER) and pg.evaluate(NOOVER), pg.evaluate(OVER))
+            go(pg, '/research/#/area/bishan', '[data-gwa-page="bishan"]')
+            bv = pg.evaluate("(() => { const f = document.querySelector('[data-gwa-fig=\"homes\"]'); return [f.querySelector('b').textContent, f.querySelector('.gwp-qr-l').textContent]; })()")
+            check(f'{vn} another area keeps the data\'s own figure and label (Bishan 1.9, "HDB flats for every private home")', bv == ['1.9', 'HDB flats for every private home'], bv)
             # 2 the link under the five PRISM dimensions
             go(pg, '/research/#/prism/kingsford-waterbay', '[data-gwa-link="hougang"]')
             lk = pg.evaluate("""(() => { const a = document.querySelector('[data-gwa-link]'), dims = document.querySelector('.gwp-dims'), src = document.querySelector('[data-gwp-sources]');
@@ -78,8 +93,12 @@ try:
                 go(pg, '/research/#/prism/' + dev, f'[data-gwp-page="{dev}"] + *, [data-gwa-link="hougang"]'); pg.wait_for_timeout(300)
                 n = pg.evaluate("(() => { const a = document.querySelector('[data-gwa-link]'); return a && a.previousElementSibling === document.querySelector('.gwp-dims') ? 1 : 0; })()")
                 check(f'{vn} {dev} (in the verified list): the link under its five dimensions', n == 1)
+            # NI V2 Batch 1 (rc2): Bartley Ridge is in Toa Payoh's verified list, so it links to Toa Payoh, never Hougang; The Sail @ Marina
+            # Bay is in none of the nine areas' lists, so it has no link
             go(pg, '/research/#/prism/bartley-ridge', '[data-gwp-page="bartley-ridge"]'); pg.wait_for_timeout(2500)
-            check(f'{vn} Bartley Ridge (not in the verified list): no neighbourhood link', pg.locator('[data-gwa-link]').count() == 0)
+            check(f'{vn} Bartley Ridge (in Toa Payoh\'s verified list): one link, to Toa Payoh', pg.locator('[data-gwa-link]').count() == 1 and pg.locator('[data-gwa-link="toa-payoh"]').count() == 1)
+            go(pg, '/research/#/prism/the-sail-at-marina-bay', '[data-gwp-page="the-sail-at-marina-bay"]'); pg.wait_for_timeout(2500)
+            check(f'{vn} The Sail @ Marina Bay (in no verified list): no neighbourhood link', pg.locator('[data-gwa-link]').count() == 0)
             # 3 Research search
             go(pg, '/research/', '#gwHome input[type="text"]'); inp = pg.locator('#gwHome input[type="text"]').first; inp.scroll_into_view_if_needed(); inp.focus(); inp.type('Hougang', delay=30); pg.wait_for_timeout(1300)
             first = pg.evaluate("(() => { const b = document.querySelector('#gwHome #res button'); return b ? [b.dataset.area || '', b.innerText.replace(/\\s+/g, ' ')] : null; })()")

@@ -5,10 +5,82 @@
    "id": "hougang",
    "name": "Hougang",
    "path": "hougang.json",
-   "sha256": "c92e648dba48b7007caf07f288839f5b48b2a4a3d79b7c8696ae41b5f5e8c8e8",
-   "releaseId": "ni-v1-hougang-2026-11-04-r2-65b38e9d8599",
+   "sha256": "120b1e325c7743d99b339970e6a86f1353c7b0293448a240ea1d7c5249165a8c",
+   "releaseId": "ni-v1-hougang-2026-11-05-r3-7da61d610c1c",
    "developmentsPath": "hougang-developments.json",
-   "developmentsSha256": "fdcb87946f09d6463bc24dda67e1716acc9a2f105ac1f2fc27bf44f12d809cf4"
+   "developmentsSha256": "c5176e604b9d4048188b031187a4567c8168d4e2f76aa1e586cc0c10297334e5"
+  },
+  {
+   "id": "sengkang",
+   "name": "Sengkang",
+   "path": "sengkang.json",
+   "sha256": "4e2d51b6333fd030d26832fd62c31d0be99566b422d9151c0ccd0fbba8b3ed9a",
+   "releaseId": "ni-v2-sengkang-2026-11-05-7809485dd0e9",
+   "developmentsPath": "sengkang-developments.json",
+   "developmentsSha256": "7cef0b7252dc46897a7156d58c8ca01016151db19c6457c6ca9f7005f9b20042"
+  },
+  {
+   "id": "punggol",
+   "name": "Punggol",
+   "path": "punggol.json",
+   "sha256": "78cbcf6c1a0535b367a65b8bff37a89f4dc7032b37903c5e73e704007c4edee4",
+   "releaseId": "ni-v2-punggol-2026-11-05-98e435930e4d",
+   "developmentsPath": "punggol-developments.json",
+   "developmentsSha256": "1784195520981d204e7d89f431797ca4afbb9a07ff85ebbee1dc2246d9437f49"
+  },
+  {
+   "id": "serangoon",
+   "name": "Serangoon",
+   "path": "serangoon.json",
+   "sha256": "c6baacfdf7731e4dd60b2c4b7ae585a9f6e7209a0c2d7fb56d7dd67d12b8a8bf",
+   "releaseId": "ni-v2-serangoon-2026-11-05-a9022b7e256d",
+   "developmentsPath": "serangoon-developments.json",
+   "developmentsSha256": "81b7dd059808e4e211b6f554daff5eb4e1eb47b79783703b2664ec9ef271cb26"
+  },
+  {
+   "id": "toa-payoh",
+   "name": "Toa Payoh",
+   "path": "toa-payoh.json",
+   "sha256": "b845514b6068073ea09f9e5bde11bc81ec891668d30be46d02ce92e169cadc5e",
+   "releaseId": "ni-v2-toa-payoh-2026-11-05-74c87d1ce62c",
+   "developmentsPath": "toa-payoh-developments.json",
+   "developmentsSha256": "0c35e32a59406495d5170cde0c8fa911f5e31d178445a986a534f6ccc14dd76b"
+  },
+  {
+   "id": "bishan",
+   "name": "Bishan",
+   "path": "bishan.json",
+   "sha256": "32a5f28e5c6db995f30425f811e09c6a658140c71cf1df7b4c1aebaa0082d0bd",
+   "releaseId": "ni-v2-bishan-2026-11-05-7b7f821ff1d4",
+   "developmentsPath": "bishan-developments.json",
+   "developmentsSha256": "02d76b9d4e6a73766f583e3967aeef9b37e367e127da8e242d8978e43229cdbd"
+  },
+  {
+   "id": "ang-mo-kio",
+   "name": "Ang Mo Kio",
+   "path": "ang-mo-kio.json",
+   "sha256": "c33cdc9b91eb996cc69f963f305fffeba5bfeaaa768daa48cf93c9d7ee83b47a",
+   "releaseId": "ni-v2-ang-mo-kio-2026-11-05-0ef4e084cb7f",
+   "developmentsPath": "ang-mo-kio-developments.json",
+   "developmentsSha256": "0c7bf73aa7f52337300b45911e3cf51f079cde68b670c185932cd0f5cbaa7a1d"
+  },
+  {
+   "id": "tampines",
+   "name": "Tampines",
+   "path": "tampines.json",
+   "sha256": "69c9423a1049c504aae0982b0b0b3234c3a6e958d20df3eb61b591ffa6a09b91",
+   "releaseId": "ni-v2-tampines-2026-11-05-77505d7c98c5",
+   "developmentsPath": "tampines-developments.json",
+   "developmentsSha256": "40cbfbd68aa93a5da231cafea8b27f357b40be764c084196da75409814103d39"
+  },
+  {
+   "id": "bedok",
+   "name": "Bedok",
+   "path": "bedok.json",
+   "sha256": "a42ab97f8266a344279181a62af498cf71eb890934d8e9dd898c367f17054adf",
+   "releaseId": "ni-v2-bedok-2026-11-05-bbfd6fa66367",
+   "developmentsPath": "bedok-developments.json",
+   "developmentsSha256": "015e17bb8c08eb3e7c7cca335d0841268e0a1ef316fe1ddb695716ccbf793a0d"
   }
  ]
 }

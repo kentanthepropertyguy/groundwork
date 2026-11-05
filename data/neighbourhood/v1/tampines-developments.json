@@ -1,0 +1,144 @@
+{
+ "area": "Tampines",
+ "boundary": "URA Master Plan 2019 planning area",
+ "releaseId": "ni-v2-tampines-2026-11-05-77505d7c98c5",
+ "count": 34,
+ "developments": [
+  {
+   "registryId": "apollo-gardens",
+   "name": "APOLLO GARDENS"
+  },
+  {
+   "registryId": "arc-at-tampines",
+   "name": "ARC AT TAMPINES"
+  },
+  {
+   "registryId": "aurelle-of-tampines",
+   "name": "AURELLE OF TAMPINES"
+  },
+  {
+   "registryId": "cascadale",
+   "name": "CASCADALE"
+  },
+  {
+   "registryId": "changi-court",
+   "name": "CHANGI COURT"
+  },
+  {
+   "registryId": "changi-green",
+   "name": "CHANGI GREEN"
+  },
+  {
+   "registryId": "changi-rise-condominium",
+   "name": "CHANGI RISE CONDOMINIUM"
+  },
+  {
+   "registryId": "citylife-at-tampines",
+   "name": "CITYLIFE@TAMPINES"
+  },
+  {
+   "registryId": "double-bay-residences",
+   "name": "DOUBLE BAY RESIDENCES"
+  },
+  {
+   "registryId": "eastpoint-green",
+   "name": "EASTPOINT GREEN"
+  },
+  {
+   "registryId": "melville-park",
+   "name": "MELVILLE PARK"
+  },
+  {
+   "registryId": "modena",
+   "name": "MODENA"
+  },
+  {
+   "registryId": "my-manhattan",
+   "name": "MY MANHATTAN"
+  },
+  {
+   "registryId": "parc-central-residences",
+   "name": "PARC CENTRAL RESIDENCES"
+  },
+  {
+   "registryId": "parktown-residence",
+   "name": "PARKTOWN RESIDENCE"
+  },
+  {
+   "registryId": "pinery-residences",
+   "name": "PINERY RESIDENCES"
+  },
+  {
+   "registryId": "pinevale",
+   "name": "PINEVALE"
+  },
+  {
+   "registryId": "q-bay-residences",
+   "name": "Q BAY RESIDENCES"
+  },
+  {
+   "registryId": "rivelle-tampines",
+   "name": "RIVELLE TAMPINES"
+  },
+  {
+   "registryId": "savannah-condopark",
+   "name": "SAVANNAH CONDOPARK"
+  },
+  {
+   "registryId": "simei-green-condominium",
+   "name": "SIMEI GREEN CONDOMINIUM"
+  },
+  {
+   "registryId": "sunbird-view",
+   "name": "SUNBIRD VIEW"
+  },
+  {
+   "registryId": "sunhaven",
+   "name": "SUNHAVEN"
+  },
+  {
+   "registryId": "tenet",
+   "name": "TENET"
+  },
+  {
+   "registryId": "the-alps-residences",
+   "name": "THE ALPS RESIDENCES"
+  },
+  {
+   "registryId": "the-eden-at-tampines",
+   "name": "THE EDEN AT TAMPINES"
+  },
+  {
+   "registryId": "the-santorini",
+   "name": "THE SANTORINI"
+  },
+  {
+   "registryId": "the-tampines-trilliant",
+   "name": "THE TAMPINES TRILLIANT"
+  },
+  {
+   "registryId": "the-tapestry",
+   "name": "THE TAPESTRY"
+  },
+  {
+   "registryId": "the-tropica",
+   "name": "THE TROPICA"
+  },
+  {
+   "registryId": "treasure-at-tampines",
+   "name": "TREASURE AT TAMPINES"
+  },
+  {
+   "registryId": "tropical-spring",
+   "name": "TROPICAL SPRING"
+  },
+  {
+   "registryId": "tropicana-condominium",
+   "name": "TROPICANA CONDOMINIUM"
+  },
+  {
+   "registryId": "waterview",
+   "name": "WATERVIEW"
+  }
+ ]
+}

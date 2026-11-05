@@ -38,4 +38,6 @@
   .gwa-ins li{padding-left:34px}.gwa-it{font-size:15.5px}.gwa-iq{font-size:14px}.gwa-fx h2{font-size:21px}
   .gwa-link{padding:12px 14px;gap:12px}
 }
-@media (max-width:359px){.gwa-link{padding:10px 12px;gap:8px}.gwa-link b,.gwa-link small{overflow-wrap:anywhere}}
+@media (max-width:359px){.gwa-link{padding:10px 12px;gap:8px}.gwa-link b,.gwa-link small{overflow-wrap:anywhere}
+  /* 200% zoom: a one-word area name as long as "Serangoon" fits its column (RC2); the PRISM pages' heading is unchanged */
+  .gwa-head .gwp-h1{font-size:30px}}

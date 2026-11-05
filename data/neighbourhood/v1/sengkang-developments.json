@@ -1,0 +1,108 @@
+{
+ "area": "Sengkang",
+ "boundary": "URA Master Plan 2019 planning area",
+ "releaseId": "ni-v2-sengkang-2026-11-05-7809485dd0e9",
+ "count": 25,
+ "developments": [
+  {
+   "registryId": "austville-residences",
+   "name": "AUSTVILLE RESIDENCES"
+  },
+  {
+   "registryId": "bellewaters",
+   "name": "BELLEWATERS"
+  },
+  {
+   "registryId": "compass-heights",
+   "name": "COMPASS HEIGHTS"
+  },
+  {
+   "registryId": "esparina-residences",
+   "name": "ESPARINA RESIDENCES"
+  },
+  {
+   "registryId": "h2o-residences",
+   "name": "H2O RESIDENCES"
+  },
+  {
+   "registryId": "high-park-residences",
+   "name": "HIGH PARK RESIDENCES"
+  },
+  {
+   "registryId": "jewel-at-buangkok",
+   "name": "JEWEL @ BUANGKOK"
+  },
+  {
+   "registryId": "la-fiesta",
+   "name": "LA FIESTA"
+  },
+  {
+   "registryId": "lush-acres",
+   "name": "LUSH ACRES"
+  },
+  {
+   "registryId": "ola",
+   "name": "OLA"
+  },
+  {
+   "registryId": "parc-botannia",
+   "name": "PARC BOTANNIA"
+  },
+  {
+   "registryId": "parc-greenwich",
+   "name": "PARC GREENWICH"
+  },
+  {
+   "registryId": "park-green",
+   "name": "PARK GREEN"
+  },
+  {
+   "registryId": "riverbank-at-fernvale",
+   "name": "RIVERBANK @ FERNVALE"
+  },
+  {
+   "registryId": "rivercove-residences",
+   "name": "RIVERCOVE RESIDENCES"
+  },
+  {
+   "registryId": "riversound-residence",
+   "name": "RIVERSOUND RESIDENCE"
+  },
+  {
+   "registryId": "rivertrees-residences",
+   "name": "RIVERTREES RESIDENCES"
+  },
+  {
+   "registryId": "rivervale-crest",
+   "name": "RIVERVALE CREST"
+  },
+  {
+   "registryId": "sengkang-grand-residences",
+   "name": "SENGKANG GRAND RESIDENCES"
+  },
+  {
+   "registryId": "the-luxurie",
+   "name": "THE LUXURIE"
+  },
+  {
+   "registryId": "the-quartz",
+   "name": "THE QUARTZ"
+  },
+  {
+   "registryId": "the-rivervale",
+   "name": "THE RIVERVALE"
+  },
+  {
+   "registryId": "the-topiary",
+   "name": "THE TOPIARY"
+  },
+  {
+   "registryId": "the-vales",
+   "name": "THE VALES"
+  },
+  {
+   "registryId": "treasure-crest",
+   "name": "TREASURE CREST"
+  }
+ ]
+}

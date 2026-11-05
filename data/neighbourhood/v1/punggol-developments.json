@@ -1,0 +1,72 @@
+{
+ "area": "Punggol",
+ "boundary": "URA Master Plan 2019 planning area",
+ "releaseId": "ni-v2-punggol-2026-11-05-98e435930e4d",
+ "count": 16,
+ "developments": [
+  {
+   "registryId": "a-treasure-trove",
+   "name": "A TREASURE TROVE"
+  },
+  {
+   "registryId": "ecopolitan",
+   "name": "ECOPOLITAN"
+  },
+  {
+   "registryId": "flo-residence",
+   "name": "FLO RESIDENCE"
+  },
+  {
+   "registryId": "northshore-bungalows",
+   "name": "NORTHSHORE BUNGALOWS"
+  },
+  {
+   "registryId": "parc-centros",
+   "name": "PARC CENTROS"
+  },
+  {
+   "registryId": "piermont-grand",
+   "name": "PIERMONT GRAND"
+  },
+  {
+   "registryId": "prive",
+   "name": "PRIVE"
+  },
+  {
+   "registryId": "river-isles",
+   "name": "RIVER ISLES"
+  },
+  {
+   "registryId": "riverparc-residence",
+   "name": "RIVERPARC RESIDENCE"
+  },
+  {
+   "registryId": "the-ambience",
+   "name": "THE AMBIENCE"
+  },
+  {
+   "registryId": "the-amore",
+   "name": "THE AMORE"
+  },
+  {
+   "registryId": "the-terrace",
+   "name": "THE TERRACE"
+  },
+  {
+   "registryId": "twin-waterfalls",
+   "name": "TWIN WATERFALLS"
+  },
+  {
+   "registryId": "waterbay",
+   "name": "WATERBAY"
+  },
+  {
+   "registryId": "watertown",
+   "name": "WATERTOWN"
+  },
+  {
+   "registryId": "waterwoods",
+   "name": "WATERWOODS"
+  }
+ ]
+}

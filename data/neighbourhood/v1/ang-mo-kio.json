@@ -1,0 +1,1021 @@
+{
+ "schemaVersion": "gw-neighbourhood-v1",
+ "status": "approved for publication: 6 finding(s) approved by Ken Tan (editorial approval confirmed by Master Planning) on 2026-11-05 (Master Planning / Ken editorial approval, 5 Nov 2026 06:20 SGT (Combined Release RC2 instruction))",
+ "area": {
+  "type": "planning_area",
+  "name": "Ang Mo Kio",
+  "boundary": "URA Master Plan 2019 planning area (no sea)",
+  "note": "HDB town AMK matches the planning area; SingStat 2026 resident estimates use Master Plan 2025 boundaries"
+ },
+ "dataMonth": "2026-09",
+ "asAt": "2026-11-05",
+ "evidenceClasses": {
+  "observed": "an official count or recorded value",
+  "computed": "arithmetic on observed values (rates, shares, ratios, ranks)",
+  "survey_estimate": "an official sample-survey estimate (GHS 2025), rounded to 100 by SingStat",
+  "estimate": "a value with a stated approximation",
+  "context": "background context; not a measure of buyers or demand"
+ },
+ "scope": {
+  "geography": "planning areas only (V1)",
+  "notInV1": [
+   "views around a single development (this page covers the planning area)",
+   "future HDB supply (not assessed)",
+   "scores or ratings",
+   "forecasts",
+   "estimates of buyer, upgrader or demand numbers"
+  ]
+ },
+ "vintages": {
+  "planningAreas": "Master Plan 2019 (every assignment and GHS 2025)",
+  "residentEstimates2026": "Master Plan 2025 (SingStat)",
+  "label": "Figures use Master Plan 2019 planning-area boundaries, except the 2026 resident estimates, which SingStat publishes on Master Plan 2025 boundaries"
+ },
+ "geography": {
+  "scope": "This page covers the Ang Mo Kio planning area only",
+  "boundaries": {
+   "MP2019": {
+    "use": "every planning-area assignment in this output (HDB blocks, HDB resales, URA dwelling units, private developments, landed streets); also the boundary SingStat states for GHS 2025 tables C020141 and C020145",
+    "sourceId": "URA_MP2019",
+    "dataset": "Master Plan 2019 Subzone Boundary (No Sea), data.gov.sg d_8594ae9ff96d0c708bc2af633048edfb; planning area = union of its subzones",
+    "label": "Master Plan 2019 planning area"
+   },
+   "MP2025": {
+    "use": "The boundary SingStat uses for its 2026 resident estimates (residents aged 65 and over, 2026 value)",
+    "sourceId": "URA_MP2025_PA",
+    "dataset": "Master Plan 2025 Planning Area Boundary (No Sea), data.gov.sg d_2cc750190544007400b2cfd5d7f53209, updated 2026-02-27",
+    "label": "Master Plan 2025 planning area"
+   }
+  },
+  "lineage": {
+   "hdbBlocks": {
+    "records": "HDB Property Information blocks",
+    "position": "OneMap Search (SLA) block-and-street search, registered API access",
+    "method": "block point in MP2019 polygon",
+    "coverage": "10,761 of 10,817 blocks placed island-wide; every Ang Mo Kio block placed",
+    "publication": "Block positions are used only to count flats in the planning area; no block coordinates or addresses are published",
+    "sourceIds": [
+     "HDB_PROPERTY",
+     "ONEMAP",
+     "URA_MP2019"
+    ],
+    "recordPeriod": {
+     "datasetUpdated": "2026-10-08",
+     "publisherCoverageEnd": "2025-12-31",
+     "latestCompletionYearInRecords": 2026,
+     "completionYear2026": {
+      "islandWide": {
+       "blocks": 77,
+       "flats": 11829
+      },
+      "ang-mo-kio": {
+       "blocks": 0,
+       "flats": 0
+      }
+     },
+     "note": "Counts include every block in HDB's 8 Oct 2026 file, including the blocks HDB records as completed in 2026"
+    }
+   },
+   "hdbResales": {
+    "records": "HDB resale registrations",
+    "position": "joined to the block (street + block) and takes the block's OneMap-derived planning area",
+    "coverage": "78,865 of 78,869 resales placed (36 months)",
+    "sourceIds": [
+     "HDB_RESALE",
+     "HDB_PROPERTY",
+     "ONEMAP",
+     "URA_MP2019"
+    ]
+   },
+   "uraDwellingUnits": {
+    "records": "URA No. of Dwelling Units by development",
+    "position": "URA's own SVY21 coordinates in the dataset (X_ADDR / Y_ADDR), converted to WGS84",
+    "method": "point in MP2019 polygon",
+    "sourceIds": [
+     "URA_DWELLING_UNITS",
+     "URA_MP2019"
+    ]
+   },
+   "privateDevelopments": {
+    "records": "URA private residential transactions by development",
+    "position": "URA's own project coordinates from its private residential transaction records (PMI_Resi_Transaction), converted from SVY21 to latitude and longitude",
+    "method": "point in MP2019 polygon",
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "URA_MP2019"
+    ]
+   },
+   "landedResales": {
+    "records": "URA landed transactions",
+    "position": "one approximate OneMap point per street (not per house)",
+    "method": "street point in MP2019 polygon",
+    "caveat": "approximate",
+    "sourceIds": [
+     "URA_TRANSACTIONS",
+     "ONEMAP",
+     "URA_MP2019"
+    ]
+   },
+   "surveyAndEstimates": {
+    "records": "GHS 2025 and SingStat resident estimates",
+    "position": "none: SingStat tabulates by planning area itself",
+    "boundary": "GHS 2025: MP2019 (SingStat footnote); resident estimates 2026: MP2025; 2021: MP2019",
+    "sourceIds": [
+     "SINGSTAT_GHS2025",
+     "SINGSTAT_GHS2025_DWELLING",
+     "SINGSTAT_RESIDENTS"
+    ]
+   }
+  },
+  "townNote": "HDB town AMK matches the planning area; this output uses the planning area"
+ },
+ "stock": [
+  {
+   "evidence": "observed",
+   "id": "stock.hdb",
+   "label": "HDB flats",
+   "value": 52139,
+   "unit": "flats",
+   "blocks": 392,
+   "breakdown": {
+    "2-room": 1101,
+    "3-room": 24519,
+    "4-room": 15178,
+    "5-room": 6292,
+    "Executive": 505,
+    "Studio apartment": 290,
+    "rental": 4254
+   },
+   "sourceIds": [
+    "HDB_PROPERTY"
+   ],
+   "asAt": "2026-10-08",
+   "coverage": "all blocks in the planning area placed (island-wide 99.5%)",
+   "period": "HDB Property Information, dataset updated 2026-10-08; records include completion years up to 2026 (no Ang Mo Kio blocks recorded as completed in 2026). The publisher's metadata coverage end of 2025-12-31 is not the latest completion year in the records",
+   "denominator": null,
+   "sample": "full count (392 blocks)",
+   "lineage": "hdbBlocks",
+   "status": "publishable"
+  },
+  {
+   "evidence": "observed",
+   "id": "stock.privateNonLanded",
+   "label": "Private condominiums and apartments (excluding EC)",
+   "value": 6310,
+   "unit": "homes",
+   "sourceIds": [
+    "URA_DWELLING_UNITS"
+   ],
+   "asAt": "records to Feb 2026 (URA labels the dataset \"as at Q4 2022\")",
+   "caveat": "condominium and apartment are not separated",
+   "period": "URA dwelling units, records to 2026-02-26 (URA labels the dataset \"as at Q4 2022\")",
+   "denominator": null,
+   "sample": "full count",
+   "lineage": "uraDwellingUnits",
+   "status": "publishable"
+  },
+  {
+   "evidence": "observed",
+   "id": "stock.ec",
+   "label": "Executive condominiums",
+   "value": 297,
+   "unit": "homes",
+   "sourceIds": [
+    "URA_DWELLING_UNITS"
+   ],
+   "asAt": "records to Feb 2026",
+   "period": "URA dwelling units, records to 2026-02-26 (URA labels the dataset \"as at Q4 2022\")",
+   "denominator": null,
+   "sample": "full count",
+   "lineage": "uraDwellingUnits",
+   "status": "publishable"
+  },
+  {
+   "evidence": "observed",
+   "id": "stock.landed",
+   "label": "Landed homes",
+   "value": 4551,
+   "unit": "homes",
+   "strataIdentifiedByName": 512,
+   "sourceIds": [
+    "URA_DWELLING_UNITS"
+   ],
+   "asAt": "records to Feb 2026",
+   "caveat": "strata landed identified by name only (partial)",
+   "period": "URA dwelling units, records to 2026-02-26 (URA labels the dataset \"as at Q4 2022\")",
+   "denominator": null,
+   "sample": "full count",
+   "lineage": "uraDwellingUnits",
+   "status": "publishable"
+  },
+  {
+   "evidence": "computed",
+   "id": "stock.privateShare",
+   "label": "HDB flats for every private home",
+   "value": 4.7,
+   "unit": "ratio",
+   "denominator": "condo, apartment, EC and landed homes (11,158)",
+   "period": "HDB as at 2026-10-08; URA records to 2026-02-26",
+   "numerator": "52,139 HDB flats (sold and rental)",
+   "sourceIds": [
+    "HDB_PROPERTY",
+    "URA_DWELLING_UNITS"
+   ],
+   "sample": "full counts",
+   "lineage": [
+    "hdbBlocks",
+    "uraDwellingUnits"
+   ],
+   "status": "publishable"
+  }
+ ],
+ "activity": [
+  {
+   "evidence": "observed",
+   "id": "activity.hdb",
+   "label": "HDB resales",
+   "value12": 866,
+   "value24": 1882,
+   "unit": "resales",
+   "byType12": {
+    "2-room": 23,
+    "3-room": 421,
+    "4-room": 280,
+    "5-room": 135,
+    "Executive": 7
+   },
+   "period12": "2025-10 to 2026-09",
+   "period24": "2024-10 to 2026-09",
+   "basis": "registration month; positioned by block",
+   "sourceIds": [
+    "HDB_RESALE",
+    "HDB_PROPERTY"
+   ],
+   "coverage": "78,865 of 78,869 resales placed island-wide (36 months)",
+   "period": "2025-10 to 2026-09",
+   "denominator": null,
+   "sample": "all registered resales placed in the area",
+   "lineage": "hdbResales",
+   "status": "publishable"
+  },
+  {
+   "evidence": "observed",
+   "id": "activity.condo",
+   "label": "Condo and apartment resales",
+   "value12": 186,
+   "value24": 366,
+   "unit": "resales",
+   "developments": 25,
+   "period12": "2025-10 to 2026-09",
+   "sourceIds": [
+    "URA_TRANSACTIONS"
+   ],
+   "note": "Resales only; new sales (344) and sub-sales (102) are not included",
+   "period": "2025-10 to 2026-09",
+   "period24": "2024-10 to 2026-09",
+   "denominator": null,
+   "sample": "all 186 resales in 25 developments, including developments for which URA does not record the number of homes",
+   "lineage": "privateDevelopments",
+   "status": "publishable"
+  },
+  {
+   "evidence": "observed",
+   "id": "activity.ec",
+   "label": "EC resales",
+   "value12": 8,
+   "value24": 14,
+   "unit": "resales",
+   "developments": 1,
+   "sourceIds": [
+    "URA_TRANSACTIONS"
+   ],
+   "period": "2025-10 to 2026-09",
+   "period24": "2024-10 to 2026-09",
+   "denominator": null,
+   "sample": "all resales in 1 development",
+   "lineage": "privateDevelopments",
+   "status": "publishable"
+  },
+  {
+   "evidence": "observed",
+   "id": "activity.landed",
+   "label": "Landed resales (land title: terrace, semi-detached, detached)",
+   "value12": 93,
+   "value24": 180,
+   "unit": "resales",
+   "strata12": 36,
+   "sourceIds": [
+    "URA_TRANSACTIONS"
+   ],
+   "caveat": "positioned per street (approximate), planning area by street point",
+   "period": "2025-10 to 2026-09",
+   "period24": "2024-10 to 2026-09",
+   "denominator": null,
+   "sample": "land-title resales; strata landed shown separately",
+   "lineage": "landedResales",
+   "status": "publishable"
+  }
+ ],
+ "liquidity": [
+  {
+   "evidence": "computed",
+   "id": "liquidity.hdb",
+   "label": "HDB resales per 100 flats a year",
+   "value": 1.8,
+   "unit": "per 100 homes a year",
+   "period": "12 months to Sep 2026",
+   "denominator": "47,885 sold flats",
+   "byType": {
+    "3-room": 1.7,
+    "4-room": 1.8,
+    "5-room": 2.1
+   },
+   "comparison": {
+    "singapore": 2.2,
+    "rank": {
+     "position": 26,
+     "of": 29,
+     "tiedWith": [
+      "Serangoon",
+      "Clementi"
+     ],
+     "rule": "areas with 1,000+ flats / homes; condo and EC developments with 12+ months since their first resale; HDB by HDB Property Information block positions"
+    },
+    "neighbouringAreas": [
+     {
+      "area": "Bishan",
+      "value": 1.9
+     },
+     {
+      "area": "Sengkang",
+      "value": 2.3
+     },
+     {
+      "area": "Serangoon",
+      "value": 1.8
+     },
+     {
+      "area": "Yishun",
+      "value": 2.3
+     }
+    ]
+   },
+   "numerator": "866 HDB resales, 2025-10 to 2026-09",
+   "sample": "866 resales",
+   "sourceIds": [
+    "HDB_RESALE",
+    "HDB_PROPERTY"
+   ],
+   "lineage": "hdbResales",
+   "status": "publishable"
+  },
+  {
+   "evidence": "computed",
+   "id": "liquidity.condo",
+   "label": "Condo and apartment resales per 100 homes a year",
+   "value": 3,
+   "unit": "per 100 homes a year",
+   "period": "12 months to Sep 2026",
+   "denominator": "6,267 homes in the 19 developments with a URA homes count",
+   "sample": "186 resales",
+   "comparison": {
+    "singapore": 3.5,
+    "rank": {
+     "position": 27,
+     "of": 35,
+     "tiedWith": [
+      "Novena"
+     ],
+     "rule": "areas with 1,000+ flats / homes; condo and EC developments with 12+ months since their first resale; HDB by HDB Property Information block positions"
+    },
+    "neighbouringAreas": [
+     {
+      "area": "Bishan",
+      "value": 3.5
+     },
+     {
+      "area": "Sengkang",
+      "value": 3.6
+     },
+     {
+      "area": "Serangoon",
+      "value": 4
+     },
+     {
+      "area": "Yishun",
+      "value": 3.9
+     }
+    ],
+    "rankStatement": "joint 27th of 35 (with Novena); joint 24th of 35 (with Marine Parade, Bukit Timah) excluding the one recently completed development",
+    "rankRule": "Both rankings are given; excluding the one recently completed development leaves Ang Mo Kio's rate unchanged"
+   },
+   "sensitivity": {
+    "excludingRecentlyCompleted": {
+     "value": 3,
+     "excluded": [
+      "Lattice One (first resale 2024-03)"
+     ],
+     "singapore": 3.3,
+     "rank": {
+      "position": 24,
+      "of": 35,
+      "tiedWith": [
+       "Marine Parade",
+       "Bukit Timah"
+      ],
+      "rule": "areas with 1,000+ flats / homes; condo and EC developments with 12+ months since their first resale; HDB by HDB Property Information block positions"
+     },
+     "rule": "excludes developments whose first resale falls inside the last 36 months (completed recently): Lattice One (first resale 2024-03); 18 developments, 6,219 homes remain"
+    },
+    "windows": {
+     "12 months": {
+      "value": 3,
+      "developments": 19,
+      "homes": 6267
+     },
+     "24 months": {
+      "value": 2.9,
+      "developments": 19,
+      "homes": 6267
+     },
+     "36 months": {
+      "value": 3,
+      "developments": 19,
+      "homes": 6267
+     }
+    },
+    "method": "Home-weighted, development-level annualised rates: for each development with a URA homes count, resales in the window x 12 / the months it was resellable in the window (from its first resale, capped at the window; at least 12 months required); then the sum of annualised resales / the sum of homes x 100. Larger developments therefore weigh more. The 12-month headline (3.0) is 186 / 6,267 directly. The windows are sensitivities, not the headline, and are not compared with the Singapore 12-month figure."
+   },
+   "numerator": "186 resales, 2025-10 to 2026-09, in the 19 developments with a URA homes count",
+   "sourceIds": [
+    "URA_TRANSACTIONS",
+    "URA_DWELLING_UNITS"
+   ],
+   "lineage": "privateDevelopments",
+   "reconciliation": {
+    "allCondoResales12": {
+     "value": 186,
+     "developments": 25,
+     "usedIn": "activity.condo"
+    },
+    "inRate": {
+     "resales": 186,
+     "homes": 6267,
+     "developments": 19,
+     "usedIn": "liquidity.condo"
+    },
+    "outsideRate": {
+     "resales": 0,
+     "developments": 6,
+     "reason": "no URA homes count for the development (a rate needs its own denominator)"
+    },
+    "rule": "186 counts every condo resale; the rate of 3.0 uses the 186 resales in developments for which URA records the number of homes (6,267 homes)"
+   },
+   "status": "publishable"
+  },
+  {
+   "id": "liquidity.ec",
+   "label": "EC resales per 100 homes a year",
+   "status": "below_threshold",
+   "reason": "Not shown: fewer than 1,000 EC homes in Ang Mo Kio, so no resale rate is published",
+   "threshold": {
+    "rule": "1,000+ EC homes",
+    "actual": 297
+   },
+   "value": null
+  },
+  {
+   "evidence": "computed",
+   "id": "liquidity.privateToHdb",
+   "label": "Condo resale rate relative to HDB",
+   "value": 1.7,
+   "unit": "times",
+   "comparison": {
+    "singapore": 1.6,
+    "rank": {
+     "position": 10,
+     "of": 28,
+     "tiedWith": [
+      "Kallang",
+      "Marine Parade",
+      "Tampines",
+      "Yishun"
+     ],
+     "rule": "areas with 1,000+ flats / homes; condo and EC developments with 12+ months since their first resale; HDB by HDB Property Information block positions"
+    }
+   },
+   "period": "2025-10 to 2026-09",
+   "numerator": "liquidity.condo (3.0)",
+   "denominator": "liquidity.hdb (1.8)",
+   "sample": "as the two rates",
+   "sourceIds": [
+    "URA_TRANSACTIONS",
+    "URA_DWELLING_UNITS",
+    "HDB_RESALE",
+    "HDB_PROPERTY"
+   ],
+   "lineage": [
+    "privateDevelopments",
+    "hdbResales"
+   ],
+   "status": "publishable"
+  }
+ ],
+ "upgraderContext": [
+  {
+   "evidence": "computed",
+   "id": "context.hdbLargeFlats",
+   "label": "HDB flats that are 4-room or larger",
+   "value": 45.9,
+   "unit": "per cent of sold flats",
+   "count": 21975,
+   "comparison": {
+    "singapore": 71.8
+   },
+   "sourceIds": [
+    "HDB_PROPERTY"
+   ],
+   "period": "HDB Property Information, dataset updated 2026-10-08; records include completion years up to 2026 (no Ang Mo Kio blocks recorded as completed in 2026). The publisher's metadata coverage end of 2025-12-31 is not the latest completion year in the records",
+   "numerator": "21,975 sold 4-room, 5-room, Executive and multi-generation flats (multi-generation: 0 in Ang Mo Kio)",
+   "denominator": "47,885 sold flats (rental flats excluded)",
+   "basis": "sold HDB flats only, in Ang Mo Kio and in the Singapore comparison",
+   "sample": "full count",
+   "lineage": "hdbBlocks",
+   "status": "publishable"
+  },
+  {
+   "evidence": "observed",
+   "id": "context.hdbMedianPrices",
+   "label": "Median HDB resale prices, 12 months",
+   "unit": "SGD",
+   "sourceIds": [
+    "HDB_RESALE"
+   ],
+   "values": {
+    "3-room": {
+     "ang-mo-kio": 430888,
+     "n": 421,
+     "singapore": 440000,
+     "nSingapore": 5760
+    },
+    "4-room": {
+     "ang-mo-kio": 615000,
+     "n": 280,
+     "singapore": 630000,
+     "nSingapore": 10809
+    },
+    "5-room": {
+     "ang-mo-kio": 995000,
+     "n": 135,
+     "singapore": 740000,
+     "nSingapore": 5785
+    }
+   },
+   "belowThreshold": [
+    {
+     "type": "Executive",
+     "resales": 7
+    }
+   ],
+   "rule": "Medians are given only where there were at least 10 resales",
+   "period": "2025-10 to 2026-09",
+   "denominator": null,
+   "sample": "n per flat type (Ang Mo Kio and Singapore) in values",
+   "lineage": "hdbResales",
+   "status": "publishable"
+  },
+  {
+   "evidence": "survey_estimate",
+   "id": "context.income",
+   "label": "Resident households by monthly household employment income",
+   "unit": "per cent of households",
+   "households": 61900,
+   "values": {
+    "noEmployedPerson": 21.5,
+    "atOrAbove10000": 40.4,
+    "atOrAbove15000": 26.7,
+    "atOrAbove20000": 17.8
+   },
+   "singapore": {
+    "noEmployedPerson": 14.2,
+    "atOrAbove10000": 50.5,
+    "atOrAbove15000": 33.5,
+    "atOrAbove20000": 21.8
+   },
+   "sourceIds": [
+    "SINGSTAT_GHS2025"
+   ],
+   "caveat": "Employment income includes employer CPF contributions and covers households in all dwelling types (SingStat does not publish income by dwelling type for planning areas). It does not measure buying power or demand",
+   "period": "General Household Survey 2025 (published 30 Jun 2026)",
+   "denominator": "61,900 resident households (survey estimate, rounded to 100)",
+   "sample": "GHS 2025 sample survey; SingStat advises caution with small cells",
+   "boundary": "MP2019",
+   "lineage": "surveyAndEstimates",
+   "status": "publishable"
+  },
+  {
+   "evidence": "survey_estimate",
+   "id": "context.householdsByDwelling",
+   "label": "Resident households by dwelling type",
+   "unit": "households",
+   "values": {
+    "Total": 61900,
+    "HDB Dwellings": 52200,
+    "Condominium & Other Apartments": 5500,
+    "Landed Properties": 4100
+   },
+   "sourceIds": [
+    "SINGSTAT_GHS2025_DWELLING"
+   ],
+   "caveat": "Counts resident households, not homes; household and housing-stock figures measure different things and are not combined",
+   "period": "General Household Survey 2025 (published 30 Jun 2026)",
+   "denominator": null,
+   "sample": "GHS 2025 sample survey, rounded to 100",
+   "boundary": "MP2019",
+   "lineage": "surveyAndEstimates",
+   "reconciliation": {
+    "total": 61900,
+    "listedCategories": 61800,
+    "unlisted": 100,
+    "explanation": "C020141 lists three dwelling categories (HDB dwellings, condominium & other apartments, landed properties). Its Total (column \"Total1/\") also covers households in dwelling types the table does not list; SingStat's footnote 1/ is not reproduced in the stored record. Each figure is separately rounded to the nearest 100 (SingStat: \"may not add up due to rounding\"), so rounding accounts for at most 200 of the gap; the whole gap may be rounding.",
+    "crossChecks": {
+     "singapore": {
+      "total": 1487100,
+      "listedCategories": 1483600,
+      "unlisted": 3500
+     },
+     "hdbSubtypes": {
+      "sumOfSubtypes": 52300,
+      "hdbTotal": 52200,
+      "note": "subtypes sum to 52,300 against the HDB total of 52,200: rounding"
+     }
+    },
+    "reading": "The 100 households outside the three listed categories are survey estimates in dwelling types the table does not list",
+    "rule": "The three categories and the total are shown as SingStat publishes them; the 100 are not shown as a separate category, and shares are of the published total"
+   },
+   "status": "publishable"
+  },
+  {
+   "evidence": "observed",
+   "id": "context.recentHdb",
+   "label": "HDB flats in blocks completed 2016 or later",
+   "value": 2995,
+   "unit": "flats",
+   "blocks": 16,
+   "sourceIds": [
+    "HDB_PROPERTY"
+   ],
+   "caveat": "Based on the year each block was completed, not on when its flats reach the minimum occupation period",
+   "period": "HDB Property Information, dataset updated 2026-10-08; records include completion years up to 2026 (no Ang Mo Kio blocks recorded as completed in 2026). The publisher's metadata coverage end of 2025-12-31 is not the latest completion year in the records",
+   "denominator": null,
+   "sample": "full count",
+   "lineage": "hdbBlocks",
+   "status": "publishable"
+  },
+  {
+   "evidence": "estimate",
+   "id": "context.age65",
+   "label": "Residents aged 65 and over",
+   "value": 26.9,
+   "unit": "per cent of residents",
+   "earlier": {
+    "year": 2021,
+    "value": 22.9
+   },
+   "comparison": {
+    "singapore": 19.5
+   },
+   "sourceIds": [
+    "SINGSTAT_RESIDENTS"
+   ],
+   "caveat": "SingStat June estimates; 2026 on Master Plan 2025 boundaries",
+   "period": "June 2026 (earlier: June 2021)",
+   "denominator": "159,940 residents (SingStat estimate, rounded)",
+   "sample": "SingStat population estimate (not a survey sample)",
+   "boundary": "2026: MP2025; 2021: MP2019 (vintages differ; compare with care)",
+   "lineage": "surveyAndEstimates",
+   "status": "publishable"
+  }
+ ],
+ "futureSupply": [
+  {
+   "id": "supply.unsoldLaunched",
+   "label": "Launched private homes still unsold (developer sales)",
+   "status": "deferred",
+   "reason": "Not yet published: the number of launched but unsold private homes in the planning area is still being verified",
+   "value": null
+  },
+  {
+   "id": "supply.pipelineLocated",
+   "label": "Private homes in URA's pipeline located inside Ang Mo Kio",
+   "status": "withheld",
+   "reason": "Not published: URA's list of private projects in the pipeline cannot yet be matched reliably to the Ang Mo Kio planning area",
+   "value": null
+  },
+  {
+   "id": "supply.knownSites",
+   "label": "Known upcoming sites (awarded government land sale sites)",
+   "status": "deferred",
+   "reason": "Not yet published: known upcoming sites in this planning area have not yet been reviewed",
+   "value": null
+  },
+  {
+   "evidence": "context",
+   "id": "supply.hdbFuture",
+   "label": "Future HDB flats (BTO projects)",
+   "value": null,
+   "unit": "flats",
+   "missing": "Not assessed: there is no official open dataset of upcoming HDB projects",
+   "period": null,
+   "status": "not_assessed",
+   "denominator": null,
+   "sample": null
+  }
+ ],
+ "sources": [
+  {
+   "id": "HDB_PROPERTY",
+   "publisher": "Housing & Development Board (HDB)",
+   "dataset": "HDB Property Information",
+   "licence": "Singapore Open Data Licence version 1.0",
+   "status": "confirmed",
+   "attribution": "Contains information from HDB Property Information (Housing & Development Board (HDB)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0."
+  },
+  {
+   "id": "HDB_RESALE",
+   "publisher": "Housing & Development Board (HDB)",
+   "dataset": "Resale flat prices based on registration date from Jan-2017 onwards",
+   "licence": "Singapore Open Data Licence version 1.0",
+   "status": "confirmed",
+   "attribution": "Contains information from Resale flat prices based on registration date from Jan-2017 onwards (Housing & Development Board (HDB)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0."
+  },
+  {
+   "id": "ONEMAP",
+   "publisher": "Singapore Land Authority (SLA)",
+   "dataset": "OneMap Search",
+   "licence": "OneMap Terms of Use and OneMap Open Data Licence (Singapore Open Data Licence v1.0), registered API access",
+   "status": "confirmed",
+   "attribution": "Positions: OneMap © contributors | Singapore Land Authority. Contains information from OneMap Search, used under the terms of the Singapore Open Data Licence version 1.0.",
+   "use": "Used only to place HDB blocks and landed streets in the planning area; no OneMap coordinates or address records are published"
+  },
+  {
+   "id": "SINGSTAT_GHS2025",
+   "publisher": "Singapore Department of Statistics (SingStat)",
+   "dataset": "General Household Survey 2025, table C020145",
+   "licence": "SingStat Terms of Use (SingStat Table Builder is a listed Service); datasets under the Singapore Open Data Licence, which prevails",
+   "status": "confirmed",
+   "attribution": "SingStat, General Household Survey 2025, table C020145 (resident households by planning area and monthly household employment income)"
+  },
+  {
+   "id": "SINGSTAT_GHS2025_DWELLING",
+   "publisher": "Singapore Department of Statistics (SingStat)",
+   "dataset": "General Household Survey 2025, table C020141 (Resident Households by Planning Area of Residence and Type of Dwelling)",
+   "licence": "SingStat Terms of Use and Singapore Open Data Licence version 1.0",
+   "status": "confirmed",
+   "attribution": "SingStat, General Household Survey 2025, table C020141 (resident households by planning area of residence and type of dwelling)",
+   "datasetId": "C020141",
+   "updated": "30/06/2026",
+   "conditions": [
+    "Credit the source as stated.",
+    "Reproduce the figures accurately (survey estimates rounded to 100).",
+    "Do not present Groundwork's analysis as the Government's, or suggest Government association or endorsement.",
+    "Stop using the content if SingStat asks."
+   ]
+  },
+  {
+   "id": "SINGSTAT_RESIDENTS",
+   "publisher": "Singapore Department of Statistics (SingStat)",
+   "dataset": "Singapore Residents by Planning Area / Subzone, Age Group, Sex and Type of Dwelling; Residential Dwellings by Planning Area / Subzone and Type of Dwelling (June)",
+   "licence": "SingStat Terms of Use and Singapore Open Data Licence version 1.0",
+   "status": "confirmed",
+   "attribution": "Source: Singapore Department of Statistics, Singapore Residents by Planning Area / Subzone, Age Group, Sex and Type of Dwelling (June 2021 and June 2026) and Residential Dwellings by Planning Area / Subzone and Type of Dwelling (June 2026). Analysis by Groundwork."
+  },
+  {
+   "id": "URA_DWELLING_UNITS",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "No of Dwelling Units",
+   "licence": "Singapore Open Data Licence version 1.0",
+   "status": "confirmed",
+   "attribution": "Contains information from No of Dwelling Units (Urban Redevelopment Authority (URA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0."
+  },
+  {
+   "id": "URA_MP2019",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "Master Plan 2019 Subzone Boundary (No Sea)",
+   "datasetId": "d_8594ae9ff96d0c708bc2af633048edfb",
+   "licence": "Singapore Open Data Licence version 1.0",
+   "status": "confirmed",
+   "attribution": "Contains information from Master Plan 2019 Subzone Boundary (No Sea) (Urban Redevelopment Authority (URA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "use": "planning-area boundaries for every assignment"
+  },
+  {
+   "id": "URA_MP2025_PA",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "Master Plan 2025 Planning Area Boundary (No Sea)",
+   "datasetId": "d_2cc750190544007400b2cfd5d7f53209",
+   "licence": "Singapore Open Data Licence version 1.0 (https://data.gov.sg/open-data-licence)",
+   "status": "confirmed",
+   "attribution": "Contains information from Master Plan 2025 Planning Area Boundary (No Sea) (Urban Redevelopment Authority (URA)) from data.gov.sg, made available under the terms of the Singapore Open Data Licence version 1.0.",
+   "use": "boundary of the SingStat 2026 resident estimates only",
+   "conditions": [
+    "Attribute as stated.",
+    "Do not imply endorsement by the publisher.",
+    "Used only as the boundary of the SingStat 2026 resident estimates; no boundary geometry is published."
+   ]
+  },
+  {
+   "id": "URA_TRANSACTIONS",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "PMI_Resi_Transaction",
+   "licence": "Singapore Open Data Licence version 1.0 (URA Data Service grant of licence)",
+   "status": "confirmed",
+   "attribution": "Contains information from URA private residential data (PMI_Resi_Transaction) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA."
+  }
+ ],
+ "limitations": [
+  "condo and apartment not separated",
+  "strata landed identified by name only",
+  "landed resales are placed in the planning area by street, so the landed resale count is approximate",
+  "URA dwelling units labelled \"as at Q4 2022\" but hold records to Feb 2026",
+  "future HDB supply and expected completion of known sites not available",
+  "buyer origin not available from official data",
+  "GHS 2025 income and dwelling figures are survey estimates rounded to 100",
+  "2026 resident estimates use MP2025 boundaries; every other figure uses MP2019"
+ ],
+ "insights": [
+  {
+   "id": "insight.1",
+   "text": "Ang Mo Kio has about 52,100 HDB flats and 11,200 private homes: 4.7 HDB flats for every private home.",
+   "qualifier": "Counts of homes, not of buyers.",
+   "figures": {
+    "hdbFlats": 52139,
+    "privateHomes": 11158,
+    "hdbPerPrivate": 4.7
+   },
+   "period": "HDB as at 2026-10-08; URA records to 2026-02-26",
+   "itemIds": [
+    "stock.hdb",
+    "stock.privateNonLanded",
+    "stock.ec",
+    "stock.landed",
+    "stock.privateShare"
+   ],
+   "sourceIds": [
+    "HDB_PROPERTY",
+    "URA_DWELLING_UNITS"
+   ]
+  },
+  {
+   "id": "insight.2",
+   "text": "Ang Mo Kio condos resell about 1.7 times as often as its HDB flats: 3.0 vs 1.8 homes per 100 a year (Singapore 3.5 vs 2.2).",
+   "qualifier": "Excluding the one recently completed development does not change the rate.",
+   "figures": {
+    "condo": 3,
+    "hdb": 1.8,
+    "singaporeCondo": 3.5,
+    "singaporeHdb": 2.2,
+    "condoExcludingRecent": 3
+   },
+   "period": "12 months to Sep 2026",
+   "itemIds": [
+    "liquidity.condo",
+    "liquidity.hdb",
+    "liquidity.privateToHdb"
+   ],
+   "sourceIds": [
+    "URA_TRANSACTIONS",
+    "URA_DWELLING_UNITS",
+    "HDB_RESALE",
+    "HDB_PROPERTY"
+   ]
+  },
+  {
+   "id": "insight.3",
+   "text": "Ang Mo Kio ranks joint 27th of 35 planning areas for condo resale activity. Excluding one recently completed development, it ranks joint 24th.",
+   "qualifier": "Resale activity does not establish selling time or price performance. Both rankings are given; excluding the one recently completed development leaves Ang Mo Kio's rate unchanged.",
+   "figures": {
+    "rank": {
+     "position": 27,
+     "of": 35,
+     "tiedWith": [
+      "Novena"
+     ],
+     "rule": "areas with 1,000+ flats / homes; condo and EC developments with 12+ months since their first resale; HDB by HDB Property Information block positions"
+    },
+    "rankExcludingRecent": {
+     "position": 24,
+     "of": 35,
+     "tiedWith": [
+      "Marine Parade",
+      "Bukit Timah"
+     ],
+     "rule": "areas with 1,000+ flats / homes; condo and EC developments with 12+ months since their first resale; HDB by HDB Property Information block positions"
+    },
+    "rate": 3,
+    "rateExcludingRecent": 3,
+    "excluded": [
+     "Lattice One (first resale 2024-03)"
+    ]
+   },
+   "period": "12 months to Sep 2026",
+   "itemIds": [
+    "liquidity.condo"
+   ],
+   "sourceIds": [
+    "URA_TRANSACTIONS",
+    "URA_DWELLING_UNITS"
+   ],
+   "peerComparisons": {
+    "singapore": 3.5,
+    "singaporeExcludingRecent": 3.3,
+    "neighbouringAreas": [
+     {
+      "area": "Bishan",
+      "value": 3.5
+     },
+     {
+      "area": "Sengkang",
+      "value": 3.6
+     },
+     {
+      "area": "Serangoon",
+      "value": 4
+     },
+     {
+      "area": "Yishun",
+      "value": 3.9
+     }
+    ],
+    "note": "joint 27th with Novena; joint 24th with Marine Parade, Bukit Timah"
+   }
+  },
+  {
+   "id": "insight.4",
+   "text": "866 HDB flats and 186 condos resold in Ang Mo Kio in the last 12 months.",
+   "qualifier": "October 2025 to September 2026. The 186 condo resales are all resales; the resale rate uses the 186 resales in the 19 developments for which URA records the number of homes.",
+   "figures": {
+    "hdbResales": 866,
+    "condoResales": 186
+   },
+   "period": "2025-10 to 2026-09",
+   "itemIds": [
+    "activity.hdb",
+    "activity.condo",
+    "liquidity.condo"
+   ],
+   "sourceIds": [
+    "HDB_RESALE",
+    "URA_TRANSACTIONS"
+   ]
+  },
+  {
+   "id": "insight.5",
+   "text": "Ang Mo Kio's 5-room flats resold at a median $995,000, 34% above Singapore's $740,000.",
+   "qualifier": "Median of 135 resales. Shown for context; it does not indicate what any buyer can afford.",
+   "figures": {
+    "ang-mo-kio": 995000,
+    "n": 135,
+    "singapore": 740000,
+    "nSingapore": 5785,
+    "differencePct": 34.5
+   },
+   "period": "2025-10 to 2026-09",
+   "itemIds": [
+    "context.hdbMedianPrices"
+   ],
+   "sourceIds": [
+    "HDB_RESALE"
+   ]
+  },
+  {
+   "id": "insight.6",
+   "text": "40.4% of Ang Mo Kio households earn $10,000 or more a month from work, below Singapore (50.5%).",
+   "qualifier": "Household income does not measure buying power or demand. Survey estimate from the General Household Survey 2025.",
+   "figures": {
+    "ang-mo-kio": 40.4,
+    "singapore": 50.5,
+    "households": 61900
+   },
+   "period": "General Household Survey 2025 (published 30 Jun 2026)",
+   "itemIds": [
+    "context.income"
+   ],
+   "sourceIds": [
+    "SINGSTAT_GHS2025"
+   ]
+  }
+ ],
+ "updates": {
+  "cadence": "quarterly review",
+  "resaleActivity": "resale activity, resale rates and median prices move to the latest complete month of HDB and URA data",
+  "stockAndContext": "housing stock and household figures are updated when HDB, URA and SingStat update their datasets",
+  "supply": "future-supply figures are added only after they have been verified for the planning area"
+ },
+ "methodNotes": [
+  "Only totals, rates and medians are published; no coordinates, addresses or individual transactions.",
+  "Medians need at least 10 resales; rates per 100 homes need at least 1,000 homes in the area.",
+  "No scores, forecasts or buyer counts; income and age figures are background context.",
+  "Each figure states its source and period."
+ ],
+ "releaseId": "ni-v2-ang-mo-kio-2026-11-05-0ef4e084cb7f"
+}

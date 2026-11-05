@@ -2,6 +2,8 @@
 
 Research by bedroom type (V1, approved by Ken 24 Oct 2026) reads `data/projects/bedroom/`, built from the ACCEPTED snapshot by `build-bedroom-research.js` ("Publishing to Research" below). Nothing else on the site reads these outputs, and Budget Search never infers bedrooms.
 
+Adding one development's floor plans (the table, the check before it goes in, and where it goes): `FLOORPLANS.md`.
+
 ## Evidence, in order
 
 1. **URA rental contracts** are the primary evidence (`rental-engine.js`). They cover every development and need no documents. A contract's size is where its sqm band and its sq ft band overlap. A sale whose whole-sqm area (±0.5) touches those contracts is **inferred** when all of these hold:
@@ -18,6 +20,12 @@ Research by bedroom type (V1, approved by Ken 24 Oct 2026) reads `data/projects/
    - Every stated area is an interval of ± half its last digit.
    - A table is used only when it passes its URA check: it explains at least 90% of sale areas, has no incomplete rows, and at least 95% of compared rental contracts agree. A table marked `developer` or `approved` is also used.
 3. **Never forced.** If the layouts at an area have different bedroom counts, the sale stays unclassified. If a usable table and the rentals disagree at an area, that is a **contradiction**: it is reported for review and never resolved by guessing.
+4. **Storeys (`levels`, 5 Nov 2026; combined release candidate gw-combined-rc, pending approval).** A table may state the storeys each layout is on (`1-15`, `16`). Only then, and only for a trusted table:
+   - **Matching.** A sale is matched only to the layouts whose storeys overlap its URA floor band. Layouts without levels always stay candidates. A URA band never picks one floor or one layout: `16-20` keeps every layout on any of storeys 16 to 20. A sale with no numeric band (`-`, basement bands) is matched to all layouts.
+   - **Floor-dependent sizes.** A size is floor-dependent when the floor band changes its candidate bedroom groups (for example, a size that is a 2-bedroom on the typical storeys and a penthouse on the top storey). Such a size gets one decision per band, keyed `63@16-20` in the snapshot. Every other size keeps one decision per size, exactly as before.
+   - **Rental contracts at those sizes.** URA rental contracts carry no floor, so they pool every floor's layouts. Where the pooled rental count differs from the floor's layout, the size is a contradiction (unclassified), as in 3. This is `FLOOR_RULE = 'A'` in `bedroom-hybrid.js`. A proposed rule B (the floor's layout decides when at least one contract at that size declares its count) exists only behind `ctx.floorRule = 'B'`, for Research & Data to decide; the refresh never sets it.
+   - **Rental fallback on a band.** On a band that still has several bedroom groups, the rental count is used only if a layout on that band has it.
+   - **Penthouses.** They remain their own group (`PH`), not a bedroom count, so the Transactions list shows them without one. The penthouse group's layouts can have different bedroom counts, so `build-bedroom-research.js` never publishes it as a pricing group (private report: "combined"); Budget Search uses bedroom counts only.
 
 The tiers come from `bedroom-hybrid.js`:
 - **verified**: layout table, with no rental contradiction;
@@ -84,7 +92,7 @@ node tools/market-data/bedroom-metrics.js --raw <private URA folder> --report <p
 2. **Classify** (`bedroom-hybrid.js --previous`). It prints `Rental contracts: 12 of 12 quarters (from–to)`.
    - A missing quarter is named.
    - A window more than one quarter behind the sales data says to run the fetch.
-   - `changes.json` lists sizes whose bedroom count changed, coverage drops of 5+ points, new developments and contradictions.
+   - `changes.json` lists sizes whose bedroom count changed, coverage drops of 5+ points, new developments and contradictions. A new floor-band key (`63@16-20`) is compared with the size it split from, so a label that changes because of `levels` is listed. The report's `floorDependent` lists every band decision and what the pooled contracts said.
 3. **Check before accepting.**
    - The window is 12 of 12.
    - No size changed bedroom count, or each change has been looked at.

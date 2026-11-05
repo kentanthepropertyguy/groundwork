@@ -90,9 +90,10 @@ function build(o) {
     if (!entry) { projects[id] = { c: null, t: {}, u: bands(recent)[0] }; rec.status = D.cls === 'cluster' ? 'cluster housing: not classified' : 'not in the accepted classification'; report.push(rec); return; }
     tally.classified++;
     const decide = BR.decider(entry), lab = new Map(BR.possibleFor(entry, rows, rent.get(name) || []).map((m) => [m.sqm, m]));
-    const gate = H.completeness({ mapping: Array.from(lab.values()) }, rows, cap, { months: BR.RULES.gateMonths, minCoverage: BR.RULES.minCoverage, maxAmbiguousShare: BR.RULES.maxAmbiguousShare, minSales: BR.RULES.minSales });
+    const gate = H.completeness({ mapping: Array.from(lab.values()) }, H.floorKeyed(Array.from(lab.values()), rows), cap, { months: BR.RULES.gateMonths, minCoverage: BR.RULES.minCoverage, maxAmbiguousShare: BR.RULES.maxAmbiguousShare, minSales: BR.RULES.minSales });
     const area = (t) => String(t.areaRaw != null ? t.areaRaw : t.sqm);
-    const tx = recent.map((t) => { const d = decide(t), m = lab.get(area(t)) || {}; return Object.assign({}, t, { group: d.group, possible: d.group == null ? (m.possible || []) : [] }); });
+    // a floor-dependent size ("63@16-20", bedroom-hybrid.js) is looked up for the sale's URA floor band first
+    const tx = recent.map((t) => { const d = decide(t), m = (t.floor && lab.get(area(t) + '@' + t.floor)) || lab.get(area(t)) || {}; return Object.assign({}, t, { group: d.group, possible: d.group == null ? (m.possible || []) : [] }); });
     const shown = {}; ((mine[id] && mine[id].resale && mine[id].resale.types) || []).forEach((x) => { shown[x.g] = x; });
     const published = (rec.published = Object.keys(shown));
     const counts = Array.from(new Set(tx.map((t) => t.group).filter((g) => g != null).concat(...tx.map((t) => t.possible)).concat(Object.keys(gate.types)).concat(published))).filter((g) => COUNTS.test(g)).sort();

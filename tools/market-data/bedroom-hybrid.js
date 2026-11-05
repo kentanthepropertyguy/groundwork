@@ -42,41 +42,68 @@ function completeness(S, rows, latestYm, opt) {
   });
   return { recent: recent.length, unclassified: open.length, coverage, types };
 }
+// Floor-dependent sizes (5 Nov 2026) have their own mapping key per URA floor band ("63@16-20"). completeness() is left unchanged
+// (its source is hash-locked): callers pass it the sales re-keyed, so a sale on such a band is looked up under its band key.
+function floorKeyed(mapping, rows) {
+  const keys = new Set((mapping || []).map((m) => m.sqm).filter((k) => String(k).indexOf('@') > -1));
+  if (!keys.size) return rows;
+  return rows.map((t) => { const k = String(t.areaRaw != null ? t.areaRaw : t.sqm) + '@' + t.floor; return t.floor && keys.has(k) ? Object.assign({}, t, { areaRaw: k }) : t; });
+}
+const FLOOR_RULE = 'A';
 function classifyDevelopment(rows, P, rentals, ctx, rule) {
   const cs = RE.contracts(rentals), cl = RE.cells(cs), sctx = RE.salesContext(rows, cl);
   const lq = P && P.layouts.length ? Q.check(P.layouts, rows, rentals) : null;
   const trusted = !!(P && P.layouts.length && (lq.verdict === 'usable' || TRUSTED.indexOf(P.status) > -1));
   const memo = new Map(), contradictions = [];
+  // Floor-aware matching (5 Nov 2026): only for a trusted table that states levels. A size is FLOOR-DEPENDENT when the layouts that could
+  // be on the sale's URA floor band fall in different bedroom groups from all the layouts of that size (e.g. a size that is a 2-bedroom on
+  // the typical storeys and a penthouse on the top storey). Its decision is kept per band ("63@16-20"); every other size, and every
+  // development without levels, keeps one decision per size exactly as before.
+  const groupsOf = (c) => uniq((c.cls === 'C' ? c.groups : c.group != null ? [c.group] : []).map(String)).sort().join('|');
   const decide = (t) => {
     const a = String(t.areaRaw != null ? t.areaRaw : t.sqm);
-    if (memo.has(a)) return memo.get(a);
-    const lay = trusted ? E.classify(a, P.layouts) : null, ren = RE.classifySale(a, cl, rule, sctx);
+    let lays = trusted ? P.layouts : null, key = a, floorDep = false;
+    if (trusted && P.hasLevels && E.floorBand(t.floor)) {
+      const on = E.layoutsOnFloor(P.layouts, t.floor), all = E.classify(a, P.layouts), here = E.classify(a, on);
+      if (groupsOf(all) !== groupsOf(here)) { lays = on; key = a + '@' + t.floor; floorDep = true; }
+    }
+    if (memo.has(key)) return memo.get(key);
+    const lay = trusted ? E.classify(a, lays) : null, ren = RE.classifySale(a, cl, rule, sctx);
     let d;
     if (lay && (lay.cls === 'A' || lay.cls === 'B')) {
-      const beds = Array.from(new Set(P.layouts.filter((l) => lay.codes.indexOf(l.code) > -1).map((l) => l.bedrooms)));
-      if (ren.cls === 'inferred' && beds.length === 1 && ren.beds !== beds[0]) {
-        d = { cls: 'C', group: null, groups: [], codes: lay.codes, tier: 'unclassified', reason: 'contradiction', possible: uniq([String(beds[0]), String(ren.beds)]) };
-        contradictions.push({ sqm: a, layouts: beds[0], rental: ren.beds, contracts: ren.n, purity: Math.round(ren.purity * 1000) / 1000, codes: lay.codes });
-      } else d = Object.assign({}, lay, { tier: 'verified', rental: ren.cls === 'inferred' ? 'agrees' : ren.cls });
-    } else if (ren.cls === 'inferred') {
+      const mine = lays.filter((l) => lay.codes.indexOf(l.code) > -1), beds = Array.from(new Set(mine.map((l) => l.bedrooms)));
+      // URA rental contracts carry no floor: at a floor-dependent size they pool every floor's layouts. FLOOR_RULE (default 'A', the
+      // contradiction safeguard kept): if the pooled rental count differs from the floor's layout, the size is a contradiction, exactly as
+      // everywhere else. 'B' (proposed, needs Research & Data approval; set only by ctx.floorRule): the floor's layout decides when at least
+      // one contract at that size declares its bedroom count.
+      const declares = ren.counts && (ren.counts[String(beds[0])] || 0) > 0, ruleB = ((ctx && ctx.floorRule) || FLOOR_RULE) === 'B';
+      if (ren.cls === 'inferred' && beds.length === 1 && ren.beds !== beds[0] && !(ruleB && floorDep && declares)) {
+        d = { cls: 'C', group: null, groups: [], codes: lay.codes, tier: 'unclassified', reason: 'contradiction', possible: uniq([lay.group, String(ren.beds)].map(String)) };
+        contradictions.push(Object.assign({ sqm: a, layouts: beds[0], rental: ren.beds, contracts: ren.n, purity: Math.round(ren.purity * 1000) / 1000, codes: lay.codes }, floorDep ? { floor: t.floor } : {}));
+      } else d = Object.assign({}, lay, { tier: 'verified', rental: ren.cls === 'inferred' ? (ren.beds === beds[0] || beds.length > 1 ? 'agrees' : 'pooled across floors (' + ren.beds + '-bedroom); the floor\'s layout decides') : ren.cls }, floorDep ? { floor: t.floor } : {});
+    } else if (ren.cls === 'inferred' && !(floorDep && lay && lay.cls === 'C' && lay.groups.map(String).indexOf(String(ren.beds)) < 0)) {   // on a floor band, never a count no layout on that band has
       d = { cls: 'B', group: String(ren.beds), codes: [], tier: 'inferred', evidence: { contracts: ren.n, purity: Math.round(ren.purity * 1000) / 1000, strength: ren.tier } };
     } else {
       d = { cls: lay && lay.cls === 'C' ? 'C' : 'D', group: null, groups: lay && lay.groups ? lay.groups : [], codes: lay ? lay.codes : [], near: lay ? lay.near : null, tier: 'unclassified',
         reason: lay ? (lay.cls === 'C' ? 'layouts with different bedroom counts' : 'no layout fits') + '; rental ' + ren.cls : 'rental ' + ren.cls,
         possible: lay && lay.cls === 'C' && lay.groups && lay.groups.length ? lay.groups.map(String) : rentalPossible(ren) };
     }
-    memo.set(a, d); return d;
+    memo.set(key, d); return d;
   };
   const Pany = P || { project: rows.length ? rows[0].project : '', layouts: [], status: 'none', publishable: false };
   const res = E.analyse(rows, Pany, ctx, { decide });
   const S = res.summary;
   // sizes with no rental evidence at all: the bedroom counts of the nearest classified sizes below and above
-  const decided = Array.from(memo.entries()).filter(([, d]) => d.group != null).map(([a, d]) => ({ a: Number(a), g: d.group })).sort((x, y) => x.a - y.a);
-  memo.forEach((d, a) => { if (d.group != null || (d.possible && d.possible.length)) return; const lo = decided.filter((x) => x.a < Number(a)).pop(), hi = decided.find((x) => x.a > Number(a)); d.possible = uniq([lo && lo.g, hi && hi.g].filter(Boolean)); });
+  const num = (k) => Number(String(k).split('@')[0]);
+  const decided = Array.from(memo.entries()).filter(([, d]) => d.group != null).map(([a, d]) => ({ a: num(a), g: d.group })).sort((x, y) => x.a - y.a);
+  memo.forEach((d, a) => { if (d.group != null || (d.possible && d.possible.length)) return; const lo = decided.filter((x) => x.a < num(a)).pop(), hi = decided.find((x) => x.a > num(a)); d.possible = uniq([lo && lo.g, hi && hi.g].filter(Boolean)); });
   S.layoutQuality = lq; S.layoutsTrusted = trusted;
   S.rental = { contracts: cs.length, dropped: cs.dropped, bandConflicts: cs.bandConflicts };
   S.contradictions = contradictions;
-  S.mapping = Array.from(memo.entries()).map(([a, d]) => Object.assign({ sqm: a, tier: d.tier, group: d.group, reason: d.reason || null }, d.group == null ? { possible: d.possible || [] } : {})).sort((x, y) => Number(x.sqm) - Number(y.sqm));
+  // floor-dependent sizes (only where a table states levels): each band's decision, and what the pooled rental contracts said
+  const fd = Array.from(memo.entries()).filter(([k]) => k.indexOf('@') > -1).map(([k, d]) => ({ key: k, group: d.group, tier: d.tier, rental: d.rental || null, reason: d.reason || null }));
+  if (fd.length) S.floorDependent = fd;
+  S.mapping = Array.from(memo.entries()).map(([a, d]) => Object.assign({ sqm: a, tier: d.tier, group: d.group, reason: d.reason || null }, d.group == null ? { possible: d.possible || [] } : {})).sort((x, y) => num(x.sqm) - num(y.sqm) || (x.sqm < y.sqm ? -1 : x.sqm > y.sqm ? 1 : 0));
   return S;
 }
 
@@ -92,7 +119,8 @@ function changes(prev, next, minShift) {
   Object.keys(next.developments).forEach((p) => {
     const n = next.developments[p], q = prev.developments[p];
     if (!q) { out.newDevelopments.push(p); return; }
-    Object.keys(n.map).forEach((a) => { const was = q.map[a], now = n.map[a]; if (was && now && was.split(':')[1] !== now.split(':')[1]) out.contradictions.push({ project: p, sqm: a, was, now }); });
+    Object.keys(n.map).forEach((a) => { const was = Object.prototype.hasOwnProperty.call(q.map, a) ? q.map[a] : q.map[a.split('@')[0]], now = n.map[a];   // a new floor-band key ("63@16-20") is compared with the size it split from
+    if (was && now && was.split(':')[1] !== now.split(':')[1]) out.contradictions.push({ project: p, sqm: a, was, now }); });
     const d = (n.share || 0) - (q.share || 0);
     if (d <= -minShift) out.coverageDrops.push({ project: p, was: q.share, now: n.share }); else if (d >= minShift) out.coverageGains.push({ project: p, was: q.share, now: n.share });
   });
@@ -100,9 +128,13 @@ function changes(prev, next, minShift) {
   return out;
 }
 
+// Every table is read by its OWN header (5 Nov 2026): a table may add the optional levels column, or order its columns differently, and
+// still load. (Before, rows were appended under one fixed header, so a table with an extra column lost every row to "unknown status".)
+const LAYOUT_COLUMNS = ['project', 'code', 'bedrooms', 'variant', 'sqm', 'sqft', 'levels', 'source', 'status', 'note'];
+const csvCell = (v) => { const s = String(v == null ? '' : v); return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
 function loadDb(dirs) {
-  let csv = 'project,code,bedrooms,variant,sqm,sqft,source,status,note\n', src = 'id,project,title,url,retrieved,kind,note\n';
-  dirs.filter(Boolean).forEach((d) => fs.readdirSync(d).filter((f) => /\.csv$/.test(f) && f !== 'sources.csv' && f !== 'ranges.csv').forEach((f) => { csv += fs.readFileSync(path.join(d, f), 'utf8').split(/\r?\n/).slice(1).filter((l) => l.trim()).join('\n') + '\n'; }));
+  let csv = LAYOUT_COLUMNS.join(',') + '\n', src = 'id,project,title,url,retrieved,kind,note\n';
+  dirs.filter(Boolean).forEach((d) => fs.readdirSync(d).filter((f) => /\.csv$/.test(f) && f !== 'sources.csv' && f !== 'ranges.csv').sort().forEach((f) => { E.parseCsv(fs.readFileSync(path.join(d, f), 'utf8')).forEach((r) => { csv += LAYOUT_COLUMNS.map((c) => csvCell(r[c])).join(',') + '\n'; }); }));
   dirs.filter(Boolean).forEach((d) => { const f = path.join(d, 'sources.csv'); if (fs.existsSync(f)) src += fs.readFileSync(f, 'utf8').split(/\r?\n/).slice(1).filter((l) => l.trim()).join('\n') + '\n'; });
   return E.loadLayouts(csv, src);
 }
@@ -164,7 +196,7 @@ function publicView(report, opt) {
   return pub;
 }
 
-module.exports = { RULES, publicView, classifyDevelopment, completeness, rentalPossible, snapshot, changes, run, loadDb, preferCurated };
+module.exports = { RULES, publicView, classifyDevelopment, completeness, floorKeyed, rentalPossible, snapshot, changes, run, loadDb, preferCurated, LAYOUT_COLUMNS, FLOOR_RULE };
 
 if (require.main === module) {
   const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > -1 ? process.argv[i + 1] : d; };

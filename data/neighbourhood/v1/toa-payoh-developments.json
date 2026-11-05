@@ -1,0 +1,172 @@
+{
+ "area": "Toa Payoh",
+ "boundary": "URA Master Plan 2019 planning area",
+ "releaseId": "ni-v2-toa-payoh-2026-11-05-74c87d1ce62c",
+ "count": 41,
+ "developments": [
+  {
+   "registryId": "18-woodsville",
+   "name": "18 WOODSVILLE"
+  },
+  {
+   "registryId": "8-at-woodleigh",
+   "name": "8@WOODLEIGH"
+  },
+  {
+   "registryId": "avon-park",
+   "name": "AVON PARK"
+  },
+  {
+   "registryId": "bartley-ridge",
+   "name": "BARTLEY RIDGE"
+  },
+  {
+   "registryId": "bartley-vue",
+   "name": "BARTLEY VUE"
+  },
+  {
+   "registryId": "bellaville",
+   "name": "BELLAVILLE"
+  },
+  {
+   "registryId": "blossoms-at-woodleigh",
+   "name": "BLOSSOMS @ WOODLEIGH"
+  },
+  {
+   "registryId": "braddell-view",
+   "name": "BRADDELL VIEW"
+  },
+  {
+   "registryId": "casa-meya",
+   "name": "CASA MEYA"
+  },
+  {
+   "registryId": "euro-asia-park",
+   "name": "EURO-ASIA PARK"
+  },
+  {
+   "registryId": "gem-residences",
+   "name": "GEM RESIDENCES"
+  },
+  {
+   "registryId": "intero",
+   "name": "INTERO"
+  },
+  {
+   "registryId": "leicester-lodge",
+   "name": "LEICESTER LODGE"
+  },
+  {
+   "registryId": "leicester-suites",
+   "name": "LEICESTER SUITES"
+  },
+  {
+   "registryId": "meya-lodge",
+   "name": "MEYA LODGE"
+  },
+  {
+   "registryId": "myra",
+   "name": "MYRA"
+  },
+  {
+   "registryId": "nin-residence",
+   "name": "NIN RESIDENCE"
+  },
+  {
+   "registryId": "oasis-garden",
+   "name": "OASIS GARDEN"
+  },
+  {
+   "registryId": "oleander-towers",
+   "name": "OLEANDER TOWERS"
+  },
+  {
+   "registryId": "one-leicester",
+   "name": "ONE LEICESTER"
+  },
+  {
+   "registryId": "parc-aston",
+   "name": "PARC ASTON"
+  },
+  {
+   "registryId": "parc-mondrian",
+   "name": "PARC MONDRIAN"
+  },
+  {
+   "registryId": "park-colonial",
+   "name": "PARK COLONIAL"
+  },
+  {
+   "registryId": "platinum-edge",
+   "name": "PLATINUM EDGE"
+  },
+  {
+   "registryId": "ridge-court",
+   "name": "RIDGE COURT"
+  },
+  {
+   "registryId": "sant-ritz",
+   "name": "SANT RITZ"
+  },
+  {
+   "registryId": "sennett-residence",
+   "name": "SENNETT RESIDENCE"
+  },
+  {
+   "registryId": "sky-at-eleven",
+   "name": "SKY@ELEVEN"
+  },
+  {
+   "registryId": "the-addition",
+   "name": "THE ADDITION"
+  },
+  {
+   "registryId": "the-areca",
+   "name": "THE ARECA"
+  },
+  {
+   "registryId": "the-orie",
+   "name": "THE ORIE"
+  },
+  {
+   "registryId": "the-poiz-residences",
+   "name": "THE POIZ RESIDENCES"
+  },
+  {
+   "registryId": "the-tre-ver",
+   "name": "THE TRE VER"
+  },
+  {
+   "registryId": "the-venue-residences",
+   "name": "THE VENUE RESIDENCES"
+  },
+  {
+   "registryId": "the-woodleigh-residences",
+   "name": "THE WOODLEIGH RESIDENCES"
+  },
+  {
+   "registryId": "thomson-800",
+   "name": "THOMSON 800"
+  },
+  {
+   "registryId": "trellis-towers",
+   "name": "TRELLIS TOWERS"
+  },
+  {
+   "registryId": "trevista",
+   "name": "TREVISTA"
+  },
+  {
+   "registryId": "wan-tho-lodge",
+   "name": "WAN THO LODGE"
+  },
+  {
+   "registryId": "woodsville-28",
+   "name": "WOODSVILLE 28"
+  },
+  {
+   "registryId": "woodsville-mansions",
+   "name": "WOODSVILLE MANSIONS"
+  }
+ ]
+}

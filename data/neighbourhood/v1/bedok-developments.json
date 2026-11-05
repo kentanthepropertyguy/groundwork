@@ -1,0 +1,1252 @@
+{
+ "area": "Bedok",
+ "boundary": "URA Master Plan 2019 planning area",
+ "releaseId": "ni-v2-bedok-2026-11-05-bbfd6fa66367",
+ "count": 311,
+ "developments": [
+  {
+   "registryId": "448-at-east-coast",
+   "name": "448@EAST COAST"
+  },
+  {
+   "registryId": "77-at-east-coast",
+   "name": "77 @ EAST COAST"
+  },
+  {
+   "registryId": "aquarine-gardens",
+   "name": "AQUARINE GARDENS"
+  },
+  {
+   "registryId": "aquarius-by-the-park",
+   "name": "AQUARIUS BY THE PARK"
+  },
+  {
+   "registryId": "aquene",
+   "name": "AQUENE"
+  },
+  {
+   "registryId": "archipelago",
+   "name": "ARCHIPELAGO"
+  },
+  {
+   "registryId": "astor",
+   "name": "ASTOR"
+  },
+  {
+   "registryId": "astoria-park",
+   "name": "ASTORIA PARK"
+  },
+  {
+   "registryId": "auralis",
+   "name": "AURALIS"
+  },
+  {
+   "registryId": "axis-at-siglap",
+   "name": "AXIS @ SIGLAP"
+  },
+  {
+   "registryId": "bagnall-haus",
+   "name": "BAGNALL HAUS"
+  },
+  {
+   "registryId": "balcon-east",
+   "name": "BALCON EAST"
+  },
+  {
+   "registryId": "bayshore-park",
+   "name": "BAYSHORE PARK"
+  },
+  {
+   "registryId": "baywater",
+   "name": "BAYWATER"
+  },
+  {
+   "registryId": "baywind-residences",
+   "name": "BAYWIND RESIDENCES"
+  },
+  {
+   "registryId": "beau-vista",
+   "name": "BEAU VISTA"
+  },
+  {
+   "registryId": "bedok-court",
+   "name": "BEDOK COURT"
+  },
+  {
+   "registryId": "bedok-residences",
+   "name": "BEDOK RESIDENCES"
+  },
+  {
+   "registryId": "bedok-shopping-complex",
+   "name": "BEDOK SHOPPING COMPLEX"
+  },
+  {
+   "registryId": "berkeley-residences",
+   "name": "BERKELEY RESIDENCES"
+  },
+  {
+   "registryId": "beta-grove",
+   "name": "BETA GROVE"
+  },
+  {
+   "registryId": "bleu-at-east-coast",
+   "name": "BLEU @ EAST COAST"
+  },
+  {
+   "registryId": "bliss-residences",
+   "name": "BLISS RESIDENCES"
+  },
+  {
+   "registryId": "bliss-ville",
+   "name": "BLISS VILLE"
+  },
+  {
+   "registryId": "blu-coral",
+   "name": "BLU CORAL"
+  },
+  {
+   "registryId": "bowmont-centre",
+   "name": "BOWMONT CENTRE"
+  },
+  {
+   "registryId": "breeze-by-the-east",
+   "name": "BREEZE BY THE EAST"
+  },
+  {
+   "registryId": "cadence-light",
+   "name": "CADENCE LIGHT"
+  },
+  {
+   "registryId": "callidora-ville",
+   "name": "CALLIDORA VILLE"
+  },
+  {
+   "registryId": "camelodge",
+   "name": "CAMELODGE"
+  },
+  {
+   "registryId": "canary-ville",
+   "name": "CANARY VILLE"
+  },
+  {
+   "registryId": "candeville",
+   "name": "CANDEVILLE"
+  },
+  {
+   "registryId": "casa-flora",
+   "name": "CASA FLORA"
+  },
+  {
+   "registryId": "casa-merah",
+   "name": "CASA MERAH"
+  },
+  {
+   "registryId": "casa-sarina",
+   "name": "CASA SARINA"
+  },
+  {
+   "registryId": "casafina",
+   "name": "CASAFINA"
+  },
+  {
+   "registryId": "cascata",
+   "name": "CASCATA"
+  },
+  {
+   "registryId": "castle-loft",
+   "name": "CASTLE LOFT"
+  },
+  {
+   "registryId": "chateau-la-salle",
+   "name": "CHATEAU LA SALLE"
+  },
+  {
+   "registryId": "coastarina",
+   "name": "COASTARINA"
+  },
+  {
+   "registryId": "costa-del-sol",
+   "name": "COSTA DEL SOL"
+  },
+  {
+   "registryId": "costa-este",
+   "name": "COSTA ESTE"
+  },
+  {
+   "registryId": "country-park-condominium",
+   "name": "COUNTRY PARK CONDOMINIUM"
+  },
+  {
+   "registryId": "crescendo-building",
+   "name": "CRESCENDO BUILDING"
+  },
+  {
+   "registryId": "crescendo-park",
+   "name": "CRESCENDO PARK"
+  },
+  {
+   "registryId": "cubik",
+   "name": "CUBIK"
+  },
+  {
+   "registryId": "d-heritage-apartments",
+   "name": "D - HERITAGE APARTMENTS"
+  },
+  {
+   "registryId": "d-casita",
+   "name": "D' CASITA"
+  },
+  {
+   "registryId": "d-palma",
+   "name": "D' PALMA"
+  },
+  {
+   "registryId": "d-ecosia",
+   "name": "D'ECOSIA"
+  },
+  {
+   "registryId": "d-gallery",
+   "name": "D'GALLERY"
+  },
+  {
+   "registryId": "d-manor",
+   "name": "D'MANOR"
+  },
+  {
+   "registryId": "d-oasia",
+   "name": "D'OASIA"
+  },
+  {
+   "registryId": "d-saville",
+   "name": "D'SAVILLE"
+  },
+  {
+   "registryId": "de-casalle",
+   "name": "DE CASALLE"
+  },
+  {
+   "registryId": "deng-fu-ville",
+   "name": "DENG FU VILLE"
+  },
+  {
+   "registryId": "e-space",
+   "name": "E-SPACE"
+  },
+  {
+   "registryId": "east-bay-gardens",
+   "name": "EAST BAY GARDENS"
+  },
+  {
+   "registryId": "east-coast-residences",
+   "name": "EAST COAST RESIDENCES"
+  },
+  {
+   "registryId": "east-grove",
+   "name": "EAST GROVE"
+  },
+  {
+   "registryId": "east-meadows",
+   "name": "EAST MEADOWS"
+  },
+  {
+   "registryId": "east-palm",
+   "name": "EAST PALM"
+  },
+  {
+   "registryId": "east-shine",
+   "name": "EAST SHINE"
+  },
+  {
+   "registryId": "east-signature",
+   "name": "EAST SIGNATURE"
+  },
+  {
+   "registryId": "east-village",
+   "name": "EAST VILLAGE"
+  },
+  {
+   "registryId": "eastbay",
+   "name": "EASTBAY"
+  },
+  {
+   "registryId": "eastcove-residences",
+   "name": "EASTCOVE RESIDENCES"
+  },
+  {
+   "registryId": "eastern-lagoon",
+   "name": "EASTERN LAGOON"
+  },
+  {
+   "registryId": "eastern-residence",
+   "name": "EASTERN RESIDENCE"
+  },
+  {
+   "registryId": "eastrees",
+   "name": "EASTREES"
+  },
+  {
+   "registryId": "eastwood-centre",
+   "name": "EASTWOOD CENTRE"
+  },
+  {
+   "registryId": "eastwood-green",
+   "name": "EASTWOOD GREEN"
+  },
+  {
+   "registryId": "eastwood-lodge",
+   "name": "EASTWOOD LODGE"
+  },
+  {
+   "registryId": "eastwood-regency",
+   "name": "EASTWOOD REGENCY"
+  },
+  {
+   "registryId": "ebony-mansions",
+   "name": "EBONY MANSIONS"
+  },
+  {
+   "registryId": "eco",
+   "name": "ECO"
+  },
+  {
+   "registryId": "eight-at-east-coast",
+   "name": "EIGHT @ EAST COAST"
+  },
+  {
+   "registryId": "elite-residences",
+   "name": "ELITE RESIDENCES"
+  },
+  {
+   "registryId": "elliot-at-the-east-coast",
+   "name": "ELLIOT AT THE EAST COAST"
+  },
+  {
+   "registryId": "emprado-suites",
+   "name": "EMPRADO SUITES"
+  },
+  {
+   "registryId": "english-villas",
+   "name": "ENGLISH VILLAS"
+  },
+  {
+   "registryId": "envio",
+   "name": "ENVIO"
+  },
+  {
+   "registryId": "escada-view",
+   "name": "ESCADA VIEW"
+  },
+  {
+   "registryId": "espira-residence",
+   "name": "ESPIRA RESIDENCE"
+  },
+  {
+   "registryId": "espira-spring",
+   "name": "ESPIRA SPRING"
+  },
+  {
+   "registryId": "espira-suites",
+   "name": "ESPIRA SUITES"
+  },
+  {
+   "registryId": "eton-court",
+   "name": "ETON COURT"
+  },
+  {
+   "registryId": "euhabitat",
+   "name": "EUHABITAT"
+  },
+  {
+   "registryId": "eunos-park",
+   "name": "EUNOS PARK"
+  },
+  {
+   "registryId": "fairmount-condominium",
+   "name": "FAIRMOUNT CONDOMINIUM"
+  },
+  {
+   "registryId": "fernwood-towers",
+   "name": "FERNWOOD TOWERS"
+  },
+  {
+   "registryId": "finland-gardens",
+   "name": "FINLAND GARDENS"
+  },
+  {
+   "registryId": "fivenine",
+   "name": "FIVENINE"
+  },
+  {
+   "registryId": "flamingo-valley",
+   "name": "FLAMINGO VALLEY"
+  },
+  {
+   "registryId": "fortune-spring",
+   "name": "FORTUNE SPRING"
+  },
+  {
+   "registryId": "g-residences",
+   "name": "G RESIDENCES"
+  },
+  {
+   "registryId": "garden-park-residences",
+   "name": "GARDEN PARK RESIDENCES"
+  },
+  {
+   "registryId": "gemini-apartments",
+   "name": "GEMINI APARTMENTS"
+  },
+  {
+   "registryId": "glamour-ville",
+   "name": "GLAMOUR VILLE"
+  },
+  {
+   "registryId": "gold-leaf-mansions",
+   "name": "GOLD LEAF MANSIONS"
+  },
+  {
+   "registryId": "goodwill-court",
+   "name": "GOODWILL COURT"
+  },
+  {
+   "registryId": "grace-court",
+   "name": "GRACE COURT"
+  },
+  {
+   "registryId": "grand-duchess-at-st-patrick-s",
+   "name": "GRAND DUCHESS AT ST PATRICK'S"
+  },
+  {
+   "registryId": "grandeur-park-residences",
+   "name": "GRANDEUR PARK RESIDENCES"
+  },
+  {
+   "registryId": "grosvenor-view",
+   "name": "GROSVENOR VIEW"
+  },
+  {
+   "registryId": "h-residences",
+   "name": "H RESIDENCES"
+  },
+  {
+   "registryId": "heji-gardens",
+   "name": "HEJI GARDENS"
+  },
+  {
+   "registryId": "heritage-east",
+   "name": "HERITAGE EAST"
+  },
+  {
+   "registryId": "heritage-residences",
+   "name": "HERITAGE RESIDENCES"
+  },
+  {
+   "registryId": "homey-gardens",
+   "name": "HOMEY GARDENS"
+  },
+  {
+   "registryId": "hua-xin-court",
+   "name": "HUA XIN COURT"
+  },
+  {
+   "registryId": "idyllic-east",
+   "name": "IDYLLIC EAST"
+  },
+  {
+   "registryId": "idyllic-residences",
+   "name": "IDYLLIC RESIDENCES"
+  },
+  {
+   "registryId": "infini-at-east-coast",
+   "name": "INFINI AT EAST COAST"
+  },
+  {
+   "registryId": "ivory-apartments",
+   "name": "IVORY APARTMENTS"
+  },
+  {
+   "registryId": "j-at-63",
+   "name": "J@63"
+  },
+  {
+   "registryId": "jersey-lodge",
+   "name": "JERSEY LODGE"
+  },
+  {
+   "registryId": "ji-xiang-court",
+   "name": "JI XIANG COURT"
+  },
+  {
+   "registryId": "joo-chiat-verbena",
+   "name": "JOO CHIAT VERBENA"
+  },
+  {
+   "registryId": "k-suites",
+   "name": "K SUITES"
+  },
+  {
+   "registryId": "kaleido",
+   "name": "KALEIDO"
+  },
+  {
+   "registryId": "kembangan-court",
+   "name": "KEMBANGAN COURT"
+  },
+  {
+   "registryId": "kembangan-plaza",
+   "name": "KEMBANGAN PLAZA"
+  },
+  {
+   "registryId": "kembangan-suites",
+   "name": "KEMBANGAN SUITES"
+  },
+  {
+   "registryId": "kew-gate",
+   "name": "KEW GATE"
+  },
+  {
+   "registryId": "kew-green",
+   "name": "KEW GREEN"
+  },
+  {
+   "registryId": "kew-residencia",
+   "name": "KEW RESIDENCIA"
+  },
+  {
+   "registryId": "kiara-10",
+   "name": "KIARA 10"
+  },
+  {
+   "registryId": "kings-apartments",
+   "name": "KINGS APARTMENTS"
+  },
+  {
+   "registryId": "kingston-terrace",
+   "name": "KINGSTON TERRACE"
+  },
+  {
+   "registryId": "knox-view",
+   "name": "KNOX VIEW"
+  },
+  {
+   "registryId": "la-vida-at-130",
+   "name": "LA VIDA @ 130"
+  },
+  {
+   "registryId": "lagoon-view",
+   "name": "LAGOON VIEW"
+  },
+  {
+   "registryId": "laguna-88",
+   "name": "LAGUNA 88"
+  },
+  {
+   "registryId": "laguna-green",
+   "name": "LAGUNA GREEN"
+  },
+  {
+   "registryId": "laguna-park",
+   "name": "LAGUNA PARK"
+  },
+  {
+   "registryId": "landbay-condominium",
+   "name": "LANDBAY CONDOMINIUM"
+  },
+  {
+   "registryId": "laverne-s-loft",
+   "name": "LAVERNE'S LOFT"
+  },
+  {
+   "registryId": "le-conney-park",
+   "name": "LE CONNEY PARK"
+  },
+  {
+   "registryId": "le-marican",
+   "name": "LE MARICAN"
+  },
+  {
+   "registryId": "le-merritt",
+   "name": "LE MERRITT"
+  },
+  {
+   "registryId": "le-reve",
+   "name": "LE REVE"
+  },
+  {
+   "registryId": "levenue",
+   "name": "LEVENUE"
+  },
+  {
+   "registryId": "limau-park",
+   "name": "LIMAU PARK"
+  },
+  {
+   "registryId": "livingston-mansions",
+   "name": "LIVINGSTON MANSIONS"
+  },
+  {
+   "registryId": "lotus-ville",
+   "name": "LOTUS VILLE"
+  },
+  {
+   "registryId": "lucky-court",
+   "name": "LUCKY COURT"
+  },
+  {
+   "registryId": "m-suites",
+   "name": "M SUITES"
+  },
+  {
+   "registryId": "mabelle",
+   "name": "MABELLE"
+  },
+  {
+   "registryId": "madeira-court",
+   "name": "MADEIRA COURT"
+  },
+  {
+   "registryId": "mandarin-gardens",
+   "name": "MANDARIN GARDENS"
+  },
+  {
+   "registryId": "marine-garden",
+   "name": "MARINE GARDEN"
+  },
+  {
+   "registryId": "martia-8",
+   "name": "MARTIA 8"
+  },
+  {
+   "registryId": "martia-residence",
+   "name": "MARTIA RESIDENCE"
+  },
+  {
+   "registryId": "mayfair-residences",
+   "name": "MAYFAIR RESIDENCES"
+  },
+  {
+   "registryId": "melinia-court",
+   "name": "MELINIA COURT"
+  },
+  {
+   "registryId": "mera-east",
+   "name": "MERA EAST"
+  },
+  {
+   "registryId": "meridian-38",
+   "name": "MERIDIAN 38"
+  },
+  {
+   "registryId": "merlot-ville",
+   "name": "MERLOT VILLE"
+  },
+  {
+   "registryId": "mill-creek",
+   "name": "MILL CREEK"
+  },
+  {
+   "registryId": "naturalis",
+   "name": "NATURALIS"
+  },
+  {
+   "registryId": "nature-mansions",
+   "name": "NATURE MANSIONS"
+  },
+  {
+   "registryId": "neptune-court",
+   "name": "NEPTUNE COURT"
+  },
+  {
+   "registryId": "ocean-park",
+   "name": "OCEAN PARK"
+  },
+  {
+   "registryId": "optima-at-tanah-merah",
+   "name": "OPTIMA @ TANAH MERAH"
+  },
+  {
+   "registryId": "palacio",
+   "name": "PALACIO"
+  },
+  {
+   "registryId": "palm-galleria",
+   "name": "PALM GALLERIA"
+  },
+  {
+   "registryId": "palm-oasis",
+   "name": "PALM OASIS"
+  },
+  {
+   "registryId": "palm-tree-nines",
+   "name": "PALM TREE NINES"
+  },
+  {
+   "registryId": "palm-vista",
+   "name": "PALM VISTA"
+  },
+  {
+   "registryId": "palmera-east",
+   "name": "PALMERA EAST"
+  },
+  {
+   "registryId": "palmera-residence",
+   "name": "PALMERA RESIDENCE"
+  },
+  {
+   "registryId": "palmwoods",
+   "name": "PALMWOODS"
+  },
+  {
+   "registryId": "parbury-hill-condominium",
+   "name": "PARBURY HILL CONDOMINIUM"
+  },
+  {
+   "registryId": "parc-bleu",
+   "name": "PARC BLEU"
+  },
+  {
+   "registryId": "parc-elegance",
+   "name": "PARC ELEGANCE"
+  },
+  {
+   "registryId": "park-east",
+   "name": "PARK EAST"
+  },
+  {
+   "registryId": "picardy-gardens",
+   "name": "PICARDY GARDENS"
+  },
+  {
+   "registryId": "pine-court",
+   "name": "PINE COURT"
+  },
+  {
+   "registryId": "pinehurst-condominium",
+   "name": "PINEHURST CONDOMINIUM"
+  },
+  {
+   "registryId": "poh-heng-court",
+   "name": "POH HENG COURT"
+  },
+  {
+   "registryId": "poshgrove-east",
+   "name": "POSHGROVE EAST"
+  },
+  {
+   "registryId": "prestige-loft",
+   "name": "PRESTIGE LOFT"
+  },
+  {
+   "registryId": "prestige-residence",
+   "name": "PRESTIGE RESIDENCE"
+  },
+  {
+   "registryId": "prospero-ville",
+   "name": "PROSPERO VILLE"
+  },
+  {
+   "registryId": "qube-suites",
+   "name": "QUBE SUITES"
+  },
+  {
+   "registryId": "radix",
+   "name": "RADIX"
+  },
+  {
+   "registryId": "residence-118",
+   "name": "RESIDENCE 118"
+  },
+  {
+   "registryId": "residence-66",
+   "name": "RESIDENCE 66"
+  },
+  {
+   "registryId": "residence-twenty-two",
+   "name": "RESIDENCE TWENTY-TWO"
+  },
+  {
+   "registryId": "residences-88",
+   "name": "RESIDENCES 88"
+  },
+  {
+   "registryId": "ricchezza",
+   "name": "RICCHEZZA"
+  },
+  {
+   "registryId": "rich-east-garden",
+   "name": "RICH EAST GARDEN"
+  },
+  {
+   "registryId": "riviera-residences",
+   "name": "RIVIERA RESIDENCES"
+  },
+  {
+   "registryId": "rymden-77",
+   "name": "RYMDEN 77"
+  },
+  {
+   "registryId": "sapphire-court",
+   "name": "SAPPHIRE COURT"
+  },
+  {
+   "registryId": "sceneca-residence",
+   "name": "SCENECA RESIDENCE"
+  },
+  {
+   "registryId": "sea-pavilion-residences",
+   "name": "SEA PAVILION RESIDENCES"
+  },
+  {
+   "registryId": "seaside-park",
+   "name": "SEASIDE PARK"
+  },
+  {
+   "registryId": "seaside-residences",
+   "name": "SEASIDE RESIDENCES"
+  },
+  {
+   "registryId": "serenity-breeze",
+   "name": "SERENITY BREEZE"
+  },
+  {
+   "registryId": "seventy-saint-patrick-s",
+   "name": "SEVENTY SAINT PATRICK'S"
+  },
+  {
+   "registryId": "shiro",
+   "name": "SHIRO"
+  },
+  {
+   "registryId": "siglap-hill-33",
+   "name": "SIGLAP HILL 33"
+  },
+  {
+   "registryId": "siglap-lodge",
+   "name": "SIGLAP LODGE"
+  },
+  {
+   "registryId": "siglap-v",
+   "name": "SIGLAP V"
+  },
+  {
+   "registryId": "silahis-apartments",
+   "name": "SILAHIS APARTMENTS"
+  },
+  {
+   "registryId": "sin-chuan-garden",
+   "name": "SIN CHUAN GARDEN"
+  },
+  {
+   "registryId": "sing-lian-building",
+   "name": "SING LIAN BUILDING"
+  },
+  {
+   "registryId": "singa-hills",
+   "name": "SINGA HILLS"
+  },
+  {
+   "registryId": "sky-eden-at-bedok",
+   "name": "SKY EDEN@BEDOK"
+  },
+  {
+   "registryId": "springvale",
+   "name": "SPRINGVALE"
+  },
+  {
+   "registryId": "st-patrick-s-court",
+   "name": "ST PATRICK'S COURT"
+  },
+  {
+   "registryId": "st-patrick-s-green",
+   "name": "ST PATRICK'S GREEN"
+  },
+  {
+   "registryId": "st-patrick-s-loft",
+   "name": "ST PATRICK'S LOFT"
+  },
+  {
+   "registryId": "st-patrick-s-residences",
+   "name": "ST PATRICK'S RESIDENCES"
+  },
+  {
+   "registryId": "starville",
+   "name": "STARVILLE"
+  },
+  {
+   "registryId": "still-mansions",
+   "name": "STILL MANSIONS"
+  },
+  {
+   "registryId": "straits-at-joo-chiat",
+   "name": "STRAITS AT JOO CHIAT"
+  },
+  {
+   "registryId": "stratford-court",
+   "name": "STRATFORD COURT"
+  },
+  {
+   "registryId": "suites-at-eastcoast",
+   "name": "SUITES @ EASTCOAST"
+  },
+  {
+   "registryId": "suites-at-eunos",
+   "name": "SUITES @ EUNOS"
+  },
+  {
+   "registryId": "suites-twenty-two",
+   "name": "SUITES TWENTY-TWO"
+  },
+  {
+   "registryId": "summer-gardens",
+   "name": "SUMMER GARDENS"
+  },
+  {
+   "registryId": "sunny-lodge",
+   "name": "SUNNY LODGE"
+  },
+  {
+   "registryId": "sunny-palms",
+   "name": "SUNNY PALMS"
+  },
+  {
+   "registryId": "sunny-parc",
+   "name": "SUNNY PARC"
+  },
+  {
+   "registryId": "sunnyvale-residences",
+   "name": "SUNNYVALE RESIDENCES"
+  },
+  {
+   "registryId": "sunshine-grandeur",
+   "name": "SUNSHINE GRANDEUR"
+  },
+  {
+   "registryId": "sunshine-loft",
+   "name": "SUNSHINE LOFT"
+  },
+  {
+   "registryId": "sunshine-mansions",
+   "name": "SUNSHINE MANSIONS"
+  },
+  {
+   "registryId": "sunshine-residence",
+   "name": "SUNSHINE RESIDENCE"
+  },
+  {
+   "registryId": "taipan-grand",
+   "name": "TAIPAN GRAND"
+  },
+  {
+   "registryId": "tanah-merah-mansion",
+   "name": "TANAH MERAH MANSION"
+  },
+  {
+   "registryId": "tanamera-crest",
+   "name": "TANAMERA CREST"
+  },
+  {
+   "registryId": "teck-guan-ville",
+   "name": "TECK GUAN VILLE"
+  },
+  {
+   "registryId": "tedge",
+   "name": "TEDGE"
+  },
+  {
+   "registryId": "telok-kurau-lodge",
+   "name": "TELOK KURAU LODGE"
+  },
+  {
+   "registryId": "telok-mansion",
+   "name": "TELOK MANSION"
+  },
+  {
+   "registryId": "terra-villas",
+   "name": "TERRA VILLAS"
+  },
+  {
+   "registryId": "tg-mansion",
+   "name": "TG MANSION"
+  },
+  {
+   "registryId": "the-ambra",
+   "name": "THE AMBRA"
+  },
+  {
+   "registryId": "the-ambrosia",
+   "name": "THE AMBROSIA"
+  },
+  {
+   "registryId": "the-amery",
+   "name": "THE AMERY"
+  },
+  {
+   "registryId": "the-azzuro",
+   "name": "THE AZZURO"
+  },
+  {
+   "registryId": "the-bale",
+   "name": "THE BALE"
+  },
+  {
+   "registryId": "the-baycourt",
+   "name": "THE BAYCOURT"
+  },
+  {
+   "registryId": "the-bayshore",
+   "name": "THE BAYSHORE"
+  },
+  {
+   "registryId": "the-beccagayle",
+   "name": "THE BECCAGAYLE"
+  },
+  {
+   "registryId": "the-calypso",
+   "name": "THE CALYPSO"
+  },
+  {
+   "registryId": "the-champagne",
+   "name": "THE CHAMPAGNE"
+  },
+  {
+   "registryId": "the-clearwater",
+   "name": "THE CLEARWATER"
+  },
+  {
+   "registryId": "the-cotz",
+   "name": "THE COTZ"
+  },
+  {
+   "registryId": "the-cristallo",
+   "name": "THE CRISTALLO"
+  },
+  {
+   "registryId": "the-daffodil",
+   "name": "THE DAFFODIL"
+  },
+  {
+   "registryId": "the-domain",
+   "name": "THE DOMAIN"
+  },
+  {
+   "registryId": "the-ebony",
+   "name": "THE EBONY"
+  },
+  {
+   "registryId": "the-espira",
+   "name": "THE ESPIRA"
+  },
+  {
+   "registryId": "the-glacier",
+   "name": "THE GLACIER"
+  },
+  {
+   "registryId": "the-glades",
+   "name": "THE GLADES"
+  },
+  {
+   "registryId": "the-grandiflora",
+   "name": "THE GRANDIFLORA"
+  },
+  {
+   "registryId": "the-hacienda",
+   "name": "THE HACIENDA"
+  },
+  {
+   "registryId": "the-heliconia",
+   "name": "THE HELICONIA"
+  },
+  {
+   "registryId": "the-lattiz",
+   "name": "THE LATTIZ"
+  },
+  {
+   "registryId": "the-lenox",
+   "name": "THE LENOX"
+  },
+  {
+   "registryId": "the-lucent",
+   "name": "THE LUCENT"
+  },
+  {
+   "registryId": "the-medley",
+   "name": "THE MEDLEY"
+  },
+  {
+   "registryId": "the-montage",
+   "name": "THE MONTAGE"
+  },
+  {
+   "registryId": "the-navian",
+   "name": "THE NAVIAN"
+  },
+  {
+   "registryId": "the-nclave",
+   "name": "THE NCLAVE"
+  },
+  {
+   "registryId": "the-seawind",
+   "name": "THE SEAWIND"
+  },
+  {
+   "registryId": "the-sound",
+   "name": "THE SOUND"
+  },
+  {
+   "registryId": "the-springfield",
+   "name": "THE SPRINGFIELD"
+  },
+  {
+   "registryId": "the-summit",
+   "name": "THE SUMMIT"
+  },
+  {
+   "registryId": "the-sunnidora",
+   "name": "THE SUNNIDORA"
+  },
+  {
+   "registryId": "the-sunniflora",
+   "name": "THE SUNNIFLORA"
+  },
+  {
+   "registryId": "the-sunny-legend",
+   "name": "THE SUNNY LEGEND"
+  },
+  {
+   "registryId": "the-taipan",
+   "name": "THE TAIPAN"
+  },
+  {
+   "registryId": "the-tanamera",
+   "name": "THE TANAMERA"
+  },
+  {
+   "registryId": "the-treeline",
+   "name": "THE TREELINE"
+  },
+  {
+   "registryId": "the-tropic-gardens",
+   "name": "THE TROPIC GARDENS"
+  },
+  {
+   "registryId": "the-trumps",
+   "name": "THE TRUMPS"
+  },
+  {
+   "registryId": "the-verte",
+   "name": "THE VERTE"
+  },
+  {
+   "registryId": "the-vesta",
+   "name": "THE VESTA"
+  },
+  {
+   "registryId": "the-vines",
+   "name": "THE VINES"
+  },
+  {
+   "registryId": "tiara-vista",
+   "name": "TIARA VISTA"
+  },
+  {
+   "registryId": "tierra-vue",
+   "name": "TIERRA VUE"
+  },
+  {
+   "registryId": "tk-one",
+   "name": "TK ONE"
+  },
+  {
+   "registryId": "treescape",
+   "name": "TREESCAPE"
+  },
+  {
+   "registryId": "tropika-east",
+   "name": "TROPIKA EAST"
+  },
+  {
+   "registryId": "uber-388",
+   "name": "UBER 388"
+  },
+  {
+   "registryId": "uni-building",
+   "name": "UNI BUILDING"
+  },
+  {
+   "registryId": "united-mansion",
+   "name": "UNITED MANSION"
+  },
+  {
+   "registryId": "urban-treasures",
+   "name": "URBAN TREASURES"
+  },
+  {
+   "registryId": "urban-vista",
+   "name": "URBAN VISTA"
+  },
+  {
+   "registryId": "vacanza-at-east",
+   "name": "VACANZA @ EAST"
+  },
+  {
+   "registryId": "vela-bay",
+   "name": "VELA BAY"
+  },
+  {
+   "registryId": "venezio",
+   "name": "VENEZIO"
+  },
+  {
+   "registryId": "veranda",
+   "name": "VERANDA"
+  },
+  {
+   "registryId": "vibes-at-east-coast",
+   "name": "VIBES @ EAST COAST"
+  },
+  {
+   "registryId": "vicenta-lodge",
+   "name": "VICENTA LODGE"
+  },
+  {
+   "registryId": "villa-marina",
+   "name": "VILLA MARINA"
+  },
+  {
+   "registryId": "villa-martia",
+   "name": "VILLA MARTIA"
+  },
+  {
+   "registryId": "villas-la-vue",
+   "name": "VILLAS LA VUE"
+  },
+  {
+   "registryId": "villas-laguna",
+   "name": "VILLAS LAGUNA"
+  },
+  {
+   "registryId": "waterfront-gold",
+   "name": "WATERFRONT GOLD"
+  },
+  {
+   "registryId": "waterfront-isle",
+   "name": "WATERFRONT ISLE"
+  },
+  {
+   "registryId": "waterfront-key",
+   "name": "WATERFRONT KEY"
+  },
+  {
+   "registryId": "waterfront-waves",
+   "name": "WATERFRONT WAVES"
+  },
+  {
+   "registryId": "whitescape",
+   "name": "WHITESCAPE"
+  },
+  {
+   "registryId": "windy-heights",
+   "name": "WINDY HEIGHTS"
+  }
+ ]
+}

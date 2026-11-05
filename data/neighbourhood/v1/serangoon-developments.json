@@ -1,0 +1,380 @@
+{
+ "area": "Serangoon",
+ "boundary": "URA Master Plan 2019 planning area",
+ "releaseId": "ni-v2-serangoon-2026-11-05-a9022b7e256d",
+ "count": 93,
+ "developments": [
+  {
+   "registryId": "8-at-stratton",
+   "name": "8 @ STRATTON"
+  },
+  {
+   "registryId": "8-eden-grove",
+   "name": "8 EDEN GROVE"
+  },
+  {
+   "registryId": "affinity-at-serangoon",
+   "name": "AFFINITY AT SERANGOON"
+  },
+  {
+   "registryId": "amaranda-gardens",
+   "name": "AMARANDA GARDENS"
+  },
+  {
+   "registryId": "bartley-residences",
+   "name": "BARTLEY RESIDENCES"
+  },
+  {
+   "registryId": "bayou-residence",
+   "name": "BAYOU RESIDENCE"
+  },
+  {
+   "registryId": "belgravia-ace",
+   "name": "BELGRAVIA ACE"
+  },
+  {
+   "registryId": "belgravia-green",
+   "name": "BELGRAVIA GREEN"
+  },
+  {
+   "registryId": "belgravia-villas",
+   "name": "BELGRAVIA VILLAS"
+  },
+  {
+   "registryId": "bella-vista",
+   "name": "BELLA VISTA"
+  },
+  {
+   "registryId": "botanique-at-bartley",
+   "name": "BOTANIQUE AT BARTLEY"
+  },
+  {
+   "registryId": "brighton-crest",
+   "name": "BRIGHTON CREST"
+  },
+  {
+   "registryId": "cambio-suites",
+   "name": "CAMBIO SUITES"
+  },
+  {
+   "registryId": "cardiff-residence",
+   "name": "CARDIFF RESIDENCE"
+  },
+  {
+   "registryId": "casa-cambio",
+   "name": "CASA CAMBIO"
+  },
+  {
+   "registryId": "casa-espania",
+   "name": "CASA ESPANIA"
+  },
+  {
+   "registryId": "casa-riviera",
+   "name": "CASA RIVIERA"
+  },
+  {
+   "registryId": "casa-rosa",
+   "name": "CASA ROSA"
+  },
+  {
+   "registryId": "chepstow-ville",
+   "name": "CHEPSTOW VILLE"
+  },
+  {
+   "registryId": "cherry-gardens",
+   "name": "CHERRY GARDENS"
+  },
+  {
+   "registryId": "cherryhill",
+   "name": "CHERRYHILL"
+  },
+  {
+   "registryId": "chiltern-park",
+   "name": "CHILTERN PARK"
+  },
+  {
+   "registryId": "chuan-park",
+   "name": "CHUAN PARK"
+  },
+  {
+   "registryId": "chuan-park-demolished",
+   "name": "CHUAN PARK (DEMOLISHED)"
+  },
+  {
+   "registryId": "clydeswood",
+   "name": "CLYDESWOOD"
+  },
+  {
+   "registryId": "cotswold-villas",
+   "name": "COTSWOLD VILLAS"
+  },
+  {
+   "registryId": "d-almira",
+   "name": "D' ALMIRA"
+  },
+  {
+   "registryId": "d-kenaris",
+   "name": "D' KENARIS"
+  },
+  {
+   "registryId": "daisy-lodge",
+   "name": "DAISY LODGE"
+  },
+  {
+   "registryId": "daisy-suites",
+   "name": "DAISY SUITES"
+  },
+  {
+   "registryId": "dunsfold-18",
+   "name": "DUNSFOLD 18"
+  },
+  {
+   "registryId": "dunsfold-residences",
+   "name": "DUNSFOLD RESIDENCES"
+  },
+  {
+   "registryId": "e-maison",
+   "name": "E MAISON"
+  },
+  {
+   "registryId": "eden-crest",
+   "name": "EDEN CREST"
+  },
+  {
+   "registryId": "eden-view",
+   "name": "EDEN VIEW"
+  },
+  {
+   "registryId": "este-villa",
+   "name": "ESTE VILLA"
+  },
+  {
+   "registryId": "evania",
+   "name": "EVANIA"
+  },
+  {
+   "registryId": "forest-woods",
+   "name": "FOREST WOODS"
+  },
+  {
+   "registryId": "fortune-view",
+   "name": "FORTUNE VIEW"
+  },
+  {
+   "registryId": "fragrant-gardens",
+   "name": "FRAGRANT GARDENS"
+  },
+  {
+   "registryId": "gambir-ridge",
+   "name": "GAMBIR RIDGE"
+  },
+  {
+   "registryId": "golden-heights",
+   "name": "GOLDEN HEIGHTS"
+  },
+  {
+   "registryId": "goldenhill-park-condominium",
+   "name": "GOLDENHILL PARK CONDOMINIUM"
+  },
+  {
+   "registryId": "jade-residences",
+   "name": "JADE RESIDENCES"
+  },
+  {
+   "registryId": "kensington-park-condominium",
+   "name": "KENSINGTON PARK CONDOMINIUM"
+  },
+  {
+   "registryId": "kingsgrove",
+   "name": "KINGSGROVE"
+  },
+  {
+   "registryId": "la-belle",
+   "name": "LA BELLE"
+  },
+  {
+   "registryId": "la-dolce-vita",
+   "name": "LA DOLCE VITA"
+  },
+  {
+   "registryId": "lynwood-eight",
+   "name": "LYNWOOD EIGHT"
+  },
+  {
+   "registryId": "marlene-ville",
+   "name": "MARLENE VILLE"
+  },
+  {
+   "registryId": "matlock-residences",
+   "name": "MATLOCK RESIDENCES"
+  },
+  {
+   "registryId": "medallion",
+   "name": "MEDALLION"
+  },
+  {
+   "registryId": "milford-villas",
+   "name": "MILFORD VILLAS"
+  },
+  {
+   "registryId": "mimosa-park",
+   "name": "MIMOSA PARK"
+  },
+  {
+   "registryId": "nim-gardens",
+   "name": "NIM GARDENS"
+  },
+  {
+   "registryId": "one-chiltern",
+   "name": "ONE CHILTERN"
+  },
+  {
+   "registryId": "pollen-collection-ii",
+   "name": "POLLEN COLLECTION II"
+  },
+  {
+   "registryId": "presto-at-upper-serangoon",
+   "name": "PRESTO@UPPER SERANGOON"
+  },
+  {
+   "registryId": "r-maison",
+   "name": "R MAISON"
+  },
+  {
+   "registryId": "rosalia-park",
+   "name": "ROSALIA PARK"
+  },
+  {
+   "registryId": "seletar-park-residence",
+   "name": "SELETAR PARK RESIDENCE"
+  },
+  {
+   "registryId": "seletar-view",
+   "name": "SELETAR VIEW"
+  },
+  {
+   "registryId": "serangoon-garden-view",
+   "name": "SERANGOON GARDEN VIEW"
+  },
+  {
+   "registryId": "serene-view-mansions",
+   "name": "SERENE VIEW MANSIONS"
+  },
+  {
+   "registryId": "serenity-park",
+   "name": "SERENITY PARK"
+  },
+  {
+   "registryId": "sommerville-loft",
+   "name": "SOMMERVILLE LOFT"
+  },
+  {
+   "registryId": "sommerville-regency",
+   "name": "SOMMERVILLE REGENCY"
+  },
+  {
+   "registryId": "sommerville-residences",
+   "name": "SOMMERVILLE RESIDENCES"
+  },
+  {
+   "registryId": "space-at-kovan",
+   "name": "SPACE @ KOVAN"
+  },
+  {
+   "registryId": "stadia",
+   "name": "STADIA"
+  },
+  {
+   "registryId": "suites-at-braddell",
+   "name": "SUITES@BRADDELL"
+  },
+  {
+   "registryId": "sunglade",
+   "name": "SUNGLADE"
+  },
+  {
+   "registryId": "sunshine-grove",
+   "name": "SUNSHINE GROVE"
+  },
+  {
+   "registryId": "sunshine-lodge",
+   "name": "SUNSHINE LODGE"
+  },
+  {
+   "registryId": "the-acacias",
+   "name": "THE ACACIAS"
+  },
+  {
+   "registryId": "the-chuan",
+   "name": "THE CHUAN"
+  },
+  {
+   "registryId": "the-garden-residences",
+   "name": "THE GARDEN RESIDENCES"
+  },
+  {
+   "registryId": "the-gazania",
+   "name": "THE GAZANIA"
+  },
+  {
+   "registryId": "the-greenwich",
+   "name": "THE GREENWICH"
+  },
+  {
+   "registryId": "the-lilium",
+   "name": "THE LILIUM"
+  },
+  {
+   "registryId": "the-quinn",
+   "name": "THE QUINN"
+  },
+  {
+   "registryId": "the-scala",
+   "name": "THE SCALA"
+  },
+  {
+   "registryId": "the-scenic-at-braddell",
+   "name": "THE SCENIC @ BRADDELL"
+  },
+  {
+   "registryId": "the-silver-spurz",
+   "name": "THE SILVER SPURZ"
+  },
+  {
+   "registryId": "the-springbloom",
+   "name": "THE SPRINGBLOOM"
+  },
+  {
+   "registryId": "the-sunnydale",
+   "name": "THE SUNNYDALE"
+  },
+  {
+   "registryId": "the-sunshine",
+   "name": "THE SUNSHINE"
+  },
+  {
+   "registryId": "the-vue",
+   "name": "THE VUE"
+  },
+  {
+   "registryId": "the-yardley",
+   "name": "THE YARDLEY"
+  },
+  {
+   "registryId": "verdana-villas",
+   "name": "VERDANA VILLAS"
+  },
+  {
+   "registryId": "vibes-at-upper-serangoon",
+   "name": "VIBES@UPPER SERANGOON"
+  },
+  {
+   "registryId": "wolskel-lodge",
+   "name": "WOLSKEL LODGE"
+  },
+  {
+   "registryId": "yikai-court",
+   "name": "YIKAI COURT"
+  }
+ ]
+}

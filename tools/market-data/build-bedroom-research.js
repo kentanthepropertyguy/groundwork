@@ -84,10 +84,13 @@ const round = (v, k) => Math.round(v * Math.pow(10, k || 0)) / Math.pow(10, k ||
 
 // The accepted decision for an area: {cls, tier, group} as bedroom-engine.js expects. Unclassified areas are class D here; what they could be
 // is the completeness gate's business (possibleFor, then bedroom-hybrid.js completeness()).
+// A snapshot key "63@16-20" is a floor-dependent size (bedroom-hybrid.js): it wins over the plain size for a sale on that URA floor band.
+const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+const lookup = (map, t) => { const a = String(t.areaRaw != null ? t.areaRaw : t.sqm), k = t.floor ? a + '@' + t.floor : null; return k && own(map, k) ? map[k] : map[a]; };
 function decider(entry) {
   const map = (entry && entry.map) || {};
   return (t) => {
-    const a = String(t.areaRaw != null ? t.areaRaw : t.sqm), v = map[a];
+    const v = lookup(map, t);
     if (v) { const p = v.split(':'), g = p[1]; return p[0] === 'v' ? { cls: 'A', tier: 'verified', group: g, codes: [] } : { cls: 'B', tier: 'inferred', group: g, codes: [] }; }
     return { cls: 'D', tier: 'unclassified', group: null, groups: [], codes: [] };
   };
@@ -98,14 +101,15 @@ function decider(entry) {
 // the layout side of those few sizes needs the private layout tables, which this build does not read.
 function possibleFor(entry, rows, rentals) {
   const map = (entry && entry.map) || {}, cl = RE.cells(RE.contracts(rentals || [])), sctx = RE.salesContext(rows, cl);
-  const decided = Object.keys(map).filter((a) => map[a]).map((a) => ({ a: Number(a), g: map[a].split(':')[1] })).sort((x, y) => x.a - y.a);
+  const num = (k) => Number(String(k).split('@')[0]);
+  const decided = Object.keys(map).filter((a) => map[a]).map((a) => ({ a: num(a), g: map[a].split(':')[1] })).sort((x, y) => x.a - y.a);
   const areas = Array.from(new Set(rows.map((t) => String(t.areaRaw != null ? t.areaRaw : t.sqm)).concat(Object.keys(map))));
-  return areas.sort((x, y) => Number(x) - Number(y)).map((a) => {
+  return areas.sort((x, y) => num(x) - num(y) || (x < y ? -1 : x > y ? 1 : 0)).map((a) => {
     const v = map[a];
     if (v) return { sqm: a, tier: v[0] === 'v' ? 'verified' : 'inferred', group: v.split(':')[1] };
-    const ren = RE.classifySale(a, cl, RE.RULE, sctx);
+    const ren = RE.classifySale(a.split('@')[0], cl, RE.RULE, sctx);
     let possible = ren.cls === 'inferred' ? [String(ren.beds)] : H.rentalPossible(ren);
-    if (!possible.length) { const lo = decided.filter((x) => x.a < Number(a)).pop(), hi = decided.find((x) => x.a > Number(a)); possible = Array.from(new Set([lo && lo.g, hi && hi.g].filter(Boolean))); }
+    if (!possible.length) { const lo = decided.filter((x) => x.a < num(a)).pop(), hi = decided.find((x) => x.a > num(a)); possible = Array.from(new Set([lo && lo.g, hi && hi.g].filter(Boolean))); }
     return { sqm: a, tier: 'unclassified', group: null, possible };
   });
 }
@@ -124,6 +128,10 @@ function typeFigures(tx, g, sale, latest, gate) {
   const out = { g, label: E.groupLabel(g), n36, ambiguous: round(ambiguous, 3), basis, kept24: gate ? gate.kept : null };
   if (gate && !gate.ok) { out.figures = false; out.why = gate.kept < RULES.minSales ? 'few' : gate.share > RULES.maxAmbiguousShare ? 'ambiguous' : 'coverage'; return out; }
   if (win == null) { out.figures = false; out.why = 'few'; return out; }
+  // The penthouse group (5 Nov 2026, Master Planning): its layouts can have different bedroom counts, so its figures are never published
+  // as one pricing group. Only a group that would otherwise have figures is affected: a group withheld as too few is still named as such,
+  // exactly as before. Its sales stay in Transactions without a bedroom count; the private report says "combined".
+  if (g === 'PH') { out.figures = false; out.why = 'combined'; return out; }
   const c = E.cell(rows), sq = rows.map((t) => Math.floor(t.sqm * SQFT)).sort((x, y) => x - y);   // floor, as the 100 sq ft bands do (65 sqm = 699 sq ft, in 600–699)
   const wb = { verified: rows.filter((t) => t.tier === 'verified').length, inferred: rows.filter((t) => t.tier === 'inferred').length };
   Object.assign(out, { figures: true, win, n: c.n, act: c.act, last: ymToInt(c.last), from: ymToS(latest - win + 1), to: ymToS(latest), price: c.price, psf: c.psf, sqft: [sq[0], sq[sq.length - 1]], basis: wb });
@@ -192,7 +200,7 @@ function build(o) {
     const res = E.analyse(D.rows.map((t) => Object.assign({ project: name }, t)), { project: name, layouts: [], status: 'none', publishable: false }, ctx, { decide: decider(entry) });
     const tx = res.tx, S = res.summary, groups = Object.keys(S.groups);
     const rows = D.rows.map((t) => Object.assign({ project: name }, t));
-    const gate = H.completeness({ mapping: possibleFor(entry, rows, rent.get(name) || []) }, rows, latest, { months: RULES.gateMonths, minCoverage: RULES.minCoverage, maxAmbiguousShare: RULES.maxAmbiguousShare, minSales: RULES.minSales });
+    const mapping = possibleFor(entry, rows, rent.get(name) || []), gate = H.completeness({ mapping }, H.floorKeyed(mapping, rows), latest, { months: RULES.gateMonths, minCoverage: RULES.minCoverage, maxAmbiguousShare: RULES.maxAmbiguousShare, minSales: RULES.minSales });
     rec.gate = { coverage: gate.coverage == null ? null : round(gate.coverage, 3), recent: gate.recent, unclassified: gate.unclassified, types: gate.types };
     const pub = {};
     SALES.forEach((sale) => {

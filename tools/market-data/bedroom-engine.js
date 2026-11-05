@@ -19,7 +19,11 @@
    The developer's sqm is used when stated; sqft only when sqm is not.
 
    Layout tables are CSV (one file can hold many developments), so they can be kept and edited in a spreadsheet:
-     project,code,bedrooms,variant,sqm,sqft,source,status,note
+     project,code,bedrooms,variant,sqm,sqft[,levels],source,status,note
+   levels (optional, 5 Nov 2026): the storeys a layout is on, from the developer's unit list ("1-15", "16"). When given, a sale is matched
+   only to layouts whose storeys OVERLAP the sale's URA floor band ("16-20" keeps a layout on 16; "11-15" does not). A band never picks a
+   floor or a layout: every layout that could be on the band stays a candidate, layouts without levels always stay, and a sale with no
+   usable band (URA "-", basement bands) is matched to all layouts, exactly as before.
    project = the URA project name exactly; bedrooms = integer (0 = studio); variant = '' | study | premium | dual-key | penthouse |
    pes | loft | flexi | other; status = draft (not used) | reference (checks only) | secondary | developer | approved. Sources are a second CSV:
      id,project,title,url,retrieved,kind,note
@@ -47,6 +51,14 @@ function interval(value, unit) {
 }
 const overlaps = (a, b) => Math.max(a[0], b[0]) < Math.min(a[1], b[1]) - EPS;
 const midGap = (a, b) => Math.abs((a[0] + a[1]) / 2 - (b[0] + b[1]) / 2);   // distance between the stated values, in sqm
+
+/* ---------- storeys (levels) and URA floor bands ---------- */
+// "16" -> [16,16]; "1-15" -> [1,15]; blank -> null (no level information: the layout matches every floor)
+function parseLevels(v) { const s = String(v == null ? '' : v).trim(); if (!s) return null; const m = /^(\d{1,3})(?:\s*-\s*(\d{1,3}))?$/.exec(s); if (!m) return undefined; const lo = +m[1], hi = +(m[2] || m[1]); return lo >= 1 && hi >= lo ? [lo, hi] : undefined; }
+// URA floorRange "16-20" / "01-05" -> [16,20] / [1,5]; "-", "B1-B5" or anything else -> null (no filtering)
+function floorBand(fr) { const m = /^(\d{1,3})-(\d{1,3})$/.exec(String(fr == null ? '' : fr).trim()); return m ? [+m[1], +m[2]] : null; }
+// the layouts that could be on this floor band: storeys overlap the band, or no storeys stated
+function layoutsOnFloor(layouts, fr) { const b = floorBand(fr); if (!b) return layouts; return layouts.filter((l) => !l.levels || (l.levels[0] <= b[1] && l.levels[1] >= b[0])); }
 
 /* ---------- CSV ---------- */
 function parseCsv(text) {
@@ -85,8 +97,10 @@ function loadLayouts(layoutCsv, sourceCsv) {
     if (!ivSqm && ivSqft) {   // sqft only: note when it does not sit near a whole sqm (the brochure may state a decimal sqm)
       const mid = (ivSqft[0] + ivSqft[1]) / 2; if (Math.abs(mid - Math.round(mid)) > 0.1) issue('sqft ' + r.sqft + ' is ' + mid.toFixed(2) + ' sqm, not near a whole sqm; check the brochure sqm');
     }
+    const levels = parseLevels(r.levels);
+    if (levels === undefined) issue('levels "' + r.levels + '" not understood (write e.g. 16 or 1-15); ignored');
     const L = { code: r.code, bedrooms, variant: VARIANTS.indexOf(variant) < 0 ? 'other' : variant, sqm: r.sqm || null, sqft: r.sqft || null,
-      iv: ivSqm || ivSqft, basis: ivSqm ? 'sqm' : 'sqft', source: r.source || null, status, note: r.note || '' };
+      iv: ivSqm || ivSqft, basis: ivSqm ? 'sqm' : 'sqft', levels: levels || null, source: r.source || null, status, note: r.note || '' };
     if (P.all.some((x) => x.code === L.code)) issue('duplicate code');
     P.all.push(L);
     if (USE_STATUSES.indexOf(status) > -1) P.layouts.push(L);
@@ -98,6 +112,7 @@ function loadLayouts(layoutCsv, sourceCsv) {
     P.referenceOnly = !used.length && P.reference.length > 0;
     P.status = !used.length ? (P.reference.length ? 'reference' : 'none') : used.every((l) => l.status === 'approved') ? 'approved' : used.every((l) => PUBLISH_STATUSES.indexOf(l.status) > -1) ? 'developer' : used.every((l) => l.status === 'extracted') ? 'extracted' : 'secondary';
     P.publishable = used.length > 0 && used.every((l) => PUBLISH_STATUSES.indexOf(l.status) > -1);
+    P.hasLevels = used.some((l) => !!l.levels);
     used.forEach((l) => { if (l.source && !P.sources.some((s) => s.id === l.source)) P.issues.push(l.code + ': source "' + l.source + '" not listed in sources'); });
   });
   return out;
@@ -269,4 +284,4 @@ function rentalCheck(rentals, layouts) {
   return out;
 }
 
-module.exports = { rentalCheck, SQFT_PER_SQM, VARIANTS, STATUSES, USE_STATUSES, PUBLISH_STATUSES, SALE_NAME, interval, overlaps, decimalsOf, parseCsv, loadLayouts, classify, groupOf, groupLabel, groupOrder, cell, reading, analyse };
+module.exports = { rentalCheck, SQFT_PER_SQM, VARIANTS, STATUSES, USE_STATUSES, PUBLISH_STATUSES, SALE_NAME, interval, overlaps, decimalsOf, parseCsv, loadLayouts, classify, groupOf, groupLabel, groupOrder, cell, reading, analyse, parseLevels, floorBand, layoutsOnFloor };

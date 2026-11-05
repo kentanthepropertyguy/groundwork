@@ -10,6 +10,10 @@
    verified development file's sha256) and each area file (schema gw-neighbourhood-v1, pinned by the index). Fails closed: a file that is not the
    pinned one, an unknown schema, an insight without its qualifier, a deferred / withheld / not-assessed record carrying a value, any
    coordinate or address field, or a source without its attribution shows no neighbourhood page and no link.
+   Several areas (Batch 1, 5 Nov 2026, combined release candidate): an area's HDB medians are keyed by its index id ("toa-payoh"); a
+   record below its publication threshold (status "below_threshold", e.g. an EC rate with fewer than 1,000 EC homes) and a median with too
+   few resales ("belowThreshold") read "Not shown" with the data's own reason, never a number. An area with no approved finding shows no
+   page and no link (every summary figure takes its qualifier from an approved finding).
    Never shown: a score, a forecast, a buyer / upgrader / demand count, a value for a deferred (S3) or withheld (S4) record (it reads "Not
    published in this release", never zero or "none"), or a radius view. Every figure carries its period; every source its attribution.
    ========================================================================== */
@@ -19,12 +23,19 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
   const NI = { SCHEMA: 'gw-neighbourhood-v1', INDEX_SCHEMA: 'gw-neighbourhood-v1-index', DIR: 'data/neighbourhood/v1/',
-    INDEX: '73e557b3d02965e0c082e128a39ea9d3d6f7c247178452c319d76e8f6a30ee5f' };   // the index of Claude C's r2 package (ni-v1-hougang-2026-11-04-r2-65b38e9d8599)
+    INDEX: 'a22ba4a75f2e33e20d971ab1661e3414427bda34e8e069681ffca850faaf46fd' };   // NI V2 Batch 1 index, editorial approval 2026-11-05
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const isNum = (v) => typeof v === 'number' && isFinite(v);
   const n0 = (v) => (isNum(v) ? v.toLocaleString('en-SG', { maximumFractionDigits: 0 }) : '');
   const n1 = (v) => (isNum(v) ? v.toLocaleString('en-SG', { maximumFractionDigits: 1 }) : '');
+  // resale rates always with one decimal ("4.0", as the approved text writes them; Batch 1 r2)
+  const r1 = (v) => (isNum(v) ? v.toLocaleString('en-SG', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '');
   const money = (v) => (isNum(v) ? '$' + n0(v) : '');
+  // HDB flats per private home (stock.privateShare): the data's own figure and label, except where the ratio is one for one (Serangoon, RC2,
+  // Master Planning 5 Nov 2026), which reads "1.0 : 1" with "HDB flats to private homes" (never "1 HDB flats for every private home").
+  // The data files and their hashes are unchanged; this is wording only, in the summary card and the Homes row alike.
+  const share1 = (x) => isNum(x.value) && Math.round(x.value * 10) === 10;
+  const shareFig = (x) => (share1(x) ? { v: '1.0\u00a0:\u00a01', label: 'HDB flats to private homes' } : { v: n1(x.value), label: x.label });
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   // dates as a buyer reads them: 2026-10-08 -> 8 Oct 2026; 2025-10 -> Oct 2025 (the text is otherwise the data's own)
   const dates = (t) => String(t || '').replace(/\b(\d{4})-(\d{2})-(\d{2})\b/g, (_, y, m, d) => +d + ' ' + MON[+m - 1] + ' ' + y).replace(/\b(\d{4})-(\d{2})\b/g, (_, y, m) => MON[+m - 1] + ' ' + y);
@@ -41,6 +52,7 @@
   }
   const ITEM_SECTIONS = ['stock', 'activity', 'liquidity', 'upgraderContext', 'futureSupply'];
   const UNPUBLISHED = ['deferred', 'withheld', 'not_assessed'];
+  const BELOW = 'below_threshold';   // not published because a threshold is not met; carries no value, like the statuses above
   const VALUE_KEYS = ['value', 'value12', 'value24', 'values', 'count', 'sites', 'byType', 'byType12'];
   function checkIndex(ix) {
     if (!ix || ix.schemaVersion !== NI.INDEX_SCHEMA || !Array.isArray(ix.areas)) throw new Error('neighbourhood index: schema');
@@ -67,14 +79,21 @@
     const src = {}; (d.sources || []).forEach((s) => { if (!s.id || !s.publisher || !s.dataset || !s.attribution) throw new Error('neighbourhood: source ' + s.id); src[s.id] = s; });
     const items = {}; ITEM_SECTIONS.forEach((k) => (d[k] || []).forEach((it) => { if (!it.id || !it.label || !it.status) throw new Error('neighbourhood: item'); items[it.id] = it; (it.sourceIds || []).forEach((s) => { if (!src[s]) throw new Error('neighbourhood: item source ' + s); }); }));
     // an unpublished record (deferred S3, withheld S4, not assessed) carries no value of any kind, so it can never be drawn as a number
-    Object.keys(items).forEach((k) => { const it = items[k]; if (UNPUBLISHED.indexOf(it.status) >= 0 && VALUE_KEYS.some((v) => it[v] != null)) throw new Error('neighbourhood: a value on an unpublished record ' + k); });
+    Object.keys(items).forEach((k) => { const it = items[k]; if ((UNPUBLISHED.indexOf(it.status) >= 0 || it.status === BELOW) && VALUE_KEYS.some((v) => it[v] != null)) throw new Error('neighbourhood: a value on an unpublished record ' + k); });
+    // HDB medians: each flat type's median under the area's own key (its index id), a number; a type below the resale threshold is listed
+    // in belowThreshold with its count, never as a median
+    const med = items['context.hdbMedianPrices'];
+    if (med && med.status === 'publishable') {
+      Object.keys(med.values || {}).forEach((t) => { const v = med.values[t]; if (!v || !isNum(v[entry.id]) || !isNum(v.singapore)) throw new Error('neighbourhood: median key ' + t); });
+      (med.belowThreshold || []).forEach((b) => { if (!b || !b.type || !isNum(b.resales) || (med.values || {})[b.type]) throw new Error('neighbourhood: below-threshold median ' + (b && b.type)); });
+    }
     if (!Array.isArray(d.insights) || !d.insights.length) throw new Error('neighbourhood: insights');
     d.insights.forEach((i) => {
       if (!i.id || !i.text || !i.qualifier || !i.period) throw new Error('neighbourhood: insight ' + i.id);
       (i.sourceIds || []).forEach((s) => { if (!src[s]) throw new Error('neighbourhood: insight source ' + s); });
-      (i.itemIds || []).forEach((s) => { if (!items[s] || UNPUBLISHED.indexOf(items[s].status) >= 0) throw new Error('neighbourhood: insight item ' + s); });
+      (i.itemIds || []).forEach((s) => { if (!items[s] || UNPUBLISHED.indexOf(items[s].status) >= 0 || items[s].status === BELOW) throw new Error('neighbourhood: insight item ' + s); });
     });
-    return { d, items, src };
+    return { d, items, src, key: entry.id };
   }
 
   /* ---------------------------------------------------------------- the page */
@@ -89,12 +108,13 @@
     const figs = [];
     if (share && isNum(share.value) && hdb && isNum(hdb.value) && priv.every((x) => x && isNum(x.value)) && i1) {
       const r100 = (v) => Math.round(v / 100) * 100, pt = priv.reduce((s, x) => s + x.value, 0);
-      figs.push({ k: 'homes', scope: 'Homes', v: n1(share.value), label: share.label, cmp: 'About ' + n0(r100(hdb.value)) + ' HDB flats and ' + n0(r100(pt)) + ' private homes', q: i1.qualifier, t: dates(i1.period), ids: i1.sourceIds });
+      const sf = shareFig(share);
+      figs.push({ k: 'homes', scope: 'Homes', v: sf.v, label: sf.label, cmp: 'About ' + n0(r100(hdb.value)) + ' HDB flats and ' + n0(r100(pt)) + ' private homes', q: i1.qualifier, t: dates(i1.period), ids: i1.sourceIds });
     }
-    if (L && isNum(L.value) && L.comparison && i2) figs.push({ k: 'condo', scope: 'Condo resales', v: n1(L.value), label: 'resales per 100 homes a year',
-      cmp: ['Singapore ' + n1(L.comparison.singapore), cap(L.comparison.rankStatement || '')].filter(Boolean).join(' · '), q: i2.qualifier, t: dates(i2.period), ids: i2.sourceIds });
+    if (L && isNum(L.value) && L.comparison && i2) figs.push({ k: 'condo', scope: 'Condo resales', v: r1(L.value), label: 'resales per 100 homes a year',
+      cmp: ['Singapore ' + r1(L.comparison.singapore), cap(L.comparison.rankStatement || '')].filter(Boolean).join(' · '), q: i2.qualifier, t: dates(i2.period), ids: i2.sourceIds });
     const p5 = P && P.values && P.values['5-room'];
-    if (p5 && isNum(p5.hougang) && i5) figs.push({ k: 'prices', scope: 'HDB prices', v: money(p5.hougang), label: 'median 5-room resale', cmp: 'Singapore ' + money(p5.singapore), q: i5.qualifier, t: dates(i5.period), ids: i5.sourceIds });
+    if (p5 && isNum(p5[m.key]) && i5) figs.push({ k: 'prices', scope: 'HDB prices', v: money(p5[m.key]), label: 'median 5-room resale', cmp: 'Singapore ' + money(p5.singapore), q: i5.qualifier, t: dates(i5.period), ids: i5.sourceIds });
     const warn = i3 ? String(i3.qualifier).split(/(?<=\.)\s/)[0] : '';
     return { figs, warn };
   }
@@ -105,20 +125,24 @@
     ['atOrAbove20000', 'Households earning $20,000 or more a month from work'], ['noEmployedPerson', 'Households with no employed person']];
   const NOT_PUBLISHED = 'Not published in this release', NOT_ASSESSED = 'Not assessed';
   // an unpublished record's own reason, as the data states it, without its leading "Not (yet) published: " / "Not assessed: "
-  const why = (t) => cap(String(t || '').replace(/^Not (yet )?(published|assessed):\s*/i, ''));
+  const why = (t) => cap(String(t || '').replace(/^Not (yet )?(published|assessed|shown):\s*/i, ''));
+  const NOT_SHOWN = 'Not shown';
   function rank(c) { const r = c && c.rank; if (!r || !isNum(r.position)) return ''; return (r.tiedWith && r.tiedWith.length ? 'joint ' : '') + ordinal(r.position) + ' of ' + r.of + ' planning areas'; }
   function rowsOf(m, x) {
     if (UNPUBLISHED.indexOf(x.status) >= 0) return [row(x.label, x.status === 'not_assessed' ? NOT_ASSESSED : NOT_PUBLISHED, why(x.status === 'not_assessed' ? x.missing : x.reason))];
+    if (x.status === BELOW) return [row(x.label, NOT_SHOWN, why(x.reason))];
     if (x.status !== 'publishable') return [];
     const id = x.id;
-    if (/^stock\./.test(id)) return [row(x.label, id === 'stock.privateShare' ? n1(x.value) : n0(x.value), dates(x.period))];
+    if (id === 'stock.privateShare') { const sf = shareFig(x); return [row(sf.label, sf.v, dates(x.period))]; }
+    if (/^stock\./.test(id)) return [row(x.label, n0(x.value), dates(x.period))];
     if (/^activity\./.test(id)) return [row(x.label, n0(x.value12), n0(x.value24) + ' over 24 months · ' + per(x) + (x.byType12 ? ' · ' + Object.keys(x.byType12).map((k) => k + ' ' + n0(x.byType12[k])).join(', ') : ''))];
     if (/^liquidity\./.test(id)) {
-      const c = x.comparison || {}, nb = (c.neighbouringAreas || []).map((a) => a.area + ' ' + n1(a.value)).join(', ');
-      const fig = n1(x.value) + (x.unit === 'times' ? ' times' : '');
-      return [row(x.label, fig, ['Singapore ' + n1(c.singapore), c.rankStatement ? c.rankStatement : rank(c), nb ? 'Neighbouring areas: ' + nb : '', /^\d/.test(String(x.sample || '')) ? 'Base: ' + x.sample : '', per(x)].filter(Boolean).join(' · '))];
+      const c = x.comparison || {}, rate = x.unit === 'times' ? n1 : r1, nb = (c.neighbouringAreas || []).map((a) => a.area + ' ' + rate(a.value)).join(', ');
+      const fig = rate(x.value) + (x.unit === 'times' ? ' times' : '');
+      return [row(x.label, fig, ['Singapore ' + rate(c.singapore), c.rankStatement ? c.rankStatement : rank(c), nb ? 'Neighbouring areas: ' + nb : '', /^\d/.test(String(x.sample || '')) ? 'Base: ' + x.sample : '', per(x)].filter(Boolean).join(' · '))];
     }
-    if (id === 'context.hdbMedianPrices') return Object.keys(x.values || {}).map((t) => { const v = x.values[t]; return row('Median ' + t + ' HDB resale', money(v.hougang), 'Singapore ' + money(v.singapore) + ' · ' + n0(v.n) + ' resales · ' + per(x)); });
+    if (id === 'context.hdbMedianPrices') return Object.keys(x.values || {}).map((t) => { const v = x.values[t]; return row('Median ' + t + ' HDB resale', money(v[m.key]), 'Singapore ' + money(v.singapore) + ' · ' + n0(v.n) + ' resales · ' + per(x)); })
+      .concat((x.belowThreshold || []).map((b) => row('Median ' + b.type + ' HDB resale', NOT_SHOWN, n0(b.resales) + ' resale' + (b.resales === 1 ? '' : 's') + ' · ' + (x.rule || '') + ' · ' + per(x))));
     if (id === 'context.income') return INCOME.filter(([k]) => isNum(x.values[k])).map(([k, l]) => row(l, n1(x.values[k]) + '%', 'Singapore ' + n1(x.singapore[k]) + '% · ' + dates(x.period)))
       .concat([row('', '', [x.caveat, x.denominator].filter(Boolean).join(' · '))]);
     if (id === 'context.householdsByDwelling') return Object.keys(x.values || {}).map((k) => row('Resident households: ' + k, n0(x.values[k]), dates(x.period))).concat([row('', '', x.caveat || '')]);
@@ -136,8 +160,8 @@
     return [
       { k: 'H', name: 'Homes', q: 'How many homes, by type', hl: hdb ? n0(hdb.value) + ' HDB flats · ' + n0(pv.reduce((s, x) => s + x.value, 0)) + ' private homes' : '', sub: i1 ? i1.qualifier : '', items: sec('stock') },
       { k: 'R', name: 'Resales', q: 'How many homes changed hands', hl: ah && ac ? n0(ah.value12) + ' HDB · ' + n0(ac.value12) + ' condo resales' : '', sub: ah ? per(ah) : '', items: sec('activity') },
-      { k: 'A', name: 'Resale rates', q: 'How often homes resell, against Singapore', hl: lc && lh ? 'Condos ' + n1(lc.value) + ' · HDB ' + n1(lh.value) + ' per 100 homes a year' : '', sub: lc && lh ? 'Singapore ' + n1(lc.comparison.singapore) + ' and ' + n1(lh.comparison.singapore) + ' · ' + per(lc) : '', items: sec('liquidity') },
-      { k: 'C', name: 'Prices, households and residents', q: 'Context, not buying power or demand', hl: P5 ? '5-room HDB median ' + money(P5.hougang) : '', sub: P5 ? 'Singapore ' + money(P5.singapore) + ' · ' + per(I('context.hdbMedianPrices')) : '', items: sec('upgraderContext') },
+      { k: 'A', name: 'Resale rates', q: 'How often homes resell, against Singapore', hl: lc && lh ? 'Condos ' + r1(lc.value) + ' · HDB ' + r1(lh.value) + ' per 100 homes a year' : '', sub: lc && lh ? 'Singapore ' + r1(lc.comparison.singapore) + ' and ' + r1(lh.comparison.singapore) + ' · ' + per(lc) : '', items: sec('liquidity') },
+      { k: 'C', name: 'Prices, households and residents', q: 'Context, not buying power or demand', hl: P5 ? '5-room HDB median ' + money(P5[m.key]) : '', sub: P5 ? 'Singapore ' + money(P5.singapore) + ' · ' + per(I('context.hdbMedianPrices')) : '', items: sec('upgraderContext') },
       { k: 'F', name: 'Future supply', q: 'What is and is not recorded', hl: ks && ks.sites && ks.sites.length ? ks.sites.length + ' known site' + (ks.sites.length === 1 ? '' : 's') + ' · ' + ks.sites.map((s) => s.name).join(', ') : 'No known site recorded',
         sub: unpub.length ? unpub.length + ' supply figure' + (unpub.length === 1 ? '' : 's') + ' not published in this release' : '', items: sec('futureSupply') }
     ];
@@ -226,7 +250,8 @@
   // on a development's PRISM page: the link to its planning area, only when the approved index lists that development
   function mountLink(app, devId, o) {
     const root = o.root || '../';
-    return index(root).then((ix) => Promise.all(ix.areas.map((e) => developments(root, e).then((ids) => (ids.indexOf(devId) >= 0 ? e : null)))).then((hit) => {
+    // each area's development file is checked on its own: one that fails its checks never hides another area's link
+    return index(root).then((ix) => Promise.all(ix.areas.map((e) => developments(root, e).then((ids) => (ids.indexOf(devId) >= 0 ? e : null), () => null))).then((hit) => {
       const a = hit.find(Boolean); if (!a) return null;
       return area(root, a.id).then((m) => {   // the area page must itself pass its checks before anything links to it
         if (!m || (o.still && !o.still()) || app.querySelector('[data-gwa-link]')) return null;
@@ -235,5 +260,5 @@
       });
     })).catch(() => null);
   }
-  return { NI, checkIndex, checkDevelopments, checkArea, summaryOf, groupsOf, rowsOf, pageHtml, linkHtml, dates, show, mountLink, NOT_PUBLISHED, NOT_ASSESSED, _reset: () => { idx = null; [areas, devs].forEach((o) => Object.keys(o).forEach((k) => delete o[k])); } };
+  return { NI, NOT_SHOWN, checkIndex, checkDevelopments, checkArea, summaryOf, groupsOf, rowsOf, pageHtml, linkHtml, dates, show, mountLink, NOT_PUBLISHED, NOT_ASSESSED, _reset: () => { idx = null; [areas, devs].forEach((o) => Object.keys(o).forEach((k) => delete o[k])); } };
 });

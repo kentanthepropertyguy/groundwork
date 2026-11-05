@@ -33,13 +33,13 @@ const FLAG = { NETT: 1, PSF: 2, REPEAT: 4, ATYPICAL: 8 };
 const LIMITS = { psfLow: 0.6, psfHigh: 1.6, psfMinRows: 5, sizeLow: 2 / 3, sizeHigh: 1.5 };
 const med = (a) => { if (!a.length) return null; const s = a.slice().sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
 
-// rows of one development: [{ym, sale, floorRange, sqm, areaRaw, price, nett}] ; decide(areaRaw) -> 'v:3' | 'i:3' | null
+// rows of one development: [{ym, sale, floorRange, sqm, areaRaw, price, nett}] ; decide(areaRaw, floorRange) -> 'v:3' | 'i:3' | null
 function buildRows(rows, decide, floorBands) {
   const psfMed = {}; [1, 2, 3].forEach((s) => { const a = rows.filter((t) => t.sale === s).map((t) => t.price / (t.sqm * E.SQFT_PER_SQM)); psfMed[s] = a.length >= LIMITS.psfMinRows ? med(a) : null; });
   const key = (t) => [t.ym, t.sale, t.areaRaw, t.floorRange, t.price].join('|'), seen = new Map();
   rows.forEach((t) => seen.set(key(t), (seen.get(key(t)) || 0) + 1));
   // bedroom per size, and each type's median size (over all of this development's labelled rows)
-  const lab = (t) => { const v = decide(String(t.areaRaw)); return v ? { basis: v[0], beds: Number(v.split(':')[1]) } : null; };
+  const lab = (t) => { const v = decide(String(t.areaRaw), t.floorRange); return v ? { basis: v[0], beds: Number(v.split(':')[1]) } : null; };
   const sizes = {}; rows.forEach((t) => { const l = lab(t); if (l && Number.isInteger(l.beds)) (sizes[l.beds] = sizes[l.beds] || []).push(t.sqm); });
   const typeMed = {}; Object.keys(sizes).forEach((b) => { typeMed[b] = med(sizes[b]); });
   return rows.slice().sort((a, b) => b.ym - a.ym || a.sale - b.sale || b.price - a.price).map((t) => {
@@ -77,7 +77,8 @@ function run(o) {
   const shards = {}, stats = { developments: 0, rows: 0, bySale: { 1: 0, 2: 0, 3: 0 }, labelled: { v: 0, i: 0 }, labelledBySale: { 1: 0, 2: 0, 3: 0 }, flags: { nett: 0, psf: 0, repeat: 0, atypical: 0 }, noFloor: 0 };
   by.forEach((list, name) => {
     const s = G.split(list), entry = snap.developments[name], map = (entry && entry.map) || {};
-    const rows = buildRows(s.rows, (a) => map[a] || null, man.floorBands);
+    // a floor-dependent size has its own snapshot key per URA floor band ("63@16-20", bedroom-hybrid.js); it wins over the plain size
+    const own = (k) => Object.prototype.hasOwnProperty.call(map, k), rows = buildRows(s.rows, (a, fr) => (fr && own(a + '@' + fr) ? map[a + '@' + fr] : map[a]) || null, man.floorBands);
     const id = P.slugify(name), k = P.shardName(P.shardOf(id, man.shards));
     (shards[k] = shards[k] || { v: 1, kind: 'gw-tx-history', shard: k, projects: {} }).projects[id] = { name, cls: s.cls, rows };
     stats.developments++;

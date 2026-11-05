@@ -1,0 +1,140 @@
+{
+ "area": "Ang Mo Kio",
+ "boundary": "URA Master Plan 2019 planning area",
+ "releaseId": "ni-v2-ang-mo-kio-2026-11-05-0ef4e084cb7f",
+ "count": 33,
+ "developments": [
+  {
+   "registryId": "adana-at-thomson",
+   "name": "ADANA @ THOMSON"
+  },
+  {
+   "registryId": "alana",
+   "name": "ALANA"
+  },
+  {
+   "registryId": "amo-residence",
+   "name": "AMO RESIDENCE"
+  },
+  {
+   "registryId": "atelier-villas",
+   "name": "ATELIER VILLAS"
+  },
+  {
+   "registryId": "bullion-park",
+   "name": "BULLION PARK"
+  },
+  {
+   "registryId": "cabana",
+   "name": "CABANA"
+  },
+  {
+   "registryId": "castle-green",
+   "name": "CASTLE GREEN"
+  },
+  {
+   "registryId": "centro-residences",
+   "name": "CENTRO RESIDENCES"
+  },
+  {
+   "registryId": "far-horizon-gardens",
+   "name": "FAR HORIZON GARDENS"
+  },
+  {
+   "registryId": "floraview",
+   "name": "FLORAVIEW"
+  },
+  {
+   "registryId": "floraville",
+   "name": "FLORAVILLE"
+  },
+  {
+   "registryId": "grande-vista",
+   "name": "GRANDE VISTA"
+  },
+  {
+   "registryId": "grandeur-8",
+   "name": "GRANDEUR 8"
+  },
+  {
+   "registryId": "hillock-green",
+   "name": "HILLOCK GREEN"
+  },
+  {
+   "registryId": "horizon-gardens",
+   "name": "HORIZON GARDENS"
+  },
+  {
+   "registryId": "horizon-green",
+   "name": "HORIZON GREEN"
+  },
+  {
+   "registryId": "lattice-one",
+   "name": "LATTICE ONE"
+  },
+  {
+   "registryId": "lentor-central-residences",
+   "name": "LENTOR CENTRAL RESIDENCES"
+  },
+  {
+   "registryId": "lentor-gardens-residences",
+   "name": "LENTOR GARDENS RESIDENCES"
+  },
+  {
+   "registryId": "lentor-hills-residences",
+   "name": "LENTOR HILLS RESIDENCES"
+  },
+  {
+   "registryId": "lentor-mansion",
+   "name": "LENTOR MANSION"
+  },
+  {
+   "registryId": "lentor-modern",
+   "name": "LENTOR MODERN"
+  },
+  {
+   "registryId": "lentoria",
+   "name": "LENTORIA"
+  },
+  {
+   "registryId": "mayflower-residences",
+   "name": "MAYFLOWER RESIDENCES"
+  },
+  {
+   "registryId": "meadows-at-peirce",
+   "name": "MEADOWS @ PEIRCE"
+  },
+  {
+   "registryId": "nuovo",
+   "name": "NUOVO"
+  },
+  {
+   "registryId": "peirce-view",
+   "name": "PEIRCE VIEW"
+  },
+  {
+   "registryId": "poets-villas",
+   "name": "POETS VILLAS"
+  },
+  {
+   "registryId": "seasons-park",
+   "name": "SEASONS PARK"
+  },
+  {
+   "registryId": "sunrise-gardens",
+   "name": "SUNRISE GARDENS"
+  },
+  {
+   "registryId": "the-calrose",
+   "name": "THE CALROSE"
+  },
+  {
+   "registryId": "the-panorama",
+   "name": "THE PANORAMA"
+  },
+  {
+   "registryId": "thomson-grove",
+   "name": "THOMSON GROVE"
+  }
+ ]
+}

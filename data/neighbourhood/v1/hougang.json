@@ -1,6 +1,6 @@
 {
  "schemaVersion": "gw-neighbourhood-v1",
- "status": "approved for publication",
+ "status": "approved for publication: V1 approved 4 Nov 2026; neighbour correction (Bedok and Geylang added) approved by Master Planning 5 Nov 2026",
  "area": {
   "type": "planning_area",
   "name": "Hougang",
@@ -345,6 +345,14 @@
     },
     "neighbouringAreas": [
      {
+      "area": "Bedok",
+      "value": 2.2
+     },
+     {
+      "area": "Geylang",
+      "value": 2
+     },
+     {
       "area": "Sengkang",
       "value": 2.3
      },
@@ -387,6 +395,14 @@
      "rule": "areas with 1,000+ flats / homes; condo and EC developments with 12+ months since their first resale; HDB by HDB Property Information block positions"
     },
     "neighbouringAreas": [
+     {
+      "area": "Bedok",
+      "value": 3.6
+     },
+     {
+      "area": "Geylang",
+      "value": 3.7
+     },
      {
       "area": "Sengkang",
       "value": 3.6
@@ -963,6 +979,14 @@
     "singaporeExcludingRecent": 3.3,
     "neighbouringAreas": [
      {
+      "area": "Bedok",
+      "value": 3.6
+     },
+     {
+      "area": "Geylang",
+      "value": 3.7
+     },
+     {
       "area": "Sengkang",
       "value": 3.6
      },
@@ -1073,6 +1097,6 @@
   "No scores, forecasts or buyer counts; income and age figures are background context.",
   "Each figure states its source and period."
  ],
- "releaseId": "ni-v1-hougang-2026-11-04-r2-65b38e9d8599",
- "supersedes": "ni-v1-hougang-2026-11-04-940d9596cba3"
+ "releaseId": "ni-v1-hougang-2026-11-05-r3-7da61d610c1c",
+ "supersedes": "ni-v1-hougang-2026-11-04-r2-65b38e9d8599"
 }

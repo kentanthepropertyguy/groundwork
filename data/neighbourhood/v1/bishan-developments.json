@@ -1,0 +1,148 @@
+{
+ "area": "Bishan",
+ "boundary": "URA Master Plan 2019 planning area",
+ "releaseId": "ni-v2-bishan-2026-11-05-7b7f821ff1d4",
+ "count": 35,
+ "developments": [
+  {
+   "registryId": "183-longhaus",
+   "name": "183 LONGHAUS"
+  },
+  {
+   "registryId": "3bhc",
+   "name": "3BHC"
+  },
+  {
+   "registryId": "artisan-8",
+   "name": "ARTISAN 8"
+  },
+  {
+   "registryId": "bishan-8",
+   "name": "BISHAN 8"
+  },
+  {
+   "registryId": "bishan-loft",
+   "name": "BISHAN LOFT"
+  },
+  {
+   "registryId": "bishan-park-condominium",
+   "name": "BISHAN PARK CONDOMINIUM"
+  },
+  {
+   "registryId": "bishan-point",
+   "name": "BISHAN POINT"
+  },
+  {
+   "registryId": "boonview",
+   "name": "BOONVIEW"
+  },
+  {
+   "registryId": "centurion-12",
+   "name": "CENTURION 12"
+  },
+  {
+   "registryId": "clover-by-the-park",
+   "name": "CLOVER BY THE PARK"
+  },
+  {
+   "registryId": "country-esquire",
+   "name": "COUNTRY ESQUIRE"
+  },
+  {
+   "registryId": "country-grandeur",
+   "name": "COUNTRY GRANDEUR"
+  },
+  {
+   "registryId": "faber-garden-condominium",
+   "name": "FABER GARDEN CONDOMINIUM"
+  },
+  {
+   "registryId": "flame-tree-park",
+   "name": "FLAME TREE PARK"
+  },
+  {
+   "registryId": "grandioso-8",
+   "name": "GRANDIOSO 8"
+  },
+  {
+   "registryId": "jadescape",
+   "name": "Jadescape"
+  },
+  {
+   "registryId": "marymount-view",
+   "name": "MARYMOUNT VIEW"
+  },
+  {
+   "registryId": "rafflesia-condominium",
+   "name": "RAFFLESIA CONDOMINIUM"
+  },
+  {
+   "registryId": "seasons-view",
+   "name": "SEASONS VIEW"
+  },
+  {
+   "registryId": "sin-ming-plaza",
+   "name": "SIN MING PLAZA"
+  },
+  {
+   "registryId": "sky-habitat",
+   "name": "SKY HABITAT"
+  },
+  {
+   "registryId": "sky-vue",
+   "name": "SKY VUE"
+  },
+  {
+   "registryId": "the-gardens-at-bishan",
+   "name": "THE GARDENS AT BISHAN"
+  },
+  {
+   "registryId": "the-windsor",
+   "name": "THE WINDSOR"
+  },
+  {
+   "registryId": "thomson-grand",
+   "name": "THOMSON GRAND"
+  },
+  {
+   "registryId": "thomson-imperial-court",
+   "name": "THOMSON IMPERIAL COURT"
+  },
+  {
+   "registryId": "thomson-plaza",
+   "name": "THOMSON PLAZA"
+  },
+  {
+   "registryId": "thomson-v-one",
+   "name": "THOMSON V ONE"
+  },
+  {
+   "registryId": "thomson-v-two",
+   "name": "THOMSON V TWO"
+  },
+  {
+   "registryId": "thomson-view-condominium",
+   "name": "THOMSON VIEW CONDOMINIUM"
+  },
+  {
+   "registryId": "three-11",
+   "name": "THREE 11"
+  },
+  {
+   "registryId": "tresalveo",
+   "name": "TRESALVEO"
+  },
+  {
+   "registryId": "thomson-impressions",
+   "name": "Thomson Impressions"
+  },
+  {
+   "registryId": "thomson-reserve",
+   "name": "Thomson Reserve"
+  },
+  {
+   "registryId": "thomson-three",
+   "name": "Thomson Three"
+  }
+ ]
+}
