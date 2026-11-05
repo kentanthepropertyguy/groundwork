@@ -18,7 +18,16 @@
   "sourceAsOf": "2026-09",
   "exportedAt": "2026-10-30T18:00:00Z",
   "approvedAt": "2026-10-31T01:56:15+08:00",
-  "approvalRef": "GW-PRISM-V1-2026-10-31-A1"
+  "approvalRef": "GW-PRISM-V1-2026-10-31-A1",
+  "amendments": [
+   {
+    "ref": "GW-PRISM-V1-AMEND-KW-20261106-01",
+    "approvedAt": "2026-11-06",
+    "approvedBy": "Master Planning (ChatGPT 01), for Ken Tan",
+    "scope": "Withdrawn after the Kingsford Waterbay bedroom classification release of 5 Nov 2026: the first verdict watch-out, one limitation, and the reasons given for P.priceEvidence and R.bedroomCoverage. No new figures, metrics or claims.",
+    "previousSha256": "2d7266d31571169f2281a8aad3b31acb682de0229a6fd106cf47d2ff54ca1144"
+   }
+  ]
  },
  "release": {
   "status": "approved",
@@ -80,12 +89,6 @@
   ],
   "watchOut": [
    {
-    "text": "Bedroom-specific resale activity is unclassified for this development",
-    "uses": [
-     "R.bedroomCoverage"
-    ]
-   },
-   {
     "text": "The 194 rental contracts in 12 months include renewals",
     "uses": [
      "R.rentalContracts12"
@@ -99,7 +102,6 @@
   },
   "uses": [
    "R.activeMonths24",
-   "R.bedroomCoverage",
    "R.peerRank24",
    "R.rentalContracts12"
   ],
@@ -149,7 +151,7 @@
      "P0"
     ],
     "researchIds": [],
-    "status": "insufficient",
+    "status": "withheld",
     "value": null,
     "unit": null,
     "numerator": null,
@@ -175,7 +177,7 @@
     "methodId": "prism-v1-prototype-6:P0",
     "coverage": {
      "verified": false,
-     "reason": "no bedroom type or size band meets the minimum sample"
+     "reason": "Not part of this approved report."
     },
     "approval": {
      "state": "proposed",
@@ -184,9 +186,9 @@
     },
     "detail": null,
     "withheldDetail": null,
-    "nullReason": "no bedroom type or size band meets the minimum sample",
-    "nullReasonCode": "insufficient",
-    "note": "no bedroom type or size band meets the minimum sample"
+    "nullReason": "Not part of this approved report.",
+    "nullReasonCode": "not_approved",
+    "note": null
    }
   ],
   "R": [
@@ -245,7 +247,7 @@
     "researchIds": [
      "area-study:liquidity.bedroomCoverage"
     ],
-    "status": "insufficient",
+    "status": "withheld",
     "value": null,
     "unit": "share_of_resales",
     "numerator": null,
@@ -273,7 +275,7 @@
     "methodId": "bedroom_coverage_v1",
     "coverage": {
      "verified": false,
-     "reason": "No approved bedroom classification for this development."
+     "reason": "Not part of this approved report."
     },
     "approval": {
      "state": "proposed",
@@ -282,8 +284,8 @@
     },
     "detail": null,
     "withheldDetail": null,
-    "nullReason": "No approved bedroom classification for this development: bedroom-specific resale activity is not shown.",
-    "nullReasonCode": "no_bedroom_classification",
+    "nullReason": "Not part of this approved report.",
+    "nullReasonCode": "not_approved",
     "note": null
    },
    {
@@ -1810,7 +1812,6 @@
   "No composite score: score100 is null in V1 (no approved scoring method exists).",
   "Straight-line distances only. Observed transactions are not counts of prospective buyers, and nothing here is a forecast.",
   "Launched-but-unsold homes and pipeline homes are withheld until their local and release approvals exist, and are never added together.",
-  "No approved bedroom classification for this development: no bedroom-specific resale claims.",
   "Rental contracts include renewals; they do not show occupancy, yield or tenant demand."
  ]
 }

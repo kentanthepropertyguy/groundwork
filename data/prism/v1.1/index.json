@@ -1,6 +1,6 @@
 {
  "schemaVersion": "prism-public-v1.1-r3-index",
- "releaseId": "prism-v1.1-r3-fmrt-hpr-2026-11-04-5cc64056341d",
+ "releaseId": "prism-v1.1-r3-kw-v1amend-2026-11-06-104839837c2a",
  "status": "approved",
  "asAt": "2026-11-04",
  "approvalChain": [
@@ -11,7 +11,7 @@
   "GW-FMRT-P1-20261104-01",
   "GW-FMRT-P1-AMEND-HPR-20261104-01"
  ],
- "manifestSha256": "c56115d20a51dae0c8ed547aeeee71d7c74388492a9687bf73de48f79be7e67e",
+ "manifestSha256": "66cd26fddba776b5476e0d59e0a1d3d0cc3fadeab59c0447f520dc7a319b0bd1",
  "redirectsSha256": "2b67e1e3ca7b0e34e526ae4d6022fce59f97f80672a928ad8e4c8eba3c18d600",
  "counts": {
   "reports": 2099,

@@ -1,8 +1,9 @@
 {
  "note": "sha256 of the two V1 assessment pages as rendered by the live V3 renderer (c49c17e) on the live r3 data, pageHtml(md, { root: '../' }); the compact quick read must be the only addition",
  "commit": "c49c17e",
+ "amended": "GW-PRISM-V1-AMEND-KW-20261106-01 (6 Nov 2026): Kingsford Waterbay re-pinned; the page differs from 98df6900... only by the two withdrawn statements (a Verdict watch-out and a limitation)",
  "pages": {
-  "kingsford-waterbay": "98df690012084b21707de790c317660eef6d0680857659ab17743391e54c5660",
+  "kingsford-waterbay": "d2175347c4f596384df3793f1a41b0559dd87b47418f1900e18597de2978ef67",
   "hougang-central": "bb4d5245684a313011caf191a57506f896911a871ed428f4c812b31210270819"
  }
 }

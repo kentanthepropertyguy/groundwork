@@ -24,7 +24,7 @@ const STATEMENT = 'Upcoming on the Cross Island Line: Serangoon North MRT about 
 // 1 the delta
 const ix = JSON.parse(readB('index.json')), man = JSON.parse(readB('manifest.json'));
 check('a delta on Future MRT Phase 1 (deltaApproval ' + REF + ', previous prism-v1.1-r3-fmrt-p1-2026-11-04-ebfc22ae60fd), pinned', sha(readB('index.json')) === G.V11.INDEX && sha(readB('manifest.json')) === G.V11.MANIFEST &&
-  man.deltaApproval === REF && man.previous === 'prism-v1.1-r3-fmrt-p1-2026-11-04-ebfc22ae60fd' && G.V11.CHAIN[G.V11.CHAIN.length - 1] === REF && G.FMRT_AMEND[ID] === REF && Object.keys(G.FMRT_AMEND).length === 1);
+  (man.deltaApproval === REF ? man.previous === 'prism-v1.1-r3-fmrt-p1-2026-11-04-ebfc22ae60fd' : man.deltaApproval === 'GW-PRISM-V1-AMEND-KW-20261106-01' && man.previous === 'prism-v1.1-r3-fmrt-hpr-2026-11-04-5cc64056341d') && G.V11.CHAIN[G.V11.CHAIN.length - 1] === REF && G.FMRT_AMEND[ID] === REF && Object.keys(G.FMRT_AMEND).length === 1);
 check('every file the manifest lists matches its sha256', man.files.every((f) => sha(readB(f.path)) === f.sha256));
 const key = sha(ID).charAt(0), se = ix.shards.find((s) => s.key === key), sh = G.checkShard(JSON.parse(readB(se.path)), se, (id) => sha(id).charAt(0)), e = sh.entries.find((x) => x.id === ID);
 const rb = readB(e.path), r = JSON.parse(rb);

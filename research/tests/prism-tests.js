@@ -10,7 +10,7 @@ let pass = 0, fail = 0;
 const t = (name, fn) => { try { const r = fn(); if (r && r.then) return r.then(() => { pass++; console.log('  ok   ' + name); }, (e) => { fail++; console.log('  FAIL ' + name + '\n       ' + e.message); }); pass++; console.log('  ok   ' + name); } catch (e) { fail++; console.log('  FAIL ' + name + '\n       ' + e.message); } return Promise.resolve(); };
 const sha = (b) => crypto.createHash('sha256').update(b).digest('hex');
 const DIR = path.join(root, 'data/prism/v1');
-const MANIFEST_SHA = '831114f97c6b72f7af5c2d82c275a6eadae8ca4a6c489fa9fdea9596437de83b';   // the approved release as delivered (31 Oct 2026)
+const MANIFEST_SHA = '9015dfbcfc9c1c35732cdabe1eca5c8cc6fceba541b1cab07986d959ab52dd58';   // the approved release (31 Oct 2026), with GW-PRISM-V1-AMEND-KW-20261106-01 (6 Nov 2026); was 831114f9...
 const MAN = JSON.parse(fs.readFileSync(path.join(DIR, 'manifest.json'), 'utf8'));
 const raw = (id) => fs.readFileSync(path.join(DIR, 'reports', id + '.json'), 'utf8');
 const entry = (id) => MAN.reports.find((r) => r.id === id);

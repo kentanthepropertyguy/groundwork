@@ -28,7 +28,7 @@ check('the root index is the pinned file and the approved release', sha(ixB) ===
 // later deltas (the Hundred Palms Residences amendment, GW-FMRT-P1-AMEND-HPR-20261104-01) follow Phase 1 in the chain; they are tested in their own file
 const AMEND = Object.keys(G.FMRT_AMEND || {}), AMEND_REFS = AMEND.map((k) => G.FMRT_AMEND[k]);
 check('the manifest is the pinned file, bound by the root; Phase 1 (or an approved amendment after it) is the latest delta', sha(manB) === G.V11.MANIFEST && ix.manifestSha256 === G.V11.MANIFEST &&
-  man.releaseId === ix.releaseId && (man.deltaApproval === REF ? man.previous === FX.previous : AMEND_REFS.indexOf(man.deltaApproval) >= 0) && man.formatApproval === 'GW-PRISM-R3-SCHEMA-20261103-01');
+  man.releaseId === ix.releaseId && (man.deltaApproval === REF ? man.previous === FX.previous : AMEND_REFS.indexOf(man.deltaApproval) >= 0 || man.deltaApproval === 'GW-PRISM-V1-AMEND-KW-20261106-01') && man.formatApproval === 'GW-PRISM-R3-SCHEMA-20261103-01');
 check('the chain is r3\'s four approvals, then GW-FMRT-P1-20261104-01 (then only approved amendments)', G.V11.CHAIN[4] === REF && G.V11.CHAIN.slice(5).every((x) => AMEND_REFS.indexOf(x) >= 0) && man.approvalChain.join('|') === G.V11.CHAIN.join('|'));
 const badFiles = man.files.filter((f) => sha(readB(f.path)) !== f.sha256).map((f) => f.path);
 check('every file the manifest lists (' + man.files.length + ') matches its sha256', man.files.length === 2116 && !badFiles.length, badFiles.slice(0, 3));

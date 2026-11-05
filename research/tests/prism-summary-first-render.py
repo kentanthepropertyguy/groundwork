@@ -32,7 +32,7 @@ PAGES = {
     'the-quinn': ('profile', 3, None, None),
     'lush-acres': ('profile', 3, None, None),   # no watch sentence: the first figure's approved limitation is the warning
     '8-raja': ('profile', 2, None, None),       # partial: two figures only
-    'kingsford-waterbay': ('v1', 3, 'Regular project-wide resale activity', 'Bedroom-specific resale activity is unclassified for this development'),
+    'kingsford-waterbay': ('v1', 3, 'Regular project-wide resale activity', 'The 194 rental contracts in 12 months include renewals'),
     'hougang-central': ('v1', 3, None, None),
 }
 SUMMARY = """(() => { const q = document.querySelector('[data-gwp-quick]'); if (!q) return null; const top = q.querySelector('[data-gwp-short]');

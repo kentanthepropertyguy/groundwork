@@ -36,7 +36,7 @@
   const VERSION = 'prism-v1.1-r2-web-1';
   const SCHEMA = 'prism-public-v1';
   const DIR = 'data/prism/v1/';
-  const MANIFEST_V = '831114f97c';
+  const MANIFEST_V = '9015dfbcfc';
   // first 10 hex of manifest.json's sha256 (MANIFEST_V): a new release changes the address, so caches never mix releases
   // The nationwide release (GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1, D5): index.json is the root, pinned by sha256; it pins 16 shards
   // (index/<k>.json, k = first hex digit of sha256(report id)), each pins its reports. The page loads the root, the one shard a development
@@ -54,13 +54,15 @@
   const FMRT_AMEND = { 'hundred-palms-residences': 'GW-FMRT-P1-AMEND-HPR-20261104-01' };
   const V11 = { SCHEMA: 'prism-public-v1.1-r3', INDEX_SCHEMA: 'prism-public-v1.1-r3-index', SHARD_SCHEMA: 'prism-public-v1.1-r3-shard', DIR: 'data/prism/v1.1/',
     CHAIN: ['GW-PRISM-V1.1-2026-11-01-A1', 'GW-PRISM-V1.1-2026-11-03-DECILE', 'GW-PRISM-V1.1-2026-11-03-A2', 'GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1', FMRT, FMRT_AMEND['hundred-palms-residences']],
-    RELEASE: 'prism-v1.1-r3-fmrt-hpr-2026-11-04-5cc64056341d',
-    INDEX: '04afa13cdb2b891a400305309a9fe6be60c7cc0d5b095989e89be39f5d9332f0',      // index.json, byte for byte: any other is not read
-    MANIFEST: 'c56115d20a51dae0c8ed547aeeee71d7c74388492a9687bf73de48f79be7e67e',   // manifest.json, bound by the root (manifestSha256)
+    RELEASE: 'prism-v1.1-r3-kw-v1amend-2026-11-06-104839837c2a',
+    INDEX: 'da6d667fffa91588f4e9762e67d10d0ae662a13682ca5dc9338490232cd151a6',      // index.json, byte for byte: any other is not read
+    MANIFEST: '66cd26fddba776b5476e0d59e0a1d3d0cc3fadeab59c0447f520dc7a319b0bd1',   // manifest.json, bound by the root (manifestSha256)
     STATES: ['full', 'partial', 'pending', 'unavailable', 'new_launch', 'redirect'], PAGE_STATES: ['full', 'partial'],
     SHARDS: '0123456789abcdef',
+    // GW-PRISM-V1-AMEND-KW-20261106-01 (Master Planning, 6 Nov 2026): one V1 report withdraws statements made out of date by a later bedroom
+    // classification release (no new figures); its new sha256 replaces the 31 Oct one. A delta on the previous release; the chain is unchanged.
     V1PAIR: { release: 'prism-v1-release-2026-10-30-10911d7e2c92', approvalRef: 'GW-PRISM-V1-2026-10-31-A1',
-      sha256: ['2d7266d31571169f2281a8aad3b31acb682de0229a6fd106cf47d2ff54ca1144', '330f8e9f874bbf0e9e282b75d9e94b19a5e8d723be1f3ccb20faabfa306fc78f', '56b6139e0f013ac17bf92ac18183e290cc46fdb617e7906dc2513ff14e948ce1'] },
+      sha256: ['e8ed33432017b967dff5bffee51364c98785f8cf859336474c6fb23055b03ecf', '330f8e9f874bbf0e9e282b75d9e94b19a5e8d723be1f3ccb20faabfa306fc78f', '56b6139e0f013ac17bf92ac18183e290cc46fdb617e7906dc2513ff14e948ce1'] },
     PERIODS: { URA_TRANSACTIONS: '2026-09', URA_RENTAL: '2026-09', URA_DWELLING_UNITS: 'URA states Q4 2022; file updated 2026-02-26', URA_MP2019: 'Master Plan 2019', GW_BEDROOM: '2026-09',
       SINGSTAT_GHS2025: 'GHS 2025', LTA_RAIL_EXITS: 'accessed 2026-10-20', MOE_SCHOOLS: 'accessed 2026-10-20', NEA_SUPERMARKETS: 'accessed 2026-10-20', NEA_HAWKERS: 'accessed 2026-10-20',
       NPARKS_PARKS: 'accessed 2026-10-20', ONEMAP: 'accessed 2026-10-20', GW_UPCOMING: '2026-10-21',

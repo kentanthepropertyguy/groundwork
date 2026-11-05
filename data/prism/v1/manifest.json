@@ -45,7 +45,7 @@
    "id": "kingsford-waterbay",
    "slug": "kingsford-waterbay",
    "path": "reports/kingsford-waterbay.json",
-   "sha256": "2d7266d31571169f2281a8aad3b31acb682de0229a6fd106cf47d2ff54ca1144",
+   "sha256": "e8ed33432017b967dff5bffee51364c98785f8cf859336474c6fb23055b03ecf",
    "approved": true
   },
   {
@@ -61,6 +61,15 @@
    "path": "reports/thomson-three.json",
    "sha256": "56b6139e0f013ac17bf92ac18183e290cc46fdb617e7906dc2513ff14e948ce1",
    "approved": true
+  }
+ ],
+ "amendments": [
+  {
+   "ref": "GW-PRISM-V1-AMEND-KW-20261106-01",
+   "reportId": "kingsford-waterbay",
+   "approvedAt": "2026-11-06",
+   "previousSha256": "2d7266d31571169f2281a8aad3b31acb682de0229a6fd106cf47d2ff54ca1144",
+   "sha256": "e8ed33432017b967dff5bffee51364c98785f8cf859336474c6fb23055b03ecf"
   }
  ]
 }
