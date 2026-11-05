@@ -3,7 +3,7 @@
  "kind": "kpt-launch-roster",
  "scope": "active",
  "note": "The developer-listing projects the New Launches catalogue may show now. Names, locations and dates only. A project that leaves the developer listings is removed from this list; nothing here describes availability.",
- "asOf": "2026-10-27T05:20:33.429Z",
+ "asOf": "2026-11-05T16:49:28.747Z",
  "projects": [
   {
    "slug": "21-anderson",
@@ -16,8 +16,8 @@
    "street": "ANDERSON ROAD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "26-newton",
@@ -30,8 +30,8 @@
    "street": "NEWTON ROAD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "8-at-bt",
@@ -44,8 +44,8 @@
    "street": "BUKIT TIMAH LINK",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "amberwood-at-holland",
@@ -58,8 +58,8 @@
    "street": "HOLLAND LINK",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "ardor-residence",
@@ -72,8 +72,8 @@
    "street": "HAIG ROAD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "artisan-8",
@@ -86,8 +86,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "atlassia",
@@ -100,8 +100,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "aurea",
@@ -114,8 +114,8 @@
    "street": "BEACH ROAD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "bagnall-haus",
@@ -128,8 +128,8 @@
    "street": "UPPER EAST COAST ROAD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "canberra-crescent-residences",
@@ -142,8 +142,8 @@
    "street": "CANBERRA CRESCENT",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "canninghill-piers",
@@ -156,8 +156,8 @@
    "street": "CLARKE QUAY",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "cape-royale",
@@ -170,22 +170,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
-  },
-  {
-   "slug": "chuan-park",
-   "name": "CHUAN PARK",
-   "displayName": "Chuan Park",
-   "district": "19",
-   "region": "OCR",
-   "tenure": "99 yrs from 2024",
-   "tenureGroup": 1,
-   "street": "LORONG CHUAN",
-   "locSource": "ura",
-   "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "claydence",
@@ -198,8 +184,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "coastal-cabana",
@@ -212,8 +198,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "duet-at-emily",
@@ -226,8 +212,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "dunearn-house",
@@ -240,8 +226,8 @@
    "street": "DUNEARN ROAD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "eden-residences-at-capitol",
@@ -254,8 +240,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "elta",
@@ -268,8 +254,8 @@
    "street": "CLEMENTI AVENUE 1",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "faber-residence",
@@ -282,8 +268,8 @@
    "street": "FABER WALK",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "gems-ville",
@@ -296,8 +282,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "grand-dunman",
@@ -310,8 +296,8 @@
    "street": "DUNMAN ROAD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "hudson-place-residences",
@@ -324,8 +310,8 @@
    "street": "MEDIA CIRCLE",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "j-den",
@@ -338,8 +324,8 @@
    "street": "JURONG EAST CENTRAL 1",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "jansen-house",
@@ -352,8 +338,8 @@
    "street": "JANSEN ROAD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "kallang-riverside",
@@ -366,8 +352,8 @@
    "street": "KAMPONG BUGIS",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "kassia",
@@ -380,8 +366,8 @@
    "street": "FLORA DRIVE",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "kovan-jewel",
@@ -394,8 +380,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "lentor-gardens-residences",
@@ -408,8 +394,8 @@
    "street": "LENTOR GARDENS",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "lentoria",
@@ -422,8 +408,8 @@
    "street": "LENTOR HILLS ROAD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "lloyd-sixtyfive",
@@ -436,8 +422,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "lucerne-grand",
@@ -450,8 +436,8 @@
    "street": "LAKESIDE DRIVE",
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "lucida",
@@ -464,8 +450,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "meyer-blue",
@@ -478,8 +464,8 @@
    "street": "MEYER ROAD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "midtown-bay",
@@ -492,8 +478,8 @@
    "street": "BEACH ROAD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "narra-residences",
@@ -506,8 +492,8 @@
    "street": "DAIRY FARM WALK",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "nava-grove",
@@ -520,8 +506,8 @@
    "street": "PINE GROVE",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "newport-residences",
@@ -534,8 +520,8 @@
    "street": "ANSON ROAD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "north-gaia",
@@ -548,8 +534,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "norwood-grand",
@@ -562,8 +548,8 @@
    "street": "CHAMPIONS WAY",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "ocho",
@@ -576,8 +562,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "one-marina-gardens",
@@ -590,8 +576,8 @@
    "street": "MARINA GARDENS LANE",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "parktown-residence",
@@ -604,8 +590,8 @@
    "street": "TAMPINES STREET 62",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "penrith",
@@ -618,8 +604,8 @@
    "street": "MARGARET DRIVE",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "promenade-peak",
@@ -632,8 +618,8 @@
    "street": "ZION PROMENADE",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "reignwood-hamilton-scotts",
@@ -646,8 +632,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "residences-at-emerald-hill",
@@ -660,8 +646,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "river-green",
@@ -674,8 +660,8 @@
    "street": "RIVER VALLEY GREEN",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "river-modern",
@@ -688,8 +674,8 @@
    "street": "RIVER VALLEY GREEN",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "seascape-at-sentosa",
@@ -702,8 +688,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "skies-miltonia",
@@ -716,8 +702,8 @@
    "street": "MILTONIA CLOSE",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "sophia-meadow",
@@ -730,8 +716,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "sora",
@@ -744,8 +730,8 @@
    "street": "YUAN CHING ROAD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "springleaf-residence",
@@ -758,8 +744,8 @@
    "street": "UPPER THOMSON ROAD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "terra-hill",
@@ -772,8 +758,8 @@
    "street": "YEW SIANG ROAD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "the-arcady-at-boon-keng",
@@ -786,8 +772,8 @@
    "street": "SAINT BARNABAS LANE",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "the-collective-at-one-sophia",
@@ -800,8 +786,8 @@
    "street": "SOPHIA ROAD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "the-giverny-residences",
@@ -814,8 +800,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "the-hillshore",
@@ -828,8 +814,8 @@
    "street": "PASIR PANJANG ROAD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "the-line-at-tanjong-rhu",
@@ -842,8 +828,8 @@
    "street": "TANJONG RHU ROAD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "the-lumos",
@@ -856,8 +842,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "the-myst",
@@ -870,8 +856,8 @@
    "street": "UPPER BUKIT TIMAH ROAD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "the-oliv",
@@ -884,8 +870,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "the-orie",
@@ -898,8 +884,22 @@
    "street": "LORONG 1 TOA PAYOH",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
+  },
+  {
+   "slug": "the-ranz",
+   "name": "The Ranz",
+   "displayName": "The Ranz",
+   "district": "08",
+   "region": "RCR",
+   "tenure": "Freehold",
+   "tenureGroup": 4,
+   "street": "RANGOON ROAD",
+   "locSource": "reviewed",
+   "firstSeen": "2026-11-06",
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "the-residences-at-w-singapore-sentosa-cove",
@@ -912,8 +912,8 @@
    "street": "OCEAN WAY",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "the-ritz-carlton-residences",
@@ -926,8 +926,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "the-robertson-opus",
@@ -940,8 +940,8 @@
    "street": "UNITY STREET",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "the-sen",
@@ -954,8 +954,8 @@
    "street": "JALAN JURONG KECHIL",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "the-serra-residences",
@@ -968,8 +968,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-27",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "the-shorefront",
@@ -982,8 +982,22 @@
    "street": "JALAN LOYANG BESAR",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
+  },
+  {
+   "slug": "thomson-reserve",
+   "name": "Thomson Reserve",
+   "displayName": "Thomson Reserve",
+   "district": "20",
+   "region": "RCR",
+   "tenure": "99 yrs (start year not given)",
+   "tenureGroup": 0,
+   "street": "BRIGHT HILL DRIVE",
+   "locSource": "reviewed",
+   "firstSeen": "2026-11-06",
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "tmw-maxwell",
@@ -996,8 +1010,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "turquoise",
@@ -1010,8 +1024,8 @@
    "street": null,
    "locSource": "reviewed",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "union-square-residences",
@@ -1024,8 +1038,8 @@
    "street": "HAVELOCK ROAD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "upperhouse-at-orchard-boulevard",
@@ -1038,8 +1052,8 @@
    "street": "ORCHARD BOULEVARD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "v-on-shenton",
@@ -1052,8 +1066,8 @@
    "street": "SHENTON WAY",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "vela-bay",
@@ -1066,8 +1080,8 @@
    "street": "BAYSHORE WALK",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "verd-joo-chiat",
@@ -1080,8 +1094,8 @@
    "street": "JOO CHIAT TERRACE",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "w-residences-marina-view-singapore",
@@ -1094,8 +1108,8 @@
    "street": "MARINA VIEW",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   },
   {
    "slug": "zyon-grand",
@@ -1108,8 +1122,8 @@
    "street": "KIM SENG ROAD",
    "locSource": "ura",
    "firstSeen": "2026-10-07",
-   "lastChecked": "2026-10-27",
-   "lastListed": "2026-10-27"
+   "lastChecked": "2026-11-06",
+   "lastListed": "2026-11-06"
   }
  ]
 }
