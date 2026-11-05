@@ -63,10 +63,13 @@ try:
                     hp = pg.evaluate("""(() => [document.querySelector('.gwp-qr-h') ? document.querySelector('.gwp-qr-h').innerText.replace(/\\s+/g, ' ').trim() : '',
                       [...document.querySelectorAll('.gwp-qr .gwp-qr-f b')].map(b => b.textContent), document.body.textContent.indexOf('High resale activity, but sustained activity is still settling') >= 0,
                       document.querySelector('#gwpDimI [data-gwp-line="infrastructure.mrt"] [data-gwp-statement]').textContent])()""")
-                    check(f'{vn} {id}: the approved quick read, Reveal and MRT today, exactly', hp[0] == 'Farther from MRT. Higher pricing. Steady market.' and hp[1] == ['22.7% above', '1.6 km', '0.8% fewer'] and hp[2] and
+                    # the future-MRT reading pilot (Groundwork 01, 6 Nov 2026) now names the station in the quick read (prism-fmrt-quick-tests.js); the Reveal and MRT today are unchanged
+                    check(f'{vn} {id}: the pilot quick read, the approved Reveal and MRT today, exactly', hp[0] == 'New MRT station being built 300 m away. Higher pricing. Steady market.' and hp[1] == ['22.7% above', '1.6 km', '300 m', '0.8% fewer'] and hp[2] and
                           hp[3] == 'Hougang MRT about 1,600 m, Kovan MRT about 1,610 m; closer than 1 of 46 similar developments. Straight-line distances.', hp)
                 qr = pg.evaluate("(() => { const q = document.querySelector('.gwp-qr'); return q ? q.innerText : ''; })()")
-                check(f'{vn} {id}: the quick read never names a planned station', not PLANNED.search(qr), qr[:200])
+                if id == 'hundred-palms-residences':   # the pilot: only its approved nearest future station, with its status and LTA target
+                    check(f'{vn} {id}: the pilot quick read names only Serangoon North MRT, under construction, LTA target 2030', 'Serangoon North MRT' in qr and 'Under construction · LTA target 2030' in qr.replace('\u00a0', ' ') and not PLANNED.search(qr.replace('Serangoon North MRT', '')), qr[:300])
+                else: check(f'{vn} {id}: the quick read never names a planned station', not PLANNED.search(qr), qr[:200])
                 check(f'{vn} {id}: no script error', not errs, errs[:2])
             ctx.close()
         br.close()

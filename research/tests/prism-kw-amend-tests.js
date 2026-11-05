@@ -58,7 +58,10 @@ check('V1.1 manifest: every listed file (reports, shards, redirects) unchanged: 
   const back = [[G.MANIFEST_V, APPROVED.v1Manifest.slice(0, 10)], [G.V11.RELEASE, APPROVED.release], [G.V11.INDEX, APPROVED.index], [G.V11.MANIFEST, APPROVED.v11Manifest], [rSha, APPROVED.report]];
   back.forEach(([a, b]) => { g = g.split(a).join(b); });
   g = g.replace(/    \/\/ GW-PRISM-V1-AMEND-KW-20261106-01 [^\n]*\n    \/\/ [^\n]*\n/, '');
-  check('gw-prism.js: only the pins and a two-line note changed (put back, it is the approved file: no logic change)', sha(g) === APPROVED.gwPrism); }
+  // later approved renderer changes, each tested in its own file (put back as above, the file is one of these):
+  //   the future-MRT reading pilot (Groundwork 01, 6 Nov 2026): FM, futureNear and their uses; research/tests/prism-fmrt-quick-tests.js
+  const LATER = ['78b7cc405a9aed4920b3452092d6f56f7693b6fa1e851c90967c4ea965fb999c'];
+  check('gw-prism.js: only the pins and a two-line note changed (put back, it is the approved file: no logic change; or a later approved renderer change)', sha(g) === APPROVED.gwPrism || LATER.indexOf(sha(g)) >= 0, sha(g)); }
 check('the Research page loads this exact gw-prism.js (script version)', read('research/index.html').indexOf('gw-prism.js?v=' + sha(readB('assets/js/gw-prism.js')).slice(0, 10) + '"') > 0);
 
 // 3 the page

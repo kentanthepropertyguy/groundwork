@@ -491,6 +491,25 @@
     foot: 'The original figures, periods, comparison groups and sources are in the five dimensions below.'
   };
   const fill = (t, o) => t.replace(/\{(\w+)\}/g, (_, k) => (o[k] == null ? '' : o[k]));
+  /* Future MRT in the buyer-facing reading (Ken / Groundwork 01, 6 Nov 2026; PILOT: the one report in FM.PILOT until approved for the rest).
+     Only where the approved future-transport line (Phase 1, FT) materially changes the connectivity reading: its nearest station under
+     construction is within FM.NEAR m (the same straight-line rule as "Close to MRT") while today's nearest station is not "close".
+     Then the quick read's headline, its MRT figure, the "farther from MRT" sentence and the full analysis's MRT card also state that station:
+     straight-line distance to the planned station site, "under construction", and the LTA target year. Facts only: no benefit, demand,
+     price or appreciation claim; price, resale and market readings are untouched; the approved Reveal is unchanged. */
+  const FM = { PILOT: { 'hundred-palms-residences': true }, NEAR: 500,
+    head: 'New MRT station being built {m} away',
+    scopeToday: 'MRT today', scopeFut: 'Future MRT', futLabel: '{station}', futSub: '{line} · Under construction · LTA\u00a0target\u00a0{y}',   // the target year never on a line of its own
+    watch: 'Farther from an MRT or LRT station than most similar developments today; {station} ({line}) is under construction about {m} away, LTA target {y}.',
+    card: 'Future: {station} ({line}) about {m} to the planned site, under construction, LTA target {y}.' };   // the card's own limit says straight line
+  function futureNear(v) {
+    if (!v || !FM.PILOT[v.id] || !v.profile) return null;
+    const l = lineOf(v, 'I', 'infrastructure.futureTransport'), s = l && l.status === 'available' && l.data && Array.isArray(l.data.stations) ? l.data.stations[0] : null;
+    if (!s || s.status !== 'under_construction' || !isNum(s.distanceM) || s.distanceM > FM.NEAR || !/^20\d\d$/.test(s.target || '')) return null;
+    const m = lineOf(v, 'I', 'infrastructure.mrt'), t = m && m.status === 'available' && m.data && Array.isArray(m.data.stations) ? m.data.stations[0] : null, rank = m && m.data && m.data.rank;
+    if (t && isNum(t.distanceM) && t.distanceM <= FM.NEAR && !(rank && rank.band === 'below')) return null;   // already "Close to MRT" today: no material change
+    return { name: s.name, line: s.line, code: s.code, target: s.target, distanceM: s.distanceM, m: metres(s.distanceM) };
+  }
   // op: the page's approved opening (reveal11), shown on top; its notes (Settling, D3's missing-evidence statements) are not repeated below
   function explain11(v, name, op) {
     if (!v || !v.profile) return null;
@@ -523,7 +542,7 @@
         why: C.R.why[k], limit: k === 'settling' && shown('Settling: ') ? '' : C.R.limit[k] || '', key: k === 'below', when: (settling ? 'Observed, ' : '') + R.periodLabel }); }
     if (st && isNum(st.distanceM)) cards.push({ dim: 'I', scope: XT.scope.location, name: C.I.name, v: metres(st.distanceM), unit: fill(C.I.unit, { station: st.name }),
       cmp: rank && isNum(rank.peersWithValue) ? fill(C.I.closer, { x: num(rank.higher, 0), n: num(rank.peersWithValue, 0), wf: wf(rank) })   /* the approved statement's own count, in every band */ : '',
-      why: rank && C.I.why[rank.band] ? C.I.why[rank.band] : '', limit: C.I.limit, when: '' });
+      why: rank && C.I.why[rank.band] ? C.I.why[rank.band] : '', limit: C.I.limit, when: '', fut: futureNear(v) ? (() => { const f = futureNear(v); return fill(FM.card, { station: f.name, line: f.line, code: f.code, m: f.m, y: f.target }); })() : '' });
     if (chg !== null && mk.period && mk.period.latest) cards.push({ dim: 'M', scope: XT.scope.market, name: C.M.name, v: fill(chg < 0 ? C.M.fewer : chg > 0 ? C.M.more : C.M.zero, { x: ab(chg) }), unit: C.M.unit,
       cmp: fill(C.M.cmp, { prior: num(mk.data.prior, 0), latest: num(mk.data.latest, 0) }) + (q && q.data && q.data.resales2km === mk.data.latest && rk(q.data, C.M.rank, C.M.rank0) ? '. ' + rk(q.data, C.M.rank, C.M.rank0) : ''),
       why: C.M.why[mkey], limit: mkey === 'flat' ? '' : C.M.limit, when: period(mk.period.latest) + ' against the year before' });
@@ -541,7 +560,8 @@
     if (settling && !shown('Settling: ')) watch.push(XT.watch.settling);
     if (R && R.band === 'below' && !settling) watch.push(XT.watch.resaleBelow);
     if (P && P.band === 'above') watch.push(fill(XT.watch.priceAbove, { cls }));
-    if (rank && rank.band === 'below') watch.push(XT.watch.mrtFar);
+    const fu = futureNear(v);
+    if (rank && rank.band === 'below') watch.push(fu ? fill(FM.watch, { station: fu.name, line: fu.line, m: fu.m, y: fu.target }) : XT.watch.mrtFar);
     if (mkey === 'down' || mkey === 'up') watch.push(fill(mkey === 'down' ? XT.watch.marketDown : XT.watch.marketUp, { x: ab(chg), apart: R ? XT.watch.apart : '' }));
     const miss = (k, ms, t) => { const l = lineOf(v, k, ms); if (l && l.status === 'not_available' && l.statement.indexOf('Not available: ') === 0 && !shown(l.statement)) watch.push(fill(t, { why: l.statement.slice(15) })); };
     if (!P) miss('P', 'price.entry', XT.watch.noPrice);
@@ -558,7 +578,7 @@
     if (!x) return '';
     const card = (f) => '<a class="gwp-xf" href="#/prism/' + esc(id || '') + '/' + f.dim.toLowerCase() + '" data-gwp-xjump="' + f.dim + '"><span class="gwp-xs">' + esc(f.scope) + ' · ' + esc(f.name) + '</span>' +
       '<span class="gwp-xv"><b>' + esc(f.v) + '</b> <span class="gwp-xl">' + esc(f.unit) + '</span></span>' + (f.cmp ? '<small class="gwp-xd">' + esc(f.cmp) + '</small>' : '') +
-      (f.why ? '<span class="gwp-xy">' + esc(f.why) + '</span>' : '') + (f.limit ? '<small class="gwp-xw' + (f.key ? ' gwp-xw--k' : '') + '">' + esc(f.limit) + '</small>' : '') + (f.when ? '<small class="gwp-xt">' + esc(f.when) + '</small>' : '') + '<span class="gwp-xm">Details ›</span></a>';
+      (f.why ? '<span class="gwp-xy">' + esc(f.why) + '</span>' : '') + (f.fut ? '<span class="gwp-xu" data-gwp-future>' + esc(f.fut) + '</span>' : '') + (f.limit ? '<small class="gwp-xw' + (f.key ? ' gwp-xw--k' : '') + '">' + esc(f.limit) + '</small>' : '') + (f.when ? '<small class="gwp-xt">' + esc(f.when) + '</small>' : '') + '<span class="gwp-xm">Details ›</span></a>';
     const notes = op && op.notes.length ? '<p class="gwp-xrn">' + op.notes.map(esc).join(' ') + '</p>' : '';
     const top = op && op.kind === 'reveal' ? '<p class="gwp-k">PRISM Reveal</p><p class="gwp-xh">' + esc(op.head) + '</p>' + notes + '<p class="gwp-xlead">' + esc(x.head) + '</p>' :
       !x.lead && op ? '<p class="gwp-k">PRISM summary</p><p class="gwp-xh">' + esc(op.head) + '</p>' + notes + '<p class="gwp-xlead">' + esc(x.head) + '</p>' :
@@ -604,16 +624,19 @@
     const loc = near ? QT.loc.near : rank && rank.band === 'below' ? QT.loc.far : rank && rank.band === 'above' ? QT.loc.access : '';
     const pr = P && QT.price[P.band] ? fill(QT.price[P.band], { cls }) : '';
     const rsl = pr || !R ? '' : settling ? QT.resale.settling : R.band === 'above' && big ? QT.resale.above : R.band === 'below' ? QT.resale.below : R.band === 'around' && steady ? QT.resale.steady : '';
-    const head = [loc, pr || rsl, mkey ? QT.market[mkey] : ''].filter(Boolean).map((t) => t + '.').join(' ');
+    const fu = futureNear(v), locF = fu ? fill(FM.head, { m: fu.m }) : loc;   // today's distance is the MRT figure just below
+    const head = [locF, pr || rsl, mkey ? QT.market[mkey] : ''].filter(Boolean).map((t) => t + '.').join(' ');
     // three figures: Price, MRT, nearby market; a missing one is taken by the next available measure (resale rate), never invented
     const by = {}; x.cards.forEach((c) => { by[c.dim] = c; });
     // Summary first (Master Planning, 4 Nov 2026): each figure keeps its approved peer comparison (the V2 card's first sentence) beneath it
     const fig = (c) => ({ dim: c.dim, scope: QT.scope[c.dim], v: c.v, label: c.dim === 'P' ? fill(QT.fig.P, { x: '', cls }).trim() : c.dim === 'I' ? fill(QT.fig.I, { station: c.unit.replace(/^to /, '') }) : QT.fig[c.dim],
       cmp: c.cmp ? c.cmp.split('. ')[0] : '' });
-    const order = ['P', 'I', by.M ? 'M' : 'S', 'R'].filter((k) => by[k]), figs = order.slice(0, 3).map((k) => fig(by[k]));
+    const fig1 = (c) => { const f = fig(c); if (c.dim === 'I' && fu) { f.scope = FM.scopeToday; f.fut = { scope: fill(FM.scopeFut, { line: fu.line }), v: fu.m, label: fill(FM.futLabel, { station: fu.name, line: fu.line }), sub: fill(FM.futSub, { line: fu.line, y: fu.target }) }; } return f; };
+    const order = ['P', 'I', by.M ? 'M' : 'S', 'R'].filter((k) => by[k]), figs = order.slice(0, 3).map((k) => fig1(by[k]));
     // what looks promising / what to watch: the approved sentences, without the station distance already shown as a figure
     const mrtLine = (t) => / is about [\d,.]+ k?m from .+ \(straight line\)\.$/.test(t);
-    const good = x.goodAll.filter((t) => !(mrtLine(t) && order.slice(0, 3).indexOf('I') >= 0)).slice(0, 2), watch = x.watchAll.slice(0, 2);
+    const fw = fu ? fill(FM.watch, { station: fu.name, line: fu.line, m: fu.m, y: fu.target }) : null;
+    const good = x.goodAll.filter((t) => !(mrtLine(t) && order.slice(0, 3).indexOf('I') >= 0)).slice(0, 2), watch = x.watchAll.filter((t) => !(fw && t === fw && order.slice(0, 3).indexOf('I') >= 0)).slice(0, 2);   // the quick read: today's and the future station are in the MRT figure; the full analysis keeps the sentence
     // the one warning on top: the first approved "watch" sentence (they are in a fixed order of strength); with none, the first shown
     // figure's own approved limitation. The other watch sentence stays in the quick read, below.
     const lim = order.slice(0, 3).map((k) => by[k].limit).filter(Boolean)[0] || '';
@@ -622,8 +645,9 @@
   // Summary first (Master Planning, 4 Nov 2026): the answer in about fifteen seconds (one headline, three figures, one warning), then,
   // below a rule, the rest of the approved quick read unchanged in wording: the Reveal with its qualifications, what looks promising, the
   // other watch sentence and the question before buying
-  const qrFig = (f, id) => '<a class="gwp-qr-f" href="#/prism/' + esc(id || '') + '/' + f.dim.toLowerCase() + '" data-gwp-xjump="' + f.dim + '"><span class="gwp-qr-s">' + esc(f.scope) + '</span><b>' + esc(f.v) + '</b><span class="gwp-qr-l">' + esc(f.label) + '</span>' +
-    (f.cmp ? '<small class="gwp-qr-c">' + esc(f.cmp) + '</small>' : '') + '</a>';
+  const qrFig = (f, id) => '<a class="gwp-qr-f' + (f.fut ? ' gwp-qr-f--fu' : '') + '" href="#/prism/' + esc(id || '') + '/' + f.dim.toLowerCase() + '" data-gwp-xjump="' + f.dim + '"><span class="gwp-qr-s">' + esc(f.scope) + '</span><b>' + esc(f.v) + '</b><span class="gwp-qr-l">' + esc(f.label) + '</span>' +
+    (f.cmp ? '<small class="gwp-qr-c">' + esc(f.cmp) + '</small>' : '') +
+    (f.fut ? '<span class="gwp-qr-u" data-gwp-future><span class="gwp-qr-s">' + esc(f.fut.scope) + '</span><b>' + esc(f.fut.v) + '</b><span class="gwp-qr-l">' + esc(f.fut.label) + '</span><small class="gwp-qr-c">' + esc(f.fut.sub) + '</small></span>' : '') + '</a>';
   const qrHead = (h) => '<h2 class="gwp-qr-h">' + h.split(/(?<=\.) /).map((t) => '<span>' + esc(t) + '</span>').join(' ') + '</h2>';
   const qrWarn = (w) => (w ? '<p class="gwp-qr-w" data-gwp-warn><b>' + esc(QT.warn) + '</b> ' + esc(w) + '</p>' : '');
   function quickHtml(q, id, full) {
@@ -1198,5 +1222,5 @@
     }
   }
 
-  return { NA, naHtml, TAB_SUB, FMRT, FMRT_AMEND, FT, futureStatement, futureOk, compactQuick, compactHtml, CQ, quick11, quickHtml, QT, itemsOk, redirect11, hasReport, isCurated, explain11, explainHtml, XT, PICKS_MAX, CURATED, hasEvidence, REVEAL, ES, reveal11, revealHtml, V11, PANELS, checkIndex, checkShard, checkPair, checkReport11, model11, compose, hasPage, headline11, lineHtml, posHtml, yieldHtml, incomeHtml, v11Html, VERSION, switchHtml, leadSites, layersHtml, dimsHtml, evidenceOf, headline, landingHtml, mountLanding, QUESTION, SCHEMA, DIR, MANIFEST_V, PILLARS, checkManifest, checkReport, approved, shown, model, value, detail, period, evidence, previewHtml, pageHtml, load, mountPreview, show, _cache: cache, _settled: settled };
+  return { NA, naHtml, TAB_SUB, FMRT, FMRT_AMEND, FT, FM, futureNear, futureStatement, futureOk, compactQuick, compactHtml, CQ, quick11, quickHtml, QT, itemsOk, redirect11, hasReport, isCurated, explain11, explainHtml, XT, PICKS_MAX, CURATED, hasEvidence, REVEAL, ES, reveal11, revealHtml, V11, PANELS, checkIndex, checkShard, checkPair, checkReport11, model11, compose, hasPage, headline11, lineHtml, posHtml, yieldHtml, incomeHtml, v11Html, VERSION, switchHtml, leadSites, layersHtml, dimsHtml, evidenceOf, headline, landingHtml, mountLanding, QUESTION, SCHEMA, DIR, MANIFEST_V, PILLARS, checkManifest, checkReport, approved, shown, model, value, detail, period, evidence, previewHtml, pageHtml, load, mountPreview, show, _cache: cache, _settled: settled };
 });

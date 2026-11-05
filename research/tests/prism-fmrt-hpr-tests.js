@@ -11,6 +11,9 @@
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
 const SITE = path.resolve(__dirname, '../..');
 const G = require(path.join(SITE, 'assets/js/gw-prism.js'));
+// The future-MRT reading pilot (G.FM.PILOT, Groundwork 01, 6 Nov 2026) later changes this report's quick read and MRT card; it is tested in
+// prism-fmrt-quick-tests.js. Here: the amendment exactly as approved, so the pilot is switched off.
+G.FM.PILOT = {};
 let ok = 0, fail = 0;
 const check = (n, c, i) => { if (c) { ok++; console.log('  ok  ', n); } else { fail++; console.log('  FAIL', n, i === undefined ? '' : JSON.stringify(i).slice(0, 400)); } };
 const D = path.join(SITE, 'data/prism/v1.1/'), readB = (p) => fs.readFileSync(path.join(D, p)), sha = (b) => crypto.createHash('sha256').update(b).digest('hex');

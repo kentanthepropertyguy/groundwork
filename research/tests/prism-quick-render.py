@@ -24,6 +24,8 @@ B = os.environ.get('LIVE') or f'http://127.0.0.1:{P}'
 CASES = ['bartley-ridge', 'hundred-palms-residences', 'thomson-three', 'the-quinn', 'veranda', '8-raja', 'roots-at-transit', 'm5', 'boulevard-88', 'mendon-spring',
          'the-coast-at-sentosa-cove', 'the-verandah-residences', '91-marshall', '15-holland-hill']
 PHONE_BUDGET = 1100   # px: the quick read on a 390 px phone (V2's card was 748-1,123 px; the prototype about 1,500 px)
+# the future-MRT reading pilot (gw-prism.js FM.PILOT; Groundwork 01, 6 Nov 2026): its MRT figure also shows Future MRT, so 20 px more
+FM_PILOT = {'hundred-palms-residences'}; PILOT_BUDGET = PHONE_BUDGET + 20
 NOOVER = 'document.documentElement.scrollWidth <= innerWidth + 1'
 EXPECT = "(id) => { const G = GW_PRISM, v = G._settled[id] && G._settled[id].v11; if (!v) return null; const q = G.quick11(v, v.name, G.reveal11(v)); return q && { head: q.head, figs: q.figs.map((f) => f.v) }; }"
 try:
@@ -40,7 +42,7 @@ try:
                 except Exception: check(f'{vn} {id}: the quick read loads', False, pg.url); continue
                 pg.wait_for_timeout(300)
                 ex = pg.evaluate(EXPECT, id); head = re.sub(r'\s+', ' ', pg.inner_text('.gwp-qr-h')).strip()
-                figs = pg.evaluate("[...document.querySelectorAll('.gwp-qr .gwp-qr-f b')].map(b => b.textContent)")
+                figs = pg.evaluate("[...document.querySelectorAll('.gwp-qr .gwp-qr-f > b')].map(b => b.textContent)")   # the figure's own value (not the Future MRT part of the pilot's MRT figure)
                 check(f'{vn} {id}: "{head}" with {figs}', ex is not None and head == ex['head'] and figs == ex['figs'] and 1 <= len(figs) <= 3, [ex, head, figs])
                 order = pg.evaluate("(() => { const q = document.querySelector('.gwp-qr').getBoundingClientRect(), d = document.querySelector('#gwpDimsH').getBoundingClientRect(), f = document.querySelector('#gwp-full'); return [q.bottom <= d.top, f.hidden, document.querySelector('.gwp-qr').compareDocumentPosition(f) === 4]; })()")
                 check(f'{vn} {id}: the quick read first; the full analysis hidden until asked for; the five dimensions below', all(order) and pg.locator('[data-gwp-pillar]').count() == 5, order)
@@ -53,7 +55,8 @@ try:
                 check(f'{vn} {id}: headline and figures in the same navy, whatever their sign', cols == ['rgb(22, 33, 62)'], cols)
                 if w == 390:
                     h = pg.evaluate("document.querySelector('.gwp-qr').getBoundingClientRect().height"); heights[id] = round(h)
-                    check(f'{vn} {id}: phone: the quick read is {round(h)} px (budget {PHONE_BUDGET})', h <= PHONE_BUDGET, h)
+                    bud = PILOT_BUDGET if id in FM_PILOT else PHONE_BUDGET
+                    check(f'{vn} {id}: phone: the quick read is {round(h)} px (budget {bud})', h <= bud, h)
                     small = pg.evaluate("Math.min(...[...document.querySelectorAll('.gwp-qr *')].filter(e => e.offsetParent && [...e.childNodes].some(n => n.nodeType === 3 && n.textContent.trim())).map(e => parseFloat(getComputedStyle(e).fontSize)))")
                     check(f'{vn} {id}: phone: no text below 9.5 px', small >= 9.5, small)
                 if SHOTS: os.makedirs(SHOTS, exist_ok=True); pg.locator('.gwp-qr').screenshot(path=f'{SHOTS}/{id}-{w}-quick.png')

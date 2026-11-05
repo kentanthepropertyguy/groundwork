@@ -41,8 +41,9 @@ const QR = /<section class="gwp-qr"[\s\S]*?<\/section>/, FULL = /<div class="gwp
 const prof = pages.filter((p) => p.pg.mode === 'profile'), asmt = pages.filter((p) => p.pg.mode === 'assessment');
 // the two V1 pages carry the compact quick read instead (Master Planning, 4 Nov 2026; prism-v1-quick-tests.js), never the full one or the V2 card
 check('the two V1 assessment pages: no full quick read and no V2 card (their compact quick read is checked in prism-v1-quick-tests.js)', asmt.length === 2 && asmt.every((p) => !/gwp-xp|data-gwp-quick |id="gwp-full"/.test(p.html)));
-const withQ = prof.filter((p) => QR.test(p.html));
-check('every profile page with an explanation opens with the quick read (' + withQ.length + '); the 2 others keep their approved opening alone', withQ.length === 2095 && prof.filter((p) => !QR.test(p.html)).every((p) => /class="gwp-rv11"/.test(p.html)));
+// a report in the future-MRT reading pilot (G.FM.PILOT; Groundwork 01, 6 Nov 2026) has its MRT phrase and figure from the approved future line: tested in prism-fmrt-quick-tests.js
+const withQ0 = prof.filter((p) => QR.test(p.html)), withQ = withQ0.filter((p) => !G.futureNear(p.v));
+check('every profile page with an explanation opens with the quick read (' + withQ0.length + '); the 2 others keep their approved opening alone', withQ0.length === 2095 && withQ.length === 2095 - Object.keys(G.FM.PILOT).length && prof.filter((p) => !QR.test(p.html)).every((p) => /class="gwp-rv11"/.test(p.html)));
 check('the quick read comes first, then the V2 explanation (hidden, unchanged: exactly explainHtml), then the five dimensions', withQ.every((p) => {
   const h = p.html, a = h.indexOf('<section class="gwp-qr"'), f = FULL.exec(h), op = G.reveal11(p.v), x = G.explain11(p.v, p.r.name, op);
   return a >= 0 && f && a < h.indexOf('id="gwp-full"') && h.indexOf('id="gwp-full"') < h.indexOf('gwp-dims') && f[1] === G.explainHtml(x, op, p.id) && /data-gwp-full aria-expanded="false" aria-controls="gwp-full"/.test(h);
@@ -110,8 +111,8 @@ check('no score, forecast, valuation, recommendation, demand, investment or pric
 const br = withQ.find((p) => p.id === 'bartley-ridge'), bq = br && G.quick11(br.v, br.r.name, G.reveal11(br.v));
 check('Bartley Ridge (the reference): "Close to MRT. Priced near comparable condos. Slower market." with 2% below comparable condo prices, 190 m from Bartley MRT, 16.8% fewer nearby resales',
   !!bq && bq.head === 'Close to MRT. Priced near comparable condos. Slower market.' && bq.figs.map((f) => f.v + ' ' + f.label).join(' | ') === '2% below comparable condo prices | 190 m from Bartley MRT | 16.8% fewer nearby resales', bq && [bq.head, bq.figs]);
-for (const id of ['thomson-three', 'hundred-palms-residences', 'the-quinn']) { const p = withQ.find((x) => x.id === id), op = G.reveal11(p.v);
+for (const id of ['thomson-three', 'hundred-palms-residences', 'the-quinn']) { const p = withQ0.find((x) => x.id === id), op = G.reveal11(p.v);
   check(id + ' (protected): its approved Reveal "' + op.head + '" visible in the quick read; its full page otherwise unchanged', text(QR.exec(p.html)[0]).indexOf('PRISM Reveal · ' + op.head) >= 0); }
-check('final wording (Master Planning, 4 Nov 2026): "Good location" and "Fair pricing" appear on no page; "Close to MRT" and "Priced near comparable condos/ECs" are used', withQ.every((p) => !/Good location|Fair pricing/.test(QR.exec(p.html)[0])) && withQ.some((p) => /Close to MRT\./.test(QR.exec(p.html)[0])) && withQ.some((p) => /Priced near comparable condos\./.test(QR.exec(p.html)[0])) && withQ.some((p) => /Priced near comparable ECs\./.test(QR.exec(p.html)[0])));
+check('final wording (Master Planning, 4 Nov 2026): "Good location" and "Fair pricing" appear on no page; "Close to MRT" and "Priced near comparable condos/ECs" are used', withQ0.every((p) => !/Good location|Fair pricing/.test(QR.exec(p.html)[0])) && withQ.some((p) => /Close to MRT\./.test(QR.exec(p.html)[0])) && withQ.some((p) => /Priced near comparable condos\./.test(QR.exec(p.html)[0])) && withQ.some((p) => /Priced near comparable ECs\./.test(QR.exec(p.html)[0])));
 console.log('prism-quick-tests: %d passed, %d failed', ok, fail);
 process.exit(fail ? 1 : 0);
