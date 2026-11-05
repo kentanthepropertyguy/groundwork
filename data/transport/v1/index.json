@@ -1,0 +1,13 @@
+{
+ "schema": "gw-transit-index-v1",
+ "prismRelease": "prism-v1.1-r3-kw-v1amend-2026-11-06-104839837c2a",
+ "builtAt": "2026-11-06",
+ "about": "MRT today and future MRT per development, built only from approved PRISM V1.1 lines by tools/transit/build-transit-data.js. Rebuild after every PRISM release.",
+ "files": [
+  {
+   "id": "hundred-palms-residences",
+   "path": "hundred-palms-residences.json",
+   "sha256": "5ab99a8f094b69999af3b82e9e7f0b8d9c65806d8c7b6a83299a1dcef8b0752d"
+  }
+ ]
+}

@@ -1,0 +1,17 @@
+/* GROUNDWORK — MRT today and future MRT (assets/js/gw-transit.js), in the report's Location & amenities section, below the map.
+   Same type, lines and colours as the nearest-places list above it (.gwl-near in kpt-lg.css). */
+.gwt{ display:grid; gap:12px; min-width:0; padding-top:6px; }
+.gwt-h{ margin:0; font-size:18px; line-height:1.3; font-weight:600; color:var(--kpt-ink); }
+.gwt-cols{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px 28px; align-items:start; }
+.gwt-col{ display:grid; gap:8px; min-width:0; align-content:start; }
+.gwt-k{ margin:0; font-size:13px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--kpt-muted); }
+.gwt-list{ list-style:none; margin:0; padding:0; display:grid; }
+.gwt-list li{ display:grid; gap:3px; padding:10px 0; border-top:1px solid var(--kpt-line); min-width:0; }
+.gwt-top{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
+.gwt-top b{ font-size:15.5px; font-weight:500; color:var(--kpt-ink); line-height:1.35; min-width:0; }
+.gwt-d{ flex:none; font-size:15px; color:var(--kpt-ink); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.gwt-s{ font-size:13.5px; color:var(--kpt-body); line-height:1.4; }
+.gwt-x{ font-size:12.5px; color:var(--kpt-muted); line-height:1.4; }
+@media (max-width:760px){ .gwt-cols{ grid-template-columns:1fr; gap:18px; } }
+@media (max-width:359px){ .gwt-top{ flex-wrap:wrap; gap:2px 10px; } }
+[data-gwt-target]{ white-space:nowrap; }

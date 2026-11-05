@@ -62,6 +62,8 @@
 <script src="../assets/js/gw-pulse.js?v=6b170dca99"></script>
 <template id="gwLazy-loc"><script src="../assets/js/kpt-map-core.js?v=2026-10-30.3"></script></template>
 <script src="../assets/js/gw-locmap.js?v=c31f9e5e97"></script>
+<script src="../assets/js/gw-transit.js?v=8fa88e77df"></script>
+<template id="gwLazy-transit"><link rel="stylesheet" href="../assets/css/gw-transit.css?v=b5cebd4588"></template>
 <script src="../assets/js/gw-records.js?v=1969b79e59"></script>
 <script src="../assets/js/gw-rent.js?v=1d72b69f47"></script>
 <script src="../assets/js/gw-bedroom.js?v=506605b31a"></script>
@@ -622,6 +624,8 @@
           { const lead = $app.querySelector('[data-lg-lead]') || $app.querySelector('.kpr-meta'), loc = $app.querySelector('[data-lg-loc]');
             if (lead && loc) lead.insertAdjacentHTML('afterend', '<p class="lg-fine kpr-onmap"><button type="button" class="kpr-link" data-lg-loc-go>Location &amp; amenities ›</button></p>');
             if (loc && window.GW_LOC) { const t = document.getElementById('gwLazy-loc'), core = t && t.content.querySelector('script') ? t.content.querySelector('script').getAttribute('src') : null; try { GW_LOC.mount(loc, { id: M.id, name: M.name, root: '../', mapCore: core }); } catch (e) { loc.hidden = true; } }
+            // Future MRT Phase 2 (6 Nov 2026): MRT today and future MRT, below the map, for developments with approved transit data (Hundred Palms Residences first)
+            if (loc && window.GW_TRANSIT) { const t = document.getElementById('gwLazy-transit'), l = t && t.content.querySelector('link'); try { GW_TRANSIT.mount(loc, { id: M.id, root: '../', css: l ? l.getAttribute('href') : null }); } catch (e) { /* nothing shown */ } }
             const lg = $app.querySelector('[data-lg-loc-go]'); if (lg && loc) lg.addEventListener('click', () => { if (loc.__gwlLoad) loc.__gwlLoad(); loc.scrollIntoView({ behavior: 'smooth', block: 'start' }); track('research_map_opened', { from: 'analysis' }); });
             const ar = $app.querySelector('[data-gwb-area]'), ab = document.getElementById('gwbArea'); if (ar && ab) ar.addEventListener('click', () => { ab.hidden = !ab.hidden; ar.setAttribute('aria-expanded', String(!ab.hidden)); if (!ab.hidden) { const sel = document.getElementById('sizeSel'); if (sel) sel.focus({ preventScroll: true }); } }); }
           // 25 Oct 2026: home types (or sizes), transactions and rents under the answer. A row chooses the type or size for the whole report, and the
