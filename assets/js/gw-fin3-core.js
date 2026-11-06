@@ -17,7 +17,7 @@
      sale: { type, price, loan, cpfRefund }                     the sale figures, only when the buyer adds them
      couple: true | false | undefined married, buying in two names (asked only when it changes ABSD)
      cpfBal: [{ oa, sa }], cover95    CPF balances, only when CPF is used while a home is still owned (CPF Board set-aside)
-     ratePct (default 4), years (blank = longest standard)
+     ratePct (default DEFAULT_RATE_PCT: the MAS 4% rate), years (blank = longest standard)
      bkind: 'private'|'hdb'|'ec', hdbLoan: 'hdb'|'bank'           How much can I borrow?
      akind: 'new'|'completed'|'hdb', price, valuation              What can I afford? (price: optional, a price to check)
      pkind: 'new'|'ec'|'completed'|'resaleec'|'hdb', otp, noDate, top, csc, completion,
@@ -31,6 +31,9 @@
   const num = (x) => (typeof x === 'number' && isFinite(x) ? x : null);
   const has = (x) => num(x) !== null;
   const nn = (x) => (has(x) && x > 0 ? x : 0);
+  // P2 (6 Nov 2026): the default interest rate, written once. It is the MAS 4% medium-term rate (GW_RULES.stressRate), used as a cautious planning rate
+  // (the planner's KPT_ASSUMPTIONS.planningRate reuses the same rate). Before, a literal 4 stood in five places.
+  const DEFAULT_RATE_PCT = R.stressRate * 100;
   const people = (st) => (st.n === 2 ? [0, 1] : [0]).map((k) => Object.assign({ k: k }, (st.p || [])[k] || {}));
 
   /* ---------------- the borrowers and what they already pay ---------------- */
@@ -104,7 +107,7 @@
     if (!r.ok) return { state: 'invalid', errors: (r.invalid || []).map((x) => ({ key: x.field === 'age' ? 'p.0.age' : x.field === 'income' ? 'p.0.fixed' : x.field, text: x.text })), need: r.missing || [] };
     const L = loansOf(st), kind = st.bkind === 'hdb' ? (st.hdbLoan === 'bank' ? 'hdb-bank' : 'hdb-loan') : st.bkind === 'ec' ? 'ec' : 'private';
     if (r.noTenure) return { state: 'notenure', kind: kind, cause: r.cause, B: r.B };
-    const years = r.tenure.years, ratePct = has(st.ratePct) ? st.ratePct : (kind === 'hdb-loan' ? R.hdbLoanRate * 100 : 4);
+    const years = r.tenure.years, ratePct = has(st.ratePct) ? st.ratePct : (kind === 'hdb-loan' ? R.hdbLoanRate * 100 : DEFAULT_RATE_PCT);
     const r0 = L.total > 0 ? borrowRun(st, true) : null;
     const maxLoan = r.maxLoan, monthly = C.instal(maxLoan, ratePct / 100, years);
     // the age effect: the standard tenure for this kind of loan, and whether the age shortens it
@@ -144,7 +147,7 @@
     const sell = st.homes >= 1 && st.plan === 'sell';
     const s = { kind: st.akind === 'completed' ? 'completed' : st.akind === 'hdb' ? 'hdb' : 'new',
       buyers: people(st).map((x) => { const b = { res: resOf(x), fta: ftaOf(x), owned: own[x.k] }; if (!(x.k === 1 && x.nb)) { b.age = x.age; b.fixed = x.fixed; b.variable = x.variable; } return b; }),
-      debts: L.otherAmt, ratePct: has(st.ratePct) ? st.ratePct : 4, years: has(st.years) ? st.years : undefined, cash: st.cash, cpf: st.cpf, saveMo: has(st.saveMo) ? st.saveMo : undefined, cpfMo: has(st.cpfMo) ? st.cpfMo : undefined,
+      debts: L.otherAmt, ratePct: has(st.ratePct) ? st.ratePct : DEFAULT_RATE_PCT, years: has(st.years) ? st.years : undefined, cash: st.cash, cpf: st.cpf, saveMo: has(st.saveMo) ? st.saveMo : undefined, cpfMo: has(st.cpfMo) ? st.cpfMo : undefined,
       home: !(st.homes >= 1) ? 'none' : sell ? 'sell' : 'keep', couple: st.couple, cpfBal: st.cpfBal, cover95: st.cover95, cpfIsUsable: st.cpfIsUsable === true,
       price: has(st.price) && st.price > 0 ? st.price : undefined, valuation: st.akind === 'completed' && has(st.valuation) ? st.valuation : undefined };
     if (st.homes >= 1) {
@@ -242,7 +245,7 @@
     const order = st.homes >= 1 ? (st.order === 'buy' || st.order === 'sell' ? st.order : 'none') : 'none';
     const sw = st.saleWhen || 'unsure';
     const i = { kind: engineKind(st.pkind), uiKind: st.pkind, price: st.price, otp: st.noDate ? undefined : st.otp, undated: !!st.noDate, buyers: people(st).map((x) => ({ res: resOf(x), fta: ftaOf(x), owned: own[x.k] })), couple: st.couple,
-      age: age, ratePct: has(st.ratePct) ? st.ratePct : 4, years: has(st.years) ? st.years : undefined, cash: nn(st.cash), cpf: nn(st.cpf), saveMo: nn(st.saveMo), cpfMo: nn(st.cpfMo), payInstalmentFromCpf: true,
+      age: age, ratePct: has(st.ratePct) ? st.ratePct : DEFAULT_RATE_PCT, years: has(st.years) ? st.years : undefined, cash: nn(st.cash), cpf: nn(st.cpf), saveMo: nn(st.saveMo), cpfMo: nn(st.cpfMo), payInstalmentFromCpf: true,
       order: order, sale: { cash: 0, cpf: 0, removesOwnership: true }, flatLoan: 'none', loansOther: 0, prefLoan: has(st.loanAmt) ? st.loanAmt : undefined,
       dates: { mode: 'grouped', top: st.top || undefined, csc: st.csc || undefined, completion: st.completion || undefined },
       valuation: (st.pkind === 'completed' || st.pkind === 'resaleec') && has(st.valuation) ? st.valuation : undefined, refund: { assume: false }, rent: { monthly: 0 } };
@@ -339,7 +342,7 @@
     let age = aged ? (bs.length === 1 ? bs[0].age : (Bc && Bc.iwaaUse !== null ? Bc.iwaaUse : Math.max.apply(null, bs.map((b) => b.age)))) : null;
     const ageAssumed = age === null;
     if (ageAssumed) age = Math.max(21, R.bankLtv.endAge - (years0 || std));   // the oldest age at which this tenure still ends by 65: the standard limit, said on the page
-    const ratePct = has(st.ratePct) ? st.ratePct : 4;
+    const ratePct = has(st.ratePct) ? st.ratePct : DEFAULT_RATE_PCT;
     // a home under construction: the monthly figure is rounded to the cent, as the funding check rounds it, so both show the same dollar
     const P = st.price, base = Object.assign({ price: P, age: age, years: years0, ratePct: ratePct, loans: L.home, kind: kind === 'ec' ? 'ec' : 'private', buyers: dutyBuyers(st), couple: st.couple, valuation: kind === 'completed' && has(st.valuation) ? st.valuation : undefined }, buildOf(st, kind));
     const rule = C.progressive(base);
@@ -462,7 +465,7 @@
     const where = { price: st.price, valuation: flat === 'resale' && has(st.valuation) && st.valuation > 0 ? st.valuation : undefined };
     const lim = C.flatCheck(where, Infinity, ltv, minCash), typed = has(st.loanAmt) ? st.loanAmt : null;
     const fc = C.flatCheck(where, typed !== null ? Math.min(typed, lim.loanLimit) : lim.loanLimit, ltv, minCash);
-    const ratePct = has(st.ratePct) ? st.ratePct : (lender === 'hdb' ? Math.round(R.hdbLoanRate * 1000) / 10 : 4);
+    const ratePct = has(st.ratePct) ? st.ratePct : (lender === 'hdb' ? Math.round(R.hdbLoanRate * 1000) / 10 : DEFAULT_RATE_PCT);
     const m = fc.loan > 0.5 ? C.mortgage({ loan: fc.loan, ratePct: ratePct, years: years, lender: lender }) : null;
     const d = C.stampDuty({ price: fc.dutyBase, kind: 'hdb', buyers: dutyBuyers(st), couple: st.couple });
     if (!d.ok) return { state: 'invalid', hdb: true, flat, errors: d.invalid || [] };
@@ -520,7 +523,7 @@
       capWith: capW, capWithout: cap0, price: P, limit: limit, loanWith: loanW, loanWithout: loan0, extra: Math.max(0, loanW - loan0), extraIfNoLimit: Math.max(0, capW - cap0),
       by: by, byWithout: by0, incomeTest: incomeTest, share: share, income: counted, incomeWithout: counted - monthly, cap: cap, forNew: r.forNew, forNewMsr: a.prop === 'hdb' || a.prop === 'ec' ? r.forNewMsr : null, forNewTdsr: r.forNewTdsr,
       homeDebts: Math.round(nn(a.homeLoans)) > 0 ? nn(a.homeDebts) : 0, otherDebts: nn(a.debts), debts: (Math.round(nn(a.homeLoans)) > 0 ? nn(a.homeDebts) : 0) + nn(a.debts),
-      capAlt: capAlt, loanAlt: loanAlt, monthly: C.instal(loanW, (has(a.ratePct) ? a.ratePct : 4) / 100, r.tenure.years),
+      capAlt: capAlt, loanAlt: loanAlt, monthly: C.instal(loanW, (has(a.ratePct) ? a.ratePct : DEFAULT_RATE_PCT) / 100, r.tenure.years),
       down: P !== null ? P - loanW : null, cashMin: P !== null ? P * minCash : null, target: null };
     // the assets a target loan needs, for the same kind and treatment (and the other treatment): found by running the same engine, so it can
     // never disagree with the figure above. A target the price's loan limit can't reach, or one the income already supports, says so instead.
@@ -600,5 +603,5 @@
     return out;
   }
 
-  return { cpfBuffer, assetLoan, assetRun, costHdb, flat, sell, incomeNeeded, cost, borrowersOf, loansOf, needOf, borrow, priceLoan, ownedOf, toAssess, afford, dutyBuyers, schedule, timelineInput, incomeLoan, funding, engineKind, fromHomes, withHomes, CFG, loanCount };
+  return { cpfBuffer, assetLoan, assetRun, costHdb, flat, sell, incomeNeeded, cost, borrowersOf, loansOf, needOf, borrow, priceLoan, ownedOf, toAssess, afford, dutyBuyers, schedule, timelineInput, incomeLoan, funding, engineKind, fromHomes, withHomes, CFG, loanCount, DEFAULT_RATE_PCT };
 });

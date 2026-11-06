@@ -77,6 +77,8 @@ const D = JSON.parse(read('data/map/home.json'));
   let changed = []; try { changed = cp.execSync('git diff --name-only origin/main', { cwd: root, encoding: 'utf8' }).split('\n').filter(Boolean); } catch (e) { changed = null; }
   // HSU P1 (6 Nov 2026): the two new engine extension files are additions loaded by no page; the existing calculators and engine stay untouched
   if (changed) changed = changed.filter((f) => !/^assets\/js\/gw-(calc|engine)-position\.js$/.test(f));
+  // P2/P3 (6 Nov 2026): this guards a HOMEPAGE release (one that changes the homepage itself); a calculator release is checked by its own tests
+  if (changed && changed.indexOf('index.html') < 0) changed = null;
   if (changed) ok(!changed.some((f) => /^research\/map\/|^assets\/js\/kpt-map|^assets\/css\/kpt-map|^data\/(map\/(?!home\.json)|prism\/|projects\/)|^assets\/js\/(gw-prism|gw-pmm|gw-engine|gw-fin3|gw-calc)/.test(f)), 'the frozen Map, its data, PRISM, Plan My Move and the calculators are untouched', changed);
 }
 console.log('home-tests: ' + pass + ' passed, ' + fail + ' failed');

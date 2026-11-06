@@ -17,7 +17,7 @@ for _ in range(200):
     try: socket.create_connection(('127.0.0.1', P), 0.2).close(); break
     except OSError: time.sleep(0.05)
 BASE = {'schema': 'gw-case-v1', 'people': [{'age': 40, 'res': 'SC', 'income': {'fixed': 9000}}, {'age': 38, 'res': 'SC', 'income': {'fixed': 7000}}], 'household': {'cash': 150000, 'cpf': 80000, 'couple': True}, 'otherLoans': [],
-        'owned': [{'id': 'flat', 'type': 'hdb', 'owners': [0, 1], 'intent': 'keep', 'loan': {'monthly': 1200, 'lender': 'hdb'}, 'monthlyCosts': 90, 'sale': {'price': 700000, 'loan': 150000, 'cpfRefund': 260000}}],
+        'owned': [{'id': 'flat', 'type': 'hdb', 'owners': [0, 1], 'intent': 'keep', 'loan': {'monthly': 1200, 'lender': 'hdb'}, 'mop': {'met': True}, 'monthlyCosts': 90, 'sale': {'price': 700000, 'loan': 150000, 'cpfRefund': 260000}}],
         'purchase': {'type': 'completed', 'price': 1800000, 'monthlyCosts': 450}, 'financing': {}}
 CASES = [{'case': BASE, 'opts': {}}, {'case': BASE, 'opts': {'years': 10, 'pct': {'current': 1.5, 'next': -1}, 'sell': {'housing': 'rent', 'rent': 3500}}},
          {'case': BASE, 'opts': {'years': 3, 'sell': {'housing': 'buy', 'price': 1100000, 'monthlyCosts': 300}, 'oneOff': {'upgrade': 60000}}}]
@@ -32,7 +32,7 @@ try:
         for f in ['assets/js/gw-calc-position.js', 'assets/js/gw-engine-position.js']: pg.add_script_tag(url=f'/{f}')
         after = pg.evaluate("() => ({ calc: Object.keys(GW_CALC).sort(), eng: Object.keys(GW_ENGINE).sort(), same: window.__m === GW_CALC.mortgage && window.__a === GW_ENGINE.afford })")
         added_c = sorted(set(after['calc']) - set(before['calc'])); added_e = sorted(set(after['eng']) - set(before['eng']))
-        check('GW_CALC gains only the five primitives (and their version)', added_c == ['POSITION_VERSION', 'breakEven', 'ledger', 'loanAt', 'loanFrom', 'valueAt'] and set(before['calc']) <= set(after['calc']), added_c)
+        check('GW_CALC gains only the position primitives and mopEnd (P3), and their version', added_c == ['POSITION_VERSION', 'breakEven', 'ledger', 'loanAt', 'loanFrom', 'mopEnd', 'valueAt'] and set(before['calc']) <= set(after['calc']), added_c)
         check('GW_ENGINE gains only position and compare (and their version and schema)', added_e == ['COMPARE_SCHEMA', 'POSITION_VERSION', 'compare', 'position'], added_e)
         check('their existing functions are the same objects (nothing replaced)', after['same'])
         got = pg.evaluate("(cases) => cases.map((k) => { const r = GW_ENGINE.compare(k.case, k.opts); const f = (x) => ({ status: x.status, position: x.end ? x.end.position : null, cash: x.today ? x.today.cash : null }); return { hold: f(r.choices.hold), sell: f(r.choices.sell), upgrade: f(r.choices.upgrade), comparable: r.comparable }; })", CASES)

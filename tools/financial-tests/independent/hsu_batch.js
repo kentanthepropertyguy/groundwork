@@ -19,6 +19,7 @@ const out = cases.map((k) => {
     if (x.today) { o.todayCash = x.today.cash; o.todayCpf = x.today.cpf; }
     if (x.homes && x.homes.length) { o.loan = x.homes[0].loanToday; o.loanEnd = x.homes[0].loan; o.interest = x.homes[0].interest; o.years = x.homes[0].years || null; }
     if (x.costs) o.duty = x.costs.duty || 0;
+    if (x.mop) o.mopEndsIn = x.mop.endsIn;   // P3: within the HDB minimum occupation period
     if (x.end) { o.position = x.end.position; o.equity = x.end.equity; o.cash = x.end.cash; o.cpf = x.end.cpf; o.paid = x.end.paid.total; }
     return o;
   };

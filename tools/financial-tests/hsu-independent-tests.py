@@ -6,7 +6,8 @@ written for this test, not from Groundwork's JavaScript, then compared with the 
   rest of the down payment, BSD + ABSD in cash, the $5,000 purchase-cost estimate), both loans month by month, the price assumption, rent and recurring
   costs, and the one ledger: position = equity + cash left + CPF left − everything paid for housing.
 Cases: 300 seeded households (one or two buyers under 55; an HDB flat, or a private home held more than four years; a completed private home next) ×
-1, 5 and 10 years. Run from the site folder: python3 tools/financial-tests/hsu-independent-tests.py
+1, 5 and 10 years. P3 (6 Nov 2026): each HDB flat has a category and a completion month; its minimum occupation period (HDB: Standard 5 years, Plus and
+Prime 10, Fresh Start 20, from legal completion) is worked out here again, and a flat still within it can be neither sold nor upgraded from (stop). Run from the site folder: python3 tools/financial-tests/hsu-independent-tests.py
 """
 import json, math, os, random, subprocess, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -23,6 +24,13 @@ def check(name, cond, info=''):
         if fail < 15: print('  FAIL', name, str(info)[:500])
 
 COMMISSION, GST, LEGAL, PURCHASE_COSTS, PLAN_RATE, HDB_RATE = .02, .09, 3000, 5000, .04, .026
+MOP_YEARS = {'standard': 5, 'plus': 10, 'prime': 10, 'freshStart': 20}   # HDB, Conditions after buying (checked 6 Nov 2026)
+AS_OF = (2026, 11)
+
+def mop_met(mop):
+    y, m = map(int, mop['completed'].split('-'))
+    end = (y + MOP_YEARS[mop['category']]) * 12 + (m - 1)
+    return AS_OF[0] * 12 + AS_OF[1] - 1 > end, '%d-%02d' % (end // 12, end % 12 + 1)
 
 def running(balance, monthly, rate, months):
     """a loan already running: month by month, the last payment only what is owed. Returns (balance, interest, paid)."""
@@ -96,6 +104,7 @@ def household():
     if two: people.append({'age': 30 + random.randrange(22), 'res': 'SC', 'income': {'fixed': round(random.random() * 12000)}})
     owned = {'id': 'home', 'type': 'hdb' if hdb else 'private', 'owners': [0, 1] if two else [0], 'intent': 'keep',
              'sale': {'price': price, 'loan': owed, 'cpfRefund': round(random.random() * (price - owed) * .6)}}
+    if hdb: owned['mop'] = {'category': random.choice(['standard', 'standard', 'standard', 'plus', 'freshStart']), 'completed': '%d-%02d' % (2004 + random.randrange(20), 1 + random.randrange(12))}
     if not hdb: owned['sale']['bought'] = '2015-0%d-15' % (1 + random.randrange(9)); owned['sale']['sold'] = '2026-11-06'   # held over 4 years: no SSD
     if owed: owned['loan'] = {'monthly': mo, 'ratePct': rate}
     rec = random.random() < .7
@@ -105,7 +114,7 @@ def household():
          'purchase': {'type': 'completed', 'price': round(price * (1.2 + random.random() * 1.5) / 1000) * 1000}, 'financing': {}}
     if two: c['household']['couple'] = True
     if rec: c['purchase']['monthlyCosts'] = round(200 + random.random() * 600)
-    o = {'pct': {'current': random.choice([0, 0, 2, -1.5]), 'next': random.choice([0, 0, 3, -2])}, 'sell': {'housing': 'rent', 'rent': 2500 + round(random.random() * 3000)}}
+    o = {'asOf': '%d-%02d' % AS_OF, 'pct': {'current': random.choice([0, 0, 2, -1.5]), 'next': random.choice([0, 0, 3, -2])}, 'sell': {'housing': 'rent', 'rent': 2500 + round(random.random() * 3000)}}
     return c, o
 
 cases = []
@@ -118,15 +127,22 @@ eng = json.loads(subprocess.run(['node', os.path.join(HERE, 'independent', 'hsu_
 os.unlink(tmp.name)
 
 near = lambda a, b, tol=0.01: a is not None and b is not None and abs(a - b) <= tol
-n = {'hold': 0, 'sell': 0, 'upgrade': 0, 'stop': 0, 'compared': 0}
+n = {'hold': 0, 'sell': 0, 'upgrade': 0, 'stop': 0, 'compared': 0, 'mop': 0}
 for k, (cs, e) in enumerate(zip(cases, eng)):
     want = model(cs['case'], cs['opts'])
     rec_given = 'monthlyCosts' in cs['case']['owned'][0]
     # Hold: its loan always; its position only when it is compared (renting is compared, so the recurring costs must be given)
     h = e['hold']; w = want['hold']
     check('hold #%d loan at the end and interest' % k, near(h.get('loanEnd', 0), w['loanEnd']) and near(h.get('interest', 0), w['interest']), (h, w)); n['hold'] += 1
-    if rec_given: check('hold #%d position' % k, near(h.get('position'), w['position']), (h, w))
+    mop = cs['case']['owned'][0].get('mop'); within = bool(mop) and not mop_met(mop)[0]
+    # renting is not compared while the flat cannot be sold (within its MOP), so recurring costs are then excluded for every home and Hold has its figure
+    if rec_given or within: check('hold #%d position' % k, near(h.get('position'), w['position']), (h, w))
     else: check('hold #%d: no end figure while the recurring costs are missing' % k, 'position' not in h, h)
+    if within:
+        ends = mop_met(mop)[1]
+        check('#%d within the MOP: Sell and Upgrade stop, ending in %s' % (k, ends), all(e[x]['status'] == 'stop' and e[x]['reason'] == 'within-mop' and e[x].get('mopEndsIn') == ends and 'position' not in e[x] for x in ('sell', 'upgrade')), (e['sell'], e['upgrade'], mop))
+        check('#%d within the MOP: nothing compared' % k, not e['comparable'], e['comparable'])
+        n['mop'] += 1; continue
     # Sell (rent): its housing cost is complete, so it always has an end figure
     s = e['sell']; ws = want['sell']
     check('sell #%d position, cash and CPF' % k, near(s.get('position'), ws['position']) and near(s.get('cash'), ws['cash']) and near(s.get('cpf'), ws['cpf']), (s, ws)); n['sell'] += 1
@@ -143,6 +159,6 @@ for k, (cs, e) in enumerate(zip(cases, eng)):
     check('#%d comparable exactly when recurring costs are given for every home (renting is compared)' % k, e['comparable'] == (rec_given and u['status'] in ('ok', 'stop')), (e['comparable'], rec_given, u['status']))
     if e['comparable']: n['compared'] += 1
 
-check('enough of each choice compared (%s)' % n, n['upgrade'] > 300 and n['stop'] > 20 and n['compared'] > 300)
-print('hsu-independent-tests: %d passed, %d failed (%d cases: hold %d, sell %d, upgrade %d, upgrade not possible %d, comparable %d)' % (ok, fail, len(cases), n['hold'], n['sell'], n['upgrade'], n['stop'], n['compared']))
+check('enough of each choice compared (%s)' % n, n['upgrade'] > 250 and n['stop'] > 20 and n['compared'] > 250 and n['mop'] > 50)
+print('hsu-independent-tests: %d passed, %d failed (%d cases: hold %d, sell %d, upgrade %d, upgrade not possible %d, within the MOP %d, comparable %d)' % (ok, fail, len(cases), n['hold'], n['sell'], n['upgrade'], n['stop'], n['mop'], n['compared']))
 sys.exit(1 if fail else 0)

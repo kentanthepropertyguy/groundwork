@@ -23,6 +23,14 @@
   if (typeof module === 'object' && module.exports) module.exports = api; else root.GW_FIN3_UI = api;
 })(typeof self !== 'undefined' ? self : this, function (root) {
   'use strict';
+  // P2 (6 Nov 2026): the rule values this page names are read from GW_RULES (gw-rules.js), never written here. In Node (writing the pages) the same
+  // rules are loaded from their files. STRESS: the MAS 4% medium-term rate; DEF: the default interest rate (GW_FIN3's, the same rate); LTV0: the standard
+  // 75% loan limit; TEN / TENMAX: the standard and longest bank tenures ({ private, hdb }); END: age 65, where the lower limit starts; HDBTEN / HDBEND: an
+  // HDB loan's 25 years and age 65; OA: the CPF OA rate (dated).
+  const RU = () => root.GW_RULES || (typeof require === 'function' ? require('./gw-rules.js')(require('../../tools/hdb-upgrade/rules.js')) : null);
+  const STRESS = () => RU().stressRate * 100, DEF = () => (root.GW_FIN3 ? root.GW_FIN3.DEFAULT_RATE_PCT : STRESS()), LTV0 = () => RU().bankLtv.standard[0].ltv;
+  const TEN = () => RU().bankLtv.standardTenure, TENMAX = () => RU().bankLtv.maxTenure, END = () => RU().bankLtv.endAge, HDBTEN = () => RU().hdbLoan.maxTenureYears, HDBEND = () => RU().hdbLoan.endAge;
+  const OA = () => Math.round(RU().cpfOaRate * 10000) / 100;
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const $ = (n) => '$' + Math.round(n || 0).toLocaleString('en-US');
   const $r = (n) => '$' + (Math.floor((n || 0) / 1000) * 1000).toLocaleString('en-US');   // a capacity or budget, rounded down to $1,000
@@ -97,8 +105,8 @@
     '<div class="f3-g2">' + money('cpfBal.0.oa', '<span data-when="n:1">Your</span><span data-when="n:2">First person’s</span> OA') + money('cpfBal.0.sa', 'SA or RA', { ph: '0 if none' }) + '</div>' +
     '<div class="f3-g2" data-when="n:2">' + money('cpfBal.1.oa', 'Second person’s OA') + money('cpfBal.1.sa', 'SA or RA', { ph: '0 if none' }) + '</div><p class="f3-fine" data-cpf2-out></p></div>';
   const moneyHtml = () => '<div class="f3-grp"><h2 class="f3-gh">Your money for the purchase</h2><div class="f3-g2">' + money('cash', 'Cash', { ph: 'e.g. 200,000' }) + money('cpf', 'CPF OA you can use', { ph: 'e.g. 150,000' }) + '</div></div>';
-  const assumeHtml = (page) => '<details class="f3-as" data-as><summary><span>Interest rate and loan tenure</span> <em data-as-sum>4% · longest standard tenure</em></summary><div class="f3-g2">' +
-    numf('ratePct', 'Interest rate', '% a year', { ph: '4', hint: page === 'borrow' ? 'For the monthly repayment. Banks test what you can borrow at 4% or this rate, whichever is higher.' : 'Banks test at 4% or this rate, whichever is higher.' }) +
+  const assumeHtml = (page) => '<details class="f3-as" data-as><summary><span>Interest rate and loan tenure</span> <em data-as-sum>' + DEF() + '% · longest standard tenure</em></summary><div class="f3-g2">' +
+    numf('ratePct', 'Interest rate', '% a year', { ph: String(DEF()), hint: page === 'borrow' ? 'For the monthly repayment. Banks test what you can borrow at ' + STRESS() + '% or this rate, whichever is higher.' : 'Banks test at ' + STRESS() + '% or this rate, whichever is higher.' }) +
     numf('years', 'Loan tenure', 'years', { ph: 'longest standard', hint: 'Blank: the longest that keeps the standard loan limit at your age.' }) + '</div>' +
     (page === 'afford' ? '<div class="f3-g2" data-when="akind:new">' + money('saveMo', 'Cash you can add each month', { opt: true }) + money('cpfMo', 'CPF added each month', { opt: true }) + '</div><p class="f3-fine" data-when="akind:new">With these, each new-launch payment is checked on its date.</p>' :
       page === 'pay' ? '<div class="f3-g2">' + money('saveMo', 'Cash you can add each month', { opt: true }) + money('cpfMo', 'CPF added each month', { opt: true }) + '</div><p class="f3-fine">With these, the monthly mortgage is tested against your savings too.</p>' : '') + '</details>';
@@ -184,14 +192,14 @@
     if (page === 'borrow') return '<section class="f3 f3-frame f3-borrowpage" data-f3="borrow"><div class="f3-grid f3-grid-pay"><form class="f3-form" novalidate>' + carryHtml +
       seg('n', 'Who is borrowing?', [['1', 'Just me'], ['2', 'Two of us']], '1', { cls: 'f3-bwho' }) +
       '<div class="f3-bp" data-inc>' + bpCard(0) + bpCard(1) + '</div>' + bpJointHtml() + '<p class="f3-incneed" data-inc-need hidden></p>' +
-      '<div class="f3-chips" role="group" aria-label="Assumptions">' + chip('age', 'Age 35') + chip('bkind', 'Private home') + chip('rate', '4% · longest tenure') + '</div>' +
+      '<div class="f3-chips" role="group" aria-label="Assumptions">' + chip('age', 'Age 35') + chip('bkind', 'Private home') + chip('rate', DEF() + '% · longest tenure') + '</div>' +
       '<p class="f3-fine f3-chipnote">Usual assumptions. Tap any to change it.</p><div class="f3-scrim" data-scrim hidden></div>' +
-      panel('age', 'Age', '<div class="f3-g2">' + numf('p.0.age', '<span data-when="n:1">Your age</span><span data-when="n:2">Person 1</span>', 'years', { ph: '35' }) + '<div data-when="n:2">' + numf('p.1.age', 'Person 2', 'years', { ph: '35' }) + '</div></div><p class="f3-fine">Banks end a loan by about 65, so age sets how long it can run.</p>', { open: true }) +
+      panel('age', 'Age', '<div class="f3-g2">' + numf('p.0.age', '<span data-when="n:1">Your age</span><span data-when="n:2">Person 1</span>', 'years', { ph: '35' }) + '<div data-when="n:2">' + numf('p.1.age', 'Person 2', 'years', { ph: '35' }) + '</div></div><p class="f3-fine">Banks end a loan by about ' + END() + ', so age sets how long it can run.</p>', { open: true }) +
       // the home: its choices are the options list (holders kept hidden); an HDB loan adds the household (as options) and the remaining lease (typed, behind "Custom")
       panel('bkind', 'The home', '<div class="f3-hold">' + seg('bkind', '', [['private', 'Private home'], ['hdb', 'HDB flat'], ['ec', 'New EC']], 'private', { aria: 'Buying' }) + seg('hdbLoan', 'Loan from', [['hdb', 'HDB'], ['bank', 'A bank']], 'hdb', {}) +
         seg('household', 'Applying as', [['family', 'Family'], ['extended', 'Extended family'], ['single', 'Single']], 'family', {}) + '</div>' +
         '<div data-when="hdbl:1">' + numf('lease', 'Remaining lease of the flat', 'years', { ph: 'e.g. 70', hint: 'If it won’t last until the youngest of you is 95, HDB lends less than 75% of the price.' }) + '</div>') +
-      panel('rate', 'Interest and tenure', '<div class="f3-g2">' + numf('ratePct', 'Interest rate', '% a year', { ph: '4' }) + numf('years', 'Loan tenure', 'years', { ph: 'longest' }) + '</div><p class="f3-fine">Banks test what you can borrow at 4% or your rate, whichever is higher. Leave the tenure blank for the longest your age allows.</p>') +
+      panel('rate', 'Interest and tenure', '<div class="f3-g2">' + numf('ratePct', 'Interest rate', '% a year', { ph: String(DEF()) }) + numf('years', 'Loan tenure', 'years', { ph: 'longest' }) + '</div><p class="f3-fine">Banks test what you can borrow at ' + STRESS() + '% or your rate, whichever is higher. Leave the tenure blank for the longest your age allows.</p>') +
       '</form><div class="f3-out f3-out-pay" aria-label="Your answer"><div class="f3-card f3-card-pay"><div data-out aria-live="polite"></div>' +
       '<div class="f3-opts"><details class="f3-in-d" data-why hidden><summary data-why-sum>How it is worked out</summary><ul class="f3-why" data-why-out></ul></details>' +
       '<details class="f3-in-d" data-var><summary>Add bonus, commission or rent</summary><div class="f3-cmpin"><div class="f3-g2">' + money('p.0.bonusYr', '<span data-when="n:1">Bonus and commission, a year</span><span data-when="n:2">First person’s bonus and commission, a year</span>', { ph: 'e.g. 24,000' }) + money('p.0.rentMo', '<span data-when="n:1">Rent you receive, a month</span><span data-when="n:2">First person’s rent, a month</span>', { ph: 'e.g. 2,500' }) + '</div><div class="f3-g2" data-when="n:2">' + money('p.1.bonusYr', 'Second person’s bonus and commission, a year', { ph: 'e.g. 12,000' }) + money('p.1.rentMo', 'Second person’s rent, a month', { ph: '0 if none' }) + '</div><p class="f3-fine">Banks count 70% of it, averaged over the year.</p></div></details>' +
@@ -208,7 +216,7 @@
     // The funding check (cash in hand, a home sale, the mortgage as it builds up) and the comparisons open on request.
     return '<section class="f3 f3-paypage f3-frame" data-f3="pay"><div class="f3-grid f3-grid-pay"><form class="f3-form" novalidate>' + carryHtml +
       money('price', 'Price of the home', { ph: 'e.g. 2,000,000', cls: 'f3-big' }) + '<p class="f3-fine" data-from-research hidden></p>' +
-      '<div class="f3-chips" role="group" aria-label="Assumptions">' + chip('pkind', 'New launch') + chip('who', 'Singapore Citizen, first home') + chip('loan', '75% loan') + chip('rate', '4% · 30 years') + chip('cpf', 'No CPF') + '</div>' +
+      '<div class="f3-chips" role="group" aria-label="Assumptions">' + chip('pkind', 'New launch') + chip('who', 'Singapore Citizen, first home') + chip('loan', LTV0() * 100 + '% loan') + chip('rate', DEF() + '% · ' + TEN().private + ' years') + chip('cpf', 'No CPF') + '</div>' +
       '<p class="f3-fine f3-chipnote">Usual assumptions. Tap one to change it.</p><div class="f3-scrim" data-scrim hidden></div>' +
       panel('pkind', 'The property', seg('pkind', '', [['new', 'New launch'], ['ec', 'New EC'], ['completed', 'Completed private'], ['resaleec', 'Resale EC'], ['hdb', 'HDB resale flat'], ['bto', 'New HDB flat (BTO)']], 'new', { aria: 'Buying' }) + '<div data-when="pkind:bto">' + seg('btoRoom', 'Flat size', [['2', '2-room Flexi'], ['3', '3-room'], ['4', '4-room or bigger']], '4') + '</div>', { hold: true }) +
       panel('who', 'Who’s buying', peopleHtml('pay') + homeListHtml() + loansHtml()) +
@@ -217,7 +225,7 @@
         '<div class="f3-g2" data-when="lman:1"><div data-when="lpct:1">' + numf('loanPct', 'Loan, % of the price', '%', { ph: 'e.g. 75' }) + '</div>' + money('loanAmt', 'Loan amount', { ph: 'the most allowed' }) + '</div><input type="hidden" data-k="loanBy" data-t="hid">' +
         '<p class="f3-loanline"><span data-loan-hint></span></p>' +
         '<div data-when="pkind:hdb">' + money('valuation', 'HDB valuation', { opt: true, ph: 'if known', hint: 'The loan is on the lower of the price and the valuation; any amount above the valuation is cash.' }) + '</div>') +
-      panel('rate', 'Interest and tenure', '<div class="f3-g2">' + numf('ratePct', 'Interest rate', '% a year', { ph: '4' }) + numf('years', 'Loan tenure', 'years', { ph: '30' }) + '</div>') +
+      panel('rate', 'Interest and tenure', '<div class="f3-g2">' + numf('ratePct', 'Interest rate', '% a year', { ph: String(DEF()) }) + numf('years', 'Loan tenure', 'years', { ph: String(TEN().private) }) + '</div>') +
       panel('cpf', 'CPF', money('cpf', 'CPF to use', { ph: '0 if none', hint: 'Ordinary Account savings you will put in. Leave it blank to see the least cash you need.' })) +
       '</form><div class="f3-out f3-out-pay" aria-label="Your answer"><div class="f3-card f3-card-pay"><div data-out aria-live="polite"></div>' +
       '<div class="f3-opts"><details class="f3-in-d" data-bd hidden><summary data-bd-sum>Where the money goes</summary><div data-bd-out></div></details>' +
@@ -560,7 +568,7 @@
       applyWhen(raw, st); drawLoans(st); drawHomes(st); showErrs(); save(); if (page === 'borrow') paintOffer();
       paintHomeLoanNote(st);
       { const fr = q('[data-from-research]'); if (fr && !fr.hidden && fromPrice !== null && String(raw.price || '').replace(/\D/g, '') !== String(fromPrice).replace(/\D/g, '')) { fr.hidden = true; brought = null; } }
-      const asSum = q('[data-as-sum]'); if (asSum) asSum.textContent = (st.ratePct !== null ? st.ratePct : 4) + '% · ' + (st.years ? yrs(st.years) : 'longest standard tenure');
+      const asSum = q('[data-as-sum]'); if (asSum) asSum.textContent = (st.ratePct !== null ? st.ratePct : DEF()) + '% · ' + (st.years ? yrs(st.years) : 'longest standard tenure');
       lastSt = st;
       if (page === 'borrow') paintBorrow(st); else if (page === 'afford') paintAfford(st); else if (page === 'sell') paintSell(st); else if (page === 'upgrade') paintUpgrade(st); else { paintPay(st); paintHomeAsk(st); }
       if (openK) paintSheet(openK);
@@ -685,15 +693,15 @@
           { label: 'I know my loan', sub: man ? (c0.overLimit ? 'Requested: ' + pc(c0.typed / P) + ' (' + $(c0.typed) + ') · Applicable limit: ' + pc(c0.ltv) + ' (' + $(c0.loan) + ')' : pc(c0.typed / P) + ' · ' + $(c0.typed)) : 'A % of the price or an amount', set: { loanMode: 'manual' }, act: 'cust', sel: man && !c0.overLimit, req: man && c0.overLimit }] }];
         // quick choices: the four highest within this buyer's limit (the earlier 70/60/50% and the MAS tiers 75/55/45/35%), and 75% when the limit is lower, which says
         // the limit is what would be used (a request, never shown as allowed)
-        const lim = inc ? inc.ltv : 0.75, within = [0.75, 0.7, 0.6, 0.55, 0.5, 0.45, 0.35].filter((x) => x <= lim + 1e-9).slice(0, 4);
-        const tiers = (lim < 0.75 - 1e-9 ? [0.75] : []).concat(within).map((x) => { const c = alt({ loanAmt: Math.round(P * x) }); if (!c) return null;
+        const lim = inc ? inc.ltv : LTV0(), within = [0.75, 0.7, 0.6, 0.55, 0.5, 0.45, 0.35].filter((x) => x <= lim + 1e-9).slice(0, 4);
+        const tiers = (lim < LTV0() - 1e-9 ? [LTV0()] : []).concat(within).map((x) => { const c = alt({ loanAmt: Math.round(P * x) }); if (!c) return null;
           // Ken (1 Nov 2026): a percentage above the limit, when it is the one asked for, is shown as requested (no tick), with the limit beside it; the limit is what is used
           const picked = man && Math.abs(c0.typed - P * x) < 1;
           return { label: Math.round(x * 100) + '% of the price', sub: c.overLimit ? (picked ? 'Requested: ' + Math.round(x * 100) + '% · Applicable limit: ' + pc(c.ltv) + ' (' + $(c.loan) + ' is used)' : 'Above your ' + pc(c.ltv) + ' limit: ' + $(c.loan) + ' would be used') : $(c.loan) + ' · upfront ' + $(up(c)) + ' · ' + $(c.monthly) + '/mo', set: { loanMode: 'manual', loanPct: String(Math.round(x * 100)), loanBy: 'pct', loanAmt: fmt(P * x) }, sel: picked && !c.overLimit, req: picked && c.overLimit }; }).filter(Boolean);
         return g.concat([{ title: 'Or choose a loan', opts: tiers }, { opts: [{ label: 'Another % or amount', act: 'cust', set: { loanMode: 'manual' } }] }]);
       }
       if (k === 'rate') {
-        const r0 = st.ratePct !== null ? st.ratePct : 4;
+        const r0 = st.ratePct !== null ? st.ratePct : DEF();
         return [{ title: 'Interest rate', opts: [2.5, 3, 3.5, 4].map((r) => { const c = alt({ ratePct: r }); return { label: r + '% a year', sub: c ? $(c.monthly) + '/mo' : '', set: { ratePct: String(r) }, sel: r0 === r }; }) },
           { title: 'Loan tenure', opts: [35, 30, 25, 20].map((y) => { const c = alt({ years: y }); return { label: y + ' years', sub: c ? $(c.monthly) + '/mo' + (c.years < y ? ' · ' + yrs(c.years) + ' to age ' + root.GW_RULES.bankLtv.maturityAge : '') + (c.lower ? ' · loan limit ' + pc(c.ltv) + ', ' + $(c.down + c.duty) + ' upfront' : '') : '', set: { years: String(y) }, sel: (st.years || c0.years) === y }; }) },
           { opts: [cust('Another tenure or rate')] }];
@@ -718,17 +726,17 @@
         if (st.bkind === 'hdb' && st.hdbLoan !== 'bank') {
           const C0 = root.GW_RULES.hdbIncomeCeilings || {};
           g0.push({ title: 'Applying for the HDB loan as', opts: [['family', 'Family'], ['extended', 'Extended family'], ['single', 'Single, 35 or older']].map((x) => ({ label: x[1], sub: C0[x[0]] ? 'HDB loan income ceiling ' + $(C0[x[0]]) + ' a month' : '', set: { household: x[0] }, sel: (st.household || 'family') === x[0], act: 'stay' })) });
-          g0.push({ opts: [{ label: 'Remaining lease of the flat', sub: st.lease ? st.lease + ' years' + (b0 && b0.state === 'ok' && b0.ltv < 0.75 ? ' · loan limit ' + pc(b0.ltv) : '') : 'Below 95 for the youngest of you, HDB lends less', act: 'cust', sel: !!st.lease }] });
+          g0.push({ opts: [{ label: 'Remaining lease of the flat', sub: st.lease ? st.lease + ' years' + (b0 && b0.state === 'ok' && b0.ltv < LTV0() ? ' · loan limit ' + pc(b0.ltv) : '') : 'Below 95 for the youngest of you, HDB lends less', act: 'cust', sel: !!st.lease }] });
         }
         return g0; }
       if (k === 'age') return [];   // ages are typed exactly, never picked from round numbers
       if (k === 'rate') {
-        const hdbL = st.bkind === 'hdb' && st.hdbLoan !== 'bank', r0 = st.ratePct !== null ? st.ratePct : (hdbL ? Math.round(root.GW_RULES.hdbLoanRate * 1000) / 10 : 4);
+        const hdbL = st.bkind === 'hdb' && st.hdbLoan !== 'bank', r0 = st.ratePct !== null ? st.ratePct : (hdbL ? Math.round(root.GW_RULES.hdbLoanRate * 1000) / 10 : DEF());
         const g = [];
         if (!hdbL) g.push({ title: 'Interest rate', opts: [3, 3.5, 4, 4.5, 5].map((r) => { const b = ok ? lend(Object.assign({}, st, { ratePct: r })) : null; return { label: r + '% a year', sub: b ? 'Lends about ' + $r(b.maxLoan) + ' · ' + $(b.monthly) + '/mo' : '', set: { ratePct: String(r) }, sel: r0 === r }; }) });
-        g.push({ title: 'Loan tenure', opts: [[null, 'Standard: to age 65, at most ' + (hdbL ? 25 : st.bkind === 'hdb' ? 25 : 30) + ' years']].concat(hdbL ? [[25, '25 years'], [20, '20 years']] : st.bkind === 'hdb' ? [[30, '30 years'], [25, '25 years'], [20, '20 years']] : [[35, '35 years'], [30, '30 years'], [25, '25 years'], [20, '20 years']]).map((x) => { const b = ok ? lend(Object.assign({}, st, { years: x[0] })) : null; return { label: x[1], sub: b ? 'Lends about ' + $r(b.maxLoan) + ' over ' + yrs(b.years) + (x[0] && b.years < x[0] ? ' (to age ' + (b.kind === 'hdb-loan' ? 65 : root.GW_RULES.bankLtv.maturityAge) + ')' : '') + (b.ltv < 0.75 && x[0] ? ' · loan limit ' + pc(b.ltv) : '') : '', set: { years: x[0] === null ? '' : String(x[0]) }, sel: (st.years || null) === x[0] }; }) });
+        g.push({ title: 'Loan tenure', opts: [[null, 'Standard: to age ' + END() + ', at most ' + (hdbL ? HDBTEN() : st.bkind === 'hdb' ? TEN().hdb : TEN().private) + ' years']].concat((hdbL ? [HDBTEN(), 20] : st.bkind === 'hdb' ? [TENMAX().hdb, 25, 20] : [TENMAX().private, TEN().private, 25, 20]).map((y) => [y, y + ' years'])).map((x) => { const b = ok ? lend(Object.assign({}, st, { years: x[0] })) : null; return { label: x[1], sub: b ? 'Lends about ' + $r(b.maxLoan) + ' over ' + yrs(b.years) + (x[0] && b.years < x[0] ? ' (to age ' + (b.kind === 'hdb-loan' ? HDBEND() : root.GW_RULES.bankLtv.maturityAge) + ')' : '') + (b.ltv < LTV0() && x[0] ? ' · loan limit ' + pc(b.ltv) : '') : '', set: { years: x[0] === null ? '' : String(x[0]) }, sel: (st.years || null) === x[0] }; }) });
         g.push({ opts: [cust('Another tenure or rate')] });
-        if (!hdbL) g.note = 'Banks test what you can borrow at 4% or your rate, whichever is higher, so a lower rate lowers the instalment but not the loan.';
+        if (!hdbL) g.note = 'Banks test what you can borrow at ' + STRESS() + '% or your rate, whichever is higher, so a lower rate lowers the instalment but not the loan.';
         return g;
       }
       return [];
@@ -764,7 +772,7 @@
         set('n', st.n === 2 ? 'Two of us' : 'Buying alone');
         set('bkind', st.bkind === 'hdb' ? (st.hdbLoan === 'bank' ? 'HDB flat, bank loan' : 'HDB flat, HDB loan') : st.bkind === 'ec' ? 'New EC' : 'Private home');
         set('loans', L0.total > 0 ? $(L0.total) + '/mo of loans' : 'No other loans');
-        set('rate', (st.ratePct !== null ? st.ratePct : (st.bkind === 'hdb' && st.hdbLoan !== 'bank' ? Math.round(root.GW_RULES.hdbLoanRate * 1000) / 10 : 4)) + '% · ' + (st.years ? st.years + ' years' : 'longest tenure'));
+        set('rate', (st.ratePct !== null ? st.ratePct : (st.bkind === 'hdb' && st.hdbLoan !== 'bank' ? Math.round(root.GW_RULES.hdbLoanRate * 1000) / 10 : DEF())) + '% · ' + (st.years ? st.years + ' years' : 'longest tenure'));
       }
       if (page === 'upgrade') set('ures', st.reserve > 0 ? 'Keep funds aside: ' + $s(st.reserve) : 'Keep funds aside: None');
       if (page === 'sell') {
@@ -779,7 +787,7 @@
         set('pkind', { new: 'New launch', ec: 'New EC', completed: 'Completed private', resaleec: 'Resale EC', hdb: 'HDB resale flat', bto: 'New HDB flat (BTO)' }[st.pkind] || 'New launch');
         set('who', (st.n === 2 ? 'Two buyers' : RN[st.p[0].res] || 'Singapore Citizen') + ', ' + (st.homes === 0 ? 'first home' : st.homes === 1 ? 'own a home' : 'own 2+ homes') + (L0.total > 0 ? ', loans' : ''));
         set('loan', !c && st.price > 0 && unanswered(st).length ? 'Loan' : c && c.state === 'ok' && c.hdb ? (c.typed === 0 ? 'No loan' : (c.lender === 'hdb' ? 'HDB loan' : 'Bank loan') + (c.typed !== null ? ' ' + $s(c.loan) : '')) : c && c.state === 'ok' ? (c.typed !== null ? 'Loan ' + $s(c.loan) : c.incomeCap !== null && c.incomeCap < c.ruleLoan - 0.5 ? 'Loan from income' : pc(c.ltv) + ' loan') : (st.pkind === 'hdb' || st.pkind === 'bto' ? (st.hdbLoan === 'bank' ? 'Bank loan' : 'HDB loan') : '75% loan'));
-        set('rate', (c && c.state === 'ok' ? c.ratePct : st.ratePct !== null ? st.ratePct : 4) + '% · ' + (c && c.state === 'ok' ? c.years : (st.years || 30)) + ' years');
+        set('rate', (c && c.state === 'ok' ? c.ratePct : st.ratePct !== null ? st.ratePct : DEF()) + '% · ' + (c && c.state === 'ok' ? c.years : (st.years || TEN().private)) + ' years');
         set('cpf', st.cpf > 0 ? 'CPF ' + $s(st.cpf) : 'No CPF');
       }
     }
@@ -788,12 +796,12 @@
     function judgeBorrow(st, b, step) {
       const lever = step > 999 ? ' Each extra $1,000 a month, including a co-borrower’s, adds about ' + $(step) + '.' : '';
       if (!b.ageCut) return { text: 'Income is the limit here, not age.' + lever, alt: null };
-      if (b.kind === 'hdb-loan') return { text: 'Age is the limit here: an HDB loan ends by 65, so it runs only ' + yrs(b.years) + '.' + lever, alt: null };
+      if (b.kind === 'hdb-loan') return { text: 'Age is the limit here: an HDB loan ends by ' + HDBEND() + ', so it runs only ' + yrs(b.years) + '.' + lever, alt: null };
       const s2 = F.borrow(Object.assign({}, st, { years: root.GW_RULES.bankLtv.maturityAge - Math.round(b.age) }), { assumeAge: true });
-      if (!(s2.state === 'ok' && s2.maxLoan > b.maxLoan + 999)) return { text: 'Age is the limit here: a loan ending by 65 runs only ' + yrs(b.years) + '.' + lever, alt: null };
+      if (!(s2.state === 'ok' && s2.maxLoan > b.maxLoan + 999)) return { text: 'Age is the limit here: a loan ending by ' + END() + ' runs only ' + yrs(b.years) + '.' + lever, alt: null };
       const P2 = Math.floor(s2.maxLoan / s2.ltv / 100000) * 100000;
       const alt = { loan: s2.maxLoan, years: s2.years, endAge: Math.round(b.age + s2.years), ltv: s2.ltv, minCash: s2.minCash, price: P2, down: P2 * (1 - s2.ltv), cashMin: P2 * s2.minCash };
-      return { text: 'Age is the limit here: a loan ending by 65 runs only ' + yrs(b.years) + '. Stretched to age ' + alt.endAge + ', it could be about ' + $r(alt.loan) + ', but banks then lend only ' + pc(alt.ltv) + ' of the price and at least ' + pc(alt.minCash) + ' must be cash: on a ' + fmtP(P2) + ' home, ' + $(alt.down) + ' upfront, at least ' + $(alt.cashMin) + ' of it in cash.' + lever, alt: alt };
+      return { text: 'Age is the limit here: a loan ending by ' + END() + ' runs only ' + yrs(b.years) + '. Stretched to age ' + alt.endAge + ', it could be about ' + $r(alt.loan) + ', but banks then lend only ' + pc(alt.ltv) + ' of the price and at least ' + pc(alt.minCash) + ' must be cash: on a ' + fmtP(P2) + ' home, ' + $(alt.down) + ' upfront, at least ' + $(alt.cashMin) + ' of it in cash.' + lever, alt: alt };
     }
     /* ---- the one-page summary ("Save as PDF"): filled from the result object that drew the answer card; nothing recalculated, nothing read back from the page ---- */
     let view = null;
@@ -940,8 +948,8 @@
         .concat(b.counted < b.income - 0.5 ? [{ label: 'Income the bank counts', sub: 'Bonus, commission and rent at 70%', value: SG($(b.counted)) }] : [])
         .concat([{ label: v.msr ? 'The limit: 30% of income' : 'The limit: 55% of income', sub: v.msr ? 'For home loans (MSR)' + (b.kind === 'hdb-loan' ? '' : ', and 55% for all loans (TDSR)') : 'For all loan repayments (TDSR)', value: SG($(b.counted * b.share)) + '/mo' }])
         .concat(b.debts > 0 ? [{ label: 'Loans you already repay', sub: 'They lower it by about ' + SG($r(b.debtsCut)), value: '−' + SG($(b.debts)) + '/mo' }] : [])
-        .concat([{ label: 'Stress rate', sub: b.kind === 'hdb-loan' ? 'HDB’s own rate' : 'Banks test at 4% or your rate, whichever is higher', value: v.test + '%' },
-          { label: 'Tenure', sub: b.ageCut ? 'Ends at age ' + v.endAge + ': ' + (b.kind === 'hdb-loan' ? 'HDB loans end by 65' : 'the standard loan limit needs the loan to end by 65') : 'The longest standard tenure, ending at age ' + v.endAge, value: yrs(b.years) },
+        .concat([{ label: 'Stress rate', sub: b.kind === 'hdb-loan' ? 'HDB’s own rate' : 'Banks test at ' + STRESS() + '% or your rate, whichever is higher', value: v.test + '%' },
+          { label: 'Tenure', sub: b.ageCut ? 'Ends at age ' + v.endAge + ': ' + (b.kind === 'hdb-loan' ? 'HDB loans end by ' + HDBEND() : 'the standard loan limit needs the loan to end by ' + END()) : 'The longest standard tenure, ending at age ' + v.endAge, value: yrs(b.years) },
           { key: 'lend2', label: v.lendL || 'The bank may lend about', value: SG($r(b.maxLoan)), cls: 'tot' }]);
       const right = [];
       if (a) { const t = a.top; right.push({ title: 'Your budget with your cash and CPF', rows: [{ label: 'Home price', sub: { funds: 'Your cash and CPF are the limit', income: 'The loan is the limit', payments: 'Payment timing is the limit', choice: 'Your chosen loan is the limit' }[a.limitedBy] || '', value: SG($r(a.budget)) },
@@ -951,7 +959,7 @@
       else if (ck && ck.state === 'ok') right.push({ title: 'Home price this loan could support', rows: [{ label: 'Home price', sub: 'The loan as ' + pc(b.ltv) + ' of the price', value: '≈ ' + SG(v.pTxt) }, { label: 'Bank loan', value: SG($(ck.loan)) },
         { label: 'Cash, at least', sub: pc(ck.minCash) + ' of the price. MAS rule.', value: SG($(ck.cashMin)) }, { label: 'Cash or CPF', value: SG($(ck.flex)) }, { label: 'Buyer’s Stamp Duty', sub: 'Usually cash first; CPF may reimburse eligible duty', value: SG($(ck.bsd)) },
         { label: 'Upfront, cash and CPF', value: SG($(v.upfront)), cls: 'tot' }], note: 'What the loan supports, before your savings: a loan-based estimate, not your full budget. Stamp duty as a Singapore Citizen buying a first home.' });
-      if (v.alt) { const a = v.alt; right.push({ title: 'If the loan ran to age ' + a.endAge, rows: [{ label: 'The bank may lend about', sub: 'Over ' + yrs(a.years), value: SG($r(a.loan)) }, { label: 'Loan limit', sub: 'Of the price, the lower limit past age 65', value: pc(a.ltv) }, { label: 'Cash, at least', sub: 'Of the price', value: pc(a.minCash) },
+      if (v.alt) { const a = v.alt; right.push({ title: 'If the loan ran to age ' + a.endAge, rows: [{ label: 'The bank may lend about', sub: 'Over ' + yrs(a.years), value: SG($r(a.loan)) }, { label: 'Loan limit', sub: 'Of the price, the lower limit past age ' + END(), value: pc(a.ltv) }, { label: 'Cash, at least', sub: 'Of the price', value: pc(a.minCash) },
         { label: 'On a ' + SG(fmtP(a.price)) + ' home', sub: 'Upfront, at least ' + SG($(a.cashMin)) + ' of it in cash', value: SG($(a.down)) }], note: 'A longer loan lowers the share banks lend, so more of the price is paid upfront.' }); }
       return { tool: 'BORROW', checked: checkedOn(), question: 'How much can I borrow?', basis: basisWords(st, null).concat(a ? [SG($(st.cash || 0)) + ' cash', SG($(st.cpf || 0)) + ' CPF'] : []), figures: figures, judge: SG((v.elig ? v.elig + ' ' : '') + v.judge), left: [{ title: 'How the loan is worked out', rows: how, note: 'An estimate of what your income supports, not a bank approval.' }], right: right };
     }
@@ -1034,7 +1042,7 @@
       if (b.state === 'need') { out.innerHTML = '<p class="f3-eb">' + (st.n === 2 && (b.need || []).indexOf('p.1.fixed') >= 0 && (b.need || []).indexOf('p.0.fixed') < 0 ? 'Add Person 2’s income' : st.n === 2 ? 'Type both incomes to begin' : 'Type your income to begin') + '</p>' + row('The bank may lend about', '<span class="f3-dash">—</span>', 'Over the longest tenure your age allows') + row('Monthly instalment', '<span class="f3-dash">—</span>', 'The most banks allow') + row('Home price this loan supports', '<span class="f3-dash">—</span>', 'A loan-based estimate, not your full budget'); quietB(); return; }
       if (b.state === 'invalid') { out.innerHTML = '<p class="f3-eb">Check the figures</p><p class="f3-note">' + esc((b.errors[0] || {}).text || 'Check the figures marked.') + '</p>'; quietB(); return; }
       if (b.state === 'zero') { out.innerHTML = '<p class="f3-eb">No income entered</p>' + row('The bank may lend about', '$0', 'There is no income to lend against. Add a salary, including a co-borrower’s.'); quietB(); return; }
-      if (b.state === 'notenure') { out.innerHTML = '<p class="f3-eb">At this age</p><p class="f3-note">' + (b.kind === 'hdb-loan' ? 'No HDB loan tenure fits: HDB loans end by age 65.' : 'No bank loan tenure fits: banks usually end a loan by age ' + root.GW_RULES.bankLtv.maturityAge + '.') + '</p>'; quietB(); return; }
+      if (b.state === 'notenure') { out.innerHTML = '<p class="f3-eb">At this age</p><p class="f3-note">' + (b.kind === 'hdb-loan' ? 'No HDB loan tenure fits: HDB loans end by age ' + HDBEND() + '.' : 'No bank loan tenure fits: banks usually end a loan by age ' + root.GW_RULES.bankLtv.maturityAge + '.') + '</p>'; quietB(); return; }
       done();
       const msr = b.binding === 'msr', cap = msr ? '30%' : '55%', test = Math.round(b.testRatePct * 100) / 100, endAge = Math.round(b.age + b.years);
       const price = b.maxLoan / b.ltv, pRound = Math.floor(price / 10000) * 10000, pTxt = pRound >= 1e6 ? '$' + (pRound / 1e6).toFixed(2).replace(/0$/, '') + 'M' : $r(pRound);
@@ -1057,7 +1065,7 @@
       const elig = b.elig === 'age' ? 'Singles must be ' + (root.GW_RULES.hdbSingleMinAge || 35) + ' or older to buy a flat with an HDB loan under the Single Singapore Citizen scheme, and the age entered is ' + b.youngest + '. Other schemes may apply: confirm with an HFE letter.'
         : b.elig === 'ceiling' ? 'Household income of ' + $(b.income) + ' a month is above HDB’s loan ceiling of ' + $(b.ceiling) + ' for ' + ({ family: 'families', extended: 'extended families', single: 'singles' }[b.household] || 'your household') + '. You may need a bank loan instead.' : '';
       const lendL = b.kind === 'hdb-loan' ? (elig ? 'HDB could lend, if eligible' : 'HDB may lend about') : 'The bank may lend about';
-      const lendRow = (cls) => row(lendL, '<span data-answer' + (a && a.state === 'ok' ? '' : '') + ' data-cap>' + $r(b.maxLoan) + '</span>', 'Over ' + yrs(b.years) + ', ending at age ' + endAge + (b.ageAssumed ? ' (age 35 assumed)' : '') + (st.years && b.years < st.years ? '. You chose ' + yrs(st.years) + '; ' + (b.kind === 'hdb-loan' ? 'HDB loans end by 65' : 'most banks end a loan by ' + root.GW_RULES.bankLtv.maturityAge) : '') + (st.years && b.ltv < 0.75 && b.kind === 'private' ? '. Loan limit ' + pc(b.ltv) + ' of the price at this tenure' : '') + INDIC, cls);
+      const lendRow = (cls) => row(lendL, '<span data-answer' + (a && a.state === 'ok' ? '' : '') + ' data-cap>' + $r(b.maxLoan) + '</span>', 'Over ' + yrs(b.years) + ', ending at age ' + endAge + (b.ageAssumed ? ' (age 35 assumed)' : '') + (st.years && b.years < st.years ? '. You chose ' + yrs(st.years) + '; ' + (b.kind === 'hdb-loan' ? 'HDB loans end by ' + HDBEND() : 'most banks end a loan by ' + root.GW_RULES.bankLtv.maturityAge) : '') + (st.years && b.ltv < LTV0() && b.kind === 'private' ? '. Loan limit ' + pc(b.ltv) + ' of the price at this tenure' : '') + INDIC, cls);
       // a price brought from What will this home cost me?: what that home needs from the loan
       const askP = st.price > 0 && b.kind !== 'hdb-loan' ? F.priceLoan(b, st.price) : null;
       const bNote = brought && brought.k === 'price' && String(raw.price || '').replace(/\D/g, '') === String(brought.v).replace(/\D/g, '') ? '<span data-brought>' + brought.text + '</span> ' : '';
@@ -1097,7 +1105,7 @@
       if (b.altLtv) wl.push('<li><b>Loan limit:</b> ' + pc(b.ltv) + ' of the price, counting both of your housing loans. If your bank counts each borrower’s own loans (one each), it may be ' + pc(b.altLtv) + '. Your bank confirms the limit.</li>');
       else if (eachOwn(b)) wl.push('<li><b>Loan limit:</b> ' + pc(b.ltv) + ' of the price: MAS counts each borrower’s own housing loans, and you each have one. If your bank counts both loans together, it is ' + pc(root.GW_RULES.bankLtv[b.ltv < root.GW_RULES.bankLtv.standard[1].ltv ? 'lower' : 'standard'][2].ltv) + '. Your bank confirms the limit.</li>');
       if (b.debtsCut > 999) wl.push('<li><b>Your loans:</b> the ' + $(b.debts) + ' a month you already pay lowers it by about ' + $r(b.debtsCut) + '.</li>');
-      wl.push('<li><b>Tenure:</b> ' + yrs(b.years) + (b.joint ? ', using the ' + (b.kind === 'hdb-loan' ? 'average' : 'income-weighted') + ' age of ' + Math.round(b.age * 10) / 10 : '') + (b.ageCut ? ', shorter than ' + b.ageCut.full + ' so it ends by age ' + (b.kind === 'hdb-loan' ? 65 : root.GW_RULES.bankLtv.endAge) : '') + '.</li>');
+      wl.push('<li><b>Tenure:</b> ' + yrs(b.years) + (b.joint ? ', using the ' + (b.kind === 'hdb-loan' ? 'average' : 'income-weighted') + ' age of ' + Math.round(b.age * 10) / 10 : '') + (b.ageCut ? ', shorter than ' + b.ageCut.full + ' so it ends by age ' + (b.kind === 'hdb-loan' ? HDBEND() : root.GW_RULES.bankLtv.endAge) : '') + '.</li>');
       (b.notes || []).forEach((n) => wl.push('<li>' + esc(n.text) + '</li>'));
       wl.push('<li>An estimate of what your income supports, not a bank approval. The bank decides.</li>');
       if (why) { why.hidden = false; q('[data-why-sum]').textContent = 'How the ' + $r(b.maxLoan) + ' is worked out'; q('[data-why-out]').innerHTML = wl.join(''); }
@@ -1475,7 +1483,7 @@
       const notes = ['The tenure counts from the month after the bank’s first payment. Before TOP each instalment repays what has been paid out; from the month after TOP it is on the whole loan, as OCBC’s home loan terms set out. Ask your bank which way it charges.',
         est ? 'TOP is an estimate, ' + b.top + ' months after the option, as in the payment schedule. Add the developer’s TOP date under All payments to use it.' : '',
         typeof st.ratePct === 'number' ? '' : c.ratePct + '% is MAS’s stress-test rate, used because no rate was chosen. Today’s packages are lower.',
-        shortTerm(c, b) ? (b.endsBeforeTop ? 'The repayment start at TOP is an assumption made so a figure can be shown; the ' + pc(c.ltv) + ' limit is unchanged. ' : '') + 'With few years left by TOP, banks may set the tenure differently, for example by when your loan must end by age 65. That is for your bank to confirm.' : ''].filter(Boolean);
+        shortTerm(c, b) ? (b.endsBeforeTop ? 'The repayment start at TOP is an assumption made so a figure can be shown; the ' + pc(c.ltv) + ' limit is unchanged. ' : '') + 'With few years left by TOP, banks may set the tenure differently, for example by when your loan must end by age ' + END() + '. That is for your bank to confirm.' : ''].filter(Boolean);
       // each construction milestone: what the bank pays and the estimated monthly mortgage from the month after it (Ken, 28 Oct 2026)
       // Loan selection (Ken, 1 Nov 2026): every construction stage is listed, $0 where the bank has not paid yet; the instalment after a stage is the engine's own
       // (bank.after for a stage it pays, bank.dueAt for one it doesn't), so the figures are those of the validated path
@@ -1659,7 +1667,7 @@
       let incRow = '', incBasis = '';
       if (inc && inc.state === 'ok') {
         // a home under construction: the bank's test is the whole loan over the full term (MAS Notice 645), not the instalment from TOP; the line says so (Ken, 28 Oct 2026)
-        const basis = 'Before CPF' + (inc.debts > 0 ? ', with ' + $(inc.debts) + '/mo of loans' : ', no other loans') + (bucOf(st, c) ? ' · bank’s test over ' + yrs(c.years) + (c.ratePct < 4 ? ', tested at 4%' : '') : (c.ratePct < 4 ? ', tested at 4%' : '')) + (inc.ageAssumed ? ', loan to 65' : '') + (inc.rule === 'msr' ? ', EC cap 30% of income' : '');
+        const basis = 'Before CPF' + (inc.debts > 0 ? ', with ' + $(inc.debts) + '/mo of loans' : ', no other loans') + (bucOf(st, c) ? ' · bank’s test over ' + yrs(c.years) + (c.ratePct < STRESS() ? ', tested at ' + STRESS() + '%' : '') : (c.ratePct < STRESS() ? ', tested at ' + STRESS() + '%' : '')) + (inc.ageAssumed ? ', loan to ' + END() : '') + (inc.rule === 'msr' ? ', EC cap 30% of income' : '');
         incBasis = basis;
         incRow = row('Income needed', '<span class="f3-approx">≈</span> ' + r100(inc.income) + '<small>/mth</small>', mine ? (c.aboveIncome ? '<b class="f3-warn">Your income supports about ' + $r(c.incomeCap) + '</b>, so a bank would lend less' : 'Your income covers it') : basis);
       } else if (inc && inc.state === 'out') incRow = row('Income needed', '<span class="f3-dash">—</span>', 'More than an income can support at this age and tenure');
@@ -1668,7 +1676,7 @@
       if (st.years && c.years < st.years) alerts.push('You chose ' + yrs(st.years) + '. Most banks end a loan by age ' + root.GW_RULES.bankLtv.maturityAge + ', so ' + yrs(c.years) + ' is used here. MAS allows up to ' + root.GW_RULES.bankLtv.maxTenure.private + ' years for a private home; a bank may decide differently.');
       if (c.lower) { const c0 = F.cost(Object.assign({}, st, { years: null })), more = c0.state === 'ok' && !c0.lower ? (c.down + c.duty) - (c0.down + c0.duty) : 0;
         // Ken (28 Oct 2026): when a loan ending by 65 would, counted from the bank's first payment, end before TOP, the scenario shown is the longer tenure at the lower limit; say why
-        alerts.push('A lower loan limit applies because ' + (c.lowerWhy === 'age' ? 'the loan runs past age 65' + (c.shortStd ? ' (a ' + c.shortStd.years + '-year loan ending by 65 would, counted from the bank’s first payment, end before TOP, so ' + yrs(c.years) + ' is used)' : '') : 'the tenure is over 30 years') + ': banks may lend ' + pc(c.ltv) + ' of the price instead of ' + pc(c.shortStd ? c.shortStd.ltv : c0.state === 'ok' && !c0.lower ? c0.ltv : 0.75) + ', and at least ' + pc(c.minCash) + ' must be cash' + (more > 0.5 ? '. That is ' + $(more) + ' more from you' + (F.engineKind(st.pkind) !== 'completed' ? ', most of it during construction,' : '') + ' than with ' + yrs(c0.years) + '.' : '.')); }
+        alerts.push('A lower loan limit applies because ' + (c.lowerWhy === 'age' ? 'the loan runs past age ' + END() + (c.shortStd ? ' (a ' + c.shortStd.years + '-year loan ending by ' + END() + ' would, counted from the bank’s first payment, end before TOP, so ' + yrs(c.years) + ' is used)' : '') : 'the tenure is over ' + TEN().private + ' years') + ': banks may lend ' + pc(c.ltv) + ' of the price instead of ' + pc(c.shortStd ? c.shortStd.ltv : c0.state === 'ok' && !c0.lower ? c0.ltv : LTV0()) + ', and at least ' + pc(c.minCash) + ' must be cash' + (more > 0.5 ? '. That is ' + $(more) + ' more from you' + (F.engineKind(st.pkind) !== 'completed' ? ', most of it during construction,' : '') + ' than with ' + yrs(c0.years) + '.' : '.')); }
       // V3.12 Stage 2 (Ken, 27 Oct 2026): ABSD payable now is kept apart from any refund later, in one short line under the cash (never a box): the figure is what is
       // paid upfront; a refund depends on IRAS's conditions after the purchase, so it is never taken off the cash. The conditions (GW_CALC.stampDuty's own note) open on request.
       const rn = c.absd > 0 ? (c.dutyNotes || []).filter((n) => n.id === 'refund' || n.id === 'single-senior')[0] : null;
@@ -1741,7 +1749,7 @@
       const alerts = [];
       if (c.overLimit) alerts.push('Above the loan limit: up to ' + $(c.ruleLoan) + ' here (' + pc(c.ltv) + '), so that is used.');
       if (c.capped) alerts.push('You chose ' + yrs(st.years) + '. ' + (c.lender === 'hdb' ? 'An HDB loan runs up to ' + root.GW_RULES.hdbLoan.maxTenureYears + ' years and ends by age ' + root.GW_RULES.hdbLoan.endAge : 'Most banks end a loan by age ' + root.GW_RULES.bankLtv.maturityAge) + ', so ' + yrs(c.years) + ' is used here.');
-      if (c.lower) alerts.push('A lower loan limit applies because the bank loan runs past age 65 or over 25 years: ' + pc(c.ltv) + ' of the price, and at least ' + pc(c.minCash) + ' in cash.');
+      if (c.lower) alerts.push('A lower loan limit applies because the bank loan runs past age ' + END() + ' or over ' + TEN().hdb + ' years: ' + pc(c.ltv) + ' of the price, and at least ' + pc(c.minCash) + ' in cash.');
       if (c.lender === 'hdb' && c.loan > 0.5) alerts.push('With an HDB loan, HDB expects you to use your CPF savings above $' + root.GW_RULES.hdbLoan.oaRetain.toLocaleString('en-US') + ' first, so the loan can be smaller than this.' + (c.flat === 'resale' ? ' A lease that doesn’t cover the youngest buyer to age 95 also lowers it.' : ''));
       const incRow = c.loan > 0.5 ? row('Income needed', '<span class="f3-approx">≈</span> ' + r100(c.incomeMsr) + '<small>/mth</small>', 'Household, before CPF; repayments within 30% of income (MSR), tested at ' + Math.round(c.stressRate * 1000) / 10 + '%') : '';
       out.innerHTML = '<p class="f3-eb">For a ' + $(c.price) + ' ' + KN[st.pkind] + '</p>' + signRow +
@@ -1839,7 +1847,7 @@
         'Instalments: the tenure starts the month after the bank’s first payment. Until TOP, each instalment repays what has been paid out; from the month after TOP it is on the whole loan, as OCBC’s home loan terms set out. Some banks keep progressive instalments until CSC.' + (alt || '') + ' Ask your bank which it uses.',
         fb ? plain(fb) : '',
         'CPF: your minimum cash is paid in cash first (the booking fee counts), then CPF pays your share of each stage and the instalments; anything it can’t cover is cash. Stamp duty is cash.',
-        'Contributions arrive mid-month: an HDB loan is deducted before them, a private home’s loan after. OA interest of 2.5% is counted only once credited, on 1 January.' + (N.indexOf('split') >= 0 ? ' The CPF you entered is split between you in proportion to your contributions.' : '') + (N.indexOf('nocpf') >= 0 ? ' No CPF balance entered: your OA starts at $0.' : ''),
+        'Contributions arrive mid-month: an HDB loan is deducted before them, a private home’s loan after. OA interest of ' + OA() + '% is counted only once credited, on 1 January.' + (N.indexOf('split') >= 0 ? ' The CPF you entered is split between you in proportion to your contributions.' : '') + (N.indexOf('nocpf') >= 0 ? ' No CPF balance entered: your OA starts at $0.' : ''),
         N.indexOf('existing') >= 0 ? 'Your existing home’s loan is paid from CPF' + (N.indexOf('refund') >= 0 ? ' until its sale completes; the CPF refund is credited the month after.' : N.indexOf('refund-first') >= 0 ? '; sold first, its CPF refund is counted from the option.' : ', every month.') : '',
         N.indexOf('setaside') >= 0 ? 'Owning another home for good, the OA up to the set-aside is kept for your retirement and not used here.' : N.indexOf('setaside-full') >= 0 ? 'Owning another home for good, the whole ' + (b.setAside ? b.setAside.sum + ' (' + $(b.setAside.amount) + ')' : 'retirement sum') + ' is kept out of your OA here (no SA balance entered).' : '',
         N.indexOf('turn55') >= 0 ? 'Turning 55 before TOP: your SA, then your OA, move to your Retirement Account up to the Full Retirement Sum (' + $(root.GW_CPFBUF ? root.GW_CPFBUF.FRS_LATEST : 228200) + '); only what is left in your OA is used here. Your contribution is kept as entered.' : '',

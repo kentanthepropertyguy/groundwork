@@ -122,6 +122,24 @@
     // Minimum cash with an HDB loan: NONE. The downpayment (price, or the lower of price and valuation, less the loan) "can be paid in full using your CPF Ordinary Account"; only the part of the
     // price above the valuation (cash over valuation) is cash. The 5% minimum cash belongs to a BANK loan. Option fee and exercise fee (the deposit) cannot be paid with CPF and are paid in cash
     // first, but they are part of the price, not extra (CPF Board, "3 differences between an HDB loan and a bank loan"; CPF Housing Scheme T&C Part A 1(b)(i); checked 24 Oct 2026).
+    // HDB — Minimum Occupation Period (MOP). P3 (Master Planning, 6 Nov 2026), checked 6 Nov 2026 on hdb.gov.sg:
+    //   "Conditions after buying" (MOP section): Standard and unclassified flats 5 years; new and resale Plus and Prime flats 10 years (Prime includes the
+    //   Prime Location Public Housing flats sold before the October 2024 sales exercise); Fresh Start Housing Scheme flats 20 years. The MOP is counted from
+    //   the legal completion of the flat purchase (a new flat: the key collection appointment; a resale flat: the resale completion). Not counted: any time the
+    //   whole flat is rented out with HDB's approval, and any period the lease is infringed.
+    //   https://www.hdb.gov.sg/residential/buying-a-flat/conditions-after-buying
+    //   "Acquiring private property": a household with at least one Singapore Citizen owner may buy private residential property only after the MOP (and may
+    //   keep the flat); an owner household of Singapore PRs only must sell the flat within 6 months of buying one.
+    //   https://www.hdb.gov.sg/cs/infoweb/residential/living-in-an-hdb-flat/acquiring-private-property
+    //   Selling before the MOP: only with HDB's approval in exceptional circumstances (divorce, death of an owner, financial hardship and the like), case by
+    //   case on appeal; HDB's selling pages say bankruptcy and divorce bring "additional requirements". Not assessed by the tools: they say so.
+    //   SERS replacement flats: 5 years from key collection for SERS sites announced from 7 Apr 2022 (HDB release 2 Jul 2022; earlier sites had a different
+    //   rule), asked as a special case, not computed. Plus and Prime flats also repay a subsidy recovery on resale (set for each project; 6% to 9% of the
+    //   resale price so far): not modelled, and never reached inside a 10-year period for flats sold from Oct 2024.
+    // The planner's rules.js still states mopYears 5 as an assumption; the 5 years for Standard flats is read from it here, not copied.
+    hdbMop: { years: { standard: BASE.mopYears, plus: 10, prime: 10, freshStart: 20 }, from: 'legal-completion', notCounted: ['whole-flat rental approved by HDB', 'periods the lease is infringed'],
+      privateAfterMop: 'household with a Singapore Citizen owner', sprOnlySellWithinMonths: 6, earlySale: 'HDB approval on appeal only, case by case (not assessed)',
+      sersReplacementFrom: '2022-04-07', checked: '2026-11-06' },
     hdbLoan: { stressRate: 0.03, ltv: 0.75, minCash: 0, maxTenureYears: 25, endAge: 65, leaseBufferYears: 20, oaRetain: 20000, leaseCoverAge: 95 },
     // VALUATION (a resale, private or HDB). The loan limit (LTV), the minimum cash and the CPF that may be used are all worked on the LOWER of the price and the
     // valuation; the part of the price above the valuation (cash over valuation) is paid in cash, and neither the loan nor CPF can cover it; stamp duty is on the
@@ -135,7 +153,7 @@
     // CPF Board release, 22 Sep 2026: OA interest 2.5% and HDB concessionary loan rate 2.6% for 1 Oct – 31 Dec 2026.
     // https://www.cpf.gov.sg/member/infohub/news/news-releases/government-extends-4-per-cent-interest-rate-floor-on-special-medisave-and-retirement-account-monies-until-31-december-2027
     // https://www.hdb.gov.sg/managing-my-home/finances/loan-matters/interest-rate
-    // VALID ONLY TO 31 DEC 2026 (audit A2-17): tests/30-audit-calc.test.js fails after that date until these are re-checked.
+    // VALID ONLY TO 31 DEC 2026 (audit A2-17): tools/financial-tests/rules-dated-tests.js fails after that date until these are re-checked (P3: it did not exist before 6 Nov 2026).
     hdbLoanRate: 0.026,
     hdbLoanRateFor: 'Oct–Dec 2026',
     cpfOaRate: 0.025,
@@ -280,6 +298,7 @@
       valuation: 'CPF Board (down payment of a property; 3 differences between an HDB loan and a bank loan; CPF Housing Scheme terms), HDB (resale acceptance and approval), IRAS: loan and CPF on the lower of price and valuation; cash over valuation in cash; an HDB loan needs no minimum cash, a bank loan does; the option fee and exercise payment are paid in cash; stamp duty on the higher',
       pps: 'Housing Developers Rules: standard progressive payment schedule',
       hdbPayments: 'HDB: Option to Purchase, resale application and completion pages; new flat booking, Agreement for Lease and key collection pages (checked 24 Oct 2026)',
+      hdbMop: 'HDB, Conditions after buying (MOP: Standard 5 years, Plus and Prime 10, Fresh Start 20, from legal completion; whole-flat rental not counted) and Acquiring private property (only after the MOP; SPR-only owners sell within 6 months); checked 6 Nov 2026',
       plannerConventions: 'Planning conventions (not statutory rules): dates and defaults the Payment Timeline Planner uses when the real date is unknown; each is shown as an estimate and editable',
     },
   };

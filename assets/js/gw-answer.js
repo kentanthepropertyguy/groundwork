@@ -75,7 +75,7 @@
     const list = buyers.map((b) => ({ age: b.age, fixed: nn(b.fixed), variable: nn(b.variable), rental: nn(b.rental) }));
     const B = C.borrowers(list);
     const complete = buyers.length > 0 && buyers.every((b) => has(b.age)) && B.gross > 0 && B.iwaa !== null;
-    const rate = has(s.ratePct) ? s.ratePct : 4;
+    const rate = has(s.ratePct) ? s.ratePct : R.stressRate * 100;   // P2: the MAS 4% rate (GW_RULES), the same default as GW_FIN3
     // $0 typed for every buyer is an answer (no income to lend against); a blank income is not (it cannot be checked yet)
     const zeroIncome = buyers.length > 0 && buyers.every((b) => has(b.age)) && B.gross <= 0 && buyers.every((b) => has(b.fixed) || has(b.variable) || has(b.rental));
     const out = { s: s, buyers: buyers, list: list, B: B, complete: complete, zeroIncome: zeroIncome, ratePct: rate, kind: s.kind === 'completed' ? 'completed' : 'new' };

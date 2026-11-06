@@ -17,6 +17,10 @@
                               Cash and CPF left are their flows in and out today (a sale's proceeds in; a purchase's cash, CPF and costs out);
                               rent and recurring costs are monthly amounts over the period. Equity, cash and CPF stay separate in the result:
                               the position is not money available to spend. With `against` (another ledger), the differences from it.
+     mopEnd(i, asOf)          P3 (6 Nov 2026): when an HDB flat's minimum occupation period ends (GW_RULES.hdbMop): the flat's category
+                              ('standard', 'plus', 'prime', 'freshStart'), the month its purchase legally completed (YYYY-MM, or a date), and any
+                              months not counted (whole-flat rental with HDB's approval). Months only: the MOP is treated as met from the month
+                              after the one it ends in, so a flat is never shown as sellable before its date. Or { met: true } when the owner says so.
      breakEven(i)             the yearly price change a home held at the end needs for one position to equal another:
                                 value × (1 + g)^years + rest = target   →   g = ((target − rest) / value)^(1/years) − 1
                               given as numbers (target, rest, value, years) or as two ledgers ({ target: ledger, of: ledger with one home }).
@@ -142,5 +146,30 @@
     return { ok: true, state: Math.abs(pct) > max ? 'beyond' : 'at', pct: pct, totalPct: (ratio - 1) * 100, maxPct: max };
   }
 
-  return { POSITION_VERSION: VERSION, loanAt, loanFrom, valueAt, ledger, breakEven };
+  /* ---------------- mopEnd: an HDB flat's minimum occupation period (P3) ---------------- */
+  // i: { met: true } (the owner says it is over) or { category, completed: 'YYYY-MM[-DD]', notCountedMonths }; asOf: 'YYYY-MM[-DD]' (today, from the page).
+  const MONTH = /^(\d{4})-(\d{2})(?:-\d{2})?$/;
+  const monthIndex = (s) => { const m = MONTH.exec(String(s || '')); return m && +m[2] >= 1 && +m[2] <= 12 ? +m[1] * 12 + (+m[2] - 1) : null; };
+  const monthText = (k) => Math.floor(k / 12) + '-' + String(k % 12 + 1).padStart(2, '0');
+  function mopEnd(i, asOf) {
+    i = i || {};
+    if (i.met === true) return { ok: true, state: 'met', basis: 'owner' };
+    const need = [];
+    if (i.category === undefined || i.category === null || i.category === '') need.push({ field: 'category', need: 'required' });
+    if (i.completed === undefined || i.completed === null || i.completed === '') need.push({ field: 'completed', need: 'required' });
+    if (asOf === undefined || asOf === null || asOf === '') need.push({ field: 'asOf', need: 'required' });
+    if (need.length) return missing(need);
+    const years = R.hdbMop.years[i.category], from = monthIndex(i.completed), now = monthIndex(asOf), gap = num(i.notCountedMonths) !== null ? i.notCountedMonths : 0;
+    const bad = [];
+    if (num(years) === null) bad.push({ field: 'category', text: 'One of: ' + Object.keys(R.hdbMop.years).join(', ') + '.' });
+    if (from === null) bad.push({ field: 'completed', text: 'A month, YYYY-MM.' });
+    if (now === null) bad.push({ field: 'asOf', text: 'A month, YYYY-MM.' });
+    if (!(Number.isInteger(gap) && gap >= 0 && gap <= MONTHS_MAX)) bad.push({ field: 'notCountedMonths', text: 'Whole months, 0 or more.' });
+    if (bad.length) return invalid(bad);
+    if (from > now) return invalid([{ field: 'completed', text: 'The completion month is after today.' }]);
+    const ends = from + years * 12 + gap;
+    return { ok: true, state: now > ends ? 'met' : 'not-met', basis: 'rule', category: i.category, years: years, notCountedMonths: gap, completed: monthText(from), endsIn: monthText(ends), monthsLeft: now > ends ? 0 : ends - now + 1, checked: R.hdbMop.checked };
+  }
+
+  return { POSITION_VERSION: VERSION, loanAt, loanFrom, valueAt, ledger, breakEven, mopEnd };
 });

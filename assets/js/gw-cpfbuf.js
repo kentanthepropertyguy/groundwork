@@ -20,8 +20,8 @@
   'use strict';
   if (!R || !C || typeof C.bankPath !== 'function' || typeof C.bankMonths !== 'function') throw new Error('GW_CPFBUF needs GW_RULES and GW_CALC (with bankPath)');
   const VERSION = 'B1-2026-10-28 (methodology v1.1)';
-  const OA_RATE = 0.025;          // R7: the legislated floor and the current OA rate
-  const FRS_LATEST = 228200;      // R10, A8: members turning 55 in 2027, the latest published
+  const OA_RATE = R.cpfOaRate;    // R7: the OA rate (GW_RULES, dated; today the legislated 2.5% floor). P2: read, not written here
+  const FRS_LATEST = R.cpfRetirementSums[Math.max.apply(null, Object.keys(R.cpfRetirementSums).filter((y) => /^\d{4}$/.test(y)).map(Number))].frs;   // R10, A8: the latest published year (GW_RULES). P2: read, not written here
   const STAGES = R.pps.map((s) => ({ id: s.id, pct: s.pct }));
   const num = (x) => (typeof x === 'number' && isFinite(x) ? x : null);
   const nn = (x) => (num(x) !== null && x > 0 ? x : 0);

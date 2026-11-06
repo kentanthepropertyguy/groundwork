@@ -23,8 +23,10 @@
    compared only when given for every home held in the choices compared, or for none (then excluded for all, and said). A choice that rents or
    says it has no housing cost makes them required for every home held (its housing cost is complete; an owner's would not be). Otherwise the
    comparison is marked not comparable, with what is missing.
-   Not in P1 (said, never approximated): new launches and ECs as the next home, buying first, more than one home owned, the MOP check (the
-   rule expansion is P3; an HDB sale carries a provisional note until then).
+   HDB minimum occupation period (P3, 6 Nov 2026): an HDB flat is sold (Sell, Upgrade) only once its MOP is over (GW_CALC.mopEnd on GW_RULES.hdbMop):
+   owned[0].mop is { met: true } or { category, completed: 'YYYY-MM' [, notCountedMonths] }, with o.asOf (today, from the page). Within the MOP: stop,
+   with the month it ends; selling earlier needs HDB's approval on appeal, which is not assessed. Not given: incomplete (required).
+   Not in P1 (said, never approximated): new launches and ECs as the next home, buying first, more than one home owned.
    UMD: adds to window.GW_ENGINE (after gw-engine.js and gw-calc-position.js); in Node, require() returns the factory:
    (GW_RULES, GW_CALC with the position primitives, the planner's assumptions, GW_ENGINE).
    ========================================================================== */
@@ -56,7 +58,7 @@
     out.purchaseCosts = given(o.purchaseCosts) ? o.purchaseCosts : A.purchaseCosts; a('purchaseCosts', out.purchaseCosts, given(o.purchaseCosts) ? 'user' : 'convention');
     if (!(has(out.purchaseCosts) && out.purchaseCosts >= NONE)) out.invalid.push({ field: 'purchaseCosts', text: 'An amount of $0 or more.' });
     a('returns', NONE, 'convention'); a('valueBasis', 'market value, no sale assumed at the end', 'convention'); a('saleRepays', 'today’s loan balance', 'convention');
-    out.sell = obj(o.sell); out.oneOff = obj(o.oneOff);
+    out.sell = obj(o.sell); out.oneOff = obj(o.oneOff); out.asOf = o.asOf;
     return out;
   }
   const oneOffOf = (op, id) => (has(op.oneOff[id]) ? op.oneOff[id] : NONE);
@@ -134,11 +136,22 @@
   }
 
   // the home sold now: GW_ENGINE.sale on the case with that home's intent set to sell. The split into cash and CPF needs the CPF refund.
-  function saleNow(c, ch) {
+  // An HDB flat first: its minimum occupation period must be over (P3). Within it the choice stops here, with the month it ends.
+  function mopOf(c, ch, op) {
+    const h = obj(obj(c).owned[0]);
+    if (h.type !== 'hdb') return true;
+    if (!h.mop) { ch.status = 'incomplete'; ch.missing.push({ field: 'owned[0].mop', need: 'required' }); return false; }
+    const m = C.mopEnd(obj(h.mop), op.asOf), at = (f) => (f === 'asOf' ? 'asOf' : 'owned[0].mop.' + f); ch.blocks.mop = m;
+    if (!m.ok) { ch.status = (m.invalid || []).length ? 'invalid' : 'incomplete'; m.missing.forEach((x) => ch.missing.push({ field: at(x.field), need: 'required' })); (m.invalid || []).forEach((x) => ch.invalid.push({ field: at(x.field), text: x.text })); return false; }
+    if (m.state !== 'met') { ch.status = 'stop'; ch.reason = 'within-mop'; ch.mop = { endsIn: m.endsIn, monthsLeft: m.monthsLeft, years: m.years, category: m.category, earlySale: R.hdbMop.earlySale, checked: R.hdbMop.checked }; return false; }
+    ch.assumptions.push({ key: 'owned[0].mop', value: m.state, basis: m.basis, checked: R.hdbMop.checked });
+    return true;
+  }
+  function saleNow(c, ch, op) {
+    if (!mopOf(c, ch, op)) return null;
     const cs = clone(c); cs.owned[0].intent = 'sell'; delete cs.purchase;
     const s = E.sale(cs, cs.owned[0].id); ch.blocks.sale = s;
     ch.provisional = ch.provisional.concat(s.provisional || []);
-    if (cs.owned[0].type === 'hdb') ch.provisional.push({ key: 'owned[0].mop', note: 'The HDB minimum occupation period is not checked yet (rule update pending): the flat must be past it to be sold.' });
     if (s.status !== 'ok') { ch.status = s.status; ch.reason = s.reason; ch.missing = ch.missing.concat(s.missing); ch.invalid = ch.invalid.concat(s.invalid); return null; }
     s.assumptions.forEach((x) => ch.assumptions.push(x));
     const fig = s.figures, v = s.value;
@@ -181,7 +194,7 @@
   function sell(c, op) {
     const ch = base('sell'), hh = needHousehold(c, ch);
     if (ch.missing.length) { ch.status = 'incomplete'; return ch; }
-    const sale = saleNow(c, ch); if (!sale) return ch;
+    const sale = saleNow(c, ch, op); if (!sale) return ch;
     const S = op.sell, how = S.housing;
     ch.housing = how || null;
     // today's figures stand whatever comes next
@@ -210,7 +223,7 @@
     if (!has(pu.price)) ch.missing.push({ field: 'purchase.price', need: 'required' });
     if (pu.order === 'buy-first') { ch.status = 'unsupported'; ch.reason = 'buy-first'; return ch; }
     if (ch.missing.length) { ch.status = 'incomplete'; return ch; }
-    const sale = saleNow(c, ch); if (!sale) return ch;
+    const sale = saleNow(c, ch, op); if (!sale) return ch;
     if (buy(c, ch, sale, hh, pu.price, op.pctNext, pu.monthlyCosts, op, 'upgrade')) ch.recurring = [{ home: 'purchase.monthlyCosts', monthly: pu.monthlyCosts }];
     return ch;
   }
