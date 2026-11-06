@@ -157,7 +157,7 @@ const BLOCK_KEYS = ['status', 'missing', 'invalid', 'assumptions', 'provisional'
   const refs = html.filter((p) => /gw-engine\.js/.test(fs.readFileSync(p, 'utf8')));
   const rel = refs.map((p) => path.relative(H.root, p).split(path.sep).join('/'));
   // HSU P4 (7 Nov 2026): Hold, sell or upgrade? (journey/compare/) is the second page on the shared engine; still no calculator
-  ok(html.length > 20 && rel.sort().join() === 'journey/compare/index.html,journey/index.html', 'only Plan My Move V2 (journey/) and Hold, sell or upgrade? (journey/compare/) load gw-engine.js (' + html.length + ' pages checked)', rel);
+  ok(html.length > 20 && rel.sort().join() === 'journey/compare/index.html,journey/index.html,tools/hold-sell-upgrade/index.html', 'only Plan My Move V2 (journey/) and Hold, Sell or Upgrade? (journey/compare/, tools/hold-sell-upgrade/: one component) load gw-engine.js (' + html.length + ' pages checked)', rel);
   const js = fs.readdirSync(path.join(H.root, 'assets/js')).filter((f) => f !== 'gw-engine.js' && /\.js$/.test(f));
   const users = js.filter((f) => /GW_ENGINE|gw-engine/.test(fs.readFileSync(path.join(H.root, 'assets/js', f), 'utf8')));
   // HSU P1 (6 Nov 2026): gw-engine-position.js is GW_ENGINE's own extension (its position and compare blocks), loaded by no page yet

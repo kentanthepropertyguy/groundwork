@@ -136,7 +136,8 @@ try:
         # V3.8 (Ken 27 Oct 2026): seven equal calculator cards replace the four questions and the text links; the menu lists the same seven (v38-render covers the rest)
         SEVEN = [['Purchase Costs & Timeline', 'payment-planner/'], ['How Much Can I Borrow?', 'tdsr/'], ['Pledged & Unpledged Assets', 'pledged-assets/'], ['Mortgage Instalment', 'mortgage/'], ['Sale Proceeds', 'sale-proceeds/'], ['Buyer’s Stamp Duty (BSD\u00a0&\u00a0ABSD)', 'stamp-duty/'], ['Seller’s Stamp Duty', 'ssd/']]
         cards = pg.evaluate("[...document.querySelectorAll('.gw-tdir .gw-tc')].map(a=>[a.querySelector('b').textContent,a.getAttribute('href')])")
-        check(f'{tag} calculators: the seven, in order', cards == SEVEN, cards)
+        # HSU V1.1 (7 Nov 2026): Hold, Sell or Upgrade? is first, then the seven; the menu column keeps the seven
+        check(f'{tag} calculators: Hold, Sell or Upgrade? then the seven, in order', cards == [['Hold, Sell or Upgrade?', 'hold-sell-upgrade/']] + SEVEN, cards)
         check(f'{tag} calculators: no Upgrade card and no text links underneath', pg.locator('.gw-tdir .gw-mone').count() == 0 and not any(c[1] == 'hdb-upgrade/' for c in cards))
         col = pg.evaluate("[...document.querySelectorAll('.gw-ms-tools .gw-mi b')].map(b=>b.textContent)")
         check(f'{tag} header menu: the same seven', col == [c[0] for c in SEVEN], col)

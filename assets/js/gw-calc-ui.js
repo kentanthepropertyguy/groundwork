@@ -42,6 +42,7 @@
     worth: '<path d="M5 20V12m5 8V7m5 13v-6m5 6V4"/>',
     research: '<path d="M4 20V8l6-4v16M10 20V10l6 3v7M16 20v-6l4 2v4"/><path d="M3 20h18"/>',
     'pledged-assets': '<rect x="4.5" y="10.5" width="15" height="9.5" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/><path d="M12 14.5v2"/>',
+    'hold-sell-upgrade': '<path d="M12 21v-8"/><path d="M12 13 5 6M12 13l7-7M12 13V4"/><path d="M5 10V6h4M19 10V6h-4M9.5 6.5 12 4l2.5 2.5"/>',
   };
   const svg = (k) => '<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + ICON[k] + '</svg>';
   // name: plain words (menu, directory, page heading) · tag: the term people know · title: the formal name (page titles, WhatsApp).
@@ -70,7 +71,10 @@
   // What can I afford? and the HDB and EC loan limit are part of How much can I borrow? (their addresses redirect there).
   // V3.8 (Ken 27 Oct 2026): seven calculators, equal, in a two-column grid of cards (one column on a phone), in Ken's order (the borrowing tools together).
   // Upgrade from HDB is part of Plan My Move (its address and page are unchanged); one section under the cards leads there. An eighth card fits the grid as is.
+  // HSU V1.1 (Master Planning, 7 Nov 2026): Hold, Sell or Upgrade? is the eighth calculator, first in the grid; it opens clean (Plan My Move's own link
+  // to journey/compare/ carries its answers). The header menu is unchanged.
   const DIRECTORY = [
+    ['hold-sell-upgrade', 'hold-sell-upgrade/', 'Hold, Sell or Upgrade?', 'What if I keep my home, sell it, or upgrade?'],
     ['payment-planner', 'payment-planner/', 'Purchase Costs & Timeline', 'How much will this home cost me, and when do I pay?'],
     ['tdsr', 'tdsr/', 'How Much Can I Borrow?', 'How much could a bank lend me?'],
     ['pledged-assets', 'pledged-assets/', 'Pledged & Unpledged Assets', 'Could my savings and investments help me borrow more?'],
@@ -86,7 +90,7 @@
   function directoryHtml() {
     const card = (x) => '<li><a class="gw-tc" href="' + x[1] + '" data-tool="' + x[0] + '">' + svg(x[0]) + GO + '<b>' + esc(x[2]) + '</b><span>' + esc(x[3]) + '</span></a></li>';
     return '<h2 class="gw-vh">Calculators</h2><ul class="gw-tcs">' + DIRECTORY.map(card).join('') + '</ul>' +
-      '<section class="gw-pmm" aria-labelledby="gw-pmm-h"><div><h2 id="gw-pmm-h">Planning your next property move?</h2><p>Buying, selling or upgrading? Use Plan My Move to connect your financial calculations across the journey. Own a home? <a href="../journey/compare/" data-tool="hold-sell-upgrade">Compare holding, selling and upgrading</a>.</p></div>' +
+      '<section class="gw-pmm" aria-labelledby="gw-pmm-h"><div><h2 id="gw-pmm-h">Planning your next property move?</h2><p>Buying, selling or upgrading? Use Plan My Move to connect your financial calculations across the journey.</p></div>' +
       '<a class="gw-pmm-go" href="../journey/" data-gw-nav-to="journey">Explore Plan My Move <span aria-hidden="true">→</span></a></section>';
   }
 

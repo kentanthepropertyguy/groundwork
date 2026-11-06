@@ -213,13 +213,14 @@ const startOf = (x, ch) => { const s = x.today && x.today.sale; return ch === 'h
   // P4 (7 Nov 2026): gw-pmm.js gains only the Hold, sell or upgrade? link for owners and its handoff (Plan My Move's own tests and pmm-render show V2 unchanged)
   if (changed) ok(!changed.some((l) => /^[MD]\tassets\/js\/(gw-calc|gw-engine)\.js$/.test(l)), 'gw-calc.js and gw-engine.js are not modified', changed);
   if (changed) {
-    const pagesChanged = changed.filter((l) => /^M\t.*\.html$/.test(l)).map((l) => l.slice(2)), tagless = (s) => s.replace(/\?v=[0-9A-Za-z._-]+/g, '?v=').replace(/HDB’s rate is [^(<]*\(CPF Board\)\./g, 'HDB-RATE').replace(/ Own a home\? <a href="\.\.\/journey\/compare\/" data-tool="hold-sell-upgrade">Compare holding, selling and upgrading<\/a>\./, '');   // P4: the Calculators page's one added link   // the quarterly rate sentence (rules-source-tests checks it)
+    // V1.1: HSU's own pages and the Calculators page (its new card) are checked by hsu-render.py; every other page may change only in its version tags
+    const pagesChanged = changed.filter((l) => /^M\t.*\.html$/.test(l)).map((l) => l.slice(2)).filter((f) => ['tools/index.html', 'journey/compare/index.html', 'tools/hold-sell-upgrade/index.html'].indexOf(f) < 0), tagless = (s) => s.replace(/\?v=[0-9A-Za-z._-]+/g, '?v=').replace(/HDB’s rate is [^(<]*\(CPF Board\)\./g, 'HDB-RATE').replace(/ Own a home\? <a href="\.\.\/journey\/compare\/" data-tool="hold-sell-upgrade">Compare holding, selling and upgrading<\/a>\./, '');   // P4: the Calculators page's one added link   // the quarterly rate sentence (rules-source-tests checks it)
     const other = pagesChanged.filter((f) => tagless(fs.readFileSync(path.join(root, f), 'utf8')) !== tagless(cp.execSync('git show origin/main:' + f, { cwd: root, encoding: 'utf8' })));
     ok(other.length === 0, 'every page changed differs from live only in its version tags, and the Mortgage page in its quarterly rate sentence (' + pagesChanged.length + ' pages)', other);
   }
   const pages = cp.execSync('git ls-files "*.html"', { cwd: root, encoding: 'utf8' }).split('\n').filter(Boolean);
   // P4 (7 Nov 2026): the Hold, sell or upgrade? page is the one page that loads them
-  ok(pages.filter((f) => /gw-calc-position|gw-engine-position/.test(fs.readFileSync(path.join(root, f), 'utf8'))).join() === 'journey/compare/index.html', 'only journey/compare/ loads the position primitives and blocks');
+  ok(pages.filter((f) => /gw-calc-position|gw-engine-position/.test(fs.readFileSync(path.join(root, f), 'utf8'))).sort().join() === 'journey/compare/index.html,tools/hold-sell-upgrade/index.html', 'only the Hold, Sell or Upgrade? pages (journey/compare/, tools/hold-sell-upgrade/) load the position primitives and blocks');
   // the engine blocks: no formula, rate or arithmetic (strings, regexes and comments out)
   const src = fs.readFileSync(path.join(root, 'assets/js/gw-engine-position.js'), 'utf8');
   const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '').replace(/'(?:\\.|[^'\\])*'/g, "''").replace(/\/\^[^/\n]*\/[a-z]*/g, 'RX').replace(/\/[^/\n*]+\/\.test/g, 'RX.test');

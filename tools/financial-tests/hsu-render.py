@@ -1,4 +1,4 @@
-"""Hold, sell or upgrade? (HSU P4, journey/compare/): the page in a real browser, against the engine.
+"""Hold, Sell or Upgrade? (HSU P4, V1.1): the calculator (tools/hold-sell-upgrade/) and Plan My Move's entry (journey/compare/), in a real browser, against the engine.
   A  Parity: 60 seeded households (HDB and private, with and without loans, MOP met / not yet / unsure, every way of living after a sale, 1, 5 and
      10 years, price changes): every position, difference from Hold, today's cash and CPF, monthly housing cost and state the page shows equals
      GW_ENGINE.compare's for the same figures (tools/financial-tests/independent/hsu_page_batch.js, the page's own caseOf/optsOf, run in Node).
@@ -61,8 +61,9 @@ def node_expect(states, today):
     tmp = tempfile.NamedTemporaryFile('w', suffix='.json', delete=False); json.dump(states, tmp); tmp.close()
     out = json.loads(subprocess.run(['node', os.path.join(SITE, 'tools/financial-tests/independent/hsu_page_batch.js'), tmp.name, today], capture_output=True, text=True, check=True).stdout)
     os.unlink(tmp.name); return out
-def open_state(pg, st, hash_='#results'):
-    pg.goto(B + '/journey/compare/'); pg.wait_for_selector('[data-hsu] .hsu-card')
+HSU = '/tools/hold-sell-upgrade/'
+def open_state(pg, st, hash_='#results', at=None):
+    pg.goto(B + (at or HSU)); pg.wait_for_selector('[data-hsu] .hsu-card')
     pg.evaluate("() => history.replaceState(null, '', '" + hash_ + "')"); pg.evaluate("(s) => sessionStorage.setItem('gw.hsu.v1', JSON.stringify(s))", st)   # the hash first (no popstate), then this tab's state
     pg.reload(); pg.wait_for_selector('[data-hsu] .hsu-card')
 def shown(pg):
@@ -74,7 +75,7 @@ try:
     with sync_playwright() as p:
         br = p.chromium.launch()
         ctx = br.new_context(viewport={'width': 1440, 'height': 900}); pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
-        pg.goto(B + '/journey/compare/'); pg.wait_for_selector('[data-hsu] .hsu-card')
+        pg.goto(B + HSU); pg.wait_for_selector('[data-hsu] .hsu-card')
         today = pg.evaluate("(() => { const d = new Date(), p = (n) => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); })()")
         EXP = node_expect(STATES, today)
         # ---------- A parity ----------
@@ -104,13 +105,20 @@ try:
         st = lambda **kw: {'v': 1, 'f': dict(base, **kw), 'o': {}, 'from': None}
         open_state(pg, st()); sh = shown(pg)
         check('B: Sell before “where you’d live”: today’s cash and CPF only, no 5-year figure, and it says what to add', sh['sell']['pos'] is None and sh['sell']['cash'] == '$421,740' and sh['sell']['cpf'] == '$340,000' and 'where you would live' in (sh['sell']['state'] or ''), sh['sell'])
-        check('B: …and Hold and Upgrade are still compared', sh['hold']['pos'] == '$758,601' and sh['upgrade']['pos'] == '$416,680' and 'ahead of upgrading' in (sh['answer'] or ''), sh['answer'])
+        check('B: …and Hold and Upgrade are still compared', sh['hold']['pos'] == '$758,601' and sh['upgrade']['pos'] == '$416,680' and 'more than upgrading' in pg.locator('[data-gap]').inner_text(), sh['answer'])
         open_state(pg, st(live='rent', rent=3500)); sh = shown(pg)
-        check('B: the worked example: Hold $758,601 · Sell $551,740 · Upgrade $416,680; about $207,000 and $342,000 (the P4 concept)', sh['hold']['pos'] == '$758,601' and sh['sell']['pos'] == '$551,740' and sh['upgrade']['pos'] == '$416,680' and sh['answer'] == 'Keeping your flat leaves you about $207,000 ahead of selling and renting, and about $342,000 ahead of upgrading.', sh)
+        gap = pg.locator('[data-gap]').inner_text()
+        check('B: the worked example: Hold $758,601 · Sell $551,740 · Upgrade $416,680; one headline (conditional, never "better"), the gaps underneath', sh['hold']['pos'] == '$758,601' and sh['sell']['pos'] == '$551,740' and sh['upgrade']['pos'] == '$416,680' and sh['answer'] == 'On your figures, keeping your flat leaves you in the strongest estimated position.' and gap == 'About $207,000 more than selling and renting, and about $342,000 more than upgrading.', (sh['answer'], gap))
+        why = pg.evaluate("() => Object.fromEntries([...document.querySelectorAll('[data-why]')].map((l) => [l.dataset.why, l.textContent]))")
+        check('V1.1: why they differ, one short line each, from the engine’s own figures (loan left, rent, interest, duty, selling and buying costs)', '$93,999' in why.get('hold', '') and '$210,000 goes on rent' in why.get('sell', '') and all(x in why.get('upgrade', '') for x in ('$253,460 loan interest', '$59,600 stamp duty', '$18,260 to sell', '$5,000 to buy')) and max(len(v) for v in why.values()) < 140, why)
+        eq = pg.evaluate("() => [document.querySelector('[data-row=\"hold.equity\"]').textContent, document.querySelector('[data-row=\"upgrade.equity\"]').textContent, document.querySelector('[data-row=\"sell.equity\"]').textContent]")
+        check('V1.1: cash, CPF and home equity are separate rows; the position is not cash', eq == ['$606,001', '$624,088', '—'], eq)
+        order = pg.evaluate("() => ['[data-ans]', '[data-cols]', '[data-why-box]', '[data-breakeven]', '[data-chips]', '[data-workings]'].map((s) => document.querySelector(s).getBoundingClientRect().top)")
+        check('V1.1: the order is answer, the three figures, why they differ, break-even, assumptions, then the workings (collapsed)', order == sorted(order) and not pg.evaluate("() => document.querySelector('[data-workings]').open"), order)
         be = pg.locator('[data-breakeven]').inner_text() if pg.locator('[data-breakeven]').count() else ''
-        check('B: the break-even line says 3.5% a year, and that it is arithmetic, not a forecast', '3.5% a year' in be and 'not a forecast' in be, be)
+        check('B: the break-even line says 3.5% a year, and that it is arithmetic, not a forecast', '3.5% a year' in be and 'not a forecast' in be and len(be) < 170, be)
         lab = pg.locator('[data-label]').inner_text(); note = pg.locator('[data-note]').inner_text()
-        check('B: labelled a comparison under the visitor’s assumptions, not a recommendation or a forecast; the position is not money to spend', 'not a recommendation or a price forecast' in lab and 'not money you can spend' in note, (lab, note))
+        check('B: labelled a comparison under the visitor’s assumptions, not a recommendation or a forecast; the position is not money to spend', 'not a recommendation or a price forecast' in lab and 'not cash you can spend' in note, (lab, note))
         open_state(pg, st(live='rent', rent=3500, mop='notyet', mopcat='standard', mopmon='2023-02')); sh = shown(pg)
         check('B: within the MOP: Sell and Upgrade stop with the month it ends, nothing compared', sh['sell']['pos'] is None and sh['upgrade']['pos'] is None and 'Feb 2028' in (sh['sell']['state'] or '') and 'appeal' in (sh['sell']['state'] or '') and sh['hold']['pos'] == '$758,601' and sh['answer'] == 'Only keeping your flat can be worked out now: it is within its minimum occupation period until Feb 2028.', sh)
         open_state(pg, st(live='rent', rent=3500, mop='unsure')); sh = shown(pg)
@@ -126,9 +134,12 @@ try:
         check('B: a PR buying: ABSD in the purchase (sell first: 5% for a PR’s first home)', 'ABSD' in w and 'no ABSD' not in w, w[:600])
         # ---------- C entry ----------
         pg.goto(B + '/journey/compare/'); pg.evaluate("() => { sessionStorage.setItem('gw.hsu.v1', JSON.stringify({ v: 1, f: { hval: 999999, cash: 1 }, o: {} })); sessionStorage.setItem('gw.hsu.handoff', JSON.stringify({ v: 1, a: { cash: 123456 } })); }")
-        pg.goto(B + '/tools/'); pg.click('a[href="../journey/compare/"]'); pg.wait_for_selector('[data-hsu] .hsu-card')
+        pg.goto(B + '/tools/'); pg.wait_for_selector('.gw-tcs')
+        cards = pg.evaluate("() => { const c = [...document.querySelectorAll('.gw-tcs .gw-tc')].map((a) => a.getAttribute('data-tool')); return { cards: c, band: document.querySelectorAll('.gw-pmm a').length }; }")
+        check('V1.1: the Calculators page lists Hold, Sell or Upgrade? first of eight calculators; the Plan My Move band is back to its one link', cards['cards'][0] == 'hold-sell-upgrade' and len(cards['cards']) == 8 and cards['band'] == 1, cards)
+        pg.click('.gw-tcs a[href="hold-sell-upgrade/"]'); pg.wait_for_selector('[data-hsu] .hsu-card')
         vals = pg.evaluate("() => [document.querySelector('[data-k=hval]').value, document.querySelector('[data-k=cash]').value, sessionStorage.getItem('gw.hsu.handoff')]")
-        check('C: from the Calculators page: starts clean (no old figures, a stray handoff ignored and removed)', vals == ['', '', None], vals)
+        check('C: from the Calculators card (tools/hold-sell-upgrade/): starts clean (no old figures, a stray handoff ignored and removed)', vals == ['', '', None] and pg.url.endswith('/tools/hold-sell-upgrade/#figures'), (vals, pg.url))
         pmm = {'v': 1, 'a': {'sit': 'upgrade', 'n': '2', 'p0age': 40, 'p0inc': 9000, 'p0res': 'SC', 'p1age': 38, 'p1inc': 7000, 'p1res': 'SC', 'htype': 'hdb', 'hown': 'both', 'hloan': 'yes', 'hmo': 1200, 'ptype': 'completed', 'cash': 150000, 'cpf': 80000, 'sprice': 700000, 'sloan': 150000, 'scpf': 260000, 'optSeen': True}, 'homes': [{'name': 'A', 'price': 1800000, 'type': 'completed'}], 'step': 'options'}
         pg.goto(B + '/tools/'); pg.evaluate("(s) => sessionStorage.setItem('gw.pmm.v2', JSON.stringify(s))", pmm); pg.goto(B + '/journey/#options'); pg.wait_for_selector('[data-pmm-hsu]')
         pg.click('[data-pmm-hsu]'); pg.wait_for_selector('[data-hsu] .hsu-card')
@@ -136,6 +147,8 @@ try:
         check('C: from Plan My Move V2: its answers are carried over once (home, loan, CPF, cash, the home considered); the handoff is removed', got['hval'] == '700,000' and got['howe'] == '150,000' and got['hcpf'] == '260,000' and got['nprice'] == '1,800,000' and got['cash'] == '150,000' and 'Plan My Move' in got['sub'] and got['hand'] is None and got['url'] == '?from=pmm', got)
         pg.locator('[data-k="mop"] [data-v="met"]').click(); pg.reload(); pg.wait_for_selector('[data-hsu] .hsu-card')
         check('C: a reload keeps this tab’s figures (including what was added)', pg.evaluate("() => document.querySelector('[data-k=hval]').value") == '700,000' and pg.locator('[data-k="mop"] [data-v="met"]').get_attribute('aria-checked') == 'true')
+        open_state(pg, st(live='rent', rent=3500), at='/journey/compare/'); sh = shown(pg)
+        check('C: Plan My Move’s own page (journey/compare/) runs the same component: the same figures', sh['hold']['pos'] == '$758,601' and sh['upgrade']['pos'] == '$416,680')
         pg.goto(B + '/journey/compare/'); pg.wait_for_selector('[data-hsu] .hsu-card')
         check('C: typing the address again (a new arrival, not a reload): starts clean', pg.evaluate("() => document.querySelector('[data-k=hval]').value") == '')
         pg.goto(B + '/tools/'); pg.evaluate("(s) => sessionStorage.setItem('gw.pmm.v2', JSON.stringify(s))", dict(pmm, a=dict(pmm['a'], sit='first'))); pg.goto(B + '/journey/#options'); pg.wait_for_selector('[data-pmm-explore]')
@@ -159,7 +172,7 @@ try:
             check(f'D {w}: the summary first (position, difference, monthly cost for each choice), details behind sections, no sideways scroll', lay['sum'] == 'block' and lay['closed'] and lay['heads'] and len(lay['rows']) == 3 and '$758,601' in lay['rows'][0] and '$1,290 a month' in lay['rows'][0] and '$207,000 behind' in lay['rows'][1] and lay['sumTop'] < lay['colsTop'] and lay['sw'] <= lay['w'], lay)
             p2.locator('[data-more="upgrade"] summary').click()
             check(f'D {w}: a section opens to the choice’s cash, CPF and loan', p2.locator('[data-row="upgrade.cash"]').is_visible() and p2.locator('[data-row="upgrade.cash"]').inner_text() == '$247,140')
-            p2.goto(B + '/journey/compare/'); p2.wait_for_selector('[data-see]')
+            p2.goto(B + HSU); p2.wait_for_selector('[data-see]')
             check(f'D {w}: the figures form fits (no sideways scroll), no script error', p2.evaluate('document.documentElement.scrollWidth') <= w and not e2, e2[:2])
             c2.close()
         br.close()

@@ -141,16 +141,30 @@
   const monthlyOf = (x) => (x && x.monthly ? (x.monthly.instalment || 0) + (x.monthly.rent || 0) + (x.monthly.recurring || 0) : null);
 
   // the answer: one sentence from the ledger's own differences (the comparison under the visitor's assumptions, never a recommendation)
+  // V1.1 (7 Nov 2026): the answer is a headline (which choice leaves the strongest estimated position, on the visitor's figures) and the gaps
+  // underneath; never "the better choice". The gaps are the ledger's own positions side by side (display differences only).
   function answerOf(r, f, o) {
     const ch = r.choices, ids = ['hold', 'sell', 'upgrade'].filter((k) => ch[k] && ch[k].status === 'ok' && ch[k].end);
     const flat = !(num(o && o.pcur) || 0) && !(num(o && o.pnext) || 0);
-    const eyebrow = 'After ' + yrs(r.years) + ', ' + (flat ? 'if prices stay where they are' : 'at the price changes you set');
-    if (!r.comparable || ids.indexOf('hold') < 0 || ids.length < 2) return { eyebrow: eyebrow, text: null };
+    const eyebrow = 'After ' + yrs(r.years) + ' · ' + (flat ? 'prices unchanged' : 'your price changes');
+    if (!r.comparable || ids.indexOf('hold') < 0 || ids.length < 2) return { eyebrow: eyebrow, text: null, sub: '' };
     const sorted = ids.slice().sort((a, b) => ch[b].end.position - ch[a].end.position), best = sorted[0];
-    const gap = (k) => ch[best].end.position - ch[k].end.position;
-    const parts = sorted.slice(1).map((k) => (Math.round(gap(k) / ROUND) ? 'about ' + $k(gap(k)) + ' ahead of ' + nameOf(k, f) : 'about the same as ' + nameOf(k, f)));
-    const text = cap(nameOf(best, f)) + ' leaves you ' + parts.join(', and ') + '.';
-    return { eyebrow: eyebrow, text: text, best: best, order: sorted };
+    const gap = (k) => ch[best].end.position - ch[k].end.position, same = sorted.slice(1).filter((k) => !Math.round(gap(k) / ROUND));
+    const text = same.length ? 'On your figures, ' + nameOf(best, f) + ' and ' + list(same.map((k) => nameOf(k, f))) + ' come out about the same.' : 'On your figures, ' + nameOf(best, f) + ' leaves you in the strongest estimated position.';
+    const rest = sorted.slice(1).filter((k) => same.indexOf(k) < 0);
+    const sub = rest.length ? cap(rest.map((k, i) => (i ? 'and ' : '') + 'about ' + $k(gap(k)) + ' more than ' + nameOf(k, f)).join(', ')) + '.' : '';
+    return { eyebrow: eyebrow, text: text, sub: sub, best: best, order: sorted };
+  }
+  // why the outcomes differ: one short line per choice, from the engine's own figures (interest, duty, sale and purchase costs, rent, loan left,
+  // the value change the visitor's price assumption makes)
+  function whyOf(r, f) {
+    const ch = r.choices, out = [], home = isHdb(f) ? 'flat' : 'home';
+    const value = (e) => (e.valueChange ? ' Your price assumption ' + (e.valueChange > 0 ? 'adds ' : 'takes ') + $(Math.abs(e.valueChange)) + (e.valueChange > 0 ? ' to' : ' off') + ' its value.' : '');
+    const h = ch.hold, s = ch.sell, u = ch.upgrade;
+    if (h.end) { const H = h.homes && h.homes[0]; out.push({ k: 'hold', text: 'You keep the ' + home + (H && H.loanToday ? ' and pay its loan down to ' + $(h.end.loans) + '.' : ', with no loan to pay.') + value(h.end) }); }
+    if (s.end) out.push({ k: 'sell', text: f.live === 'rent' ? $(s.end.paid.rent) + ' goes on rent, and you own no home at the end.' : f.live === 'none' ? 'You keep the sale money, but own no home at the end.' : (s.costs ? $(s.costs.interest) + ' loan interest and ' + $(s.costs.duty) + ' stamp duty on a smaller home.' : '') + (s.end.valueChange ? value(s.end) : '') });
+    if (u.end && u.costs) { const sc = u.costs.sale || {}; out.push({ k: 'upgrade', text: $(u.costs.interest) + ' loan interest, ' + $(u.costs.duty) + ' stamp duty, ' + $(sc.costs) + ' to sell and ' + $(u.costs.purchaseCosts) + ' to buy.' + (sc.ssd ? ' ' + $(sc.ssd) + ' Seller’s Stamp Duty.' : '') + value(u.end) }); }
+    return out;
   }
   function costLine(r) {
     const u = r.choices.upgrade;
@@ -161,11 +175,11 @@
   function breakEvenText(r, f, o) {
     const b = r.breakEven && r.breakEven.upgrade, u = r.choices.upgrade;
     if (!b || !b.ok || !u || !u.end) return '';
-    const cur = num(o && o.pcur) || 0, tail = ' while your ' + (isHdb(f) ? 'flat' : 'home') + (cur ? ' changes by ' + pc(cur) + ' a year' : ' stays at today’s price') + '. This is arithmetic on your figures, not a forecast.';
-    if (b.state === 'ahead') return '<b>Upgrade stays ahead of Hold</b> whatever the new home’s price does. This is arithmetic on your figures, not a forecast.';
-    if (b.state === 'beyond') return '<b>Upgrade would need the new home’s price to change by more than ' + pc(b.maxPct, 0) + ' a year</b> to match Hold' + tail;
-    if (b.pct >= 0) return '<b>Upgrade catches up with Hold</b> if the new home’s price rises about <b>' + pc(b.pct) + ' a year</b> (' + pc(b.totalPct, 0) + ' over ' + yrs(r.years) + ')' + tail;
-    return '<b>Upgrade stays ahead of Hold</b> unless the new home’s price falls more than about <b>' + pc(-b.pct) + ' a year</b> (' + pc(-b.totalPct, 0) + ' over ' + yrs(r.years) + ')' + tail;
+    const cur = num(o && o.pcur) || 0, mine = cur ? ' (your ' + (isHdb(f) ? 'flat' : 'home') + ' at ' + pc(cur) + ' a year)' : '';
+    if (b.state === 'ahead') return '<b>Upgrade stays ahead of Hold</b> whatever the new home’s price does.';
+    if (b.state === 'beyond') return '<b>Upgrade would need the new home’s price to change by more than ' + pc(b.maxPct, 0) + ' a year</b> to match Hold' + mine + '.';
+    if (b.pct >= 0) return '<b>Upgrade catches up with Hold</b> if the new home’s price rises about <b>' + pc(b.pct) + ' a year</b> (' + pc(b.totalPct, 0) + ' in ' + yrs(r.years) + ')' + mine + '.';
+    return '<b>Upgrade stays ahead of Hold</b> unless the new home’s price falls more than about <b>' + pc(-b.pct) + ' a year</b> (' + pc(-b.totalPct, 0) + ' in ' + yrs(r.years) + ')' + mine + '.';
   }
 
   // the summary sheet (Save as PDF), from the same result that draws the page
@@ -176,7 +190,7 @@
     const rowsOf = (k) => { const e = ch[k].end; return e ? [{ label: 'Home value', value: e.value ? $(e.value) : '—' }, { label: 'Loan left', value: e.loans ? $(e.loans) : '—' }, { label: 'Cash left from today', value: $(e.cash) }, { label: 'CPF left from today', value: $(e.cpf) }, { label: 'Paid for housing', value: $(e.paid.total) }, { label: 'Position', value: $(e.position) }] : [{ label: stateText(k, ch[k], f, r), value: '' }]; };
     return { tool: 'hsu', checked: checked, question: 'Hold, sell or upgrade?',
       basis: [yrs(r.years), (num(o.pcur) || 0) === 0 && (num(o.pnext) || 0) === 0 ? 'prices unchanged' : 'prices: your home ' + pc(num(o.pcur) || 0) + ', the next ' + pc(num(o.pnext) || 0) + ' a year', 'cash and CPF earn 0%', 'market value at the end, no sale assumed', 'a comparison under your assumptions, not a recommendation or a forecast'],
-      figures: ['hold', 'sell', 'upgrade'].map(fig), judge: A.text || 'The comparison needs more figures.',
+      figures: ['hold', 'sell', 'upgrade'].map(fig), judge: A.text ? A.text + (A.sub ? ' ' + A.sub : '') : 'The comparison needs more figures.',
       left: [{ title: 'Hold', rows: rowsOf('hold') }, { title: 'Sell', rows: rowsOf('sell') }], right: [{ title: 'Upgrade', rows: rowsOf('upgrade') }, { title: 'Not money you can spend', rows: [{ label: 'The position includes what you own at its value. Excluded unless entered: renovation, moving and furnishing.', value: '' }] }] };
   }
 
@@ -251,7 +265,8 @@
     }
     function resultsShell() {
       return '<section class="hsu-card hsu-res" aria-labelledby="hsuR"><h2 class="hsu-vh" id="hsuR" tabindex="-1">Your comparison</h2><div class="hsu-top"><p data-figs></p><button type="button" class="hsu-lnk" data-change>Change figures</button></div>' +
-        '<div data-answer aria-live="polite"></div><div data-sum></div><div class="hsu-cols" data-cols></div><p class="hsu-note" data-note></p><div data-be></div><div data-chips></div></section>' +
+        '<div data-answer aria-live="polite"></div><div data-sum></div><div class="hsu-cols" data-cols></div><p class="hsu-note" data-note></p>' +
+        '<div class="hsu-why" data-why-box></div><div data-be></div><p class="hsu-lab" data-label>Based on your figures and assumptions: a comparison, not a recommendation or a price forecast.</p><div data-chips></div></section>' +
         '<details class="hsu-w" data-workings><summary>How this is worked out</summary><div class="in" data-work></div></details>' +
         '<div class="hsu-act"><button type="button" class="hsu-go" data-pdf>Save as PDF</button><a class="hsu-ken" href="https://wa.me/6590908898?text=' + encodeURIComponent(waText) + '" target="_blank" rel="noopener" data-gw-wa="hsu" data-hsu-ken>Talk it through with Ken</a></div>';
     }
@@ -290,11 +305,11 @@
       const head = '<div class="hd"><h3>' + nameOf(k, f, 'title') + '</h3><p class="what">' + esc(nameOf(k, f, 'what')) + '</p>' +
         (e ? '<p class="hsu-pos" data-pos="' + k + '">' + $(e.position) + '</p>' + (k === 'hold' || vs ? '<span class="hsu-diff" data-diff="' + k + '">' + (k === 'hold' ? 'Starting point' : Math.round(vs.position / ROUND) ? $k(vs.position) + (vs.position < 0 ? ' behind Hold' : ' ahead of Hold') : 'About the same as Hold') + '</span>' : '') : '<p class="hsu-wait" data-state="' + k + '">' + esc(why) + '</p>') + '</div>';
       const rows = [];
-      if (mo !== null) rows.push(['grp', 'Each month'], ['Housing', $(mo), 'mo']);
-      if (t) rows.push(['grp', 'Today'], ['Cash', $(t.cash), 'cash'], ['CPF', $(t.cpf), 'cpf']);
-      if (e) rows.push(['grp', 'In ' + yrs(r.years)], ['Home value', e.value ? $(e.value) : '—', 'value'], ['Loan left', H ? $(e.loans) : '—', 'loan'], ['Paid for housing', $(e.paid.total), 'paid']);
+      if (mo !== null) rows.push(['Housing a month', $(mo), 'mo']);
+      if (t) rows.push(['Cash today', $(t.cash), 'cash'], ['CPF today', $(t.cpf), 'cpf']);
+      if (e) rows.push(['Home equity in ' + yrs(r.years), e.value ? $(e.equity) : '—', 'equity']);
       const body = rows.length ? '<ul class="hsu-rows">' + rows.map((w) => (w[0] === 'grp' ? '<li class="grp">' + w[1] + '</li>' : '<li><span>' + w[0] + '</span><b data-row="' + k + '.' + w[2] + '">' + w[1] + '</b></li>')).join('') + '</ul>' : '';
-      return '<article class="hsu-c' + (k === 'hold' ? ' base' : '') + '" data-col="' + k + '">' + head + (body ? '<details class="hsu-more" data-more="' + k + '"><summary>' + nameOf(k, f, 'title') + ': ' + (e ? 'cash, CPF and loan' : 'what you would have today') + '</summary>' + body + '</details>' : '') + '</article>';
+      return '<article class="hsu-c' + (k === 'hold' ? ' base' : '') + '" data-col="' + k + '">' + head + (body ? '<details class="hsu-more" data-more="' + k + '"><summary>' + nameOf(k, f, 'title') + ': ' + (e ? 'cash, CPF and equity' : 'what you would have today') + '</summary>' + body + '</details>' : '') + '</article>';
     }
     function summary(r) {
       return '<ul class="hsu-sum" aria-label="The three choices">' + ['hold', 'sell', 'upgrade'].map((k) => {
@@ -331,12 +346,12 @@
       const glob = r.missing.length ? '<p class="hsu-miss" data-global>To compare all three, add ' + esc(list(uniq(r.missing.map(fieldText)))) + '.</p>' : '';
       const mopX = ['sell', 'upgrade'].map((k) => r.choices[k]).find((x) => x.reason === 'within-mop' && x.mop);
       const none = mopX && r.choices.hold.end ? 'Only keeping your flat can be worked out now: it is within its minimum occupation period until ' + monthText(mopX.mop.endsIn) + '.' : 'Not enough figures to compare yet.';
-      qs('[data-answer]').innerHTML = '<p class="hsu-eb">' + esc(A.eyebrow) + '</p>' + (A.text ? '<p class="hsu-ans" data-ans>' + esc(A.text) + '</p>' + (costLine(r) ? '<p class="hsu-sub2">' + esc(costLine(r)) + '</p>' : '') : '<p class="hsu-ans" data-ans>' + esc(none) + '</p>') + glob +
-        '<p class="hsu-lab" data-label>A comparison under your assumptions, not a recommendation or a price forecast.</p>';
+      qs('[data-answer]').innerHTML = '<p class="hsu-eb">' + esc(A.eyebrow) + '</p>' + (A.text ? '<p class="hsu-ans" data-ans>' + esc(A.text) + '</p>' + (A.sub ? '<p class="hsu-gap" data-gap>' + esc(A.sub) + '</p>' : '') : '<p class="hsu-ans" data-ans>' + esc(none) + '</p>') + glob;
       qs('[data-sum]').innerHTML = summary(r);
       qs('[data-cols]').innerHTML = ['hold', 'sell', 'upgrade'].map((k) => card(k, r)).join('');
-      qs('[data-note]').textContent = 'Your position = what you own, less what you owe, plus the cash and CPF left from today, less everything paid for housing. It includes your home’s value, so it is not money you can spend.';
-      const be = breakEvenText(r, f, S.o); qs('[data-be]').innerHTML = be ? '<div class="hsu-be" data-breakeven>' + be + '</div>' : '';
+      qs('[data-note]').textContent = 'Position = home equity + cash + CPF, less what you pay for housing. It is not cash you can spend.';
+      const why = whyOf(r, f); qs('[data-why-box]').innerHTML = why.length ? '<h3>Why they differ</h3><ul>' + why.map((w) => '<li data-why="' + w.k + '"><b>' + nameOf(w.k, f, 'title') + '</b> ' + esc(w.text) + '</li>').join('') + '</ul>' : '';
+      const be = breakEvenText(r, f, S.o); qs('[data-be]').innerHTML = be ? '<p class="hsu-be" data-breakeven>' + be + ' <span>Arithmetic on your figures, not a forecast.</span></p>' : '';
       const open = qs('[data-ed][aria-expanded="true"]'), openKey = open ? open.dataset.ed : null;
       if (!qs('[data-chips] .hsu-as') || !openKey) qs('[data-chips]').innerHTML = chipsHtml(r);
       else qa('[data-ed]').forEach((b) => { const tmp = document.createElement('div'); tmp.innerHTML = chipsHtml(r); const nb = tmp.querySelector('[data-ed="' + b.dataset.ed + '"]'); if (nb) b.textContent = nb.textContent; });
@@ -400,5 +415,5 @@
     go(want, 'load');
   }
   if (typeof document !== 'undefined') { const run = () => mount(document.querySelector('[data-hsu]')); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run(); }
-  return { KEY, HANDOFF, caseOf, optsOf, fromPmm, answerOf, stateText, breakEvenText, costLine, sheetOf, nameOf, monthlyOf, mount };
+  return { KEY, HANDOFF, caseOf, optsOf, fromPmm, answerOf, whyOf, stateText, breakEvenText, costLine, sheetOf, nameOf, monthlyOf, mount };
 });

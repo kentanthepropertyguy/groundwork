@@ -25,6 +25,7 @@ def M(s):
     m = re.search(r'\$([\d,]+)', s or ''); return int(m.group(1).replace(',', '')) if m else None
 AF = lambda r, n: (1 - (1 + r / 12) ** (-n * 12)) / (r / 12)
 rd = lambda x: int(x // 1000 * 1000)
+HSU = ('hold-sell-upgrade', 'Hold, Sell or Upgrade?', 'What if I keep my home, sell it, or upgrade?')   # HSU V1.1 (Master Planning, 7 Nov 2026): first of eight; the menu keeps the seven
 SEVEN = [('payment-planner', 'Purchase Costs & Timeline', 'How much will this home cost me, and when do I pay?'), ('tdsr', 'How Much Can I Borrow?', 'How much could a bank lend me?'),
          ('pledged-assets', 'Pledged & Unpledged Assets', 'Could my savings and investments help me borrow more?'), ('mortgage', 'Mortgage Instalment', 'What will my monthly instalment be?'),
          ('sale-proceeds', 'Sale Proceeds', 'What will I get back when I sell?'), ('stamp-duty', 'Buyer’s Stamp Duty (BSD\u00a0&\u00a0ABSD)', 'How much stamp duty will I pay when buying a property?'), ('ssd', 'Seller’s Stamp Duty', 'Will I pay Seller’s Stamp Duty when I sell?')]
@@ -43,7 +44,7 @@ try:
             print(f'D {tag}: the Calculators page')
             pg.goto(B + '/tools/'); pg.wait_for_selector('.gw-tcs')
             cards = pg.evaluate("()=>[...document.querySelectorAll('.gw-tcs a.gw-tc')].map(a=>({id:a.dataset.tool,href:a.getAttribute('href'),t:a.querySelector('b').textContent,s:a.querySelector('span').textContent,r:a.getBoundingClientRect().toJSON()}))")
-            check(f'{tag} D1: seven cards, in Ken\'s order, with his names and lines', [(c['id'], c['t'], c['s']) for c in cards] == SEVEN, [(c['id'], c['t']) for c in cards])
+            check(f'{tag} D1: Hold, Sell or Upgrade? (HSU V1.1), then the seven cards in Ken\'s order, with his names and lines', [(c['id'], c['t'], c['s']) for c in cards] == [HSU] + SEVEN, [(c['id'], c['t']) for c in cards])
             check(f'{tag} D2: no Upgrade from HDB card, and no separate "advanced" or one-figure section', pg.locator('.gw-tcs [data-tool="hdb-upgrade"]').count() == 0 and 'Looking for one figure' not in pg.inner_text('main') and 'Advanced' not in pg.inner_text('main'))
             cols = len(set(round(c['r']['x']) for c in cards)); hs = [round(c['r']['height']) for c in cards]
             # Design Standard R1 (Ken, 28 Oct 2026): the Calculators grid spans the shared shell, three across from 1280px
@@ -52,14 +53,14 @@ try:
             check(f'{tag} D4: each card has an icon and an arrow, and the whole card is the link', pg.evaluate("()=>[...document.querySelectorAll('.gw-tcs a.gw-tc')].every(a=>a.querySelectorAll('svg').length===2&&a.parentElement.tagName==='LI')"))
             check(f'{tag} D5: no sideways scrolling, no text clipped', overflow(pg) <= 0 and pg.evaluate("()=>[...document.querySelectorAll('.gw-tc b,.gw-tc span,.gw-pmm *')].every(e=>e.scrollWidth<=e.clientWidth+1)"), overflow(pg))
             pm = pg.locator('.gw-pmm')
-            check(f'{tag} D6: "Planning your next property move?" under the cards, linking to Plan My Move', pm.count() == 1 and 'Buying, selling or upgrading? Use Plan My Move to connect your financial calculations across the journey.' in pm.inner_text() and pg.locator('.gw-pmm a[data-tool="hold-sell-upgrade"]').get_attribute('href') == '../journey/compare/' and pg.locator('.gw-pmm a.gw-pmm-go').get_attribute('href') == '../journey/' and 'Explore Plan My Move' in pg.locator('.gw-pmm a.gw-pmm-go').inner_text() and pm.bounding_box()['y'] > cards[-1]['r']['y'], pm.inner_text() if pm.count() else '')
+            check(f'{tag} D6: "Planning your next property move?" under the cards, linking to Plan My Move', pm.count() == 1 and 'Buying, selling or upgrading? Use Plan My Move to connect your financial calculations across the journey.' in pm.inner_text() and pg.locator('.gw-pmm a').count() == 1 and pg.locator('.gw-pmm a.gw-pmm-go').get_attribute('href') == '../journey/' and 'Explore Plan My Move' in pg.locator('.gw-pmm a.gw-pmm-go').inner_text() and pm.bounding_box()['y'] > cards[-1]['r']['y'], pm.inner_text() if pm.count() else '')
             if tag == 'desktop':
                 pg.focus('body'); seen = []
                 for _ in range(40):
                     pg.keyboard.press('Tab'); a = pg.evaluate("()=>{const e=document.activeElement;return e&&e.closest('.gw-tcs')?e.dataset.tool:(e&&e.closest('.gw-pmm')?'pmm':null)}")
                     if a and a not in seen: seen.append(a)
                     if a == 'pmm': break
-                check('D7: the keyboard reaches all seven cards in order, then Plan My Move', seen == [s[0] for s in SEVEN] + ['pmm'], seen)
+                check('D7: the keyboard reaches all eight cards in order, then Plan My Move', seen == [HSU[0]] + [s[0] for s in SEVEN] + ['pmm'], seen)
                 vis = pg.evaluate("()=>{const a=document.querySelector('.gw-tcs a');a.focus();return getComputedStyle(a).outlineStyle}"); check('D8: a focused card shows a focus ring', vis != 'none', vis)
                 for sid, name, _ in SEVEN:
                     with pg.expect_navigation(): pg.click(f'.gw-tcs a[data-tool="{sid}"]')
