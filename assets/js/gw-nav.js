@@ -62,6 +62,7 @@
     launch: '<path d="M4 20V10l6-4 6 4v10"/><path d="M8 20v-5h4v5"/><path d="M18 3v5M15.5 5.5h5"/><path d="M3 20h18"/>',
     'pledged-assets': '<rect x="4.5" y="10.5" width="15" height="9.5" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/><path d="M12 14.5v2"/>',
     close: '<path d="m6 6 12 12M18 6 6 18"/>',
+    'hold-sell-upgrade': '<path d="M12 21v-8"/><path d="M12 13 5 6M12 13l7-7M12 13V4"/><path d="M5 10V6h4M19 10V6h-4M9.5 6.5 12 4l2.5 2.5"/>',
   };
   const svg = (k, size) => '<svg viewBox="0 0 24 24" width="' + (size || 22) + '" height="' + (size || 22) + '" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + ICON[k] + '</svg>';
 
@@ -88,6 +89,9 @@
       t: ['sale proceeds', 'proceeds', 'selling', 'sell', 'sell my flat', 'sell my hdb', 'sell my condo', 'cash proceeds', 'net proceeds', 'cpf refund', 'refund cpf', 'accrued interest', 'cpf accrued interest', 'how much will i get', 'cash from sale', 'agent commission', 'selling costs'] },
     { id: 'ssd', name: 'Seller’s Stamp Duty', tag: 'Will I pay Seller’s Stamp Duty when I sell?', tag0: 'Calculate SSD when selling', short: 'Seller’s Stamp Duty', href: 'tools/ssd/', icon: 'ssd', menu: 1, sec: 'tools',
       t: ['ssd', 'sellers stamp duty', 'seller stamp duty', 'selling stamp duty', 'sell within', 'sell early', 'selling early', 'holding period', 'minimum holding', 'stamp duty selling'] },
+    // HSU V1.1 (7 Nov 2026): Hold, Sell or Upgrade? is a calculator (first card on the Calculators page); the search finds it, the menu's column is unchanged
+    { id: 'hold-sell-upgrade', name: 'Hold, Sell or Upgrade?', tag: 'What if I keep my home, sell it, or upgrade?', short: 'Keep, sell or upgrade, compared over five years', href: 'tools/hold-sell-upgrade/', icon: 'hold-sell-upgrade', search: 1, sec: 'tools',
+      t: ['hold sell upgrade', 'hold or sell', 'keep or sell', 'sell or keep', 'should i sell', 'should i upgrade', 'upgrade or not', 'stay or sell', 'keep my flat', 'keep my home', 'sell and rent', 'sell and rent back', 'compare upgrade', 'upgrading', 'right-size', 'right size', 'downsize', 'break even', 'break-even'] },
     // V3.4 (26 Oct 2026): Upgrade from HDB is the four-step thread at tools/hdb-upgrade/ again; What can I afford? and the HDB/EC loan limit are part of How much can I borrow? (search still finds them by name).
     { id: 'hdb-upgrade', name: 'Upgrade from HDB', tag: 'Flat value → proceeds → loan → budget', short: 'Flat value → proceeds → loan → budget, in four steps', href: 'tools/hdb-upgrade/', icon: 'hdb-upgrade', search: 1, sec: 'sell',
       t: ['hdb upgrade', 'hdb upgrade planner', 'upgrade planner', 'upgrade', 'upgrading', 'upgrader', 'hdb to condo', 'hdb to private', 'upgrade from hdb', 'can i afford to upgrade', 'afford a condo', 'private property budget', 'sell hdb buy condo', 'next home budget', 'budget'] },
