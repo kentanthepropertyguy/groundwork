@@ -17,6 +17,7 @@
 const fs = require('fs'), path = require('path'), cp = require('child_process');
 const H = require('./harness.js')(process.argv[2]);
 const { R, C, T, A, S } = H, root = H.root;
+const BASE = require(path.join(root, 'tools/hdb-upgrade/rules.js'));
 const ASM = require(path.join(root, 'tools/hdb-upgrade/assumptions.js'));
 const F = require(path.join(root, 'assets/js/gw-fin3-core.js'))(R, C, T, A, S);
 const BUF = require(path.join(root, 'assets/js/gw-cpfbuf.js'))(R, C);
@@ -101,12 +102,13 @@ function household() {
   const people = [{ age: 30 + Math.floor(rnd() * 22), res: pick(['SC', 'SC', 'SC', 'PR']), income: { fixed: Math.round(4000 + rnd() * 16000) } }];
   if (two) people.push({ age: 30 + Math.floor(rnd() * 22), res: 'SC', income: { fixed: Math.round(rnd() * 12000) } });
   const owned = { id: 'home', type: hdb ? 'hdb' : 'private', owners: two ? [0, 1] : [0], intent: 'keep', sale: { price: price, loan: loanOwed, cpfRefund: Math.round(rnd() * (price - loanOwed) * 0.6) } };
+  if (hdb) owned.mop = { category: 'standard', completed: '2016-0' + (1 + (price % 9)) };   // past its MOP by the asOf month below (P3)
   if (!hdb) { owned.sale.bought = (2015 + Math.floor(rnd() * 11)) + '-0' + (1 + Math.floor(rnd() * 9)) + '-15'; owned.sale.sold = '2026-11-06'; }   // some within SSD
   if (loanOwed) { owned.loan = { monthly: mo }; if (rnd() < 0.5) owned.loan.ratePct = Math.round(rate * 100) / 100; else owned.loan.lender = lender; }
   const c = { schema: 'gw-case-v1', people: people, household: { cash: Math.round(rnd() * 400000), cpf: Math.round(rnd() * 250000) }, otherLoans: rnd() < 0.2 ? [{ person: 0, monthly: Math.round(rnd() * 1200) }] : [], owned: [owned],
     purchase: { type: 'completed', price: Math.round((price * (1.2 + rnd() * 1.5)) / 1000) * 1000 }, financing: {} };
   if (two) c.household.couple = true;
-  const o = { years: pick([1, 5, 10]), pct: { current: pick([0, 0, 2, -1.5]), next: pick([0, 0, 3, -2]) }, sell: pick([{ housing: 'rent', rent: 2500 + Math.round(rnd() * 3000) }, { housing: 'none' }, { housing: 'buy', price: Math.round(price * 0.8 / 1000) * 1000 }]) };
+  const o = { asOf: '2026-11', years: pick([1, 5, 10]), pct: { current: pick([0, 0, 2, -1.5]), next: pick([0, 0, 3, -2]) }, sell: pick([{ housing: 'rent', rent: 2500 + Math.round(rnd() * 3000) }, { housing: 'none' }, { housing: 'buy', price: Math.round(price * 0.8 / 1000) * 1000 }]) };
   if (rnd() < 0.5) { owned.monthlyCosts = Math.round(100 + rnd() * 400); c.purchase.monthlyCosts = Math.round(200 + rnd() * 600); o.sell.monthlyCosts = Math.round(150 + rnd() * 400); }
   if (rnd() < 0.3) o.oneOff = { upgrade: Math.round(rnd() * 80000), sell: Math.round(rnd() * 20000), hold: Math.round(rnd() * 10000) };
   if (rnd() < 0.3) o.purchaseCosts = Math.round(rnd() * 9000);
@@ -154,7 +156,7 @@ const startOf = (x, ch) => { const s = x.today && x.today.sale; return ch === 'h
 /* ---------- 5 explicit incomplete states ---------- */
 {
   const base = () => ({ schema: 'gw-case-v1', people: [{ age: 40, res: 'SC', income: { fixed: 9000 } }, { age: 38, res: 'SC', income: { fixed: 7000 } }], household: { cash: 150000, cpf: 80000, couple: true }, otherLoans: [],
-    owned: [{ id: 'flat', type: 'hdb', owners: [0, 1], intent: 'keep', loan: { monthly: 1200, lender: 'hdb' }, sale: { price: 700000, loan: 150000, cpfRefund: 260000 } }], purchase: { type: 'completed', price: 1800000 }, financing: {} });
+    owned: [{ id: 'flat', type: 'hdb', owners: [0, 1], intent: 'keep', loan: { monthly: 1200, lender: 'hdb' }, mop: { met: true }, sale: { price: 700000, loan: 150000, cpfRefund: 260000 } }], purchase: { type: 'completed', price: 1800000 }, financing: {} });
   let r = X.compare(base(), {});
   ok(r.choices.sell.status === 'incomplete' && r.choices.sell.reason === 'housing' && !r.choices.sell.end && r.choices.sell.today && r.choices.sell.today.cash > 0 && !r.vsHold.sell && r.comparable, 'Sell without where you’d live: today’s figures only, no end figure, left out of the comparison (Hold and Upgrade still compared)');
   ok(r.excluded.some((x) => x.key === 'recurring') && r.excluded.some((x) => x.key === 'returns') && r.choices.hold.excluded.indexOf('recurring') >= 0, 'recurring costs given for no home: excluded for every home, and said; 0% returns said');
@@ -183,7 +185,22 @@ const startOf = (x, ch) => { const s = x.today && x.today.sale; return ch === 'h
   ok(X.compare(base(), { years: 0 }).status === 'invalid' && X.compare(base(), { years: 11 }).status === 'invalid', 'the period: 1 to 10 years');
   const r5 = X.compare(base(), {});
   ok(r5.assumptions.find((a) => a.key === 'years').value === 5 && r5.assumptions.find((a) => a.key === 'pct.current').value === 0 && r5.assumptions.find((a) => a.key === 'pct.next').value === 0 && r5.assumptions.find((a) => a.key === 'purchaseCosts').value === 5000 && r5.assumptions.find((a) => a.key === 'returns').value === 0, 'defaults said: 5 years, 0% price change for each home, the $5,000 purchase-cost estimate, 0% returns');
-  ok(r5.choices.sell.provisional.some((p) => p.key === 'owned[0].mop') && r5.choices.upgrade.provisional.some((p) => p.key === 'owned[0].mop'), 'an HDB sale carries the MOP note until the rule update (P3)');
+  ok(r5.choices.sell.assumptions.some((a) => a.key === 'owned[0].mop' && a.value === 'met' && a.basis === 'owner' && a.checked === R.hdbMop.checked) && !r5.choices.sell.provisional.some((p) => p.key === 'owned[0].mop'), 'an HDB flat past its MOP (the owner says so): sold, and the rule’s check date said (P3; no provisional note any more)');
+  // P3: the HDB minimum occupation period (GW_RULES.hdbMop, GW_CALC.mopEnd)
+  const bm = (mop) => { const b = base(); if (mop === undefined) delete b.owned[0].mop; else b.owned[0].mop = mop; return b; };
+  r = X.compare(bm(undefined), { sell: { housing: 'none' } });
+  ok(['sell', 'upgrade'].every((k) => r.choices[k].status === 'incomplete' && r.choices[k].missing.some((m) => m.field === 'owned[0].mop')) && r.choices.hold.end, 'an HDB flat with no MOP answer: Sell and Upgrade ask for it; Hold is unaffected');
+  r = X.compare(bm({ category: 'standard', completed: '2023-02' }), { asOf: '2026-11', sell: { housing: 'none' } });
+  ok(['sell', 'upgrade'].every((k) => r.choices[k].status === 'stop' && r.choices[k].reason === 'within-mop' && r.choices[k].mop.endsIn === '2028-02' && r.choices[k].mop.monthsLeft === 16 && !r.choices[k].end) && r.choices.hold.end && !r.comparable, 'within the MOP (Standard, completed Feb 2023): Sell and Upgrade stop, “ends Feb 2028, 16 months”; nothing is compared with a sale that cannot happen', r.choices.sell.mop);
+  ok(/appeal/.test(r.choices.sell.mop.earlySale), 'within the MOP: an earlier sale needs HDB’s approval on appeal, said, not assessed');
+  const at = (mop, asOf) => X.compare(bm(mop), { asOf: asOf, sell: { housing: 'none' } }).choices.sell;
+  ok(at({ category: 'standard', completed: '2021-11' }, '2026-11').status === 'stop' && at({ category: 'standard', completed: '2021-11' }, '2026-12').status === 'ok', 'months only: the MOP ending in Nov 2026 counts as met from Dec 2026, never before its date');
+  ok(at({ category: 'plus', completed: '2017-01' }, '2026-11').mop.endsIn === '2027-01' && at({ category: 'prime', completed: '2014-06' }, '2026-11').status === 'ok' && at({ category: 'freshStart', completed: '2010-01' }, '2026-11').mop.endsIn === '2030-01', 'Plus and Prime 10 years, Fresh Start 20 (from GW_RULES.hdbMop)');
+  ok(at({ category: 'standard', completed: '2021-01', notCountedMonths: 12 }, '2026-11').mop.endsIn === '2027-01', 'months the whole flat was rented out with HDB’s approval are added (not counted)');
+  ok(at({ category: 'standard', completed: '2016-01' }, undefined).missing.some((m) => m.field === 'asOf') && at({ category: 'deluxe', completed: '2016-01' }, '2026-11').status === 'invalid' && at({ category: 'standard', completed: '2027-01' }, '2026-11').status === 'invalid', 'today’s month is required (never assumed); an unknown category or a completion after today is invalid');
+  ok(P.mopEnd({ category: 'standard', completed: '2016-01' }, '2026-11').years === R.hdbMop.years.standard && R.hdbMop.years.standard === BASE.mopYears, 'Standard’s 5 years is read from the planner’s rule, not copied');
+  const priv = base(); priv.owned[0].type = 'private'; delete priv.owned[0].mop; priv.owned[0].sale.bought = '2015-01-15'; priv.owned[0].sale.sold = '2026-11-06';
+  ok(!X.compare(priv, { sell: { housing: 'none' } }).choices.sell.missing.some((m) => /mop/.test(m.field)), 'a private home: no MOP asked');
   ok(r5.choices.hold.assumptions.some((a) => a.key === 'owned[0].loan.ratePct' && a.basis === 'rule' && a.validUntil === R.ratesValidUntil), 'the HDB loan rate used for Hold is the dated rule, said with its validity date');
   const two = base(); two.owned.push({ id: 'b', type: 'private', owners: [0], intent: 'keep' });
   ok(X.compare(two, {}).status === 'unsupported', 'two homes owned: unsupported in P1');
@@ -192,10 +209,17 @@ const startOf = (x, ch) => { const s = x.today && x.today.sale; return ch === 'h
 /* ---------- 6 nothing existing changes ---------- */
 {
   let changed = null; try { changed = cp.execSync('git diff --name-status origin/main', { cwd: root, encoding: 'utf8' }).split('\n').filter(Boolean); } catch (e) { /* outside a checkout */ }
-  // only new files, apart from two existing tests adjusted for them (engine-contract P6 names the new extension; home-tests' footer check no longer finds itself)
-  if (changed) ok(changed.every((l) => /^A\t/.test(l) || /^M\t(tools\/financial-tests\/engine-contract-tests\.js|research\/tests\/home-tests\.js)$/.test(l)), 'no site file modified (gw-calc.js, gw-engine.js, every page, Plan My Move V2, the calculators): only new files and two test adjustments', changed.filter((l) => !/^A\t/.test(l)));
+  // P2/P3 (6 Nov 2026): GW_CALC's and GW_ENGINE's own files and Plan My Move V2 stay untouched; a page may change only in its version tags
+  // P4 (7 Nov 2026): gw-pmm.js gains only the Hold, sell or upgrade? link for owners and its handoff (Plan My Move's own tests and pmm-render show V2 unchanged)
+  if (changed) ok(!changed.some((l) => /^[MD]\tassets\/js\/(gw-calc|gw-engine)\.js$/.test(l)), 'gw-calc.js and gw-engine.js are not modified', changed);
+  if (changed) {
+    const pagesChanged = changed.filter((l) => /^M\t.*\.html$/.test(l)).map((l) => l.slice(2)), tagless = (s) => s.replace(/\?v=[0-9A-Za-z._-]+/g, '?v=').replace(/HDB’s rate is [^(<]*\(CPF Board\)\./g, 'HDB-RATE').replace(/ Own a home\? <a href="\.\.\/journey\/compare\/" data-tool="hold-sell-upgrade">Compare holding, selling and upgrading<\/a>\./, '');   // P4: the Calculators page's one added link   // the quarterly rate sentence (rules-source-tests checks it)
+    const other = pagesChanged.filter((f) => tagless(fs.readFileSync(path.join(root, f), 'utf8')) !== tagless(cp.execSync('git show origin/main:' + f, { cwd: root, encoding: 'utf8' })));
+    ok(other.length === 0, 'every page changed differs from live only in its version tags, and the Mortgage page in its quarterly rate sentence (' + pagesChanged.length + ' pages)', other);
+  }
   const pages = cp.execSync('git ls-files "*.html"', { cwd: root, encoding: 'utf8' }).split('\n').filter(Boolean);
-  ok(pages.every((f) => !/gw-calc-position|gw-engine-position/.test(fs.readFileSync(path.join(root, f), 'utf8'))), 'no page loads the new files (inert)');
+  // P4 (7 Nov 2026): the Hold, sell or upgrade? page is the one page that loads them
+  ok(pages.filter((f) => /gw-calc-position|gw-engine-position/.test(fs.readFileSync(path.join(root, f), 'utf8'))).join() === 'journey/compare/index.html', 'only journey/compare/ loads the position primitives and blocks');
   // the engine blocks: no formula, rate or arithmetic (strings, regexes and comments out)
   const src = fs.readFileSync(path.join(root, 'assets/js/gw-engine-position.js'), 'utf8');
   const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '').replace(/'(?:\\.|[^'\\])*'/g, "''").replace(/\/\^[^/\n]*\/[a-z]*/g, 'RX').replace(/\/[^/\n*]+\/\.test/g, 'RX.test');

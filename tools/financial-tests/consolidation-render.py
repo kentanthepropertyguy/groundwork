@@ -46,7 +46,7 @@ try:
         # ---- 1. the Calculators page (V3.8, Ken 27 Oct 2026: seven equal calculator cards; Upgrade from HDB through Plan My Move)
         pg.goto(B + '/tools/'); pg.wait_for_selector('.gw-tdir'); pg.wait_for_timeout(300)
         check(vn + ': seven calculator cards, each once, no badges', pg.locator('.gw-tdir a.gw-tc').count() == 7 and pg.locator('.gw-tdir a.gw-tc em').count() == 0)
-        check(vn + ': no text links underneath; the Plan My Move section links to the journey', pg.locator('.gw-tdir .gw-mone a').count() == 0 and pg.get_attribute('.gw-pmm a', 'href') == '../journey/')
+        check(vn + ': no text links underneath; the Plan My Move section links to the journey', pg.locator('.gw-tdir .gw-mone a').count() == 0 and pg.get_attribute('.gw-pmm a.gw-pmm-go', 'href') == '../journey/' and pg.get_attribute('.gw-pmm a[data-tool="hold-sell-upgrade"]', 'href') == '../journey/compare/')   # HSU P4 (7 Nov 2026): the band also links to Hold, sell or upgrade?
         check(vn + ': no sideways scroll on the Calculators page', pg.evaluate('document.documentElement.scrollWidth <= innerWidth'))
         for tool, path in CARDS.items():
             pg.goto(B + '/tools/'); pg.wait_for_selector('.gw-tdir'); pg.click('.gw-tdir a[data-tool="%s"]' % tool); pg.wait_for_load_state(); pg.wait_for_timeout(200)

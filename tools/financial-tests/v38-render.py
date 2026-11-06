@@ -52,7 +52,7 @@ try:
             check(f'{tag} D4: each card has an icon and an arrow, and the whole card is the link', pg.evaluate("()=>[...document.querySelectorAll('.gw-tcs a.gw-tc')].every(a=>a.querySelectorAll('svg').length===2&&a.parentElement.tagName==='LI')"))
             check(f'{tag} D5: no sideways scrolling, no text clipped', overflow(pg) <= 0 and pg.evaluate("()=>[...document.querySelectorAll('.gw-tc b,.gw-tc span,.gw-pmm *')].every(e=>e.scrollWidth<=e.clientWidth+1)"), overflow(pg))
             pm = pg.locator('.gw-pmm')
-            check(f'{tag} D6: "Planning your next property move?" under the cards, linking to Plan My Move', pm.count() == 1 and 'Buying, selling or upgrading? Use Plan My Move to connect your financial calculations across the journey.' in pm.inner_text() and pg.locator('.gw-pmm a').get_attribute('href') == '../journey/' and 'Explore Plan My Move' in pg.locator('.gw-pmm a').inner_text() and pm.bounding_box()['y'] > cards[-1]['r']['y'], pm.inner_text() if pm.count() else '')
+            check(f'{tag} D6: "Planning your next property move?" under the cards, linking to Plan My Move', pm.count() == 1 and 'Buying, selling or upgrading? Use Plan My Move to connect your financial calculations across the journey.' in pm.inner_text() and pg.locator('.gw-pmm a[data-tool="hold-sell-upgrade"]').get_attribute('href') == '../journey/compare/' and pg.locator('.gw-pmm a.gw-pmm-go').get_attribute('href') == '../journey/' and 'Explore Plan My Move' in pg.locator('.gw-pmm a.gw-pmm-go').inner_text() and pm.bounding_box()['y'] > cards[-1]['r']['y'], pm.inner_text() if pm.count() else '')
             if tag == 'desktop':
                 pg.focus('body'); seen = []
                 for _ in range(40):
@@ -65,7 +65,7 @@ try:
                     with pg.expect_navigation(): pg.click(f'.gw-tcs a[data-tool="{sid}"]')
                     pg.wait_for_load_state('domcontentloaded'); h1 = pg.inner_text('h1'); st = pg.evaluate("()=>location.pathname")
                     check(f'D9: {name} opens tools/{sid}/', st == f'/tools/{sid}/' and len(h1) > 3, [st, h1]); pg.go_back(); pg.wait_for_selector('.gw-tcs')
-                with pg.expect_navigation(): pg.click('.gw-pmm a')
+                with pg.expect_navigation(): pg.click('.gw-pmm a.gw-pmm-go')
                 pg.wait_for_load_state('domcontentloaded'); pg.wait_for_selector('[data-pmm] [data-next]')
                 # Plan My Move V2 (6 Nov 2026): the guided journey offers the upgrade as its "Upgrade" situation (selling an HDB flat also offers the HDB upgrade planner on My Options)
                 check('D10: Explore Plan My Move opens the journey, which still offers the upgrade', pg.evaluate("()=>location.pathname") == '/journey/' and pg.locator('[data-pmm] [data-k="sit"] [data-v="upgrade"]').count() == 1, pg.evaluate("()=>location.pathname"))

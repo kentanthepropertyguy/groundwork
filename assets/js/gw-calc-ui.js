@@ -19,6 +19,10 @@
   // V4-01: an income-weighted age is shown and carried to 0.1 year, rounded UP, so a weighted 35.04 becomes 35.1 (not 35.0).
   // MAS Notice 632's tests (age + tenure over 65) compare against whole years, so rounding up keeps every LTV and tenure
   // result identical to the exact age; rounding to nearest could turn a loan that runs past 65 into one that doesn't.
+  // P2 (6 Nov 2026): dated rates (the HDB loan rate, the CPF OA rate and their validity) are read from GW_RULES, never written here, so the quarterly
+  // refresh is one edit in gw-rules.js. In Node (writing the pages) the same rules are loaded from their files.
+  const RULES = () => root.GW_RULES || (typeof require === 'function' ? require('./gw-rules.js')(require('../../tools/hdb-upgrade/rules.js')) : null);
+  const ratePc = (x) => Math.round(x * 10000) / 100 + '%';
   const ageUp = (a) => Math.ceil(a * 10 - 1e-9) / 10;
   // R1.2.2: the two ways of weighting joint borrowers' ages (gross income, or income after the 30% reduction) give different ages; MAS's meaning is not confirmed
   const iwaaDiffers = (B) => B.list.length > 1 && B.iwaa !== null && B.iwaaGross !== null && ageUp(B.iwaa) !== ageUp(B.iwaaGross);
@@ -82,7 +86,7 @@
   function directoryHtml() {
     const card = (x) => '<li><a class="gw-tc" href="' + x[1] + '" data-tool="' + x[0] + '">' + svg(x[0]) + GO + '<b>' + esc(x[2]) + '</b><span>' + esc(x[3]) + '</span></a></li>';
     return '<h2 class="gw-vh">Calculators</h2><ul class="gw-tcs">' + DIRECTORY.map(card).join('') + '</ul>' +
-      '<section class="gw-pmm" aria-labelledby="gw-pmm-h"><div><h2 id="gw-pmm-h">Planning your next property move?</h2><p>Buying, selling or upgrading? Use Plan My Move to connect your financial calculations across the journey.</p></div>' +
+      '<section class="gw-pmm" aria-labelledby="gw-pmm-h"><div><h2 id="gw-pmm-h">Planning your next property move?</h2><p>Buying, selling or upgrading? Use Plan My Move to connect your financial calculations across the journey. Own a home? <a href="../journey/compare/" data-tool="hold-sell-upgrade">Compare holding, selling and upgrading</a>.</p></div>' +
       '<a class="gw-pmm-go" href="../journey/" data-gw-nav-to="journey">Explore Plan My Move <span aria-hidden="true">→</span></a></section>';
   }
 
@@ -132,7 +136,7 @@
   const FORMS = {
     mortgage: () => chips('lender', 'Loan', [['bank', 'Bank loan'], ['hdb', 'HDB loan']], { value: 'bank' }) +
       money('loan', 'Loan amount', { share: 'loan', ph: 'e.g. 600,000', cls: 'gw-mainin' }) +
-      achips([['ratePct', '4% a year', '% a year', numf('ratePct', 'Interest rate', '% a year', { value: '4', hint: '<span data-when="lender:bank">Banks test the loan at 4% or your rate after any lock-in period, if higher. Use the rate you’ve been quoted.</span><span data-when="lender:hdb">HDB’s rate is 2.6% a year for Oct–Dec 2026, valid to 31 Dec 2026 (CPF Board).</span>' })],
+      achips([['ratePct', '4% a year', '% a year', numf('ratePct', 'Interest rate', '% a year', { value: '4', hint: '<span data-when="lender:bank">Banks test the loan at 4% or your rate after any lock-in period, if higher. Use the rate you’ve been quoted.</span><span data-when="lender:hdb">HDB’s rate is ' + ratePc(RULES().hdbLoanRate) + ' a year for ' + RULES().hdbLoanRateFor + ', valid to ' + RULES().ratesValidUntilText + ' (CPF Board).</span>' })],
         ['years', '25 years', ' years', numf('years', 'Loan tenure', 'years', { value: '25', hint: '<span data-when="lender:bank">Up to 30 years for HDB flats and 35 for other homes.</span><span data-when="lender:hdb">Up to 25 years for an HDB loan.</span>' })]], 'Usual assumptions. Tap one to change it.'),
     'stamp-duty': () => money('price', 'Purchase price', { share: 'buyPrice', ph: 'e.g. 1,500,000', hint: 'Or the market value, if that is higher.', cls: 'gw-mainin' }) +
       chips('kind', 'What are you buying?', KIND_STAMP, { value: 'private', hint: 'An EC bought on the resale market counts as a private home here.' }) +
@@ -145,7 +149,7 @@
       money('loan', 'Outstanding loan', { opt: true, share: 'outstandingLoan', ph: '0 if none' }) +
       money('cpfPrincipal', 'CPF used for this home', { opt: true, share: 'cpfPrincipal', ph: 'principal, all owners', hint: 'Down payment and instalments paid from CPF, plus any CPF housing grants. If an owner aged 55 or older pledged this home for their retirement sum, add the pledged amount. CPF’s ‘What happens if’ section under Home Ownership shows the full refund.' }) +
       money('cpfInterest', 'CPF accrued interest', { opt: true, share: 'cpfInterest', ph: 'all owners', hint: 'On the same CPF page. <button type="button" class="gw-link" data-estimate>Estimate it</button>' }) +
-      '<div class="gw-est" data-est hidden>' + numf('estYears', 'Years since you started using CPF for it', 'years', { ph: 'e.g. 8', hint: 'A rough upper estimate: 2.5% a year (valid to 31 Dec 2026) on the full amount from the start. CPF counts each amount from when it was used, so your CPF page usually shows less.' }) + '</div>' +
+      '<div class="gw-est" data-est hidden>' + numf('estYears', 'Years since you started using CPF for it', 'years', { ph: 'e.g. 8', hint: 'A rough upper estimate: ' + ratePc(RULES().cpfOaRate) + ' a year (valid to ' + RULES().ratesValidUntilText + ') on the full amount from the start. CPF counts each amount from when it was used, so your CPF page usually shows less.' }) + '</div>' +
       // A1-05: the SSD dates sit with the main details, not in "More options"
       '<div data-when="type:private,ec" class="gw-grid1">' + datef('bought', 'Date you bought (for SSD)', { hint: SSD_DATE_HINT }) + datef('sold', 'Date you sell', { today: true }) + '</div>') +
       more(numf('commissionPct', 'Agent’s commission', '%', { value: '2', hint: 'Your estimate; commission is agreed with your agent.' }) + check('gst', 'Add 9% GST to the commission', { checked: true }) +
@@ -279,7 +283,7 @@
         (r.overHdbTenure ? '<p class="gw-warn">HDB loans run for up to 25 years.</p>' : '') +
         work(rows([['Total interest', $(r.interest)], ['Total repaid', $(r.total)], ['Interest share of repayments', pc(r.interestShare)], ['First year', $(r.firstYear.interest) + ' interest · ' + $(r.firstYear.principal) + ' principal', 'w'],
           r.balanceAfter[5] !== undefined ? ['Still owed after 5 years', $(r.balanceAfter[5])] : null, r.balanceAfter[10] !== undefined ? ['Still owed after 10 years', $(r.balanceAfter[10])] : null])) +
-        sources(['Assumes the same rate for the whole tenure; most bank rates change after a few years.', 'Income figures assume no other debts. Your lender decides.'].concat(r.lender === 'hdb' ? ['HDB’s loan rate of 2.6% a year is valid to 31 Dec 2026.'] : []), 'Rules: MAS TDSR 55% and MSR 30%, tested at the higher of 4% and your rate (MAS Notice 645); HDB loan tested at the higher of 3% and its loan rate. Checked 9 Oct 2026.') +
+        sources(['Assumes the same rate for the whole tenure; most bank rates change after a few years.', 'Income figures assume no other debts. Your lender decides.'].concat(r.lender === 'hdb' ? ['HDB’s loan rate of ' + ratePc(RULES().hdbLoanRate) + ' a year is valid to ' + RULES().ratesValidUntilText + '.'] : []), 'Rules: MAS TDSR 55% and MSR 30%, tested at the higher of 4% and your rate (MAS Notice 645); HDB loan tested at the higher of 3% and its loan rate. Checked 9 Oct 2026.') +
         next([['../tdsr/', 'How much could I borrow?', 'calc-tdsr'], ['../payment-planner/', 'Plan your payments', 'payment-planner']]);
     },
     'stamp-duty'(r, v) {
@@ -372,7 +376,7 @@
           !hdb ? ['TDSR limit, 55%, less all debts', $(r.forNewTdsr) + ' a month'] : null, ['Left for the new loan', $(r.forNew) + ' a month' + (!hdb ? ' (' + r.binding.toUpperCase() + ' is the limit)' : ''), 'tot'],
           hdb ? ['Tenure', t.years + ' years (the shortest of 25, 65 minus average age' + (t.lease ? ', lease minus 20' : '') + ')', 'w'] : ['Tenure', t.years + ' years (standard up to ' + t.std + ')'],
           ['Loan limit (LTV)', pc(r.ltv, r.ltv === 0.75 || !hdb ? 0 : 1)]])) +
-        sources([hdb ? 'HDB tests the loan at 3% or its loan rate, if higher (2.6% a year, valid to 31 Dec 2026). You need an HDB Flat Eligibility (HFE) letter, and everyone in the HFE application counts towards the income ceiling. HDB decides the loan.' : 'Banks test the loan at 4% or their own higher rate, against both MSR and TDSR. They decide the final amount.'],
+        sources([hdb ? 'HDB tests the loan at 3% or its loan rate, if higher (' + ratePc(RULES().hdbLoanRate) + ' a year, valid to ' + RULES().ratesValidUntilText + '). You need an HDB Flat Eligibility (HFE) letter, and everyone in the HFE application counts towards the income ceiling. HDB decides the loan.' : 'Banks test the loan at 4% or their own higher rate, against both MSR and TDSR. They decide the final amount.'],
           'Rules: MAS Notice 645 (MSR 30%, TDSR 55%, at 4%); HDB loan: 3% floor, 75% LTV pro-rated if the lease doesn’t cover the youngest applicant to 95, 25 years, income ceilings from 24 Aug 2026 (HDB, MND). Checked 9 Oct 2026.' + (r.flat ? ' Valuation: the loan is on the lower of price and valuation; an HDB loan needs no minimum cash, a bank loan does; cash over valuation is cash (HDB, CPF Board). Checked 24 Oct 2026.' : '')) +
         next([['../tdsr/', 'TDSR in detail', 'calc-tdsr'], ['../mortgage/', 'Monthly instalment', 'calc-mortgage']]);
     },
@@ -613,7 +617,7 @@
     // ---- the assessment ----
     // R2.4: the assessment ends with the page's reference, e.g. (Ref KPT-CALC-SD · wati/oct): the page and campaign, never a figure
     const withRef = (m) => (root.KPT && root.KPT.waTag ? root.KPT.waTag(m) : m);
-    const message = () => withRef((id === 'msr' && ceilingOver(last.r) ? C.messages[FN[id]](last.v, last.r).replace('Indicative maximum loan', eligFlag(last.r) === 'age' ? 'Theoretical maximum HDB loan (singles age requirement not met, so not eligible to buy under that scheme)' : 'Theoretical maximum loan (income above the HDB loan ceiling, so not eligible for an HDB loan)') : C.messages[FN[id]](last.v, last.r)) + (last.v.cpfInterestEstimated ? '\n(CPF accrued interest is a rough upper estimate at 2.5% a year on the full amount.)' : ''));
+    const message = () => withRef((id === 'msr' && ceilingOver(last.r) ? C.messages[FN[id]](last.v, last.r).replace('Indicative maximum loan', eligFlag(last.r) === 'age' ? 'Theoretical maximum HDB loan (singles age requirement not met, so not eligible to buy under that scheme)' : 'Theoretical maximum loan (income above the HDB loan ceiling, so not eligible for an HDB loan)') : C.messages[FN[id]](last.v, last.r)) + (last.v.cpfInterestEstimated ? '\n(CPF accrued interest is a rough upper estimate at ' + ratePc(RULES().cpfOaRate) + ' a year on the full amount.)' : ''));
     box.querySelector('[data-send-wa]').addEventListener('click', () => {
       if (!last) return;
       const msg = message();

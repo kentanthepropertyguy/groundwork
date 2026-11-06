@@ -8,6 +8,8 @@
    Forward and reload work. Nothing goes in a URL, analytics or WhatsApp except the step's name. Standalone calculators are not touched.
    Budget Search gets the budget only when the visitor taps "Explore homes" (kpt.handoff, its existing contract) and opens with
    ?plan=v2, so it shows "Part of your Plan My Move" and the way back (gw-nav.js PLAN.v2).
+   Hold, sell or upgrade? (HSU P4, 7 Nov 2026): for owners, My Options links to journey/compare/?from=pmm; the answers go across only on that tap
+   (sessionStorage gw.hsu.handoff, read once and removed by gw-hsu.js). Nothing else here changes.
    Pure helpers work in Node for the tests (caseOf, sheetOf, stepDone, nextSteps); mount() is browser only. UMD: window.GW_PMM.
    ========================================================================== */
 (function (root, factory) {
@@ -164,6 +166,7 @@
       if (st === 'options') return '<h2 class="pmm-t" tabindex="-1">My Options</h2><p class="pmm-sub">Find homes within your budget, and check the ones you like.</p>' +
         '<div class="pmm-opts"><a class="pmm-opt" href="' + rootPath + 'tools/what-can-i-buy/?plan=v2" data-pmm-explore><b>Explore homes within your budget</b><span data-explore-sub>Sizes and developments, as a list and on a map.</span><i>›</i></a>' +
         '<a class="pmm-opt" href="' + rootPath + 'research/" data-pmm-research data-gw-go="research" data-pulse-for="buy"><b>Research a development</b><span>Recent sales, rents and how prices have moved. Compare two side by side.</span><i>›</i></a>' +
+        (owning(S.a) ? '<a class="pmm-opt" href="' + rootPath + 'journey/compare/?from=pmm" data-pmm-hsu><b>Hold, sell or upgrade?</b><span>Compare keeping your home, selling it and upgrading over five years, with your answers carried over.</span><i>›</i></a>' : '') +
         (selling(S.a) && S.a.htype === 'hdb' ? '<a class="pmm-opt" href="' + rootPath + 'tools/hdb-upgrade/" data-pmm-hdbup><b>Upgrading from HDB, in detail</b><span>The HDB upgrade planner: your flat’s value, sale proceeds, budget and timing on one page.</span><i>›</i></a>' : '') + '</div>' +
         '<p class="pmm-st">Homes you are considering</p><p class="pmm-note">Add a price to see the cash, loan and monthly instalment for that home, from the same calculations as your budget.</p>' +
         '<div class="pmm-homes" data-homes></div><button type="button" class="pmm-add" data-add-home>+ Add a home</button>';
@@ -359,6 +362,11 @@
       if (e.target.closest('[data-back]')) { const prev = STEPS[Math.max(0, idxOf(cur) - 1)][0]; if (history.state && history.state.pmm && history.state.pmm === cur && idxOf(cur) > 0 && root.sessionStorage.getItem('gw.pmm.nav') === '1') history.back(); else go(prev, 'push'); return; }
       if (e.target.closest('[data-restart]')) { try { root.sessionStorage.removeItem(KEY); } catch (x) { /* ignore */ } S.a = { p0res: 'SC', p1res: 'SC' }; S.homes = []; go('situation', 'push'); track('journey_restart', { journey: 'plan-my-move' }); return; }
       if (e.target.closest('[data-pdf]')) { if (root.GW_SHEET) root.GW_SHEET.print(() => track('pdf_saved', { tool_name: 'plan-my-move' })); return; }
+      if (e.target.closest('[data-pmm-hsu]')) {
+        // HSU's handoff: the answers and homes, on this tap only, in this tab (gw-hsu.js reads it once, on arrival from this link)
+        try { root.sessionStorage.setItem('gw.hsu.handoff', JSON.stringify({ v: 1, from: 'pmm', a: S.a, homes: S.homes })); } catch (x) { /* storage blocked: the comparison starts clean */ }
+        track('tool_selected', { tool: 'hold-sell-upgrade', placement: 'plan-my-move' });
+      }
       if (e.target.closest('[data-pmm-explore]') && R.budget) {
         // Budget Search's own handoff contract (kpt-market.js readHandoff): the budget only, on this tap, in this tab
         const ages = (caseOf(S.a, 'completed').people || []).map((p) => p.age).filter((x) => typeof x === 'number');
