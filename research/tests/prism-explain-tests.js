@@ -53,7 +53,10 @@ const W = {
     /^Closer to an MRT or LRT station than most similar developments\.$/, /^Priced in line with comparable (condo|EC)s\.$/, /^Priced below most comparable (condo|EC)s \(a position, not a sign of value\)\.$/,
     /^No other (condo|EC) was selling new homes within 2 km in the latest year\.$/,
     /^Most recent resales came in the first resale wave, so the long-run resale rate is not yet known\.$/, /^Less resale activity than most similar developments\.$/, /^Priced above most comparable (condo|EC)s\.$/,
-    /^Farther from an MRT or LRT station than most similar developments\.$/, /^The surrounding market (slowed \([\d.,]+% fewer|picked up \([\d.,]+% more) resales within 2 km\)(, separate from this development's own resale record)?\.$/,
+    /^Farther from an MRT or LRT station than most similar developments\.$/, 
+    // the future-MRT reading (gw-prism.js FM.ON, Groundwork 01 / Master Planning, 6 Nov 2026): the same sentence, "today", with the approved nearest future station
+    /^Farther from an MRT or LRT station than most similar developments today; .+ MRT \(.+ Line\) is under construction about [\d,]+ m away, LTA target 20\d\d\.$/,
+    /^The surrounding market (slowed \([\d.,]+% fewer|picked up \([\d.,]+% more) resales within 2 km\)(, separate from this development's own resale record)?\.$/,
     /^No price comparison: .+$/, /^No resale rate: .+$/, /^Fewer than 50 homes, so a few sales move the resale rate\.$/, /^(1 other (condo|EC) development|[\d,]+ other (condo|EC) developments) sold new homes within 2 km in the latest year\.$/],
   ask: { priceAbove: 'What does the premium over comparable {cls}s pay for: unit size, floor, facing, age or facilities?', priceBelow: 'What explains the lower price position against comparable {cls}s: age, tenure, unit mix or location?',
     resale: 'How many units are listed for resale here now, and how quickly have recent ones sold?', mrt: 'How long is the actual walk or ride to the station you would use?',

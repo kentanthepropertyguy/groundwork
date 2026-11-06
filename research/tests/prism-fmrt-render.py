@@ -4,7 +4,7 @@ Run from the site folder:  python3 research/tests/prism-fmrt-render.py   (LIVE=h
  - qualifying pages: Infrastructure & Catalysts -> Future transport shows the approved line (the report's own statement), its fixed note and
    its sources; the URA and LTA records are in Sources (LTA not linked); nothing runs past its box; no sideways scroll
  - held, protected and out-of-range pages keep "Not yet assessed"; no planned station appears anywhere else on the page
- - the V3 quick read is unchanged (its figures never include a planned station); no script error"""
+ - the V3 quick read never names a planned station, except the 21 future-MRT reports (FM.ON): only their approved nearest one; no script error"""
 import json, os, pathlib, re, socket, subprocess, time
 from playwright.sync_api import sync_playwright
 SITE = pathlib.Path(__file__).resolve().parents[2]
@@ -27,6 +27,9 @@ SHOW = ['parc-vera', 'vue-8-residence', '1-king-albert-park', 'the-esparis', 'hu
 KEEP = ['eastwood-lodge', 'bukit-828', 'caspian', 'thomson-three', 'bartley-ridge']  # TEL5 held; Brickland; JRL; protected; none within 2 km
 PLANNED = re.compile(r'Defu MRT|Elias MRT|Maju MRT|Pasir Ris East MRT|Serangoon North MRT|Teck Ghee MRT|Turf City MRT|Tampines North MRT|Tavistock MRT|Loyang MRT|West Coast MRT|Jurong Lake District MRT|Bedok South|Sungei Bedok|Xilin|Brickland')
 NOOVER = 'document.documentElement.scrollWidth <= innerWidth + 1'
+# the future-MRT reading (Groundwork 01 / Master Planning, 6 Nov 2026): the 21 reviewed reports in gw-prism.js FM.ON name their nearest future station in the quick read
+FM_ON = set(re.findall(r"'([a-z0-9-]+)': true", re.search(r"ON: \{([^}]*)\}", (SITE / 'assets/js/gw-prism.js').read_text()).group(1)))
+assert len(FM_ON) == 21, FM_ON
 try:
     with sync_playwright() as p:
         br = p.chromium.launch()
@@ -67,8 +70,9 @@ try:
                     check(f'{vn} {id}: the pilot quick read, the approved Reveal and MRT today, exactly', hp[0] == 'New MRT station being built 300 m away. Higher pricing. Steady market.' and hp[1] == ['22.7% above', '1.6 km', '300 m', '0.8% fewer'] and hp[2] and
                           hp[3] == 'Hougang MRT about 1,600 m, Kovan MRT about 1,610 m; closer than 1 of 46 similar developments. Straight-line distances.', hp)
                 qr = pg.evaluate("(() => { const q = document.querySelector('.gwp-qr'); return q ? q.innerText : ''; })()")
-                if id == 'hundred-palms-residences':   # the pilot: only its approved nearest future station, with its status and LTA target
-                    check(f'{vn} {id}: the pilot quick read names only Serangoon North MRT, under construction, LTA target 2030', 'Serangoon North MRT' in qr and 'Under construction · LTA target 2030' in qr.replace('\u00a0', ' ') and not PLANNED.search(qr.replace('Serangoon North MRT', '')), qr[:300])
+                if id in FM_ON:   # the future-MRT reading (gw-prism.js FM.ON): only its approved nearest future station, with its status and LTA target
+                    s0 = ftl(rep(id))['data']['stations'][0]
+                    check(f'{vn} {id}: the quick read names only {s0["name"]}, under construction, LTA target {s0["target"]}', s0['name'] in qr and f'Under construction · LTA target {s0["target"]}' in qr.replace('\u00a0', ' ') and not PLANNED.search(qr.replace(s0['name'], '')), qr[:300])
                 else: check(f'{vn} {id}: the quick read never names a planned station', not PLANNED.search(qr), qr[:200])
                 check(f'{vn} {id}: no script error', not errs, errs[:2])
             ctx.close()

@@ -75,10 +75,13 @@ check('the protected reports without an approved amendment are byte for byte r3'
 
 // 5 V3 quick read, V2 explanation, Reveal unchanged for the 300
 const mdl = (r, id) => { const e = entries.find((x) => x.id === id), v = G.model11(r, e); v.periods = G.V11.PERIODS; v.curated = G.isCurated(e); return v; };
+// the future-MRT reading (gw-prism.js FM.ON, 6 Nov 2026) reads the new line by design and is tested in prism-fmrt-quick-tests.js; here it is off
+const keepON = G.FM.ON; G.FM.ON = {};
 const opDiff = avail.filter((id) => { const a = mdl(revert(id), id), b = mdl(R[id], id), ra = G.reveal11(a), rb = G.reveal11(b);
   return JSON.stringify(ra) !== JSON.stringify(rb) || JSON.stringify(G.explain11(a, a.name, ra && ra.kind === 'reveal' ? ra : null)) !== JSON.stringify(G.explain11(b, b.name, rb && rb.kind === 'reveal' ? rb : null)) ||
     JSON.stringify(G.quick11(a, a.name, ra)) !== JSON.stringify(G.quick11(b, b.name, rb)) || JSON.stringify(G.headline11(a, 'I')) !== JSON.stringify(G.headline11(b, 'I')); });
-check('the Reveal, V2 explanation, V3 quick read and Infrastructure headline of every changed report are exactly as on r3', !opDiff.length, opDiff.slice(0, 3));
+G.FM.ON = keepON;
+check('the Reveal, V2 explanation, V3 quick read and Infrastructure headline of every changed report are exactly as on r3 (the future-MRT reading off)', !opDiff.length, opDiff.slice(0, 3));
 
 // 6 fail closed
 const base = avail[0], tamper = (f) => { const r = JSON.parse(JSON.stringify(R[base])); f(r, r.profile.lines.find((l) => l.measure === FT)); return r; };

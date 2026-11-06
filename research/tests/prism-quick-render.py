@@ -24,8 +24,12 @@ B = os.environ.get('LIVE') or f'http://127.0.0.1:{P}'
 CASES = ['bartley-ridge', 'hundred-palms-residences', 'thomson-three', 'the-quinn', 'veranda', '8-raja', 'roots-at-transit', 'm5', 'boulevard-88', 'mendon-spring',
          'the-coast-at-sentosa-cove', 'the-verandah-residences', '91-marshall', '15-holland-hill']
 PHONE_BUDGET = 1100   # px: the quick read on a 390 px phone (V2's card was 748-1,123 px; the prototype about 1,500 px)
-# the future-MRT reading pilot (gw-prism.js FM.PILOT; Groundwork 01, 6 Nov 2026): its MRT figure also shows Future MRT, so 20 px more
-FM_PILOT = {'hundred-palms-residences'}; PILOT_BUDGET = PHONE_BUDGET + 20
+# the future-MRT reading (gw-prism.js FM.ON, the 21 reviewed reports; Groundwork 01 / Master Planning, 6 Nov 2026): the MRT figure also shows
+# Future MRT, so 20 px more, for those reports only
+_FMON = re.search(r"ON: \{([^}]*)\}", (SITE / 'assets/js/gw-prism.js').read_text()).group(1)
+FM_PILOT = set(re.findall(r"'([a-z0-9-]+)': true", _FMON)); PILOT_BUDGET = PHONE_BUDGET + 20
+assert len(FM_PILOT) == 21, FM_PILOT
+if os.environ.get('CASES'): CASES = os.environ['CASES'].split(',')   # e.g. the 21 future-MRT reports
 NOOVER = 'document.documentElement.scrollWidth <= innerWidth + 1'
 EXPECT = "(id) => { const G = GW_PRISM, v = G._settled[id] && G._settled[id].v11; if (!v) return null; const q = G.quick11(v, v.name, G.reveal11(v)); return q && { head: q.head, figs: q.figs.map((f) => f.v) }; }"
 try:

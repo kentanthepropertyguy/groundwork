@@ -1,7 +1,10 @@
-/* PRISM: future MRT in the buyer-facing reading (Ken / Groundwork 01, 6 Nov 2026), PILOT Hundred Palms Residences. In node, all 2,099 reports.
+/* PRISM: future MRT in the buyer-facing reading (Ken / Groundwork 01, 6 Nov 2026: Hundred Palms pilot; then all 21 qualifying reports, Master
+   Planning, 6 Nov 2026). In node, all 2,099 reports.
    Run from the site folder:  node research/tests/prism-fmrt-quick-tests.js [path to the previous gw-prism.js, for the Hundred Palms before/after checks]
-   1 the rule: only a pilot report whose approved future-transport station (under construction, LTA target) is within 500 m while today's
-     nearest station is not "close"; Hundred Palms Residences qualifies; no other report is touched (FM.PILOT)
+   1 the rule: only a report in the reviewed list FM.ON whose approved future-transport station (under construction, LTA target) is within
+     500 m while today's nearest station is not "close"; FM.ON is exactly the 21 reports the rule qualifies; no other report is touched
+   1b each of the 21: the station is its approved line's nearest; only the headline's location phrase, the MRT figure (today + future), the repeated
+     watch sentence and the MRT card change; price, resale and market figures, the warning on top (a lead "farther from MRT" stays), what looks promising, the question and the Reveal do not
    2 Hundred Palms: the quick read headline names the new station with its straight-line distance; the MRT figure shows MRT today and Future
      MRT (line, under construction, LTA target); the price, resale and market figures, the watch-out and the Reveal are unchanged; the full
      analysis's MRT card and its "farther from MRT" sentence state the station, the status and the LTA target
@@ -23,10 +26,30 @@ const out = (Gx, id) => { const v = mdl(Gx, id), op = Gx.reveal11(v), x = Gx.exp
 const HPR = 'hundred-palms-residences', BAD = /apprecia|uplift|capital|price gain|value|invest|boost|premium|demand|buyer appeal|improve|benefit|better|score|rank|percentile|forecast|expected to rise|walk|minutes/i;
 
 // 1 the rule
-check('the pilot is Hundred Palms Residences only', JSON.stringify(Object.keys(G.FM.PILOT)) === JSON.stringify([HPR]));
-const qual = entries.filter((e) => { const v = mdl(G, e.id); const saved = G.FM.PILOT[e.id]; G.FM.PILOT[e.id] = true; const f = G.futureNear(v); if (!saved) delete G.FM.PILOT[e.id]; return !!f; }).map((e) => e.id);
-check('Hundred Palms qualifies (future station 300 m, under construction; today 1.6 km); ' + qual.length + ' reports would qualify if the pilot were extended', qual.indexOf(HPR) >= 0, qual.length);
-check('no other report is affected while the pilot is Hundred Palms only', entries.filter((e) => e.id !== HPR && G.futureNear(mdl(G, e.id))).length === 0);
+const ON = Object.keys(G.FM.ON).sort();
+const qual = entries.filter((e) => { const v = mdl(G, e.id); const saved = G.FM.ON[e.id]; G.FM.ON[e.id] = true; const f = G.futureNear(v); if (!saved) delete G.FM.ON[e.id]; return !!f; }).map((e) => e.id).sort();
+check('FM.ON is exactly the ' + qual.length + ' reports the rule qualifies (21, Hundred Palms among them)', qual.length === 21 && JSON.stringify(ON) === JSON.stringify(qual) && ON.indexOf(HPR) >= 0, [ON.length, qual.filter((x) => ON.indexOf(x) < 0)]);
+check('no report outside FM.ON is affected', entries.filter((e) => !G.FM.ON[e.id] && G.futureNear(mdl(G, e.id))).length === 0);
+// 1b each of the 21, against its own reading with the rule off
+const off = (id) => { const keep = G.FM.ON; G.FM.ON = {}; try { return out(G, id); } finally { G.FM.ON = keep; } };
+const each = ON.map((id) => {
+  const A = out(G, id), Z = off(id), f = G.futureNear(A.v), l = A.v.profile.lines.I.find((x) => x.measure === 'infrastructure.futureTransport'), s0 = l.data.stations[0], P = [];
+  const bad = (m) => P.push(id + ': ' + m);
+  if (!f || f.name !== s0.name || f.distanceM !== s0.distanceM || f.target !== s0.target || f.line !== s0.line || s0.status !== 'under_construction' || f.distanceM > 500) bad('station');
+  if (A.q.head.indexOf('New MRT station being built ' + f.m + ' away.') !== 0 || A.q.head.split('. ').slice(1).join('. ') !== Z.q.head.split('. ').filter((t) => !/MRT/.test(t)).join('. ')) bad('headline ' + A.q.head + ' / ' + Z.q.head);
+  const I1 = A.q.figs.find((x) => x.dim === 'I'), I0 = Z.q.figs.find((x) => x.dim === 'I');
+  if (!I1 || I1.v !== I0.v || I1.label !== I0.label || I1.cmp !== I0.cmp || I1.scope !== 'MRT today' || !I1.fut || I1.fut.v !== f.m || I1.fut.label !== f.name || I1.fut.sub !== f.line + ' · Under construction · LTA\u00a0target\u00a0' + f.target) bad('MRT figure');
+  if (JSON.stringify(A.q.figs.filter((x) => x.dim !== 'I')) !== JSON.stringify(Z.q.figs.filter((x) => x.dim !== 'I'))) bad('other figures');
+  const zw = Z.x.watchAll.slice(0, 2).filter((t, i) => !(t === G.XT.watch.mrtFar && i > 0));   // expected: the lead warning unchanged; a second "farther from MRT" not repeated, nothing new in its place
+  if (A.q.warn !== Z.q.warn || A.q.warn !== (zw[0] || Z.q.warn) || JSON.stringify(A.q.good) !== JSON.stringify(Z.q.good) || A.q.ask !== Z.q.ask || JSON.stringify(A.op) !== JSON.stringify(Z.op) || A.html.indexOf(G.revealHtml(A.op)) < 0) bad('warn/good/ask/Reveal');
+  if (JSON.stringify(A.q.also) !== JSON.stringify(zw.slice(1))) bad('also watch');
+  const X1 = A.x.cards.find((c) => c.dim === 'I'), X0 = Z.x.cards.find((c) => c.dim === 'I');
+  if (!X1 || ['v', 'unit', 'cmp', 'why', 'limit'].some((k) => X1[k] !== X0[k]) || X1.fut !== 'Future: ' + f.name + ' (' + f.line + ') about ' + f.m + ' to the planned site, under construction, LTA target ' + f.target + '.') bad('MRT card');
+  if (JSON.stringify(A.x.cards.filter((c) => c.dim !== 'I')) !== JSON.stringify(Z.x.cards.filter((c) => c.dim !== 'I')) || A.x.head !== Z.x.head || JSON.stringify(A.x.goodAll) !== JSON.stringify(Z.x.goodAll)) bad('full analysis');
+  const added = [A.q.head.split('. ')[0], I1 && I1.fut && I1.fut.sub, X1 && X1.fut].concat(A.x.watchAll.filter((t) => Z.x.watchAll.indexOf(t) < 0));
+  if (added.some((t) => !t || BAD.test(t))) bad('wording ' + added.filter((t) => t && BAD.test(t)));
+  return P; });
+check('each of the 21: approved nearest station; only the MRT phrase, the MRT figure, the repeated watch sentence and the MRT card change; nothing else; no claim wording', each.every((p) => !p.length), [].concat(...each).slice(0, 5));
 const near = G.futureNear(mdl(G, HPR));
 check('Hundred Palms: the station read from its approved future-transport line', JSON.stringify(near) === JSON.stringify({ name: 'Serangoon North MRT', line: 'Cross Island Line', code: 'CR9', target: '2030', distanceM: 300, m: '300 m' }), near);
 
@@ -57,8 +80,8 @@ check('every added statement names the status and the LTA target or sits beside 
 
 // 4 every other report unchanged
 const BASE = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/prism-fmrt-quick-baseline.json'), 'utf8')).html;
-const diff = entries.filter((e) => e.id !== HPR).filter((e) => sha(out(G, e.id).html) !== BASE[e.id]).map((e) => e.id);
-check('every other report (' + (entries.length - 1) + '): quick read, full analysis and Reveal byte for byte the live renderer\'s before the pilot (fixture)', Object.keys(BASE).length === entries.length && diff.length === 0, diff.slice(0, 5));
-check('Hundred Palms is the one report whose output changed', sha(H.html) !== BASE[HPR]);
+const diff = entries.filter((e) => !G.FM.ON[e.id]).filter((e) => sha(out(G, e.id).html) !== BASE[e.id]).map((e) => e.id);
+check('every other report (' + (entries.length - ON.length) + '): quick read, full analysis and Reveal byte for byte the live renderer\'s before the pilot (fixture)', Object.keys(BASE).length === entries.length && diff.length === 0, diff.slice(0, 5));
+check('exactly the 21 reports in FM.ON changed', ON.every((id) => sha(out(G, id).html) !== BASE[id]));
 console.log('prism-fmrt-quick-tests: %d passed, %d failed', ok, fail);
 process.exit(fail ? 1 : 0);

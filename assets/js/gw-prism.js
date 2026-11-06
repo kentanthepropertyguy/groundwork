@@ -491,19 +491,21 @@
     foot: 'The original figures, periods, comparison groups and sources are in the five dimensions below.'
   };
   const fill = (t, o) => t.replace(/\{(\w+)\}/g, (_, k) => (o[k] == null ? '' : o[k]));
-  /* Future MRT in the buyer-facing reading (Ken / Groundwork 01, 6 Nov 2026; PILOT: the one report in FM.PILOT until approved for the rest).
+  /* Future MRT in the buyer-facing reading (Ken / Groundwork 01, 6 Nov 2026: one pilot report, live-verified; then the 20 other
+     qualifying reports, Master Planning, 6 Nov 2026). FM.ON is the reviewed list: a report is never switched on by new data alone.
      Only where the approved future-transport line (Phase 1, FT) materially changes the connectivity reading: its nearest station under
      construction is within FM.NEAR m (the same straight-line rule as "Close to MRT") while today's nearest station is not "close".
      Then the quick read's headline, its MRT figure, the "farther from MRT" sentence and the full analysis's MRT card also state that station:
      straight-line distance to the planned station site, "under construction", and the LTA target year. Facts only: no benefit, demand,
      price or appreciation claim; price, resale and market readings are untouched; the approved Reveal is unchanged. */
-  const FM = { PILOT: { 'hundred-palms-residences': true }, NEAR: 500,
+  const FM = { ON: { 'belysa': true, 'elias-green': true, 'fontaine-parry': true, 'hundred-palms-residences': true, 'hundred-trees': true, 'kensington-park-condominium': true, 'livia': true, 'loyang-valley': true, 'nouvelle-park': true, 'nv-residences': true, 'oasis-at-elias': true, 'parc-vera': true, 'regentville': true, 'ris-grandeur': true, 'stratum': true, 'terrasse': true, 'the-esparis': true, 'the-palette': true, 'the-waterline': true, 'vue-8-residence': true, 'whitewater': true },   // the 21 reports the rule qualifies on the live release (reviewed one by one)
+    NEAR: 500,
     head: 'New MRT station being built {m} away',
     scopeToday: 'MRT today', scopeFut: 'Future MRT', futLabel: '{station}', futSub: '{line} · Under construction · LTA\u00a0target\u00a0{y}',   // the target year never on a line of its own
     watch: 'Farther from an MRT or LRT station than most similar developments today; {station} ({line}) is under construction about {m} away, LTA target {y}.',
     card: 'Future: {station} ({line}) about {m} to the planned site, under construction, LTA target {y}.' };   // the card's own limit says straight line
   function futureNear(v) {
-    if (!v || !FM.PILOT[v.id] || !v.profile) return null;
+    if (!v || !FM.ON[v.id] || !v.profile) return null;
     const l = lineOf(v, 'I', 'infrastructure.futureTransport'), s = l && l.status === 'available' && l.data && Array.isArray(l.data.stations) ? l.data.stations[0] : null;
     if (!s || s.status !== 'under_construction' || !isNum(s.distanceM) || s.distanceM > FM.NEAR || !/^20\d\d$/.test(s.target || '')) return null;
     const m = lineOf(v, 'I', 'infrastructure.mrt'), t = m && m.status === 'available' && m.data && Array.isArray(m.data.stations) ? m.data.stations[0] : null, rank = m && m.data && m.data.rank;
@@ -636,7 +638,9 @@
     // what looks promising / what to watch: the approved sentences, without the station distance already shown as a figure
     const mrtLine = (t) => / is about [\d,.]+ k?m from .+ \(straight line\)\.$/.test(t);
     const fw = fu ? fill(FM.watch, { station: fu.name, line: fu.line, m: fu.m, y: fu.target }) : null;
-    const good = x.goodAll.filter((t) => !(mrtLine(t) && order.slice(0, 3).indexOf('I') >= 0)).slice(0, 2), watch = x.watchAll.filter((t) => !(fw && t === fw && order.slice(0, 3).indexOf('I') >= 0)).slice(0, 2);   // the quick read: today's and the future station are in the MRT figure; the full analysis keeps the sentence
+    const good = x.goodAll.filter((t) => !(mrtLine(t) && order.slice(0, 3).indexOf('I') >= 0)).slice(0, 2), watch = x.watchAll.slice(0, 2).filter((t, i) => !(fw && t === fw && i > 0 && order.slice(0, 3).indexOf('I') >= 0)).map((t) => (fw && t === fw ? XT.watch.mrtFar : t));
+    // the quick read: today's and the future station are in the MRT figure, so the full analysis's future-station sentence is not repeated
+    // below and nothing takes its place; when "farther from MRT" is the lead warning, it stays, in the approved words, unchanged (Master Planning, 6 Nov 2026)
     // the one warning on top: the first approved "watch" sentence (they are in a fixed order of strength); with none, the first shown
     // figure's own approved limitation. The other watch sentence stays in the quick read, below.
     const lim = order.slice(0, 3).map((k) => by[k].limit).filter(Boolean)[0] || '';

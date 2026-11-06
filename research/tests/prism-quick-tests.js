@@ -41,9 +41,9 @@ const QR = /<section class="gwp-qr"[\s\S]*?<\/section>/, FULL = /<div class="gwp
 const prof = pages.filter((p) => p.pg.mode === 'profile'), asmt = pages.filter((p) => p.pg.mode === 'assessment');
 // the two V1 pages carry the compact quick read instead (Master Planning, 4 Nov 2026; prism-v1-quick-tests.js), never the full one or the V2 card
 check('the two V1 assessment pages: no full quick read and no V2 card (their compact quick read is checked in prism-v1-quick-tests.js)', asmt.length === 2 && asmt.every((p) => !/gwp-xp|data-gwp-quick |id="gwp-full"/.test(p.html)));
-// a report in the future-MRT reading pilot (G.FM.PILOT; Groundwork 01, 6 Nov 2026) has its MRT phrase and figure from the approved future line: tested in prism-fmrt-quick-tests.js
+// a report in the future-MRT reading (G.FM.ON; Groundwork 01, 6 Nov 2026) has its MRT phrase and figure from the approved future line: tested in prism-fmrt-quick-tests.js
 const withQ0 = prof.filter((p) => QR.test(p.html)), withQ = withQ0.filter((p) => !G.futureNear(p.v));
-check('every profile page with an explanation opens with the quick read (' + withQ0.length + '); the 2 others keep their approved opening alone', withQ0.length === 2095 && withQ.length === 2095 - Object.keys(G.FM.PILOT).length && prof.filter((p) => !QR.test(p.html)).every((p) => /class="gwp-rv11"/.test(p.html)));
+check('every profile page with an explanation opens with the quick read (' + withQ0.length + '); the 2 others keep their approved opening alone', withQ0.length === 2095 && withQ.length === 2095 - Object.keys(G.FM.ON).length && prof.filter((p) => !QR.test(p.html)).every((p) => /class="gwp-rv11"/.test(p.html)));
 check('the quick read comes first, then the V2 explanation (hidden, unchanged: exactly explainHtml), then the five dimensions', withQ.every((p) => {
   const h = p.html, a = h.indexOf('<section class="gwp-qr"'), f = FULL.exec(h), op = G.reveal11(p.v), x = G.explain11(p.v, p.r.name, op);
   return a >= 0 && f && a < h.indexOf('id="gwp-full"') && h.indexOf('id="gwp-full"') < h.indexOf('gwp-dims') && f[1] === G.explainHtml(x, op, p.id) && /data-gwp-full aria-expanded="false" aria-controls="gwp-full"/.test(h);
