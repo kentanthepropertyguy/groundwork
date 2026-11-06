@@ -4,10 +4,11 @@ A How much can I borrow?, a housing loan with no repayment (blank or $0): the re
   waits (no loan figure, never $0 assumed), "Enter the repayment" takes the visitor to the field, and every mark goes as soon as a repayment is in.
   Single and joint borrowers, separate loans, a loan in both names, 1 and 2+ loans, clearing the field, changing the number of loans. With the repayment in,
   the answer is the live release's, word for word (BASE).
-B Plan My Move: a step opened from the plan carries ?plan= (and ?j=1 for a calculator): "Part of your Plan My Move", the step it is, "Back to my plan" and
-  the next step; the figures carry on (income, cash, CPF) and survive Back and Forward; back on the plan, the step done says what it found and the next
-  step is pointed out. Opened directly (or from Calculators) a calculator is unchanged: no bar, a clean start, nothing kept for the plan. No bar on
-  Research or the Map. A first visit to the plan page is unchanged. Clearing the figures clears the plan's results. No script error, no sideways scroll."""
+B Plan My Move: a step address carrying ?plan= (and ?j=1 for a calculator), as shared before V2: "Part of your Plan My Move", the step it is,
+  "Back to my plan" and the next step; the figures carry on (income, cash, CPF) and survive Back and Forward; "Back to my plan" lands on the V2 guided
+  journey (the checklist panels it used to open are gone; V2 itself is tested in pmm-render.py). Opened directly (or from Calculators) a calculator is
+  unchanged: no bar, a clean start, nothing kept for the plan. No bar on Research or the Map. Clearing the figures clears the plan's results.
+  No script error, no sideways scroll."""
 import os, re, socket, subprocess, sys, time
 from playwright.sync_api import sync_playwright
 SITE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -98,14 +99,11 @@ try:
                 ctx0.close()
             ctx.close()
 
-            # ---------- B Plan My Move ----------
-            ctx = br.new_context(**kw); pg = page(ctx, B + '/journey/#buy', errs); pg.wait_for_selector('#buy:not([hidden])')
-            check(f'{vn} a first visit to the plan: unchanged (nothing marked done)', pg.locator('#buy .gw-step.done, [data-gw-plan-prog], .gw-next-tag').count() == 0)
-            pg.locator('#buy a[href*="tools/tdsr/"]').click(); pg.wait_for_selector('[data-gw-plan]')
-            check(f'{vn} buy step 1 opened from the plan: ?plan=buy and ?j=1', 'plan=buy' in pg.url and 'j=1' in pg.url and pg.url.endswith('#cash'), pg.url)
+            # ---------- B Plan My Move (step addresses shared before V2) ----------
+            ctx = br.new_context(**kw); pg = page(ctx, B + '/tools/tdsr/?j=1&plan=buy#cash', errs); pg.wait_for_selector('[data-gw-plan]')
             bar = pg.locator('[data-gw-plan]').inner_text().replace('\n', ' ')
             check(f'{vn} "Part of your Plan My Move", step 1 of 4, Back to my plan, Next', 'Part of your Plan My Move' in bar and 'Step 1 of 4' in bar and 'Back to my plan' in bar and 'Next: Homes in budget' in bar, bar)
-            check(f'{vn} Back to my plan goes to the buying plan', pg.locator('[data-gw-plan-back]').get_attribute('href').endswith('journey/#buy'))
+            check(f'{vn} Back to my plan goes to the journey page', pg.locator('[data-gw-plan-back]').get_attribute('href').endswith('journey/#buy'))
             check(f'{vn} the header marks Plan My Move', pg.locator('.gw-nav .gw-links a[data-kpt-nav="journey"][aria-current="page"]').count() == 1 or pg.locator('.gw-nav .gw-links').count() == 0)
             check(f'{vn} the bar fits (no sideways scroll)', pg.evaluate(NOOVER))
             typ(pg, 'p.0.fixed', '9000'); typ(pg, 'cash', '300000'); typ(pg, 'cpf', '150000'); seg(pg, 'p.0.own', '0')
@@ -125,22 +123,15 @@ try:
             check(f'{vn} Back again: step 1, the bar and the figures as left', 'Step 1 of 4' in pg.locator('[data-gw-plan]').inner_text() and vals.get('cash') == '300,000', vals)
             pg.go_forward(); pg.wait_for_selector('[data-gw-plan]'); pg.go_forward(); pg.wait_for_selector('[data-gw-plan]')
             check(f'{vn} Forward twice: the payments step again, with its bar', 'Step 4 of 4' in pg.locator('[data-gw-plan]').inner_text())
-            pg.locator('[data-gw-plan-back]').click(); pg.wait_for_selector('#buy:not([hidden]) [data-gw-plan-prog]')
-            s1 = pg.locator('#buy .gw-step').nth(0); prog = pg.locator('#buy [data-gw-plan-prog]').inner_text()
-            check(f'{vn} back on the plan: step 1 ticked with its budget', 'done' in (s1.get_attribute('class') or '') and ('Budget about $' + format(int(bud // 1000 * 1000), ',')) in s1.inner_text(), s1.inner_text()[:200])
-            check(f'{vn} ... the next step pointed out (Research, the one not yet opened), and the progress line', pg.locator('#buy .gw-step.next h3').inner_text().startswith('Next') and 'Research the developments' in pg.locator('#buy .gw-step.next').inner_text() and '3 of 4 steps done' in prog, prog)
-            check(f'{vn} ... no sideways scroll', pg.evaluate(NOOVER))
-            # the selling plan and the moving plans
-            for panel, pre, first, want in [('sell', None, 'a[href*="journey/worth/"]', ('plan=sell', 'Step 1 of 3', 'journey/#sell')),
-                                            ('move', 'hdb', 'a[href*="tools/hdb-upgrade/"]', ('plan=move-hdb', 'Step 2 of 3', 'journey/#move')),
-                                            ('move', 'condo', 'a[href*="tools/sale-proceeds/"]', ('plan=move-condo', 'Step 2 of 4', 'journey/#move')),
-                                            ('move', 'landed', 'a[href*="tools/tdsr/"]', ('plan=move-landed', 'Step 3 of 4', 'journey/#move')),
-                                            ('up', None, 'a[href*="tools/hdb-upgrade/"]', ('plan=up', 'Step 1 of 2', 'journey/#up'))]:
-                pg.goto(B + '/journey/#' + panel); pg.wait_for_selector(f'#{panel}:not([hidden])')
-                if pre: pg.locator(f'#{panel} [data-gw-q="type"][data-gw-v="{pre}"]').click(); pg.wait_for_selector(f'#{panel} [data-gw-out] .gw-step')
-                pg.locator(f'#{panel} {first}').first.click(); pg.wait_for_selector('[data-gw-plan]')
+            pg.locator('[data-gw-plan-back]').click(); pg.wait_for_selector('[data-pmm] .pmm-card')
+            check(f'{vn} Back to my plan: the V2 guided journey, no checklist panel, no sideways scroll', pg.locator('[data-gw-panel]').count() == 0 and pg.locator('[data-pmm] [data-next]').is_visible() and pg.evaluate(NOOVER))
+            # the selling, moving and upgrade plans (addresses shared before V2)
+            for u, want in [('/journey/worth/?plan=sell', ('Step 1 of 3', 'journey/#sell')), ('/tools/hdb-upgrade/?j=1&plan=move-hdb', ('Step 2 of 3', 'journey/#move')),
+                            ('/tools/sale-proceeds/?j=1&plan=move-condo#private', ('Step 2 of 4', 'journey/#move')), ('/tools/tdsr/?j=1&plan=move-landed#sell', ('Step 3 of 4', 'journey/#move')),
+                            ('/tools/hdb-upgrade/?j=1&plan=up', ('Step 1 of 2', 'journey/#up'))]:
+                pg.goto(B + u); pg.wait_for_selector('[data-gw-plan]')
                 t = pg.locator('[data-gw-plan]').inner_text()
-                check(f'{vn} {panel}{"/" + pre if pre else ""}: {want[0]}, {want[1]}, back to {want[2]}', want[0] in pg.url and want[1] in t and 'Part of your Plan My Move' in t and pg.locator('[data-gw-plan-back]').get_attribute('href').endswith(want[2]) and pg.locator('[data-gw-strip]:not([data-gw-plan])').count() == 0, [pg.url, t[:120]])
+                check(f'{vn} {u}: {want[0]}, back to {want[1]}', want[0] in t and 'Part of your Plan My Move' in t and pg.locator('[data-gw-plan-back]').get_attribute('href').endswith(want[1]) and pg.locator('[data-gw-strip]:not([data-gw-plan])').count() == 0, t[:120])
             # standalone: unchanged and clean
             pg.goto(B + '/tools/tdsr/'); pg.wait_for_selector('[data-out]')
             vals = pg.evaluate("[...document.querySelectorAll('input[data-k]')].filter((e) => e.value).map((e) => e.dataset.k)")

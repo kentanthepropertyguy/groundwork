@@ -60,15 +60,17 @@ try:
             else:
                 go = pg.locator('.gw-links a[data-kpt-nav="journey"]')
             if phone: pg.goto(B + '/'); pg.wait_for_selector('.gw-doors3'); pg.locator('.gw-menu summary').first.click(); pg.wait_for_selector('.gw-menu[open] .gw-mfoot'); go = pg.locator('.gw-menu[open] a[href="journey/"]').first
-            go.click(); pg.wait_for_selector('.gw-paths')
-            paths = pg.eval_on_selector_all('.gw-path b', 'bs => bs.map(b => b.textContent)')
-            check(vn + ': Plan My Move opens Guide Me with the four choices', pg.url.rstrip('/').endswith('/journey') and len(paths) == 4 and paths[2] == 'Upgrade from HDB' and paths[3] == 'Sell and buy again', paths)
-            check(vn + ': at the start, not scrolled past the choices, no path open', pg.evaluate('scrollY') < 5 and pg.locator('.gw-panel.on, .gw-path[aria-expanded="true"]').count() == 0)
+            go.click(); pg.wait_for_selector('[data-pmm] [data-next]')
+            # Plan My Move V2 (6 Nov 2026): one guided journey in four steps in place of Guide Me's four paths
+            steps = pg.eval_on_selector_all('[data-pmm] .pmm-steps span', 'ss => ss.map(s => s.textContent)')
+            check(vn + ': Plan My Move opens the guided journey: My Situation, My Budget, My Options, My Plan', pg.url.split('#')[0].rstrip('/').endswith('/journey') and steps == ['My Situation', 'My Budget', 'My Options', 'My Plan'], steps)
+            check(vn + ': at the start: Step 1 of 4, not scrolled past it', pg.evaluate('scrollY') < 5 and pg.inner_text('[data-pmm] [data-k-step]') == 'Step 1 of 4')
             check(vn + ': Plan My Move is marked as the current section', pg.locator('[data-kpt-nav="journey"][aria-current="page"], .gw-secs [data-gw-nav-to="journey"][aria-current="page"]').count() >= 1)
             shot(pg, f'03-plan-my-move-{vn}')
-            pg.locator('.gw-path[data-gw-path="sell"]').click(); pg.wait_for_function("location.hash === '#sell'")
-            check(vn + ': a chosen path still deep-links (#sell)', pg.locator('#sell').is_visible())
-            pg.goto(B + '/journey/#up'); pg.wait_for_selector('#up'); check(vn + ': journey/#up still opens the upgrade path', pg.locator('#up').is_visible())
+            pg.goto(B + '/journey/#sell'); pg.wait_for_selector('[data-pmm] [data-next]')
+            check(vn + ': an older deep link (#sell) opens the journey at Step 1', pg.inner_text('[data-pmm] [data-k-step]') == 'Step 1 of 4')
+            pg.goto(B + '/journey/#up'); pg.wait_for_selector('[data-pmm] [data-next]')
+            check(vn + ': journey/#up opens the journey as an upgrade from HDB', pg.get_attribute('[data-pmm] [data-k="sit"] [data-v="upgrade"]', 'aria-checked') == 'true')
             pg.goto(B + '/tools/'); pg.wait_for_selector('h1'); check(vn + ': the directory is "Calculators" at /tools/ (V3.4: four questions)', pg.inner_text('h1') == 'Calculators')
             check(vn + ': no page errors', not errs, errs); ctx.close()
 

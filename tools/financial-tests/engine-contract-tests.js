@@ -5,7 +5,8 @@
       from the engine's value, never computed; cases the engines cannot express refused as unsupported, never approximated; the case is never changed.
    4b owned-property records: owners, keep/sell, loans and the sale map to the pages' own homes list (GW_FIN3.withHomes), one record per home.
    P5 no rules in the adapter: no rate, band, limit, year or arithmetic in gw-engine.js (a static scan); rules are read only as metadata.
-   P6 nothing live: no page loads gw-engine.js; the Decoupling Timeline & Costs feature is not touched.
+   P6 live in one place only: Plan My Move V2 (journey/index.html, through gw-pmm.js) is the one page that loads gw-engine.js; the calculators
+      keep their own engines; the Decoupling Timeline & Costs feature is not touched.
    Run from the site folder: node tools/financial-tests/engine-contract-tests.js */
 const fs = require('fs'), path = require('path');
 const H = require('./harness.js')(process.argv[2]);
@@ -148,15 +149,17 @@ const BLOCK_KEYS = ['status', 'missing', 'invalid', 'assumptions', 'provisional'
   ok(!/\b(bsdBands|absd|ltv|tdsr|msr|stressRate|cpfOaRate|hdbLoanRate)\s*:/.test(code), 'no rule table defined in the adapter');
 }
 
-/* ---------- P6 nothing live; Decoupling untouched ---------- */
+/* ---------- P6 live only in Plan My Move V2; Decoupling untouched ---------- */
 {
   const html = [];
   const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).forEach((e) => { const p = path.join(d, e.name); if (e.isDirectory()) { if (!/^(\.git|node_modules)$/.test(e.name)) walk(p); } else if (/\.html?$/.test(e.name)) html.push(p); });
   walk(H.root);
   const refs = html.filter((p) => /gw-engine\.js/.test(fs.readFileSync(p, 'utf8')));
-  ok(html.length > 20 && !refs.length, 'no page loads gw-engine.js (' + html.length + ' pages checked)', refs.map((p) => path.relative(H.root, p)));
+  const rel = refs.map((p) => path.relative(H.root, p).split(path.sep).join('/'));
+  ok(html.length > 20 && rel.join() === 'journey/index.html', 'only Plan My Move V2 (journey/) loads gw-engine.js (' + html.length + ' pages checked)', rel);
   const js = fs.readdirSync(path.join(H.root, 'assets/js')).filter((f) => f !== 'gw-engine.js' && /\.js$/.test(f));
-  ok(!js.some((f) => /GW_ENGINE|gw-engine/.test(fs.readFileSync(path.join(H.root, 'assets/js', f), 'utf8'))), 'no other script uses GW_ENGINE');
+  const users = js.filter((f) => /GW_ENGINE|gw-engine/.test(fs.readFileSync(path.join(H.root, 'assets/js', f), 'utf8')));
+  ok(users.join() === 'gw-pmm.js', 'only the V2 journey (gw-pmm.js) uses GW_ENGINE; no calculator does', users);
   ok(!fs.existsSync(path.join(H.root, 'assets/js/gw-decouple.js')) && !fs.existsSync(path.join(H.root, 'tools/decoupling')) && !/decoupl/i.test(fs.readFileSync(path.join(H.root, 'assets/js/gw-engine.js'), 'utf8').replace(/Not here \(kept separate on purpose\): the Decoupling Timeline & Costs engine/, '')), 'the Decoupling Timeline & Costs feature is not touched and not modelled here');
 }
 

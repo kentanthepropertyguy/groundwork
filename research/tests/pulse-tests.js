@@ -242,9 +242,11 @@ ok(/HDB, condo or landed — prices, past sales, rents and comparisons\./.test(l
 const home = read('index.html'); // 25 Oct 2026: the homepage's Research door is one card (its list of tool links was removed); Market Pulse is reached in every development's Research report
 ok(/<a class="gw-door gw-door3" href="research\/"/.test(home) && !/data-mp[ >]/.test(home), 'Home: the Research door leads to Research (where Market Pulse lives), no new section');
 ok(!/gw-pulse|data-mp/.test(home), 'Home gains no new block');
-const jr = read('journey/index.html'); ok(/data-pulse-for="sell"[^>]*>See how the market is moving in your development/.test(jr), 'Sell: a way into the development\'s market report');
+// Plan My Move V2 (6 Nov 2026): the checklist's Sell and Buy panels are replaced by the guided journey (gw-pmm.js); its My Options step's
+// "Research a development" carries the buyer's question through the same handler (gw-journey.js); the owner's sale price links to Property values
+const pmm = read('assets/js/gw-pmm.js'); ok(/data-pmm-research data-gw-go="research" data-pulse-for="buy"/.test(pmm) && /gw-journey\.js/.test(read('journey/index.html')), 'Plan My Move: My Options\' Research link carries the buyer\'s question (the journey\'s click handler is loaded)');
 ok(/data-pulse-for="sell"/.test(read('assets/js/gw-journey.js')) && /pulseFor === 'sell' \|\| a\.dataset\.pulseFor === 'buy'/.test(read('assets/js/gw-journey.js')), 'the journey links set the owner\'s or the buyer\'s question');
-ok(/data-pulse-for="buy">See them on the map/.test(jr), 'Buy: the research step carries the buyer\'s question');
+
 ok(/f === 'go'\) \{ try \{ window\.sessionStorage\.setItem\('kpt\.pulse\.for', 'buy'\)/.test(read('assets/js/kpt-discover-ui.js')), 'Budget Search: opening a development\'s research sets the buyer\'s question');
 const mp = read('research/map/index.html'); ok(/gw-pulse\.js/.test(mp) && mp.indexOf('gw-pulse.js') < mp.indexOf('kpt-map-app.js'), 'the Map loads the module before the app');
 const ma = read('assets/js/kpt-map-app.js'); ok(/getJson\('pulse\.json'\)/.test(ma) && /pulseHtml\(name\)/.test(ma) && !/Full market report/.test(ma) && /data-m-full="\$\{esc\(p\.id\)\}">View Full Research/.test(ma), 'the Map panel shows the snapshot; its existing View Full Research (25 Oct 2026, was "Open full analysis") is the one way into the report (no second link)');

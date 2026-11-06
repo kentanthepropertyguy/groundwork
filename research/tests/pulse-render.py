@@ -109,17 +109,15 @@ try:
         open_dev(pg, base, '24-one-residences', '#waOwn')
         m2 = urllib.parse.unquote(pg.get_attribute('#waOwn', 'href').split('text=', 1)[1])
         check(f'{vn}: a development with no recent resales says so in the message', 'no resales in the last 12 months' in m2.lower(), m2)
-        # Sell: the moving guide's development step sets the owner's question
+        # Plan My Move V2 (6 Nov 2026): the guided journey's My Options step offers "Research a development" to someone choosing their next home, so it
+        # carries the buyer's question (the checklist's Sell step, which carried the owner's, is gone; the owner's sale price links to Property values)
         pg.evaluate("try { sessionStorage.removeItem('kpt.pulse.for'); } catch (e) {}")
-        pg.goto(f'http://127.0.0.1:{P}/journey/'); pg.wait_for_selector('a[data-pulse-for="sell"]', state='attached', timeout=10000)
-        link = pg.query_selector('a[data-pulse-for="sell"]'); check(f'{vn}: Sell has a way into the development\'s market report', 'See how the market is moving' in link.inner_text() or 'See how the market' in link.text_content())
-        pg.evaluate("document.querySelector('a[data-pulse-for=sell]').click()"); pg.wait_for_timeout(300)
-        check(f'{vn}: following it keeps the owner\'s question for this tab only', pg.evaluate("sessionStorage.getItem('kpt.pulse.for')") == 'sell' and pg.evaluate("localStorage.getItem('kpt.pulse.for')") is None)
-        # Buy: the journey's research step carries the buyer's question
-        pg.evaluate("try { sessionStorage.removeItem('kpt.pulse.for'); } catch (e) {}")
-        pg.goto(f'http://127.0.0.1:{P}/journey/#buy'); pg.wait_for_selector('a[data-pulse-for="buy"]', state='attached', timeout=10000)
+        pg.goto(f'http://127.0.0.1:{P}/journey/'); pg.wait_for_selector('[data-pmm] [data-next]', timeout=10000)
+        pg.evaluate("sessionStorage.setItem('gw.pmm.v2', JSON.stringify({ v: 1, a: { sit: 'first', n: '1', p0age: 32, p0inc: 8000, p0res: 'SC', ptype: 'completed', cash: 150000, cpf: 100000 }, homes: [], step: 'options' }))")
+        pg.goto(f'http://127.0.0.1:{P}/journey/?from=test#options'); pg.wait_for_selector('a[data-pulse-for="buy"]', state='attached', timeout=10000)
+        check(f'{vn}: the journey\'s My Options leads into Research', 'Research a development' in pg.inner_text('a[data-pulse-for="buy"]'))
         pg.evaluate("document.querySelector('a[data-pulse-for=buy]').click()"); pg.wait_for_timeout(300)
-        check(f'{vn}: following Buy\'s research step keeps the buyer\'s question for this tab', pg.evaluate("sessionStorage.getItem('kpt.pulse.for')") == 'buy')
+        check(f'{vn}: following it keeps the buyer\'s question for this tab only', pg.evaluate("sessionStorage.getItem('kpt.pulse.for')") == 'buy' and pg.evaluate("localStorage.getItem('kpt.pulse.for')") is None)
         open_dev(pg, base, 'parc-clematis')
         check(f'{vn}: and the report then leads with the asking-price question', pg.evaluate("document.querySelector('[data-lg-for] > *').querySelector('a').id") == 'wa')
         # Home entry

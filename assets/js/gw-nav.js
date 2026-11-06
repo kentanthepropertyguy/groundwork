@@ -381,14 +381,19 @@
     up: { name: 'Upgrade from HDB', back: 'journey/#up', steps: [['budget', 'Upgrade budget', 'tools/hdb-upgrade/'], ['explore', 'What it buys', 'tools/what-can-i-buy/']] },
     'move-hdb': { name: 'Selling and buying', back: 'journey/#move', steps: [['worth', 'Flat value', 'journey/worth/#hdb'], ['budget', 'Upgrade budget', 'tools/hdb-upgrade/'], ['explore', 'What it buys', 'tools/what-can-i-buy/']] },
     'move-condo': { name: 'Selling and buying', back: 'journey/#move', steps: [['worth', 'Home value', 'research/', false], ['proceeds', 'Sale proceeds', 'tools/sale-proceeds/#private'], ['next', 'Your next budget', 'tools/tdsr/#sell'], ['explore', 'What it buys', 'tools/what-can-i-buy/']] },
+    // Plan My Move V2 (Master Planning, 6 Nov 2026): the four steps are on journey/ itself; Budget Search (My Options) and the value page (My Budget's
+    // selling price) open with ?plan=v2 and show where the visitor is, with the way back to that step
+    v2: { name: 'Plan My Move', back: 'journey/#options', steps: [['situation', 'My Situation', 'journey/#situation'], ['budget', 'My Budget', 'journey/#budget'], ['options', 'My Options', 'journey/#options'], ['plan', 'My Plan', 'journey/#plan']],
+      pages: { 'tools/what-can-i-buy/': 2, 'journey/worth/': 1 } },
     'move-landed': { name: 'Selling and buying', back: 'journey/#move', steps: [['worth', 'Street sales', 'journey/worth/#landed'], ['proceeds', 'Sale proceeds', 'tools/sale-proceeds/#private'], ['next', 'Your next budget', 'tools/tdsr/#sell'], ['explore', 'What it buys', 'tools/what-can-i-buy/']] },
   };
   const pathOf = (href) => String(href).split('#')[0];
   const isTool = (path) => /^tools\/(?!what-can-i-buy\/)[a-z0-9-]+\/$/.test(path);
   // a step's address with the plan (and the journey marker for a calculator)
-  const planHref = (r, key, st) => r + pathOf(st[2]) + '?' + (isTool(pathOf(st[2])) ? 'j=1&' : '') + 'plan=' + key + (st[2].indexOf('#') >= 0 ? '#' + st[2].split('#')[1] : '');
+  const planHref = (r, key, st) => (PLAN[key] && PLAN[key].pages ? r + st[2] : r + pathOf(st[2]) + '?' + (isTool(pathOf(st[2])) ? 'j=1&' : '') + 'plan=' + key + (st[2].indexOf('#') >= 0 ? '#' + st[2].split('#')[1] : ''));
   // which step of the plan this address is (by its path; null when it is not one of them)
-  function planStepAt(key, path) { const P = PLAN[key]; if (!P) return null; const k = P.steps.findIndex((x) => path.replace(/index\.html$/, '').slice(-pathOf(x[2]).length - 1) === '/' + pathOf(x[2])); return k < 0 ? null : k; }
+  function planStepAt(key, path) { const P = PLAN[key]; if (!P) return null;
+    if (P.pages) { const pg = Object.keys(P.pages).find((k) => path.replace(/index\.html$/, '').slice(-k.length - 1) === '/' + k); return pg ? P.pages[pg] : null; } const k = P.steps.findIndex((x) => path.replace(/index\.html$/, '').slice(-pathOf(x[2]).length - 1) === '/' + pathOf(x[2])); return k < 0 ? null : k; }
   const $k = (n) => '$' + Math.round(n).toLocaleString('en-US');
   // what a step found, from what this tab already holds: the answers the calculators keep for the plan (gw.plan.v1, journey only) and the value look-up (gw.ctx.v1)
   function planResults(storage) {
@@ -407,7 +412,7 @@
   function planHtml(key, cur, r, res, seen) {
     const P = PLAN[key], n = P.steps.length, nx = P.steps[cur + 1];
     return '<nav class="gw-strip gw-plan" aria-label="Part of your Plan My Move: ' + P.name + ', step ' + (cur + 1) + ' of ' + n + '" data-gw-plan="' + key + '"><div class="gw-strip-h"><b>Part of your Plan My Move <span>· Step ' + (cur + 1) + ' of ' + n + '</span></b>' +
-      '<a class="gw-plan-back" href="' + r + P.back + '" data-gw-plan-back>‹ Back to my plan</a></div><ol style="grid-template-columns:repeat(' + n + ',minmax(0,1fr))">' +
+      '<a class="gw-plan-back" href="' + r + (P.pages ? P.steps[cur][2] : P.back) + '" data-gw-plan-back>‹ Back to my plan</a></div><ol style="grid-template-columns:repeat(' + n + ',minmax(0,1fr))">' +
       P.steps.map((x, k) => { const ok = k !== cur && (seen || []).indexOf(x[0]) >= 0; return '<li' + (k === cur ? ' aria-current="step"' : ok ? ' class="done"' : '') + '><a href="' + planHref(r, key, x) + '" data-gw-plan-to="' + x[0] + '"><i>' + (ok ? '✓' : k + 1) + '</i>' + esc(x[1]) + '</a></li>'; }).join('') + '</ol>' +
       (nx ? '<a class="gw-strip-next" href="' + planHref(r, key, nx) + '" data-gw-plan-to="' + nx[0] + '">Next: ' + esc(nx[1]) + ' ›</a>' : '') + '</nav>';
   }

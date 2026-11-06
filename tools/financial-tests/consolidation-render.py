@@ -1,7 +1,7 @@
 import json, os, pathlib, re, socket, subprocess, sys, time
 from playwright.sync_api import sync_playwright
 """Calculator consolidation and Tools directory (24 Oct 2026). Run from the site folder:  python3 tools/financial-tests/consolidation-render.py
-1. Every All Tools card opens the tool it names; the HDB upgrading line opens the four-step journey; search still finds HDB upgrade, TDSR, ABSD and Full payment planning.
+1. Every All Tools card opens the tool it names; the HDB upgrading line opens Plan My Move as an upgrade from HDB; search still finds HDB upgrade, TDSR, ABSD and Full payment planning.
 2. The old HDB upgrade planner address opens What can I afford? set up for a flat being sold, on step 3 of the upgrade path, with the old figures carried over.
 3. The Payment timeline's monthly-instalment warning: not shown merely because no monthly amount was entered; a payment shortfall, and an instalment gap after
    monthly amounts were entered, still warn; the estimated monthly mortgage stays visible in every case.
@@ -51,8 +51,10 @@ try:
         for tool, path in CARDS.items():
             pg.goto(B + '/tools/'); pg.wait_for_selector('.gw-tdir'); pg.click('.gw-tdir a[data-tool="%s"]' % tool); pg.wait_for_load_state(); pg.wait_for_timeout(200)
             check(vn + ': the ' + tool + ' link opens ' + path + ' as a standalone tool', pg.url.split('#')[0].endswith(path) and 'j=1' not in pg.url, pg.url)
-        pg.goto(B + '/journey/#up'); pg.wait_for_selector('#up'); pg.wait_for_timeout(400)
-        check(vn + ': Plan My Move’s "Upgrade from HDB" leads into the four-step thread', pg.is_visible('#up') and pg.get_attribute('#up [data-gw-up-go]', 'href').endswith('tools/hdb-upgrade/'), pg.get_attribute('#up [data-gw-up-go]', 'href'))
+        pg.goto(B + '/journey/#up'); pg.wait_for_selector('[data-pmm] [data-next]')
+        # Plan My Move V2 (6 Nov 2026): "Upgrade from HDB" opens the guided journey as an upgrade from an HDB flat; the HDB upgrade planner is
+        # offered on My Options (pmm-render.py) and found by search (below)
+        check(vn + ': Plan My Move’s "Upgrade from HDB" opens the guided journey as an upgrade from an HDB flat', pg.get_attribute('[data-pmm] [data-k="sit"] [data-v="upgrade"]', 'aria-checked') == 'true' and pg.get_attribute('[data-pmm] [data-k="htype"] [data-v="hdb"]', 'aria-checked') == 'true')
         # search, by the words people use (the menu's search box)
         pg.goto(B + '/tools/'); pg.wait_for_selector('.gw-tdir')
         for q, want in [('HDB upgrade', 'tools/hdb-upgrade/'), ('TDSR', 'tools/tdsr/'), ('ABSD', 'tools/stamp-duty/'), ('Full payment planning', 'tools/payment-planner/'), ('What can I afford', 'tools/tdsr/#cash'), ('MSR', 'tools/tdsr/#hdb')]:
