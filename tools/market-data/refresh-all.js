@@ -15,6 +15,7 @@
      5. build-suggest.js         Research "Compare with" suggestions                              -> data/research/suggest.json
      6. build-coverage.js        Not-covered names (research/index.html) and the registry's different-class wording
      7. build-pulse.js           The Map's market snapshot, from the same module and records as the Research report -> data/map/pulse.json
+     7b. build-home-preview.js   The homepage map preview: three developments' Map figures and the dots around them (the Map's own data and logic) -> data/map/home.json
    With --snapshot (25 Oct 2026), from the SAME URA fetch, so every figure on a page agrees with the transactions listed under it:
      8. build-bedroom-research.js  Bedroom types (accepted classification, never redone here)      -> data/projects/bedroom
      8b. build-bedroom-search.js   Budget Search by bedrooms, resale (the same types and gate; read by Budget Search, kpt-discover-beds.js) -> data/projects/find-beds.json
@@ -53,6 +54,7 @@ run('Registry classes', 'build-registry-classes.js', []);
 run('Compare suggestions', 'build-suggest.js', []);
 run('Coverage metadata', 'build-coverage.js', ['--raw', raw]);
 run('Market pulse (Map snapshot)', 'build-pulse.js', []);
+run('Homepage map preview', 'build-home-preview.js', []);
 const snap = arg('snapshot'), rep = arg('report');
 if (snap) {
   if (!rep || path.resolve(rep).startsWith(site + path.sep)) { console.error('--snapshot needs --report <a PRIVATE folder outside the site>.'); process.exit(2); }

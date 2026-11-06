@@ -1,0 +1,79 @@
+/* ==========================================================================
+   GROUNDWORK — the homepage hero with its map preview (Homepage V1.1, 6 Nov 2026; assets/js/gw-home.js).
+   Design Standard v1 tokens only: white page, grey --gw-line borders, navy type and selected states, gold eyebrows, blue CTAs.
+   Desktop: title, search, the three developments and the selected one's figures on the left; the map on the right, both in the first
+   screen. Phone: title, search, developments, map, figures, then the journey cards. Motion: CSS only, none under reduced motion.
+   ========================================================================== */
+.gw-home .gw-wrap{gap:28px}
+.gh-hero{display:grid;grid-template-columns:minmax(360px,470px) minmax(0,1fr);gap:32px;align-items:stretch}
+.gh-left{display:flex;flex-direction:column;gap:14px;min-width:0}
+.gw-home .gw-launch-head{gap:8px}
+.gw-home .gw-h1-l{margin:0}   /* the shared heading size (Design Standard: 44 px, 32 px on a phone) */
+.gw-home .gw-l-search{max-width:none}
+
+/* the three developments, in the search's "Try" row (hidden with the search results, as before) */
+.gw-home .gh-try{gap:6px;font-size:13.5px;min-height:36px}
+.gw-home .gh-try button{min-height:36px;padding:0 12px;font-size:14px;font-weight:500;transition:background .15s,border-color .15s,color .15s}
+.gw-home .gh-try button[aria-pressed=true]{background:var(--gw-ink);border-color:var(--gw-ink);color:#fff}
+.gw-home .gh-try button:focus-visible,.gh-pin:focus-visible{outline:3px solid var(--gw-gold);outline-offset:2px}
+
+/* the selected development */
+.gh-pv{margin-top:auto;padding-top:4px;transition:opacity .2s,transform .2s;min-height:236px}
+.gh-pv.gh-swap{opacity:0;transform:translateY(6px)}
+.gw-home .gh-o{margin:0;font-size:11.5px !important;color:var(--gw-gold)}
+.gw-home .gh-n{margin:4px 0 0;font-size:26px;line-height:1.1;letter-spacing:-.02em;color:var(--gw-ink)}
+.gw-home .gh-meta{margin:3px 0 0;font-size:14px;color:var(--gw-muted)}
+.gh-kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0 10px}
+.gh-kv div{border:1px solid var(--gw-line);border-radius:12px;padding:12px 14px;min-width:0}
+.gh-kv b{display:block;font-size:30px;line-height:1;letter-spacing:-.025em;color:var(--gw-ink);font-variant-numeric:tabular-nums}
+.gh-kv small{display:block;margin-top:6px;font-size:12.5px;line-height:1.35;color:var(--gw-muted)}
+.gw-home .gh-hint{margin:0;font-size:13px;line-height:1.45;color:var(--gw-muted)}
+.gw-home .gh-acts{margin:12px 0 0}
+.gw-home .gh-acts .gw-btn{min-height:44px;padding:10px 20px;font-size:15px;width:auto}
+
+/* the map */
+.gh-map{position:relative;min-height:520px;border:1px solid var(--gw-line);border-radius:16px;overflow:hidden;background:#EEF1F5;box-shadow:0 1px 2px rgba(22,33,62,.04),0 8px 24px rgba(22,33,62,.06);isolation:isolate}
+.gh-map[hidden]{display:none}
+.gh-tiles,.gh-pins{position:absolute;left:0;top:0;transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.gh-now .gh-tiles,.gh-now .gh-pins{transition:none}
+.gh-tiles img{position:absolute;display:block;max-width:none;opacity:0;transition:opacity .35s}
+.gh-tiles img.ok{opacity:1}
+.gh-pins{z-index:2}
+.gh-dot{position:absolute;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:#fff;border:2px solid var(--gw-ink);box-shadow:0 1px 3px rgba(22,33,62,.25);transition:opacity .3s}
+.gh-sel .gh-dot{opacity:.45}
+.gh-pin{position:absolute;width:20px;height:20px;margin:-10px 0 0 -10px;padding:0;border-radius:50%;background:#fff;border:3px solid var(--gw-ink);box-shadow:0 1px 3px rgba(22,33,62,.3);cursor:pointer;transition:transform .2s}
+.gh-pin::after{content:"";position:absolute;inset:-12px;border-radius:50%}   /* a 44 px tap target */
+.gh-pin:hover{transform:scale(1.15)}
+.gh-pin.on{background:var(--gw-ink);border-color:#fff;transform:scale(1.2)}
+.gh-pin.on::before{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--gw-ink);animation:gh-pulse 1.8s ease-out infinite}
+@keyframes gh-pulse{0%{transform:scale(1);opacity:.8}100%{transform:scale(2.6);opacity:0}}
+.gh-lbl{position:absolute;z-index:3;transform:translate(18px,-50%);background:var(--gw-ink);color:#fff;border-radius:8px;padding:6px 11px;font-size:13px;font-weight:600;line-height:1.3;white-space:nowrap;box-shadow:0 8px 24px rgba(22,33,62,.18);pointer-events:none;opacity:0;transition:opacity .25s}
+.gh-lbl.on{opacity:1}
+.gh-lbl small{display:block;font-size:11.5px;font-weight:400;opacity:.88}
+.gw-home .gh-open{position:absolute;z-index:4;left:12px;top:12px;min-height:38px;padding:8px 16px;font-size:14.5px;width:auto;background:rgba(255,255,255,.96)}
+.gh-attr{position:absolute;z-index:4;right:8px;bottom:8px;display:flex;align-items:center;font-size:11px;line-height:1.3;color:var(--gw-body);background:rgba(255,255,255,.94);padding:3px 8px 3px 5px;border-radius:6px;border:1px solid var(--gw-line);max-width:calc(100% - 16px)}
+.gh-attr img{width:20px;height:20px;display:block}
+.gh-attr a{color:var(--gw-body) !important;text-decoration:underline}
+.gh-map[data-tiles=failed]::after{content:"The map image could not load. Explore on Map for every development.";position:absolute;inset:auto 16px 48px;z-index:3;text-align:center;font-size:13px;color:var(--gw-muted)}
+
+/* gentle entry */
+.gh-ready .gh-map,.gh-ready .gh-pv{animation:gh-in .5s ease-out both}
+.gh-ready .gh-pv{animation-delay:.12s}
+@keyframes gh-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* narrower screens: one column in the phone order (title, search, developments, map, figures) */
+@media (max-width:899px){
+  .gh-hero{grid-template-columns:minmax(0,1fr);gap:16px}
+  .gh-left{display:contents}
+  .gh-left > .gw-launch-head{order:1}.gh-left > .gw-l-search{order:2}.gh-map{order:3;min-height:340px}.gh-pv{order:4;margin-top:0;min-height:0}
+}
+@media (max-width:719px){
+  .gh-map{min-height:320px;border-radius:14px}
+  .gh-kv b{font-size:26px}
+  .gw-home .gh-try button{padding:0 12px}
+}
+@media (prefers-reduced-motion:reduce){
+  .gh-tiles,.gh-pins,.gh-tiles img,.gh-pv,.gh-dot,.gh-pin,.gh-lbl,.gw-home .gh-try button{transition:none}
+  .gh-pin.on::before{animation:none}
+  .gh-ready .gh-map,.gh-ready .gh-pv{animation:none}
+}
