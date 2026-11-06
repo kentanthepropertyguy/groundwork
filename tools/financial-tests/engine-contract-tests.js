@@ -159,7 +159,8 @@ const BLOCK_KEYS = ['status', 'missing', 'invalid', 'assumptions', 'provisional'
   ok(html.length > 20 && rel.join() === 'journey/index.html', 'only Plan My Move V2 (journey/) loads gw-engine.js (' + html.length + ' pages checked)', rel);
   const js = fs.readdirSync(path.join(H.root, 'assets/js')).filter((f) => f !== 'gw-engine.js' && /\.js$/.test(f));
   const users = js.filter((f) => /GW_ENGINE|gw-engine/.test(fs.readFileSync(path.join(H.root, 'assets/js', f), 'utf8')));
-  ok(users.join() === 'gw-pmm.js', 'only the V2 journey (gw-pmm.js) uses GW_ENGINE; no calculator does', users);
+  // HSU P1 (6 Nov 2026): gw-engine-position.js is GW_ENGINE's own extension (its position and compare blocks), loaded by no page yet
+  ok(users.join() === 'gw-engine-position.js,gw-pmm.js', 'only the V2 journey (gw-pmm.js) and GW_ENGINE’s own extension (gw-engine-position.js) use GW_ENGINE; no calculator does', users);
   ok(!fs.existsSync(path.join(H.root, 'assets/js/gw-decouple.js')) && !fs.existsSync(path.join(H.root, 'tools/decoupling')) && !/decoupl/i.test(fs.readFileSync(path.join(H.root, 'assets/js/gw-engine.js'), 'utf8').replace(/Not here \(kept separate on purpose\): the Decoupling Timeline & Costs engine/, '')), 'the Decoupling Timeline & Costs feature is not touched and not modelled here');
 }
 

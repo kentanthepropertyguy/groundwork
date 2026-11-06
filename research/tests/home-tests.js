@@ -71,9 +71,12 @@ const D = JSON.parse(read('data/map/home.json'));
   ok(!/data-gw-try=/.test(main), 'the search\'s "Try" row now offers the three developments (no ABSD / Valuation buttons)');
   const pages = cp.execSync('git ls-files "*.html"', { cwd: root, encoding: 'utf8' }).split('\n').filter(Boolean).map((f) => [f, read(f)]).filter(([, t]) => /<footer class="gw-foot">/.test(t));
   ok(pages.length >= 19 && pages.every(([, t]) => /TikTok Live every night · @kennx8898<\/a>/.test(t) && /class="gw-live">LIVE</.test(t) && /ken-portrait\.jpg/.test(t)), 'every footer: "TikTok Live every night", the LIVE line and Ken\'s photo kept (' + pages.length + ' pages)');
-  const all = cp.execSync('git grep -l -e "8–9.30pm" -e "nightly 8" -- "*.html" "*.js" "*.css" || true', { cwd: root, encoding: 'utf8' }).trim();
-  ok(all === '', 'no livestream hours anywhere', all);
+  // the site's files only: the tests that look for the old wording necessarily contain it (fixed 6 Nov 2026: this check found itself once committed)
+  const all = cp.execSync('git grep -l -e "8–9.30pm" -e "nightly 8" -- "*.html" "*.js" "*.css" ":!research/tests" ":!tools/financial-tests" || true', { cwd: root, encoding: 'utf8' }).trim();
+  ok(all === '', 'no livestream hours anywhere on the site', all);
   let changed = []; try { changed = cp.execSync('git diff --name-only origin/main', { cwd: root, encoding: 'utf8' }).split('\n').filter(Boolean); } catch (e) { changed = null; }
+  // HSU P1 (6 Nov 2026): the two new engine extension files are additions loaded by no page; the existing calculators and engine stay untouched
+  if (changed) changed = changed.filter((f) => !/^assets\/js\/gw-(calc|engine)-position\.js$/.test(f));
   if (changed) ok(!changed.some((f) => /^research\/map\/|^assets\/js\/kpt-map|^assets\/css\/kpt-map|^data\/(map\/(?!home\.json)|prism\/|projects\/)|^assets\/js\/(gw-prism|gw-pmm|gw-engine|gw-fin3|gw-calc)/.test(f)), 'the frozen Map, its data, PRISM, Plan My Move and the calculators are untouched', changed);
 }
 console.log('home-tests: ' + pass + ' passed, ' + fail + ' failed');
