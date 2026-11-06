@@ -371,6 +371,82 @@
     } catch (e) { /* storage blocked */ }
   }
 
+  /* ---------------- Plan My Move continuity (Master Planning, 6 Nov 2026) ----------------
+     A calculator opened from a Plan My Move step carries the plan in its address (?plan=<key>, beside ?j=1): explicit journey context only, never a figure.
+     It then shows "Part of your Plan My Move", where the visitor is in the plan, and "Back to my plan". Opened any other way it is unchanged.
+     The steps mirror the journey page's own (a test keeps them equal). bar: false = a step whose page is never given the bar (Research and the frozen Map). */
+  const PLAN = {
+    buy: { name: 'Buying', back: 'journey/#buy', steps: [['budget', 'Your budget', 'tools/tdsr/#cash'], ['explore', 'Homes in budget', 'tools/what-can-i-buy/'], ['research', 'Research', 'research/map/', false], ['payments', 'Payments', 'tools/payment-planner/']] },
+    sell: { name: 'Selling', back: 'journey/#sell', steps: [['worth', 'Home value', 'journey/worth/'], ['proceeds', 'Sale proceeds', 'tools/sale-proceeds/'], ['next', 'What you can buy next', 'tools/tdsr/#sell']] },
+    up: { name: 'Upgrade from HDB', back: 'journey/#up', steps: [['budget', 'Upgrade budget', 'tools/hdb-upgrade/'], ['explore', 'What it buys', 'tools/what-can-i-buy/']] },
+    'move-hdb': { name: 'Selling and buying', back: 'journey/#move', steps: [['worth', 'Flat value', 'journey/worth/#hdb'], ['budget', 'Upgrade budget', 'tools/hdb-upgrade/'], ['explore', 'What it buys', 'tools/what-can-i-buy/']] },
+    'move-condo': { name: 'Selling and buying', back: 'journey/#move', steps: [['worth', 'Home value', 'research/', false], ['proceeds', 'Sale proceeds', 'tools/sale-proceeds/#private'], ['next', 'Your next budget', 'tools/tdsr/#sell'], ['explore', 'What it buys', 'tools/what-can-i-buy/']] },
+    'move-landed': { name: 'Selling and buying', back: 'journey/#move', steps: [['worth', 'Street sales', 'journey/worth/#landed'], ['proceeds', 'Sale proceeds', 'tools/sale-proceeds/#private'], ['next', 'Your next budget', 'tools/tdsr/#sell'], ['explore', 'What it buys', 'tools/what-can-i-buy/']] },
+  };
+  const pathOf = (href) => String(href).split('#')[0];
+  const isTool = (path) => /^tools\/(?!what-can-i-buy\/)[a-z0-9-]+\/$/.test(path);
+  // a step's address with the plan (and the journey marker for a calculator)
+  const planHref = (r, key, st) => r + pathOf(st[2]) + '?' + (isTool(pathOf(st[2])) ? 'j=1&' : '') + 'plan=' + key + (st[2].indexOf('#') >= 0 ? '#' + st[2].split('#')[1] : '');
+  // which step of the plan this address is (by its path; null when it is not one of them)
+  function planStepAt(key, path) { const P = PLAN[key]; if (!P) return null; const k = P.steps.findIndex((x) => path.replace(/index\.html$/, '').slice(-pathOf(x[2]).length - 1) === '/' + pathOf(x[2])); return k < 0 ? null : k; }
+  const $k = (n) => '$' + Math.round(n).toLocaleString('en-US');
+  // what a step found, from what this tab already holds: the answers the calculators keep for the plan (gw.plan.v1, journey only) and the value look-up (gw.ctx.v1)
+  function planResults(storage) {
+    const g = (k) => { try { return JSON.parse(storage.getItem(k) || 'null') || {}; } catch (e) { return {}; } };
+    const R = g('gw.plan.v1'), C = g('gw.ctx.v1'), out = {};
+    if (R.borrow && R.borrow.budget > 0) out['tools/tdsr/'] = 'Budget about ' + $k(Math.floor(R.borrow.budget / 1000) * 1000);
+    else if (R.borrow && R.borrow.loan > 0) out['tools/tdsr/'] = 'Loan about ' + $k(R.borrow.loan) + '. Add your cash and CPF for a budget';
+    if (R.sell && typeof R.sell.total === 'number') out['tools/sale-proceeds/'] = 'About ' + $k(R.sell.total) + ' back after the loan and costs';
+    if (R.upgrade && R.upgrade.budget > 0) out['tools/hdb-upgrade/'] = 'Budget about ' + $k(Math.floor(R.upgrade.budget / 1000) * 1000);
+    if (R.pay && R.pay.price > 0 && typeof R.pay.cash === 'number') out['tools/payment-planner/'] = 'At ' + $k(R.pay.price) + ': ' + $k(R.pay.cash) + ' in cash and CPF';
+    if (C.hdb && C.hdb.block) out['journey/worth/'] = 'Looked up Blk ' + C.hdb.block;
+    return out;
+  }
+  // the plan bar for a calculator page: the existing step strip's look, headed "Part of your Plan My Move"
+  // seen: the steps of this plan the visitor has opened from it (gw.ctx.v1 planSeen), the only ones ticked: an answer worked out elsewhere is not this plan's
+  function planHtml(key, cur, r, res, seen) {
+    const P = PLAN[key], n = P.steps.length, nx = P.steps[cur + 1];
+    return '<nav class="gw-strip gw-plan" aria-label="Part of your Plan My Move: ' + P.name + ', step ' + (cur + 1) + ' of ' + n + '" data-gw-plan="' + key + '"><div class="gw-strip-h"><b>Part of your Plan My Move <span>· Step ' + (cur + 1) + ' of ' + n + '</span></b>' +
+      '<a class="gw-plan-back" href="' + r + P.back + '" data-gw-plan-back>‹ Back to my plan</a></div><ol style="grid-template-columns:repeat(' + n + ',minmax(0,1fr))">' +
+      P.steps.map((x, k) => { const ok = k !== cur && (seen || []).indexOf(x[0]) >= 0; return '<li' + (k === cur ? ' aria-current="step"' : ok ? ' class="done"' : '') + '><a href="' + planHref(r, key, x) + '" data-gw-plan-to="' + x[0] + '"><i>' + (ok ? '✓' : k + 1) + '</i>' + esc(x[1]) + '</a></li>'; }).join('') + '</ol>' +
+      (nx ? '<a class="gw-strip-next" href="' + planHref(r, key, nx) + '" data-gw-plan-to="' + nx[0] + '">Next: ' + esc(nx[1]) + ' ›</a>' : '') + '</nav>';
+  }
+
+  // The plan page (journey/): each step of the open plan says what it found and the next step is pointed out, for a visitor coming back from a calculator.
+  // Nothing changes for a first visit (no step done). A step counts as done once opened from this plan (gw.ctx.v1 planSeen); its answer, when one is kept, is said.
+  // the moving path's home type: the chip chosen on the page, else the type this tab gave
+  const moveType = (pnl, C) => { const b = pnl.querySelector('[data-gw-q="type"][aria-pressed="true"]'); return b ? b.getAttribute('data-gw-v') : (C || {}).type; };
+  function planMark(scope) {
+    if (typeof document === 'undefined') return;
+    let res = {}, C = {}; try { res = planResults(root.sessionStorage); C = JSON.parse(root.sessionStorage.getItem('gw.ctx.v1') || '{}') || {}; } catch (e) { return; }
+    const seen = C.planSeen && typeof C.planSeen === 'object' ? C.planSeen : {};
+    [].slice.call((scope || document).querySelectorAll('[data-gw-panel]')).forEach((pnl) => {
+      const k0 = pnl.getAttribute('data-gw-panel'), mt = moveType(pnl, C), key = k0 === 'move' ? (PLAN['move-' + mt] ? 'move-' + mt : null) : k0 !== 'up' && PLAN[k0] ? k0 : null;
+      [].slice.call(pnl.querySelectorAll('[data-gw-plan-prog],.gw-step-res,.gw-next-tag')).forEach((x) => x.remove());
+      const steps = [].slice.call(pnl.querySelectorAll('.gw-step')).map((el) => {
+        el.classList.remove('done', 'next'); const n = el.querySelector('.n'); if (n && n.dataset.n) n.textContent = n.dataset.n;
+        const a = el.querySelector('a.gw-btn[href]:not([data-gw-wa])'); if (a && a.dataset.cls !== undefined) { a.className = a.dataset.cls; }
+        let k = null; if (key && a) { try { k = planStepAt(key, new URL(a.getAttribute('href'), location.href).pathname); } catch (e) { k = null; } }
+        return { el, n, a, k };
+      }).filter((x) => x.k !== null);
+      if (!key || !steps.length) return;
+      const P = PLAN[key], sn = seen[key] || [];
+      let count = 0;
+      steps.forEach((x) => { const st = P.steps[x.k], done = sn.indexOf(st[0]) >= 0, r = done ? res[pathOf(st[2])] : null; x.done = done; x.r = r; if (done) count++; });
+      if (!count) return;   // a first visit: the page is exactly as before
+      steps.forEach((x, i) => {
+        if (x.done) { x.el.classList.add('done'); if (x.n) { if (!x.n.dataset.n) x.n.dataset.n = x.n.textContent; x.n.textContent = '✓'; } if (x.r) { const p = document.createElement('p'); p.className = 'gw-step-res'; p.textContent = x.r; const h = x.el.querySelector('h3'); if (h) h.insertAdjacentElement('afterend', p); } }
+      });
+      const nx = steps.find((x) => !x.done);   // the first step not yet done
+      if (nx) { nx.el.classList.add('next'); const h = nx.el.querySelector('h3'); if (h) h.insertAdjacentHTML('afterbegin', '<span class="gw-next-tag">Next</span>'); if (nx.a) { if (nx.a.dataset.cls === undefined) nx.a.dataset.cls = nx.a.className; nx.a.classList.add('pri'); }
+        steps.forEach((x) => { if (x !== nx && x.a && x.a.classList.contains('pri')) { if (x.a.dataset.cls === undefined) x.a.dataset.cls = x.a.className; x.a.classList.remove('pri'); } }); }
+      const first = steps[0].el, line = document.createElement('p'); line.className = 'gw-plan-prog'; line.setAttribute('data-gw-plan-prog', '');
+      const nh = nx ? (nx.el.querySelector('h3') || {}).textContent || '' : '';
+      line.textContent = 'Your plan: ' + count + ' of ' + steps.length + ' steps done' + (nx ? ' · Next: ' + nh.replace(/^Next/, '') : '. Ready to talk it through with Ken?');
+      first.parentNode.insertBefore(line, first);
+    });
+  }
+
   /* ---------------- browser behaviour ---------------- */
   function mount() {
     if (typeof document === 'undefined') return;
@@ -583,7 +659,23 @@
     // ---- the "Upgrading from HDB" step strip ----
     const path = location.pathname, here = /\/tools\/sale-proceeds\/$/.test(path) ? 'sale-proceeds' : /\/tools\/planner\/$/.test(path) ? 'planner' : /\/tools\/what-can-i-buy\/$/.test(path) ? 'what-can-i-buy' : /\/journey\/worth\/$/.test(path) ? 'worth' : null;
     if (/\/journey\/$/.test(path) && location.hash === '#up') setCtx({ path: 'upgrade' });
+    // Plan My Move: a page opened from a plan step shows where it sits in the plan (only with ?plan= in its address; never on Research or the Map)
+    const planKey = (() => { try { const k = new URLSearchParams(location.search).get('plan'); return PLAN[k] ? k : null; } catch (e) { return null; } })();
+    const planCur = planKey ? planStepAt(planKey, location.pathname) : null;
+    const showPlan = () => {
+      const old = document.querySelector('[data-gw-plan]'); if (old && old.parentNode) old.parentNode.remove();
+      if (planCur === null || PLAN[planKey].steps[planCur][3] === false || document.body.classList.contains('kpm')) return false;
+      const anchor = document.querySelector('main') || document.body, host = document.createElement('div'); host.className = 'gw-strip-host gw-plan-host';
+      host.innerHTML = planHtml(planKey, planCur, base, planResults(root.sessionStorage), ((getCtx().planSeen || {})[planKey]) || []); anchor.insertBefore(host, anchor.firstChild);
+      document.documentElement.classList.add('gw-onpath');
+      // the header marks Plan My Move as where the visitor is
+      [].slice.call(document.querySelectorAll('.gw-nav .gw-links a[data-kpt-nav]')).forEach((x) => { if (x.getAttribute('data-kpt-nav') === 'journey') x.setAttribute('aria-current', 'page'); else if (x.getAttribute('aria-current') === 'page') x.removeAttribute('aria-current'); });
+      // this step was opened from the plan: the plan page counts it as visited (this tab only)
+      { const C = getCtx(), sn = Object.assign({}, C.planSeen || {}), id = PLAN[planKey].steps[planCur][0]; sn[planKey] = (sn[planKey] || []).filter((x) => x !== id).concat([id]); setCtx({ planSeen: sn }); }
+      return true;
+    };
     const showStrip = () => {
+      if (showPlan()) { const o = document.querySelector('[data-gw-strip]'); if (o && !o.hasAttribute('data-gw-plan')) o.remove(); return; }
       const old = document.querySelector('[data-gw-strip]'); if (old) old.remove();
       const C = getCtx(); if (!here || C.path !== 'upgrade' || (here === 'worth' && C.type && C.type !== 'hdb')) return;
       const anchor = document.querySelector('main') || document.body; const host = document.createElement('div'); host.className = 'gw-strip-host'; host.innerHTML = stripHtml(here, base, upDone());
@@ -604,9 +696,19 @@
     const markJourney = (e) => {
       const a = e.target && e.target.closest ? e.target.closest('a[href]') : null; if (!a) return;
       let u; try { u = new URL(a.getAttribute('href'), root.location.href); } catch (x) { return; }
-      if (u.origin !== root.location.origin || !TOOL_PAGE.test(u.pathname) || u.searchParams.get('j') === '1' || !fromJourney(a)) return;
+      if (u.origin !== root.location.origin) return;
+      // Plan My Move: a step link on the plan page, or a link to the plan's next page from a page already in the plan, carries the plan (not to Research or the Map)
+      const pk = planKey || planFromJourney(a);
+      if (pk && !u.searchParams.get('plan')) { const k = planStepAt(pk, u.pathname); if (k !== null && PLAN[pk].steps[k][3] !== false) { u.searchParams.set('plan', pk); if (TOOL_PAGE.test(u.pathname)) u.searchParams.set('j', '1'); a.setAttribute('href', u.pathname + u.search + u.hash); } }
+      if (!TOOL_PAGE.test(u.pathname) || u.searchParams.get('j') === '1' || !fromJourney(a)) return;
       u.searchParams.set('j', '1'); a.setAttribute('href', u.pathname + u.search + u.hash);
     };
+    // on the plan page: the open path's plan (the moving path by the home type chosen)
+    function planFromJourney(a) {
+      const pnl = a.closest && a.closest('[data-gw-panel]'); if (!pnl || !/\/journey\/?$/.test(location.pathname)) return null;
+      const k = pnl.getAttribute('data-gw-panel'); if (k !== 'move') return PLAN[k] ? k : null;
+      const t = moveType(pnl, getCtx()); return PLAN['move-' + t] ? 'move-' + t : null;
+    }
     document.addEventListener('click', markJourney, true); document.addEventListener('auxclick', markJourney, true);
     // Plan My Move: marked on the guided-path page, whichever path is open.
     if (/\/journey\/?$/.test(location.pathname)) {
@@ -645,10 +747,12 @@
       [].slice.call(upBox.querySelectorAll('[data-up-step]')).forEach((li) => { const k = keys.indexOf(li.dataset.upStep), ok = !!D[keys[k]] && k !== ni; li.classList.toggle('done', ok); li.classList.toggle('now', k === ni); const i = li.querySelector('i'); if (i) i.textContent = ok ? '✓' : String(k + 1); });
       const go = upBox.querySelector('[data-gw-up-go]'); if (go) { go.href = base + 'tools/hdb-upgrade/'; go.textContent = (ni === 0 ? 'Start: Upgrade from HDB' : 'Carry on: Upgrade from HDB') + ' ›'; go.dataset.gwGo = 'up-hdb-upgrade'; }
     }
+    // Plan My Move: the plan page shows what each step found (on load, on Back to it, and when the visitor changes path)
+    if (/\/journey\/?$/.test(location.pathname)) { planMark(document); window.addEventListener('pageshow', () => planMark(document)); window.addEventListener('hashchange', () => planMark(document)); }
     // The moving guide (journey page) tells us when a visitor chooses the HDB upgrade path.
     document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-gw-q]'); if (!b) return; setTimeout(() => { const C = getCtx(), g = b.closest('[data-gw-guide]'); const dir = g && g.querySelector('[data-gw-q="dir"][aria-pressed="true"]'); setCtx({ path: C.type === 'hdb' && !(dir && dir.dataset.gwV === 'smaller') ? 'upgrade' : null }); }, 0); });
 
   }
   if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount(); }
-  return { DISTRICTS, districtOf, ONE_FIGURE, oneFigureHtml, upDone, finStamp, clearJourney, oneEdit, deaccent, ENTRIES, SECTIONS, SEC_ORDER, NAV_ORDER, doorHtml, researchRows, row, MENU_TOOLS, QUICK, UP, MAIN, LAUNCHES, ASK, ICON, svg, norm, matchTools, scoredTools, matchDevs, matchSites, matchRoads, roadList, roadTitle, roadKey, roadLandedHref, roadMapHref, findRoads, roadsNow, displayName, menuHtml, searchHtml, quickHtml, stripHtml, href, esc };
+  return { PLAN, planHtml, planResults, planStepAt, planMark, DISTRICTS, districtOf, ONE_FIGURE, oneFigureHtml, upDone, finStamp, clearJourney, oneEdit, deaccent, ENTRIES, SECTIONS, SEC_ORDER, NAV_ORDER, doorHtml, researchRows, row, MENU_TOOLS, QUICK, UP, MAIN, LAUNCHES, ASK, ICON, svg, norm, matchTools, scoredTools, matchDevs, matchSites, matchRoads, roadList, roadTitle, roadKey, roadLandedHref, roadMapHref, findRoads, roadsNow, displayName, menuHtml, searchHtml, quickHtml, stripHtml, href, esc };
 });

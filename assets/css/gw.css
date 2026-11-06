@@ -447,6 +447,15 @@ body.gw-legacy .gw-strip-host{max-width:760px;padding:0}
 .gw-strip-next{justify-self:start;font-weight:600;font-size:14.5px;color:var(--gw-blue) !important;text-decoration:none !important;min-height:32px;display:inline-flex;align-items:center}
 .gw-strip-next.done{color:var(--gw-muted) !important;font-weight:400;font-size:13.5px}
 @media (max-width:719px){.gw-strip-host{padding:0 16px;margin-top:10px}}
+/* Plan My Move continuity (Master Planning, 6 Nov 2026): a calculator opened from the plan (the step strip's look) and the plan page on the way back */
+.gw-plan .gw-strip-h{gap:8px 14px;flex-wrap:wrap}.gw-plan .gw-strip-h b{font-weight:600}.gw-plan .gw-strip-h b span{font-weight:400;color:var(--gw-muted)}
+.gw-plan-back{font-size:14px;font-weight:600;color:var(--gw-blue) !important;text-decoration:none !important;min-height:32px;display:inline-flex;align-items:center;white-space:nowrap}
+.gw-step.done>.n{background:var(--gw-green);border-color:var(--gw-green);color:#fff}
+.gw-step-res{margin:2px 0 6px !important;font-size:14px;font-weight:600;color:var(--gw-ink) !important}
+.gw-step.next{box-shadow:inset 3px 0 0 var(--gw-blue)}
+.gw-next-tag{display:inline-block;margin-right:8px;padding:1px 8px;border-radius:999px;background:#EAF2FD;color:var(--gw-blue);font-size:12px;font-weight:600;letter-spacing:.02em;vertical-align:2px}
+.gw-plan-prog{margin:0 0 10px;font-size:14px;color:var(--gw-body)}
+@media (max-width:719px){.gw-plan .gw-strip-h{font-size:13.5px}.gw-plan li a{font-size:12px}}
 .gw-prefill{background:#F3F7FD;border-radius:10px;padding:8px 12px;font-size:13.5px;color:var(--gw-body);margin:0 0 12px;font-family:var(--gw-font)}
 /* "Check an asking price" (condo developments in Research, HDB blocks in Property values & prices) */
 .gw-apc{border:1px solid var(--gw-line);border-radius:20px;padding:18px;display:grid;gap:12px;background:#fff;text-align:left;font-family:var(--gw-font);color:var(--gw-ink);width:100%;max-width:660px;margin:0 auto;box-sizing:border-box}

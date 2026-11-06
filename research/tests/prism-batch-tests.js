@@ -74,7 +74,7 @@ entries.forEach((e) => {
 check('every report matches its sha256, pairs correctly with V1 (or is V1.1-only), passes the gate with exactly the items its shard lists', bad.length === 0, bad.slice(0, 5));
 check('every item in the release is approved under a reference in the chain, with its own report id (no item is shown otherwise)', Object.keys(models).length === entries.length);
 const refs = {}; let nItems = 0; entries.forEach((e) => { (function walk(o) { if (!o || typeof o !== 'object') return; if (Array.isArray(o)) { o.forEach(walk); return; } if ('approval' in o) { nItems++; refs[o.approval.approvalRef] = (refs[o.approval.approvalRef] || 0) + 1; } Object.keys(o).forEach((k) => walk(o[k])); })(models[e.id].r); });
-check('25,229 evidence items, each approved (' + JSON.stringify(refs) + ')', nItems === 25229 && Object.keys(refs).every((k) => G.V11.CHAIN.indexOf(k) >= 0));
+check('25,231 evidence items (25,229 + the 2 Y1 rental-yield bands), each approved (' + JSON.stringify(refs) + ')', nItems === 25231 && refs['GW-PRISM-V1.1-2026-11-06-Y1'] === 2 && Object.keys(refs).every((k) => G.V11.CHAIN.indexOf(k) >= 0));
 
 // ---- 2 every page
 const pages = Object.keys(models), problems = [];

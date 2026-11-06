@@ -263,6 +263,7 @@
     const $$ = (s, el) => [].slice.call((el || box).querySelectorAll(s)), q = (s) => box.querySelector(s);
     const out = q('[data-out]'), bar = q('[data-bar]');
     const journey = /[?&]j=1(&|$)/.test(root.location.search);
+    const inPlan = journey && /[?&]plan=[a-z-]+(&|$)/.test(root.location.search);   // opened from a Plan My Move step (gw-nav.js PLAN)
     const store = (k) => ({ get() { try { return JSON.parse(root.sessionStorage.getItem(k) || 'null'); } catch (e) { return null; } }, set(o) { try { root.sessionStorage.setItem(k, JSON.stringify(o)); } catch (e) { /* storage blocked */ } }, del() { try { root.sessionStorage.removeItem(k); } catch (e) { /* ignore */ } } });
     // V3.7: standalone (no ?j=1) keeps its own entries and shares nothing; the journey shares as before (see the file header)
     const again = (() => { try { const n = root.performance.getEntriesByType('navigation')[0]; return !!n && (n.type === 'reload' || n.type === 'back_forward'); } catch (e) { return false; } })();
@@ -563,6 +564,16 @@
       lastSt = st;
       if (page === 'borrow') paintBorrow(st); else if (page === 'afford') paintAfford(st); else if (page === 'sell') paintSell(st); else if (page === 'upgrade') paintUpgrade(st); else { paintPay(st); paintHomeAsk(st); }
       if (openK) paintSheet(openK);
+      planKeep();
+    }
+    // Plan My Move continuity (Master Planning, 6 Nov 2026): on the journey only (?j=1), the answer this page shows is kept for the plan page, so "Back to my
+    // plan" shows what each step found. Read from the answer on screen (no new figure), this tab only (sessionStorage; cleared with the journey's figures),
+    // never in a URL, analytics or WhatsApp. A step with no answer now has none kept.
+    function planKeep() {
+      if (!journey) return;
+      const v = view, R0 = !v ? null : v.tool === 'borrow' ? { loan: v.b.maxLoan, budget: v.a ? v.a.budget : null } : v.tool === 'sell' ? { total: v.r.total, cash: v.r.cpfIn ? v.r.cash : null, cpf: v.r.cpfIn ? v.r.cpf : null }
+        : v.tool === 'upgrade' ? { budget: v.a.budget } : v.tool === 'cost' || v.tool === 'costhdb' ? { price: v.c.price, cash: v.c.cash } : null;
+      try { const S1 = root.sessionStorage, P = JSON.parse(S1.getItem('gw.plan.v1') || '{}') || {}; if (R0) P[page] = R0; else delete P[page]; S1.setItem('gw.plan.v1', JSON.stringify(P)); } catch (e) { /* storage blocked: the plan page simply shows no result */ }
     }
     function paintOffer() {
       const el = q('[data-saleoffer]'); if (!el) return;
@@ -572,6 +583,9 @@
         : '<p class="f3-fine"><b>From What will I get from selling?</b> About ' + $(+raw.offerCash) + ' in cash and ' + $(+raw.offerCpf) + ' back to CPF after the sale. They are not in your figures: add them only if the sale completes before you need the money.</p><button type="button" class="f3-lnk" data-offer-add>Add them to my cash and CPF</button>';
       if (el.__h !== h) { el.innerHTML = h; el.__h = h; }
     }
+    // the answer's "Enter the repayment" takes the visitor to the field it is waiting for (on a phone the answer sits below the inputs)
+    box.addEventListener('click', (e) => { const g = e.target.closest('[data-needgo]'); if (!g) return; const el = q('[data-k="' + g.dataset.needgo + '"]'); if (!el) return;
+      const f = el.matches('input') ? el : el.querySelector('button'); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); if (f) try { f.focus({ preventScroll: true }); } catch (x) { f.focus(); } });
     box.addEventListener('click', (e) => { if (!e.target.closest('[data-offer-add]')) return;
       const add = (k, v) => { const cur = mv(raw[k]); put(k, Math.round((cur > 0 ? cur : 0) + v).toLocaleString('en-US')); };
       add('cash', +raw.offerCash || 0); add('cpf', +raw.offerCpf || 0); offPage.offerUsed = '1'; raw.offerUsed = '1'; track('fin3_sale_offer_added', {}); changed(true); });
@@ -993,15 +1007,30 @@
     // apply if the bank counts each borrower's own loans (altLtv / alt). With the internal setting per_borrower, 45% is used and the bracket says so (eachOwn).
     function eachOwn(x) { return x && x.homeRows >= 2 && x.homeLoans < Math.min(2, x.homeRows) ? ' (MAS counts each borrower’s own housing loans: one each; your bank confirms the limit)' : ''; }
     function altLine(ltv) { return '<br><span class="f3-cond" data-ltv-alt>' + pc(ltv) + ' may apply if your bank counts each borrower’s own housing loans. Your bank confirms the limit.</span>'; }
+    // Missing repayment (Master Planning, 6 Nov 2026): the field the answer waits for is marked amber with one line under it, and the answer says what it
+    // is waiting for; the marks go as soon as the figure is in. Nothing is assumed: a housing loan with no repayment (blank or $0) is never taken as $0.
+    function markNeed(keys) {
+      $$('.f3-needf').forEach((el) => el.classList.remove('f3-needf'));
+      $$('[data-needmsg]').forEach((el) => { const i = q('[aria-describedby="' + el.id + '"]'); if (i) i.removeAttribute('aria-describedby'); el.remove(); });
+      (keys || []).forEach((k) => {
+        const inp = q('[data-k="' + k + '"]'), seg = /\.hl$/.test(k), host = inp && (seg ? inp.closest('.f3-q') : inp.closest('.f3-f')); if (!host) return;
+        const m = document.createElement('small'); m.className = 'f3-needmsg'; m.id = 'f3need-' + k.replace(/\W/g, ''); m.setAttribute('data-needmsg', k);
+        m.textContent = seg ? 'Choose None, 1 or 2+ to calculate your borrowing amount.' : 'Enter your existing monthly housing loan repayment to calculate your borrowing amount.';
+        host.classList.add('f3-needf'); host.appendChild(m); if (!seg) inp.setAttribute('aria-describedby', m.id);
+      });
+    }
     function paintBorrow(st) {
       const b0 = F.borrow(st, { assumeAge: true }), hn = (st.hlNeed || []).length && b0.state !== 'need' ? { state: 'need', need: st.hlNeed } : null, b = hn || b0; lastB = b; paintChips(st, null); paintPS(st, b);
+      markNeed(hn ? hn.need : []);
       const why = q('[data-why]'), toc = q('[data-to-cost]'), quietB = () => { if (why) why.hidden = true; if (toc) toc.hidden = true; { const th = q('[data-to-homes]'); if (th) th.hidden = true; } lastBudget = null; setBar(''); view = null; pdfBtn(false); };
       { const ni = q('[data-inc-need]'); if (ni) { const two = st.n === 2 && b.state === 'need' && (b.need || []).indexOf('p.1.fixed') >= 0; ni.hidden = !two; ni.textContent = two ? (st.p[0].fixed > 0 ? 'Add Person 2’s income to see what you can borrow together.' : 'Add both incomes to see what you can borrow together.') : ''; } }
       if (hn) { const pl = (k) => ((k === 'jlAmt' ? raw.jl : raw[k.replace('hlAmt', 'hl')]) === '2' ? 'loans' : 'loan'), nm = (k) => (k === 'jlAmt' ? 'the housing ' + pl(k) + ' in both your names' : st.n === 2 ? 'Person ' + (+k.split('.')[1] + 1) + '’s housing ' + pl(k) : 'your housing ' + pl(k));
         const ask = hn.need.filter((k) => /\.hl$/.test(k)), amts = hn.need.filter((k) => !/\.hl$/.test(k)), who = (k) => (st.n === 2 ? 'Person ' + (+k.split('.')[1] + 1) + ' has' : 'you have');
-        out.innerHTML = '<p class="f3-eb">' + (ask.length ? 'Confirm your housing loans' : 'Add the monthly repayment') + '</p>' +
+        out.innerHTML = '<div class="f3-wait" data-hl-wait><p class="f3-eb">Waiting for ' + (ask.length && amts.length ? 'your answers' : ask.length ? 'one answer' : 'one figure') + '</p><p class="f3-wh">' + (ask.length ? 'Confirm your housing loans' : 'Add the monthly repayment') + '</p>' +
           (ask.length ? '<p class="f3-note" data-hl-ask>Say whether ' + ask.map(who).join(' and whether ') + ' any outstanding housing loans (None, 1 or 2+). They change what a bank can lend, so they are not assumed.</p>' : '') +
-          (amts.length ? '<p class="f3-note" data-hl-need>Add the monthly repayment for ' + amts.map(nm).join(' and ') + '. Banks count it in full, so the loan can’t be worked out without it.</p>' : '') + row('The bank may lend about', '<span class="f3-dash">—</span>', 'Over the longest tenure your age allows'); quietB(); return; }
+          (amts.length ? '<p class="f3-note" data-hl-need>For ' + amts.map(nm).join(' and ') + '. Banks count it in full, so nothing is assumed.</p>' : '') +
+          '<button type="button" class="f3-wgo" data-needgo="' + esc(hn.need[0]) + '">' + (ask.length && !amts.length ? 'Answer it' : 'Enter the repayment') + ' ›</button></div>' +
+          row('The bank may lend about', '<span class="f3-dash">—</span>', 'Shown once the repayment is in'); quietB(); return; }
       if (b.state === 'need') { out.innerHTML = '<p class="f3-eb">' + (st.n === 2 && (b.need || []).indexOf('p.1.fixed') >= 0 && (b.need || []).indexOf('p.0.fixed') < 0 ? 'Add Person 2’s income' : st.n === 2 ? 'Type both incomes to begin' : 'Type your income to begin') + '</p>' + row('The bank may lend about', '<span class="f3-dash">—</span>', 'Over the longest tenure your age allows') + row('Monthly instalment', '<span class="f3-dash">—</span>', 'The most banks allow') + row('Home price this loan supports', '<span class="f3-dash">—</span>', 'A loan-based estimate, not your full budget'); quietB(); return; }
       if (b.state === 'invalid') { out.innerHTML = '<p class="f3-eb">Check the figures</p><p class="f3-note">' + esc((b.errors[0] || {}).text || 'Check the figures marked.') + '</p>'; quietB(); return; }
       if (b.state === 'zero') { out.innerHTML = '<p class="f3-eb">No income entered</p>' + row('The bank may lend about', '$0', 'There is no income to lend against. Add a salary, including a co-borrower’s.'); quietB(); return; }
@@ -1074,6 +1103,8 @@
       if (why) { why.hidden = false; q('[data-why-sum]').textContent = 'How the ' + $r(b.maxLoan) + ' is worked out'; q('[data-why-out]').innerHTML = wl.join(''); }
       const bud = a && a.state === 'ok' ? Math.floor(a.budget / 1000) * 1000 : null, budTxt = bud !== null ? fmtP(bud) : null;
       // the budget goes on to Budget Search only when the visitor asks to explore (as What can I afford? did)
+      // Plan My Move (6 Nov 2026): inside the plan, the budget goes on to Budget Search as it changes (as the journey's Planner did), so the plan's next step has it
+      if (inPlan) handoff(bud !== null ? a : null, st);
       { const th = q('[data-to-homes]'); if (th) { th.hidden = bud === null; if (bud !== null) th.textContent = 'See homes within ' + budTxt; if (!th.__w) { th.__w = true; th.addEventListener('click', () => { if (lastBudget && lastBudget.a) { handoff(lastBudget.a, lastBudget.st); if (pendingHand) { try { root.sessionStorage.setItem('kpt.handoff', JSON.stringify(pendingHand)); } catch (e) { /* ignore */ } } } }); } } lastBudget = bud !== null ? { a: a, st: st } : null; }
       if (toc) { toc.hidden = b.kind === 'hdb-loan' || b.kind === 'hdb-bank'; toc.textContent = 'See what a ' + (budTxt || pTxt) + ' home costs me'; toc.dataset.price = String(bud !== null ? bud : pRound); toc.dataset.what = bud !== null ? 'budget' : 'price'; toc.dataset.kind = b.kind === 'ec' ? 'ec' : st.akind === 'completed' && bud !== null ? 'completed' : 'new'; }
       setBar(bud !== null ? '<span class="f3-bm"><span class="k">Your budget, about</span><b>' + $r(a.budget) + '</b><span class="s">' + $(a.top.monthly) + '/mo · loan ' + $r(b.maxLoan) + '</span></span>'

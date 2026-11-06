@@ -180,7 +180,7 @@
     document.querySelectorAll('[data-gw-guide="move"]').forEach((g) => {
       const out = g.querySelector('[data-gw-out]'), q2 = g.querySelector('[data-gw-q2]'), state = { type: null, dir: null };
       if (q2) q2.hidden = true;
-      const render = () => { out.innerHTML = guideHtml(moveGuide(state.type, state.dir, rootPath, ctx.get())); };
+      const render = () => { out.innerHTML = guideHtml(moveGuide(state.type, state.dir, rootPath, ctx.get())); if (root.GWN && root.GWN.planMark) root.GWN.planMark(g.closest('[data-gw-panel]') ? g.closest('[data-gw-panel]').parentNode : document); };   // Plan My Move: what each step found
       const pick = (b, user) => {
         const q = b.dataset.gwQ, v = b.dataset.gwV;
         g.querySelectorAll('[data-gw-q="' + q + '"]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));

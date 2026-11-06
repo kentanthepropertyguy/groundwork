@@ -1,24 +1,25 @@
 {
  "schemaVersion": "prism-public-v1.1-r3-manifest",
- "releaseId": "prism-v1.1-r3-kw-v1amend-2026-11-06-104839837c2a",
+ "releaseId": "prism-v1.1-r3-y1-2026-11-06-de6e404addb9",
  "status": "approved",
  "asAt": "2026-11-04",
- "generatedAt": "2026-11-06T00:00:00Z",
+ "generatedAt": "2026-11-06T04:44:00Z",
  "approvalChain": [
   "GW-PRISM-V1.1-2026-11-01-A1",
   "GW-PRISM-V1.1-2026-11-03-DECILE",
   "GW-PRISM-V1.1-2026-11-03-A2",
   "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
   "GW-FMRT-P1-20261104-01",
-  "GW-FMRT-P1-AMEND-HPR-20261104-01"
+  "GW-FMRT-P1-AMEND-HPR-20261104-01",
+  "GW-PRISM-V1.1-2026-11-06-Y1"
  ],
  "formatApproval": "GW-PRISM-R3-SCHEMA-20261103-01",
- "deltaApproval": "GW-PRISM-V1-AMEND-KW-20261106-01",
- "previous": "prism-v1.1-r3-fmrt-hpr-2026-11-04-5cc64056341d",
+ "deltaApproval": "GW-PRISM-V1.1-2026-11-06-Y1",
+ "previous": "prism-v1.1-r3-kw-v1amend-2026-11-06-104839837c2a",
  "counts": {
   "reports": 2099,
   "entries": 2509,
-  "items": 25229,
+  "items": 25231,
   "states": {
    "partial": 1444,
    "full": 655,
@@ -123,7 +124,7 @@
   },
   {
    "path": "index/9.json",
-   "sha256": "56a4d5a0b2480d471439e48208c18290bfb46b949dbc9ca87257753e0ca6fc69"
+   "sha256": "ca4415bea99a2656a428df2f58123aa6478900d7293071f9574f1414121a69e8"
   },
   {
    "path": "index/a.json",
@@ -3039,7 +3040,7 @@
   },
   {
    "path": "reports/hundred-palms-residences.json",
-   "sha256": "ad9318193a0faae3a3b79a807d6ebad0cd92324c16516e371a6169f40a6526a9"
+   "sha256": "823f7532d790a429dd5dac437895fae5ffd956b7e221661e04a5f634d2319a4e"
   },
   {
    "path": "reports/hundred-trees.json",

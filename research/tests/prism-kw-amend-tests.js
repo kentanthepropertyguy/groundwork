@@ -47,17 +47,23 @@ check('V1 manifest: the Kingsford pin is the amended report; with the pin and th
   (() => { const b = JSON.parse(v1t); delete b.amendments; b.reports.find((x) => x.id === ID).sha256 = APPROVED.report; return sha(j1(b)) === APPROVED.v1Manifest; })());
 check('the page asks for this V1 manifest (MANIFEST_V) and pairs V1.1 with the amended report', G.MANIFEST_V === sha(v1t).slice(0, 10) && G.V11.V1PAIR.sha256[0] === rSha && G.V11.V1PAIR.sha256.slice(1).join() === [APPROVED.hougang, APPROVED.thomson].join());
 const mt = read('data/prism/v1.1/manifest.json'), man = JSON.parse(mt), it = read('data/prism/v1.1/index.json'), ix = JSON.parse(it);
-check('V1.1: a delta on the previous release (deltaApproval ' + REF + ', previous ' + APPROVED.release + '), chain unchanged, pinned', man.deltaApproval === REF && man.previous === APPROVED.release && man.releaseId === ix.releaseId && ix.releaseId === G.V11.RELEASE &&
+// later approved deltas on this one, undone before the put-back checks: Y1 (GW-PRISM-V1.1-2026-11-06-Y1, rental yield for one curated report)
+const Y1 = { ref: 'GW-PRISM-V1.1-2026-11-06-Y1', previous: 'prism-v1.1-r3-kw-v1amend-2026-11-06-104839837c2a', generatedAt: '2026-11-06T00:00:00Z', files: { 'reports/hundred-palms-residences.json': 'ad9318193a0faae3a3b79a807d6ebad0cd92324c16516e371a6169f40a6526a9', 'index/9.json': '56a4d5a0b2480d471439e48208c18290bfb46b949dbc9ca87257753e0ca6fc69' }, items: 2 };
+const undoMan = (b) => { if (b.deltaApproval !== Y1.ref) return b; b.files.forEach((f) => { if (Y1.files[f.path]) f.sha256 = Y1.files[f.path]; }); b.counts.items -= Y1.items; b.approvalChain = b.approvalChain.filter((x) => x !== Y1.ref);
+  b.releaseId = Y1.previous; b.generatedAt = Y1.generatedAt; b.deltaApproval = REF; b.previous = APPROVED.release; return b; };
+check('V1.1: a delta on the previous release (deltaApproval ' + REF + ', previous ' + APPROVED.release + '), chain unchanged, pinned (or Y1 on it)', (man.deltaApproval === REF ? man.previous === APPROVED.release && G.V11.CHAIN.indexOf(Y1.ref) < 0 : man.deltaApproval === Y1.ref && man.previous === Y1.previous) && man.releaseId === ix.releaseId && ix.releaseId === G.V11.RELEASE &&
   sha(mt) === G.V11.MANIFEST && ix.manifestSha256 === sha(mt) && sha(it) === G.V11.INDEX && ix.approvalChain.join() === G.V11.CHAIN.join() && G.V11.CHAIN.indexOf(REF) < 0);
-check('V1.1 manifest: every listed file (reports, shards, redirects) unchanged: the same list, and each file matches its sha256', sha(JSON.stringify(man.files)) === APPROVED.files && man.files.every((f) => sha(readB('data/prism/v1.1/' + f.path)) === f.sha256));
-{ const b = JSON.parse(mt); b.releaseId = APPROVED.release; b.generatedAt = '2026-11-04T04:18:03Z'; b.deltaApproval = 'GW-FMRT-P1-AMEND-HPR-20261104-01'; b.previous = 'prism-v1.1-r3-fmrt-p1-2026-11-04-ebfc22ae60fd';
+check('V1.1 manifest: every listed file (reports, shards, redirects) unchanged: the same list, and each file matches its sha256 (Y1 undone)', sha(JSON.stringify(undoMan(JSON.parse(mt)).files)) === APPROVED.files && man.files.every((f) => sha(readB('data/prism/v1.1/' + f.path)) === f.sha256));
+{ const b = undoMan(JSON.parse(mt)); b.releaseId = APPROVED.release; b.generatedAt = '2026-11-04T04:18:03Z'; b.deltaApproval = 'GW-FMRT-P1-AMEND-HPR-20261104-01'; b.previous = 'prism-v1.1-r3-fmrt-p1-2026-11-04-ebfc22ae60fd';
   b.supplements.reports.find((x) => x.id === ID).sha256 = APPROVED.report;
-  const c = JSON.parse(it); c.releaseId = APPROVED.release; c.manifestSha256 = APPROVED.v11Manifest;
+  const c = JSON.parse(it); if (man.deltaApproval === Y1.ref) { c.approvalChain = c.approvalChain.filter((x) => x !== Y1.ref); c.shards.find((x) => x.key === '9').sha256 = Y1.files['index/9.json']; }
+  c.releaseId = APPROVED.release; c.manifestSha256 = APPROVED.v11Manifest;
   check('V1.1 manifest and index: with the release fields and the pin put back, both are the approved files', sha(j1(b)) === APPROVED.v11Manifest && sha(j1(c)) === APPROVED.index); }
 { let g = read('assets/js/gw-prism.js');
   const back = [[G.MANIFEST_V, APPROVED.v1Manifest.slice(0, 10)], [G.V11.RELEASE, APPROVED.release], [G.V11.INDEX, APPROVED.index], [G.V11.MANIFEST, APPROVED.v11Manifest], [rSha, APPROVED.report]];
   back.forEach(([a, b]) => { g = g.split(a).join(b); });
   g = g.replace(/    \/\/ GW-PRISM-V1-AMEND-KW-20261106-01 [^\n]*\n    \/\/ [^\n]*\n/, '');
+  g = g.replace(", '" + Y1.ref + "'],   // " + Y1.ref + ': rental yield, one curated report (2 bands)', '],');   // Y1's chain link
   // later approved renderer changes, each tested in its own file (put back as above, the file is one of these):
   //   the future-MRT reading pilot (Groundwork 01, 6 Nov 2026): FM, futureNear and their uses; research/tests/prism-fmrt-quick-tests.js
   //   the future-MRT reading for all 21 qualifying reports (Master Planning, 6 Nov 2026): FM.ON; the same tests

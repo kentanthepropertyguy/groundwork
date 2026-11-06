@@ -53,10 +53,10 @@
   // only on that report's future-transport line, in the same approved form; every other item of the report keeps its approval
   const FMRT_AMEND = { 'hundred-palms-residences': 'GW-FMRT-P1-AMEND-HPR-20261104-01' };
   const V11 = { SCHEMA: 'prism-public-v1.1-r3', INDEX_SCHEMA: 'prism-public-v1.1-r3-index', SHARD_SCHEMA: 'prism-public-v1.1-r3-shard', DIR: 'data/prism/v1.1/',
-    CHAIN: ['GW-PRISM-V1.1-2026-11-01-A1', 'GW-PRISM-V1.1-2026-11-03-DECILE', 'GW-PRISM-V1.1-2026-11-03-A2', 'GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1', FMRT, FMRT_AMEND['hundred-palms-residences']],
-    RELEASE: 'prism-v1.1-r3-kw-v1amend-2026-11-06-104839837c2a',
-    INDEX: 'da6d667fffa91588f4e9762e67d10d0ae662a13682ca5dc9338490232cd151a6',      // index.json, byte for byte: any other is not read
-    MANIFEST: '66cd26fddba776b5476e0d59e0a1d3d0cc3fadeab59c0447f520dc7a319b0bd1',   // manifest.json, bound by the root (manifestSha256)
+    CHAIN: ['GW-PRISM-V1.1-2026-11-01-A1', 'GW-PRISM-V1.1-2026-11-03-DECILE', 'GW-PRISM-V1.1-2026-11-03-A2', 'GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1', FMRT, FMRT_AMEND['hundred-palms-residences'], 'GW-PRISM-V1.1-2026-11-06-Y1'],   // GW-PRISM-V1.1-2026-11-06-Y1: rental yield, one curated report (2 bands)
+    RELEASE: 'prism-v1.1-r3-y1-2026-11-06-de6e404addb9',
+    INDEX: '4ba7e307126e8fff21665b6bd360b31f252d60e449f673e4521d66c07b232069',      // index.json, byte for byte: any other is not read
+    MANIFEST: '23ff6d59f591188b3e28339163dc739d7dc664614fb6882f1c8bfebfab123d15',   // manifest.json, bound by the root (manifestSha256)
     STATES: ['full', 'partial', 'pending', 'unavailable', 'new_launch', 'redirect'], PAGE_STATES: ['full', 'partial'],
     SHARDS: '0123456789abcdef',
     // GW-PRISM-V1-AMEND-KW-20261106-01 (Master Planning, 6 Nov 2026): one V1 report withdraws statements made out of date by a later bedroom

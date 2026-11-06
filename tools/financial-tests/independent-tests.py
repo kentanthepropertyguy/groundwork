@@ -117,7 +117,8 @@ for name, inp, want in named:
 
 # ---------- run the engines and compare ----------
 with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False) as f: json.dump(cases, f); tmp = f.name
-eng = json.loads(subprocess.run(['node', os.path.join(HERE, 'independent', 'engine_batch.js'), tmp], capture_output=True, text=True, check=True).stdout)
+# GW_ENGINE_BATCH=engine_batch_adapter.js runs the same cases through the shared engine adapter (gw-engine.js, Phase 1, 6 Nov 2026)
+eng = json.loads(subprocess.run(['node', os.path.join(HERE, 'independent', os.environ.get('GW_ENGINE_BATCH', 'engine_batch.js')), tmp], capture_output=True, text=True, check=True).stdout)
 os.unlink(tmp)
 for c, e, g in zip(cases['duty'], exp['duty'], eng['duty']): check('duty %s' % c, g['bsd'] == e[0] and g['absd'] == e[1], (e, g))
 for c, e, g in zip(cases['ssd'], exp['ssd'], eng['ssd']): check('ssd %s' % c, g['ssd'] == e, (e, g))

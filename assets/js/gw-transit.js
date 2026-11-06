@@ -18,7 +18,7 @@
 })(typeof self !== 'undefined' ? self : this, function (root) {
   'use strict';
   const TR = { SCHEMA: 'gw-transit-v1', INDEX_SCHEMA: 'gw-transit-index-v1', DIR: 'data/transport/v1/',
-    INDEX: '9c501e282bea9fea07ef865ae544ce95c7b2f6f20cd54681712a1c70ab49be01' };
+    INDEX: '0e338a3e138b2d19a5cde8017c95b7e024706441fcf7dd7abd18448fea576e28' };
   // A station in service that gains a line under construction. Keyed by the in-service station's name; its distance is the in-service one
   // (to today's station exits: the new platforms' entrances are not published). Only facts LTA states.
   const INTERCHANGES = {

@@ -27,7 +27,7 @@ const STATEMENT = 'Upcoming on the Cross Island Line: Serangoon North MRT about 
 // 1 the delta
 const ix = JSON.parse(readB('index.json')), man = JSON.parse(readB('manifest.json'));
 check('a delta on Future MRT Phase 1 (deltaApproval ' + REF + ', previous prism-v1.1-r3-fmrt-p1-2026-11-04-ebfc22ae60fd), pinned', sha(readB('index.json')) === G.V11.INDEX && sha(readB('manifest.json')) === G.V11.MANIFEST &&
-  (man.deltaApproval === REF ? man.previous === 'prism-v1.1-r3-fmrt-p1-2026-11-04-ebfc22ae60fd' : man.deltaApproval === 'GW-PRISM-V1-AMEND-KW-20261106-01' && man.previous === 'prism-v1.1-r3-fmrt-hpr-2026-11-04-5cc64056341d') && G.V11.CHAIN[G.V11.CHAIN.length - 1] === REF && G.FMRT_AMEND[ID] === REF && Object.keys(G.FMRT_AMEND).length === 1);
+  (man.deltaApproval === REF ? man.previous === 'prism-v1.1-r3-fmrt-p1-2026-11-04-ebfc22ae60fd' : man.deltaApproval === 'GW-PRISM-V1-AMEND-KW-20261106-01' ? man.previous === 'prism-v1.1-r3-fmrt-hpr-2026-11-04-5cc64056341d' : man.deltaApproval === 'GW-PRISM-V1.1-2026-11-06-Y1' && man.previous === 'prism-v1.1-r3-kw-v1amend-2026-11-06-104839837c2a') && G.V11.CHAIN[5] === REF && G.FMRT_AMEND[ID] === REF && Object.keys(G.FMRT_AMEND).length === 1);
 check('every file the manifest lists matches its sha256', man.files.every((f) => sha(readB(f.path)) === f.sha256));
 const key = sha(ID).charAt(0), se = ix.shards.find((s) => s.key === key), sh = G.checkShard(JSON.parse(readB(se.path)), se, (id) => sha(id).charAt(0)), e = sh.entries.find((x) => x.id === ID);
 const rb = readB(e.path), r = JSON.parse(rb);
@@ -42,12 +42,12 @@ check('the approved template, word for word', l.statement === STATEMENT && G.fut
 check('under the amendment reference (record FMRT1A/...), with the two Phase 1 sources', l.approval.approvalRef === REF && l.approval.recordItem === 'FMRT1A/' + ID + '/' + FT && l.sourceIds.join('|') === 'URA_MP2025_RAIL_STATIONS|LTA_RAIL_PROJECTS' &&
   r.sources.filter((s) => s.id === 'URA_MP2025_RAIL_STATIONS' || s.id === 'LTA_RAIL_PROJECTS').length === 2 && r.sources.find((s) => s.id === 'LTA_RAIL_PROJECTS').url === null);
 const back = JSON.parse(JSON.stringify(r)); back.profile.lines[back.profile.lines.findIndex((x) => x.measure === FT)] = APPROVED_LINE;
-back.sources = back.sources.filter((s) => s.id !== 'URA_MP2025_RAIL_STATIONS' && s.id !== 'LTA_RAIL_PROJECTS');
-check('with its approved line put back and the two sources taken off, the report is byte for byte the approved file', sha(ser(back)) === APPROVED_SHA);
+back.sources = back.sources.filter((s) => s.id !== 'URA_MP2025_RAIL_STATIONS' && s.id !== 'LTA_RAIL_PROJECTS' && s.id !== 'URA_RENTAL'); back.rentalYield = null;   // Y1 (GW-PRISM-V1.1-2026-11-06-Y1) added the rental yield and its source
+check('with its approved line put back, the two sources taken off (and the later Y1 rental yield taken off), the report is byte for byte the approved file', sha(ser(back)) === APPROVED_SHA);
 check('Score /100 stays null', r.compositeScore === null);
 
 // 3 the approved opening and comparisons
-const mdl = (x) => { const v = G.model11(x, e); v.periods = G.V11.PERIODS; v.curated = true; return v; }, a = mdl(back), b = mdl(r);
+const mdl = (x) => { const v = G.model11(x, Object.assign({}, e, { items: e.items - (r.rentalYield && !x.rentalYield ? r.rentalYield.bands.length : 0) })); v.periods = G.V11.PERIODS; v.curated = true; return v; }, a = mdl(back), b = mdl(r);   // back: without the later Y1 bands
 const ra = G.reveal11(a), rb2 = G.reveal11(b);
 check('the approved Reveal, exactly: "High resale activity, but sustained activity is still settling", with its notes', JSON.stringify(ra) === JSON.stringify(rb2) && rb2.kind === 'reveal' && rb2.head === 'High resale activity, but sustained activity is still settling');
 const qa = G.quick11(a, a.name, ra), qb = G.quick11(b, b.name, rb2);
@@ -59,7 +59,9 @@ check('MRT today, exactly: "Hougang MRT about 1,600 m, Kovan MRT about 1,610 m; 
   JSON.stringify(G.headline11(a, 'I')) === JSON.stringify(G.headline11(b, 'I')) && mrt.data.rank.peersWithValue === 46);
 const page = (x) => G.pageHtml(G.compose(null, mdl(x)), { root: '../' }), LINE = /<div class="gwp-m gwp-pfl[^"]*" data-gwp-line="infrastructure\.futureTransport"[\s\S]*?<\/dd><\/div>/;
 const pa = page(back), pb = page(r);
-check('the page: everything but the Future transport line and the two new Sources entries is exactly the approved page', pa.replace(LINE, '@') === pb.replace(LINE, '@').replace(/<li><b>(Urban Redevelopment Authority \(URA\)<\/b> · Amendment to Master Plan 2025|Land Transport Authority \(LTA\)<\/b> · Cross Island Line project page)[\s\S]*?<\/li>/g, ''));
+// the later Y1 delta adds only its yield table, the word "gross rental yield" in the V1.1 line and the URA rental Sources entry
+const noY1 = (h) => h.replace(/<div class="gwp-v11" data-gwp-yield>[\s\S]*?<p class="gwp-ms">[^<]*<\/p><\/div>/, '').replace(', gross rental yield ·', ' ·').replace(/<li><b>Urban Redevelopment Authority \(URA\)<\/b> · PMI_Resi_Rental[\s\S]*?<\/li>/, '');
+check('the page: everything but the Future transport line and the two new Sources entries is exactly the approved page (the later Y1 rental yield taken off)', pa.replace(LINE, '@') === noY1(pb).replace(LINE, '@').replace(/<li><b>(Urban Redevelopment Authority \(URA\)<\/b> · Amendment to Master Plan 2025|Land Transport Authority \(LTA\)<\/b> · Cross Island Line project page)[\s\S]*?<\/li>/g, ''));
 
 // 4 fail closed
 const tamper = (f, rr) => { const x = JSON.parse(JSON.stringify(rr || r)); f(x, x.profile.lines.find((q) => q.measure === FT)); return x; };

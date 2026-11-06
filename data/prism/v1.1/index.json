@@ -1,6 +1,6 @@
 {
  "schemaVersion": "prism-public-v1.1-r3-index",
- "releaseId": "prism-v1.1-r3-kw-v1amend-2026-11-06-104839837c2a",
+ "releaseId": "prism-v1.1-r3-y1-2026-11-06-de6e404addb9",
  "status": "approved",
  "asAt": "2026-11-04",
  "approvalChain": [
@@ -9,9 +9,10 @@
   "GW-PRISM-V1.1-2026-11-03-A2",
   "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
   "GW-FMRT-P1-20261104-01",
-  "GW-FMRT-P1-AMEND-HPR-20261104-01"
+  "GW-FMRT-P1-AMEND-HPR-20261104-01",
+  "GW-PRISM-V1.1-2026-11-06-Y1"
  ],
- "manifestSha256": "66cd26fddba776b5476e0d59e0a1d3d0cc3fadeab59c0447f520dc7a319b0bd1",
+ "manifestSha256": "23ff6d59f591188b3e28339163dc739d7dc664614fb6882f1c8bfebfab123d15",
  "redirectsSha256": "2b67e1e3ca7b0e34e526ae4d6022fce59f97f80672a928ad8e4c8eba3c18d600",
  "counts": {
   "reports": 2099,
@@ -82,7 +83,7 @@
   {
    "key": "9",
    "path": "index/9.json",
-   "sha256": "56a4d5a0b2480d471439e48208c18290bfb46b949dbc9ca87257753e0ca6fc69",
+   "sha256": "ca4415bea99a2656a428df2f58123aa6478900d7293071f9574f1414121a69e8",
    "entries": 155
   },
   {
