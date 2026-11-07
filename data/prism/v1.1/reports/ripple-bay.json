@@ -120,7 +120,114 @@
    }
   ]
  },
- "rentalYield": null,
+ "rentalYield": {
+  "period": {
+   "start": "2025-10",
+   "end": "2026-09"
+  },
+  "caption": "Gross yield = 12 x typical rent / typical resale price for the same size band. Before maintenance, property tax, vacancy and agent fees. Not a return on your cash. Lease: 99 yrs from 2011.",
+  "rules": {
+   "minResales": 5,
+   "minRentalContracts": 10,
+   "minPeers": 10,
+   "peers": "same class, market segment and 100 sq ft size band; original lease 99 years or longer, including freehold and 999-year (short leases excluded)",
+   "range": "the range from combining the middle half of rents with the middle half of prices (12 x lower-quartile rent / upper-quartile price to 12 x upper-quartile rent / lower-quartile price); not a confidence interval",
+   "shortLease": "Developments with leases under 99 years are excluded from standard long-lease peer groups."
+  },
+  "bands": [
+   {
+    "itemId": "ripple-bay/400-499",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-Y2-2026-11-06-A1",
+     "recordItem": "Y2/ripple-bay/400-499"
+    },
+    "band": "400-499 sq ft",
+    "typicalRent": 2600,
+    "rentalContracts": 29,
+    "typicalResalePrice": 715000,
+    "resales": 8,
+    "grossYieldPct": 4.36,
+    "rangePct": [
+     4.11,
+     4.49
+    ],
+    "peerGroup": {
+     "developments": 27,
+     "medianPct": 4.3,
+     "middleHalfPct": [
+      4.11,
+      4.48
+     ]
+    },
+    "position": "near",
+    "positionText": "near the peer median (its range includes it)",
+    "differencePts": 0.06
+   },
+   {
+    "itemId": "ripple-bay/700-799",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-Y2-2026-11-06-A1",
+     "recordItem": "Y2/ripple-bay/700-799"
+    },
+    "band": "700-799 sq ft",
+    "typicalRent": 3300,
+    "rentalContracts": 80,
+    "typicalResalePrice": 1100000,
+    "resales": 13,
+    "grossYieldPct": 3.6,
+    "rangePct": [
+     3.26,
+     3.75
+    ],
+    "peerGroup": {
+     "developments": 37,
+     "medianPct": 3.35,
+     "middleHalfPct": [
+      3.23,
+      3.74
+     ]
+    },
+    "position": "near",
+    "positionText": "near the peer median (its range includes it)",
+    "differencePts": 0.25
+   },
+   {
+    "itemId": "ripple-bay/1000-1099",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-Y2-2026-11-06-A1",
+     "recordItem": "Y2/ripple-bay/1000-1099"
+    },
+    "band": "1000-1099 sq ft",
+    "typicalRent": 4200,
+    "rentalContracts": 23,
+    "typicalResalePrice": 1580000,
+    "resales": 9,
+    "grossYieldPct": 3.19,
+    "rangePct": [
+     3,
+     3.42
+    ],
+    "peerGroup": {
+     "developments": 25,
+     "medianPct": 3.33,
+     "middleHalfPct": [
+      2.93,
+      3.55
+     ]
+    },
+    "position": "near",
+    "positionText": "near the peer median (its range includes it)",
+    "differencePts": -0.14
+   }
+  ],
+  "sourceIds": [
+   "URA_TRANSACTIONS",
+   "URA_RENTAL"
+  ]
+ },
  "householdIncome": null,
  "profile": {
   "comparisonGroup": {
@@ -546,6 +653,26 @@
     ]
    },
    "attribution": "Contains information from URA private residential data (PMI_Resi_Transaction) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
+   "url": "https://eservice.ura.gov.sg/maps/api/"
+  },
+  {
+   "id": "URA_RENTAL",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "PMI_Resi_Rental",
+   "datasetId": "PMI_Resi_Rental",
+   "asAt": "2026-09",
+   "updated": null,
+   "accessed": null,
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0 (URA Data Service grant of licence)",
+    "url": "https://www.ura.gov.sg/eservices-info/maps/acceptance-grant-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated, with the access date.",
+     "Analysis and derived statistics are Groundwork’s; not endorsed by URA."
+    ]
+   },
+   "attribution": "Contains information from URA private residential data (PMI_Resi_Rental) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
    "url": "https://eservice.ura.gov.sg/maps/api/"
   },
   {

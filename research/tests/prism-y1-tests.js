@@ -11,7 +11,7 @@
    4 privacy */
 'use strict';
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
-const SITE = path.resolve(__dirname, '../..');
+const SITE = require('./prism-delta-view.js')(path.resolve(__dirname, '../..'));   // later approved data-only deltas (Y2) taken off: this test checks its own release
 const G = require(path.join(SITE, 'assets/js/gw-prism.js'));
 let ok = 0, fail = 0;
 const check = (n, c, i) => { if (c) { ok++; console.log('  ok  ', n); } else { fail++; console.log('  FAIL', n, i === undefined ? '' : JSON.stringify(i).slice(0, 400)); } };

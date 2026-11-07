@@ -120,7 +120,143 @@
    }
   ]
  },
- "rentalYield": null,
+ "rentalYield": {
+  "period": {
+   "start": "2025-10",
+   "end": "2026-09"
+  },
+  "caption": "Gross yield = 12 x typical rent / typical resale price for the same size band. Before maintenance, property tax, vacancy and agent fees. Not a return on your cash. Lease: 99 yrs from 2014.",
+  "rules": {
+   "minResales": 5,
+   "minRentalContracts": 10,
+   "minPeers": 10,
+   "peers": "same class, market segment and 100 sq ft size band; original lease 99 years or longer, including freehold and 999-year (short leases excluded)",
+   "range": "the range from combining the middle half of rents with the middle half of prices (12 x lower-quartile rent / upper-quartile price to 12 x upper-quartile rent / lower-quartile price); not a confidence interval",
+   "shortLease": "Developments with leases under 99 years are excluded from standard long-lease peer groups."
+  },
+  "bands": [
+   {
+    "itemId": "symphony-suites/600-699",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-Y2-2026-11-06-A1",
+     "recordItem": "Y2/symphony-suites/600-699"
+    },
+    "band": "600-699 sq ft",
+    "typicalRent": 3100,
+    "rentalContracts": 41,
+    "typicalResalePrice": 970000,
+    "resales": 5,
+    "grossYieldPct": 3.84,
+    "rangePct": [
+     3.71,
+     4.02
+    ],
+    "peerGroup": {
+     "developments": 33,
+     "medianPct": 3.76,
+     "middleHalfPct": [
+      3.57,
+      3.97
+     ]
+    },
+    "position": "near",
+    "positionText": "near the peer median (its range includes it)",
+    "differencePts": 0.08
+   },
+   {
+    "itemId": "symphony-suites/700-799",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-Y2-2026-11-06-A1",
+     "recordItem": "Y2/symphony-suites/700-799"
+    },
+    "band": "700-799 sq ft",
+    "typicalRent": 3450,
+    "rentalContracts": 35,
+    "typicalResalePrice": 1080000,
+    "resales": 7,
+    "grossYieldPct": 3.83,
+    "rangePct": [
+     3.64,
+     4.04
+    ],
+    "peerGroup": {
+     "developments": 37,
+     "medianPct": 3.35,
+     "middleHalfPct": [
+      3.23,
+      3.67
+     ]
+    },
+    "position": "above",
+    "positionText": "above the peer median",
+    "differencePts": 0.48
+   },
+   {
+    "itemId": "symphony-suites/900-999",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-Y2-2026-11-06-A1",
+     "recordItem": "Y2/symphony-suites/900-999"
+    },
+    "band": "900-999 sq ft",
+    "typicalRent": 3525,
+    "rentalContracts": 12,
+    "typicalResalePrice": 1230000,
+    "resales": 9,
+    "grossYieldPct": 3.44,
+    "rangePct": [
+     3.39,
+     3.56
+    ],
+    "peerGroup": {
+     "developments": 32,
+     "medianPct": 3.3,
+     "middleHalfPct": [
+      3.08,
+      3.6
+     ]
+    },
+    "position": "above",
+    "positionText": "above the peer median",
+    "differencePts": 0.14
+   },
+   {
+    "itemId": "symphony-suites/1000-1099",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-Y2-2026-11-06-A1",
+     "recordItem": "Y2/symphony-suites/1000-1099"
+    },
+    "band": "1000-1099 sq ft",
+    "typicalRent": 4350,
+    "rentalContracts": 14,
+    "typicalResalePrice": 1429000,
+    "resales": 8,
+    "grossYieldPct": 3.65,
+    "rangePct": [
+     3.5,
+     3.89
+    ],
+    "peerGroup": {
+     "developments": 25,
+     "medianPct": 3.3,
+     "middleHalfPct": [
+      2.93,
+      3.51
+     ]
+    },
+    "position": "above",
+    "positionText": "above the peer median",
+    "differencePts": 0.35
+   }
+  ],
+  "sourceIds": [
+   "URA_TRANSACTIONS",
+   "URA_RENTAL"
+  ]
+ },
  "householdIncome": null,
  "profile": {
   "comparisonGroup": {
@@ -512,6 +648,26 @@
     ]
    },
    "attribution": "Contains information from URA private residential data (PMI_Resi_Transaction) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
+   "url": "https://eservice.ura.gov.sg/maps/api/"
+  },
+  {
+   "id": "URA_RENTAL",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "PMI_Resi_Rental",
+   "datasetId": "PMI_Resi_Rental",
+   "asAt": "2026-09",
+   "updated": null,
+   "accessed": null,
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0 (URA Data Service grant of licence)",
+    "url": "https://www.ura.gov.sg/eservices-info/maps/acceptance-grant-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated, with the access date.",
+     "Analysis and derived statistics are Groundwork’s; not endorsed by URA."
+    ]
+   },
+   "attribution": "Contains information from URA private residential data (PMI_Resi_Rental) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
    "url": "https://eservice.ura.gov.sg/maps/api/"
   },
   {

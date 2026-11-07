@@ -120,7 +120,56 @@
    }
   ]
  },
- "rentalYield": null,
+ "rentalYield": {
+  "period": {
+   "start": "2025-10",
+   "end": "2026-09"
+  },
+  "caption": "Gross yield = 12 x typical rent / typical resale price for the same size band. Before maintenance, property tax, vacancy and agent fees. Not a return on your cash. Lease: 99 yrs from 1998.",
+  "rules": {
+   "minResales": 5,
+   "minRentalContracts": 10,
+   "minPeers": 10,
+   "peers": "same class, market segment and 100 sq ft size band; original lease 99 years or longer, including freehold and 999-year (short leases excluded)",
+   "range": "the range from combining the middle half of rents with the middle half of prices (12 x lower-quartile rent / upper-quartile price to 12 x upper-quartile rent / lower-quartile price); not a confidence interval",
+   "shortLease": "Developments with leases under 99 years are excluded from standard long-lease peer groups."
+  },
+  "bands": [
+   {
+    "itemId": "water-place/1200-1299",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-Y2-2026-11-06-A1",
+     "recordItem": "Y2/water-place/1200-1299"
+    },
+    "band": "1200-1299 sq ft",
+    "typicalRent": 6000,
+    "rentalContracts": 41,
+    "typicalResalePrice": 2365000,
+    "resales": 6,
+    "grossYieldPct": 3.04,
+    "rangePct": [
+     2.86,
+     3.23
+    ],
+    "peerGroup": {
+     "developments": 14,
+     "medianPct": 3.27,
+     "middleHalfPct": [
+      2.91,
+      3.46
+     ]
+    },
+    "position": "below",
+    "positionText": "below the peer median",
+    "differencePts": -0.23
+   }
+  ],
+  "sourceIds": [
+   "URA_TRANSACTIONS",
+   "URA_RENTAL"
+  ]
+ },
  "householdIncome": null,
  "profile": {
   "comparisonGroup": {
@@ -550,6 +599,26 @@
     ]
    },
    "attribution": "Contains information from URA private residential data (PMI_Resi_Transaction) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
+   "url": "https://eservice.ura.gov.sg/maps/api/"
+  },
+  {
+   "id": "URA_RENTAL",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "PMI_Resi_Rental",
+   "datasetId": "PMI_Resi_Rental",
+   "asAt": "2026-09",
+   "updated": null,
+   "accessed": null,
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0 (URA Data Service grant of licence)",
+    "url": "https://www.ura.gov.sg/eservices-info/maps/acceptance-grant-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated, with the access date.",
+     "Analysis and derived statistics are Groundwork’s; not endorsed by URA."
+    ]
+   },
+   "attribution": "Contains information from URA private residential data (PMI_Resi_Rental) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
    "url": "https://eservice.ura.gov.sg/maps/api/"
   },
   {

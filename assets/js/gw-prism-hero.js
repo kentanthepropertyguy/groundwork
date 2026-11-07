@@ -187,11 +187,20 @@
   const json = (u) => fetch(u).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   function mount(app, md, o) {
     o = o || {};
-    const G = root.GW_PRISM, H = root.GW_HOME, LOC = root.GW_LOC;
+    const G = root.GW_PRISM;
     if (!G || !md || md.mode !== 'profile' || !md.v11 || !md.v11.profile) return null;
     const page = app.querySelector('.gwp-page[data-gwp-page="' + md.id + '"][data-gwp-mode="profile"]');
     if (!page || page.querySelector('[data-gph]')) return null;
-    const rt = o.root || '../', op = openingOf(G, md), figs = stripOf(op), cs = cornersOf(G, md, op);
+    const op = openingOf(G, md), figs = stripOf(op), cs = cornersOf(G, md, op);
+    const card = (op && op.x && op.x.cards.find((x) => x.dim === 'I')) || null, mrt = lineOf(md.v11, 'I', 'infrastructure.mrt');
+    const st = mrt && mrt.status === 'available' && mrt.data && Array.isArray(mrt.data.stations) ? mrt.data.stations[0] : null;
+    return mountWith(page, { id: md.id, name: md.name, op, figs, cs, station: st ? st.name : null, label: card ? card.v : '' }, o);
+  }
+  // The same hero on any page laid out like a PRISM page (gw-lens.js uses it for a Market Lens view): c = { id, name, op, figs, cs, station, label }.
+  // Nothing in it reads a finding: c carries the opening, figures and corners already chosen by the caller.
+  function mountWith(page, c, o) {
+    o = o || {};
+    const H = root.GW_HOME, LOC = root.GW_LOC, md = { id: c.id, name: c.name }, op = c.op, figs = c.figs, cs = c.cs, rt = o.root || '../';
     let mode = o.dim ? 'detailed' : (store.get(MODE_KEY) === 'detailed' ? 'detailed' : 'simple');
     // the header: the crumb stays; the views (tabs) and the actions share one row; the name and its facts move into the hero
     const head = page.querySelector('.gwp-head'), h1 = head.querySelector('.gwp-h1'), meta = head.querySelector('.gwp-meta'), tabs = head.querySelector('.gwp-tabs'), acts = head.querySelector('.gwp-acts');
@@ -236,13 +245,11 @@
       if (!hero.isConnected || (o.still && !o.still())) return;
       const here = LOC.position(a[0], md.id);
       if (!here) { hero.classList.add('gph--plain'); return; }
-      const card = (op && op.x && op.x.cards.find((c) => c.dim === 'I')) || null, mrt = lineOf(md.v11, 'I', 'infrastructure.mrt');
-      const st = mrt && mrt.status === 'available' && mrt.data && Array.isArray(mrt.data.stations) ? mrt.data.stations[0] : null;
-      const sta = st && a[1] && Array.isArray(a[1].stations) ? a[1].stations.find((s) => s.n === st.name) : null;   // the station the report names, never another
+      const sta = c.station && a[1] && Array.isArray(a[1].stations) ? a[1].stations.find((s) => s.n === c.station) : null;   // the station the report names, never another
       hero.querySelector('[data-gph-onmap]').hidden = false;
       // the flight plays once per visit to a development; coming back (from Property Data, Back) shows the settled map, with Replay
       const key = 'gw.prism.flown:' + md.id, flown = ss.get(key) === '1'; ss.set(key, '1');
-      drawMap(hero, H, { here, sta, label: card ? card.v : '', name: md.name, places: a[0], id: md.id, fly: !flown });
+      drawMap(hero, H, { here, sta, label: c.label || '', name: md.name, places: a[0], id: md.id, fly: !flown });
     });
     return { op, figs, cs };
   }
@@ -319,5 +326,5 @@
     root.addEventListener('resize', onResize);
   }
 
-  return { VERSION, UI, KEYS, ORDER, FLIGHT, PG, openingOf, stripOf, cornersOf, projAt, tileRange, frame, anchor, vert, heroHtml, stripHtml, glanceHtml, modeHtml, mount };
+  return { VERSION, UI, KEYS, ORDER, FLIGHT, PG, mountWith, openingOf, stripOf, cornersOf, projAt, tileRange, frame, anchor, vert, heroHtml, stripHtml, glanceHtml, modeHtml, mount };
 });

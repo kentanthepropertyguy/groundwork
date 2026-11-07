@@ -131,7 +131,7 @@
   }
  ],
  "derivedFrom": {
-  "prismRelease": "prism-v1.1-r3-y1-2026-11-06-de6e404addb9",
+  "prismRelease": "prism-v1.1-r3-y2-2026-11-06-0882fde8fb3e",
   "report": "data/prism/v1.1/reports/hundred-palms-residences.json",
   "reportSha256": "823f7532d790a429dd5dac437895fae5ffd956b7e221661e04a5f634d2319a4e",
   "items": [

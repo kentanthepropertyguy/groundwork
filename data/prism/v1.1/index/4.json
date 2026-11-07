@@ -22,8 +22,8 @@
    "name": "76 Shenton",
    "kind": "completed",
    "path": "reports/76-shenton.json",
-   "sha256": "d90e61e5dd67100dac1cd0a37bf4cf97054a7efb9205c512c4453dfeddf85c51",
-   "items": 13,
+   "sha256": "74ffb636b066e78a264cc00a4c148889160bb5835d78fefd765d7837e31a60f4",
+   "items": 15,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -130,8 +130,8 @@
    "name": "Blue Horizon",
    "kind": "completed",
    "path": "reports/blue-horizon.json",
-   "sha256": "6ae950c0ca00ed1658c6267a66db09667c7af7cc97f104e4dd02bd2ae350c9db",
-   "items": 13,
+   "sha256": "0341005e0b7e7250f03ec53898e63c4c9d8517b6e5eacb0883ecc503f404df77",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -354,8 +354,8 @@
    "name": "City Square Residences",
    "kind": "completed",
    "path": "reports/city-square-residences.json",
-   "sha256": "369bc02f5c02e5f467a199009f11516052e3eb15030e5111cd7bb73df9838a6a",
-   "items": 13,
+   "sha256": "e28b5e82d6ad8b4ac7f4fdaf2cb4677912fab5517e53149d78b7b753dd23e392",
+   "items": 15,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -614,8 +614,8 @@
    "name": "Foresque Residences",
    "kind": "completed",
    "path": "reports/foresque-residences.json",
-   "sha256": "77845155e8665a18bd5ca198675f9145a6c25967712c4783a43071e573e21ad1",
-   "items": 13,
+   "sha256": "ee07d6495b413f608bd3f82caf5abbdc42db15fa6ae883e2c47be69c6f953d81",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -862,8 +862,8 @@
    "name": "Kingsford . Hillview Peak",
    "kind": "completed",
    "path": "reports/kingsford-hillview-peak.json",
-   "sha256": "dbfd1f318c928ce8d35e5879d769721b68306286e90ac7178a61eb1848fbb4d6",
-   "items": 13,
+   "sha256": "e85ca798e1c4573341daf6c6478722a2021d461b021cdf7342f317c68e47ab58",
+   "items": 15,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -888,8 +888,8 @@
    "name": "LA Fiesta",
    "kind": "completed",
    "path": "reports/la-fiesta.json",
-   "sha256": "96579b0c34f8e734651d533a7d0b8fb67a9926952125d20330e3e53d52653484",
-   "items": 13,
+   "sha256": "0752cc3afa6c670d6a1e125bdf6d3d9d1928319c144e14e0e361dd72960e0c17",
+   "items": 15,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1042,8 +1042,8 @@
     "R"
    ],
    "path": "reports/nv-residences.json",
-   "sha256": "3f3534827abc12011d5f83f77fa62fab7d77e9b897b42c70f94e9aa699023b5a",
-   "items": 12,
+   "sha256": "1a500f0b6e31b2430a97a4c5b98703d30e3cd8cc90a867a1ba67f703676cf28f",
+   "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1130,8 +1130,8 @@
    "name": "Palm Isles",
    "kind": "completed",
    "path": "reports/palm-isles.json",
-   "sha256": "0c1d7272cb1cfee78c790155454559a0952770b15b67dc33d1e08bd59d584de7",
-   "items": 13,
+   "sha256": "e4d2ca0e9e6dec4699557d1b13b6581fb4d647cc0dba9510bb5ca700f48901e2",
+   "items": 15,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1209,8 +1209,8 @@
     "P"
    ],
    "path": "reports/parc-rosewood.json",
-   "sha256": "01d0974b7195390e3d2992b7b26a79f65953fb5dbeb93ceda3caf42ae6fc19fd",
-   "items": 12,
+   "sha256": "98cce24559b2f9d7c0cbeff1ed4cabf0fee76599bdc5b18904a894284ab6e275",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1589,8 +1589,8 @@
    "name": "Tanamera Crest",
    "kind": "completed",
    "path": "reports/tanamera-crest.json",
-   "sha256": "803047d398edf93cbd1f63c7624e370a694b5ae8ee026a7d1fe47f1ece5c12e6",
-   "items": 13,
+   "sha256": "2c0cf993f9b9fa4ec5e74889df8d6dcc7ce88fd55d281bb08d87499c8d80a805",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1819,8 +1819,8 @@
    "name": "The Residences at W Singapore Sentosa Cove",
    "kind": "completed",
    "path": "reports/the-residences-at-w-singapore-sentosa-cove.json",
-   "sha256": "77d7fc89e23a14cbd2c7be05df4e7b399f26d5f9c49d59109b623b77ae44bf27",
-   "items": 13,
+   "sha256": "9346ac951888e721841c28bc251e2ebee147547c77e282fe909289a71889a948",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1905,8 +1905,8 @@
    "name": "The Tessarina",
    "kind": "completed",
    "path": "reports/the-tessarina.json",
-   "sha256": "21ef3d7137396c5b543a739cdc6f2d88397ea49704ebe02e3e1b2c2de2ab8767",
-   "items": 13,
+   "sha256": "5a972d9bb63d3def1cc72c245bf2df3ec542290a3a98e904d7750a562039ae18",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1924,8 +1924,8 @@
    "name": "The Venue Residences",
    "kind": "completed",
    "path": "reports/the-venue-residences.json",
-   "sha256": "48582f4b28b123a1b56b4a477f8711f2da3722aff540574dd6c05bcff41f5da4",
-   "items": 13,
+   "sha256": "594bad64a57158b3f83ac78b8947a99785113fe02de6d6ce0e789d75c1ee2a07",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -2001,8 +2001,8 @@
     "P"
    ],
    "path": "reports/westwood-residences.json",
-   "sha256": "c896bd8735b7b9ecf24526c731c6b6b3b58ce24c7fd497cc4bd5eef137c09af8",
-   "items": 12,
+   "sha256": "35423567537c7970a8b7253588c9ebfedf27fa97c9b460d47bd8e6bbc04b3033",
+   "items": 15,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },

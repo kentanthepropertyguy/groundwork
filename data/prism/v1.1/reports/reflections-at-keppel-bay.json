@@ -119,7 +119,173 @@
    }
   ]
  },
- "rentalYield": null,
+ "rentalYield": {
+  "period": {
+   "start": "2025-10",
+   "end": "2026-09"
+  },
+  "caption": "Gross yield = 12 x typical rent / typical resale price for the same size band. Before maintenance, property tax, vacancy and agent fees. Not a return on your cash. Lease: 99 yrs from 2006.",
+  "rules": {
+   "minResales": 5,
+   "minRentalContracts": 10,
+   "minPeers": 10,
+   "peers": "same class, market segment and 100 sq ft size band; original lease 99 years or longer, including freehold and 999-year (short leases excluded)",
+   "range": "the range from combining the middle half of rents with the middle half of prices (12 x lower-quartile rent / upper-quartile price to 12 x upper-quartile rent / lower-quartile price); not a confidence interval",
+   "shortLease": "Developments with leases under 99 years are excluded from standard long-lease peer groups."
+  },
+  "bands": [
+   {
+    "itemId": "reflections-at-keppel-bay/1000-1099",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-Y2-2026-11-06-A1",
+     "recordItem": "Y2/reflections-at-keppel-bay/1000-1099"
+    },
+    "band": "1000-1099 sq ft",
+    "typicalRent": 5700,
+    "rentalContracts": 37,
+    "typicalResalePrice": 1750000,
+    "resales": 7,
+    "grossYieldPct": 3.91,
+    "rangePct": [
+     3.53,
+     4.1
+    ],
+    "peerGroup": null,
+    "position": "too_few_peers",
+    "positionText": null,
+    "differencePts": null
+   },
+   {
+    "itemId": "reflections-at-keppel-bay/1100-1199",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-Y2-2026-11-06-A1",
+     "recordItem": "Y2/reflections-at-keppel-bay/1100-1199"
+    },
+    "band": "1100-1199 sq ft",
+    "typicalRent": 6300,
+    "rentalContracts": 37,
+    "typicalResalePrice": 1862500,
+    "resales": 6,
+    "grossYieldPct": 4.06,
+    "rangePct": [
+     3.71,
+     4.27
+    ],
+    "peerGroup": {
+     "developments": 11,
+     "medianPct": 2.89,
+     "middleHalfPct": [
+      2.82,
+      3.01
+     ]
+    },
+    "position": "above",
+    "positionText": "above the peer median",
+    "differencePts": 1.17
+   },
+   {
+    "itemId": "reflections-at-keppel-bay/1200-1299",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-Y2-2026-11-06-A1",
+     "recordItem": "Y2/reflections-at-keppel-bay/1200-1299"
+    },
+    "band": "1200-1299 sq ft",
+    "typicalRent": 6500,
+    "rentalContracts": 25,
+    "typicalResalePrice": 2100000,
+    "resales": 5,
+    "grossYieldPct": 3.71,
+    "rangePct": [
+     3.46,
+     4.14
+    ],
+    "peerGroup": {
+     "developments": 14,
+     "medianPct": 3.18,
+     "middleHalfPct": [
+      2.91,
+      3.44
+     ]
+    },
+    "position": "above",
+    "positionText": "above the peer median",
+    "differencePts": 0.53
+   },
+   {
+    "itemId": "reflections-at-keppel-bay/1400-1499",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-Y2-2026-11-06-A1",
+     "recordItem": "Y2/reflections-at-keppel-bay/1400-1499"
+    },
+    "band": "1400-1499 sq ft",
+    "typicalRent": 7700,
+    "rentalContracts": 13,
+    "typicalResalePrice": 2750000,
+    "resales": 5,
+    "grossYieldPct": 3.36,
+    "rangePct": [
+     3.21,
+     4
+    ],
+    "peerGroup": null,
+    "position": "too_few_peers",
+    "positionText": null,
+    "differencePts": null
+   },
+   {
+    "itemId": "reflections-at-keppel-bay/1500-1599",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-Y2-2026-11-06-A1",
+     "recordItem": "Y2/reflections-at-keppel-bay/1500-1599"
+    },
+    "band": "1500-1599 sq ft",
+    "typicalRent": 8200,
+    "rentalContracts": 29,
+    "typicalResalePrice": 2625000,
+    "resales": 10,
+    "grossYieldPct": 3.75,
+    "rangePct": [
+     3.22,
+     4.04
+    ],
+    "peerGroup": null,
+    "position": "too_few_peers",
+    "positionText": null,
+    "differencePts": null
+   },
+   {
+    "itemId": "reflections-at-keppel-bay/1700-1799",
+    "approval": {
+     "state": "approved",
+     "approvalRef": "GW-PRISM-V1.1-Y2-2026-11-06-A1",
+     "recordItem": "Y2/reflections-at-keppel-bay/1700-1799"
+    },
+    "band": "1700-1799 sq ft",
+    "typicalRent": 9500,
+    "rentalContracts": 18,
+    "typicalResalePrice": 2850000,
+    "resales": 5,
+    "grossYieldPct": 4,
+    "rangePct": [
+     3.6,
+     4.2
+    ],
+    "peerGroup": null,
+    "position": "too_few_peers",
+    "positionText": null,
+    "differencePts": null
+   }
+  ],
+  "sourceIds": [
+   "URA_TRANSACTIONS",
+   "URA_RENTAL"
+  ]
+ },
  "householdIncome": null,
  "profile": {
   "comparisonGroup": {
@@ -487,6 +653,26 @@
     ]
    },
    "attribution": "Contains information from URA private residential data (PMI_Resi_Transaction) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
+   "url": "https://eservice.ura.gov.sg/maps/api/"
+  },
+  {
+   "id": "URA_RENTAL",
+   "publisher": "Urban Redevelopment Authority (URA)",
+   "dataset": "PMI_Resi_Rental",
+   "datasetId": "PMI_Resi_Rental",
+   "asAt": "2026-09",
+   "updated": null,
+   "accessed": null,
+   "licence": {
+    "name": "Singapore Open Data Licence version 1.0 (URA Data Service grant of licence)",
+    "url": "https://www.ura.gov.sg/eservices-info/maps/acceptance-grant-licence",
+    "status": "confirmed",
+    "conditions": [
+     "Attribute as stated, with the access date.",
+     "Analysis and derived statistics are Groundwork’s; not endorsed by URA."
+    ]
+   },
+   "attribution": "Contains information from URA private residential data (PMI_Resi_Rental) from the URA Data Service, made available under the terms of the Singapore Open Data Licence version 1.0. Analysis and derived statistics by Groundwork. Not endorsed by URA.",
    "url": "https://eservice.ura.gov.sg/maps/api/"
   },
   {

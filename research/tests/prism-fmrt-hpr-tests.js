@@ -9,7 +9,7 @@
    4 fail closed: the amendment reference on any other report or item, the Phase 1 reference on this report, or any other form is rejected */
 'use strict';
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
-const SITE = path.resolve(__dirname, '../..');
+const SITE = require('./prism-delta-view.js')(path.resolve(__dirname, '../..'));   // later approved data-only deltas (Y2) taken off: this test checks its own release
 const G = require(path.join(SITE, 'assets/js/gw-prism.js'));
 // The future-MRT reading (G.FM.ON, Groundwork 01, 6 Nov 2026) later changes this report's quick read and MRT card; it is tested in
 // prism-fmrt-quick-tests.js. Here: the amendment exactly as approved, so the pilot is switched off.

@@ -47,7 +47,7 @@
 <template id="gwLazy-hdb"><script src="../assets/js/gw-hdb.js?v=ff7e6ae643"></script></template>
 <template id="gwLazy-budget"><link rel="stylesheet" href="../assets/css/kpt-discover.css?v=8d0ad26e1e"><script src="../assets/js/kpt-market.js?v=f2c5f82332"></script><script src="../assets/js/kpt-find.js?v=e88bca722f"></script><script src="../assets/js/kpt-discover.js?v=bdf69efa8d"></script><script src="../assets/js/kpt-discover-beds.js?v=8a9a8b8867"></script></template>
 <template id="gwLazy-budget-ui"><script src="../assets/js/kpt-discover-ui.js?v=bb58e094b2"></script></template>
-<template id="gwLazy-prism"><script src="../assets/js/gw-prism.js?v=07e603ecd8"></script><link rel="stylesheet" href="../assets/css/gw-prism-hero.css?v=f51a39730d"><script src="../assets/js/gw-home.js?v=dadd1864c8"></script><script src="../assets/js/gw-prism-hero.js?v=12a9caf140"></script></template>
+<template id="gwLazy-prism"><script src="../assets/js/gw-prism.js?v=5be2148421"></script><link rel="stylesheet" href="../assets/css/gw-prism-hero.css?v=f51a39730d"><script src="../assets/js/gw-home.js?v=dadd1864c8"></script><script src="../assets/js/gw-prism-hero.js?v=c0fc909f42"></script><link rel="stylesheet" href="../assets/css/gw-lens.css?v=86c7de0d48"><script src="../assets/js/gw-lens.js?v=33cf270259"></script></template>
 <template id="gwLazy-area"><link rel="stylesheet" href="../assets/css/gw-area.css?v=d54725b788"><script src="../assets/js/gw-area.js?v=15f5a75254"></script></template>
 <template id="gwLazy-az"><script src="../assets/js/kpt-registry-core.js?v=f702981cf5"></script></template>
 <script src="../assets/js/kpt-analytics.js?v=9cadbd3fbe"></script>
@@ -62,7 +62,7 @@
 <script src="../assets/js/gw-pulse.js?v=6b170dca99"></script>
 <template id="gwLazy-loc"><script src="../assets/js/kpt-map-core.js?v=2026-10-30.3"></script></template>
 <script src="../assets/js/gw-locmap.js?v=c31f9e5e97"></script>
-<script src="../assets/js/gw-transit.js?v=0690371a53"></script>
+<script src="../assets/js/gw-transit.js?v=c2cd7b96ce"></script>
 <template id="gwLazy-transit"><link rel="stylesheet" href="../assets/css/gw-transit.css?v=b5cebd4588"></template>
 <script src="../assets/js/gw-records.js?v=1969b79e59"></script>
 <script src="../assets/js/gw-rent.js?v=1d72b69f47"></script>
@@ -748,17 +748,23 @@
   const onRoute = (view, id) => () => { const v = R.parseHash(String(location.hash).toLowerCase()); return v.view === view && v.id === id; };
   let lastRoute = '';
   function prismPreview(id) {
-    prismLoad().then(() => GW_PRISM.mountPreview($app, id, { root: '../', still: onRoute('project', id), returning: true })).catch(() => {});
+    prismLoad().then(() => GW_PRISM.mountPreview($app, id, { root: '../', still: onRoute('project', id), returning: true }))
+      // Market Lens (GW-PRISM-ML-V1-2026-11-07-A1; off until switched on): a development with a Market Lens view gets its PRISM Analysis tab here
+      .then(() => { if (window.GW_LENS) return GW_LENS.mountTab($app, id, { root: '../', still: onRoute('project', id) }); }).catch(() => {});
   }
   function showPrism(id, from, dim) {
     $app.innerHTML = '<div class="kpr-state"><div class="kpr-skel"></div><div class="kpr-skel" style="width:60%"></div></div>';
     document.body.dataset.view = 'prism';
     const site = window.KPTV2 && KPTV2.sites && KPTV2.sites[id];   // a launch with its own site: its PRISM page offers that site (it has no resale report to compare)
     prismLoad().then(() => GW_PRISM.show($app, id, { root: '../', still: onRoute('prism', id), cameFromReport: () => from === 'project:' + id, site: site && site.url ? { url: site.url } : null, compare: !site, dim: dim || null,
-      fallback: () => { location.replace('#/p/' + id); }, track: (k) => track('research_option_selected', { project_id: id, option: k === 'full' ? 'prism-full' : 'prism' }) }))
+      // no PRISM page: a Market Lens view where the export has one (unavailable or pending; off until switched on), else Property Data as before
+      fallback: () => { const go = () => location.replace('#/p/' + id); if (!window.GW_LENS) return go();
+        GW_LENS.mountOnly($app, id, { root: '../', still: onRoute('prism', id), dim: dim || null }).then((ok) => { if (!ok) return go(); const h = $app.querySelector('h1'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } }).catch(go); }, track: (k) => track('research_option_selected', { project_id: id, option: k === 'full' ? 'prism-full' : 'prism' }) }))
       .then((md) => {
         // PRISM Research hero, Release 1 (Master Planning, 7 Nov 2026): on an evidence-profile page only, after gw-prism.js has drawn and checked it
         try { if (md && window.GW_PRISMHERO) GW_PRISMHERO.mount($app, md, { root: '../', still: onRoute('prism', id), dim: dim || null }); } catch (e) { /* the page stays exactly as drawn */ }
+        // Market Lens (GW-PRISM-ML-V1-2026-11-07-A1; off until switched on): its card and its lines under the five dimensions, never on a protected report
+        try { if (md && window.GW_LENS) GW_LENS.mountProfile($app, md, { root: '../', still: onRoute('prism', id) }).catch(() => {}); } catch (e) { /* the page stays exactly as drawn */ }
         const h = $app.querySelector('h1'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
         // Neighbourhood Intelligence: a development the approved index lists in a planning area gets one plain link under its five dimensions
         if ($app.querySelector('[data-gwp-page="' + id + '"]')) areaLoad().then(() => GW_AREA.mountLink($app, id, { root: '../', still: onRoute('prism', id) })).catch(() => {}); })

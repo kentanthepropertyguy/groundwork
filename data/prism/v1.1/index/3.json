@@ -215,8 +215,8 @@
    "name": "Casablanca",
    "kind": "completed",
    "path": "reports/casablanca.json",
-   "sha256": "0ef988b97e6dfa07cc90c6ec5c5fef3603bd53aaa25a9e8f3ca43d1d19ad3c6d",
-   "items": 13,
+   "sha256": "2e86d9c29de511b15dc64f6f173b942e337d6f009e89c20979539104dd656008",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -457,8 +457,8 @@
    "name": "Echelon",
    "kind": "completed",
    "path": "reports/echelon.json",
-   "sha256": "fafd5f777918edbc664225f820ef4b9bfb2a5804a8b31df5db254e668495d108",
-   "items": 13,
+   "sha256": "93e98338c2e833c2e9498ea276783ec1b07861d4f0786a56da44d134c410dd20",
+   "items": 15,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -584,8 +584,8 @@
    "name": "Heron Bay",
    "kind": "completed",
    "path": "reports/heron-bay.json",
-   "sha256": "ff61cebb16362d3408bb7c190e799bdeeea8d1a3c4def29a4afa3bfdb1ea3e1f",
-   "items": 13,
+   "sha256": "eae648dabda8c93d8ec22ddec40d903874bb5a58e09c6d9bd0848eda7280169a",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -764,8 +764,8 @@
    "name": "Kovan Residences",
    "kind": "completed",
    "path": "reports/kovan-residences.json",
-   "sha256": "dc6633d8ba889d294831418cf85624bbf39cb006b6d479b31d437c6d0c3ed75c",
-   "items": 13,
+   "sha256": "f3f631011bd41982b84f7058a67e9fc5566d40fa2c7621ec89273d740f03d40d",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -940,8 +940,8 @@
    "name": "One Amber",
    "kind": "completed",
    "path": "reports/one-amber.json",
-   "sha256": "afb3e17f606933060fa28ecf4ac24805ae0ea1c9302662d58940496a109215cb",
-   "items": 13,
+   "sha256": "383bb70ccf5634c948344a46e15896ce5e9edf00046a84674bfdb673315e5187",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1140,8 +1140,8 @@
    "name": "Ridgewood",
    "kind": "completed",
    "path": "reports/ridgewood.json",
-   "sha256": "8f5aad0d821d6f5663111d1fa875948fe93b8fa67ac0e582ee7112659a2e100b",
-   "items": 13,
+   "sha256": "d48f01bb894b78c0d8a52604ba19097fcdb5cb2d6c0d145fbc637aac0928e6a6",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1239,8 +1239,8 @@
     "P"
    ],
    "path": "reports/sol-acres.json",
-   "sha256": "3fdd3f00afaeadbe70e665bde14a33f16e0c9b93b57b2b5aff45b28c71ffd0f0",
-   "items": 12,
+   "sha256": "4c1085de1663fb5c455f851526ebba5b5f055d88db2317d6144e81a8452822a4",
+   "items": 16,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1392,8 +1392,8 @@
    "name": "The Bayshore",
    "kind": "completed",
    "path": "reports/the-bayshore.json",
-   "sha256": "2cbae203b030c839ee3e69d4d83fb8b57ee6bd93155f3d736840eaabd309d3db",
-   "items": 13,
+   "sha256": "a7fa43a4f12451af6fe97eda5c80ec6f75249198a633d46a988f36b84db4cefa",
+   "items": 18,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1443,8 +1443,8 @@
    "name": "The Esta",
    "kind": "completed",
    "path": "reports/the-esta.json",
-   "sha256": "e1d78cb065c26f9f9447a6058c43d6d40ddae005262c60f0949f1293bbc5129d",
-   "items": 13,
+   "sha256": "e9f7ac0c235f85bc1b952251dd7ce4f23fc1082f320797283acccf3a573c2a87",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1454,8 +1454,8 @@
    "name": "The Glades",
    "kind": "completed",
    "path": "reports/the-glades.json",
-   "sha256": "4a0e304090683743e0bc161aa3f7178661328dfad28f4bbd543095b8286835fb",
-   "items": 13,
+   "sha256": "359c23556c0ccb266483ce95c4a60f7dede67f0131ee51ae17433bb7c2bd7ada",
+   "items": 16,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1509,8 +1509,8 @@
    "name": "The Metropolitan Condominium",
    "kind": "completed",
    "path": "reports/the-metropolitan-condominium.json",
-   "sha256": "03857fb457a5ff94807e982fc8d5bc17c14f42429d23c74ca21ca49c9acfb831",
-   "items": 13,
+   "sha256": "159ae11253498e32f6d3279b2a02e630b89ba113432e56444932519975893636",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1746,8 +1746,8 @@
    "name": "Wandervale",
    "kind": "completed",
    "path": "reports/wandervale.json",
-   "sha256": "204c6542e41b58b7c9738a24721f3e65d885f8f1c7d056d52590fd3d0dcd5cd8",
-   "items": 13,
+   "sha256": "d82c5d4271a5af78b85dce4389f191382c6b0a9389b22c4a874c63ade7c0db9b",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1760,8 +1760,8 @@
     "P"
    ],
    "path": "reports/watercolours.json",
-   "sha256": "1632064cce940b18cab9f0b1f8f1b798c6040014d47d34bcaefaf20015366b04",
-   "items": 12,
+   "sha256": "3e48cf1b0e151b57a08720c602a3d0734226435309961fabbf2ec4bdf0e06a23",
+   "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },

@@ -1,0 +1,1183 @@
+{
+ "kind": "prism-v1.1-delta-record",
+ "delta": "Y2",
+ "ref": "GW-PRISM-V1.1-Y2-2026-11-06-A1",
+ "bands": 480,
+ "decisions": {
+  "x1": "publish",
+  "x2": "publish"
+ },
+ "pre": {
+  "release": "prism-v1.1-r3-y1-2026-11-06-de6e404addb9",
+  "previous": "prism-v1.1-r3-kw-v1amend-2026-11-06-104839837c2a",
+  "deltaApproval": "GW-PRISM-V1.1-2026-11-06-Y1",
+  "generatedAt": "2026-11-06T04:44:00Z"
+ },
+ "post": {
+  "release": "prism-v1.1-r3-y2-2026-11-06-0882fde8fb3e"
+ },
+ "chainLink": {
+  "pre": "'GW-PRISM-V1.1-2026-11-06-Y1'],   // GW-PRISM-V1.1-2026-11-06-Y1: rental yield, one curated report (2 bands)",
+  "post": "'GW-PRISM-V1.1-2026-11-06-Y1', 'GW-PRISM-V1.1-Y2-2026-11-06-A1'],   // GW-PRISM-V1.1-2026-11-06-Y1: rental yield, one curated report (2 bands); GW-PRISM-V1.1-Y2-2026-11-06-A1: rental yield, 283 reports (480 bands)"
+ },
+ "expectPre": {
+  "manifest": "23ff6d59f591188b3e28339163dc739d7dc664614fb6882f1c8bfebfab123d15",
+  "index": "4ba7e307126e8fff21665b6bd360b31f252d60e449f673e4521d66c07b232069",
+  "gwPrism": "07e603ecd84dae9973c042e445200dc2919f04b750269a8c98ab01cb4df5022b",
+  "gwTransit": "0690371a530e0d471f28e1e74cef9d318f64676d0b24e369a08a8b7d8d1b9dee",
+  "transitIndex": "0e338a3e138b2d19a5cde8017c95b7e024706441fcf7dd7abd18448fea576e28",
+  "transitFiles": {
+   "hundred-palms-residences": "f59cd90b12f3c41d9f7d3a1d3551a6bc793725aa07f537bbb34dd81631ed5144"
+  },
+  "scriptVersions": {
+   "gwPrism": "07e603ecd8",
+   "gwTransit": "0690371a53"
+  }
+ },
+ "reviewed": {
+  "manifestSha256": "97ed0864b4a2aead9df86bb6922064a3fae15c31c50539f25fb7f75637b98145",
+  "bandsSha256": "1ac4fd6403fa8f0a63adedbb1719c1c9567cb15d0e275898b656ba761cc70706"
+ },
+ "reports": {
+  "1-canberra": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "10-shelford": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "76-shenton": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "a-treasure-trove": {
+   "bands": 5,
+   "addedUraRental": true
+  },
+  "alex-residences": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "alexis": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "altez": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "amber-45": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "amber-park": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "aquarius-by-the-park": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "arc-at-tampines": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "archipelago": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "ardmore-park": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "ardmore-three": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "artra": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "aspen-heights": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "austville-residences": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "ballota-park-condominium": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "bartley-residences": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "bartley-ridge": {
+   "bands": 4,
+   "addedUraRental": true
+  },
+  "bayshore-park": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "bedok-residences": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "blue-horizon": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "botanique-at-bartley": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "botannia": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "boulevard-88": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "braddell-view": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "butterworth-8": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "cardiff-residence": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "caribbean-at-keppel-bay": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "carissa-park-condominium": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "casa-cambio": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "casa-merah": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "casablanca": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "cashew-heights-condominium": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "castle-green": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "central-green-condominium": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "central-grove": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "centro-residences": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "changi-rise-condominium": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "city-gate": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "city-square-residences": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "citylife-at-tampines": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "citylights": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "cityscape-at-farrer-park": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "clover-by-the-park": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "coastline-residences": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "coco-palms": {
+   "bands": 4,
+   "addedUraRental": true
+  },
+  "commonwealth-towers": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "compass-heights": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "concourse-skyline": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "costa-del-sol": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "costa-rhu": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "cote-d-azur": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "d-leedon": {
+   "bands": 7,
+   "addedUraRental": true
+  },
+  "d-nest": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "de-royale": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "double-bay-residences": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "dover-parkview": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "duo-residences": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "e-maison": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "east-meadows": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "eastpoint-green": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "echelon": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "eco": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "edelweiss-park-condominium": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "eight-courtyards": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "eight-riversuites": {
+   "bands": 4,
+   "addedUraRental": true
+  },
+  "elias-green": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "esparina-residences": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "euhabitat": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "evergreen-park": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "fernwood-towers": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "flamingo-valley": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "flo-residence": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "foresque-residences": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "forest-woods": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "forestville": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "forett-at-bukit-timah": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "gardenvista": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "gem-residences": {
+   "bands": 4,
+   "addedUraRental": true
+  },
+  "goldenhill-park-condominium": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "grandeur-8": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "grandeur-park-residences": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "guilin-view": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "h2o-residences": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "haig-162": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "hazel-park-condominium": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "hedges-park-condominium": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "heritage-view": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "heron-bay": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "high-park-residences": {
+   "bands": 5,
+   "addedUraRental": true
+  },
+  "highline-residences": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "hillion-residences": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "hillsta": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "hillview-regency": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "icon": {
+   "bands": 4,
+   "addedUraRental": true
+  },
+  "ivory-heights": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "j-gateway": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "jewel-at-buangkok": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "kensington-park-condominium": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "kerrisdale": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "kim-sia-court": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "kingsford-hillview-peak": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "kovan-melody": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "kovan-residences": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "la-casa": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "la-fiesta": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "lagoon-view": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "laguna-park": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "lake-grande": {
+   "bands": 5,
+   "addedUraRental": true
+  },
+  "lake-life": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "lakepoint-condominium": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "lakeville": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "le-quest": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "leedon-residence": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "livia": {
+   "bands": 4,
+   "addedUraRental": true
+  },
+  "mandarin-gardens": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "marina-one-residences": {
+   "bands": 4,
+   "addedUraRental": true
+  },
+  "martin-modern": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "maysprings": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "meadows-at-peirce": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "melville-park": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "midtown-residences": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "neptune-court": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "nin-residence": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "northvale": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "northwave": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "nv-residences": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "okio": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "oleander-towers": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "one-amber": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "orchid-park-condominium": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "oue-twin-peaks": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "palm-gardens": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "palm-isles": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "parc-botannia": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "parc-centros": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "parc-elegance": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "parc-life": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "parc-oasis": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "parc-olympia": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "parc-riviera": {
+   "bands": 5,
+   "addedUraRental": true
+  },
+  "parc-rosewood": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "parc-vera": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "parc-vista": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "park-place-residences-at-plq": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "parkview-apartments": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "pine-grove": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "pinewood-gardens": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "principal-garden": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "prive": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "q-bay-residences": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "queens": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "queens-peak": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "reflections-at-keppel-bay": {
+   "bands": 6,
+   "addedUraRental": true
+  },
+  "regent-grove": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "regent-heights": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "regent-park": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "regentville": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "rezi-3two": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "ridgewood": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "rio-vista": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "ripple-bay": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "river-isles": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "river-place": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "riverbank-at-fernvale": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "rivercove-residences": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "rivergate": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "riversails": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "rivervale-crest": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "riverwalk-apartments": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "rosewood": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "sanctuary-green": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "savannah-condopark": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "seaside-residences": {
+   "bands": 4,
+   "addedUraRental": true
+  },
+  "seasons-park": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "seasons-view": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "seastrand": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "signature-at-yishun": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "signature-park": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "silversea": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "sims-urban-oasis": {
+   "bands": 4,
+   "addedUraRental": true
+  },
+  "simsville": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "skies-miltonia": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "sky-green": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "sky-vue": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "skysuites-at-anson": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "sol-acres": {
+   "bands": 4,
+   "addedUraRental": true
+  },
+  "sophia-hills": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "spottiswoode-residences": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "st-thomas-suites": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "stars-of-kovan": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "starville": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "sunglade": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "symphony-heights": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "symphony-suites": {
+   "bands": 4,
+   "addedUraRental": true
+  },
+  "tanamera-crest": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "tanglin-view": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-alps-residences": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "the-bayshore": {
+   "bands": 5,
+   "addedUraRental": true
+  },
+  "the-brownstone": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "the-cascadia": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "the-clearwater": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-clement-canopy": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "the-clift": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-coast-at-sentosa-cove": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-crest": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-criterion": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "the-draycott": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-esta": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-estuary": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "the-gardens-at-bishan": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "the-glades": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "the-greenwich": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-hillier": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "the-inflora": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "the-interlace": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "the-lakefront-residences": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-lakeshore": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "the-luxurie": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "the-mayfair": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-metropolitan-condominium": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-miltonia-residences": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-minton": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "the-oceanfront-at-sentosa-cove": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-palette": {
+   "bands": 4,
+   "addedUraRental": true
+  },
+  "the-panorama": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "the-parc-condominium": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "the-poiz-residences": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "the-quartz": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "the-quintet": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-residences-at-w-singapore-sentosa-cove": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-rise-at-oxley-residences": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-rochester-residences": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-sail-at-marina-bay": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "the-santorini": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "the-scala": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "the-scotts-tower": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-shore-residences": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-skywoods": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-tampines-trilliant": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "the-tembusu": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "the-tennery": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-terrace": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-tessarina": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-topiary": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-trilinq": {
+   "bands": 4,
+   "addedUraRental": true
+  },
+  "the-tropica": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-vales": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "the-venue-residences": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-vermont-on-cairnhill": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-visionaire": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "the-vue": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "the-warren": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "the-waterside": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "thomson-800": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "thomson-grand": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "thomson-impressions": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "treasure-crest": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "tree-house": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "trilive": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "tropical-spring": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "twin-fountains": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "twin-waterfalls": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "urban-vista": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "v-on-shenton": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "vacanza-at-east": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "valley-park": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "visioncrest": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "vue-8-residence": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "wandervale": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "water-place": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "waterbay": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "watercolours": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "waterfront-isle": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "watertown": {
+   "bands": 2,
+   "addedUraRental": true
+  },
+  "waterview": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "waterwoods": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "westwood-residences": {
+   "bands": 3,
+   "addedUraRental": true
+  },
+  "whitewater": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "windy-heights": {
+   "bands": 1,
+   "addedUraRental": true
+  },
+  "woodhaven": {
+   "bands": 1,
+   "addedUraRental": true
+  }
+ },
+ "x1": {
+  "decision": "X1",
+  "approvalRef": "GW-PRISM-V1.1-Y2-2026-11-06-A1",
+  "scope": "display only: the yield table cell for a band with position too_few_peers",
+  "text": "Fewer than 10 comparable developments; not compared.",
+  "pre": "(Array.isArray(b.peerGroup.middleHalfPct) ? ' (middle half ' + pct2(b.peerGroup.middleHalfPct[0]) + '–' + pct2(b.peerGroup.middleHalfPct[1]) + '%)' : '') : '') + (b.positionText ?",
+  "post": "(Array.isArray(b.peerGroup.middleHalfPct) ? ' (middle half ' + pct2(b.peerGroup.middleHalfPct[0]) + '–' + pct2(b.peerGroup.middleHalfPct[1]) + '%)' : '') : (b.position === 'too_few_peers' ? 'Fewer than 10 comparable developments; not compared.' : '')) + (b.positionText ?"
+ }
+}

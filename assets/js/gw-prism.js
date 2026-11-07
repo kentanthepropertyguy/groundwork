@@ -53,10 +53,10 @@
   // only on that report's future-transport line, in the same approved form; every other item of the report keeps its approval
   const FMRT_AMEND = { 'hundred-palms-residences': 'GW-FMRT-P1-AMEND-HPR-20261104-01' };
   const V11 = { SCHEMA: 'prism-public-v1.1-r3', INDEX_SCHEMA: 'prism-public-v1.1-r3-index', SHARD_SCHEMA: 'prism-public-v1.1-r3-shard', DIR: 'data/prism/v1.1/',
-    CHAIN: ['GW-PRISM-V1.1-2026-11-01-A1', 'GW-PRISM-V1.1-2026-11-03-DECILE', 'GW-PRISM-V1.1-2026-11-03-A2', 'GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1', FMRT, FMRT_AMEND['hundred-palms-residences'], 'GW-PRISM-V1.1-2026-11-06-Y1'],   // GW-PRISM-V1.1-2026-11-06-Y1: rental yield, one curated report (2 bands)
-    RELEASE: 'prism-v1.1-r3-y1-2026-11-06-de6e404addb9',
-    INDEX: '4ba7e307126e8fff21665b6bd360b31f252d60e449f673e4521d66c07b232069',      // index.json, byte for byte: any other is not read
-    MANIFEST: '23ff6d59f591188b3e28339163dc739d7dc664614fb6882f1c8bfebfab123d15',   // manifest.json, bound by the root (manifestSha256)
+    CHAIN: ['GW-PRISM-V1.1-2026-11-01-A1', 'GW-PRISM-V1.1-2026-11-03-DECILE', 'GW-PRISM-V1.1-2026-11-03-A2', 'GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1', FMRT, FMRT_AMEND['hundred-palms-residences'], 'GW-PRISM-V1.1-2026-11-06-Y1', 'GW-PRISM-V1.1-Y2-2026-11-06-A1'],   // GW-PRISM-V1.1-2026-11-06-Y1: rental yield, one curated report (2 bands); GW-PRISM-V1.1-Y2-2026-11-06-A1: rental yield, 283 reports (480 bands)
+    RELEASE: 'prism-v1.1-r3-y2-2026-11-06-0882fde8fb3e',
+    INDEX: 'd7a99a92fe1805d9da5501db3c9f2b417cbac764ebfdaa98a6ba43b6039238ca',      // index.json, byte for byte: any other is not read
+    MANIFEST: 'b184c3bfad32c0baa05270d5323aaf71cc14408dc05b8244a28d540dbd623c28',   // manifest.json, bound by the root (manifestSha256)
     STATES: ['full', 'partial', 'pending', 'unavailable', 'new_launch', 'redirect'], PAGE_STATES: ['full', 'partial'],
     SHARDS: '0123456789abcdef',
     // GW-PRISM-V1-AMEND-KW-20261106-01 (Master Planning, 6 Nov 2026): one V1 report withdraws statements made out of date by a later bedroom
@@ -821,7 +821,7 @@
     return '<div class="gwp-v11" data-gwp-yield><p class="gwp-k">Gross rental yield by size · ' + esc(period(y.period)) + '</p><div class="gwp-tw"><table class="gwp-yt gwp-yt--stack"><thead><tr><th scope="col">Size</th><th scope="col" class="n">Typical rent</th><th scope="col" class="n">Typical resale price</th><th scope="col" class="n">Gross yield</th><th scope="col">Comparable developments</th></tr></thead><tbody>' +
       y.bands.map((b) => '<tr data-gwp-band="' + esc(b.band) + '"><th scope="row">' + esc(b.band.replace('-', '–')) + '</th><td class="n" data-l="Typical rent">' + money(b.typicalRent) + '<small>a month · ' + plural(b.rentalContracts, 'contract') + '</small></td><td class="n" data-l="Typical resale price">' + money(b.typicalResalePrice) + '<small>' + plural(b.resales, 'resale') + '</small></td>' +
         '<td class="n" data-l="Gross yield"><b>' + pct2(b.grossYieldPct) + '%</b>' + (Array.isArray(b.rangePct) ? '<small>range ' + pct2(b.rangePct[0]) + '–' + pct2(b.rangePct[1]) + '%</small>' : '') + '</td>' +
-        '<td data-l="Comparable developments">' + (b.peerGroup ? 'Median ' + pct2(b.peerGroup.medianPct) + '% of ' + num(b.peerGroup.developments, 0) + (Array.isArray(b.peerGroup.middleHalfPct) ? ' (middle half ' + pct2(b.peerGroup.middleHalfPct[0]) + '–' + pct2(b.peerGroup.middleHalfPct[1]) + '%)' : '') : '') + (b.positionText ? '<small>' + esc(b.positionText) + '</small>' : '') + '</td></tr>').join('') +
+        '<td data-l="Comparable developments">' + (b.peerGroup ? 'Median ' + pct2(b.peerGroup.medianPct) + '% of ' + num(b.peerGroup.developments, 0) + (Array.isArray(b.peerGroup.middleHalfPct) ? ' (middle half ' + pct2(b.peerGroup.middleHalfPct[0]) + '–' + pct2(b.peerGroup.middleHalfPct[1]) + '%)' : '') : (b.position === 'too_few_peers' ? 'Fewer than 10 comparable developments; not compared.' : '')) + (b.positionText ? '<small>' + esc(b.positionText) + '</small>' : '') + '</td></tr>').join('') +
       '</tbody></table></div><p class="gwp-md" data-gwp-yield-caption>' + esc(y.caption) + '</p>' +
       '<ul class="gwp-fine gwp-v11l">' + [r.range ? 'Range: ' + r.range + '.' : '', r.peers ? 'Comparable developments: ' + r.peers + '.' : '', r.shortLease || ''].filter(Boolean).map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul>' +
       '<p class="gwp-ms">' + esc(srcNames(y.sourceIds)) + ' · ' + esc(period(y.period)) + '</p></div>';

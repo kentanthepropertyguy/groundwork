@@ -58,8 +58,8 @@
    "name": "Archipelago",
    "kind": "completed",
    "path": "reports/archipelago.json",
-   "sha256": "f5065b84a0aed89b63a7cb3c10bceba3b7dcb38b35ea73b9e0e81b8e9291cfac",
-   "items": 13,
+   "sha256": "8e1685eac855be1d07a34b179c113ba32c2a3997a7526e3a696ac72cc100dcc7",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -347,8 +347,8 @@
    "name": "Elias Green",
    "kind": "completed",
    "path": "reports/elias-green.json",
-   "sha256": "214ac35d8a737d78b89540e202c4d300eb78713e116d1b0d33465073d82f5dcc",
-   "items": 13,
+   "sha256": "f62607d599a7ad03ba9c2b7742bec929685d02b3aeac0040d18a5a89a214b149",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -402,8 +402,8 @@
    "name": "Forestville",
    "kind": "completed",
    "path": "reports/forestville.json",
-   "sha256": "6062fe2e8147aaeb7d16831b9875d43ce0d53aa7aaa201159db9b10a7d7b9d05",
-   "items": 13,
+   "sha256": "bc4f0c07a76a98d9b08c51882a576791a4f4ee32180cbbf6c124f6405942e16a",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -477,8 +477,8 @@
    "name": "Hazel Park Condominium",
    "kind": "completed",
    "path": "reports/hazel-park-condominium.json",
-   "sha256": "3df096ceaca60d09570e1c29c485ee3faa9ab403f5a212dc6377d969a6667256",
-   "items": 13,
+   "sha256": "c74762485af0345fdf045e48f0cd9718e203e8400d6380283b8068e50b9e24e1",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -700,8 +700,8 @@
     "P"
    ],
    "path": "reports/lake-life.json",
-   "sha256": "d49d0cb748614bac8040048c61a281c8af377ccf0d3c53ab0fe581f17deb0aae",
-   "items": 12,
+   "sha256": "6bdcb5e39ba9be9ad46724e7346728be304e2bcb219b079367264a825c0d2dbd",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -909,8 +909,8 @@
    "name": "Palm Gardens",
    "kind": "completed",
    "path": "reports/palm-gardens.json",
-   "sha256": "82a483d0d6ed2c4e0ecaaa15f1c30c65a06f93ee67e3a190d8ab96f7705692c4",
-   "items": 13,
+   "sha256": "51b62607a26c3a3418922267ea76a722eb43c1892bd445fa259908b1024bd736",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -949,8 +949,8 @@
    "name": "Parc Botannia",
    "kind": "completed",
    "path": "reports/parc-botannia.json",
-   "sha256": "1bc56683c12631108539b0c0e492c2c78fb27c4edce5ee30645d04c5408e44e1",
-   "items": 13,
+   "sha256": "8e03701348c342024626e2ded697ab0627fde5906a54916eb4761978461b62db",
+   "items": 15,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1013,8 +1013,8 @@
    "name": "Rio Vista",
    "kind": "completed",
    "path": "reports/rio-vista.json",
-   "sha256": "8041b9fa98a7f17836a3c1559c535e732c830ad1e93bc4dbdbe9da9f84c4048f",
-   "items": 13,
+   "sha256": "3c73585a6b9efb93e6cd1261d99fdde6b9cb10ab9e6d9cbaeff3ece98cb98c10",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1042,8 +1042,8 @@
     "P"
    ],
    "path": "reports/river-place.json",
-   "sha256": "7867c572b8a6434ddfb1e472be1392c0c053c77a2fb9d83275e8ae898608ff5e",
-   "items": 12,
+   "sha256": "f36ac38034cb5a0863d0e3330786f30af5d6aa0dafa75007ec4d3cb19b741b69",
+   "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1053,8 +1053,8 @@
    "name": "Riverbank @ Fernvale",
    "kind": "completed",
    "path": "reports/riverbank-at-fernvale.json",
-   "sha256": "083e2d921a28287c020fd3df4e1eb84328b713afd1177245c77c0780c8bb65ab",
-   "items": 13,
+   "sha256": "63a8c4f02becf92a9907f7258356498c377ee4e40b216c36fcc215a8d81d0da3",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1117,8 +1117,8 @@
    "name": "Savannah Condopark",
    "kind": "completed",
    "path": "reports/savannah-condopark.json",
-   "sha256": "da77d72a8abf84111b3fa365f726df97735cb4f45cdd8113f245018f78472302",
-   "items": 13,
+   "sha256": "54e71560c693e707e4599bac214a5bf14c264847a8062c9d1dc4ac38ae91de91",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1312,8 +1312,8 @@
    "name": "Symphony Heights",
    "kind": "completed",
    "path": "reports/symphony-heights.json",
-   "sha256": "3c6919dc7863d3dad6b03f8a38a8febfc6c15a0b30917ca0f586b89729373d0c",
-   "items": 13,
+   "sha256": "91c181e32e622f9e4a175f4bd2cbe363d63cf6ca39dfa5104a1ffe55bad1badf",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1409,8 +1409,8 @@
    "name": "The Clearwater",
    "kind": "completed",
    "path": "reports/the-clearwater.json",
-   "sha256": "555a80d62f13b04f4a422e5d55df2d15ed741f42be2ff971c16d57d025200a8d",
-   "items": 13,
+   "sha256": "7b83915f3b1a64cb5196705e571b7e4438230df4295b8765aa821a16ef8c42a6",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1423,8 +1423,8 @@
     "P"
    ],
    "path": "reports/the-criterion.json",
-   "sha256": "3edfcc2f90937122a8bb0e6a8340f77d27eb6d1537ed9ff250de0a6d29fb957d",
-   "items": 12,
+   "sha256": "83e6c863db7819f19a6bd9d04f3196788729654c05db30cb34fec4a02ccd7593",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1434,8 +1434,8 @@
    "name": "The Draycott",
    "kind": "completed",
    "path": "reports/the-draycott.json",
-   "sha256": "f64d4881295ffd1e1a1f455dbf8f138d0ba59e4cb15b1bef0dd29bda9e7b7c63",
-   "items": 13,
+   "sha256": "94af73223765ab2d36047a9506d6bfe369898ec004ccdec1ecdb0c690f67faa9",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1731,8 +1731,8 @@
    "name": "Vacanza @ East",
    "kind": "completed",
    "path": "reports/vacanza-at-east.json",
-   "sha256": "5f837fb00a4c8c705b813e7ec5837a64959388e745ccbf2bdba482fc4e0a4fbb",
-   "items": 13,
+   "sha256": "01c308abd7bb9c75d87895e7b6a2782e698bbb1a4a78f744bc379502fbe09872",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1742,8 +1742,8 @@
    "name": "Valley Park",
    "kind": "completed",
    "path": "reports/valley-park.json",
-   "sha256": "53f004d6c5ceb72d4b2ccbd207c828c1b3a9d572e831c8097f3b98374a08b18a",
-   "items": 13,
+   "sha256": "e7697dbecb313d223642f24c9b3fcfec3ca0e2f261d972ece3dbf733334f6fb3",
+   "items": 15,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },

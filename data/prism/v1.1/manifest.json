@@ -1,9 +1,9 @@
 {
  "schemaVersion": "prism-public-v1.1-r3-manifest",
- "releaseId": "prism-v1.1-r3-y1-2026-11-06-de6e404addb9",
+ "releaseId": "prism-v1.1-r3-y2-2026-11-06-0882fde8fb3e",
  "status": "approved",
  "asAt": "2026-11-04",
- "generatedAt": "2026-11-06T04:44:00Z",
+ "generatedAt": "2026-11-07T05:30:00Z",
  "approvalChain": [
   "GW-PRISM-V1.1-2026-11-01-A1",
   "GW-PRISM-V1.1-2026-11-03-DECILE",
@@ -11,15 +11,16 @@
   "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1",
   "GW-FMRT-P1-20261104-01",
   "GW-FMRT-P1-AMEND-HPR-20261104-01",
-  "GW-PRISM-V1.1-2026-11-06-Y1"
+  "GW-PRISM-V1.1-2026-11-06-Y1",
+  "GW-PRISM-V1.1-Y2-2026-11-06-A1"
  ],
  "formatApproval": "GW-PRISM-R3-SCHEMA-20261103-01",
- "deltaApproval": "GW-PRISM-V1.1-2026-11-06-Y1",
- "previous": "prism-v1.1-r3-kw-v1amend-2026-11-06-104839837c2a",
+ "deltaApproval": "GW-PRISM-V1.1-Y2-2026-11-06-A1",
+ "previous": "prism-v1.1-r3-y1-2026-11-06-de6e404addb9",
  "counts": {
   "reports": 2099,
   "entries": 2509,
-  "items": 25231,
+  "items": 25711,
   "states": {
    "partial": 1444,
    "full": 655,
@@ -88,67 +89,67 @@
  "files": [
   {
    "path": "index/0.json",
-   "sha256": "5c9dde49d1d95bbb2221f185ad42ee6d1f1e4cb8b2b8608defb7365303a3cc65"
+   "sha256": "d82716a75b4208f541e9fb3f8402e61145af78217a29e5a8e3deeb83353c0a69"
   },
   {
    "path": "index/1.json",
-   "sha256": "0704fb50e3586b2af404706daaf5a50940ec8177c8a2df53489418c6ee2adaa1"
+   "sha256": "f9c940d62405379e135b8447ecc569b2002db9d059435540380bc3883d08416f"
   },
   {
    "path": "index/2.json",
-   "sha256": "47564f2d466712031a322244fd53d3ab3485c37047cbd1a7792a734bb443bf58"
+   "sha256": "5d7fff88d8efc12d7bc726fa497876a55e18f983590aca32b56281b76f2314da"
   },
   {
    "path": "index/3.json",
-   "sha256": "54f85f4649f06e673ba8bde092f3c0c4cff38b06f78eae2cd2e1ec7d2cb50112"
+   "sha256": "c0d57a24cafa94b40980a0fe5b0c777422c727a512e1fdaef208c20b11e47dab"
   },
   {
    "path": "index/4.json",
-   "sha256": "fb06de6855a233da7b06f3ddaefcea5f6772ac895ea2ccea438be7b87fee6249"
+   "sha256": "f69ffe2985d3c4c83740354a6c7924ebbd988a78a060f5aa36b84490f6380521"
   },
   {
    "path": "index/5.json",
-   "sha256": "da5502fdb6b09571be063cdb6690b4e8e48d1ea9718ac110d53ae934017f33ad"
+   "sha256": "9249c5e9aca7ce5e0cb6fa10f4bf8a916cb0215d0ae2754d541342d0ae919304"
   },
   {
    "path": "index/6.json",
-   "sha256": "c2f15ec6320514c8b071085dc445ac8d3fbdaa2eb72c29946972b7b0a247ba44"
+   "sha256": "7abd25efd1f3f83236693a65f674932dd906d37926260207fc67d2544db9d7db"
   },
   {
    "path": "index/7.json",
-   "sha256": "3bb5fbdc98a5cc0e7d8a7e08ea12c2be95b0110bd782947959ca89baf67084ea"
+   "sha256": "a5cef600a303c758676ad0db85187aebc51d34346ab006768d5961d74db2d2b3"
   },
   {
    "path": "index/8.json",
-   "sha256": "0d355136066e21833561b7bff21d00e3ae53a6c206878c174e84e360e1db62f4"
+   "sha256": "4d892de6be20fbbb7301111b4633cd4fe7987ee3d09afa60d0a1e2ef963a9051"
   },
   {
    "path": "index/9.json",
-   "sha256": "ca4415bea99a2656a428df2f58123aa6478900d7293071f9574f1414121a69e8"
+   "sha256": "10a9268bf0863e9e0f55855fa18dbfa71991d132049ff34c60a5ede076fb497b"
   },
   {
    "path": "index/a.json",
-   "sha256": "eb04b0c048bef7e94ad41566e0378ca8283021dff0f38835d67eb8f48a36014d"
+   "sha256": "68e5acd65bbd9c097549514e7c222c58ee2d7d459084bb5047da3e0efb4f9c6b"
   },
   {
    "path": "index/b.json",
-   "sha256": "a39401a3ceadd04f3b676de0e70800eb2e51ddbb8965f576a07991bebeb0d2b3"
+   "sha256": "8c3f14678d261559eef688f24ce98e18e8d9bb402ad32bec6c38bc0d370f11c3"
   },
   {
    "path": "index/c.json",
-   "sha256": "12c71da5f8ddb53bce9b9f13502a74a65134cfe57af11dd881cd62584b76b890"
+   "sha256": "ca529e50428b1b427b16437f4e8ff5a2feab4e242b3cdbb063f2c8fb1cc54339"
   },
   {
    "path": "index/d.json",
-   "sha256": "ab9869800e13479d169d64536a7b19bbc77fad6a11bd511bcd8636201cd14139"
+   "sha256": "3b77849acad930e57dcb3ba4f362c21183107dbd3780e340be01b2a9f3b4085f"
   },
   {
    "path": "index/e.json",
-   "sha256": "f6ea02a173bce98054adb83b8276baae33bcbe2e9b64d3b6bac2606a137fc86c"
+   "sha256": "6b31cd1306fa3c3701883af01c3c6a7603cdb26c2abfae86777140de485dd349"
   },
   {
    "path": "index/f.json",
-   "sha256": "e84ffcfc34ada20a195d32f9e87365243b0d2f9254aa2fe9c23630b6cbea3063"
+   "sha256": "79c23cc8f6587c77030e89b511638f8f7efeb41bb3891a993c93c44a8af8104f"
   },
   {
    "path": "redirects.json",
@@ -156,7 +157,7 @@
   },
   {
    "path": "reports/1-canberra.json",
-   "sha256": "69d4c5f6718c845bb708054583bb14239501f764935fd122d56370464a07d18b"
+   "sha256": "bc1f38b6b24f7bc796c3f7d27f4bebbd833a963ae60a0416b8be3dcd284086f4"
   },
   {
    "path": "reports/1-king-albert-park.json",
@@ -180,7 +181,7 @@
   },
   {
    "path": "reports/10-shelford.json",
-   "sha256": "484d52be6f1e637e62a55050cbb3a6f952d9184bf66d2d65896898e5e1caa9b4"
+   "sha256": "bf6c0fba719d84c5d6e87f6c6c9e21bfa030e560e132492d91fdb49adb304bd9"
   },
   {
    "path": "reports/11-amber-road.json",
@@ -304,7 +305,7 @@
   },
   {
    "path": "reports/76-shenton.json",
-   "sha256": "d90e61e5dd67100dac1cd0a37bf4cf97054a7efb9205c512c4453dfeddf85c51"
+   "sha256": "74ffb636b066e78a264cc00a4c148889160bb5835d78fefd765d7837e31a60f4"
   },
   {
    "path": "reports/77-at-east-coast.json",
@@ -364,7 +365,7 @@
   },
   {
    "path": "reports/a-treasure-trove.json",
-   "sha256": "41cc2825ae5376b4c1a627513b41012d4306dbc56bb5c2fa4d2073b8b0b9d9f1"
+   "sha256": "52be1161b05ea02c203beb28c7ed0cac2247d398919cd9b4ad911ca1a8032a3f"
   },
   {
    "path": "reports/aalto.json",
@@ -408,11 +409,11 @@
   },
   {
    "path": "reports/alex-residences.json",
-   "sha256": "45f0ae47982ded02f8da3a0d8ec45840a4c167530ff724148e1ad45d528bd36a"
+   "sha256": "ec00761132cdd5a18a4c8e1d3dbf5db0bca07b107a178a367c6eba2eb17bd4e8"
   },
   {
    "path": "reports/alexis.json",
-   "sha256": "34806a3c1c2d58d4f752e156513744f64f151e495f771715ca01948b2de5742d"
+   "sha256": "d754445eed8bc7aa854c86d807b1344b6fc9b72f12a1d42541383931b6630ced"
   },
   {
    "path": "reports/allsworth-park.json",
@@ -424,7 +425,7 @@
   },
   {
    "path": "reports/altez.json",
-   "sha256": "8c5bae0f0b610e390fb36eab46fa071b3ed52debaa6db764c7c73b7add78f66b"
+   "sha256": "3dab723703a06eda973e552d0ab882f64e5ded7467384be220c82ca36ff78456"
   },
   {
    "path": "reports/amaninda.json",
@@ -436,11 +437,11 @@
   },
   {
    "path": "reports/amber-45.json",
-   "sha256": "6e890ffc71f67f4bcdce552839c19bac616025a5e1fdc93d05957b81a43e123f"
+   "sha256": "ce74708d3ee474a4b218fcbf34b9a10b740f28c1fb0beacc46e931f3d11cb320"
   },
   {
    "path": "reports/amber-park.json",
-   "sha256": "830dccaa15cc5e22a404e7a8159c619e253997f8efaed6be4707408719ee96a5"
+   "sha256": "cd739ddb419bfba589605db0a50ee61af090638c1b36f6f093489f3e856ad199"
   },
   {
    "path": "reports/amber-point.json",
@@ -476,7 +477,7 @@
   },
   {
    "path": "reports/aquarius-by-the-park.json",
-   "sha256": "563bcecbab4a361bf91c3a9bed1c07ad91e1acb1e7e2b83489f8d59ca4c7d971"
+   "sha256": "739b94130d9080af2e9f6e8b37648693b5a91194b5b0fba07e4a74508e593373"
   },
   {
    "path": "reports/aquene.json",
@@ -484,11 +485,11 @@
   },
   {
    "path": "reports/arc-at-tampines.json",
-   "sha256": "a8d363bfea80485fbaf05f65a82e4d8bb54462572de134c536c0086060797edd"
+   "sha256": "0197d140d9af4ec5edb5cc87f3e7be50b5db511a86317743995f323ffadc463b"
   },
   {
    "path": "reports/archipelago.json",
-   "sha256": "f5065b84a0aed89b63a7cb3c10bceba3b7dcb38b35ea73b9e0e81b8e9291cfac"
+   "sha256": "8e1685eac855be1d07a34b179c113ba32c2a3997a7526e3a696ac72cc100dcc7"
   },
   {
    "path": "reports/ardmore-ii.json",
@@ -496,11 +497,11 @@
   },
   {
    "path": "reports/ardmore-park.json",
-   "sha256": "f11d6918e010b9aaf1b67b93b6e7b5cd80fe50e8dc2e936839067871c68e6650"
+   "sha256": "cb848d700a536db8ab4af2e37c2845534ff0a322c8c95ac90d0f4f7a9bd04d1e"
   },
   {
    "path": "reports/ardmore-three.json",
-   "sha256": "6071b36db134111cd7f9c985a9dfe99b6b560bb169750ecc0020b9979eb04e7b"
+   "sha256": "69d4f4d2ee68cd753b430df0c651537d05d68999b6af290b197a91da1289b868"
   },
   {
    "path": "reports/arena-residences.json",
@@ -516,7 +517,7 @@
   },
   {
    "path": "reports/artra.json",
-   "sha256": "64ffc40e73e38fc4d3361325a50b33af7049485942b14046b0472e24af949414"
+   "sha256": "d85d5831a2024543277147432c5df4c2498c709603fe49dea24c1f9255ec71b5"
   },
   {
    "path": "reports/ascent-at-456.json",
@@ -528,7 +529,7 @@
   },
   {
    "path": "reports/aspen-heights.json",
-   "sha256": "a6b839b3769bfa822724d723061d47e2deb53d896295d375cda2670b0fa50a42"
+   "sha256": "604f5a007fdd09d9b46fb56f124e84a5d63ffe8238734f21f0708b036d08cfed"
   },
   {
    "path": "reports/aspen-linq.json",
@@ -588,7 +589,7 @@
   },
   {
    "path": "reports/austville-residences.json",
-   "sha256": "0cb238906fd32967af3515bf53cb2846205b23d99b0aa855275f7711b1a6ff62"
+   "sha256": "def171ca9e0600295e0e2e90cab79abc7e69d36402c6d8cdbcf0811cd819b533"
   },
   {
    "path": "reports/ava-towers.json",
@@ -640,7 +641,7 @@
   },
   {
    "path": "reports/ballota-park-condominium.json",
-   "sha256": "c4708663a1061efb448762118b7c2be600a81996748620e1193b9d833384ac14"
+   "sha256": "a091929366b19777e9247f25c00e7beeaf240d91bbc246649417c03f94d6925d"
   },
   {
    "path": "reports/balmoral-8.json",
@@ -684,11 +685,11 @@
   },
   {
    "path": "reports/bartley-residences.json",
-   "sha256": "051b9be1ac10a36065af873358379292dd51ebd6e48536a4ee33a0ad76d133da"
+   "sha256": "93fe17e0de34592c5a27898c7e988594e27e8bee7f8a8510a41e53a4eb1617bb"
   },
   {
    "path": "reports/bartley-ridge.json",
-   "sha256": "51b0f40f0cfa1fd85656dc6687e0e77c67961b78157ad00fa5a7ed856aa7c154"
+   "sha256": "66947b749bee9ab772cad012922a6935968612ee91b83ee24762fad4703bfad6"
   },
   {
    "path": "reports/bassein-court.json",
@@ -700,7 +701,7 @@
   },
   {
    "path": "reports/bayshore-park.json",
-   "sha256": "7ad4f5edfcb23d83b699b6092bf13b6de6134457601adba4ee5672da2dd250cd"
+   "sha256": "3f95d2b3e5d29c1a66e2854eceb147623cac27088a040b3940c843439bd78350"
   },
   {
    "path": "reports/bayville-condominium.json",
@@ -740,7 +741,7 @@
   },
   {
    "path": "reports/bedok-residences.json",
-   "sha256": "c9b6f9586949ffe306741d931a978bb4d5c6f3a1eeecebb418efe2c02edef397"
+   "sha256": "a68da862413f386628a93c48faeeeec1dfb1416be1f9f90cf8f77b12003a1215"
   },
   {
    "path": "reports/bella-casita.json",
@@ -876,7 +877,7 @@
   },
   {
    "path": "reports/blue-horizon.json",
-   "sha256": "6ae950c0ca00ed1658c6267a66db09667c7af7cc97f104e4dd02bd2ae350c9db"
+   "sha256": "0341005e0b7e7250f03ec53898e63c4c9d8517b6e5eacb0883ecc503f404df77"
   },
   {
    "path": "reports/bluwaters-2.json",
@@ -920,11 +921,11 @@
   },
   {
    "path": "reports/botanique-at-bartley.json",
-   "sha256": "51221592e858294c1ec18435ca8d169d3de2aa019a7c69bbe0424e0cda914982"
+   "sha256": "bd789dff9feed04946e245b215a2ffa0d34b816eb087b36a189aedfc3b1eb4ac"
   },
   {
    "path": "reports/botannia.json",
-   "sha256": "e68b58461ce2039c3a9fcca4b85fee54d0066ff21091186635287ffbb3694bcf"
+   "sha256": "c5471f58b1d6f084821ef7ace55afb69420f6d274f053ebff1136bc9d0401d05"
   },
   {
    "path": "reports/bougainvilla-apartments.json",
@@ -932,7 +933,7 @@
   },
   {
    "path": "reports/boulevard-88.json",
-   "sha256": "c570668a8a7837edc7c119342fe15ca3c1461eb1734e9097b569238823ccf73b"
+   "sha256": "bb2b6bb01203396405675521041f6a0ebbc91faee2f4877564d6b3897a2a899a"
   },
   {
    "path": "reports/boulevard-vue.json",
@@ -944,7 +945,7 @@
   },
   {
    "path": "reports/braddell-view.json",
-   "sha256": "fd73a57155535e875285cfb9149bd993aae3c342068b33c4d44067ce99b86367"
+   "sha256": "7e89e2dd04b076b3899941c2a4458ae23d8fa00a8538b9cf190c6ead6281cc0c"
   },
   {
    "path": "reports/breeze-by-the-east.json",
@@ -1000,7 +1001,7 @@
   },
   {
    "path": "reports/butterworth-8.json",
-   "sha256": "e579665382984df2fe186922c979a48ac402a224e1abd117d21f5dad4aa2e6c5"
+   "sha256": "2d7aa4e3da809dde8938eee5556b120191a437f4d1d9dd3264e16caf7a7b3818"
   },
   {
    "path": "reports/butterworth-view.json",
@@ -1108,15 +1109,15 @@
   },
   {
    "path": "reports/cardiff-residence.json",
-   "sha256": "d122610c521720476970426436bbc59043aaef0690f0ce836e3f9fa3e88ffe5b"
+   "sha256": "c55fd45922c54d85bd30135d534dabb7c811fd4ef930b298cceec0d7ba9526e4"
   },
   {
    "path": "reports/caribbean-at-keppel-bay.json",
-   "sha256": "5774177130848369cac7b49ab74c02e3aef0e635a27a70de3b6ce1b046cd3ee5"
+   "sha256": "7f9aed64e28097f7c0b1799c54b0d9b5daec9673c80831243793df8118d58740"
   },
   {
    "path": "reports/carissa-park-condominium.json",
-   "sha256": "d8dfa9f06197c06bbc7c1a005a5ed2b2d21996721085726ba551256b7b867806"
+   "sha256": "ba19e89d6caafdb1c2d4513c918ed78086260082180e85cb5bd6cd4eb0246a45"
   },
   {
    "path": "reports/carlyx-green.json",
@@ -1144,7 +1145,7 @@
   },
   {
    "path": "reports/casa-cambio.json",
-   "sha256": "a06df4627204618c7e75a864e911502127f738ee6ac9c9f71b043f41eaed4c7f"
+   "sha256": "b2376f4ef3ecc75a140ca2974d3911d7d0bab8da826f690196133fbf51b55807"
   },
   {
    "path": "reports/casa-emerald.json",
@@ -1180,7 +1181,7 @@
   },
   {
    "path": "reports/casa-merah.json",
-   "sha256": "aeb99afd9191f4ce6c575eaa4c8773c04170ae86530d08e8810a3c481ca3d84c"
+   "sha256": "295a79e6f8dceb71750cdf9ac5cb01f5caddae1a9b70b5b29099002db638a199"
   },
   {
    "path": "reports/casa-meya.json",
@@ -1212,7 +1213,7 @@
   },
   {
    "path": "reports/casablanca.json",
-   "sha256": "0ef988b97e6dfa07cc90c6ec5c5fef3603bd53aaa25a9e8f3ca43d1d19ad3c6d"
+   "sha256": "2e86d9c29de511b15dc64f6f173b942e337d6f009e89c20979539104dd656008"
   },
   {
    "path": "reports/casafina.json",
@@ -1232,7 +1233,7 @@
   },
   {
    "path": "reports/cashew-heights-condominium.json",
-   "sha256": "d67a403cf197232522604f0f65458e5b6955f5d26b6694ef85367169b58d0644"
+   "sha256": "5860b9560040730188b9f3ad17e8af3731c7a1b0cedb5ed01022bf89111067dd"
   },
   {
    "path": "reports/cashew-park-condominium.json",
@@ -1252,7 +1253,7 @@
   },
   {
    "path": "reports/castle-green.json",
-   "sha256": "7b77ad8ed845452bbd2b2f7a61ee63b21c1bb2d02667b409395c9c4e7e2de501"
+   "sha256": "09e71a47af8ac4f416da6511a80341eed6450b5cba5b8b29561e4233c2d4d6af"
   },
   {
    "path": "reports/castle-loft.json",
@@ -1316,11 +1317,11 @@
   },
   {
    "path": "reports/central-green-condominium.json",
-   "sha256": "7572eac2d8f2ded607f6eb563b22a985b220dac1a65ee90d2699a2266e81c957"
+   "sha256": "afe0cd65ba587da87bf1f22275c895acea454f7711af190dc510797cfbac2cb0"
   },
   {
    "path": "reports/central-grove.json",
-   "sha256": "c0b9c84c9722367f764f380c8f8b6d4f9b881a352d05de5a5c0e4a64554d22e4"
+   "sha256": "72dd66cf2b1a3d3e277a26b952f7092e745162d79d48741fb1c0bfcae445d37f"
   },
   {
    "path": "reports/central-imperial.json",
@@ -1344,7 +1345,7 @@
   },
   {
    "path": "reports/centro-residences.json",
-   "sha256": "01bbc447d03f751a1f6c6809b8e45efd5070dba7c015381837d2846a7c51553c"
+   "sha256": "440c4a5409abcf45c00d610cb50c14b9bb2db0554f9bd9e542ca960dbac0bf5f"
   },
   {
    "path": "reports/century-mansions.json",
@@ -1376,7 +1377,7 @@
   },
   {
    "path": "reports/changi-rise-condominium.json",
-   "sha256": "b39a98ecd5790cc6096fcec2fee798b727adbb639654c8836ed9c2f123d50b8d"
+   "sha256": "69de034d206ad678dfd4e96e929a1577e3cc5d5d29a69f1935f68011444f45d2"
   },
   {
    "path": "reports/chantilly-rise.json",
@@ -1464,7 +1465,7 @@
   },
   {
    "path": "reports/city-gate.json",
-   "sha256": "97586daa62ec344426afe1bd28be245ab17082f37f77c7aa11829b67f276cbb5"
+   "sha256": "d1a35e738a1e20bb551bbb70ec431567923be53d4523d80bd305166883132ee6"
   },
   {
    "path": "reports/city-loft.json",
@@ -1480,7 +1481,7 @@
   },
   {
    "path": "reports/city-square-residences.json",
-   "sha256": "369bc02f5c02e5f467a199009f11516052e3eb15030e5111cd7bb73df9838a6a"
+   "sha256": "e28b5e82d6ad8b4ac7f4fdaf2cb4677912fab5517e53149d78b7b753dd23e392"
   },
   {
    "path": "reports/city-studios.json",
@@ -1492,15 +1493,15 @@
   },
   {
    "path": "reports/citylife-at-tampines.json",
-   "sha256": "7c8c5f911c2e9c6ac94e463899ddbc0847c204d898acc6061aa2278b1d517846"
+   "sha256": "cd8bb10bc6af461db6af0e11a1c97556c1108a655f4b7f17da2ec42200dde183"
   },
   {
    "path": "reports/citylights.json",
-   "sha256": "b93dcc7d7743127f1b6405791c061dff7a09ca23d4308b97eba45d2fdc838d4e"
+   "sha256": "b7ccd61821779aed2fff945e8dfc97e2e1c4718b3cb475fbecf3efb4d103764c"
   },
   {
    "path": "reports/cityscape-at-farrer-park.json",
-   "sha256": "c273830a78640c09f6dcc455e32e3cd8a5ab877bbce297be58cbba48edb0a583"
+   "sha256": "fcac7e0c0e38e8beac3aa980a46a00e6b762eb51059cb171ee192f5a6f66b778"
   },
   {
    "path": "reports/cityvale.json",
@@ -1536,7 +1537,7 @@
   },
   {
    "path": "reports/clover-by-the-park.json",
-   "sha256": "45709a46deb32f4ed4e5e78da120b71366c431ffa1a887b6b6be32ecc4e36ed9"
+   "sha256": "4914a6b5463a3632c76a6b4b5b50df9afca81ec6178ed84da9bad5fdb79b49a5"
   },
   {
    "path": "reports/cluny-park-residence.json",
@@ -1568,23 +1569,23 @@
   },
   {
    "path": "reports/coastline-residences.json",
-   "sha256": "d3ce8d200a5bbed73be9bdea6a12626008e1d540540a48b154dad0d72faa285d"
+   "sha256": "f6e363c01e4e2e93e36829fe74f7fc80ddbfcc8ba44a417dbc7a8f646e8aeef5"
   },
   {
    "path": "reports/coco-palms.json",
-   "sha256": "969cda7a01b099f905164fff6bd9557054a289de619bde69c7ce952944fc5dd8"
+   "sha256": "f6f1492a8afc6152b1cf9f214a185b2379b04ca929fe7c04974876da85dc1745"
   },
   {
    "path": "reports/commonwealth-towers.json",
-   "sha256": "449560deda176079bb2b79d837284b2726eae75398a4861265c57828e75e6df0"
+   "sha256": "bcaf802bf18e98e64576a63bdb898948f3f46d77a16d0c93b1e53c14be71ff9f"
   },
   {
    "path": "reports/compass-heights.json",
-   "sha256": "0d54c9dde1cc60552b86622ffd1752281b458c404c040726cf866d0075f6f085"
+   "sha256": "0d0a33acf1a518c6760bc609c5ea535cab4844347b384980acf372e746c308b3"
   },
   {
    "path": "reports/concourse-skyline.json",
-   "sha256": "1ec3b83f8a0db3aad87e92a8a693fe8b206e37f74c86d806145ca3d6f740a677"
+   "sha256": "9b4e7047aef06931d81d4ba4a24adb89a25a655569edee64a2d150b9b1c35e25"
   },
   {
    "path": "reports/coralis.json",
@@ -1612,7 +1613,7 @@
   },
   {
    "path": "reports/costa-del-sol.json",
-   "sha256": "c7a7c703bae1df92f373b3b27c1c4624cccdea73615bc8ed0494644824eb0a3d"
+   "sha256": "36ca3e4ff4614185fd59479ff78996b4f3017f95899befb43b84136a1005e688"
   },
   {
    "path": "reports/costa-este.json",
@@ -1620,7 +1621,7 @@
   },
   {
    "path": "reports/costa-rhu.json",
-   "sha256": "4f8a95c8b258090e7fe064fb8df4b7ad80d273ff2716a9b51bb3f33fee517568"
+   "sha256": "0215d3545fbc7090772fea2ea08c12bc3213db3a9884f072e42b012465c80e15"
   },
   {
    "path": "reports/cosy-23.json",
@@ -1632,7 +1633,7 @@
   },
   {
    "path": "reports/cote-d-azur.json",
-   "sha256": "3c82446e0e2d9a5fe62fb5bfcc39beff4f09815febe5f0d5847592bca913b874"
+   "sha256": "e532f63327a3a85f40a18623526ad1469213b9c4e58c3c6ff7208deadd08059a"
   },
   {
    "path": "reports/country-esquire.json",
@@ -1768,7 +1769,7 @@
   },
   {
    "path": "reports/d-leedon.json",
-   "sha256": "4ac9737da42f0486112b6513c39e6970702d2952d6fbed5ea0e47212dbd2239b"
+   "sha256": "a39ccd7b52de508792f6cfab7d559f3fc5c4c4880353ac737155a635d7dc1dc9"
   },
   {
    "path": "reports/d-lotus.json",
@@ -1784,7 +1785,7 @@
   },
   {
    "path": "reports/d-nest.json",
-   "sha256": "cdd0f2af49696490fefc46ab1e131a71693692cb81ba16a719af0abd598e5304"
+   "sha256": "c8e7ec1c0e42fbf00bf019e8476ed2b576ac3909307111461192d28d889f7d67"
   },
   {
    "path": "reports/d-oasia.json",
@@ -1852,7 +1853,7 @@
   },
   {
    "path": "reports/de-royale.json",
-   "sha256": "6e586969d975effe6257c4262c570e099e6c76f634f9ae6636f8211332eb6d6a"
+   "sha256": "d37c94796db5c52526f84b15e9db1855b03ee436a6d34ad42f9ea95e22b8874e"
   },
   {
    "path": "reports/delight-court.json",
@@ -1896,11 +1897,11 @@
   },
   {
    "path": "reports/double-bay-residences.json",
-   "sha256": "8a75f732ab7d623e8849356d171023627aecf2300303b6495d9fd61b7011908f"
+   "sha256": "970dcf62923c6ed26f709e5d88d504f3ad03a1c685a78394fa72a8569e35d7c4"
   },
   {
    "path": "reports/dover-parkview.json",
-   "sha256": "949d762cc27548aab65696e186d2a3d5be7659e01bdb3e71d3a0861b19a1178d"
+   "sha256": "6cbf928fafbaa64a1748ab2e22fbc0978232841b8edae6c8ef1f40309cd9dcd0"
   },
   {
    "path": "reports/duchess-manor.json",
@@ -1948,7 +1949,7 @@
   },
   {
    "path": "reports/duo-residences.json",
-   "sha256": "1b97a78d8fbd19dfd5afcad44cc30908b5170759e8d0c9a71481f8b0083a2ea3"
+   "sha256": "6a0ccf657e89095a47376bf75a0da5127181e019a80fcff0be8dee0635b31733"
   },
   {
    "path": "reports/dynasty-garden.json",
@@ -1960,7 +1961,7 @@
   },
   {
    "path": "reports/e-maison.json",
-   "sha256": "f6748952da5fb6027e3a19dd09c83ed685493eb94b2f08511316a4b895132301"
+   "sha256": "fb65a786eaaf5dcd3d3d5e338fa06b4f0c57797e041c55451172bf681647f115"
   },
   {
    "path": "reports/e-space.json",
@@ -1996,7 +1997,7 @@
   },
   {
    "path": "reports/east-meadows.json",
-   "sha256": "280df9439b0cdc7ce25bd2608c8cabfddd107c796accb053e0a03fbd30f2563a"
+   "sha256": "a42bd237df3aa3b9599416daa68179c9c725e52723de0eb57cf60062c543362e"
   },
   {
    "path": "reports/east-mews.json",
@@ -2048,7 +2049,7 @@
   },
   {
    "path": "reports/eastpoint-green.json",
-   "sha256": "2a4a9a181827859780e1178c51e14946e7c97fe49b99cca91a05ebb979211d91"
+   "sha256": "9782fb7f9928c2e675f2a8000627c65094438a5b252819caa6a95a0e5bdd0952"
   },
   {
    "path": "reports/eastside-loft.json",
@@ -2084,7 +2085,7 @@
   },
   {
    "path": "reports/echelon.json",
-   "sha256": "fafd5f777918edbc664225f820ef4b9bfb2a5804a8b31df5db254e668495d108"
+   "sha256": "93e98338c2e833c2e9498ea276783ec1b07861d4f0786a56da44d134c410dd20"
   },
   {
    "path": "reports/eco-sanctuary.json",
@@ -2092,7 +2093,7 @@
   },
   {
    "path": "reports/eco.json",
-   "sha256": "add7a7a82c61ecec197dd558218513b1e55ee952f7f458fd4477f4960ccb70b8"
+   "sha256": "a5b060ae3c2934ef19797ae59c52b06543c23876122ffdc8fc97723079eb84c4"
   },
   {
    "path": "reports/ecopolitan.json",
@@ -2104,7 +2105,7 @@
   },
   {
    "path": "reports/edelweiss-park-condominium.json",
-   "sha256": "0f7353cb9c5eabc57007d9526fd8a47cfb7095fa35fbae7db43b4b01a2dc3e85"
+   "sha256": "58d6f0f0a70166ba8bdc70be2b11872019633629d06674d155a870a44ff5be61"
   },
   {
    "path": "reports/eden-crest.json",
@@ -2128,11 +2129,11 @@
   },
   {
    "path": "reports/eight-courtyards.json",
-   "sha256": "37d564bd4b80bb6678f8d358103ac63148e483bc041cafdc1f7c76fe9af9ada1"
+   "sha256": "ac5bdc95ac88976abe47530806e4f95a7906c3708cd834dcbee32732671b4eed"
   },
   {
    "path": "reports/eight-riversuites.json",
-   "sha256": "ef82c6269d3719d7a7eee7a74a6088b7bae8730e8118624a0c3ecbea012ebdaa"
+   "sha256": "71c0104a90424148fb228f890ffeba8733a341e280108e2510c5e09dd34af656"
   },
   {
    "path": "reports/eis-residences.json",
@@ -2140,7 +2141,7 @@
   },
   {
    "path": "reports/elias-green.json",
-   "sha256": "214ac35d8a737d78b89540e202c4d300eb78713e116d1b0d33465073d82f5dcc"
+   "sha256": "f62607d599a7ad03ba9c2b7742bec929685d02b3aeac0040d18a5a89a214b149"
   },
   {
    "path": "reports/elizabeth-heights.json",
@@ -2220,7 +2221,7 @@
   },
   {
    "path": "reports/esparina-residences.json",
-   "sha256": "cd8276aa2404554c438c370365b0da69aa817bad1dda70637bce23e025502aaa"
+   "sha256": "946004fba4bb87f7e86f26c2541631835eada1c484656f57535fcbedc228d4c9"
   },
   {
    "path": "reports/espira-residence.json",
@@ -2260,7 +2261,7 @@
   },
   {
    "path": "reports/euhabitat.json",
-   "sha256": "f90f527834999cd988b3d3ccbc8c1a973001640b355f000664a25bab565c2853"
+   "sha256": "933e8a20eeeede6d7661b7470cfe631b6e687853349e7b9c5116e1facc116026"
   },
   {
    "path": "reports/eunos-park.json",
@@ -2292,7 +2293,7 @@
   },
   {
    "path": "reports/evergreen-park.json",
-   "sha256": "3acfc7663185ae0fe120d80987f319a931d32a2bd13a86020d83ca3fbbd4b303"
+   "sha256": "d639853ceae1635055943c92c5c8765ecd16cf0384af1826849575749e75c564"
   },
   {
    "path": "reports/evergreen-view.json",
@@ -2340,7 +2341,7 @@
   },
   {
    "path": "reports/fernwood-towers.json",
-   "sha256": "30015b790c7911c443a86eecf13fc0ade018267d78aa037a21920f6a71af9b69"
+   "sha256": "251431cb767971ffadcfc264a304a066de33317b8ca5ec4a7cebc8577e8ac939"
   },
   {
    "path": "reports/ferraria-park-condominium.json",
@@ -2376,11 +2377,11 @@
   },
   {
    "path": "reports/flamingo-valley.json",
-   "sha256": "946d58402d573ab292fde3aaf768721968f5a9f092f5100139a94c9255017f5a"
+   "sha256": "6e0afb4f8f3badd67e694996b4abb850957b8b7710770c5758f6be634ec99ec1"
   },
   {
    "path": "reports/flo-residence.json",
-   "sha256": "35289288880e6a4dbf8748d7a2804f266a36110be18f931749a176bada4e1c8b"
+   "sha256": "f1ff625002d9875a4bffda50d2c37717a2da628ecc6f02d2362fa072fae03eaa"
   },
   {
    "path": "reports/flora-east.json",
@@ -2412,7 +2413,7 @@
   },
   {
    "path": "reports/foresque-residences.json",
-   "sha256": "77845155e8665a18bd5ca198675f9145a6c25967712c4783a43071e573e21ad1"
+   "sha256": "ee07d6495b413f608bd3f82caf5abbdc42db15fa6ae883e2c47be69c6f953d81"
   },
   {
    "path": "reports/forest-hills-condominium.json",
@@ -2420,15 +2421,15 @@
   },
   {
    "path": "reports/forest-woods.json",
-   "sha256": "0f1e2e80bae11860e78406d312b1dfd0a9cdc2b74ac9554796986d27b0be7955"
+   "sha256": "ab0524a513b6ae852635576ab74cde674b429015d03e6e58ef8d28e9b818a283"
   },
   {
    "path": "reports/forestville.json",
-   "sha256": "6062fe2e8147aaeb7d16831b9875d43ce0d53aa7aaa201159db9b10a7d7b9d05"
+   "sha256": "bc4f0c07a76a98d9b08c51882a576791a4f4ee32180cbbf6c124f6405942e16a"
   },
   {
    "path": "reports/forett-at-bukit-timah.json",
-   "sha256": "efdaf16d40d74c5935cfdbadece36ed42b306e5fe485db8ca98a4b3a5c370646"
+   "sha256": "ae8950100d4e85d375e9c659ec5b469bb1ada6a2462a7faefb153b781f93ba7c"
   },
   {
    "path": "reports/fort-gardens.json",
@@ -2524,11 +2525,11 @@
   },
   {
    "path": "reports/gardenvista.json",
-   "sha256": "a115f01ecd7bf6263e2f78b16959b7ec3d1a2479e67c01e2d580722f0eac7b69"
+   "sha256": "1411399cbbb49f6e96a598ae169dc68c03127809b989a845870ddda91adaf7be"
   },
   {
    "path": "reports/gem-residences.json",
-   "sha256": "333ecb77b1e2f47db79a7a99d060d3ea9798dbcfb4c5d4d9f0962bf214f0a05c"
+   "sha256": "ba96756d9098f8fbf983f43ce40c713ec6a448e0b166df06e1bac7975d7b0521"
   },
   {
    "path": "reports/gemini-apartments.json",
@@ -2612,7 +2613,7 @@
   },
   {
    "path": "reports/goldenhill-park-condominium.json",
-   "sha256": "39d302bad471a422ed8e02d68ac1cd1a3edd9af95e1e81f97620ab13a6827f2e"
+   "sha256": "859a18ffae2fd2fc8ca33569556b12b107f7f8796a759b1c67d1dbf4e5f67488"
   },
   {
    "path": "reports/goldhill-towers.json",
@@ -2668,11 +2669,11 @@
   },
   {
    "path": "reports/grandeur-8.json",
-   "sha256": "3aa3c47f293eb34cc1aa344c80d6cbd58d9d8d516fe393c6d80e9782407e2954"
+   "sha256": "837426698042430ff241ad2e2533d5754144cc1ef16f3396d824efb4e84a68de"
   },
   {
    "path": "reports/grandeur-park-residences.json",
-   "sha256": "df4c335376a487aa9fe53247d584d89be0d220ae79d42b3b7114bab3faadf049"
+   "sha256": "ea473dfbb01ac3a4e79569e9a1b33f3d6247dfbdf7c97ef27df4230a019c4165"
   },
   {
    "path": "reports/grandlink-square.json",
@@ -2716,7 +2717,7 @@
   },
   {
    "path": "reports/guilin-view.json",
-   "sha256": "b418e0c2908fad99af2f3927b77966746bddf639fe52c1adcab9fb439b4556a3"
+   "sha256": "23cf796fe1d7782f28145ff4534bf6c3d7461033b5d4d427697ba3db9844aa30"
   },
   {
    "path": "reports/guillemard-edge.json",
@@ -2736,11 +2737,11 @@
   },
   {
    "path": "reports/h2o-residences.json",
-   "sha256": "a66dd944143062aed1911b6e9d685fa2563f7342600e9eb0eddc0743b41a2a77"
+   "sha256": "ba5fdd2106b800f2986c3e6d988d89b0b9dfef4d8ba176abf364b87e4b1002f1"
   },
   {
    "path": "reports/haig-162.json",
-   "sha256": "7702e30502f4edd9cee29c083b63d25800e0e31c5da3686573f8a6fc66989507"
+   "sha256": "8f38728f81dc29eee82a1bce38a48b7c77359306a4917cf444b729ceb245c379"
   },
   {
    "path": "reports/haig-apartments.json",
@@ -2804,11 +2805,11 @@
   },
   {
    "path": "reports/hazel-park-condominium.json",
-   "sha256": "3df096ceaca60d09570e1c29c485ee3faa9ab403f5a212dc6377d969a6667256"
+   "sha256": "c74762485af0345fdf045e48f0cd9718e203e8400d6380283b8068e50b9e24e1"
   },
   {
    "path": "reports/hedges-park-condominium.json",
-   "sha256": "4774ecc0a5e47a2ac5d39aba6a726bccdc76dc61a557dd94a33cfc644172f617"
+   "sha256": "5871f1e872cefa71284e3e7329dcb8d58fdc636db0e2696f0942ca292183d888"
   },
   {
    "path": "reports/heji-gardens.json",
@@ -2828,11 +2829,11 @@
   },
   {
    "path": "reports/heritage-view.json",
-   "sha256": "2ca51586d0506b11a0d039cdc992ff15529bb9e49d431a87b98c8b25d7c8370c"
+   "sha256": "c48e5818b4537b9cab4b6d65e1a65ff55cecf6ee107a17cfa5db22f0d25d61cf"
   },
   {
    "path": "reports/heron-bay.json",
-   "sha256": "ff61cebb16362d3408bb7c190e799bdeeea8d1a3c4def29a4afa3bfdb1ea3e1f"
+   "sha256": "eae648dabda8c93d8ec22ddec40d903874bb5a58e09c6d9bd0848eda7280169a"
   },
   {
    "path": "reports/hertford-collection.json",
@@ -2848,7 +2849,7 @@
   },
   {
    "path": "reports/high-park-residences.json",
-   "sha256": "5bc1ddb87948c5e848f30c8535e4f7ce106b26e1d9517c49a0dbc2822a1c5d11"
+   "sha256": "383cae673703ec44b482be2b78e3318d80988f3ed6219e06dfc4e8d90d33618d"
   },
   {
    "path": "reports/highgate.json",
@@ -2864,7 +2865,7 @@
   },
   {
    "path": "reports/highline-residences.json",
-   "sha256": "5738a8247637e96bb63017c3e01f6c5e84e1243c9ee5d0897b606d159a939447"
+   "sha256": "1a8581db773b06c14a86f0c3f0837760b62def7c3e8ba754424994f53bfcd538"
   },
   {
    "path": "reports/hijauan.json",
@@ -2888,7 +2889,7 @@
   },
   {
    "path": "reports/hillion-residences.json",
-   "sha256": "a7aeb63d9af9e87f2fcbe6fb2c5e57464511104650c73b93c88ec0936b83c79a"
+   "sha256": "4545202145ee79ac7c4d2b2439cf220038049efe1833125eccd122434f60378c"
   },
   {
    "path": "reports/hills-apartment.json",
@@ -2904,7 +2905,7 @@
   },
   {
    "path": "reports/hillsta.json",
-   "sha256": "915b1ee8cf3bf580f9b08a09a5ffc6c290eaef190566f10f80a46d1cdb3c66fa"
+   "sha256": "5b580b2f0384a8d57378440b14aa3cb69a91a1770eb9acbaf94434c881afe18c"
   },
   {
    "path": "reports/hilltop-grove.json",
@@ -2936,7 +2937,7 @@
   },
   {
    "path": "reports/hillview-regency.json",
-   "sha256": "6865e6664e5a9f72ba9c36e93d170f2db8cbc3db4ff9580eb182b81fd6bc7123"
+   "sha256": "659f9084217514f59ee112a0019b09a177c6fc8443f2bea305be8c903f562d65"
   },
   {
    "path": "reports/hillview-residence.json",
@@ -3052,7 +3053,7 @@
   },
   {
    "path": "reports/icon.json",
-   "sha256": "e36cab7520e47e65e3a7d351d5d26e739516bf591c9100081c8c64bb50ed22d9"
+   "sha256": "d8ba6cc512da776b8f5daf5e4d492eea5bc8e5b20af08c0e10d7e276b772c5cb"
   },
   {
    "path": "reports/idyllic-east.json",
@@ -3116,7 +3117,7 @@
   },
   {
    "path": "reports/ivory-heights.json",
-   "sha256": "59b3460ce6a398c1e9202bff77d163387741dfeae746845f1992b99f0fdb5557"
+   "sha256": "e9751c777da1e4ce123ffe40ef5e34180d9604887a91ed491573feddd9739900"
   },
   {
    "path": "reports/ivory.json",
@@ -3128,7 +3129,7 @@
   },
   {
    "path": "reports/j-gateway.json",
-   "sha256": "09e3dba834e298d9279c20f6aad080629d39ededf093de543024329717952fdf"
+   "sha256": "bc424427d5dc0dce869b37b939df6791dc9fff02e5e1c0ed246d60c0dd8dc802"
   },
   {
    "path": "reports/jade-garden.json",
@@ -3192,7 +3193,7 @@
   },
   {
    "path": "reports/jewel-at-buangkok.json",
-   "sha256": "318790d129e8da66e421cb83ab04f8f45a504776c2ddb8821885e3a6deca592f"
+   "sha256": "e73f9f50cc25d130b0b85cdb2674b477500d60d71635dd2348c773fe19c3b1f0"
   },
   {
    "path": "reports/jewel-of-balmoral.json",
@@ -3312,7 +3313,7 @@
   },
   {
    "path": "reports/kensington-park-condominium.json",
-   "sha256": "859c7c9536f028083abf1caf19bac963e2db78759ca6d3c665ce4d0d81da0b0e"
+   "sha256": "85c4af5b18bafa3e4186cba75d2195a740511cc8e8ca1bf8486e2d2cf1f87871"
   },
   {
    "path": "reports/kensington-square.json",
@@ -3340,7 +3341,7 @@
   },
   {
    "path": "reports/kerrisdale.json",
-   "sha256": "ca3b59265da5591b92e65a2b1a54e0eb637f53153e4e2bf5c3b40606cdd5b793"
+   "sha256": "e976e94a971d462e6ef841b0ee309b0119d4cb7dcc7e402f520b44246ff6cce0"
   },
   {
    "path": "reports/kew-green.json",
@@ -3380,7 +3381,7 @@
   },
   {
    "path": "reports/kim-sia-court.json",
-   "sha256": "243816a39eea90728c7cd955f734d254ca9406493b79bc4582805dc7947191a3"
+   "sha256": "bdf993afddb4f6e63cce410f94484a07f120be2fc1a2efa333cd6352ff79982d"
   },
   {
    "path": "reports/kindol-gardens.json",
@@ -3400,7 +3401,7 @@
   },
   {
    "path": "reports/kingsford-hillview-peak.json",
-   "sha256": "dbfd1f318c928ce8d35e5879d769721b68306286e90ac7178a61eb1848fbb4d6"
+   "sha256": "e85ca798e1c4573341daf6c6478722a2021d461b021cdf7342f317c68e47ab58"
   },
   {
    "path": "reports/kingsford-waterbay.json",
@@ -3456,7 +3457,7 @@
   },
   {
    "path": "reports/kovan-melody.json",
-   "sha256": "2b7ac76ea7b11bbce9a9c85feae631ccc03004d496afcaaf96f89a7a903240cc"
+   "sha256": "de18e19786849fa024012d28002f73f0cfb1d46965f9e8e397d556b6fc79daf6"
   },
   {
    "path": "reports/kovan-primera.json",
@@ -3468,7 +3469,7 @@
   },
   {
    "path": "reports/kovan-residences.json",
-   "sha256": "dc6633d8ba889d294831418cf85624bbf39cb006b6d479b31d437c6d0c3ed75c"
+   "sha256": "f3f631011bd41982b84f7058a67e9fc5566d40fa2c7621ec89273d740f03d40d"
   },
   {
    "path": "reports/kovana.json",
@@ -3492,7 +3493,7 @@
   },
   {
    "path": "reports/la-casa.json",
-   "sha256": "941e24e95c49be9b63dfe5bcd7fc27a2ed8362de820b800e7d1319c8c99644f6"
+   "sha256": "7b6f8cf35f12ea2afcc122342bc8f0974a9792e66df2e405cf298922d1c5fb1c"
   },
   {
    "path": "reports/la-crystal.json",
@@ -3504,7 +3505,7 @@
   },
   {
    "path": "reports/la-fiesta.json",
-   "sha256": "96579b0c34f8e734651d533a7d0b8fb67a9926952125d20330e3e53d52653484"
+   "sha256": "0752cc3afa6c670d6a1e125bdf6d3d9d1928319c144e14e0e361dd72960e0c17"
   },
   {
    "path": "reports/la-fleur.json",
@@ -3532,7 +3533,7 @@
   },
   {
    "path": "reports/lagoon-view.json",
-   "sha256": "b2aadff5cef5a2fec1f608576f73722cba0716ac65b1874d91b99ed9e4de2fc3"
+   "sha256": "fff6669de1b203d152e7edf61c63dbd6a139adcba6c0d576c7ae8e01d1b21c31"
   },
   {
    "path": "reports/laguna-88.json",
@@ -3544,15 +3545,15 @@
   },
   {
    "path": "reports/laguna-park.json",
-   "sha256": "838c273a748aaad5d1c8614ce03983956ad452d381f9c046e2957f85b764a526"
+   "sha256": "f23af970188e381166e1c853a81e1de0661b22e614e526f37d4d28524715db2b"
   },
   {
    "path": "reports/lake-grande.json",
-   "sha256": "7d022fbd6fd52e8ed96a561325958a295b3a22de4731f164077219d59e4c68bd"
+   "sha256": "08c26433fee938b4fcfe85f3c20c62cf5b3129332ee7640f1b227e456d110fd0"
   },
   {
    "path": "reports/lake-life.json",
-   "sha256": "d49d0cb748614bac8040048c61a281c8af377ccf0d3c53ab0fe581f17deb0aae"
+   "sha256": "6bdcb5e39ba9be9ad46724e7346728be304e2bcb219b079367264a825c0d2dbd"
   },
   {
    "path": "reports/lakeholmz.json",
@@ -3560,7 +3561,7 @@
   },
   {
    "path": "reports/lakepoint-condominium.json",
-   "sha256": "0f5aad6a7fd1c739f21f084acfcdcec1cc3481de988f4c54b539fc683e3fd961"
+   "sha256": "83e94f2114699b8a47b276702c1f9763df48a18542704bd3afda4118573c7935"
   },
   {
    "path": "reports/lakeside-tower.json",
@@ -3568,7 +3569,7 @@
   },
   {
    "path": "reports/lakeville.json",
-   "sha256": "2dfa402b15f1a32fb069050b7d23aefe88f44812724b501f1ac3def9b457b821"
+   "sha256": "f3e9abd1fc8753457e5e47c9284c36487dc953f3e20391641630f37f81aa9c79"
   },
   {
    "path": "reports/landbay-condominium.json",
@@ -3632,7 +3633,7 @@
   },
   {
    "path": "reports/le-quest.json",
-   "sha256": "b0f1feeeaa9bbfff6f6a57b195218a9e4b4d7130d036b31a578dc95d90fde52c"
+   "sha256": "7cb19b75278faf526dd2c699536cb3f61a3be68de72cf1c3186f813dc663a43f"
   },
   {
    "path": "reports/le-regal.json",
@@ -3668,7 +3669,7 @@
   },
   {
    "path": "reports/leedon-residence.json",
-   "sha256": "047c63af508cc40fc632b7b44fef8693301cf37c6860eadae3bae1d36dd1b433"
+   "sha256": "d0d7a9e4597c0cf3538f45de952a661a580c12d44149a603aabd9f836cca78c4"
   },
   {
    "path": "reports/legenda-at-joo-chiat.json",
@@ -3748,7 +3749,7 @@
   },
   {
    "path": "reports/livia.json",
-   "sha256": "a53919ec4a03973660888001c8a5b962c32f56f4c0433d3401bdf4592a7bdc96"
+   "sha256": "8a35029c2ae64963082e906a4e7930e79cd37febac000462652900cb52a1d47f"
   },
   {
    "path": "reports/livingston-mansions.json",
@@ -3880,7 +3881,7 @@
   },
   {
    "path": "reports/mandarin-gardens.json",
-   "sha256": "54b4deea5f39fba9c645815a3ff1a526a0da93a1ee2f18061ecc5f20e4befefd"
+   "sha256": "da43dca4acfcc6221ed2404bd32d93120198a799bc875dad0180b0868a3517a2"
   },
   {
    "path": "reports/mandarin-park.json",
@@ -3912,7 +3913,7 @@
   },
   {
    "path": "reports/marina-one-residences.json",
-   "sha256": "00735c2f8961be59788ea79b67143fc172fc85d57df7d0be19a5ed0062cc4ae4"
+   "sha256": "cc3e62ce3ae0201e34f3361981907d26ae0aeed3d4a9ce44914a08bff966d341"
   },
   {
    "path": "reports/marine-blue.json",
@@ -3948,7 +3949,7 @@
   },
   {
    "path": "reports/martin-modern.json",
-   "sha256": "00726a5b4f13d4d6b5a0881c07f8d7d318ece19477e9b68a807418eca7c8d3ea"
+   "sha256": "28d79b79e87a8ce27f353bba38dfecc65265cda952974c86df923735b7f01e42"
   },
   {
    "path": "reports/martin-no-38.json",
@@ -3984,7 +3985,7 @@
   },
   {
    "path": "reports/maysprings.json",
-   "sha256": "0d998e11b50cb564846a7ba42e5129d4ca7c488bb03e743cca75425d62f5ce34"
+   "sha256": "73b721dc290ffc4b9172d9cc110dd40d9d558df6e2a6eb27eb47b2cb1af54c5a"
   },
   {
    "path": "reports/meadowlodge.json",
@@ -3992,7 +3993,7 @@
   },
   {
    "path": "reports/meadows-at-peirce.json",
-   "sha256": "27f535a23f1b7fcffc3fe3aca903361f1937d577a3715202bbe96d3e75bf4262"
+   "sha256": "c093f21859a3c6a103945140332dbf04fbd6630c6dc679960aad60793ae5e701"
   },
   {
    "path": "reports/medge.json",
@@ -4020,7 +4021,7 @@
   },
   {
    "path": "reports/melville-park.json",
-   "sha256": "00b87a36d83b8edd2ea87b1b839bb382e114cf2fb3dd09562d453739003c519f"
+   "sha256": "9c2ac9abddda896d18f2e0e8a4f5f8d874a9e259f2d4f6325c0587096f21f38a"
   },
   {
    "path": "reports/mendon-spring.json",
@@ -4080,7 +4081,7 @@
   },
   {
    "path": "reports/midtown-residences.json",
-   "sha256": "7f606bdbae8706f23e1fcbe1fe97423a0658a4c3d9e79176b8eb4877b69bd472"
+   "sha256": "2049da1406072e256e6f19e1426262edc3f0c47a697f457c01656426c40dbe3e"
   },
   {
    "path": "reports/mill-creek.json",
@@ -4296,7 +4297,7 @@
   },
   {
    "path": "reports/neptune-court.json",
-   "sha256": "c8ccdddc5f301eaa0f0fb1546771f888418845c62f0386d62f9af47411dca687"
+   "sha256": "bb87c6e1da08862ce0c29938ce245c215a41ea535e97fad510ede0f9241a306d"
   },
   {
    "path": "reports/ness.json",
@@ -4360,7 +4361,7 @@
   },
   {
    "path": "reports/nin-residence.json",
-   "sha256": "0167160ebeacffae1aaec72e24a0e72158d31e317dfe81a7f27ef427fb00253d"
+   "sha256": "8928e45735938dbfc0c9313195d7e8acba373db2f429db4e6fddb292f52a0902"
   },
   {
    "path": "reports/nine-residences.json",
@@ -4384,11 +4385,11 @@
   },
   {
    "path": "reports/northvale.json",
-   "sha256": "e7352a28ca3cd39bd2145371a740ac89aef34cd99ba20caa268cd112625f1b64"
+   "sha256": "8700cc423c818aedc5df294b954449eff71f2224140fe2085972afd02b9403c5"
   },
   {
    "path": "reports/northwave.json",
-   "sha256": "b1ef0f01f50e313e2ffa7f010de2805061179e35f4a67208a14bc1384799a6f2"
+   "sha256": "10d9035dc2e6d6d3a8332af50f43393b390338fcfb1da60a0aa7dfb159772e12"
   },
   {
    "path": "reports/northwood.json",
@@ -4440,7 +4441,7 @@
   },
   {
    "path": "reports/nv-residences.json",
-   "sha256": "3f3534827abc12011d5f83f77fa62fab7d77e9b897b42c70f94e9aa699023b5a"
+   "sha256": "1a500f0b6e31b2430a97a4c5b98703d30e3cd8cc90a867a1ba67f703676cf28f"
   },
   {
    "path": "reports/nyon.json",
@@ -4464,7 +4465,7 @@
   },
   {
    "path": "reports/okio.json",
-   "sha256": "cc4da5544b29a1636b9a7f8eb608316367489aa2831a2b388d7fe222f3979ce9"
+   "sha256": "ba98091707c673e4105c86571abb290fcc819d508c88a844030c31f43b6201ab"
   },
   {
    "path": "reports/ola-residences.json",
@@ -4476,7 +4477,7 @@
   },
   {
    "path": "reports/oleander-towers.json",
-   "sha256": "903d9b7bdbdaf3fa3a8ad55331240a2ddb73a3184f340de47b1bc459307068ee"
+   "sha256": "1d91e601c346c60f493fb20f3a4fbc2ab7b129dccd2df118d4d7ca41ef13f421"
   },
   {
    "path": "reports/olloi.json",
@@ -4496,7 +4497,7 @@
   },
   {
    "path": "reports/one-amber.json",
-   "sha256": "afb3e17f606933060fa28ecf4ac24805ae0ea1c9302662d58940496a109215cb"
+   "sha256": "383bb70ccf5634c948344a46e15896ce5e9edf00046a84674bfdb673315e5187"
   },
   {
    "path": "reports/one-at-pulasan.json",
@@ -4616,7 +4617,7 @@
   },
   {
    "path": "reports/orchid-park-condominium.json",
-   "sha256": "fe4a9f54d1525a635139a9cc210f07ea26ee7517b48572d1355e248428aeae40"
+   "sha256": "fd16f3dd13554a5622c46c03a423d0f47be1152225cb6b087e2e3139ac7dd59e"
   },
   {
    "path": "reports/orion.json",
@@ -4624,7 +4625,7 @@
   },
   {
    "path": "reports/oue-twin-peaks.json",
-   "sha256": "b7d6939904487a0d228c27fbcac1e25cfdc68227d42a09d63eb77cae527d57ce"
+   "sha256": "f1f5f108562fcd43468967ae0956580d51ec4b3bc23b27da788415db52848dda"
   },
   {
    "path": "reports/oxford-suites.json",
@@ -4660,7 +4661,7 @@
   },
   {
    "path": "reports/palm-gardens.json",
-   "sha256": "82a483d0d6ed2c4e0ecaaa15f1c30c65a06f93ee67e3a190d8ab96f7705692c4"
+   "sha256": "51b62607a26c3a3418922267ea76a722eb43c1892bd445fa259908b1024bd736"
   },
   {
    "path": "reports/palm-green.json",
@@ -4676,7 +4677,7 @@
   },
   {
    "path": "reports/palm-isles.json",
-   "sha256": "0c1d7272cb1cfee78c790155454559a0952770b15b67dc33d1e08bd59d584de7"
+   "sha256": "e4d2ca0e9e6dec4699557d1b13b6581fb4d647cc0dba9510bb5ca700f48901e2"
   },
   {
    "path": "reports/palm-lodge.json",
@@ -4744,7 +4745,7 @@
   },
   {
    "path": "reports/parc-botannia.json",
-   "sha256": "1bc56683c12631108539b0c0e492c2c78fb27c4edce5ee30645d04c5408e44e1"
+   "sha256": "8e03701348c342024626e2ded697ab0627fde5906a54916eb4761978461b62db"
   },
   {
    "path": "reports/parc-centennial.json",
@@ -4752,11 +4753,11 @@
   },
   {
    "path": "reports/parc-centros.json",
-   "sha256": "971ebc4f356c7999527889ea2335174e8e648d16682279fe88db2beaaa96bfb9"
+   "sha256": "5c8223109283dab36b28979b58d50fa83951fbe7fd8bc382dff78d0c681c6749"
   },
   {
    "path": "reports/parc-elegance.json",
-   "sha256": "d2e7126fb209387ce7be9f5a909d5576438420076a5153c6c205a1ef81553da9"
+   "sha256": "21b412eb4fb12653bfa8fcd3d997dfc2641976362db0cffd5bf8361937006b2c"
   },
   {
    "path": "reports/parc-emily.json",
@@ -4776,7 +4777,7 @@
   },
   {
    "path": "reports/parc-life.json",
-   "sha256": "c26d569ee9f0b08e8c94c017d26d28d968f389043472917ae367a08b34fb5639"
+   "sha256": "c33562e33e9000bbd812e9bb656920c7e5a27afd4c52d4b3aaa039981b96ca14"
   },
   {
    "path": "reports/parc-mackenzie.json",
@@ -4788,11 +4789,11 @@
   },
   {
    "path": "reports/parc-oasis.json",
-   "sha256": "9b2adff10cb701a9c6d5e0ce6dc63cece1cc2f2de3a0c0192eeefb0801c35d9c"
+   "sha256": "3ad09911b379d599127258a1a221e58bc97b5747517109cbaff2a1f066b697d8"
   },
   {
    "path": "reports/parc-olympia.json",
-   "sha256": "45e594478321d2a58f2cfeca4645d665fac97d883189fecc8cedd273cf359554"
+   "sha256": "40c3866f97c4250c689fc79d7d04c5c9d8f82b43ac1c3b685d71eb6c53e800b4"
   },
   {
    "path": "reports/parc-palais.json",
@@ -4804,11 +4805,11 @@
   },
   {
    "path": "reports/parc-riviera.json",
-   "sha256": "e07a222ff8b9eb04c74455a5ea5d84cfca8f60b1035271ec057286fcc980cd95"
+   "sha256": "d106d9b4d5e8cefd6915b69c537d884e6e189d6dc3b8871b745253f3190a1345"
   },
   {
    "path": "reports/parc-rosewood.json",
-   "sha256": "01d0974b7195390e3d2992b7b26a79f65953fb5dbeb93ceda3caf42ae6fc19fd"
+   "sha256": "98cce24559b2f9d7c0cbeff1ed4cabf0fee76599bdc5b18904a894284ab6e275"
   },
   {
    "path": "reports/parc-seabreeze.json",
@@ -4828,11 +4829,11 @@
   },
   {
    "path": "reports/parc-vera.json",
-   "sha256": "b9e2c2f7c17c69cf1d356c56bd80c1d667747dba0cfcfa61de2e94acd2e00902"
+   "sha256": "e201c740079577ccf3128322f67a7255229b62297091f5303db639c1965a29d3"
   },
   {
    "path": "reports/parc-vista.json",
-   "sha256": "5d07ea0d89c6ff5843206e29910dee9ffd1cabd42dc5393abff9067b635fb99c"
+   "sha256": "a2dcceb88e51ecb765571268c3e97fe282aa8c84334d9f306be3574b8d9488aa"
   },
   {
    "path": "reports/park-1-suites.json",
@@ -4856,7 +4857,7 @@
   },
   {
    "path": "reports/park-place-residences-at-plq.json",
-   "sha256": "705c39ec13f3972af3b9eee31c30ca4c51de994e4bbe417ebb1fef2f89cc1ce1"
+   "sha256": "02321b5d2a99791500b5d617f94b9484c741ceae88abb0ee221022d017fbe864"
   },
   {
    "path": "reports/park-residences-kovan.json",
@@ -4868,7 +4869,7 @@
   },
   {
    "path": "reports/parkview-apartments.json",
-   "sha256": "a358e8bce85bfa7f036b886a3e2ebd3fa3f976a7bf59746352bbd5ff27d8e165"
+   "sha256": "188b09dc24c053e8425bff5be7e7fb152829e00bfdcf6b2bd215da881dbf0306"
   },
   {
    "path": "reports/parkview-eclat.json",
@@ -4968,7 +4969,7 @@
   },
   {
    "path": "reports/pine-grove.json",
-   "sha256": "53a1323ce62422d5163d0fa7d0f0c40b459d16e05d14d2b794a4097c507c08fe"
+   "sha256": "1c699e28758b909b923046bff2944ff8f7e1a0082dc0bb6714391b953d24fc03"
   },
   {
    "path": "reports/pinehurst-condominium.json",
@@ -4980,7 +4981,7 @@
   },
   {
    "path": "reports/pinewood-gardens.json",
-   "sha256": "79b8fa471c63482d7c849730c610ac49f72407c56d58aeae15e80aa4afa49bd2"
+   "sha256": "37810c42120c8596205ba1410927dbb5dbc1b37bbef597f146c3df356fc4092e"
   },
   {
    "path": "reports/pinnacle-16.json",
@@ -5040,7 +5041,7 @@
   },
   {
    "path": "reports/principal-garden.json",
-   "sha256": "9834d7e3f2a63672df1052d857a8759fe56bc9c8190628cee5acae5f93a2c480"
+   "sha256": "d84a6c3bf6e26f1f2714be9227e4b2e4055756ccfb195bbcd1e72fa816b8495f"
   },
   {
    "path": "reports/pristine-heights.json",
@@ -5048,7 +5049,7 @@
   },
   {
    "path": "reports/prive.json",
-   "sha256": "4bd22a3f35ae3c8937e1242cf8c7075ede7210d95cb75c168f6a21ff86f0c9ae"
+   "sha256": "0e1cdd3fec8106214c869172970845f82e7821faf65892a825daaa271e9b8b06"
   },
   {
    "path": "reports/prospero-ville.json",
@@ -5064,7 +5065,7 @@
   },
   {
    "path": "reports/q-bay-residences.json",
-   "sha256": "b5aee22ed600a3957551c518d46f05b48b9aaae2fdfd3a416a06bb11ad067c7d"
+   "sha256": "896f03f24699a073055cf3d1277f123946afb3d000bc4303d32e6f221ddcd73b"
   },
   {
    "path": "reports/qube-suites.json",
@@ -5076,11 +5077,11 @@
   },
   {
    "path": "reports/queens-peak.json",
-   "sha256": "8e388277b61f201e6b1fe6df961a95f88257b06516bdede51697e79e2e96c15b"
+   "sha256": "19f1f4d29c765c6b329a0afcc0b958e128c0c1dd97e45bab50f99a7784bce875"
   },
   {
    "path": "reports/queens.json",
-   "sha256": "586117a9522cdeaf0c29a4192994eb241121332a0981915ce20c0b662a09e28a"
+   "sha256": "173c052d667de918e96c1a0c3a777f86dcd008d0d59197467120ae377c179d7e"
   },
   {
    "path": "reports/queensberry-lodge.json",
@@ -5140,7 +5141,7 @@
   },
   {
    "path": "reports/reflections-at-keppel-bay.json",
-   "sha256": "5526769854d4a041abfbc4ecf6f244dae3709a373f69ddfdc637ee952d9886e6"
+   "sha256": "144f1b44d10b7c2e39489d30ff4c4e0425e22395f86b2126c686c0082e70d54c"
   },
   {
    "path": "reports/regal-35.json",
@@ -5164,15 +5165,15 @@
   },
   {
    "path": "reports/regent-grove.json",
-   "sha256": "568876863ce64338240cfe26fa15d111ab4cf596829840858bbc10d434b93cb6"
+   "sha256": "e7444aa82819fd8af4c6551795e4159791f8d89048e82b49a5ca71f2bf9e5143"
   },
   {
    "path": "reports/regent-heights.json",
-   "sha256": "da8ecee811c4f62ea658e7d894f082c8626c59953f6b3219ff981590951cde1e"
+   "sha256": "4aeb40de67866c91f64c850a1af0ad7c2e3675ea8bae1a55aea4febb9b20b75b"
   },
   {
    "path": "reports/regent-park.json",
-   "sha256": "037d091d41b660d7000aa4efa5a0965b072caf81bf0c8513edf00b0a483a5b3f"
+   "sha256": "5afbee9ad69cfc3fdadae416937d1670eeda0acb9dd1f0cd49611e65338e2077"
   },
   {
    "path": "reports/regent-residences.json",
@@ -5180,7 +5181,7 @@
   },
   {
    "path": "reports/regentville.json",
-   "sha256": "3f86003c7fc35075076fa0b46198dfdb1929a898a4dda6029de479c26330c6d4"
+   "sha256": "d0351810cdaa09443e7964603893a69c14e1f4e63274be891f11e08e62e7d2f1"
   },
   {
    "path": "reports/regis-mansions.json",
@@ -5248,7 +5249,7 @@
   },
   {
    "path": "reports/rezi-3two.json",
-   "sha256": "77e7a6b936fd0d9c42093304dd1ff3e61b279bceaf817fc6d817ce6cef617dde"
+   "sha256": "cf36d19137327d48b8cb865e26c5277ea39a107c90b95d5e6ffd31306d34a8cb"
   },
   {
    "path": "reports/rhapsody-on-mount-elizabeth.json",
@@ -5276,7 +5277,7 @@
   },
   {
    "path": "reports/ridgewood.json",
-   "sha256": "8f5aad0d821d6f5663111d1fa875948fe93b8fa67ac0e582ee7112659a2e100b"
+   "sha256": "d48f01bb894b78c0d8a52604ba19097fcdb5cb2d6c0d145fbc637aac0928e6a6"
   },
   {
    "path": "reports/rio-gardens.json",
@@ -5284,11 +5285,11 @@
   },
   {
    "path": "reports/rio-vista.json",
-   "sha256": "8041b9fa98a7f17836a3c1559c535e732c830ad1e93bc4dbdbe9da9f84c4048f"
+   "sha256": "3c73585a6b9efb93e6cd1261d99fdde6b9cb10ab9e6d9cbaeff3ece98cb98c10"
   },
   {
    "path": "reports/ripple-bay.json",
-   "sha256": "666d578666f9e1d95f631e2d03e998a052882f8ec26616e3ab333157e200947c"
+   "sha256": "c470c8caf9ee3596bee4506ccc8b07dd2c3ad57089baee8daf692f356ab4b317"
   },
   {
    "path": "reports/ris-grandeur.json",
@@ -5320,11 +5321,11 @@
   },
   {
    "path": "reports/river-isles.json",
-   "sha256": "57534af07d57061a45ce64ad34757df3764e6882c939ca8fa7e8c24eef48a7b5"
+   "sha256": "a4d97f2c794b9e9363c2edaf8b92463c0caf9d5b6b6e74d1bf49020bf3da4212"
   },
   {
    "path": "reports/river-place.json",
-   "sha256": "7867c572b8a6434ddfb1e472be1392c0c053c77a2fb9d83275e8ae898608ff5e"
+   "sha256": "f36ac38034cb5a0863d0e3330786f30af5d6aa0dafa75007ec4d3cb19b741b69"
   },
   {
    "path": "reports/river-valley-apartments.json",
@@ -5332,7 +5333,7 @@
   },
   {
    "path": "reports/riverbank-at-fernvale.json",
-   "sha256": "083e2d921a28287c020fd3df4e1eb84328b713afd1177245c77c0780c8bb65ab"
+   "sha256": "63a8c4f02becf92a9907f7258356498c377ee4e40b216c36fcc215a8d81d0da3"
   },
   {
    "path": "reports/riverbay.json",
@@ -5340,7 +5341,7 @@
   },
   {
    "path": "reports/rivercove-residences.json",
-   "sha256": "f05fdca1df456a210dfd035f1b2a46bbd2994e82e63c190cfb1ba09c88e9dbde"
+   "sha256": "d57063fa17d152b47f33b9eb89209a03412b8f4d7d498d141392aec53fab7603"
   },
   {
    "path": "reports/riveredge.json",
@@ -5348,7 +5349,7 @@
   },
   {
    "path": "reports/rivergate.json",
-   "sha256": "f16230be23364fd2f96d77befad164e48ab9ebb9d9546316533e6771f634d2dc"
+   "sha256": "7f4a1ce85be82d94eec7a6027cccd9cfbfae3c14d5e1f5753b4982bd6621a6c5"
   },
   {
    "path": "reports/riveria-gardens.json",
@@ -5360,7 +5361,7 @@
   },
   {
    "path": "reports/riversails.json",
-   "sha256": "8b57bd7e4ad04078df13e4d5a5568ca1780bbbea2e5d92c25e05180f5f80278e"
+   "sha256": "b4c695b65b1688ecb1af443d974a37e0a075192d47ebeaebc7ed2366d3c0fc4c"
   },
   {
    "path": "reports/rivershire.json",
@@ -5384,11 +5385,11 @@
   },
   {
    "path": "reports/rivervale-crest.json",
-   "sha256": "c701960f10a5ae66e8c6fa8d1fe1d68ea27122cd6bb12aca1753fc7fa5cab9e9"
+   "sha256": "be3b7f10a14dae03f7465c388966757770dd4c9325134d8d657a6b40c7020cb4"
   },
   {
    "path": "reports/riverwalk-apartments.json",
-   "sha256": "2ed607671838eee787e8e499196a9ca12e41bd58ec9556906ccf66e3816d9b85"
+   "sha256": "2a3f04aa57712cddd4d0f33ac5407e0b152c616fb4f689f9234b1cdefcf20174"
   },
   {
    "path": "reports/riviera-38.json",
@@ -5464,7 +5465,7 @@
   },
   {
    "path": "reports/rosewood.json",
-   "sha256": "84280a42fa612e2c0ce9cb478afcfcf86e5690bef0f4799046591e3feb73a629"
+   "sha256": "1eb1b431207464b33c0b024196af793d9eee706b48feec2c23b0f7d95e225bf4"
   },
   {
    "path": "reports/rosyth-lodge.json",
@@ -5544,7 +5545,7 @@
   },
   {
    "path": "reports/sanctuary-green.json",
-   "sha256": "98a3f57f8f66d05fa48fe6c0752f090bac2eaa6f80a77721b791c41457402a8e"
+   "sha256": "f4eafb5b5f34e7305febae69a5510a1dbcc1890c833abb6f1e07fe5393ed33c7"
   },
   {
    "path": "reports/sandalwood.json",
@@ -5572,7 +5573,7 @@
   },
   {
    "path": "reports/savannah-condopark.json",
-   "sha256": "da77d72a8abf84111b3fa365f726df97735cb4f45cdd8113f245018f78472302"
+   "sha256": "54e71560c693e707e4599bac214a5bf14c264847a8062c9d1dc4ac38ae91de91"
   },
   {
    "path": "reports/scenic-heights.json",
@@ -5632,19 +5633,19 @@
   },
   {
    "path": "reports/seaside-residences.json",
-   "sha256": "89c9b90757012c02ed4e04a47e25957d4ccfdf7870f48d0a87c198529741f548"
+   "sha256": "3d1b4c0bc0019c0f7f6879913184a483d58e903c1a8a171b7ce62b2c1975ebf7"
   },
   {
    "path": "reports/seasons-park.json",
-   "sha256": "2990dc710c8c27b60ff2325b4aa5ada55714c54d5a20a7798226c8ed178cee12"
+   "sha256": "617c960d7693ab12d6f6d674fdba295acc725e5b11a403d815407ff0b05d5673"
   },
   {
    "path": "reports/seasons-view.json",
-   "sha256": "5d251724714a22d31969cbe3f3fea73043e682667b2ab92532af3054c523fe5c"
+   "sha256": "b945de2d8ecbbd787139deb9a921b7fc0f3381257822262cf8ac2785d8c8b32a"
   },
   {
    "path": "reports/seastrand.json",
-   "sha256": "96ef1c19d4fefd30c3932716f76ba192e4cf7978174bdee4b942445bb1136287"
+   "sha256": "ca9d69af2e6a7750402fde82c3b18c07fa602cf75b52bb56d7f49203f95bed7e"
   },
   {
    "path": "reports/seasuites.json",
@@ -5796,7 +5797,7 @@
   },
   {
    "path": "reports/signature-at-yishun.json",
-   "sha256": "53079195e3d10710f2d5033217ce0e496ac71379aa88d4f07e4bcaeef076287b"
+   "sha256": "34186df3b427cefa35728ce78695aa2c2d2ce183d64c371917366d32b2cbb053"
   },
   {
    "path": "reports/signature-crest.json",
@@ -5804,7 +5805,7 @@
   },
   {
    "path": "reports/signature-park.json",
-   "sha256": "419923dcc95b6954c26e352a4b3d7a8d24223f228cf9c604bdf3524bf3388adc"
+   "sha256": "20f51b3e8c67a96207d9bb6b67d56f7f1d073b0420e8678dd46d8976bbb9e4ad"
   },
   {
    "path": "reports/signature-residence.json",
@@ -5820,7 +5821,7 @@
   },
   {
    "path": "reports/silversea.json",
-   "sha256": "aa20223be10e966485e1b2623a86725ae1f8c7b36bb69b9ecb6403b2e490a4ec"
+   "sha256": "4ac079a1ffcd2f9ffdee0dcefd970d68bbcc73abff86d84a25e5012df2d55d93"
   },
   {
    "path": "reports/simon-plaza.json",
@@ -5852,11 +5853,11 @@
   },
   {
    "path": "reports/sims-urban-oasis.json",
-   "sha256": "537514aa54631fa55f1cf94e8b51f59fed32e2e0a863e6c1b72cb9bd6a8dfd04"
+   "sha256": "a7e28cfdf1d63276df15a32fadabdadd29576a3b4579fe5d2f5dc9f382244d74"
   },
   {
    "path": "reports/simsville.json",
-   "sha256": "709f074bd36dfc0d6ba32dd7108fb452d20e801d2c6ab1736145557a13183bc3"
+   "sha256": "6ef6e8073946bdbce89f1f67a93d4776088cf86f10aeb4e08af1dd605f273db2"
   },
   {
    "path": "reports/sin-chuan-garden.json",
@@ -5884,7 +5885,7 @@
   },
   {
    "path": "reports/skies-miltonia.json",
-   "sha256": "45960645d185fc1dbd83f46d25fdce2a63226b47aa672eb64f629c9d56ae2f22"
+   "sha256": "e54b4d28ce972fac53e6a18d15e5e6297a5fa016d695ab24f2f9168309839b95"
   },
   {
    "path": "reports/skt-mansions.json",
@@ -5900,7 +5901,7 @@
   },
   {
    "path": "reports/sky-green.json",
-   "sha256": "f21054196ee6597c9f6ad6c387ec51393a1576314d4f6b9dc780f79598bebf31"
+   "sha256": "009f21368eac016ddb60c94b05758c0ec9d116101c24e2a3e6a51014b08dfa10"
   },
   {
    "path": "reports/sky-habitat.json",
@@ -5908,7 +5909,7 @@
   },
   {
    "path": "reports/sky-vue.json",
-   "sha256": "41261a77afff77e625930995720602b61d1222af97227d7dfa88f8e3ac5e2bf8"
+   "sha256": "847198aea1b2f493635fb50b0366b48cf37422dc054a8fe0ad49bca20808dcf3"
   },
   {
    "path": "reports/skyline-360-at-saint-thomas-walk.json",
@@ -5928,7 +5929,7 @@
   },
   {
    "path": "reports/skysuites-at-anson.json",
-   "sha256": "0bc663f0161b39be56a1690c2f2f4ddc0d0c071f5d9aae9d9eadd5497fc9884f"
+   "sha256": "df41d64231907e825c8a7b5c259d0d8425857eab2299299499568edd8a6129a9"
   },
   {
    "path": "reports/skysuites17.json",
@@ -5952,7 +5953,7 @@
   },
   {
    "path": "reports/sol-acres.json",
-   "sha256": "3fdd3f00afaeadbe70e665bde14a33f16e0c9b93b57b2b5aff45b28c71ffd0f0"
+   "sha256": "4c1085de1663fb5c455f851526ebba5b5f055d88db2317d6144e81a8452822a4"
   },
   {
    "path": "reports/soleil-at-sinaran.json",
@@ -5976,7 +5977,7 @@
   },
   {
    "path": "reports/sophia-hills.json",
-   "sha256": "65b44d54e4564dbcf8fb0f89c727b3a7effee7c5e58e218aa221a095008d759e"
+   "sha256": "a5de98024e2882aba5f8040e25b5be242335ac7c211324225162bf86013078a8"
   },
   {
    "path": "reports/sophia-lodge.json",
@@ -6024,7 +6025,7 @@
   },
   {
    "path": "reports/spottiswoode-residences.json",
-   "sha256": "dc3050473cd1c7f27d97c283c012f32cea73e219f8c12fec5402743970f575cb"
+   "sha256": "0d5d617cc85d239623a3a344af1520407974d64844227268101dcb0744ccadbd"
   },
   {
    "path": "reports/spottiswoode-suites.json",
@@ -6104,7 +6105,7 @@
   },
   {
    "path": "reports/st-thomas-suites.json",
-   "sha256": "9ce192322c743e9efbe6c2e9ef8ac3d34e01a00477ad10b2897f560b6f35a619"
+   "sha256": "fdd8bb35e35b2be7349210233e81b5934a40015b1f3c3f7f4f0a4d62e0f7837a"
   },
   {
    "path": "reports/st-thomas-ville.json",
@@ -6124,11 +6125,11 @@
   },
   {
    "path": "reports/stars-of-kovan.json",
-   "sha256": "dbf44b000bac389c892efd27b991c1f0966d316a5a4bfba7a46d576429e6fc1e"
+   "sha256": "a27bc00ab8e87486fa29b638f39a01668740ac9a01f1764d15159f06c9e5d369"
   },
   {
    "path": "reports/starville.json",
-   "sha256": "2572e2d1c53187cda148c94df0eece9fe14aeff3c2d4c049e9b68ab222b7d8dd"
+   "sha256": "e7c558423b39ec526c87d53e842c8b270e98e30a71f9a7f5bd520fcf522d5a7d"
   },
   {
    "path": "reports/stellar-rv.json",
@@ -6348,7 +6349,7 @@
   },
   {
    "path": "reports/sunglade.json",
-   "sha256": "fed1992d69ee82e16af75f65ab360e2bfb76b7daeba6c80e2a607acee2538598"
+   "sha256": "36a7aa735519e56f641b6d63f9cd4af7a55523151c4b90d5d3a6fdfbd1d632af"
   },
   {
    "path": "reports/sunhaven.json",
@@ -6428,11 +6429,11 @@
   },
   {
    "path": "reports/symphony-heights.json",
-   "sha256": "3c6919dc7863d3dad6b03f8a38a8febfc6c15a0b30917ca0f586b89729373d0c"
+   "sha256": "91c181e32e622f9e4a175f4bd2cbe363d63cf6ca39dfa5104a1ffe55bad1badf"
   },
   {
    "path": "reports/symphony-suites.json",
-   "sha256": "0b7c37b9c8cfe6007e27b4ccb01b593ea56ef7057983d2819018ac2f787f1a3d"
+   "sha256": "03108e3667fdf60a5b11d73609fe1910308e3b715ea5b943400b01de6d584dd2"
   },
   {
    "path": "reports/taipan-grand.json",
@@ -6456,7 +6457,7 @@
   },
   {
    "path": "reports/tanamera-crest.json",
-   "sha256": "803047d398edf93cbd1f63c7624e370a694b5ae8ee026a7d1fe47f1ece5c12e6"
+   "sha256": "2c0cf993f9b9fa4ec5e74889df8d6dcc7ce88fd55d281bb08d87499c8d80a805"
   },
   {
    "path": "reports/tangerine-grove.json",
@@ -6480,7 +6481,7 @@
   },
   {
    "path": "reports/tanglin-view.json",
-   "sha256": "733d91bae06ed8d0ae5247a2381744db3a4b40dd766bd57959103132ab94d3ec"
+   "sha256": "1bfa683e18737a046c575766981ec9652af4053e0f1e1e2f7fdafe5192cb2759"
   },
   {
    "path": "reports/tanjong-ria-condominium.json",
@@ -6580,7 +6581,7 @@
   },
   {
    "path": "reports/the-alps-residences.json",
-   "sha256": "e2905bf216fd51a4ec781b38164420fd1335b75ca105adf9a02f30d346b7c3ef"
+   "sha256": "ba73f3731ae09f2fb86d5487f968e0a80106581215407a79bf5bb2f5fbd1f0c4"
   },
   {
    "path": "reports/the-amarelle.json",
@@ -6684,7 +6685,7 @@
   },
   {
    "path": "reports/the-bayshore.json",
-   "sha256": "2cbae203b030c839ee3e69d4d83fb8b57ee6bd93155f3d736840eaabd309d3db"
+   "sha256": "a7fa43a4f12451af6fe97eda5c80ec6f75249198a633d46a988f36b84db4cefa"
   },
   {
    "path": "reports/the-beacon-edge.json",
@@ -6756,7 +6757,7 @@
   },
   {
    "path": "reports/the-brownstone.json",
-   "sha256": "9dd4479a65872c635a00eb757139f2dc7625d66c37e08f88620a7e51853232e3"
+   "sha256": "19ecfc80282e1cd309e82ae20686c2273330c29dcf6784bfe273257bf727690a"
   },
   {
    "path": "reports/the-callista.json",
@@ -6788,7 +6789,7 @@
   },
   {
    "path": "reports/the-cascadia.json",
-   "sha256": "63cb97d724919cbf952cbf44c56805bd1dd61bc8493ad03df6a8cdc9d54f85f2"
+   "sha256": "9b75e66467d83bb765cc46160ab7e2c24158866e22104fd25660d05e291b12be"
   },
   {
    "path": "reports/the-cassandra.json",
@@ -6828,19 +6829,19 @@
   },
   {
    "path": "reports/the-clearwater.json",
-   "sha256": "555a80d62f13b04f4a422e5d55df2d15ed741f42be2ff971c16d57d025200a8d"
+   "sha256": "7b83915f3b1a64cb5196705e571b7e4438230df4295b8765aa821a16ef8c42a6"
   },
   {
    "path": "reports/the-clement-canopy.json",
-   "sha256": "229342b24429815e0c05391a4ef2feda1d1198917fc272646f6b0852c4f21051"
+   "sha256": "71d4fbae383348241e63206f73d3ce6bba99fe9901c301918e1a52c7098d4c79"
   },
   {
    "path": "reports/the-clift.json",
-   "sha256": "21b6c0ad1170e13dc06ec3f40d3cd818c84a558eb816c169bdc0c316260f9867"
+   "sha256": "9914b1cd1f46704c16b28c456ea2d9fed83b714468285030e7bc22a8920adaec"
   },
   {
    "path": "reports/the-coast-at-sentosa-cove.json",
-   "sha256": "eeec8393db529cbadf00277271cf3cecff60229ba14438bd9d5e7f2e5573175b"
+   "sha256": "b4f40faa62a5e29fc24c49a1b8717c001ecdc2808f13f4c5e0308d3249c47b1f"
   },
   {
    "path": "reports/the-cornwall.json",
@@ -6868,7 +6869,7 @@
   },
   {
    "path": "reports/the-crest.json",
-   "sha256": "b1939aceee0bcc930198f1b5dae5a120259441f3090c6c4c0bc25efac94087a3"
+   "sha256": "c744c128a1f539df38c24345bcfcb6c00c574099e72a2c88bdbadf8b0aa61de2"
   },
   {
    "path": "reports/the-cristallo.json",
@@ -6876,7 +6877,7 @@
   },
   {
    "path": "reports/the-criterion.json",
-   "sha256": "3edfcc2f90937122a8bb0e6a8340f77d27eb6d1537ed9ff250de0a6d29fb957d"
+   "sha256": "83e6c863db7819f19a6bd9d04f3196788729654c05db30cb34fec4a02ccd7593"
   },
   {
    "path": "reports/the-daffodil.json",
@@ -6896,7 +6897,7 @@
   },
   {
    "path": "reports/the-draycott.json",
-   "sha256": "f64d4881295ffd1e1a1f455dbf8f138d0ba59e4cb15b1bef0dd29bda9e7b7c63"
+   "sha256": "94af73223765ab2d36047a9506d6bfe369898ec004ccdec1ecdb0c690f67faa9"
   },
   {
    "path": "reports/the-eastside.json",
@@ -6944,7 +6945,7 @@
   },
   {
    "path": "reports/the-esta.json",
-   "sha256": "e1d78cb065c26f9f9447a6058c43d6d40ddae005262c60f0949f1293bbc5129d"
+   "sha256": "e9f7ac0c235f85bc1b952251dd7ce4f23fc1082f320797283acccf3a573c2a87"
   },
   {
    "path": "reports/the-estiva.json",
@@ -6952,7 +6953,7 @@
   },
   {
    "path": "reports/the-estuary.json",
-   "sha256": "9bab7a2f15e76772c9062c27d2c6eab36fdca12cbd1cb6415a8e80a7be114ef9"
+   "sha256": "d66fdf284bda4ebfa8892fdf8a47c0d555886e8a8b6f24575bc4b76b965eb5e5"
   },
   {
    "path": "reports/the-fernhill.json",
@@ -6980,7 +6981,7 @@
   },
   {
    "path": "reports/the-gardens-at-bishan.json",
-   "sha256": "6da24eb243494461a0afa1467e439c201a43e802d0e6b39572ad522f7f156e36"
+   "sha256": "b1a9bf9ae1d1bd8bb306a82fef03703bd0e5368fc367f3327f9338a51f746d83"
   },
   {
    "path": "reports/the-gatz.json",
@@ -7000,7 +7001,7 @@
   },
   {
    "path": "reports/the-glades.json",
-   "sha256": "4a0e304090683743e0bc161aa3f7178661328dfad28f4bbd543095b8286835fb"
+   "sha256": "359c23556c0ccb266483ce95c4a60f7dede67f0131ee51ae17433bb7c2bd7ada"
   },
   {
    "path": "reports/the-glyndebourne.json",
@@ -7020,7 +7021,7 @@
   },
   {
    "path": "reports/the-greenwich.json",
-   "sha256": "bb83e1b3251ff8a0862cf92cb0d63666c53ca84cf354d31e28c87d3215e046be"
+   "sha256": "d1c36fbd1f53da5d3d637d0b7f5bf7ca60c68d5635fb12c52094531341809df0"
   },
   {
    "path": "reports/the-hacienda.json",
@@ -7036,7 +7037,7 @@
   },
   {
    "path": "reports/the-hillier.json",
-   "sha256": "7082288bfd84da85b0787b9816ae73cdf006417a040f3d858cd7227be54d451e"
+   "sha256": "dab0b48e00542e1f5e6609948e966179b21dc890ccf78a3a38e5f57416f32bbb"
   },
   {
    "path": "reports/the-hillside.json",
@@ -7068,7 +7069,7 @@
   },
   {
    "path": "reports/the-inflora.json",
-   "sha256": "409de537f78adaa78dc0230a864914738e1daf9eb30b5e27be0ab16b25f79b14"
+   "sha256": "a812d65a61333cca77a351aabea18fd26e644a89e7d0d4f7a9b6a3ce096b6f58"
   },
   {
    "path": "reports/the-inspira.json",
@@ -7076,7 +7077,7 @@
   },
   {
    "path": "reports/the-interlace.json",
-   "sha256": "b6c90e1710a724c98839edae3ee5187ab8116d295b454f5deb603777e4498c6d"
+   "sha256": "1810d6d2f801231849512b6fd3571f2bc05c3d726ef82a85d62ece54e7af6bc4"
   },
   {
    "path": "reports/the-interweave.json",
@@ -7096,11 +7097,11 @@
   },
   {
    "path": "reports/the-lakefront-residences.json",
-   "sha256": "6bdeab478b225a3b2f556e8055b378ade2e722cab2fa022448bcdcb3ce9b25b3"
+   "sha256": "077945d7cb718d3791030c4df5ea11c00fd3f644a72310b5573f9d295f4b1ab0"
   },
   {
    "path": "reports/the-lakeshore.json",
-   "sha256": "a11b9b202a8a73ddb7b5c241ead34d50b80f8a1f02a17773c12e87f7c1caa16e"
+   "sha256": "232d8e080e1810c9abe3a762c55aa5ef1bb2076a9c6fa623f85083c49515f7ef"
   },
   {
    "path": "reports/the-lanai.json",
@@ -7168,7 +7169,7 @@
   },
   {
    "path": "reports/the-luxurie.json",
-   "sha256": "e6d1d7e0d23154c22f19ebe1d20aba14fc6106960a6ad7ae274641578bf936b2"
+   "sha256": "8e5759cf1917ec8e0b82ebd0a45b4eeb01549d53597c45bbd0347898c9c63e43"
   },
   {
    "path": "reports/the-madeira.json",
@@ -7192,7 +7193,7 @@
   },
   {
    "path": "reports/the-mayfair.json",
-   "sha256": "0c000d85abb256357b6d5ea7b3444d2479c44239ef89866e610d94875ae2c21d"
+   "sha256": "2a045de9d42950135cb5d7146c0f2dc81ae51ff7939a8830fb60b9fac0c5be50"
   },
   {
    "path": "reports/the-maylea.json",
@@ -7212,7 +7213,7 @@
   },
   {
    "path": "reports/the-metropolitan-condominium.json",
-   "sha256": "03857fb457a5ff94807e982fc8d5bc17c14f42429d23c74ca21ca49c9acfb831"
+   "sha256": "159ae11253498e32f6d3279b2a02e630b89ba113432e56444932519975893636"
   },
   {
    "path": "reports/the-metz.json",
@@ -7236,7 +7237,7 @@
   },
   {
    "path": "reports/the-miltonia-residences.json",
-   "sha256": "14c44c0da21f7eb1577de19f47958cb6576fffe36eb40fc7a5bbbd00484422a3"
+   "sha256": "8d70e0c23f83221e17ced06c1ad70a6ad7152cab2083cee7b9ae4cf70d24b8eb"
   },
   {
    "path": "reports/the-mint-residences.json",
@@ -7244,7 +7245,7 @@
   },
   {
    "path": "reports/the-minton.json",
-   "sha256": "46e0325f3f9a78bf65570315d37625f13e10f4fa65df9f99a5af1b8a8052276b"
+   "sha256": "42b2ec1914690a91fa8ec91fb58b73989e64128bbb86d26ae9fd17b358fd8508"
   },
   {
    "path": "reports/the-mkz.json",
@@ -7292,7 +7293,7 @@
   },
   {
    "path": "reports/the-oceanfront-at-sentosa-cove.json",
-   "sha256": "e9542d2a285bef294780d602032292e64d933c47b9027d60585b76006398b447"
+   "sha256": "bb3074a7bcd4a4c8e6d0c1338bf2cf3b88f3fc25dcf341826fb02a36b08d4149"
   },
   {
    "path": "reports/the-octet.json",
@@ -7324,7 +7325,7 @@
   },
   {
    "path": "reports/the-palette.json",
-   "sha256": "49b5c267bf33cdf151d31e9c585bcaedd884d25eac30fdc9f9d5ccee6f350ac1"
+   "sha256": "9604de1cb34254a8be1d115dd390c17a221d8d4538e4ddd34fb59a2b353740af"
   },
   {
    "path": "reports/the-palladium.json",
@@ -7332,11 +7333,11 @@
   },
   {
    "path": "reports/the-panorama.json",
-   "sha256": "e5ad38b4ac7f8db07f33af10b3452f0bacb8b9a9efc97dfb46147a9b4b119b28"
+   "sha256": "a28032bb2a0bb12925c5d7b1b1366281ded1f0d322f6a3b666ac68df1c17c4d2"
   },
   {
    "path": "reports/the-parc-condominium.json",
-   "sha256": "0e2fc07fb3f1a7221ca11ee561a408f77b967ba18e89d830f405dce7568877f1"
+   "sha256": "09c8bb159458b6c0e0bf4ba995a651fbcba20a5a2a4ea6e71ec6f41f18a8a6ce"
   },
   {
    "path": "reports/the-park-vale.json",
@@ -7380,7 +7381,7 @@
   },
   {
    "path": "reports/the-poiz-residences.json",
-   "sha256": "dd2fb471cb3fe8fc33ce660c26508fa15d84461ebcd9da0d6c76f75913ee0b38"
+   "sha256": "8d20c1bf14c97111e509b3e8a4aee9b664dcbd6230b2b641e86bf49196b34ffb"
   },
   {
    "path": "reports/the-princeton.json",
@@ -7400,7 +7401,7 @@
   },
   {
    "path": "reports/the-quartz.json",
-   "sha256": "70ba9bcae3a77531837f0058b8b046e129c127484d9067a1d114421221d986c0"
+   "sha256": "22494dd6c5ef5e07280ffd03c3e54d762d11b64c587945b55fa72d8d68eba668"
   },
   {
    "path": "reports/the-quinn.json",
@@ -7408,7 +7409,7 @@
   },
   {
    "path": "reports/the-quintet.json",
-   "sha256": "6643c42ad31c75d788f5d62fce06905155a34f428fd7f1aeb2c113f973c4914b"
+   "sha256": "a5b47864f3f952b6a8af760f11390c1290e2b07b2903571a793d9e0dfd1706f0"
   },
   {
    "path": "reports/the-rainforest.json",
@@ -7440,7 +7441,7 @@
   },
   {
    "path": "reports/the-residences-at-w-singapore-sentosa-cove.json",
-   "sha256": "77d7fc89e23a14cbd2c7be05df4e7b399f26d5f9c49d59109b623b77ae44bf27"
+   "sha256": "9346ac951888e721841c28bc251e2ebee147547c77e282fe909289a71889a948"
   },
   {
    "path": "reports/the-richmond.json",
@@ -7448,7 +7449,7 @@
   },
   {
    "path": "reports/the-rise-at-oxley-residences.json",
-   "sha256": "8edc61bc68ef90de5450828599ecd1deddf9672ff244a90b2db8c3adddd41436"
+   "sha256": "1b37cffe940d7228b1930517ff54b6f55902c20d0d393b24c016a3b634819eaf"
   },
   {
    "path": "reports/the-ritz-carlton-residences-singapore-cairnhill.json",
@@ -7464,11 +7465,11 @@
   },
   {
    "path": "reports/the-rochester-residences.json",
-   "sha256": "502cb3d487cc48f11648ebf95e25182ca3353df3351acb15d64943a8adbf8a85"
+   "sha256": "c77b664d35d4a78ee37096465384bcc0c7d1f7314cc45640f7adce8c6feee83c"
   },
   {
    "path": "reports/the-sail-at-marina-bay.json",
-   "sha256": "9a767f72bad589acca727cb230a57cd3a23b078add405ebb68cceb77ed3ae960"
+   "sha256": "7c9aea29fa66c9c387671a08361eef245fdf60863683b0d780a85e24a0bc6832"
   },
   {
    "path": "reports/the-sanctuary-at-geylang.json",
@@ -7476,11 +7477,11 @@
   },
   {
    "path": "reports/the-santorini.json",
-   "sha256": "96a9e24bbe5322c1fd77140cb861e98e6b4eea46fb8f1c2e4cf02ea67c247a00"
+   "sha256": "5d0ebc8293b851224a9ef707f92dbc3e41d64625a7f058ce2eed4fbf662609cc"
   },
   {
    "path": "reports/the-scala.json",
-   "sha256": "49ac4d17edc5286ae297eeaffed07d17a0b65e21ec6b0a931b457d631ca9fec1"
+   "sha256": "a061e3d6457a05fe5fc452ee5388b2c12959af945fa3be9eb3249c2aa6f44b06"
   },
   {
    "path": "reports/the-scenic-at-braddell.json",
@@ -7488,7 +7489,7 @@
   },
   {
    "path": "reports/the-scotts-tower.json",
-   "sha256": "97ffa96ba21b7cab8c5a03457fe822b2b5577c8384970cbd229dcd118315e5e3"
+   "sha256": "66b179a875031e263bb032ccb882787308c9af0e9dc41887a1bfc905a77ec27f"
   },
   {
    "path": "reports/the-sea-view.json",
@@ -7520,7 +7521,7 @@
   },
   {
    "path": "reports/the-shore-residences.json",
-   "sha256": "8d19d939981022eb3cecb771776d6457359c2a4049cd84c8e9323a97ffe02d8e"
+   "sha256": "cac4fde2018f7643fc9cdb98c3cd2879e46f5b9094db33f253bf91b34af0d47d"
   },
   {
    "path": "reports/the-siena.json",
@@ -7544,7 +7545,7 @@
   },
   {
    "path": "reports/the-skywoods.json",
-   "sha256": "8dfcbce4a780ac0bef2a95f8026c893d4a0de952353be03d7bbe23a38270d6d8"
+   "sha256": "edca35004f7c9a32d284e592106747d38a10a90d61eddfb61e6ccc74ff7a1326"
   },
   {
    "path": "reports/the-solitaire.json",
@@ -7632,7 +7633,7 @@
   },
   {
    "path": "reports/the-tampines-trilliant.json",
-   "sha256": "6eb0692b8ba2d02bcbfc4741067fca0fb47e71ff623300bf5b9b2b59320d7a71"
+   "sha256": "57fb8667d858fece15bdc50c65725a4a34c1d2c321c92e1f665c8a8af96be4aa"
   },
   {
    "path": "reports/the-tanamera.json",
@@ -7644,19 +7645,19 @@
   },
   {
    "path": "reports/the-tembusu.json",
-   "sha256": "cc6661905899cdeb697f51787365e4864c37ad654871f61926af0e365619a69d"
+   "sha256": "3d046addd3a2a398aadc4a97727b3ca107790b0a178c495c464284e638225aaa"
   },
   {
    "path": "reports/the-tennery.json",
-   "sha256": "5401b72637064d5ab261f3d6e72d068c669e1be2e995884b8fa7186bcc4d1699"
+   "sha256": "ab3c8b7cb94dd7c2c4245b5cba8cc9964e52f00b0acdaf1f2b68e4c3ef4c2722"
   },
   {
    "path": "reports/the-terrace.json",
-   "sha256": "685ac4b3841f391951772dfe1bbf36601208917dcfab63f93b83f6335b3b5364"
+   "sha256": "fa0c64d4f24aff753f7932c51c18f2569d0fbedba9ac42062e494f1a08d4a223"
   },
   {
    "path": "reports/the-tessarina.json",
-   "sha256": "21ef3d7137396c5b543a739cdc6f2d88397ea49704ebe02e3e1b2c2de2ab8767"
+   "sha256": "5a972d9bb63d3def1cc72c245bf2df3ec542290a3a98e904d7750a562039ae18"
   },
   {
    "path": "reports/the-tier.json",
@@ -7668,7 +7669,7 @@
   },
   {
    "path": "reports/the-topiary.json",
-   "sha256": "d6e6c928d4cc05aac68de4ebe5d62cdf9e5deae3a39dae73b15c79b0036cae9e"
+   "sha256": "30612fb45cf2d89a3b25067c92282741e65d2691bbfbb3981f4887e856b5f14d"
   },
   {
    "path": "reports/the-treeline.json",
@@ -7680,7 +7681,7 @@
   },
   {
    "path": "reports/the-trilinq.json",
-   "sha256": "53fe588e80734af031952d7221a3ae7965d4a6ba94e15a20a36d9a8de897c599"
+   "sha256": "db8f5e6f078e407c4c2900bb55a300e1d1248577e9f72343a2e4e2e1ddd72f16"
   },
   {
    "path": "reports/the-trillium.json",
@@ -7696,7 +7697,7 @@
   },
   {
    "path": "reports/the-tropica.json",
-   "sha256": "5a34e2ddb81c95db8453a7c5e9aabf2afec7c8c2f03130f06da16e55fdd64be6"
+   "sha256": "cf5e4e4844cf5639b961b54cca7ed88129559bca378d195d86993bc2cca1a37f"
   },
   {
    "path": "reports/the-trumps.json",
@@ -7712,7 +7713,7 @@
   },
   {
    "path": "reports/the-vales.json",
-   "sha256": "152568bcfd8f82b273dbf51cd0ae2af92fb84875f498f2819c4af03a12974198"
+   "sha256": "39f08fd07f55f6c42d70afbc3bec05645a79b862f7993f589af0640b13838517"
   },
   {
    "path": "reports/the-vanderlint.json",
@@ -7720,7 +7721,7 @@
   },
   {
    "path": "reports/the-venue-residences.json",
-   "sha256": "48582f4b28b123a1b56b4a477f8711f2da3722aff540574dd6c05bcff41f5da4"
+   "sha256": "594bad64a57158b3f83ac78b8947a99785113fe02de6d6ce0e789d75c1ee2a07"
   },
   {
    "path": "reports/the-verandah-residences.json",
@@ -7728,7 +7729,7 @@
   },
   {
    "path": "reports/the-vermont-on-cairnhill.json",
-   "sha256": "21fdf103d0830a529a78d8b0b8b7fa9de54d57d068e5bc4d969fe8fb16a3c4dc"
+   "sha256": "9dd6a82d28ec9b5f13c89727b9aa8f5447d58f6a3dd5bf2f031d3b21c611511f"
   },
   {
    "path": "reports/the-verte.json",
@@ -7764,15 +7765,15 @@
   },
   {
    "path": "reports/the-visionaire.json",
-   "sha256": "285361af35824aba6b41119cbc5f98e9f3f7c8db9da58193e0480ac3a7a9403c"
+   "sha256": "983c16ed7402eb87ffaf08e3ffcc67969a396079e186c1488ca00e8ed17e150f"
   },
   {
    "path": "reports/the-vue.json",
-   "sha256": "9568f91bee5dc97e2519bbd9fb66f7c1a1d5cdffbb95fe214041076edb894d1e"
+   "sha256": "eaeeba9bb4153e56333bd88f190c0172a6bcfdd603a9af53e7ce920a7ce32dce"
   },
   {
    "path": "reports/the-warren.json",
-   "sha256": "da75399c9db3c99c18c12a51d990f498cda567ac726f282f0cb5681f29f28330"
+   "sha256": "71e7fce5ba7001680d2234b2a46dd99f204f26d2075a6fa6238b3cb9dbf676e0"
   },
   {
    "path": "reports/the-water-edge.json",
@@ -7788,7 +7789,7 @@
   },
   {
    "path": "reports/the-waterside.json",
-   "sha256": "42b23e65a87641c08c5b699507cdd3f49bf6a19ed87806624c5b9ea02d2d6987"
+   "sha256": "b86b9c8d7dea8dbb29de703507ea150ef9da94c1dc0d92d6023e147e251b44d9"
   },
   {
    "path": "reports/the-wharf-residence.json",
@@ -7812,7 +7813,7 @@
   },
   {
    "path": "reports/thomson-800.json",
-   "sha256": "1596b17e50134cd5d71503a0ecc8178c5b5abb0dcaebbe4a0464a4d9bb487eaf"
+   "sha256": "1c0f6bccbd61a51bf4193fce5c38d76254de72b5d4c37fa6635b2ecd306f0a57"
   },
   {
    "path": "reports/thomson-euro-asia.json",
@@ -7820,7 +7821,7 @@
   },
   {
    "path": "reports/thomson-grand.json",
-   "sha256": "4d0f3807c25dcd05f14420ccf21208a55b3e341eb9453627c62486fd8fdc7bb3"
+   "sha256": "b737ceda50dc25a0c5b37e31eb134bc95741c077c6dfe1b255c7f947b178b64b"
   },
   {
    "path": "reports/thomson-grove.json",
@@ -7832,7 +7833,7 @@
   },
   {
    "path": "reports/thomson-impressions.json",
-   "sha256": "dd2416be8a2ec7a3b2585b208cfdcad86eb30fc39876c1d7e2717ec25495140b"
+   "sha256": "2f62ee34d9786eb945260ff22f4a7425c1dc81d7e3cf8da94ead964db445d4e7"
   },
   {
    "path": "reports/thomson-plaza.json",
@@ -7924,7 +7925,7 @@
   },
   {
    "path": "reports/treasure-crest.json",
-   "sha256": "3bb33f9932781f948ccb9d98e6999b7c4a5351445fad0c3ccb32659d62b0b702"
+   "sha256": "1d4888543ed48231c54b310575aac8c1574f4ee926697dfe47d1f9249d0f2916"
   },
   {
    "path": "reports/treasure-gardens.json",
@@ -7956,7 +7957,7 @@
   },
   {
    "path": "reports/tree-house.json",
-   "sha256": "73d465d19e3448920ce17c2c9a126da848abf1aeea3230164e29d2aff6b12823"
+   "sha256": "f369acb42dd3176daed7b351e88423169b6c1b8458d92d041589be840539176f"
   },
   {
    "path": "reports/treescape.json",
@@ -7988,11 +7989,11 @@
   },
   {
    "path": "reports/trilive.json",
-   "sha256": "6937eba40a998786d47298ac3770aaf42827a2d5a9d6ecdcbec7dedfbc7db8a8"
+   "sha256": "74f0d46fc5d87c9d677c3aff15b74872201c25b47989c04cda53ccdd82cfbef9"
   },
   {
    "path": "reports/tropical-spring.json",
-   "sha256": "7086fd142c8331d82f28000d993a35cf42386462620bd5856be4b88812d03dc2"
+   "sha256": "7f41b582b29af44d338d25a63f523aac0a321784b4cf087b1570dd0fb29a14f9"
   },
   {
    "path": "reports/tropicana-condominium.json",
@@ -8016,7 +8017,7 @@
   },
   {
    "path": "reports/twin-fountains.json",
-   "sha256": "294b3984b625d26477244743a50c0330ceaf389d8fff32686fb2e97b74e0ae2e"
+   "sha256": "9aa88d58855851c9545cc68f071e12076fa6ab3c2f5bb3e533d1019b0a99a87d"
   },
   {
    "path": "reports/twin-regency.json",
@@ -8024,7 +8025,7 @@
   },
   {
    "path": "reports/twin-waterfalls.json",
-   "sha256": "75dc36517d81c1d9e4d2d4efd5fe4c8f3c72630120ba4d93d5c3630ea523b015"
+   "sha256": "98f835b6e7afa07fde05c437f5f7aa2391eb93819df86759a8b2b9ac257a4add"
   },
   {
    "path": "reports/two8one-studio.json",
@@ -8092,7 +8093,7 @@
   },
   {
    "path": "reports/urban-vista.json",
-   "sha256": "d4a0509d89207c312b9e0189fe0061cb31bca3223f0f43c7886f31480581ca59"
+   "sha256": "170662caca38ff95c934ab0b5142c5c400fd6a22fb15c590999bba11d519d0a1"
   },
   {
    "path": "reports/urbana.json",
@@ -8100,7 +8101,7 @@
   },
   {
    "path": "reports/v-on-shenton.json",
-   "sha256": "c21d65c6b76c58299968b50830e4590e99ce004569b5dc1722b23782de0807a8"
+   "sha256": "936eadc44f4b882b872dd934f456953e4f7c454a8627828d5d238e6aa229162b"
   },
   {
    "path": "reports/va-residences.json",
@@ -8108,7 +8109,7 @@
   },
   {
    "path": "reports/vacanza-at-east.json",
-   "sha256": "5f837fb00a4c8c705b813e7ec5837a64959388e745ccbf2bdba482fc4e0a4fbb"
+   "sha256": "01c308abd7bb9c75d87895e7b6a2782e698bbb1a4a78f744bc379502fbe09872"
   },
   {
    "path": "reports/valley-mansion.json",
@@ -8116,7 +8117,7 @@
   },
   {
    "path": "reports/valley-park.json",
-   "sha256": "53f004d6c5ceb72d4b2ccbd207c828c1b3a9d572e831c8097f3b98374a08b18a"
+   "sha256": "e7697dbecb313d223642f24c9b3fcfec3ca0e2f261d972ece3dbf733334f6fb3"
   },
   {
    "path": "reports/van-holland.json",
@@ -8268,7 +8269,7 @@
   },
   {
    "path": "reports/visioncrest.json",
-   "sha256": "0ce095c81507668427f719ae0949c1b9b716c2dee157076a1af6e381ea7c9cb2"
+   "sha256": "22087c6a10efffb7a84e6c079997a104a4a84e265780ee3e78eca3b88e4ab06a"
   },
   {
    "path": "reports/vista-residences.json",
@@ -8304,7 +8305,7 @@
   },
   {
    "path": "reports/vue-8-residence.json",
-   "sha256": "18ce6091c833b30cbe121e05164af227a3bf0b8e29153cd48a643f6372353124"
+   "sha256": "103438d1bcc69017796a75794aa157af9a2af5f5bd861629d92ec0d6708f340d"
   },
   {
    "path": "reports/wallich-residence.json",
@@ -8316,7 +8317,7 @@
   },
   {
    "path": "reports/wandervale.json",
-   "sha256": "204c6542e41b58b7c9738a24721f3e65d885f8f1c7d056d52590fd3d0dcd5cd8"
+   "sha256": "d82c5d4271a5af78b85dce4389f191382c6b0a9389b22c4a874c63ade7c0db9b"
   },
   {
    "path": "reports/wang-lodge.json",
@@ -8328,7 +8329,7 @@
   },
   {
    "path": "reports/water-place.json",
-   "sha256": "18f43e3f0437fe976bbd83a92eaada8bdd7a6ced302d280eabdcf70d60be21b1"
+   "sha256": "e796377be0c6ae408abc858edc6deea7fbb7bfa52bee284ae0d3334e8b868cd2"
   },
   {
    "path": "reports/waterbank-at-dakota.json",
@@ -8336,11 +8337,11 @@
   },
   {
    "path": "reports/waterbay.json",
-   "sha256": "fb68012d88ad09e4df995a1e3dc792aad6dabf9c1b059fc92643e0f064afe74c"
+   "sha256": "1f090e9d044136aa20a88fa993857eb5ca3b6ad3eec3c4cae89bcb8eb9fbf3fd"
   },
   {
    "path": "reports/watercolours.json",
-   "sha256": "1632064cce940b18cab9f0b1f8f1b798c6040014d47d34bcaefaf20015366b04"
+   "sha256": "3e48cf1b0e151b57a08720c602a3d0734226435309961fabbf2ec4bdf0e06a23"
   },
   {
    "path": "reports/watercrest.json",
@@ -8364,7 +8365,7 @@
   },
   {
    "path": "reports/waterfront-isle.json",
-   "sha256": "284656fd76ccd91335c61adb9f468220246b835ba373000ec91a5de70e5b724b"
+   "sha256": "bd36a77367c93e4db2c6fbd6223cb8e2e90876e4394d4941e9026717a33ad96e"
   },
   {
    "path": "reports/waterfront-key.json",
@@ -8384,15 +8385,15 @@
   },
   {
    "path": "reports/watertown.json",
-   "sha256": "bcf81048b91c059301e1148a7b7cf87d49e8c854ff64a9d588f4dadbf40889d4"
+   "sha256": "7754ca6b42f392d211fc443386b35eb267178fe58fecea560084c5bec93bca28"
   },
   {
    "path": "reports/waterview.json",
-   "sha256": "c72564344b57bf4dae93d323c9c35aed139351f7496115b707dcac236d8e2422"
+   "sha256": "879a42150536446d01a64955a8ca52f4e15d1127310972b1b7c62192e4a89542"
   },
   {
    "path": "reports/waterwoods.json",
-   "sha256": "13aa5bd856ce94cc10b3b6b896d481aa065662cd97bf92a2f1c9ceb40eef112b"
+   "sha256": "ea65e9dd3dd2099fb59d4fb79311094dace31b831f5de6e1fe091d518d1b3bec"
   },
   {
    "path": "reports/watten-hill.json",
@@ -8416,7 +8417,7 @@
   },
   {
    "path": "reports/westwood-residences.json",
-   "sha256": "c896bd8735b7b9ecf24526c731c6b6b3b58ce24c7fd497cc4bd5eef137c09af8"
+   "sha256": "35423567537c7970a8b7253588c9ebfedf27fa97c9b460d47bd8e6bbc04b3033"
   },
   {
    "path": "reports/wharton-vale.json",
@@ -8432,7 +8433,7 @@
   },
   {
    "path": "reports/whitewater.json",
-   "sha256": "88002f4f8d96616e3857fc596802134efbc63db5ea7387e406543c08994ee9ff"
+   "sha256": "75ec549117fc443445559cc54b50bc81622c24163ec9de646d7dc8a9fc5404da"
   },
   {
    "path": "reports/wilkie-48.json",
@@ -8464,7 +8465,7 @@
   },
   {
    "path": "reports/windy-heights.json",
-   "sha256": "95526fa981ac9b9eb0596163cc49b9b6d62e4629104a12d4026adf829872f608"
+   "sha256": "57659ec472bbd5f4f4a3342bdef75156f9c8cf8e20d426aca9fcf8be7bf47bea"
   },
   {
    "path": "reports/wing-fong-building.json",
@@ -8488,7 +8489,7 @@
   },
   {
    "path": "reports/woodhaven.json",
-   "sha256": "9216317d328b33dce6c7ac4f1355e1c35b431129cb5ee18cf9053e505165bebb"
+   "sha256": "e884db1733a8c21227ef5e9c3a53e58f0e397091c372c9f1a8451d9b74940fdc"
   },
   {
    "path": "reports/woodsville-28.json",

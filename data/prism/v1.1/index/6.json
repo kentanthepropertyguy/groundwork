@@ -79,8 +79,8 @@
    "name": "Altez",
    "kind": "completed",
    "path": "reports/altez.json",
-   "sha256": "8c5bae0f0b610e390fb36eab46fa071b3ed52debaa6db764c7c73b7add78f66b",
-   "items": 13,
+   "sha256": "3dab723703a06eda973e552d0ab882f64e5ded7467384be220c82ca36ff78456",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -99,8 +99,8 @@
    "name": "Ardmore Three",
    "kind": "completed",
    "path": "reports/ardmore-three.json",
-   "sha256": "6071b36db134111cd7f9c985a9dfe99b6b560bb169750ecc0020b9979eb04e7b",
-   "items": 13,
+   "sha256": "69d4f4d2ee68cd753b430df0c651537d05d68999b6af290b197a91da1289b868",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -165,8 +165,8 @@
    "name": "Bayshore Park",
    "kind": "completed",
    "path": "reports/bayshore-park.json",
-   "sha256": "7ad4f5edfcb23d83b699b6092bf13b6de6134457601adba4ee5672da2dd250cd",
-   "items": 13,
+   "sha256": "3f95d2b3e5d29c1a66e2854eceb147623cac27088a040b3940c843439bd78350",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -446,8 +446,8 @@
    "name": "DE Royale",
    "kind": "completed",
    "path": "reports/de-royale.json",
-   "sha256": "6e586969d975effe6257c4262c570e099e6c76f634f9ae6636f8211332eb6d6a",
-   "items": 13,
+   "sha256": "d37c94796db5c52526f84b15e9db1855b03ee436a6d34ad42f9ea95e22b8874e",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -762,8 +762,8 @@
     "P"
    ],
    "path": "reports/kensington-park-condominium.json",
-   "sha256": "859c7c9536f028083abf1caf19bac963e2db78759ca6d3c665ce4d0d81da0b0e",
-   "items": 12,
+   "sha256": "85c4af5b18bafa3e4186cba75d2195a740511cc8e8ca1bf8486e2d2cf1f87871",
+   "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -834,8 +834,8 @@
     "P"
    ],
    "path": "reports/lakepoint-condominium.json",
-   "sha256": "0f5aad6a7fd1c739f21f084acfcdcec1cc3481de988f4c54b539fc683e3fd961",
-   "items": 12,
+   "sha256": "83e94f2114699b8a47b276702c1f9763df48a18542704bd3afda4118573c7935",
+   "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -856,8 +856,8 @@
    "name": "Livia",
    "kind": "completed",
    "path": "reports/livia.json",
-   "sha256": "a53919ec4a03973660888001c8a5b962c32f56f4c0433d3401bdf4592a7bdc96",
-   "items": 13,
+   "sha256": "8a35029c2ae64963082e906a4e7930e79cd37febac000462652900cb52a1d47f",
+   "items": 17,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -901,8 +901,8 @@
    "name": "Martin Modern",
    "kind": "completed",
    "path": "reports/martin-modern.json",
-   "sha256": "00726a5b4f13d4d6b5a0881c07f8d7d318ece19477e9b68a807418eca7c8d3ea",
-   "items": 13,
+   "sha256": "28d79b79e87a8ce27f353bba38dfecc65265cda952974c86df923735b7f01e42",
+   "items": 15,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1195,8 +1195,8 @@
    "name": "Park Place Residences at PLQ",
    "kind": "completed",
    "path": "reports/park-place-residences-at-plq.json",
-   "sha256": "705c39ec13f3972af3b9eee31c30ca4c51de994e4bbe417ebb1fef2f89cc1ce1",
-   "items": 13,
+   "sha256": "02321b5d2a99791500b5d617f94b9484c741ceae88abb0ee221022d017fbe864",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1276,8 +1276,8 @@
     "P"
    ],
    "path": "reports/rezi-3two.json",
-   "sha256": "77e7a6b936fd0d9c42093304dd1ff3e61b279bceaf817fc6d817ce6cef617dde",
-   "items": 12,
+   "sha256": "cf36d19137327d48b8cb865e26c5277ea39a107c90b95d5e6ffd31306d34a8cb",
+   "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1388,8 +1388,8 @@
    "name": "Seasons Park",
    "kind": "completed",
    "path": "reports/seasons-park.json",
-   "sha256": "2990dc710c8c27b60ff2325b4aa5ada55714c54d5a20a7798226c8ed178cee12",
-   "items": 13,
+   "sha256": "617c960d7693ab12d6f6d674fdba295acc725e5b11a403d815407ff0b05d5673",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1399,8 +1399,8 @@
    "name": "Seastrand",
    "kind": "completed",
    "path": "reports/seastrand.json",
-   "sha256": "96ef1c19d4fefd30c3932716f76ba192e4cf7978174bdee4b942445bb1136287",
-   "items": 13,
+   "sha256": "ca9d69af2e6a7750402fde82c3b18c07fa602cf75b52bb56d7f49203f95bed7e",
+   "items": 15,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1447,8 +1447,8 @@
    "name": "Sky Green",
    "kind": "completed",
    "path": "reports/sky-green.json",
-   "sha256": "f21054196ee6597c9f6ad6c387ec51393a1576314d4f6b9dc780f79598bebf31",
-   "items": 13,
+   "sha256": "009f21368eac016ddb60c94b05758c0ec9d116101c24e2a3e6a51014b08dfa10",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1516,8 +1516,8 @@
    "name": "Stars of Kovan",
    "kind": "completed",
    "path": "reports/stars-of-kovan.json",
-   "sha256": "dbf44b000bac389c892efd27b991c1f0966d316a5a4bfba7a46d576429e6fc1e",
-   "items": 13,
+   "sha256": "a27bc00ab8e87486fa29b638f39a01668740ac9a01f1764d15159f06c9e5d369",
+   "items": 15,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1782,8 +1782,8 @@
    "name": "The Coast at Sentosa Cove",
    "kind": "completed",
    "path": "reports/the-coast-at-sentosa-cove.json",
-   "sha256": "eeec8393db529cbadf00277271cf3cecff60229ba14438bd9d5e7f2e5573175b",
-   "items": 13,
+   "sha256": "b4f40faa62a5e29fc24c49a1b8717c001ecdc2808f13f4c5e0308d3249c47b1f",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1813,8 +1813,8 @@
    "name": "The Lakeshore",
    "kind": "completed",
    "path": "reports/the-lakeshore.json",
-   "sha256": "a11b9b202a8a73ddb7b5c241ead34d50b80f8a1f02a17773c12e87f7c1caa16e",
-   "items": 13,
+   "sha256": "232d8e080e1810c9abe3a762c55aa5ef1bb2076a9c6fa623f85083c49515f7ef",
+   "items": 15,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1827,8 +1827,8 @@
     "R"
    ],
    "path": "reports/the-palette.json",
-   "sha256": "49b5c267bf33cdf151d31e9c585bcaedd884d25eac30fdc9f9d5ccee6f350ac1",
-   "items": 12,
+   "sha256": "9604de1cb34254a8be1d115dd390c17a221d8d4538e4ddd34fb59a2b353740af",
+   "items": 16,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1951,8 +1951,8 @@
    "name": "The Visionaire",
    "kind": "completed",
    "path": "reports/the-visionaire.json",
-   "sha256": "285361af35824aba6b41119cbc5f98e9f3f7c8db9da58193e0480ac3a7a9403c",
-   "items": 13,
+   "sha256": "983c16ed7402eb87ffaf08e3ffcc67969a396079e186c1488ca00e8ed17e150f",
+   "items": 15,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },

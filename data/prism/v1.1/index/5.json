@@ -65,8 +65,8 @@
    "name": "Amber 45",
    "kind": "completed",
    "path": "reports/amber-45.json",
-   "sha256": "6e890ffc71f67f4bcdce552839c19bac616025a5e1fdc93d05957b81a43e123f",
-   "items": 13,
+   "sha256": "ce74708d3ee474a4b218fcbf34b9a10b740f28c1fb0beacc46e931f3d11cb320",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -151,8 +151,8 @@
     "P"
    ],
    "path": "reports/braddell-view.json",
-   "sha256": "fd73a57155535e875285cfb9149bd993aae3c342068b33c4d44067ce99b86367",
-   "items": 12,
+   "sha256": "7e89e2dd04b076b3899941c2a4458ae23d8fa00a8538b9cf190c6ead6281cc0c",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -191,8 +191,8 @@
     "P"
    ],
    "path": "reports/castle-green.json",
-   "sha256": "7b77ad8ed845452bbd2b2f7a61ee63b21c1bb2d02667b409395c9c4e7e2de501",
-   "items": 12,
+   "sha256": "09e71a47af8ac4f416da6511a80341eed6450b5cba5b8b29561e4233c2d4d6af",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -213,8 +213,8 @@
     "R"
    ],
    "path": "reports/coco-palms.json",
-   "sha256": "969cda7a01b099f905164fff6bd9557054a289de619bde69c7ce952944fc5dd8",
-   "items": 12,
+   "sha256": "f6f1492a8afc6152b1cf9f214a185b2379b04ca929fe7c04974876da85dc1745",
+   "items": 16,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -224,8 +224,8 @@
    "name": "Commonwealth Towers",
    "kind": "completed",
    "path": "reports/commonwealth-towers.json",
-   "sha256": "449560deda176079bb2b79d837284b2726eae75398a4861265c57828e75e6df0",
-   "items": 13,
+   "sha256": "bcaf802bf18e98e64576a63bdb898948f3f46d77a16d0c93b1e53c14be71ff9f",
+   "items": 16,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -260,8 +260,8 @@
    "name": "E Maison",
    "kind": "completed",
    "path": "reports/e-maison.json",
-   "sha256": "f6748952da5fb6027e3a19dd09c83ed685493eb94b2f08511316a4b895132301",
-   "items": 13,
+   "sha256": "fb65a786eaaf5dcd3d3d5e338fa06b4f0c57797e041c55451172bf681647f115",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -319,8 +319,8 @@
     "R"
    ],
    "path": "reports/fernwood-towers.json",
-   "sha256": "30015b790c7911c443a86eecf13fc0ade018267d78aa037a21920f6a71af9b69",
-   "items": 12,
+   "sha256": "251431cb767971ffadcfc264a304a066de33317b8ca5ec4a7cebc8577e8ac939",
+   "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -540,8 +540,8 @@
    "name": "Lakeville",
    "kind": "completed",
    "path": "reports/lakeville.json",
-   "sha256": "2dfa402b15f1a32fb069050b7d23aefe88f44812724b501f1ac3def9b457b821",
-   "items": 13,
+   "sha256": "f3e9abd1fc8753457e5e47c9284c36487dc953f3e20391641630f37f81aa9c79",
+   "items": 15,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -654,8 +654,8 @@
    "name": "Midtown Residences",
    "kind": "completed",
    "path": "reports/midtown-residences.json",
-   "sha256": "7f606bdbae8706f23e1fcbe1fe97423a0658a4c3d9e79176b8eb4877b69bd472",
-   "items": 13,
+   "sha256": "2049da1406072e256e6f19e1426262edc3f0c47a697f457c01656426c40dbe3e",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -892,8 +892,8 @@
    "name": "Regent Heights",
    "kind": "completed",
    "path": "reports/regent-heights.json",
-   "sha256": "da8ecee811c4f62ea658e7d894f082c8626c59953f6b3219ff981590951cde1e",
-   "items": 13,
+   "sha256": "4aeb40de67866c91f64c850a1af0ad7c2e3675ea8bae1a55aea4febb9b20b75b",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -983,8 +983,8 @@
    "name": "Seasons View",
    "kind": "completed",
    "path": "reports/seasons-view.json",
-   "sha256": "5d251724714a22d31969cbe3f3fea73043e682667b2ab92532af3054c523fe5c",
-   "items": 13,
+   "sha256": "b945de2d8ecbbd787139deb9a921b7fc0f3381257822262cf8ac2785d8c8b32a",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -997,8 +997,8 @@
     "P"
    ],
    "path": "reports/signature-at-yishun.json",
-   "sha256": "53079195e3d10710f2d5033217ce0e496ac71379aa88d4f07e4bcaeef076287b",
-   "items": 12,
+   "sha256": "34186df3b427cefa35728ce78695aa2c2d2ce183d64c371917366d32b2cbb053",
+   "items": 13,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1031,8 +1031,8 @@
    "name": "Sims Urban Oasis",
    "kind": "completed",
    "path": "reports/sims-urban-oasis.json",
-   "sha256": "537514aa54631fa55f1cf94e8b51f59fed32e2e0a863e6c1b72cb9bd6a8dfd04",
-   "items": 13,
+   "sha256": "a7e28cfdf1d63276df15a32fadabdadd29576a3b4579fe5d2f5dc9f382244d74",
+   "items": 17,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1061,8 +1061,8 @@
    "name": "Sophia Hills",
    "kind": "completed",
    "path": "reports/sophia-hills.json",
-   "sha256": "65b44d54e4564dbcf8fb0f89c727b3a7effee7c5e58e218aa221a095008d759e",
-   "items": 13,
+   "sha256": "a5de98024e2882aba5f8040e25b5be242335ac7c211324225162bf86013078a8",
+   "items": 16,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1391,8 +1391,8 @@
    "name": "The Miltonia Residences",
    "kind": "completed",
    "path": "reports/the-miltonia-residences.json",
-   "sha256": "14c44c0da21f7eb1577de19f47958cb6576fffe36eb40fc7a5bbbd00484422a3",
-   "items": 13,
+   "sha256": "8d70e0c23f83221e17ced06c1ad70a6ad7152cab2083cee7b9ae4cf70d24b8eb",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1460,8 +1460,8 @@
    "name": "The Poiz Residences",
    "kind": "completed",
    "path": "reports/the-poiz-residences.json",
-   "sha256": "dd2fb471cb3fe8fc33ce660c26508fa15d84461ebcd9da0d6c76f75913ee0b38",
-   "items": 13,
+   "sha256": "8d20c1bf14c97111e509b3e8a4aee9b664dcbd6230b2b641e86bf49196b34ffb",
+   "items": 16,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1507,8 +1507,8 @@
    "name": "The Shore Residences",
    "kind": "completed",
    "path": "reports/the-shore-residences.json",
-   "sha256": "8d19d939981022eb3cecb771776d6457359c2a4049cd84c8e9323a97ffe02d8e",
-   "items": 13,
+   "sha256": "cac4fde2018f7643fc9cdb98c3cd2879e46f5b9094db33f253bf91b34af0d47d",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1555,8 +1555,8 @@
    "name": "The Trilinq",
    "kind": "completed",
    "path": "reports/the-trilinq.json",
-   "sha256": "53fe588e80734af031952d7221a3ae7965d4a6ba94e15a20a36d9a8de897c599",
-   "items": 13,
+   "sha256": "db8f5e6f078e407c4c2900bb55a300e1d1248577e9f72343a2e4e2e1ddd72f16",
+   "items": 17,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
@@ -1566,8 +1566,8 @@
    "name": "The Vermont on Cairnhill",
    "kind": "completed",
    "path": "reports/the-vermont-on-cairnhill.json",
-   "sha256": "21fdf103d0830a529a78d8b0b8b7fa9de54d57d068e5bc4d969fe8fb16a3c4dc",
-   "items": 13,
+   "sha256": "9dd6a82d28ec9b5f13c89727b9aa8f5447d58f6a3dd5bf2f031d3b21c611511f",
+   "items": 14,
    "asAt": "2026-11-03",
    "approvalRef": "GW-PRISM-V1.1-2026-11-03-NATIONWIDE-1"
   },
