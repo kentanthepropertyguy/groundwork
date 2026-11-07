@@ -224,7 +224,8 @@ const IDS = ['kingsford-waterbay', 'hougang-central', 'thomson-three'];
   await t('Research loads PRISM\u2019s styles with the page (the landing grid never shifts) and its script when needed; no new navigation item', () => {
     const html = fs.readFileSync(path.join(root, 'research/index.html'), 'utf8');
     assert.ok(/<link rel="stylesheet" href="\.\.\/assets\/css\/gw-prism\.css\?v=[0-9a-f]{10}">/.test(html.split('</head>')[0]));
-    assert.ok(/<template id="gwLazy-prism"><script src="\.\.\/assets\/js\/gw-prism\.js\?v=[0-9a-f]{10}"><\/script><\/template>/.test(html));
+    // PRISM Research hero, Release 1 (Master Planning, 7 Nov 2026): the hero's style, the homepage's map helpers and the hero follow gw-prism.js in the same lazy bundle
+    assert.ok(/<template id="gwLazy-prism"><script src="\.\.\/assets\/js\/gw-prism\.js\?v=[0-9a-f]{10}"><\/script><link rel="stylesheet" href="\.\.\/assets\/css\/gw-prism-hero\.css\?v=[0-9a-f]{10}"><script src="\.\.\/assets\/js\/gw-home\.js\?v=[0-9a-f]{10}"><\/script><script src="\.\.\/assets\/js\/gw-prism-hero\.js\?v=[0-9a-f]{10}"><\/script><\/template>/.test(html));
     // V1.1 r2 (GW-PRISM-V1.1-2026-11-03-A2; Master Planning, 3 Nov 2026): an approved evidence-profile page leads from this search too (md.page)
     // Search journey (Master Planning, 4 Nov 2026): every search opens a development at #/prism/<id> (PRISM first with a report; otherwise
     // the route replaces the address with Property Data). The site search links there but adds no navigation item and no PRISM wording.

@@ -12,6 +12,7 @@ Run from the site folder:  python3 research/tests/area-render.py   (LIVE=https:/
 6 RC2: Serangoon's ratio reads "1.0 : 1" with "HDB flats to private homes" in its summary card and Homes row; Bishan keeps the data's own figure and label"""
 import json, os, pathlib, re, socket, subprocess, time
 from playwright.sync_api import sync_playwright
+import prism_detailed  # PRISM Research hero R1: these suites test the five dimensions, which are in Detailed
 SITE = pathlib.Path(__file__).resolve().parents[2]
 ok_n = fail_n = 0
 def check(name, cond, info=''):

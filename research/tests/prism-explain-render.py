@@ -8,6 +8,7 @@ discount, highest turnover, farthest from MRT, largest market rise and fall, few
  - every figure in the same navy (no colour by sign); a card opens its own dimension, in place; no script error"""
 import json, os, pathlib, re, socket, subprocess, time
 from playwright.sync_api import sync_playwright
+import prism_detailed  # PRISM Research hero R1: these suites test the five dimensions, which are in Detailed
 SITE = pathlib.Path(__file__).resolve().parents[2]
 SHOTS = os.environ.get('SHOTS')
 ok_n = fail_n = 0

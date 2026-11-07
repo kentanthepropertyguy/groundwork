@@ -4,6 +4,7 @@ Starts the site's own server and stubs OneMap (tiles, and the address search wit
 """
 import json, os, pathlib, re, socket, subprocess, sys, time
 from playwright.sync_api import sync_playwright
+import prism_detailed  # PRISM Research hero R1: these suites test the five dimensions, which are in Detailed
 SITE = pathlib.Path(__file__).resolve().parents[2]
 ANS = json.load(open(SITE / 'research/tests/fixtures/onemap-postal.json'))['answers']
 SHOTS = pathlib.Path(os.environ['UR_SHOTS']) if os.environ.get('UR_SHOTS') else None

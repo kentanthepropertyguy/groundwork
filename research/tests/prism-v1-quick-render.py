@@ -10,6 +10,7 @@ Run from the site folder:  python3 research/tests/prism-v1-quick-render.py
  - "See the PRISM Verdict and evidence" moves to the Verdict card; a figure opens its dimension in place; no script error"""
 import json, os, pathlib, re, socket, subprocess, time
 from playwright.sync_api import sync_playwright
+import prism_detailed  # PRISM Research hero R1: these suites test the five dimensions, which are in Detailed
 SITE = pathlib.Path(__file__).resolve().parents[2]
 SHOTS = os.environ.get('SHOTS'); REF = os.environ.get('REF')
 ok_n = fail_n = 0

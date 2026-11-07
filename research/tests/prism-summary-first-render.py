@@ -11,6 +11,7 @@ Run from the site folder:  python3 research/tests/prism-summary-first-render.py 
 5 nothing runs past its box; no sideways scroll; no script error"""
 import os, pathlib, re, socket, subprocess, time
 from playwright.sync_api import sync_playwright
+import prism_detailed  # PRISM Research hero R1: these suites test the five dimensions, which are in Detailed
 SITE = pathlib.Path(__file__).resolve().parents[2]
 ok_n = fail_n = 0
 def check(name, cond, info=''):
@@ -35,11 +36,14 @@ PAGES = {
     'kingsford-waterbay': ('v1', 3, 'Regular project-wide resale activity', 'The 194 rental contracts in 12 months include renewals'),
     'hougang-central': ('v1', 3, None, None),
 }
-SUMMARY = """(() => { const q = document.querySelector('[data-gwp-quick]'); if (!q) return null; const top = q.querySelector('[data-gwp-short]');
+# PRISM Research hero R1 (Master Planning, 7 Nov 2026): on an evidence-profile page the answer first is the hero's opening (the quick read
+# headline, word for word), its strip (the quick read's figures and more, each with its comparison) and the same one warning, in that order
+SUMMARY = """(() => { const q = document.querySelector('[data-gwp-quick]'); if (!q) return null; const top = q.querySelector('[data-gwp-short]'), hero = document.querySelector('.gph-box');
   const r = (e) => e ? e.getBoundingClientRect() : null, y = (e) => e ? Math.round(r(e).top + scrollY) : null, b = (e) => e ? Math.round(r(e).bottom + scrollY) : null;
-  const figs = [...top.querySelectorAll('.gwp-qr-f')], w = top.querySelectorAll('[data-gwp-warn]'), h = top.querySelectorAll('h2.gwp-qr-h');
+  const figs = hero ? [...hero.querySelectorAll('[data-gph-fig]')] : [...top.querySelectorAll('.gwp-qr-f')], w = hero ? document.querySelectorAll('[data-gwp-warn]') : top.querySelectorAll('[data-gwp-warn]'),
+    h = hero ? hero.querySelectorAll('.gph-h') : top.querySelectorAll('h2.gwp-qr-h');
   const over = [...q.querySelectorAll('*')].filter((e) => e.scrollWidth > e.clientWidth + 1 && getComputedStyle(e).overflowX === 'visible' && e.clientWidth > 0).map((e) => e.className).slice(0, 3);
-  return { heads: h.length, head: h[0] && h[0].textContent, figs: figs.length, cmp: figs.map((f) => (f.querySelector('.gwp-qr-c') || {}).textContent || ''), warns: w.length, warn: w[0] && w[0].textContent,
+  return { heads: h.length, head: h[0] && h[0].textContent, figs: figs.length, cmp: figs.map((f) => (f.querySelector('.gwp-qr-c, [data-gph-cmp]') || {}).textContent || ''), hero: !!hero, warns: w.length, warn: w[0] && w[0].textContent,
     yHead: y(h[0]), yFig: figs.length ? y(figs[0]) : null, yFigEnd: figs.length ? Math.max(...figs.map(b)) : null, yWarn: y(w[0]), bWarn: b(w[0]),
     yMore: y(q.querySelector('.gwp-qr-more, .gwp-qr-n')), yReveal: y(q.querySelector('.gwp-qr-rv')), yDims: y(document.querySelector('.gwp-dims')),
     yVerdict: y(document.querySelector('.gwp-card')), text: document.querySelector('[data-gwp-page]').textContent.replace(/\\s+/g, ' '), over }; })()"""
@@ -65,7 +69,7 @@ try:
                 check(f'{vn} {id}: the original PRISM logo in every PRISM mark ({len(lg)}), loaded', len(lg) >= 2 and all(x == ['prism-mark-original.png', True] for x in lg), lg)
                 # 2 the answer first
                 sm = pg.evaluate(SUMMARY)
-                good = sm and sm['heads'] == 1 and sm['figs'] == nf and sm['warns'] == 1 and sm['yHead'] < sm['yFig'] < sm['yWarn'] and sm['yFigEnd'] <= sm['yWarn'] + 1 and sm['bWarn'] <= sm['yMore'] + 1
+                good = sm and sm['heads'] == 1 and (sm['figs'] == nf or (sm['hero'] and nf <= sm['figs'] <= 4)) and sm['warns'] == 1 and sm['yHead'] < sm['yFig'] < sm['yWarn'] and sm['yFigEnd'] <= sm['yWarn'] + 1 and sm['bWarn'] <= sm['yMore'] + 1
                 check(f'{vn} {id}: one headline, {nf} figures, then one warning, in that order, before the rest of the quick read', good, sm and {k: sm[k] for k in ('heads', 'figs', 'warns', 'yHead', 'yFig', 'yFigEnd', 'yWarn', 'yMore')})
                 if not sm: pg.close(); continue
                 if kind == 'profile': check(f'{vn} {id}: every figure keeps its comparison beneath it', all(sm['cmp']), sm['cmp'])

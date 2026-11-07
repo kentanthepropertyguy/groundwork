@@ -7,6 +7,7 @@ Full, partial and limited-evidence pages, the protected Reveals, and the extreme
  - "Explore full PRISM analysis" opens the V2 explanation in place and moves to it, and closes it again; a figure opens its dimension"""
 import json, os, pathlib, re, socket, subprocess, time
 from playwright.sync_api import sync_playwright
+import prism_detailed  # PRISM Research hero R1: these suites test the five dimensions, which are in Detailed
 SITE = pathlib.Path(__file__).resolve().parents[2]
 SHOTS = os.environ.get('SHOTS')
 ok_n = fail_n = 0
@@ -50,9 +51,16 @@ try:
                 check(f'{vn} {id}: "{head}" with {figs}', ex is not None and head == ex['head'] and figs == ex['figs'] and 1 <= len(figs) <= 3, [ex, head, figs])
                 order = pg.evaluate("(() => { const q = document.querySelector('.gwp-qr').getBoundingClientRect(), d = document.querySelector('#gwpDimsH').getBoundingClientRect(), f = document.querySelector('#gwp-full'); return [q.bottom <= d.top, f.hidden, document.querySelector('.gwp-qr').compareDocumentPosition(f) === 4]; })()")
                 check(f'{vn} {id}: the quick read first; the full analysis hidden until asked for; the five dimensions below', all(order) and pg.locator('[data-gwp-pillar]').count() == 5, order)
-                tops = pg.evaluate("[...document.querySelectorAll('.gwp-qr .gwp-qr-f')].map(f => Math.round(f.getBoundingClientRect().top))")
-                n = len(tops); want = 1 if w >= 1024 else n
-                check(f'{vn} {id}: {"figures in one row" if w >= 1024 else "figures as compact rows"} ({n})', len(set(tops)) == want, tops)
+                # PRISM Research hero R1 (Master Planning, 7 Nov 2026): with the hero's strip, the quick read's figures move into it (shown once); the strip's
+                # layout is checked by prism-hero-render.py. Without a strip, the quick read keeps its own figures, laid out as before.
+                strip = pg.evaluate("(() => { const s = document.querySelector('[data-gph-strip]'); return s ? [...s.querySelectorAll('[data-gph-fig] .gph-fv')].map(b => b.textContent) : null; })()")
+                if strip is not None:
+                    hid = pg.evaluate("[...document.querySelectorAll('.gwp-qr .gwp-qr-f')].every(f => !f.getClientRects().length)")
+                    check(f'{vn} {id}: the quick read\'s figures are shown once, in the hero\'s strip ({len(figs)} of {len(strip)})', hid and all(f in strip for f in figs), [figs, strip])
+                else:
+                    tops = pg.evaluate("[...document.querySelectorAll('.gwp-qr .gwp-qr-f')].map(f => Math.round(f.getBoundingClientRect().top))")
+                    n = len(tops); want = 1 if w >= 1024 else n
+                    check(f'{vn} {id}: {"figures in one row" if w >= 1024 else "figures as compact rows"} ({n})', len(set(tops)) == want, tops)
                 ov = pg.evaluate("[...document.querySelectorAll('.gwp-qr, .gwp-qr *')].map(f => f.scrollWidth - f.clientWidth)")
                 check(f'{vn} {id}: nothing runs past its box; no sideways scroll', all(x <= 1 for x in ov) and pg.evaluate(NOOVER), max(ov) if ov else None)
                 cols = pg.evaluate("[...new Set([...document.querySelectorAll('.gwp-qr .gwp-qr-f b, .gwp-qr-h')].map(b => getComputedStyle(b).color))]")

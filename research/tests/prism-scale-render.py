@@ -7,6 +7,7 @@ Run from the site folder:  python3 research/tests/prism-scale-render.py
  - time to the PRISM page's opening (Reveal or verdict) within budget; no script error"""
 import os, pathlib, re, socket, subprocess, time
 from playwright.sync_api import sync_playwright
+import prism_detailed  # PRISM Research hero R1: these suites test the five dimensions, which are in Detailed
 SITE = pathlib.Path(__file__).resolve().parents[2]
 ok_n = fail_n = 0
 def check(name, cond, info=''):

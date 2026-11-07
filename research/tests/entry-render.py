@@ -2,6 +2,7 @@
 Serves the site itself; run from the repo root: python3 research/tests/entry-render.py [shots-dir]"""
 import sys, os, threading, http.server, functools
 from playwright.sync_api import sync_playwright
+import prism_detailed  # PRISM Research hero R1: these suites test the five dimensions, which are in Detailed
 ROOT = os.getcwd(); SH = sys.argv[1] if len(sys.argv) > 1 else None
 H = functools.partial(http.server.SimpleHTTPRequestHandler, directory=ROOT)
 class Q(H.func):

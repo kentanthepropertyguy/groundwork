@@ -10,6 +10,7 @@ history entry. Deep links #/p/<id>/<sale> and #/prism/<id>/<dimension> are uncha
 names only; nothing runs past its box; no sideways scroll; no script error."""
 import os, pathlib, re, socket, subprocess, time
 from playwright.sync_api import sync_playwright
+import prism_detailed  # PRISM Research hero R1: these suites test the five dimensions, which are in Detailed
 SITE = pathlib.Path(__file__).resolve().parents[2]
 ok_n = fail_n = 0
 def check(name, cond, info=''):

@@ -7,6 +7,7 @@ Run from the site folder:  python3 research/tests/prism-fmrt-render.py   (LIVE=h
  - the V3 quick read never names a planned station, except the 21 future-MRT reports (FM.ON): only their approved nearest one; no script error"""
 import json, os, pathlib, re, socket, subprocess, time
 from playwright.sync_api import sync_playwright
+import prism_detailed  # PRISM Research hero R1: these suites test the five dimensions, which are in Detailed
 SITE = pathlib.Path(__file__).resolve().parents[2]
 SHOTS = os.environ.get('SHOTS')
 ok_n = fail_n = 0
@@ -69,10 +70,11 @@ try:
                     # the future-MRT reading pilot (Groundwork 01, 6 Nov 2026) now names the station in the quick read (prism-fmrt-quick-tests.js); the Reveal and MRT today are unchanged
                     check(f'{vn} {id}: the pilot quick read, the approved Reveal and MRT today, exactly', hp[0] == 'New MRT station being built 300 m away. Higher pricing. Steady market.' and hp[1] == ['22.7% above', '1.6 km', '300 m', '0.8% fewer'] and hp[2] and
                           hp[3] == 'Hougang MRT about 1,600 m, Kovan MRT about 1,610 m; closer than 1 of 46 similar developments. Straight-line distances.', hp)
-                qr = pg.evaluate("(() => { const q = document.querySelector('.gwp-qr'); return q ? q.innerText : ''; })()")
+                # PRISM Research hero R1 (7 Nov 2026): the quick read's figures (with the future station) are shown once, in the hero's strip
+                qr = pg.evaluate("(() => [document.querySelector('.gph-box'), document.querySelector('.gwp-qr')].filter(Boolean).map((q) => q.innerText).join(' '))()")
                 if id in FM_ON:   # the future-MRT reading (gw-prism.js FM.ON): only its approved nearest future station, with its status and LTA target
-                    s0 = ftl(rep(id))['data']['stations'][0]
-                    check(f'{vn} {id}: the quick read names only {s0["name"]}, under construction, LTA target {s0["target"]}', s0['name'] in qr and f'Under construction · LTA target {s0["target"]}' in qr.replace('\u00a0', ' ') and not PLANNED.search(qr.replace(s0['name'], '')), qr[:300])
+                    s0 = ftl(rep(id))['data']['stations'][0]; q1 = qr.replace('\u00a0', ' ')
+                    check(f'{vn} {id}: the quick read names only {s0["name"]}, under construction, LTA target {s0["target"]}', s0['name'] in qr and (f'Under construction · LTA target {s0["target"]}' in q1 or f'under construction, LTA target {s0["target"]}' in q1) and not PLANNED.search(qr.replace(s0['name'], '')), qr[:300])
                 else: check(f'{vn} {id}: the quick read never names a planned station', not PLANNED.search(qr), qr[:200])
                 check(f'{vn} {id}: no script error', not errs, errs[:2])
             ctx.close()
